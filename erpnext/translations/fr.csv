@@ -1,0 +1,3029 @@
+ (Half Day),(Demi-journée)
+ .You can not assign / modify / remove Master Name,
+ Quantity should be greater than 0.,
+ after this transaction.,
+ against cost center ,
+ against sales order,contre l&#39;ordre de vente
+ against same operation,contre une même opération
+ already marked,déjà marqué
+ and fiscal year : ,
+ and year: ,et l&#39;année:
+ as it is stock Item or packing item,comme il est stock Article ou article d&#39;emballage
+ at warehouse: ,à l&#39;entrepôt:
+ budget ,
+ can not be created/modified against stopped Sales Order ,
+ can not be deleted,
+ can not be made.,ne peuvent pas être réalisés.
+ can not be received twice,
+ can only be debited/credited through Stock transactions,
+ created,
+ does not belong to ,
+ does not belong to Warehouse,
+ does not belong to the company,n&#39;appartient pas à l&#39;entreprise
+ does not exists,
+ for account ,
+ has been freezed. ,a été gelé.
+ is a frozen account. Either make the account active or assign role in Accounts Settings who can create / modify entries against this account,
+" is a frozen account. To create / edit transactions against this account, you need role",
+" is less than equals to zero in the system, valuation rate is mandatory for this item",
+ is mandatory,est obligatoire
+ is mandatory for GL Entry,est obligatoire pour l&#39;entrée GL
+ is not a ledger,n&#39;est pas un livre
+ is not active,n&#39;est pas actif
+ is not submitted document,
+" is now the default Fiscal Year. \
+			Please refresh your browser for the change to take effect.",
+ not active or does not exists in the system,pas actif ou n&#39;existe pas dans le système
+ or the BOM is cancelled or inactive,ou la nomenclature est annulé ou inactif
+ should be same as that in ,doit être le même que celui de l&#39;
+ was on leave on ,était en congé
+ will be ,sera
+ will be created,
+ will be over-billed against mentioned ,sera terminée à bec contre mentionné
+ will become ,deviendra
+ will exceed by ,
+""" does not exists",""" N'existe pas"
+# ###.##,
+"#,###",
+"#,###.##",
+"#,###.###",
+"#,##,###.##",
+#.###,
+"#.###,##",
+%  Delivered,Livré%
+% Amount Billed,Montant Facturé%
+% Billed,Facturé%
+% Completed,% Terminé
+% Delivered,Livré %
+% Installed,Installé%
+% Received,Reçus%
+% of materials billed against this Purchase Order.,% De matières facturées contre ce bon de commande.
+% of materials billed against this Sales Order,% De matières facturées contre cette ordonnance ventes
+% of materials delivered against this Delivery Note,% Des matériaux livrés contre ce bon de livraison
+% of materials delivered against this Sales Order,% Des matériaux livrés contre cette ordonnance ventes
+% of materials ordered against this Material Request,% De matériaux ordonnée contre cette Demande de Matériel
+% of materials received against this Purchase Order,% Des documents reçus contre ce bon de commande
+%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s,% ( conversion_rate_label ) s est obligatoire . Peut-être que dossier de change n'est pas créé pour % ( from_currency ) s à % ( to_currency ) s
+' in Company: ,»Dans l&#39;entreprise:
+'To Case No.' cannot be less than 'From Case No.',«L&#39;affaire no &#39; ne peut pas être inférieure à &#39;De Cas n °&#39;
+"(Paid amount + Write Off Amount) can not be \
+				greater than Grand Total",
+(Total) Net Weight value. Make sure that Net Weight of each item is,(Total ) Valeur de poids . Assurez-vous que poids net de chaque élément est
+* Will be calculated in the transaction.,* Sera calculé de la transaction.
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.
+
+To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",
+**Currency** Master,Monnaie ** ** Maître
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,Exercice ** ** représente un exercice financier. Toutes les écritures comptables et autres opérations importantes sont comparés à l&#39;exercice ** **.
+". Outstanding cannot be less than zero. \
+			 	Please match exact outstanding.",
+. Please set status of the employee as 'Left',. S&#39;il vous plaît définir le statut de l&#39;employé comme de «gauche»
+. You can not mark his attendance as 'Present',. Vous ne pouvez pas marquer sa présence comme «Présent»
+01,01
+02,02
+03,03
+04,04
+05,05
+06,06
+07,07
+08,08
+09,09
+"1 Currency = [?] Fraction
+For e.g. 1 USD = 100 Cent",
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Pour maintenir le code de référence du client sage et de les rendre consultables en fonction de leur code d&#39;utiliser cette option
+10,10
+11,11
+12,12
+2,2
+3,3
+4,4
+5,5
+6,6
+: Duplicate row from same ,: Double rangée de même
+: It is linked to other active BOM(s),: Elle est liée à d&#39;autres actifs BOM (s)
+: Mandatory for a Recurring Invoice.,: Obligatoire pour une facture récurrente.
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Ajouter / Modifier < / a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Ajouter / Modifier < / a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Ajouter / Modifier < / a>"
+"<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank"">[?]</a>","<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank""> [ ? ] </ a >"
+A Customer exists with same name,Une clientèle existe avec le même nom
+A Lead with this email id should exist,Un responsable de cette id e-mail doit exister
+"A Product or a Service that is bought, sold or kept in stock.","Un produit ou un service qui est acheté, vendu ou conservé en stock."
+A Supplier exists with same name,Un Fournisseur existe avec le même nom
+A condition for a Shipping Rule,A condition d&#39;une règle de livraison
+A logical Warehouse against which stock entries are made.,Un Entrepôt logique contre laquelle les entrées en stocks sont faits.
+A symbol for this currency. For e.g. $,Un symbole de cette monnaie. Pour exemple $
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,Un tiers distributeur / revendeur / commissionnaire / filiale / distributeur vend les produits de l&#39;entreprise pour une commission.
+A+,A +
+A-,A-
+AB+,AB +
+AB-,AB-
+AMC Expiry Date,AMC Date d&#39;expiration
+AMC expiry date and maintenance status mismatched,AMC date d'expiration et l'état d'entretien correspondent pas
+ATT,ATT
+Abbr,Abbr
+About ERPNext,À propos de ERPNext
+Above Value,Au-dessus de la valeur
+Absent,Absent
+Acceptance Criteria,Critères d&#39;acceptation
+Accepted,Accepté
+Accepted Quantity,Quantité acceptés
+Accepted Warehouse,Entrepôt acceptés
+Account,compte
+Account ,
+Account Balance,Solde du compte
+Account Details,Détails du compte
+Account Head,Chef du compte
+Account Name,Nom du compte
+Account Type,Type de compte
+Account expires on,Compte expire le
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Compte de l'entrepôt ( de l'inventaire permanent ) sera créé sous ce compte .
+Account for this ,Tenir compte de cette
+Accounting,Comptabilité
+Accounting Entries are not allowed against groups.,Les écritures comptables ne sont pas autorisés contre les groupes .
+"Accounting Entries can be made against leaf nodes, called","Écritures comptables peuvent être faites contre nœuds feuilles , appelé"
+Accounting Year.,Année de la comptabilité.
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Saisie comptable gelé jusqu&#39;à cette date, personne ne peut faire / modifier entrée sauf rôle spécifié ci-dessous."
+Accounting journal entries.,Les écritures comptables.
+Accounts,Comptes
+Accounts Frozen Upto,Jusqu&#39;à comptes gelés
+Accounts Payable,Comptes à payer
+Accounts Receivable,Débiteurs
+Accounts Settings,Paramètres des comptes
+Action,Action
+Active,Actif
+Active: Will extract emails from ,Actif: va extraire des emails à partir de
+Activity,Activité
+Activity Log,Journal d&#39;activité
+Activity Log:,Journal d'activité:
+Activity Type,Type d&#39;activité
+Actual,Réel
+Actual Budget,Budget Réel
+Actual Completion Date,Date d&#39;achèvement réelle
+Actual Date,Date Réelle
+Actual End Date,Date de fin réelle
+Actual Invoice Date,Date de la facture réelle
+Actual Posting Date,Date réelle d&#39;affichage
+Actual Qty,Quantité réelle
+Actual Qty (at source/target),Quantité réelle (à la source / cible)
+Actual Qty After Transaction,Qté réel Après Transaction
+Actual Qty: Quantity available in the warehouse.,Quantité réelle : Quantité disponible dans l'entrepôt .
+Actual Quantity,Quantité réelle
+Actual Start Date,Date de début réelle
+Add,Ajouter
+Add / Edit Taxes and Charges,Ajouter / Modifier Taxes et frais
+Add Child,Ajouter un enfant
+Add Serial No,Ajouter N ° de série
+Add Taxes,Ajouter impôts
+Add Taxes and Charges,Ajouter Taxes et frais
+Add or Deduct,Ajouter ou déduire
+Add rows to set annual budgets on Accounts.,Ajoutez des lignes d&#39;établir des budgets annuels des comptes.
+Add to calendar on this date,Ajouter au calendrier à cette date
+Add/Remove Recipients,Ajouter / supprimer des destinataires
+Additional Info,Informations additionnelles à
+Address,Adresse
+Address & Contact,Adresse et coordonnées
+Address & Contacts,Adresse &amp; Contacts
+Address Desc,Adresse Desc
+Address Details,Détails de l&#39;adresse
+Address HTML,Adresse HTML
+Address Line 1,Adresse ligne 1
+Address Line 2,Adresse ligne 2
+Address Title,Titre Adresse
+Address Type,Type d&#39;adresse
+Advance Amount,Montant de l&#39;avance
+Advance amount,Montant de l&#39;avance
+Advances,Avances
+Advertisement,Publicité
+After Sale Installations,Après Installations Vente
+Against,Contre
+Against Account,Contre compte
+Against Docname,Contre docName
+Against Doctype,Contre Doctype
+Against Document Detail No,Contre Détail document n
+Against Document No,Contre le document n °
+Against Expense Account,Contre compte de dépenses
+Against Income Account,Contre compte le revenu
+Against Journal Voucher,Contre Bon Journal
+Against Purchase Invoice,Contre facture d&#39;achat
+Against Sales Invoice,Contre facture de vente
+Against Sales Order,Contre Commande
+Against Voucher,Bon contre
+Against Voucher Type,Contre Type de Bon
+Ageing Based On,Basé sur le vieillissement
+Agent,Agent
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+
+The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
+
+For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.
+
+Note: BOM = Bill of Materials",
+Aging Date,Vieillissement Date
+All Addresses.,Toutes les adresses.
+All Contact,Tout contact
+All Contacts.,Tous les contacts.
+All Customer Contact,Tout contact avec la clientèle
+All Day,Toute la journée
+All Employee (Active),Tous les employés (Actif)
+All Lead (Open),Tous plomb (Ouvert)
+All Products or Services.,Tous les produits ou services.
+All Sales Partner Contact,Tout contact Sales Partner
+All Sales Person,Tout Sales Person
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,Toutes les opérations de vente peuvent être marqués contre plusieurs personnes ** ** Ventes de sorte que vous pouvez définir et suivre les objectifs.
+All Supplier Contact,Toutes Contacter le fournisseur
+All Supplier Types,Tous les types de fournisseurs
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>
+Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>
+Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.",
+Allocate,Allouer
+Allocate leaves for the year.,Allouer des feuilles de l&#39;année.
+Allocated Amount,Montant alloué
+Allocated Budget,Budget alloué
+Allocated amount,Montant alloué
+Allow Bill of Materials,Laissez Bill of Materials
+Allow Dropbox Access,Autoriser l&#39;accès Dropbox
+Allow For Users,Autoriser Pour les utilisateurs
+Allow Google Drive Access,Autoriser Google Drive accès
+Allow Negative Balance,Laissez solde négatif
+Allow Negative Stock,Laissez Stock Négatif
+Allow Production Order,Laissez un ordre de fabrication
+Allow User,Permettre à l&#39;utilisateur
+Allow Users,Autoriser les utilisateurs
+Allow the following users to approve Leave Applications for block days.,Autoriser les utilisateurs suivants d&#39;approuver demandes d&#39;autorisation pour les jours de bloc.
+Allow user to edit Price List Rate in transactions,Permettre à l&#39;utilisateur d&#39;éditer Prix List Noter dans les transactions
+Allowance Percent,Pourcentage allocation
+Allowed Role to Edit Entries Before Frozen Date,Autorisé rôle à modifier les entrées Avant Frozen date
+Always use above Login Id as sender,Utiliser toujours au-dessus Id de connexion comme expéditeur
+Amended From,De modifiée
+Amount,Montant
+Amount (Company Currency),Montant (Société Monnaie)
+Amount <=,Montant &lt;=
+Amount >=,Montant&gt; =
+Amount to Bill,Montant du projet de loi
+Analytics,Analytique
+Another Period Closing Entry,Une autre entrée de clôture de la période
+Another Salary Structure '%s' is active for employee '%s'. Please make its status 'Inactive' to proceed.,Une autre structure salariale '% s ' est actif pour les employés '% s' . S'il vous plaît faire son statut « inactif » pour continuer.
+"Any other comments, noteworthy effort that should go in the records.","D&#39;autres commentaires, l&#39;effort remarquable qui devrait aller dans les dossiers."
+Applicable Holiday List,Liste de vacances applicable
+Applicable Territory,Territoire applicable
+Applicable To (Designation),Applicable à (désignation)
+Applicable To (Employee),Applicable aux (Employé)
+Applicable To (Role),Applicable à (Rôle)
+Applicable To (User),Applicable aux (Utilisateur)
+Applicant Name,Nom du demandeur
+Applicant for a Job,Demandeur d&#39;une offre d&#39;emploi
+Applicant for a Job.,Candidat à un emploi.
+Applications for leave.,Les demandes de congé.
+Applies to Company,S&#39;applique à l&#39;entreprise
+Apply / Approve Leaves,Appliquer / Approuver les feuilles
+Appraisal,Évaluation
+Appraisal Goal,Objectif d&#39;évaluation
+Appraisal Goals,Objectifs d&#39;évaluation
+Appraisal Template,Modèle d&#39;évaluation
+Appraisal Template Goal,Objectif modèle d&#39;évaluation
+Appraisal Template Title,Titre modèle d&#39;évaluation
+Approval Status,Statut d&#39;approbation
+Approved,Approuvé
+Approver,Approbateur
+Approving Role,Approuver rôle
+Approving User,Approuver l&#39;utilisateur
+Are you sure you want to STOP ,
+Are you sure you want to UNSTOP ,
+Arrear Amount,Montant échu
+"As Production Order can be made for this item, \
+				it must be a stock item.",
+As existing qty for item: ,Comme quantité existante pour objet:
+As per Stock UOM,Selon Stock UDM
+"As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","Comme il ya des transactions boursières existantes pour cet article, vous ne pouvez pas modifier les valeurs de ' A Pas de série »,« Est- Stock Item »et« Méthode d'évaluation »"
+Atleast one warehouse is mandatory,Atleast un entrepôt est obligatoire
+Attendance,Présence
+Attendance Date,Date de Participation
+Attendance Details,Détails de présence
+Attendance From Date,Participation De Date
+Attendance From Date and Attendance To Date is mandatory,Participation Date de début et de présence à ce jour est obligatoire
+Attendance To Date,La participation à ce jour
+Attendance can not be marked for future dates,La participation ne peut pas être marqué pour les dates à venir
+Attendance for the employee: ,La participation de l&#39;employé:
+Attendance record.,Record de fréquentation.
+Authorization Control,Contrôle d&#39;autorisation
+Authorization Rule,Règle d&#39;autorisation
+Auto Accounting For Stock Settings,Auto Comptabilité Pour les paramètres de droits
+Auto Email Id,Identification d&#39;email automatique
+Auto Material Request,Auto Demande de Matériel
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-raise Demande de Matériel si la quantité va en dessous du niveau de re-commande dans un entrepôt
+Automatically extract Job Applicants from a mail box ,
+Automatically extract Leads from a mail box e.g.,Extraire automatiquement des prospects à partir d'une boîte aux lettres par exemple
+Automatically updated via Stock Entry of type Manufacture/Repack,Automatiquement mis à jour via l&#39;entrée de fabrication de type Stock / Repack
+Autoreply when a new mail is received,Autoreply quand un nouveau message est reçu
+Available,disponible
+Available Qty at Warehouse,Qté disponible à l&#39;entrepôt
+Available Stock for Packing Items,Disponible en stock pour l&#39;emballage Articles
+"Available in 
+BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet",
+Average Age,moyen âge
+Average Commission Rate,Taux moyen Commission
+Average Discount,D&#39;actualisation moyen
+B+,B +
+B-,B-
+BILL,PROJET DE LOI
+BILLJ,BILLJ
+BOM,BOM
+BOM Detail No,Détail BOM Non
+BOM Explosion Item,Article éclatement de la nomenclature
+BOM Item,Article BOM
+BOM No,Aucune nomenclature
+BOM No. for a Finished Good Item,N ° nomenclature pour un produit fini Bonne
+BOM Operation,Opération BOM
+BOM Operations,Opérations de nomenclature
+BOM Replace Tool,Outil Remplacer BOM
+BOM replaced,BOM remplacé
+Backup Manager,Gestionnaire de sauvegarde
+Backup Right Now,Sauvegarde Right Now
+Backups will be uploaded to,Les sauvegardes seront téléchargées sur
+Balance Qty,solde Quantité
+Balance Value,Valeur de balance
+"Balances of Accounts of type ""Bank or Cash""",Soldes des comptes de type «bancaire ou en espèces&quot;
+Bank,Banque
+Bank A/C No.,Bank A / C No.
+Bank Account,Compte bancaire
+Bank Account No.,N ° de compte bancaire
+Bank Accounts,Comptes bancaires
+Bank Clearance Summary,Banque Résumé de dégagement
+Bank Name,Nom de la banque
+Bank Reconciliation,Rapprochement bancaire
+Bank Reconciliation Detail,Détail de rapprochement bancaire
+Bank Reconciliation Statement,État de rapprochement bancaire
+Bank Voucher,Bon Banque
+Bank or Cash,Bancaire ou en espèces
+Bank/Cash Balance,Banque / Balance trésorerie
+Barcode,Barcode
+Based On,Basé sur
+Basic Info,Informations de base
+Basic Information,Renseignements de base
+Basic Rate,Taux de base
+Basic Rate (Company Currency),Taux de base (Société Monnaie)
+Batch,Lot
+Batch (lot) of an Item.,Batch (lot) d&#39;un élément.
+Batch Finished Date,Date de lot fini
+Batch ID,ID du lot
+Batch No,Aucun lot
+Batch Started Date,Date de démarrage du lot
+Batch Time Logs for Billing.,Temps de lots des journaux pour la facturation.
+Batch Time Logs for billing.,Temps de lots des journaux pour la facturation.
+Batch-Wise Balance History,Discontinu Histoire de la balance
+Batched for Billing,Par lots pour la facturation
+"Before proceeding, please create Customer from Lead","Avant de continuer , s'il vous plaît créer clientèle de plomb"
+Better Prospects,De meilleures perspectives
+Bill Date,Bill Date
+Bill No,Le projet de loi no
+Bill of Material to be considered for manufacturing,Bill of Material être considéré pour la fabrication
+Bill of Materials,Bill of Materials
+Bill of Materials (BOM),Nomenclature (BOM)
+Billable,Facturable
+Billed,Facturé
+Billed Amount,Montant facturé
+Billed Amt,Bec Amt
+Billing,Facturation
+Billing Address,Adresse de facturation
+Billing Address Name,Facturation Nom Adresse
+Billing Status,Statut de la facturation
+Bills raised by Suppliers.,Factures soulevé par les fournisseurs.
+Bills raised to Customers.,Factures aux clients soulevé.
+Bin,Boîte
+Bio,Bio
+Birthday,anniversaire
+Block Date,Date de bloquer
+Block Days,Bloquer les jours
+Block Holidays on important days.,Bloquer les jours fériés importants.
+Block leave applications by department.,Bloquer les demandes d&#39;autorisation par le ministère.
+Blog Post,Blog
+Blog Subscriber,Abonné Blog
+Blood Group,Groupe sanguin
+Both Income and Expense balances are zero. No Need to make Period Closing Entry.,Les deux soldes des revenus et dépenses sont nuls . Pas besoin de faire la période d'inscription de clôture .
+Both Warehouse must belong to same Company,Les deux Entrepôt doit appartenir à une même entreprise
+Branch,Branche
+Brand,Marque
+Brand Name,Nom de marque
+Brand master.,Marque maître.
+Brands,Marques
+Breakdown,Panne
+Budget,Budget
+Budget Allocated,Budget alloué
+Budget Detail,Détail du budget
+Budget Details,Détails du budget
+Budget Distribution,Répartition du budget
+Budget Distribution Detail,Détail Répartition du budget
+Budget Distribution Details,Détails de la répartition du budget
+Budget Variance Report,Rapport sur les écarts de budget
+Build Report,construire Rapport
+Bulk Rename,Renommer vrac
+Bummer! There are more holidays than working days this month.,Déception! Il ya plus de vacances que les jours ouvrables du mois.
+Bundle items at time of sale.,Regrouper des envois au moment de la vente.
+Buyer of Goods and Services.,Lors de votre achat de biens et services.
+Buying,Achat
+Buying Amount,Montant d&#39;achat
+Buying Settings,Réglages d&#39;achat
+By,Par
+C-FORM/,C-FORM /
+C-Form,C-Form
+C-Form Applicable,C-Form applicable
+C-Form Invoice Detail,C-Form Détail Facture
+C-Form No,C-formulaire n °
+C-Form records,Enregistrements C -Form
+CI/2010-2011/,CI/2010-2011 /
+COMM-,COMM-
+CUST,CUST
+CUSTMUM,CUSTMUM
+Calculate Based On,Calculer en fonction
+Calculate Total Score,Calculer Score total
+Calendar Events,Calendrier des événements
+Call,Appeler
+Campaign,Campagne
+Campaign Name,Nom de la campagne
+"Can not filter based on Account, if grouped by Account","Impossible de filtrer sur la base de compte , si regroupées par compte"
+"Can not filter based on Voucher No, if grouped by Voucher","Impossible de filtrer sur la base Bon Non, si regroupés par Chèque"
+Cancelled,Annulé
+Cancelling this Stock Reconciliation will nullify its effect.,Annulation de ce stock de réconciliation annuler son effet .
+Cannot ,Ne peut pas
+Cannot Cancel Opportunity as Quotation Exists,Vous ne pouvez pas annuler Possibilité de devis Existe
+Cannot approve leave as you are not authorized to approve leaves on Block Dates.,Impossible d&#39;approuver les congés que vous n&#39;êtes pas autorisé à approuver les congés sur les dates de bloc.
+Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,Vous ne pouvez pas modifier Année date de début et de fin d'année Date de fois l'exercice est enregistré .
+Cannot continue.,Impossible de continuer.
+"Cannot declare as lost, because Quotation has been made.","Vous ne pouvez pas déclarer comme perdu , parce offre a été faite."
+"Cannot delete Serial No in warehouse. \
+				First remove from warehouse, then delete.",
+Cannot set as Lost as Sales Order is made.,Impossible de définir aussi perdu que les ventes décret.
+Capacity,Capacité
+Capacity Units,Unités de capacité
+Carry Forward,Reporter
+Carry Forwarded Leaves,Effectuer Feuilles Transmises
+Case No. cannot be 0,Cas n ° ne peut pas être 0
+Cash,Espèces
+Cash Voucher,Bon trésorerie
+Cash/Bank Account,Trésorerie / Compte bancaire
+Category,Catégorie
+Cell Number,Nombre de cellules
+Change UOM for an Item.,Changer Emballage pour un article.
+Change the starting / current sequence number of an existing series.,Changer le numéro de séquence de démarrage / courant d&#39;une série existante.
+Channel Partner,Channel Partner
+Charge,Charge
+Chargeable,À la charge
+Chart of Accounts,Plan comptable
+Chart of Cost Centers,Carte des centres de coûts
+Chat,Bavarder
+Check all the items below that you want to send in this digest.,Vérifiez tous les points ci-dessous que vous souhaitez envoyer dans ce recueil.
+Check for Duplicates,Vérifier les doublons
+Check how the newsletter looks in an email by sending it to your email.,Vérifiez comment la newsletter regarde dans un e-mail en l&#39;envoyant à votre adresse email.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","Vérifiez si la facture récurrente, décochez-vous s&#39;arrête ou mis Date de fin correcte"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Vérifiez si vous avez besoin automatiques factures récurrentes. Après avoir présenté la facture de vente, l&#39;article récurrent sera visible."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,Vérifiez si vous voulez envoyer le bulletin de salaire dans le courrier à chaque salarié lors de la soumission bulletin de salaire
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,Cochez cette case si vous voulez forcer l&#39;utilisateur à sélectionner une série avant de l&#39;enregistrer. Il n&#39;y aura pas défaut si vous cochez cette.
+Check this if you want to send emails as this id only (in case of restriction by your email provider).,Cochez cette case si vous souhaitez envoyer des emails que cette id seulement (en cas de restriction par votre fournisseur de messagerie).
+Check this if you want to show in website,Cochez cette case si vous souhaitez afficher sur le site
+Check this to disallow fractions. (for Nos),Cochez cette case pour interdire les fractions. (Pour les numéros)
+Check this to pull emails from your mailbox,Cochez cette case pour extraire des emails de votre boîte aux lettres
+Check to activate,Vérifiez pour activer
+Check to make Shipping Address,Vérifiez l&#39;adresse de livraison
+Check to make primary address,Vérifiez l&#39;adresse principale
+Cheque,Chèque
+Cheque Date,Date de chèques
+Cheque Number,Numéro de chèque
+City,Ville
+City/Town,Ville /
+Claim Amount,Montant réclamé
+Claims for company expense.,Les réclamations pour frais de la société.
+Class / Percentage,Classe / Pourcentage
+Classic,Classique
+Classification of Customers by region,Classification des clients par région
+Clear Table,Effacer le tableau
+Clearance Date,Date de la clairance
+Click here to buy subscription.,Cliquez ici pour acheter l'abonnement .
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Cliquez sur le bouton pour créer une nouvelle facture de vente «Facture de vente Make &#39;.
+Click on a link to get options to expand get options ,
+Client,Client
+Close Balance Sheet and book Profit or Loss.,Fermer Bilan et livre Bénéfice ou perte .
+Closed,Fermé
+Closing Account Head,Fermeture chef Compte
+Closing Date,Date de clôture
+Closing Fiscal Year,Clôture de l&#39;exercice
+Closing Qty,Quantité de clôture
+Closing Value,Valeur de clôture
+CoA Help,Aide CoA
+Cold Calling,Cold Calling
+Color,Couleur
+Comma separated list of email addresses,Comma liste séparée par des adresses e-mail
+Comments,Commentaires
+Commission Rate,Taux de commission
+Commission Rate (%),Taux de commission (%)
+Commission partners and targets,Partenaires de la Commission et des objectifs
+Commit Log,s'engager Connexion
+Communication,Communication
+Communication HTML,Communication HTML
+Communication History,Histoire de la communication
+Communication Medium,Moyen de communication
+Communication log.,Journal des communications.
+Communications,communications
+Company,Entreprise
+Company Abbreviation,Abréviation de l'entreprise
+Company Details,Détails de la société
+Company Email,Société Email
+Company Info,Informations sur la société
+Company Master.,Maître de l&#39;entreprise.
+Company Name,Nom de la société
+Company Settings,des paramètres de société
+Company branches.,Filiales de l&#39;entreprise.
+Company departments.,Départements de l&#39;entreprise.
+Company is missing in following warehouses,Société est manquant dans la suite des entrepôts
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,"Numéros d&#39;immatriculation de la Société pour votre référence. Numéros d&#39;enregistrement TVA, etc: par exemple"
+Company registration numbers for your reference. Tax numbers etc.,"Numéros d&#39;immatriculation de la Société pour votre référence. Numéros de taxes, etc"
+"Company, Month and Fiscal Year is mandatory","Société , le mois et l'année fiscale est obligatoire"
+Complaint,Plainte
+Complete,Compléter
+Completed,Terminé
+Completed Production Orders,Terminé les ordres de fabrication
+Completed Qty,Complété Quantité
+Completion Date,Date d&#39;achèvement
+Completion Status,L&#39;état d&#39;achèvement
+Confirmation Date,date de confirmation
+Confirmed orders from Customers.,Confirmé commandes provenant de clients.
+Consider Tax or Charge for,Prenons l&#39;impôt ou charge pour
+Considered as Opening Balance,Considéré comme Solde d&#39;ouverture
+Considered as an Opening Balance,Considéré comme un solde d&#39;ouverture
+Consultant,Consultant
+Consumable Cost,Coût de consommable
+Consumable cost per hour,Coût de consommable par heure
+Consumed Qty,Quantité consommée
+Contact,Contacter
+Contact Control,Contactez contrôle
+Contact Desc,Contacter Desc
+Contact Details,Coordonnées
+Contact Email,Contact Courriel
+Contact HTML,Contacter HTML
+Contact Info,Information de contact
+Contact Mobile No,Contact Mobile Aucune
+Contact Name,Contact Nom
+Contact No.,Contactez No.
+Contact Person,Personne à contacter
+Contact Type,Type de contact
+Content,Teneur
+Content Type,Type de contenu
+Contra Voucher,Bon Contra
+Contract End Date,Date de fin du contrat
+Contribution (%),Contribution (%)
+Contribution to Net Total,Contribution à Total net
+Conversion Factor,Facteur de conversion
+Conversion Factor of UOM: %s should be equal to 1. As UOM: %s is Stock UOM of Item: %s.,Facteur de conversion de Emballage: % s doit être égal à 1 . Comme Emballage: % s est Stock Emballage de produit: % s .
+Convert into Recurring Invoice,Convertir en facture récurrente
+Convert to Group,Convertir en groupe
+Convert to Ledger,Autre Ledger
+Converted,Converti
+Copy From Item Group,Copy From Group article
+Cost Center,Centre de coûts
+Cost Center Details,Coût Center Détails
+Cost Center Name,Coût Nom du centre
+Cost Center must be specified for PL Account: ,Centre de coûts doit être spécifiée pour compte PL:
+Costing,Costing
+Country,Pays
+Country Name,Nom Pays
+"Country, Timezone and Currency","Pays , Fuseau horaire et devise"
+Create,Créer
+Create Bank Voucher for the total salary paid for the above selected criteria,Créer Chèques de la Banque pour le salaire total payé pour les critères ci-dessus sélectionnées
+Create Customer,créer clientèle
+Create Material Requests,Créer des demandes de matériel
+Create New,créer un nouveau
+Create Opportunity,créer une opportunité
+Create Production Orders,Créer des ordres de fabrication
+Create Quotation,créer offre
+Create Receiver List,Créer une liste Receiver
+Create Salary Slip,Créer bulletin de salaire
+Create Stock Ledger Entries when you submit a Sales Invoice,Créer un registre des stocks entrées lorsque vous soumettez une facture de vente
+Create and Send Newsletters,Créer et envoyer des bulletins
+Created Account Head: ,Chef de Compte créé:
+Created By,Créé par
+Created Customer Issue,Numéro client créé
+Created Group ,Groupe créé
+Created Opportunity,Création Opportunity
+Created Support Ticket,Support Ticket créé
+Creates salary slip for above mentioned criteria.,Crée le bulletin de salaire pour les critères mentionnés ci-dessus.
+Creation Date,date de création
+Creation Document No,Création document n
+Creation Document Type,Type de document de création
+Creation Time,Date de création
+Credentials,Lettres de créance
+Credit,Crédit
+Credit Amt,Crédit Amt
+Credit Card Voucher,Bon de carte de crédit
+Credit Controller,Credit Controller
+Credit Days,Jours de crédit
+Credit Limit,Limite de crédit
+Credit Note,Note de crédit
+Credit To,Crédit Pour
+Credited account (Customer) is not matching with Sales Invoice,Compte crédité ( client ) n'est pas s'assortit avec la facture de vente
+Cross Listing of Item in multiple groups,Cross Listing des articles dans plusieurs groupes
+Currency,Monnaie
+Currency Exchange,Change de devises
+Currency Name,Nom de la devise
+Currency Settings,Paramètres de devises
+Currency and Price List,Monnaie et liste de prix
+Currency is missing for Price List,Devise est absent pour la liste de prix
+Current Address,Adresse actuelle
+Current Address Is,Adresse actuelle
+Current BOM,Nomenclature actuelle
+Current Fiscal Year,Exercice en cours
+Current Stock,Stock actuel
+Current Stock UOM,Emballage Stock actuel
+Current Value,Valeur actuelle
+Custom,Coutume
+Custom Autoreply Message,Message personnalisé Autoreply
+Custom Message,Message personnalisé
+Customer,Client
+Customer (Receivable) Account,Compte client (à recevoir)
+Customer / Item Name,Client / Nom d&#39;article
+Customer / Lead Address,Client / plomb adresse
+Customer Account Head,Compte client Head
+Customer Acquisition and Loyalty,Acquisition et fidélisation client
+Customer Address,Adresse du client
+Customer Addresses And Contacts,Adresses et contacts clients
+Customer Code,Code client
+Customer Codes,Codes du Client
+Customer Details,Détails du client
+Customer Discount,Remise à la clientèle
+Customer Discounts,Réductions des clients
+Customer Feedback,Réactions des clients
+Customer Group,Groupe de clients
+Customer Group / Customer,Groupe de client / client
+Customer Group Name,Nom du groupe client
+Customer Intro,Intro à la clientèle
+Customer Issue,Numéro client
+Customer Issue against Serial No.,Numéro de la clientèle contre Serial No.
+Customer Name,Nom du client
+Customer Naming By,Client de nommage par
+Customer classification tree.,Arbre de classification de la clientèle.
+Customer database.,Base de données clients.
+Customer's Item Code,Code article client
+Customer's Purchase Order Date,Bon de commande de la date de clientèle
+Customer's Purchase Order No,Bon de commande du client Non
+Customer's Purchase Order Number,Nombre bon de commande du client
+Customer's Vendor,Client Fournisseur
+Customers Not Buying Since Long Time,Les clients ne pas acheter Depuis Long Time
+Customerwise Discount,Remise Customerwise
+Customization,Personnalisation
+Customize the Notification,Personnaliser la notification
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,Personnaliser le texte d&#39;introduction qui se déroule comme une partie de cet e-mail. Chaque transaction a un texte séparé d&#39;introduction.
+DN,DN
+DN Detail,Détail DN
+Daily,Quotidien
+Daily Time Log Summary,Daily Time Sommaire du journal
+Data Import,Importation de données
+Database Folder ID,Database ID du dossier
+Database of potential customers.,Base de données de clients potentiels.
+Date,Date
+Date Format,Format de date
+Date Of Retirement,Date de la retraite
+Date and Number Settings,Date et numéro Paramètres
+Date is repeated,La date est répétée
+Date of Birth,Date de naissance
+Date of Issue,Date d&#39;émission
+Date of Joining,Date d&#39;adhésion
+Date on which lorry started from supplier warehouse,Date à laquelle le camion a commencé à partir de l&#39;entrepôt fournisseur
+Date on which lorry started from your warehouse,Date à laquelle le camion a commencé à partir de votre entrepôt
+Dates,Dates
+Days Since Last Order,Jours depuis la dernière commande
+Days for which Holidays are blocked for this department.,Jours fériés pour lesquels sont bloqués pour ce département.
+Dealer,Revendeur
+Debit,Débit
+Debit Amt,Débit Amt
+Debit Note,Note de débit
+Debit To,Débit Pour
+Debit and Credit not equal for this voucher: Diff (Debit) is ,
+Debit or Credit,De débit ou de crédit
+Debited account (Supplier) is not matching with Purchase Invoice,Compte débité ( fournisseur ) n'est pas s'assortit avec la facture d'achat
+Deduct,Déduire
+Deduction,Déduction
+Deduction Type,Type de déduction
+Deduction1,Deduction1
+Deductions,Déductions
+Default,Par défaut
+Default Account,Compte par défaut
+Default BOM,Nomenclature par défaut
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,Par défaut Banque / argent compte sera automatiquement mis à jour dans la facture POS lorsque ce mode est sélectionné.
+Default Bank Account,Compte bancaire par défaut
+Default Buying Price List,Défaut d'achat Liste des Prix
+Default Cash Account,Compte de trésorerie par défaut
+Default Company,Société défaut
+Default Cost Center,Centre de coûts par défaut
+Default Cost Center for tracking expense for this item.,Centre de coûts par défaut pour le suivi de charge pour ce poste.
+Default Currency,Devise par défaut
+Default Customer Group,Groupe de clients par défaut
+Default Expense Account,Compte de dépenses par défaut
+Default Income Account,Compte d&#39;exploitation par défaut
+Default Item Group,Groupe d&#39;éléments par défaut
+Default Price List,Liste des prix défaut
+Default Purchase Account in which cost of the item will be debited.,Compte Achat par défaut dans lequel le coût de l&#39;article sera débité.
+Default Settings,Paramètres par défaut
+Default Source Warehouse,Source d&#39;entrepôt par défaut
+Default Stock UOM,Stock défaut Emballage
+Default Supplier,Par défaut Fournisseur
+Default Supplier Type,Fournisseur Type par défaut
+Default Target Warehouse,Cible d&#39;entrepôt par défaut
+Default Territory,Territoire défaut
+Default UOM updated in item ,
+Default Unit of Measure,Unité de mesure par défaut
+"Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.","Unité de mesure de défaut ne peut pas être modifié directement parce que vous avez déjà fait une transaction (s ) avec un autre UDM . Pour changer Emballage par défaut , utiliser l'outil « Emballage Remplacer Utility"" sous module de Stock ."
+Default Valuation Method,Méthode d&#39;évaluation par défaut
+Default Warehouse,Entrepôt de défaut
+Default Warehouse is mandatory for Stock Item.,Entrepôt de défaut est obligatoire pour Produit en stock.
+Default settings for Shopping Cart,Les paramètres par défaut pour Panier
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Définir le budget pour ce centre de coûts. Pour définir l&#39;action budgétaire, voir <a href=""#!List/Company"">Maître Société</a>"
+Delete,Effacer
+Delivered,Livré
+Delivered Items To Be Billed,Les articles livrés être facturé
+Delivered Qty,Qté livrée
+Delivered Serial No ,
+Delivery Date,Date de livraison
+Delivery Details,Détails de la livraison
+Delivery Document No,Pas de livraison de documents
+Delivery Document Type,Type de document de livraison
+Delivery Note,Remarque livraison
+Delivery Note Item,Point de Livraison
+Delivery Note Items,Articles bordereau de livraison
+Delivery Note Message,Note Message de livraison
+Delivery Note No,Remarque Aucune livraison
+Delivery Note Required,Remarque livraison requis
+Delivery Note Trends,Bordereau de livraison Tendances
+Delivery Status,Delivery Status
+Delivery Time,Délai de livraison
+Delivery To,Pour livraison
+Department,Département
+Depends on LWP,Dépend de LWP
+Description,Description
+Description HTML,Description du HTML
+Description of a Job Opening,Description d&#39;un Job Opening
+Designation,Désignation
+Detailed Breakup of the totals,Breakup détaillée des totaux
+Details,Détails
+Difference,Différence
+Difference Account,Compte de la différence
+Different UOM for items will lead to incorrect,Différents Emballage des articles mènera à incorrects
+Disable Rounded Total,Désactiver totale arrondie
+Discount  %,% De réduction
+Discount %,% De réduction
+Discount (%),Remise (%)
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Les champs d&#39;actualisation sera disponible en commande, reçu d&#39;achat, facture d&#39;achat"
+Discount(%),Remise (%)
+Display all the individual items delivered with the main items,Afficher tous les articles individuels livrés avec les principaux postes
+Distinct unit of an Item,Unité distincte d&#39;un article
+Distribute transport overhead across items.,Distribuer surdébit de transport pour tous les items.
+Distribution,Répartition
+Distribution Id,Id distribution
+Distribution Name,Nom distribution
+Distributor,Distributeur
+Divorced,Divorcé
+Do Not Contact,Ne communiquez pas avec
+Do not show any symbol like $ etc next to currencies.,Ne plus afficher n&#39;importe quel symbole comme $ etc à côté de devises.
+Do you really want to STOP ,
+Do you really want to STOP this Material Request?,Voulez-vous vraiment arrêter cette Demande de Matériel ?
+Do you really want to Submit all Salary Slip for month : ,
+Do you really want to UNSTOP ,
+Do you really want to UNSTOP this Material Request?,Voulez-vous vraiment à ce unstop Demande de Matériel ?
+Doc Name,Nom de Doc
+Doc Type,Doc Type d&#39;
+Document Description,Description du document
+Document Type,Type de document
+Documentation,Documentation
+Documents,Documents
+Domain,Domaine
+Don't send Employee Birthday Reminders,Ne pas envoyer des employés anniversaire rappels
+Download Materials Required,Télécharger Matériel requis
+Download Reconcilation Data,Télécharger Rapprochement des données
+Download Template,Télécharger le modèle
+Download a report containing all raw materials with their latest inventory status,Télécharger un rapport contenant toutes les matières premières avec leur dernier état des stocks
+"Download the Template, fill appropriate data and attach the modified file.","Télécharger le modèle , remplir les données appropriées et joindre le fichier modifié ."
+"Download the Template, fill appropriate data and attach the modified file.
+All dates and employee combination in the selected period will come in the template, with existing attendance records",
+Draft,Avant-projet
+Dropbox,Dropbox
+Dropbox Access Allowed,Dropbox accès autorisé
+Dropbox Access Key,Dropbox Clé d&#39;accès
+Dropbox Access Secret,Dropbox accès secrète
+Due Date,Due Date
+Duplicate Item,dupliquer article
+EMP/,EMP /
+ERPNext Setup,ERPNext installation
+ERPNext Setup Guide,Guide d'installation ERPNext
+"ERPNext is an open-source web based ERP made by Web Notes Technologies Pvt Ltd. to provide an integrated tool to manage most processes in a small organization. For more information about Web Notes, or to buy hosting servies, go to ",
+ESIC CARD No,CARTE Aucune ESIC
+ESIC No.,ESIC n °
+Earliest,plus tôt
+Earning,Revenus
+Earning & Deduction,Gains et déduction
+Earning Type,Gagner Type d&#39;
+Earning1,Earning1
+Edit,Éditer
+Educational Qualification,Qualification pour l&#39;éducation
+Educational Qualification Details,Détails de qualification d&#39;enseignement
+Eg. smsgateway.com/api/send_sms.cgi,Par exemple. smsgateway.com / api / send_sms.cgi
+Electricity Cost,Coût de l'électricité
+Electricity cost per hour,Coût de l'électricité par heure
+Email,Email
+Email Digest,Email Digest
+Email Digest Settings,Paramètres de messagerie Digest
+Email Digest: ,
+Email Id,Identification d&#39;email
+"Email Id must be unique, already exists for: ","Email ID doit être unique, existe déjà pour:"
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",Identification d&#39;email où un demandeur d&#39;emploi enverra par courriel par exemple &quot;jobs@example.com&quot;
+Email Sent?,Envoyer envoyés?
+Email Settings,Paramètres de messagerie
+Email Settings for Outgoing and Incoming Emails.,Paramètres de messagerie pour courriels entrants et sortants.
+Email ids separated by commas.,identifiants de messagerie séparées par des virgules.
+"Email settings for jobs email id ""jobs@example.com""",Paramètres par email pour Emploi email id &quot;jobs@example.com&quot;
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",Paramètres de messagerie pour extraire des ventes Leads e-mail par exemple id &quot;sales@example.com&quot;
+Emergency Contact,En cas d'urgence
+Emergency Contact Details,Détails de contact d&#39;urgence
+Emergency Phone,téléphone d'urgence
+Employee,Employé
+Employee Birthday,Anniversaire des employés
+Employee Designation.,Désignation des employés.
+Employee Details,Détails des employés
+Employee Education,Formation des employés
+Employee External Work History,Antécédents de travail des employés externe
+Employee Information,Renseignements sur l&#39;employé
+Employee Internal Work History,Antécédents de travail des employés internes
+Employee Internal Work Historys,Historys employés de travail internes
+Employee Leave Approver,Congé employé approbateur
+Employee Leave Balance,Congé employé Solde
+Employee Name,Nom de l&#39;employé
+Employee Number,Numéro d&#39;employé
+Employee Records to be created by,Dossiers sur les employés à être créées par
+Employee Settings,Réglages des employés
+Employee Setup,Configuration des employés
+Employee Type,Type de contrat
+Employee grades,Grades du personnel
+Employee record is created using selected field. ,dossier de l&#39;employé est créé en utilisant champ sélectionné.
+Employee records.,Les dossiers des employés.
+Employee: ,Employé:
+Employees Email Id,Les employés Id Email
+Employment Details,Détails de l&#39;emploi
+Employment Type,Type d&#39;emploi
+Enable / Disable Email Notifications,Activer / désactiver les notifications par courriel
+Enable Shopping Cart,Activer Panier
+Enabled,Activé
+Encashment Date,Date de l&#39;encaissement
+End Date,Date de fin
+End date of current invoice's period,Date de fin de la période de facturation en cours
+End of Life,Fin de vie
+Enter Row,Entrez Row
+Enter Verification Code,Entrez le code de vérification
+Enter campaign name if the source of lead is campaign.,Entrez le nom de la campagne si la source de plomb est la campagne.
+Enter department to which this Contact belongs,Entrez département auquel appartient ce contact
+Enter designation of this Contact,Entrez la désignation de ce contact
+"Enter email id separated by commas, invoice will be mailed automatically on particular date","Entrez Identifiant courriels séparé par des virgules, la facture sera envoyée automatiquement à la date particulière"
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,Introduisez les articles et qté planifiée pour laquelle vous voulez soulever ordres de fabrication ou de télécharger des matières premières pour l&#39;analyse.
+Enter name of campaign if source of enquiry is campaign,Entrez le nom de la campagne si la source de l&#39;enquête est la campagne
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Entrez les paramètres url statiques (par exemple ici sender = ERPNext, username = ERPNext, mot de passe = 1234 etc)"
+Enter the company name under which Account Head will be created for this Supplier,Entrez le nom de la société en vertu de laquelle Head compte sera créé pour ce Fournisseur
+Enter url parameter for message,Entrez le paramètre url pour le message
+Enter url parameter for receiver nos,Entrez le paramètre url pour nos récepteurs
+Entries,Entrées
+Entries against,entrées contre
+Entries are not allowed against this Fiscal Year if the year is closed.,Les inscriptions ne sont pas autorisés contre cette exercice si l&#39;année est fermé.
+Error,Erreur
+Error for,Erreur d&#39;
+Estimated Material Cost,Coût des matières premières estimée
+Everyone can read,Tout le monde peut lire
+"Example: ABCD.#####
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
+Exchange Rate,Taux de change
+Excise Page Number,Numéro de page d&#39;accise
+Excise Voucher,Bon d&#39;accise
+Exemption Limit,Limite d&#39;exemption
+Exhibition,Exposition
+Existing Customer,Client existant
+Exit,Sortie
+Exit Interview Details,Quittez Détails Interview
+Expected,Attendu
+Expected Date cannot be before Material Request Date,Date prévu ne peut pas être avant Matériel Date de la demande
+Expected Delivery Date,Date de livraison prévue
+Expected End Date,Date de fin prévue
+Expected Start Date,Date de début prévue
+Expense Account,Compte de dépenses
+Expense Account is mandatory,Compte de dépenses est obligatoire
+Expense Claim,Demande d&#39;indemnité de
+Expense Claim Approved,Demande d&#39;indemnité Approuvé
+Expense Claim Approved Message,Demande d&#39;indemnité Approuvé message
+Expense Claim Detail,Détail remboursement des dépenses
+Expense Claim Details,Détails de la réclamation des frais de
+Expense Claim Rejected,Demande d&#39;indemnité rejetée
+Expense Claim Rejected Message,Demande d&#39;indemnité rejeté le message
+Expense Claim Type,Type de demande d&#39;indemnité
+Expense Claim has been approved.,Demande de remboursement a été approuvé .
+Expense Claim has been rejected.,Demande de remboursement a été rejetée .
+Expense Claim is pending approval. Only the Expense Approver can update status.,Remboursement de frais est en attente d'approbation . Seulement l'approbateur des frais peut mettre à jour le statut .
+Expense Date,Date de frais
+Expense Details,Détail des dépenses
+Expense Head,Chef des frais
+Expense account is mandatory for item,Compte de dépenses est obligatoire pour l'article
+Expense/Difference account is mandatory for item: ,
+Expenses Booked,Dépenses Réservé
+Expenses Included In Valuation,Frais inclus dans l&#39;évaluation
+Expenses booked for the digest period,Charges comptabilisées pour la période digest
+Expiry Date,Date d&#39;expiration
+Exports,Exportations
+External,Externe
+Extract Emails,Extrait Emails
+FCFS Rate,Taux PAPS
+FIFO,FIFO
+Failed: ,Échec:
+Family Background,Antécédents familiaux
+Fax,Fax
+Features Setup,Features Setup
+Feed,Nourrir
+Feed Type,Type de flux
+Feedback,Réaction
+Female,Féminin
+Fetch exploded BOM (including sub-assemblies),Fetch nomenclature éclatée ( y compris les sous -ensembles )
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","Champ disponible dans la note de livraison, devis, facture de vente, Sales Order"
+Files Folder ID,Les fichiers d&#39;identification des dossiers
+Fill the form and save it,Remplissez le formulaire et l'enregistrer
+Filter By Amount,Filtrer par Montant
+Filter By Date,Filtrer par date
+Filter based on customer,Filtre basé sur le client
+Filter based on item,Filtre basé sur le point
+Financial Analytics,Financial Analytics
+Financial Statements,États financiers
+Finished Goods,Produits finis
+First Name,Prénom
+First Responded On,D&#39;abord répondu le
+Fiscal Year,Exercice
+Fixed Asset Account,Compte des immobilisations
+Float Precision,Flotteur de précision
+Follow via Email,Suivez par e-mail
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Le tableau suivant indique les valeurs si les articles sont en sous - traitance. Ces valeurs seront extraites de la maîtrise de la «Bill of Materials&quot; de sous - traitance articles.
+For Company,Pour l&#39;entreprise
+For Employee,Pour les employés
+For Employee Name,Pour Nom de l&#39;employé
+For Production,Pour la production
+For Reference Only.,Pour référence seulement.
+For Sales Invoice,Pour Facture de vente
+For Server Side Print Formats,Server Side Formats d&#39;impression
+For Supplier,pour fournisseur
+For UOM,Pour UOM
+For Warehouse,Pour Entrepôt
+"For e.g. 2012, 2012-13","Pour exemple, 2012, 2012-13"
+For opening balance entry account can not be a PL account,Pour ouvrir inscription en compte l&#39;équilibre ne peut pas être un compte de PL
+For reference,Pour référence
+For reference only.,À titre de référence seulement.
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Pour la commodité des clients, ces codes peuvent être utilisés dans des formats d&#39;impression comme les factures et les bons de livraison"
+Forum,Forum
+Fraction,Fraction
+Fraction Units,Unités fraction
+Freeze Stock Entries,Congeler entrées en stocks
+Friday,Vendredi
+From,À partir de
+From Bill of Materials,De Bill of Materials
+From Company,De Company
+From Currency,De Monnaie
+From Currency and To Currency cannot be same,De leur monnaie et à devises ne peut pas être la même
+From Customer,De clientèle
+From Customer Issue,De émission à la clientèle
+From Date,Partir de la date
+From Delivery Note,De bon de livraison
+From Employee,De employés
+From Lead,Du plomb
+From Maintenance Schedule,De Calendrier d'entretien
+From Material Request,De Demande de Matériel
+From Opportunity,De Opportunity
+From Package No.,De Ensemble numéro
+From Purchase Order,De bon de commande
+From Purchase Receipt,De ticket de caisse
+From Quotation,De offre
+From Sales Order,De Sales Order
+From Supplier Quotation,De Fournisseur offre
+From Time,From Time
+From Value,De la valeur
+From Value should be less than To Value,De valeur doit être inférieure à la valeur
+Frozen,Frozen
+Frozen Accounts Modifier,Frozen comptes modificateur
+Fulfilled,Remplies
+Full Name,Nom et Prénom
+Fully Completed,Entièrement complété
+"Further accounts can be made under Groups,","D'autres comptes peuvent être faites dans les groupes ,"
+Further nodes can be only created under 'Group' type nodes,D'autres nœuds peuvent être créées que sous les nœuds de type 'Groupe'
+GL Entry,Entrée GL
+GL Entry: Debit or Credit amount is mandatory for ,GL Entrée: quantité de débit ou de crédit est obligatoire pour
+GRN,GRN
+Gantt Chart,Diagramme de Gantt
+Gantt chart of all tasks.,Diagramme de Gantt de toutes les tâches.
+Gender,Sexe
+General,Général
+General Ledger,General Ledger
+Generate Description HTML,Générer HTML Description
+Generate Material Requests (MRP) and Production Orders.,Lieu à des demandes de matériel (MRP) et de la procédure de production.
+Generate Salary Slips,Générer les bulletins de salaire
+Generate Schedule,Générer annexe
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Générer des bordereaux d&#39;emballage pour les colis à livrer. Utilisé pour avertir le numéro du colis, contenu du paquet et son poids."
+Generates HTML to include selected image in the description,Génère du code HTML pour inclure l&#39;image sélectionnée dans la description
+Get Advances Paid,Obtenez Avances et acomptes versés
+Get Advances Received,Obtenez Avances et acomptes reçus
+Get Current Stock,Obtenez Stock actuel
+Get Items,Obtenir les éléments
+Get Items From Sales Orders,Obtenir des éléments de Sales Orders
+Get Items from BOM,Obtenir des éléments de nomenclature
+Get Last Purchase Rate,Obtenez Purchase Rate Dernière
+Get Non Reconciled Entries,Obtenez Non Entrées rapprochées
+Get Outstanding Invoices,Obtenez Factures en souffrance
+Get Sales Orders,Obtenez des commandes clients
+Get Specification Details,Obtenez les détails Spécification
+Get Stock and Rate,Obtenez stock et taux
+Get Template,Obtenez modèle
+Get Terms and Conditions,Obtenez Termes et Conditions
+Get Weekly Off Dates,Obtenez hebdomadaires Dates Off
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Obtenez taux d&#39;évaluation et le stock disponible à la source / cible d&#39;entrepôt sur l&#39;affichage mentionné de date-heure. Si sérialisé article, s&#39;il vous plaît appuyez sur cette touche après avoir entré numéros de série."
+GitHub Issues,questions GitHub
+Global Defaults,Par défaut mondiaux
+Global Settings / Default Values,Paramètres globaux / valeurs par défaut
+Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts),Aller au groupe approprié (généralement l'application de l'actif des fonds > Current > Comptes bancaires )
+Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties),Aller au groupe approprié (généralement source de fonds > Passif à court terme > Impôts et taxes )
+Goal,Objectif
+Goals,Objectifs
+Goods received from Suppliers.,Les marchandises reçues de fournisseurs.
+Google Drive,Google Drive
+Google Drive Access Allowed,Google Drive accès autorisé
+Grade,Grade
+Graduate,Diplômé
+Grand Total,Grand Total
+Grand Total (Company Currency),Total (Société Monnaie)
+Gratuity LIC ID,ID LIC gratuité
+"Grid ""","grille """
+Gross Margin %,Marge brute%
+Gross Margin Value,Valeur Marge brute
+Gross Pay,Salaire brut
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,Salaire brut + + Montant Montant échu Encaissement - Déduction totale
+Gross Profit,Bénéfice brut
+Gross Profit (%),Bénéfice brut (%)
+Gross Weight,Poids brut
+Gross Weight UOM,Emballage Poids brut
+Group,Groupe
+Group or Ledger,Groupe ou Ledger
+Groups,Groupes
+HR,RH
+HR Settings,Réglages RH
+HTML / Banner that will show on the top of product list.,HTML / bannière qui apparaîtra sur le haut de la liste des produits.
+Half Day,Demi-journée
+Half Yearly,La moitié annuel
+Half-yearly,Semestriel
+Happy Birthday!,Joyeux anniversaire!
+Has Batch No,A lot no
+Has Child Node,A Node enfant
+Has Serial No,N ° de série a
+Header,En-tête
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,Chefs (ou groupes) contre lequel Écritures comptables sont faites et les soldes sont maintenues.
+Health Concerns,Préoccupations pour la santé
+Health Details,Détails de santé
+Held On,Tenu le
+Help,Aider
+Help HTML,Aide HTML
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Aide: Pour lier à un autre enregistrement dans le système, utiliser &quot;# Form / Note / [Note Nom]», comme l&#39;URL du lien. (Ne pas utiliser &quot;http://&quot;)"
+"Here you can maintain family details like name and occupation of parent, spouse and children","Ici vous pouvez conserver les détails de famille comme nom et la profession des parents, le conjoint et les enfants"
+"Here you can maintain height, weight, allergies, medical concerns etc","Ici vous pouvez maintenir la hauteur, le poids, allergies, etc médicaux préoccupations"
+Hey! All these items have already been invoiced.,Hey! Tous ces éléments ont déjà été facturés.
+Hide Currency Symbol,Masquer le symbole monétaire
+High,Haut
+History In Company,Dans l&#39;histoire de l&#39;entreprise
+Hold,Tenir
+Holiday,Vacances
+Holiday List,Liste de vacances
+Holiday List Name,Nom de la liste de vacances
+Holidays,Fêtes
+Home,Maison
+Host,Hôte
+"Host, Email and Password required if emails are to be pulled","D&#39;accueil, e-mail et mot de passe requis si les courriels sont d&#39;être tiré"
+Hour Rate,Taux heure
+Hour Rate Labour,Travail heure Tarif
+Hours,Heures
+How frequently?,Quelle est la fréquence?
+"How should this currency be formatted? If not set, will use system defaults","Comment cette monnaie est formaté? S&#39;il n&#39;est pas défini, utilisera par défaut du système"
+Human Resource,des ressources humaines
+I,Je
+IDT,IDT
+II,II
+III,III
+IN,EN
+INV,INV
+INV/10-11/,INV/10-11 /
+ITEM,ARTICLE
+IV,IV
+Identification of the package for the delivery (for print),Identification de l&#39;emballage pour la livraison (pour l&#39;impression)
+If Income or Expense,Si les produits ou charges
+If Monthly Budget Exceeded,Si le budget mensuel dépassé
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.
+Available in Delivery Note and Sales Order",
+"If Supplier Part Number exists for given Item, it gets stored here","Si le numéro de pièce fournisseur existe pour objet donné, il est stocké ici"
+If Yearly Budget Exceeded,Si le budget annuel dépassé
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","Si elle est cochée, la nomenclature des sous-ensembles points seront examinés pour obtenir des matières premières. Sinon, tous les éléments du sous-ensemble sera traitée comme une matière première."
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Si elle est cochée, aucune totale. des jours de travail comprennent vacances, ce qui réduira la valeur de salaire par jour"
+"If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.","Si elle est cochée, un e-mail avec un format HTML ci-joint sera ajouté à une partie du corps du message ainsi que l&#39;attachement. Pour envoyer uniquement en pièce jointe, décochez cette."
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","Si elle est cochée, le montant de la taxe sera considéré comme déjà inclus dans le tarif Imprimer / Print Montant"
+"If disable, 'Rounded Total' field will not be visible in any transaction","Si désactiver, &#39;arrondi totale «champ ne sera pas visible dans toute transaction"
+"If enabled, the system will post accounting entries for inventory automatically.","S&#39;il est activé, le système affichera les écritures comptables pour l&#39;inventaire automatiquement."
+If more than one package of the same type (for print),Si plus d&#39;un paquet du même type (pour l&#39;impression)
+"If no change in either Quantity or Valuation Rate, leave the cell blank.","Si aucun changement soit Quantité ou évaluation noter , laisser la cellule vide."
+If non standard port (e.g. 587),Si non port standard (par exemple 587)
+If not applicable please enter: NA,S&#39;il n&#39;est pas applicable s&#39;il vous plaît entrez: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.","Si ce n&#39;est pas cochée, la liste devra être ajouté à chaque département où il doit être appliqué."
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.","S&#39;il est défini, la saisie des données n&#39;est autorisé que pour les utilisateurs spécifiés. Sinon, l&#39;entrée est autorisée pour tous les utilisateurs disposant des autorisations requises."
+"If specified, send the newsletter using this email address","S&#39;il est spécifié, envoyer le bulletin en utilisant cette adresse e-mail"
+"If the account is frozen, entries are allowed to restricted users.","Si le compte est gelé , les entrées sont autorisés pour les utilisateurs restreints ."
+"If this Account represents a Customer, Supplier or Employee, set it here.","Si ce compte représente un client, fournisseur ou employé, l&#39;indiquer ici."
+"If you follow Quality Inspection<br>
+Enables item QA Required and QA No in Purchase Receipt",
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,"Si vous avez équipe de vente et Partenaires Vente (Channel Partners), ils peuvent être marqués et maintenir leur contribution à l&#39;activité commerciale"
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","Si vous avez créé un modèle standard de taxes à l&#39;achat et Master accusations, sélectionnez-le et cliquez sur le bouton ci-dessous."
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","Si vous avez créé un modèle standard en taxes de vente et les frais de Master, sélectionnez-le et cliquez sur le bouton ci-dessous."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","Si vous avez longtemps imprimer des formats, cette fonction peut être utilisée pour diviser la page à imprimer sur plusieurs pages avec tous les en-têtes et pieds de page sur chaque page"
+"If you involve in manufacturing activity<br>
+Enables item <b>Is Manufactured</b>",
+Ignore,Ignorer
+Ignored: ,Ignoré:
+Image,Image
+Image View,Voir l&#39;image
+Implementation Partner,Partenaire de mise en œuvre
+Import,Importer
+Import Attendance,Importer Participation
+Import Failed!,Importation a échoué!
+Import Log,Importer Connexion
+Import Successful!,Importez réussie !
+Imports,Importations
+In Hours,Dans Heures
+In Process,In Process
+In Qty,Qté
+In Row,En Ligne
+In Value,Valeur
+In Words,Dans les mots
+In Words (Company Currency),En Words (Société Monnaie)
+In Words (Export) will be visible once you save the Delivery Note.,Dans Words (Exportation) sera visible une fois que vous enregistrez le bon de livraison.
+In Words will be visible once you save the Delivery Note.,Dans les mots seront visibles une fois que vous enregistrez le bon de livraison.
+In Words will be visible once you save the Purchase Invoice.,Dans les mots seront visibles une fois que vous enregistrez la facture d&#39;achat.
+In Words will be visible once you save the Purchase Order.,Dans les mots seront visibles une fois que vous enregistrez le bon de commande.
+In Words will be visible once you save the Purchase Receipt.,Dans les mots seront visibles une fois que vous enregistrez le reçu d&#39;achat.
+In Words will be visible once you save the Quotation.,Dans les mots seront visibles une fois que vous enregistrez le devis.
+In Words will be visible once you save the Sales Invoice.,Dans les mots seront visibles une fois que vous enregistrez la facture de vente.
+In Words will be visible once you save the Sales Order.,Dans les mots seront visibles une fois que vous enregistrez le bon de commande.
+Incentives,Incitations
+Incharge,Incharge
+Incharge Name,Nom Incharge
+Include holidays in Total no. of Working Days,Inclure les vacances en aucun totale. de jours de travail
+Income / Expense,Produits / charges
+Income Account,Compte de revenu
+Income Booked,Revenu Réservé
+Income Year to Date,Année revenu à ce jour
+Income booked for the digest period,Revenu réservée pour la période digest
+Incoming,Nouveau
+Incoming / Support Mail Setting,Entrant / Support mail Configurer
+Incoming Rate,Taux d&#39;entrée
+Incoming quality inspection.,Contrôle de la qualité entrant.
+Indicates that the package is a part of this delivery,Indique que le paquet est une partie de cette prestation
+Individual,Individuel
+Industry,Industrie
+Industry Type,Secteur d&#39;activité
+Inspected By,Inspecté par
+Inspection Criteria,Critères d&#39;inspection
+Inspection Required,Inspection obligatoire
+Inspection Type,Type d&#39;inspection
+Installation Date,Date d&#39;installation
+Installation Note,Note d&#39;installation
+Installation Note Item,Article Remarque Installation
+Installation Status,Etat de l&#39;installation
+Installation Time,Temps d&#39;installation
+Installation record for a Serial No.,Dossier d&#39;installation d&#39;un n ° de série
+Installed Qty,Qté installée
+Instructions,Instructions
+Integrate incoming support emails to Support Ticket,Intégrer des emails entrants soutien à l'appui de billets
+Interested,Intéressé
+Internal,Interne
+Introduction,Introduction
+Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again.,Invalid bon de livraison . Livraison note doit exister et doit être dans l'état de brouillon . S'il vous plaît corriger et essayer à nouveau.
+Invalid Email Address,Adresse email invalide
+Invalid Leave Approver,Invalide Laisser approbateur
+Invalid Master Name,Invalid Nom du Maître
+Invalid quantity specified for item ,
+Inventory,Inventaire
+Invoice Date,Date de la facture
+Invoice Details,Détails de la facture
+Invoice No,Aucune facture
+Invoice Period From Date,Période Facture De Date
+Invoice Period To Date,Période facture à ce jour
+Invoiced Amount (Exculsive Tax),Montant facturé ( impôt Exculsive )
+Is Active,Est active
+Is Advance,Est-Advance
+Is Asset Item,Est-postes de l&#39;actif
+Is Cancelled,Est annulée
+Is Carry Forward,Est-Report
+Is Default,Est défaut
+Is Encash,Est encaisser
+Is LWP,Est-LWP
+Is Opening,Est l&#39;ouverture
+Is Opening Entry,Est l&#39;ouverture d&#39;entrée
+Is PL Account,Est-compte PL
+Is POS,Est-POS
+Is Primary Contact,Est-ressource principale
+Is Purchase Item,Est-Item
+Is Sales Item,Est-Point de vente
+Is Service Item,Est-Point de service
+Is Stock Item,Est Produit en stock
+Is Sub Contracted Item,Est-Sub article à contrat
+Is Subcontracted,Est en sous-traitance
+Is this Tax included in Basic Rate?,Est-ce Taxes incluses dans le taux de base?
+Issue,Question
+Issue Date,Date d&#39;émission
+Issue Details,Détails de la demande
+Issued Items Against Production Order,Articles émis contre un ordre de fabrication
+It can also be used to create opening stock entries and to fix stock value.,Il peut également être utilisé pour créer les entrées en stocks d'ouverture et de fixer la valeur des actions .
+Item,article
+Item ,
+Item Advanced,Article avancée
+Item Barcode,Barcode article
+Item Batch Nos,Nos lots d&#39;articles
+Item Classification,Classification d&#39;article
+Item Code,Code de l&#39;article
+Item Code (item_code) is mandatory because Item naming is not sequential.,Code article (item_code) est obligatoire car nommage d&#39;objet n&#39;est pas séquentiel.
+Item Code and Warehouse should already exist.,Code article et entrepôt doivent déjà exister.
+Item Code cannot be changed for Serial No.,Code article ne peut pas être modifié pour le numéro de série
+Item Customer Detail,Détail d&#39;article
+Item Description,Description de l&#39;objet
+Item Desription,Desription article
+Item Details,Détails d&#39;article
+Item Group,Groupe d&#39;éléments
+Item Group Name,Nom du groupe d&#39;article
+Item Group Tree,Point arborescence de groupe
+Item Groups in Details,Groupes d&#39;articles en détails
+Item Image (if not slideshow),Image Article (si ce n&#39;est diaporama)
+Item Name,Nom d&#39;article
+Item Naming By,Point de noms en
+Item Price,Prix ​​de l&#39;article
+Item Prices,Prix ​​du lot
+Item Quality Inspection Parameter,Paramètre d&#39;inspection Article de qualité
+Item Reorder,Réorganiser article
+Item Serial No,Point No de série
+Item Serial Nos,Point n ° de série
+Item Shortage Report,Point Pénurie rapport
+Item Supplier,Fournisseur d&#39;article
+Item Supplier Details,Détails de produit Point
+Item Tax,Point d&#39;impôt
+Item Tax Amount,Taxes article
+Item Tax Rate,Taux d&#39;imposition article
+Item Tax1,Article impôts1
+Item To Manufacture,Point à la fabrication de
+Item UOM,Article Emballage
+Item Website Specification,Spécification Site élément
+Item Website Specifications,Spécifications Site du lot
+Item Wise Tax Detail ,Détail de l&#39;article de la taxe Wise
+Item classification.,Article classification.
+Item is neither Sales nor Service Item,Point n'est ni ventes ni service Point
+"Item must be a purchase item, \
+					as it is present in one or many Active BOMs",
+Item must have 'Has Serial No' as 'Yes',L'article doit avoir « A Pas de série » comme « oui»
+Item table can not be blank,Tableau de l'article ne peut pas être vide
+Item to be manufactured or repacked,Ce point doit être manufacturés ou reconditionnés
+Item will be saved by this name in the data base.,L&#39;article sera sauvé par ce nom dans la base de données.
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","Item, Garantie, AMC (contrat d&#39;entretien annuel) détails seront automatiquement récupérées lorsque le numéro de série est sélectionnée."
+Item-wise Last Purchase Rate,Point-sage Dernier Tarif d&#39;achat
+Item-wise Price List Rate,Article sage Prix Tarif
+Item-wise Purchase History,Historique des achats point-sage
+Item-wise Purchase Register,S&#39;enregistrer Achat point-sage
+Item-wise Sales History,Point-sage Historique des ventes
+Item-wise Sales Register,Ventes point-sage S&#39;enregistrer
+Items,Articles
+Items To Be Requested,Articles à demander
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty","Articles à être demandés, qui sont &quot;Out of Stock&quot; compte tenu de tous les entrepôts basés sur quantité projetée et qté minimum"
+Items which do not exist in Item master can also be entered on customer's request,Les éléments qui n&#39;existent pas dans la maîtrise d&#39;article peut également être inscrits sur la demande du client
+Itemwise Discount,Remise Itemwise
+Itemwise Recommended Reorder Level,Itemwise recommandée SEUIL DE COMMANDE
+JV,JV
+Job Applicant,Demandeur d&#39;emploi
+Job Opening,Offre d&#39;emploi
+Job Profile,Profil d&#39;emploi
+Job Title,Titre d&#39;emploi
+"Job profile, qualifications required etc.","Profil de poste, qualifications requises, etc"
+Jobs Email Settings,Paramètres de messagerie Emploi
+Journal Entries,Journal Entries
+Journal Entry,Journal Entry
+Journal Voucher,Bon Journal
+Journal Voucher Detail,Détail pièce de journal
+Journal Voucher Detail No,Détail Bon Journal No
+KRA,KRA
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ","Gardez une trace de campagnes de vente. Gardez une trace de Leads, citations, Sales Order etc des campagnes afin d&#39;évaluer le retour sur investissement."
+Keep a track of communication related to this enquiry which will help for future reference.,Gardez une trace de la communication liée à cette enquête qui aidera pour référence future.
+Key Performance Area,Zone de performance clé
+Key Responsibility Area,Secteur de responsabilité clé
+LEAD,LEAD
+LEAD/10-11/,LEAD/10-11 /
+LEAD/MUMBAI/,LEAD / MUMBAI /
+LR Date,LR Date
+LR No,LR Non
+Label,Étiquette
+Landed Cost Item,Article coût en magasin
+Landed Cost Items,Articles prix au débarquement
+Landed Cost Purchase Receipt,Landed Cost reçu d&#39;achat
+Landed Cost Purchase Receipts,Landed Cost reçus d&#39;achat
+Landed Cost Wizard,Assistant coût en magasin
+Last Name,Nom de famille
+Last Purchase Rate,Purchase Rate Dernière
+Latest,dernier
+Latest Updates,dernières mises à jour
+Lead,Conduire
+Lead Details,Le plomb Détails
+Lead Id,Id plomb
+Lead Name,Nom du chef de
+Lead Owner,Conduire du propriétaire
+Lead Source,Source plomb
+Lead Status,Lead Etat
+Lead Time Date,Plomb Date Heure
+Lead Time Days,Diriger jours Temps
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,Diriger jours Temps est le nombre de jours dont cet article est prévu dans votre entrepôt. Ces jours sont récupérées dans la Demande de Matériel quand vous sélectionnez cette option.
+Lead Type,Type de câbles
+Leave Allocation,Laisser Allocation
+Leave Allocation Tool,Laisser outil de répartition
+Leave Application,Demande de congés
+Leave Approver,Laisser approbateur
+Leave Approver can be one of,Laisser approbateur peut être l&#39;un des
+Leave Approvers,Laisser approbateurs
+Leave Balance Before Application,Laisser Solde Avant d&#39;application
+Leave Block List,Laisser Block List
+Leave Block List Allow,Laisser Block List Autoriser
+Leave Block List Allowed,Laisser Block List admis
+Leave Block List Date,Laisser Date de Block List
+Leave Block List Dates,Laisser Dates de listes rouges d&#39;
+Leave Block List Name,Laisser Nom de la liste de blocage
+Leave Blocked,Laisser Bloqué
+Leave Control Panel,Laisser le Panneau de configuration
+Leave Encashed?,Laisser encaissés?
+Leave Encashment Amount,Laisser Montant Encaissement
+Leave Setup,Laisser Setup
+Leave Type,Laisser Type d&#39;
+Leave Type Name,Laisser Nom Type
+Leave Without Pay,Congé sans solde
+Leave allocations.,Laisser allocations.
+Leave application has been approved.,Demande d'autorisation a été approuvé .
+Leave application has been rejected.,Demande d'autorisation a été rejetée .
+Leave blank if considered for all branches,Laisser vide si cela est jugé pour toutes les branches
+Leave blank if considered for all departments,Laisser vide si cela est jugé pour tous les ministères
+Leave blank if considered for all designations,Laisser vide si cela est jugé pour toutes les désignations
+Leave blank if considered for all employee types,Laisser vide si cela est jugé pour tous les types d&#39;employés
+Leave blank if considered for all grades,Laisser vide si cela est jugé pour tous les grades
+"Leave can be approved by users with Role, ""Leave Approver""",Le congé peut être approuvées par les utilisateurs avec le rôle «Laissez approbateur&quot;
+Ledger,Grand livre
+Ledgers,livres
+Left,Gauche
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,Entité juridique / Filiale d&#39;une carte distincte des comptes appartenant à l&#39;Organisation.
+Letter Head,A en-tête
+Level,Niveau
+Lft,Lft
+List a few of your customers. They could be organizations or individuals.,Énumérer quelques-unes de vos clients . Ils pourraient être des organisations ou des individus .
+List a few of your suppliers. They could be organizations or individuals.,Énumérer quelques-unes de vos fournisseurs . Ils pourraient être des organisations ou des individus .
+"List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them.","Liste de quelques produits ou services que vous achetez auprès de vos fournisseurs ou des fournisseurs . Si ceux-ci sont les mêmes que vos produits , alors ne les ajoutez pas ."
+List items that form the package.,Liste des articles qui composent le paquet.
+List of holidays.,Liste des jours fériés.
+List of users who can edit a particular Note,Liste des utilisateurs qui peuvent modifier une note particulière
+List this Item in multiple groups on the website.,Liste cet article dans plusieurs groupes sur le site.
+"List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Référencez vos produits ou services que vous vendez à vos clients . Assurez-vous de vérifier le Groupe de l'article , l'unité de mesure et d'autres propriétés lorsque vous démarrez ."
+"List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later.","Inscrivez vos têtes d'impôt (par exemple, la TVA , accises) ( jusqu'à 3 ) et leur taux standard. Cela va créer un modèle standard , vous pouvez modifier et ajouter plus tard ."
+Live Chat,Chat en direct
+Loading...,Chargement en cours ...
+"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","Journal des activités effectuées par les utilisateurs contre les tâches qui peuvent être utilisés pour le suivi du temps, de la facturation."
+Login Id,Connexion Id
+Login with your new User ID,Connectez-vous avec votre nouveau nom d'utilisateur
+Logo,Logo
+Logo and Letter Heads,Logo et lettres chefs
+Lost,perdu
+Lost Reason,Raison perdu
+Low,Bas
+Lower Income,Basse revenu
+MIS Control,MIS contrôle
+MREQ-,MREQ-
+MTN Details,Détails MTN
+Mail Password,Mail Mot de passe
+Mail Port,Mail Port
+Main Reports,Rapports principaux
+Maintain Same Rate Throughout Sales Cycle,Maintenir même taux long cycle de vente
+Maintain same rate throughout purchase cycle,Maintenir le taux de même tout au long du cycle d&#39;achat
+Maintenance,Entretien
+Maintenance Date,Date de l&#39;entretien
+Maintenance Details,Détails de maintenance
+Maintenance Schedule,Calendrier d&#39;entretien
+Maintenance Schedule Detail,Détail calendrier d&#39;entretien
+Maintenance Schedule Item,Article calendrier d&#39;entretien
+Maintenance Schedules,Programmes d&#39;entretien
+Maintenance Status,Statut d&#39;entretien
+Maintenance Time,Temps de maintenance
+Maintenance Type,Type d&#39;entretien
+Maintenance Visit,Visite de maintenance
+Maintenance Visit Purpose,But Visite d&#39;entretien
+Major/Optional Subjects,Sujets principaux / en option
+Make ,
+Make Accounting Entry For Every Stock Movement,Faites Entrée Comptabilité Pour chaque mouvement Stock
+Make Bank Voucher,Assurez-Bon Banque
+Make Credit Note,Assurez Note de crédit
+Make Debit Note,Assurez- notes de débit
+Make Delivery,Assurez- livraison
+Make Difference Entry,Assurez Entrée Différence
+Make Excise Invoice,Faire accise facture
+Make Installation Note,Faire Installation Remarque
+Make Invoice,Assurez- facture
+Make Maint. Schedule,Assurez- Maint . calendrier
+Make Maint. Visit,Assurez- Maint . Visiter
+Make Maintenance Visit,Assurez visite d'entretien
+Make Packing Slip,Faites le bordereau d'
+Make Payment Entry,Effectuer un paiement d'entrée
+Make Purchase Invoice,Faire la facture d'achat
+Make Purchase Order,Faites bon de commande
+Make Purchase Receipt,Assurez- ticket de caisse
+Make Salary Slip,Faire fiche de salaire
+Make Salary Structure,Faire structure salariale
+Make Sales Invoice,Faire la facture de vente
+Make Sales Order,Assurez- Commande
+Make Supplier Quotation,Faire Fournisseur offre
+Male,Masculin
+Manage 3rd Party Backups,Gérer 3rd Party sauvegardes
+Manage cost of operations,Gérer les coûts d&#39;exploitation
+Manage exchange rates for currency conversion,Gérer des taux de change pour la conversion de devises
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",Obligatoire si le stock L&#39;article est &quot;Oui&quot;. Aussi l&#39;entrepôt par défaut où quantité réservée est fixé à partir de la commande client.
+Manufacture against Sales Order,Fabrication à l&#39;encontre des commandes clients
+Manufacture/Repack,Fabrication / Repack
+Manufactured Qty,Quantité fabriquée
+Manufactured quantity will be updated in this warehouse,Quantité fabriquée sera mis à jour dans cet entrepôt
+Manufacturer,Fabricant
+Manufacturer Part Number,Numéro de pièce du fabricant
+Manufacturing,Fabrication
+Manufacturing Quantity,Quantité de fabrication
+Manufacturing Quantity is mandatory,Fabrication Quantité est obligatoire
+Margin,Marge
+Marital Status,État civil
+Market Segment,Segment de marché
+Married,Marié
+Mass Mailing,Mailing de masse
+Master Data,données
+Master Name,Nom de Maître
+Master Name is mandatory if account type is Warehouse,Nom du Master est obligatoire si le type de compte est Entrepôt
+Master Type,Type de Maître
+Masters,Maîtres
+Match non-linked Invoices and Payments.,Correspondre non liées factures et paiements.
+Material Issue,Material Issue
+Material Receipt,Réception matériau
+Material Request,Demande de matériel
+Material Request Detail No,Détail Demande Support Aucun
+Material Request For Warehouse,Demande de matériel pour l&#39;entrepôt
+Material Request Item,Article demande de matériel
+Material Request Items,Articles Demande de matériel
+Material Request No,Demande de Support Aucun
+Material Request Type,Type de demande de matériel
+Material Request used to make this Stock Entry,Demande de Matériel utilisé pour réaliser cette Stock Entrée
+Material Requests for which Supplier Quotations are not created,Les demandes significatives dont les cotes des fournisseurs ne sont pas créés
+Material Requirement,Material Requirement
+Material Transfer,De transfert de matériel
+Materials,Matériels
+Materials Required (Exploded),Matériel nécessaire (éclatée)
+Max 500 rows only.,Max 500 lignes seulement.
+Max Days Leave Allowed,Laisser jours Max admis
+Max Discount (%),Max Réduction (%)
+Max Returnable Qty,Max consigné Quantité
+Medium,Moyen
+"Merging is only possible if following \
+					properties are same in both records.
+					Group or Ledger, Debit or Credit, Is PL Account",
+Message,Message
+Message Parameter,Paramètre message
+Message Sent,Message envoyé
+Messages,Messages
+Messages greater than 160 characters will be split into multiple messages,Un message de plus de 160 caractères sera découpé en plusieurs mesage
+Middle Income,Revenu intermédiaire
+Milestone,Étape importante
+Milestone Date,Date de Milestone
+Milestones,Jalons
+Milestones will be added as Events in the Calendar,Jalons seront ajoutées au fur événements dans le calendrier
+Min Order Qty,Quantité de commande minimale
+Minimum Order Qty,Quantité de commande minimum
+Misc Details,Détails Divers
+Miscellaneous,Divers
+Miscelleneous,Miscelleneous
+Mobile No,Aucun mobile
+Mobile No.,Mobile n °
+Mode of Payment,Mode de paiement
+Modern,Moderne
+Modified Amount,Montant de modification
+Monday,Lundi
+Month,Mois
+Monthly,Mensuel
+Monthly Attendance Sheet,Feuille de présence mensuel
+Monthly Earning & Deduction,Revenu mensuel &amp; Déduction
+Monthly Salary Register,S&#39;enregistrer Salaire mensuel
+Monthly salary statement.,Fiche de salaire mensuel.
+Monthly salary template.,Modèle de salaire mensuel.
+More Details,Plus de détails
+More Info,Plus d&#39;infos
+Moving Average,Moyenne mobile
+Moving Average Rate,Moving Prix moyen
+Mr,M.
+Ms,Mme
+Multiple Item prices.,Prix ​​des ouvrages multiples.
+Multiple Price list.,Multiple liste de prix .
+Must be Whole Number,Doit être un nombre entier
+My Settings,Mes réglages
+NL-,NL-
+Name,Nom
+Name and Description,Nom et description
+Name and Employee ID,Nom et ID employé
+Name is required,Le nom est obligatoire
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers,","Nom du nouveau compte . Note: S'il vous plaît ne créez pas de comptes pour les clients et les fournisseurs ,"
+Name of person or organization that this address belongs to.,Nom de la personne ou de l&#39;organisation que cette adresse appartient.
+Name of the Budget Distribution,Nom de la Répartition du budget
+Naming Series,Nommer Série
+Negative balance is not allowed for account ,Solde négatif n&#39;est pas autorisée pour compte
+Net Pay,Salaire net
+Net Pay (in words) will be visible once you save the Salary Slip.,Salaire net (en lettres) sera visible une fois que vous enregistrez le bulletin de salaire.
+Net Total,Total net
+Net Total (Company Currency),Total net (Société Monnaie)
+Net Weight,Poids net
+Net Weight UOM,Emballage Poids Net
+Net Weight of each Item,Poids net de chaque article
+Net pay can not be negative,Le salaire net ne peut pas être négatif
+Never,Jamais
+New,nouveau
+New ,
+New Account,nouveau compte
+New Account Name,Nouveau compte Nom
+New BOM,Nouvelle nomenclature
+New Communications,Communications Nouveau-
+New Company,nouvelle entreprise
+New Cost Center,Nouveau centre de coût
+New Cost Center Name,Nouveau centre de coûts Nom
+New Delivery Notes,Nouveaux bons de livraison
+New Enquiries,New Renseignements
+New Leads,New Leads
+New Leave Application,Nouvelle demande d&#39;autorisation
+New Leaves Allocated,Nouvelle Feuilles alloué
+New Leaves Allocated (In Days),Feuilles de nouveaux alloués (en jours)
+New Material Requests,Demandes des matériaux nouveaux
+New Projects,Nouveaux projets
+New Purchase Orders,De nouvelles commandes
+New Purchase Receipts,Reçus d&#39;achat de nouveaux
+New Quotations,Citations de nouvelles
+New Sales Orders,Nouvelles commandes clients
+"New Serial No cannot have Warehouse. Warehouse must be \
+				set by Stock Entry or Purchase Receipt",
+New Stock Entries,Entrées Stock nouvelles
+New Stock UOM,Bourse de New UDM
+New Supplier Quotations,Citations Fournisseur de nouveaux
+New Support Tickets,Support Tickets nouvelles
+New Workplace,Travail du Nouveau-
+Newsletter,Bulletin
+Newsletter Content,Newsletter Content
+Newsletter Status,Statut newsletter
+"Newsletters to contacts, leads.","Bulletins aux contacts, prospects."
+Next Communcation On,Suivant Communcation sur
+Next Contact By,Suivant Par
+Next Contact Date,Date Contact Suivant
+Next Date,Date d&#39;
+Next email will be sent on:,Email sera envoyé le:
+No,Aucun
+No Action,Aucune action
+No Customer Accounts found.,Aucun client ne représente trouvés.
+"No Customer or Supplier Accounts found. Accounts are identified based on \
+			'Master Type' value in account record.",
+No Item found with ,
+No Items to Pack,Aucun élément à emballer
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.,Aucun congé approbateurs. S&#39;il vous plaît attribuer «Donner approbateur« Rôle de atleast un utilisateur.
+No Permission,Aucune autorisation
+No Production Order created.,Aucun ordre de fabrication créé .
+No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,Aucun fournisseur ne représente trouvés. Comptes fournisseurs sont identifiés sur la base de la valeur «Maître Type ' dans le compte rendu.
+No accounting entries for following warehouses,Aucune écriture comptable pour suivre les entrepôts
+No addresses created,Aucune adresse créés
+No contacts created,Pas de contacts créés
+No default BOM exists for item: ,Pas de BOM par défaut existe pour objet:
+No of Requested SMS,Pas de SMS demandés
+No of Sent SMS,Pas de SMS envoyés
+No of Visits,Pas de visites
+No record found,Aucun enregistrement trouvé
+No salary slip found for month: ,Pas de bulletin de salaire trouvé en un mois:
+Not,Pas
+Not Active,Non actif
+Not Applicable,Non applicable
+Not Available,Indisponible
+Not Billed,Non Facturé
+Not Delivered,Non Livré
+Not Set,non définie
+Not allowed entry in Warehouse,Pas autorisés à entrer dans l'entrepôt
+Note,Remarque
+Note User,Remarque utilisateur
+Note is a free page where users can share documents / notes,Note est une page libre où les utilisateurs peuvent partager des documents / notes
+Note:,Remarque:
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.","Remarque: Les sauvegardes et les fichiers ne sont pas effacés de Dropbox, vous devrez supprimer manuellement."
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.","Remarque: Les sauvegardes et les fichiers ne sont pas supprimés de Google Drive, vous devrez supprimer manuellement."
+Note: Email will not be sent to disabled users,Remarque: E-mail ne sera pas envoyé aux utilisateurs handicapés
+Notes,Remarques
+Notes:,notes:
+Nothing to request,Rien à demander
+Notice (days),Avis ( jours )
+Notification Control,Contrôle de notification
+Notification Email Address,Adresse e-mail de notification
+Notify by Email on creation of automatic Material Request,Notification par courriel lors de la création de la demande de matériel automatique
+Number Format,Format numérique
+O+,O +
+O-,O-
+OPPT,OPPT
+Offer Date,offre date
+Office,Fonction
+Old Parent,Parent Vieux
+On,Sur
+On Net Total,Le total net
+On Previous Row Amount,Le montant rangée précédente
+On Previous Row Total,Le total de la rangée précédente
+"Only Serial Nos with status ""Available"" can be delivered.","Seulement série n ° avec le statut "" disponible "" peut être livré ."
+Only Stock Items are allowed for Stock Entry,Seuls les articles de stock sont autorisées pour le stock d&#39;entrée
+Only leaf nodes are allowed in transaction,Seuls les noeuds feuilles sont autorisées dans une transaction
+Open,Ouvert
+Open Production Orders,Commandes ouverte de production
+Open Tickets,Open Billets
+Opening,ouverture
+Opening Accounting Entries,Ouverture Écritures comptables
+Opening Accounts and Stock,Comptes et Stock d'ouverture
+Opening Date,Date d&#39;ouverture
+Opening Entry,Entrée ouverture
+Opening Qty,Quantité d'ouverture
+Opening Time,Ouverture Heure
+Opening Value,Valeur d'ouverture
+Opening for a Job.,Ouverture d&#39;un emploi.
+Operating Cost,Coût d&#39;exploitation
+Operation Description,Description de l&#39;opération
+Operation No,Opération No
+Operation Time (mins),Temps de fonctionnement (min)
+Operations,Opérations
+Opportunity,Occasion
+Opportunity Date,Date de possibilité
+Opportunity From,De opportunité
+Opportunity Item,Article occasion
+Opportunity Items,Articles Opportunité
+Opportunity Lost,Une occasion manquée
+Opportunity Type,Type d&#39;opportunité
+Optional. This setting will be used to filter in various transactions.,Facultatif. Ce paramètre sera utilisé pour filtrer dans diverses opérations .
+Order Type,Type d&#39;ordre
+Ordered,ordonné
+Ordered Items To Be Billed,Articles commandés à facturer
+Ordered Items To Be Delivered,Articles commandés à livrer
+Ordered Qty,commandé Quantité
+"Ordered Qty: Quantity ordered for purchase, but not received.","Commandé Quantité: Quantité de commande pour l'achat , mais pas reçu ."
+Ordered Quantity,Quantité commandée
+Orders released for production.,Commandes validé pour la production.
+Organization,organisation
+Organization Name,Nom de l'organisme
+Organization Profile,Profil de l&#39;organisation
+Other,Autre
+Other Details,Autres détails
+Out Qty,out Quantité
+Out Value,Dehors Valeur
+Out of AMC,Sur AMC
+Out of Warranty,Hors garantie
+Outgoing,Sortant
+Outgoing Email Settings,Paramètres de messagerie sortants
+Outgoing Mail Server,Serveur de courrier sortant
+Outgoing Mails,Mails sortants
+Outstanding Amount,Encours
+Outstanding for Voucher ,Exceptionnelle pour Voucher
+Overhead,Au-dessus
+Overheads,Les frais généraux
+Overlapping Conditions found between,Conditions chevauchement constaté entre
+Overview,vue d'ensemble
+Owned,Détenue
+Owner,propriétaire
+PAN Number,Nombre PAN
+PF No.,PF n °
+PF Number,Nombre PF
+PI/2011/,PI/2011 /
+PIN,PIN
+PL or BS,PL ou BS
+PO,PO
+PO Date,date de PO
+PO No,PO Non
+POP3 Mail Server,Serveur de messagerie POP3
+POP3 Mail Settings,Paramètres de messagerie POP3
+POP3 mail server (e.g. pop.gmail.com),POP3 serveur de messagerie (par exemple pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),Serveur POP3 par exemple (pop.gmail.com)
+POS Setting,Réglage POS
+POS View,POS View
+PR Detail,Détail PR
+PR Posting Date,PR Date de publication
+PRO,PRO
+PS,PS
+Package Item Details,Détails d&#39;article de l&#39;emballage
+Package Items,Articles paquet
+Package Weight Details,Détails Poids de l&#39;emballage
+Packed Item,Article d&#39;emballage de livraison Note
+Packing Details,Détails d&#39;emballage
+Packing Detials,Detials emballage
+Packing List,Packing List
+Packing Slip,Bordereau
+Packing Slip Item,Emballage article Slip
+Packing Slip Items,Emballage Articles Slip
+Packing Slip(s) Cancelled,Bordereau d&#39;expédition (s) Annulé
+Page Break,Saut de page
+Page Name,Nom de la page
+Paid,payé
+Paid Amount,Montant payé
+Parameter,Paramètre
+Parent Account,Compte Parent
+Parent Cost Center,Centre de coûts Parent
+Parent Customer Group,Groupe Client parent
+Parent Detail docname,DocName Détail Parent
+Parent Item,Article Parent
+Parent Item Group,Groupe d&#39;éléments Parent
+Parent Sales Person,Parent Sales Person
+Parent Territory,Territoire Parent
+Parenttype,ParentType
+Partially Billed,partiellement Facturé
+Partially Completed,Partiellement réalisé
+Partially Delivered,Livré partiellement
+Partly Billed,Présentée en partie
+Partly Delivered,Livré en partie
+Partner Target Detail,Détail Cible partenaire
+Partner Type,Type de partenaire
+Partner's Website,Le site web du partenaire
+Passive,Passif
+Passport Number,Numéro de passeport
+Password,Mot de passe
+Pay To / Recd From,Pay To / RECD De
+Payables,Dettes
+Payables Group,Groupe Dettes
+Payment Days,Jours de paiement
+Payment Due Date,Date d'échéance
+Payment Entries,Les entrées de paiement
+"Payment Entry has been modified after you pulled it. 
+			Please pull it again.",
+Payment Period Based On Invoice Date,Période de paiement basé sur Date de la facture
+Payment Reconciliation,Rapprochement de paiement
+Payment Type,Type de paiement
+Payment of salary for the month: ,
+Payment to Invoice Matching Tool,Paiement à l&#39;outil Invoice Matching
+Payment to Invoice Matching Tool Detail,Paiement à l&#39;outil Détail Facture Matching
+Payments,Paiements
+Payments Made,Paiements effectués
+Payments Received,Paiements reçus
+Payments made during the digest period,Les paiements effectués au cours de la période digest
+Payments received during the digest period,Les paiements reçus au cours de la période digest
+Payroll Settings,Paramètres de la paie
+Payroll Setup,Configuration de la paie
+Pending,En attendant
+Pending Amount,Montant attente
+Pending Review,Attente d&#39;examen
+Pending SO Items For Purchase Request,"Articles en attente Donc, pour demande d&#39;achat"
+Percent Complete,Pour cent complet
+Percentage Allocation,Répartition en pourcentage
+Percentage Allocation should be equal to ,Pourcentage allocation doit être égale à
+Percentage variation in quantity to be allowed while receiving or delivering this item.,Pourcentage de variation de la quantité à être autorisé lors de la réception ou la livraison de cet article.
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,Pourcentage que vous êtes autorisé à recevoir ou de livrer plus sur la quantité commandée. Par exemple: Si vous avez commandé 100 unités. et votre allocation est de 10% alors que vous êtes autorisé à recevoir 110 unités.
+Performance appraisal.,L&#39;évaluation des performances.
+Period,période
+Period Closing Voucher,Bon clôture de la période
+Periodicity,Périodicité
+Permanent Address,Adresse permanente
+Permanent Address Is,Adresse permanente est
+Permission,Permission
+Permission Manager,Responsable autorisation
+Personal,Personnel
+Personal Details,Données personnelles
+Personal Email,Courriel personnel
+Phone,Téléphone
+Phone No,N ° de téléphone
+Phone No.,N ° de téléphone
+Pincode,Le code PIN
+Place of Issue,Lieu d&#39;émission
+Plan for maintenance visits.,Plan pour les visites de maintenance.
+Planned Qty,Quantité planifiée
+"Planned Qty: Quantity, for which, Production Order has been raised,","Prévue Quantité: Quantité , pour qui , un ordre de fabrication a été soulevée ,"
+Planned Quantity,Quantité planifiée
+Plant,Plante
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,S&#39;il vous plaît Entrez Abréviation ou nom court correctement car il sera ajouté comme suffixe à tous les chefs de compte.
+Please Select Company under which you want to create account head,S'il vous plaît Choisir société sous lequel vous voulez créer un compte tête
+Please check,S&#39;il vous plaît vérifier
+Please create new account from Chart of Accounts.,S'il vous plaît créer un nouveau compte de plan comptable .
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,S'il vous plaît ne créez pas de compte ( grands livres ) pour les clients et les fournisseurs . Ils sont créés directement par les maîtres clients / fournisseurs .
+Please enter Company,S'il vous plaît entrer Société
+Please enter Cost Center,S'il vous plaît entrer Centre de coûts
+Please enter Default Unit of Measure,S&#39;il vous plaît entrer unité de mesure par défaut
+Please enter Delivery Note No or Sales Invoice No to proceed,S&#39;il vous plaît entrer livraison Remarque Aucune facture de vente ou Non pour continuer
+Please enter Employee Id of this sales parson,S'il vous plaît entrer employés Id de ce pasteur de vente
+Please enter Expense Account,S&#39;il vous plaît entrer Compte de dépenses
+Please enter Item Code to get batch no,S'il vous plaît entrez le code d'article pour obtenir n ° de lot
+Please enter Item Code.,S'il vous plaît entrez le code d'article .
+Please enter Item first,S'il vous plaît entrer article premier
+Please enter Master Name once the account is created.,S'il vous plaît entrer Maître Nom une fois le compte créé .
+Please enter Production Item first,S'il vous plaît entrer en production l'article premier
+Please enter Purchase Receipt No to proceed,S&#39;il vous plaît entrer Achat réception Non pour passer
+Please enter Reserved Warehouse for item ,S&#39;il vous plaît entrer entrepôt réservé pour objet
+Please enter Start Date and End Date,S'il vous plaît entrer Date de début et de fin
+Please enter Warehouse for which Material Request will be raised,S'il vous plaît entrer Entrepôt à qui demande de matériel sera porté
+"Please enter account group under which account \
+					for warehouse ",
+Please enter company first,S'il vous plaît entrez première entreprise
+Please enter company name first,S'il vous plaît entrez le nom de l'entreprise d'abord
+Please enter sales order in the above table,S'il vous plaît entrez la commande client dans le tableau ci-dessus
+Please install dropbox python module,S&#39;il vous plaît installer Dropbox module Python
+Please mention default value for ',S&#39;il vous plaît mentionner la valeur par défaut pour &#39;
+Please reduce qty.,S&#39;il vous plaît réduire Cdt.
+Please save the Newsletter before sending.,S&#39;il vous plaît enregistrer le bulletin avant de l&#39;envoyer.
+Please save the document before generating maintenance schedule,S'il vous plaît enregistrer le document avant de générer le calendrier d'entretien
+Please select Account first,S'il vous plaît sélectionnez compte d'abord
+Please select Bank Account,S&#39;il vous plaît sélectionner compte bancaire
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,S&#39;il vous plaît sélectionnez Report si vous souhaitez également inclure le solde de l&#39;exercice précédent ne laisse à cet exercice
+Please select Category first,S'il vous plaît sélectionnez d'abord Catégorie
+Please select Charge Type first,S'il vous plaît sélectionnez le type de Facturation de la première
+Please select Date on which you want to run the report,S&#39;il vous plaît sélectionner la date à laquelle vous souhaitez exécuter le rapport
+Please select Price List,S&#39;il vous plaît sélectionnez Liste des Prix
+Please select a,S&#39;il vous plaît sélectionner un
+Please select a csv file,S&#39;il vous plaît sélectionner un fichier csv
+Please select a service item or change the order type to Sales.,S&#39;il vous plaît sélectionner un élément de service ou de changer le type d&#39;ordre de ventes.
+Please select a sub-contracted item or do not sub-contract the transaction.,S&#39;il vous plaît sélectionner une option de sous-traitance ou de ne pas sous-traiter la transaction.
+Please select a valid csv file with data.,S&#39;il vous plaît sélectionner un fichier CSV valide les données.
+"Please select an ""Image"" first","S'il vous plaît sélectionnez ""Image "" première"
+Please select month and year,S&#39;il vous plaît sélectionner le mois et l&#39;année
+Please select options and click on Create,S'il vous plaît sélectionner des options et cliquez sur Créer
+Please select the document type first,S&#39;il vous plaît sélectionner le type de document premier
+Please select: ,S&#39;il vous plaît choisir:
+Please set Dropbox access keys in,S&#39;il vous plaît configurer les touches d&#39;accès Dropbox dans
+Please set Google Drive access keys in,S&#39;il vous plaît configurer Google touches d&#39;accès au lecteur de
+Please setup Employee Naming System in Human Resource > HR Settings,S&#39;il vous plaît configuration Naming System employés en ressources humaines&gt; Paramètres RH
+Please setup your chart of accounts before you start Accounting Entries,S'il vous plaît configurer votre plan de comptes avant de commencer Écritures comptables
+Please specify,S&#39;il vous plaît spécifier
+Please specify Company,S&#39;il vous plaît préciser Company
+Please specify Company to proceed,Veuillez indiquer Société de procéder
+"Please specify Default Currency in Company Master \
+			and Global Defaults",
+Please specify a,S&#39;il vous plaît spécifier une
+Please specify a Price List which is valid for Territory,S&#39;il vous plaît spécifier une liste de prix qui est valable pour le territoire
+Please specify a valid,S&#39;il vous plaît spécifier une validité
+Please specify a valid 'From Case No.',S&#39;il vous plaît indiquer une valide »De Affaire n &#39;
+Please specify currency in Company,S&#39;il vous plaît préciser la devise dans la société
+Please submit to update Leave Balance.,S'il vous plaît soumettre à jour de congé balance .
+Please write something,S'il vous plaît écrire quelque chose
+Please write something in subject and message!,S'il vous plaît écrire quelque chose dans le thème et le message !
+Plot,terrain
+Plot By,terrain par
+Point of Sale,Point de vente
+Point-of-Sale Setting,Point-of-Sale Réglage
+Post Graduate,Message d&#39;études supérieures
+Postal,Postal
+Posting Date,Date de publication
+Posting Date Time cannot be before,Date d&#39;affichage temps ne peut pas être avant
+Posting Time,Affichage Temps
+Potential Sales Deal,Potentiel de l&#39;offre de vente
+Potential opportunities for selling.,Possibilités pour la vente.
+"Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3","Précision pour les champs de flotteur (quantités, des réductions, des pourcentages, etc.) Flotteurs seront arrondies à décimales spécifiées. Par défaut = 3"
+Preferred Billing Address,Préféré adresse de facturation
+Preferred Shipping Address,Preferred Adresse de livraison
+Prefix,Préfixe
+Present,Présent
+Prevdoc DocType,Prevdoc DocType
+Prevdoc Doctype,Prevdoc Doctype
+Previous Work Experience,L&#39;expérience de travail antérieure
+Price List,Liste des Prix
+Price List Currency,Devise Prix
+Price List Exchange Rate,Taux de change Prix de liste
+Price List Master,Maître Liste des Prix
+Price List Name,Nom Liste des Prix
+Price List Rate,Prix ​​Liste des Prix
+Price List Rate (Company Currency),Tarifs Taux (Société Monnaie)
+Print,Imprimer
+Print Format Style,Format d&#39;impression style
+Print Heading,Imprimer Cap
+Print Without Amount,Imprimer Sans Montant
+Printing,impression
+Priority,Priorité
+Process Payroll,Paie processus
+Produced,produit
+Produced Quantity,Quantité produite
+Product Enquiry,Demande d&#39;information produit
+Production Order,Ordre de fabrication
+Production Order must be submitted,Ordre de fabrication doit être soumise
+Production Order(s) created:\n\n,Ordre de fabrication (s ) créé : \ n \ n
+Production Orders,ordres de fabrication
+Production Orders in Progress,Les commandes de produits en cours
+Production Plan Item,Élément du plan de production
+Production Plan Items,Éléments du plan de production
+Production Plan Sales Order,Plan de Production Ventes Ordre
+Production Plan Sales Orders,Vente Plan d&#39;ordres de production
+Production Planning (MRP),Planification de la production (MRP)
+Production Planning Tool,Outil de planification de la production
+Products or Services You Buy,Produits ou services que vous achetez
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Les produits seront triés par poids-âge dans les recherches par défaut. Plus le poids-âge, plus le produit apparaîtra dans la liste."
+Project,Projet
+Project Costing,Des coûts de projet
+Project Details,Détails du projet
+Project Milestone,Des étapes du projet
+Project Milestones,Étapes du projet
+Project Name,Nom du projet
+Project Start Date,Date de début du projet
+Project Type,Type de projet
+Project Value,Valeur du projet
+Project activity / task.,Activité de projet / tâche.
+Project master.,Projet de master.
+Project will get saved and will be searchable with project name given,Projet seront sauvegardés et sera consultable avec le nom de projet donné
+Project wise Stock Tracking,Projet sage Stock Tracking
+Projected,Projection
+Projected Qty,Qté projeté
+Projects,Projets
+Prompt for Email on Submission of,Prompt for Email relative à la présentation des
+Provide email id registered in company,Fournir id e-mail enregistrée dans la société
+Public,Public
+Pull Payment Entries,Tirez entrées de paiement
+Pull sales orders (pending to deliver) based on the above criteria,Tirez les ordres de vente (en attendant de livrer) sur la base des critères ci-dessus
+Purchase,Acheter
+Purchase / Manufacture Details,Achat / Fabrication Détails
+Purchase Analytics,Achat Analytics
+Purchase Common,Achat commune
+Purchase Details,Conditions de souscription
+Purchase Discounts,Rabais sur l&#39;achat
+Purchase In Transit,Achat En transit
+Purchase Invoice,Achetez facture
+Purchase Invoice Advance,Paiement à l&#39;avance Facture
+Purchase Invoice Advances,Achat progrès facture
+Purchase Invoice Item,Achat d&#39;article de facture
+Purchase Invoice Trends,Achat Tendances facture
+Purchase Order,Bon de commande
+Purchase Order Date,Date d&#39;achat Ordre
+Purchase Order Item,Achat Passer commande
+Purchase Order Item No,Achetez article ordonnance n
+Purchase Order Item Supplied,Point de commande fourni
+Purchase Order Items,Achetez articles de la commande
+Purchase Order Items Supplied,Articles commande fourni
+Purchase Order Items To Be Billed,Purchase Order articles qui lui seront facturées
+Purchase Order Items To Be Received,Articles de bons de commande pour être reçu
+Purchase Order Message,Achat message Ordre
+Purchase Order Required,Bon de commande requis
+Purchase Order Trends,Bon de commande Tendances
+Purchase Orders given to Suppliers.,Achetez commandes faites aux fournisseurs.
+Purchase Receipt,Achat Réception
+Purchase Receipt Item,Achat d&#39;article de réception
+Purchase Receipt Item Supplied,Article reçu d&#39;achat fournis
+Purchase Receipt Item Supplieds,Achat Supplieds point de réception
+Purchase Receipt Items,Acheter des articles reçus
+Purchase Receipt Message,Achat message de réception
+Purchase Receipt No,Achetez un accusé de réception
+Purchase Receipt Required,Réception achat requis
+Purchase Receipt Trends,Achat Tendances reçus
+Purchase Register,Achat S&#39;inscrire
+Purchase Return,Achat de retour
+Purchase Returned,Achetez retour
+Purchase Taxes and Charges,Impôts achat et les frais
+Purchase Taxes and Charges Master,Impôts achat et Master frais
+Purpose,But
+Purpose must be one of ,But doit être l&#39;un des
+QA Inspection,QA inspection
+QAI/11-12/,QAI/11-12 /
+QTN,QTN
+Qty,Qté
+Qty Consumed Per Unit,Quantité consommée par unité
+Qty To Manufacture,Quantité à fabriquer
+Qty as per Stock UOM,Qté en stock pour Emballage
+Qty to Deliver,Quantité à livrer
+Qty to Order,Quantité à commander
+Qty to Receive,Quantité pour recevoir
+Qty to Transfer,Quantité de Transfert
+Qualification,Qualification
+Quality,Qualité
+Quality Inspection,Inspection de la Qualité
+Quality Inspection Parameters,Paramètres inspection de la qualité
+Quality Inspection Reading,Lecture d&#39;inspection de la qualité
+Quality Inspection Readings,Lectures inspection de la qualité
+Quantity,Quantité
+Quantity Requested for Purchase,Quantité demandée pour l&#39;achat
+Quantity and Rate,Quantité et taux
+Quantity and Warehouse,Quantité et entrepôt
+Quantity cannot be a fraction.,Quantité ne peut pas être une fraction.
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Quantité de produit obtenue après fabrication / reconditionnement des quantités données de matières premières
+"Quantity should be equal to Manufacturing Quantity. To fetch items again, click on 'Get Items' button or update the Quantity manually.","Quantité doit être égale à la fabrication d'origine. Pour récupérer de nouveau les articles , cliquez sur le bouton 'Get ' articles ou mettre à jour la quantité manuellement."
+Quarter,Trimestre
+Quarterly,Trimestriel
+Quick Help,Aide rapide
+Quotation,Citation
+Quotation Date,Date de Cotation
+Quotation Item,Article devis
+Quotation Items,Articles de devis
+Quotation Lost Reason,Devis perdu la raison
+Quotation Message,Devis message
+Quotation Series,Série de devis
+Quotation To,Devis Pour
+Quotation Trend,Tendance devis
+Quotation is cancelled.,Citation est annulée .
+Quotations received from Suppliers.,Citations reçues des fournisseurs.
+Quotes to Leads or Customers.,Citations à prospects ou clients.
+Raise Material Request when stock reaches re-order level,Soulever demande de matériel lorsque le stock atteint le niveau de réapprovisionnement
+Raised By,Raised By
+Raised By (Email),Raised By (e-mail)
+Random,Aléatoire
+Range,Gamme
+Rate,Taux
+Rate ,Taux
+Rate (Company Currency),Taux (Société Monnaie)
+Rate Of Materials Based On,Taux de matériaux à base
+Rate and Amount,Taux et le montant
+Rate at which Customer Currency is converted to customer's base currency,Vitesse à laquelle la devise du client est converti en devise de base du client
+Rate at which Price list currency is converted to company's base currency,Taux auquel la monnaie Liste de prix est converti en devise de base entreprise
+Rate at which Price list currency is converted to customer's base currency,Taux auquel la monnaie Liste de prix est converti en devise de base du client
+Rate at which customer's currency is converted to company's base currency,Vitesse à laquelle la devise du client est converti en devise de base entreprise
+Rate at which supplier's currency is converted to company's base currency,Taux auquel la monnaie du fournisseur est converti en devise de base entreprise
+Rate at which this tax is applied,Vitesse à laquelle cet impôt est appliqué
+Raw Material Item Code,Raw Code article Matière
+Raw Materials Supplied,Des matières premières fournies
+Raw Materials Supplied Cost,Coût des matières premières fournies
+Re-Order Level,Re-Order niveau
+Re-Order Qty,Re-Cdt
+Re-order,Re-order
+Re-order Level,Re-order niveau
+Re-order Qty,Re-order Quantité
+Read,Lire
+Reading 1,Lecture 1
+Reading 10,Lecture le 10
+Reading 2,Lecture 2
+Reading 3,Reading 3
+Reading 4,Reading 4
+Reading 5,Reading 5
+Reading 6,Lecture 6
+Reading 7,Lecture le 7
+Reading 8,Lecture 8
+Reading 9,Lectures suggérées 9
+Reason,Raison
+Reason for Leaving,Raison du départ
+Reason for Resignation,Raison de la démission
+Reason for losing,Raison pour perdre
+Recd Quantity,Quantité recd
+Receivable / Payable account will be identified based on the field Master Type,Compte à recevoir / payer sera identifié en fonction du champ Type de maître
+Receivables,Créances
+Receivables / Payables,Créances / dettes
+Receivables Group,Groupe de créances
+Received,reçu
+Received Date,Date de réception
+Received Items To Be Billed,Articles reçus à être facturé
+Received Qty,Quantité reçue
+Received and Accepted,Reçus et acceptés
+Receiver List,Liste des récepteurs
+Receiver Parameter,Paramètre récepteur
+Recipients,Récipiendaires
+Reconciliation Data,Données de réconciliation
+Reconciliation HTML,Réconciliation HTML
+Reconciliation JSON,Réconciliation JSON
+Record item movement.,Enregistrer le mouvement de l&#39;objet.
+Recurring Id,Id récurrent
+Recurring Invoice,Facture récurrente
+Recurring Type,Type de courant
+Reduce Deduction for Leave Without Pay (LWP),Réduire la déduction de congé sans solde (PLT)
+Reduce Earning for Leave Without Pay (LWP),Réduire Gagner de congé sans solde (PLT)
+Ref Code,Code de référence de
+Ref SQ,Réf SQ
+Reference,Référence
+Reference Date,Date de Référence
+Reference Name,Nom de référence
+Reference Number,Numéro de référence
+Refresh,Rafraîchir
+Refreshing....,Rafraîchissant ....
+Registration Details,Détails de l&#39;enregistrement
+Registration Info,D&#39;informations Inscription
+Rejected,Rejeté
+Rejected Quantity,Quantité rejetée
+Rejected Serial No,Rejeté N ° de série
+Rejected Warehouse,Entrepôt rejetée
+Rejected Warehouse is mandatory against regected item,Entrepôt rejeté est obligatoire contre l'article regected
+Relation,Rapport
+Relieving Date,Date de soulager
+Relieving Date of employee is ,Soulager la date de l&#39;employé est
+Remark,Remarque
+Remarks,Remarques
+Rename,rebaptiser
+Rename Log,Renommez identifiez-vous
+Rename Tool,Renommer l&#39;outil
+Rent Cost,louer coût
+Rent per hour,Louer par heure
+Rented,Loué
+Repeat on Day of Month,Répétez le Jour du Mois
+Replace,Remplacer
+Replace Item / BOM in all BOMs,Remplacer l&#39;élément / BOM dans toutes les nomenclatures
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM","Remplacer une nomenclature particulière dans toutes les nomenclatures d&#39;autres où il est utilisé. Il remplacera le lien de nomenclature ancienne, mettre à jour les coûts et régénérer &quot;Explosion de nomenclature article&quot; la table comme pour une nouvelle nomenclature"
+Replied,Répondu
+Report Date,Date du rapport
+Report issues at,Questions de rapport à
+Reports,Rapports
+Reports to,Rapports au
+Reqd By Date,Reqd par date
+Request Type,Type de demande
+Request for Information,Demande de renseignements
+Request for purchase.,Demande d&#39;achat.
+Requested,demandé
+Requested For,Pour demandée
+Requested Items To Be Ordered,Articles demandés à commander
+Requested Items To Be Transferred,Articles demandé à être transférés
+Requested Qty,Quantité demandée
+"Requested Qty: Quantity requested for purchase, but not ordered.","Demandé Quantité: Quantité demandée pour l'achat , mais pas ordonné ."
+Requests for items.,Les demandes d&#39;articles.
+Required By,Requis par
+Required Date,Requis Date
+Required Qty,Quantité requise
+Required only for sample item.,Requis uniquement pour les articles de l&#39;échantillon.
+Required raw materials issued to the supplier for producing a sub - contracted item.,Matières premières nécessaires délivrés au fournisseur pour la production d&#39;un élément sous - traitance.
+Reseller,Revendeur
+Reserved,réservé
+Reserved Qty,Quantité réservés
+"Reserved Qty: Quantity ordered for sale, but not delivered.","Réservés Quantité: Quantité de commande pour la vente , mais pas livré ."
+Reserved Quantity,Quantité réservés
+Reserved Warehouse,Réservé Entrepôt
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,Entrepôt réservé à des commandes clients / entrepôt de produits finis
+Reserved Warehouse is missing in Sales Order,Réservé entrepôt est manquant dans l&#39;ordre des ventes
+Reset Filters,réinitialiser les filtres
+Resignation Letter Date,Date de lettre de démission
+Resolution,Résolution
+Resolution Date,Date de Résolution
+Resolution Details,Détails de la résolution
+Resolved By,Résolu par
+Retail,Détail
+Retailer,Détaillant
+Review Date,Date de revoir
+Rgt,Rgt
+Role Allowed to edit frozen stock,Rôle autorisés à modifier stock congelé
+Role that is allowed to submit transactions that exceed credit limits set.,Rôle qui est autorisé à soumettre des transactions qui dépassent les limites de crédit fixées.
+Root cannot have a parent cost center,Racine ne peut pas avoir un centre de coûts parent
+Rounded Total,Totale arrondie
+Rounded Total (Company Currency),Totale arrondie (Société Monnaie)
+Row,Rangée
+Row ,Rangée
+Row #,Row #
+Row # ,Row #
+Rules to calculate shipping amount for a sale,Règles de calcul du montant de l&#39;expédition pour une vente
+S.O. No.,S.O. Non.
+SMS,SMS
+SMS Center,Centre SMS
+SMS Control,SMS Control
+SMS Gateway URL,URL SMS Gateway
+SMS Log,SMS Log
+SMS Parameter,Paramètre SMS
+SMS Sender Name,SMS Sender Nom
+SMS Settings,Paramètres SMS
+SMTP Server (e.g. smtp.gmail.com),Serveur SMTP (smtp.gmail.com par exemple)
+SO,SO
+SO Date,SO Date
+SO Pending Qty,SO attente Qté
+SO Qty,SO Quantité
+SO/10-11/,SO/10-11 /
+SO1112,SO1112
+SQTN,SQTN
+STE,STE
+SUP,SUP
+SUPP,SUPP
+SUPP/10-11/,SUPP/10-11 /
+Salary,Salaire
+Salary Information,Information sur le salaire
+Salary Manager,Salaire Responsable
+Salary Mode,Mode de rémunération
+Salary Slip,Glissement des salaires
+Salary Slip Deduction,Déduction bulletin de salaire
+Salary Slip Earning,Slip Salaire Gagner
+Salary Structure,Grille des salaires
+Salary Structure Deduction,Déduction structure salariale
+Salary Structure Earning,Structure salariale Gagner
+Salary Structure Earnings,Bénéfice structure salariale
+Salary breakup based on Earning and Deduction.,rupture des salaires basée sur l&#39;obtention et la déduction.
+Salary components.,Éléments du salaire.
+Sales,Ventes
+Sales Analytics,Analytics Sales
+Sales BOM,BOM ventes
+Sales BOM Help,Aide nomenclature des ventes
+Sales BOM Item,Article nomenclature des ventes
+Sales BOM Items,Articles ventes de nomenclature
+Sales Details,Détails ventes
+Sales Discounts,Escomptes sur ventes
+Sales Email Settings,Réglages Courriel Ventes
+Sales Extras,Extras ventes
+Sales Funnel,Entonnoir des ventes
+Sales Invoice,Facture de vente
+Sales Invoice Advance,Advance facture de vente
+Sales Invoice Item,Article facture de vente
+Sales Invoice Items,Facture de vente Articles
+Sales Invoice Message,Message facture de vente
+Sales Invoice No,Aucune facture de vente
+Sales Invoice Trends,Soldes Tendances de la facture
+Sales Order,Commande
+Sales Order Date,Date de Commande
+Sales Order Item,Poste de commande client
+Sales Order Items,Articles Sales Order
+Sales Order Message,Message de commande client
+Sales Order No,Ordonnance n ° de vente
+Sales Order Required,Commande obligatoire
+Sales Order Trend,Les ventes Tendance Ordre
+Sales Partner,Sales Partner
+Sales Partner Name,Nom Sales Partner
+Sales Partner Target,Cible Sales Partner
+Sales Partners Commission,Partenaires Sales Commission
+Sales Person,Sales Person
+Sales Person Incharge,Sales Person Incharge
+Sales Person Name,Nom Sales Person
+Sales Person Target Variance (Item Group-Wise),Sales Person Variance cible (Point Group-Wise)
+Sales Person Targets,Personne objectifs de vente
+Sales Person-wise Transaction Summary,Sales Person-sage Résumé de la transaction
+Sales Register,Registre des ventes
+Sales Return,Ventes de retour
+Sales Returned,ventes renvoyé
+Sales Taxes and Charges,Taxes de vente et frais
+Sales Taxes and Charges Master,Taxes de vente et frais de Master
+Sales Team,Équipe des ventes
+Sales Team Details,Détails équipe de vente
+Sales Team1,Ventes Equipe1
+Sales and Purchase,Vente et achat
+Sales campaigns,Campagnes de vente
+Sales persons and targets,Les vendeurs et les objectifs
+Sales taxes template.,Les taxes de vente gabarit.
+Sales territories.,Territoires de vente.
+Salutation,Salutation
+Same Serial No,Même N ° de série
+Sample Size,Taille de l&#39;échantillon
+Sanctioned Amount,Montant sanctionné
+Saturday,Samedi
+Save ,
+Schedule,Calendrier
+Schedule Date,calendrier Date
+Schedule Details,Planning Détails
+Scheduled,Prévu
+Scheduled Date,Date prévue
+School/University,Ecole / Université
+Score (0-5),Score (0-5)
+Score Earned,Score gagné
+Score must be less than or equal to 5,Score doit être inférieur ou égal à 5
+Scrap %,Scrap%
+Seasonality for setting budgets.,Saisonnalité de l&#39;établissement des budgets.
+"See ""Rate Of Materials Based On"" in Costing Section",Voir «Taux de matériaux à base de« coûts dans la section
+"Select ""Yes"" for sub - contracting items",Sélectionnez &quot;Oui&quot; pour la sous - traitance articles
+"Select ""Yes"" if this item is used for some internal purpose in your company.",Sélectionnez &quot;Oui&quot; si cet objet est utilisé à des fins internes de votre entreprise.
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Sélectionnez &quot;Oui&quot; si cet objet représente un travail comme la formation, la conception, la consultation, etc"
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.",Sélectionnez &quot;Oui&quot; si vous le maintien des stocks de cet article dans votre inventaire.
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",Sélectionnez &quot;Oui&quot; si vous fournir des matières premières à votre fournisseur pour la fabrication de cet article.
+Select Budget Distribution to unevenly distribute targets across months.,Sélectionnez Répartition du budget à répartir inégalement cibles à travers mois.
+"Select Budget Distribution, if you want to track based on seasonality.","Sélectionnez Répartition du budget, si vous voulez suivre en fonction de la saisonnalité."
+Select Digest Content,Sélectionner le contenu Digest
+Select DocType,Sélectionnez DocType
+"Select Item where ""Is Stock Item"" is ""No""","Sélectionner un article où "" Est Stock Item"" est ""Non"""
+Select Items,Sélectionner les objets
+Select Purchase Receipts,Sélectionnez reçus d'achat
+Select Sales Orders,Sélectionnez les commandes clients
+Select Sales Orders from which you want to create Production Orders.,Sélectionnez les commandes clients à partir de laquelle vous souhaitez créer des ordres de fabrication.
+Select Time Logs and Submit to create a new Sales Invoice.,Sélectionnez registres de temps et de soumettre à créer une nouvelle facture de vente.
+Select Transaction,Sélectionnez Transaction
+Select account head of the bank where cheque was deposited.,Sélectionnez tête compte de la banque où chèque a été déposé.
+Select company name first.,Sélectionnez le nom de la première entreprise.
+Select template from which you want to get the Goals,Sélectionnez le modèle à partir duquel vous souhaitez obtenir des Objectifs
+Select the Employee for whom you are creating the Appraisal.,Sélectionnez l&#39;employé pour lequel vous créez l&#39;évaluation.
+Select the Invoice against which you want to allocate payments.,Sélectionnez la facture sur laquelle vous souhaitez allouer des paiements .
+Select the period when the invoice will be generated automatically,Sélectionnez la période pendant laquelle la facture sera générée automatiquement
+Select the relevant company name if you have multiple companies,Sélectionnez le nom de l&#39;entreprise concernée si vous avez de multiples entreprises
+Select the relevant company name if you have multiple companies.,Sélectionnez le nom de l&#39;entreprise concernée si vous avez plusieurs sociétés.
+Select who you want to send this newsletter to,Sélectionnez qui vous souhaitez envoyer ce bulletin à
+Select your home country and check the timezone and currency.,Choisissez votre pays d'origine et vérifier le fuseau horaire et la monnaie .
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","La sélection de &quot;Oui&quot; permettra cet article à paraître dans bon de commande, facture d&#39;achat."
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","La sélection de &quot;Oui&quot; permettra de comprendre cet article dans l&#39;ordonnance de vente, bon de livraison"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",La sélection de &quot;Oui&quot; vous permettra de créer des nomenclatures montrant des matières premières et des coûts d&#39;exploitation engagés pour la fabrication de cet article.
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",La sélection de &quot;Oui&quot; vous permettra de faire un ordre de fabrication pour cet article.
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",La sélection de &quot;Oui&quot; donner une identité unique à chaque entité de cet article qui peut être consulté dans le N ° de série maître.
+Selling,Vente
+Selling Settings,Réglages de vente
+Send,Envoyer
+Send Autoreply,Envoyer Autoreply
+Send Bulk SMS to Leads / Contacts,Envoyer un SMS en vrac à Leads / contacts
+Send Email,Envoyer un email
+Send From,Envoyer partir de
+Send Notifications To,Envoyer des notifications aux
+Send Now,Envoyer maintenant
+Send Print in Body and Attachment,Envoyer Imprimer dans le corps et attachement
+Send SMS,Envoyer un SMS
+Send To,Send To
+Send To Type,Envoyer à taper
+Send automatic emails to Contacts on Submitting transactions.,Envoyer des emails automatiques vers les Contacts sur Envoi transactions.
+Send mass SMS to your contacts,Envoyer un SMS en masse à vos contacts
+Send regular summary reports via Email.,Envoyer des rapports de synthèse réguliers par e-mail.
+Send to this list,Envoyer cette liste
+Sender,Expéditeur
+Sender Name,Nom de l&#39;expéditeur
+Sent,expédié
+Sent Mail,Messages envoyés
+Sent On,Sur envoyé
+Sent Quotation,Devis envoyé
+Sent or Received,Envoyés ou reçus
+Separate production order will be created for each finished good item.,Pour la production séparée sera créée pour chaque article produit fini.
+Serial No,N ° de série
+Serial No / Batch,N ° de série / lot
+Serial No Details,Détails Pas de série
+Serial No Service Contract Expiry,N ° de série expiration du contrat de service
+Serial No Status,N ° de série Statut
+Serial No Warranty Expiry,N ° de série expiration de garantie
+Serial No created,Aucune série créée
+Serial No does not belong to Item,N ° de série n'appartient pas à l'article
+Serial No must exist to transfer out.,N ° de série doit exister pour transférer sur .
+Serial No qty cannot be a fraction,N ° de série quantité peut ne pas être une fraction
+Serial No status must be 'Available' to Deliver,N ° de série statut doit être «disponible» à livrer
+Serial Nos do not match with qty,Nos série ne correspondent pas avec quantité
+Serial Number Series,Série Série Nombre
+Serialized Item: ',Article sérialisé: &#39;
+Series,série
+Series List for this Transaction,Liste série pour cette transaction
+Service Address,Adresse du service
+Services,Services
+Session Expiry,Session d&#39;expiration
+Session Expiry in Hours e.g. 06:00,"Expiration session en heures, par exemple 06:00"
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,Set Point du Groupe sages budgets sur ce territoire. Vous pouvez également inclure la saisonnalité en réglant la distribution.
+Set Login and Password if authentication is required.,Set de connexion et mot de passe si l&#39;authentification est requise.
+Set allocated amount against each Payment Entry and click 'Allocate'.,Set montant alloué contre chaque entrée de paiement et cliquez sur « attribuer» .
+Set as Default,Définir par défaut
+Set as Lost,Définir comme perdu
+Set prefix for numbering series on your transactions,Définir le préfixe de numérotation des séries sur vos transactions
+Set targets Item Group-wise for this Sales Person.,Fixer des objectifs élément de groupe-sage pour cette personne des ventes.
+"Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.","Réglez vos paramètres de messagerie SMTP sortants ici. Toutes les notifications générées par le système, e-mails passera de ce serveur de messagerie. Si vous n&#39;êtes pas sûr, laissez ce champ vide pour utiliser des serveurs ERPNext (e-mails seront toujours envoyés à partir de votre email id) ou communiquez avec votre fournisseur de messagerie."
+Setting Account Type helps in selecting this Account in transactions.,Type de compte Configuration aide à sélectionner ce compte dans les transactions.
+Setting up...,Mise en place ...
+Settings,Réglages
+Settings for Accounts,Réglages pour les comptes
+Settings for Buying Module,Réglages pour le module d&#39;achat
+Settings for Selling Module,Réglages pour la vente Module
+Settings for Stock Module,Paramètres pour le module Stock
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",Paramètres pour extraire demandeurs d&#39;emploi à partir d&#39;une boîte aux lettres par exemple &quot;jobs@example.com&quot;
+Setup,Installation
+Setup Already Complete!!,Configuration déjà complet !
+Setup Complete!,Installation terminée !
+Setup Completed,installation terminée
+Setup Series,Série de configuration
+Setup of Shopping Cart.,Configuration de votre panier.
+Setup to pull emails from support email account,Configuration pour tirer des courriels de compte de messagerie soutien
+Share,Partager
+Share With,Partager avec
+Shipments to customers.,Les livraisons aux clients.
+Shipping,Livraison
+Shipping Account,Compte de livraison
+Shipping Address,Adresse de livraison
+Shipping Amount,Montant de livraison
+Shipping Rule,Livraison règle
+Shipping Rule Condition,Livraison Condition de règle
+Shipping Rule Conditions,Règle expédition Conditions
+Shipping Rule Label,Livraison règle étiquette
+Shipping Rules,Règles d&#39;expédition
+Shop,Magasiner
+Shopping Cart,Panier
+Shopping Cart Price List,Panier Liste des prix
+Shopping Cart Price Lists,Panier Liste des prix
+Shopping Cart Settings,Panier Paramètres
+Shopping Cart Shipping Rule,Panier Livraison règle
+Shopping Cart Shipping Rules,Panier Règles d&#39;expédition
+Shopping Cart Taxes and Charges Master,Panier taxes et redevances Maître
+Shopping Cart Taxes and Charges Masters,Panier Taxes et frais de maîtrise
+Short biography for website and other publications.,Courte biographie pour le site Web et d&#39;autres publications.
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Voir &quot;En stock&quot; ou &quot;Pas en stock» basée sur le stock disponible dans cet entrepôt.
+Show / Hide Features,Afficher / Masquer Caractéristiques
+Show / Hide Modules,Afficher / Masquer les Modules
+Show In Website,Afficher dans un site Web
+Show a slideshow at the top of the page,Afficher un diaporama en haut de la page
+Show in Website,Afficher dans Site Web
+Show this slideshow at the top of the page,Voir ce diaporama en haut de la page
+Signature,Signature
+Signature to be appended at the end of every email,Signature d&#39;être ajouté à la fin de chaque e-mail
+Single,Unique
+Single unit of an Item.,Une seule unité d&#39;un élément.
+Sit tight while your system is being setup. This may take a few moments.,Asseyez-vous serré alors que votre système est en cours d' installation. Cela peut prendre quelques instants .
+Slideshow,Diaporama
+"Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency.","Désolé! Vous ne pouvez pas changer la devise par défaut de la société, parce qu&#39;il ya des transactions en cours à son encontre. Vous aurez besoin d&#39;annuler ces opérations si vous voulez changer la devise par défaut."
+"Sorry, Serial Nos cannot be merged","Désolé , série n ne peut pas être fusionné"
+"Sorry, companies cannot be merged","Désolé , les entreprises ne peuvent pas être fusionnés"
+Source,Source
+Source Warehouse,Source d&#39;entrepôt
+Source and Target Warehouse cannot be same,Source et une cible d&#39;entrepôt ne peut pas être la même
+Spartan,Spartan
+Special Characters,Caractères spéciaux
+Special Characters ,
+Specification Details,Détails Spécifications
+Specify Exchange Rate to convert one currency into another,Spécifiez taux de change pour convertir une monnaie en une autre
+"Specify a list of Territories, for which, this Price List is valid","Spécifiez une liste des territoires, pour qui, cette liste de prix est valable"
+"Specify a list of Territories, for which, this Shipping Rule is valid","Spécifiez une liste des territoires, pour qui, cette règle d&#39;expédition est valide"
+"Specify a list of Territories, for which, this Taxes Master is valid","Spécifiez une liste des territoires, pour qui, cette Taxes Master est valide"
+Specify conditions to calculate shipping amount,Préciser les conditions pour calculer le montant de l&#39;expédition
+"Specify the operations, operating cost and give a unique Operation no to your operations.","Précisez les activités, le coût d'exploitation et de donner une opération unique, non à vos opérations ."
+Split Delivery Note into packages.,Séparer le bon de livraison dans des packages.
+Standard,Standard
+Standard Rate,Prix ​​Standard
+"Standard Terms and Conditions that can be added to Sales and Purchases.
+
+Examples:
+
+1. Validity of the offer.
+1. Payment Terms (In Advance, On Credit, part advance etc).
+1. What is extra (or payable by the Customer).
+1. Safety / usage warning.
+1. Warranty if any.
+1. Returns Policy.
+1. Terms of shipping, if applicable.
+1. Ways of addressing disputes, indemnity, liability, etc.
+1. Address and Contact of your Company.",
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
+10. Add or Deduct: Whether you want to add or deduct the tax.",
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",
+Start,Démarrer
+Start Date,Date de début
+Start date of current invoice's period,Date de début de la période de facturation en cours
+Starting up...,Démarrage ...
+State,État
+Static Parameters,Paramètres statiques
+Status,Statut
+Status must be one of ,Le statut doit être l&#39;un des
+Status should be Submitted,Statut doit être soumis
+Statutory info and other general information about your Supplier,Informations légales et autres informations générales au sujet de votre Fournisseur
+Stock,Stock
+Stock Adjustment Account,Compte d&#39;ajustement de stock
+Stock Ageing,Stock vieillissement
+Stock Analytics,Analytics stock
+Stock Balance,Solde Stock
+Stock Entries already created for Production Order ,
+Stock Entry,Entrée Stock
+Stock Entry Detail,Détail d&#39;entrée Stock
+Stock Frozen Upto,Stock Frozen Jusqu&#39;à
+Stock Ledger,Stock Ledger
+Stock Ledger Entry,Stock Ledger Entry
+Stock Level,Niveau de stock
+Stock Projected Qty,Stock projeté Quantité
+Stock Qty,Stock Qté
+Stock Queue (FIFO),Stock file d&#39;attente (FIFO)
+Stock Received But Not Billed,Stock reçus mais non facturés
+Stock Reconcilation Data,Stock Rapprochement des données
+Stock Reconcilation Template,Stock Réconciliation modèle
+Stock Reconciliation,Stock réconciliation
+"Stock Reconciliation can be used to update the stock on a particular date, ",
+Stock Settings,Paramètres de stock
+Stock UOM,Stock UDM
+Stock UOM Replace Utility,Utilitaire Stock Remplacer Emballage
+Stock Uom,Stock UDM
+Stock Value,Valeur de l&#39;action
+Stock Value Difference,Stock Value Différence
+Stock transactions exist against warehouse ,
+Stop,Stop
+Stop Birthday Reminders,Arrêter anniversaire rappels
+Stop Material Request,Matériel de demande d'arrêt
+Stop users from making Leave Applications on following days.,"Empêcher les utilisateurs de faire des demandes d&#39;autorisation, les jours suivants."
+Stop!,Stop!
+Stopped,Arrêté
+Structure cost centers for budgeting.,Centres de coûts de structure pour la budgétisation.
+Structure of books of accounts.,Structure des livres de comptes.
+"Sub-currency. For e.g. ""Cent""",Sous-monnaie. Pour exemple: &quot;Cent&quot;
+Subcontract,Sous-traiter
+Subject,Sujet
+Submit Salary Slip,Envoyer le bulletin de salaire
+Submit all salary slips for the above selected criteria,Soumettre tous les bulletins de salaire pour les critères sélectionnés ci-dessus
+Submit this Production Order for further processing.,Envoyer cette ordonnance de production pour un traitement ultérieur .
+Submitted,Soumis
+Subsidiary,Filiale
+Successful: ,Succès:
+Suggestion,Suggestion
+Suggestions,Suggestions
+Sunday,Dimanche
+Supplier,Fournisseur
+Supplier (Payable) Account,Fournisseur compte (à payer)
+Supplier (vendor) name as entered in supplier master,Fournisseur (vendeur) le nom saisi dans master fournisseur
+Supplier Account,Compte fournisseur
+Supplier Account Head,Fournisseur compte Head
+Supplier Address,Adresse du fournisseur
+Supplier Addresses And Contacts,Adresses et contacts des fournisseurs
+Supplier Addresses and Contacts,Adresses des fournisseurs et contacts
+Supplier Details,Détails de produit
+Supplier Intro,Intro Fournisseur
+Supplier Invoice Date,Date de la facture fournisseur
+Supplier Invoice No,Fournisseur facture n
+Supplier Name,Nom du fournisseur
+Supplier Naming By,Fournisseur de nommage par
+Supplier Part Number,Numéro de pièce fournisseur
+Supplier Quotation,Devis Fournisseur
+Supplier Quotation Item,Article Devis Fournisseur
+Supplier Reference,Référence fournisseur
+Supplier Shipment Date,Fournisseur Date d&#39;expédition
+Supplier Shipment No,Fournisseur expédition No
+Supplier Type,Type de fournisseur
+Supplier Type / Supplier,Fournisseur Type / Fournisseur
+Supplier Warehouse,Entrepôt Fournisseur
+Supplier Warehouse mandatory subcontracted purchase receipt,Entrepôt obligatoire facture d&#39;achat sous-traitance des fournisseurs
+Supplier classification.,Fournisseur de classification.
+Supplier database.,Base de données fournisseurs.
+Supplier of Goods or Services.,Fournisseur de biens ou services.
+Supplier warehouse where you have issued raw materials for sub - contracting,Fournisseur entrepôt où vous avez émis des matières premières pour la sous - traitance
+Supplier-Wise Sales Analytics,Fournisseur - Wise ventes Analytics
+Support,Soutenir
+Support Analtyics,Analtyics de soutien
+Support Analytics,Analytics soutien
+Support Email,Soutien Email
+Support Email Settings,Soutien des paramètres de messagerie
+Support Password,Mot de passe soutien
+Support Ticket,Support Ticket
+Support queries from customers.,En charge les requêtes des clients.
+Symbol,Symbole
+Sync Support Mails,Synchroniser mails de soutien
+Sync with Dropbox,Synchroniser avec Dropbox
+Sync with Google Drive,Synchronisation avec Google Drive
+System Administration,Administration du système
+System Scheduler Errors,Les erreurs du planificateur du système
+System Settings,Paramètres système
+"System User (login) ID. If set, it will become default for all HR forms.","L&#39;utilisateur du système (login) ID. S&#39;il est défini, il sera par défaut pour toutes les formes de ressources humaines."
+System for managing Backups,Système de gestion des sauvegardes
+System generated mails will be sent from this email id.,Mails générés par le système seront envoyés à cette id e-mail.
+TL-,BA-
+TLB-,TLB-
+Table for Item that will be shown in Web Site,Tableau pour le point qui sera affiché dans le site Web
+Target  Amount,Montant Cible
+Target Detail,Détail cible
+Target Details,Détails cibles
+Target Details1,Cible Details1
+Target Distribution,Distribution cible
+Target On,cible sur
+Target Qty,Qté cible
+Target Warehouse,Cible d&#39;entrepôt
+Task,Tâche
+Task Details,Détails de la tâche
+Tasks,tâches
+Tax,Impôt
+Tax Accounts,Comptes d'impôt
+Tax Calculation,Calcul de la taxe
+Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Catégorie impôt ne peut pas être « évaluation » ou « évaluation et totale », comme tous les articles sont des articles hors stock"
+Tax Master,Maître d&#39;impôt
+Tax Rate,Taux d&#39;imposition
+Tax Template for Purchase,Modèle d&#39;impôt pour l&#39;achat
+Tax Template for Sales,Modèle d&#39;impôt pour les ventes
+Tax and other salary deductions.,De l&#39;impôt et autres déductions salariales.
+"Tax detail table fetched from item master as a string and stored in this field.
+Used for Taxes and Charges",
+Taxable,Imposable
+Taxes,Impôts
+Taxes and Charges,Impôts et taxes
+Taxes and Charges Added,Taxes et redevances Ajouté
+Taxes and Charges Added (Company Currency),Les impôts et les frais supplémentaires (Société Monnaie)
+Taxes and Charges Calculation,Taxes et frais de calcul
+Taxes and Charges Deducted,Taxes et frais déduits
+Taxes and Charges Deducted (Company Currency),Impôts et Charges déduites (Société Monnaie)
+Taxes and Charges Total,Taxes et frais total
+Taxes and Charges Total (Company Currency),Les impôts et les frais totaux (Société Monnaie)
+Template for employee performance appraisals.,Gabarit pour l&#39;évaluation du rendement des employés.
+Template of terms or contract.,Modèle de termes ou d&#39;un contrat.
+Term Details,Détails terme
+Terms,termes
+Terms and Conditions,Termes et Conditions
+Terms and Conditions Content,Termes et Conditions de contenu
+Terms and Conditions Details,Termes et Conditions Détails
+Terms and Conditions Template,Termes et Conditions modèle
+Terms and Conditions1,Termes et conditions1
+Terretory,Terretory
+Territory,Territoire
+Territory / Customer,Territoire / client
+Territory Manager,Territory Manager
+Territory Name,Nom du territoire
+Territory Target Variance (Item Group-Wise),Territoire Variance cible (Point Group-Wise)
+Territory Targets,Les objectifs du Territoire
+Test,Test
+Test Email Id,Id Test Email
+Test the Newsletter,Testez la Newsletter
+The BOM which will be replaced,La nomenclature qui sera remplacé
+The First User: You,Le premier utilisateur: Vous
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",L&#39;article qui représente le package. Cet article doit avoir «Est Produit en stock&quot; comme &quot;No&quot; et &quot;Est Point de vente&quot; que &quot;Oui&quot;
+The Organization,l'Organisation
+"The account head under Liability, in which Profit/Loss will be booked","Le compte tête sous la responsabilité , dans lequel Bénéfice / perte sera comptabilisée"
+"The date on which next invoice will be generated. It is generated on submit.
+",
+The date on which recurring invoice will be stop,La date à laquelle la facture récurrente sera arrêter
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","Le jour du mois au cours duquel la facture automatique sera généré, par exemple 05, 28, etc"
+The day(s) on which you are applying for leave coincide with holiday(s). You need not apply for leave.,Le jour (s ) sur lequel vous postulez pour congé coïncide avec la fête (s ) . Vous n'avez pas besoin de demander l'autorisation .
+The first Leave Approver in the list will be set as the default Leave Approver,Le premier congé approbateur dans la liste sera définie comme le congé approbateur de défaut
+The first user will become the System Manager (you can change that later).,Le premier utilisateur deviendra le gestionnaire du système ( vous pouvez changer cela plus tard ) .
+The gross weight of the package. Usually net weight + packaging material weight. (for print),Le poids brut du colis. Habituellement poids net + poids du matériau d&#39;emballage. (Pour l&#39;impression)
+The name of your company for which you are setting up this system.,Le nom de votre entreprise pour laquelle vous configurez ce système .
+The net weight of this package. (calculated automatically as sum of net weight of items),Le poids net de ce paquet. (Calculé automatiquement comme la somme du poids net des articles)
+The new BOM after replacement,La nouvelle nomenclature après le remplacement
+The rate at which Bill Currency is converted into company's base currency,La vitesse à laquelle le projet de loi Monnaie est convertie en monnaie de base entreprise
+The unique id for tracking all recurring invoices. It is generated on submit.,L&#39;identifiant unique pour le suivi de toutes les factures récurrentes. Il est généré lors de la soumission.
+There is nothing to edit.,Il n'y a rien à modifier.
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Il y avait une erreur . Une raison probable pourrait être que vous n'avez pas enregistré le formulaire. S'il vous plaît contacter support@erpnext.com si le problème persiste .
+There were errors.,Il y avait des erreurs .
+This Cost Center is a,Ce centre de coûts est un
+This Currency is disabled. Enable to use in transactions,Cette devise est désactivé . Permettre d'utiliser dans les transactions
+This ERPNext subscription,Cet abonnement ERPNext
+This Leave Application is pending approval. Only the Leave Apporver can update status.,Cette demande de congé est en attente d'approbation . Seul le congé Apporver peut mettre à jour le statut .
+This Time Log Batch has been billed.,This Time Connexion lot a été facturé.
+This Time Log Batch has been cancelled.,This Time Connexion lot a été annulé.
+This Time Log conflicts with,Cette fois-Log conflits avec
+This is a root account and cannot be edited.,Il s'agit d'un compte root et ne peut être modifié .
+This is a root customer group and cannot be edited.,Il s'agit d'un groupe de clients de la racine et ne peut être modifié .
+This is a root item group and cannot be edited.,Ceci est un groupe d'élément de racine et ne peut être modifié .
+This is a root sales person and cannot be edited.,Il s'agit d'une personne de ventes de racines et ne peut être modifié .
+This is a root territory and cannot be edited.,C'est un territoire de racine et ne peut être modifié .
+This is the number of the last created transaction with this prefix,Il s&#39;agit du numéro de la dernière transaction créée par ce préfixe
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,Cet outil vous permet de mettre à jour ou corriger la quantité et la valorisation de stock dans le système. Il est généralement utilisé pour synchroniser les valeurs du système et ce qui existe réellement dans vos entrepôts.
+This will be used for setting rule in HR module,Il sera utilisé pour la règle de réglage dans le module RH
+Thread HTML,Discussion HTML
+Thursday,Jeudi
+Time Log,Temps Connexion
+Time Log Batch,Temps connecter Batch
+Time Log Batch Detail,Temps connecter Détail du lot
+Time Log Batch Details,Le journal du temps les détails du lot
+Time Log Batch status must be 'Submitted',Temps connecter statut de lot doit être «soumis»
+Time Log for tasks.,Le journal du temps pour les tâches.
+Time Log must have status 'Submitted',Temps journal doit avoir un statut «Soumis»
+Time Zone,Fuseau horaire
+Time Zones,Fuseaux horaires
+Time and Budget,Temps et budget
+Time at which items were delivered from warehouse,Heure à laquelle les articles ont été livrés à partir de l&#39;entrepôt
+Time at which materials were received,Heure à laquelle les matériaux ont été reçues
+Title,Titre
+To,À
+To Currency,Pour Devise
+To Date,À ce jour
+To Date should be same as From Date for Half Day leave,Pour la date doit être le même que Date d' autorisation pour une demi-journée
+To Discuss,Pour discuter
+To Do List,To Do List
+To Package No.,Pour Emballer n °
+To Pay,à payer
+To Produce,pour Produire
+To Time,To Time
+To Value,To Value
+To Warehouse,Pour Entrepôt
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.","Pour ajouter des nœuds de l'enfant , explorer arborescence et cliquez sur le nœud sous lequel vous voulez ajouter d'autres nœuds ."
+"To assign this issue, use the ""Assign"" button in the sidebar.","Pour attribuer ce problème, utilisez le bouton &quot;Affecter&quot; dans la barre latérale."
+"To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.","Pour créer automatiquement des tickets de support à partir de votre courrier entrant, définissez vos paramètres POP3 ici. Vous devez idéalement créer un id e-mail séparé pour le système erp afin que tous les e-mails seront synchronisés dans le système à partir de ce mail id. Si vous n&#39;êtes pas sûr, s&#39;il vous plaît contactez votre fournisseur de messagerie."
+To create a Bank Account:,Pour créer un compte bancaire :
+To create a Tax Account:,Pour créer un compte d'impôt :
+"To create an Account Head under a different company, select the company and save customer.","Pour créer un compte Head en vertu d&#39;une autre entreprise, sélectionnez l&#39;entreprise et sauver client."
+To date cannot be before from date,À ce jour ne peut pas être avant la date
+To enable <b>Point of Sale</b> features,Pour permettre <b>Point de Vente</b> fonctionnalités
+To enable <b>Point of Sale</b> view,Pour activer <b> point de vente < / b > vue
+To get Item Group in details table,Pour obtenir Groupe d&#39;éléments dans le tableau de détails
+"To merge, following properties must be same for both items","Pour fusionner , les propriétés suivantes doivent être les mêmes pour les deux articles"
+"To report an issue, go to ",
+"To set this Fiscal Year as Default, click on 'Set as Default'","Pour définir cette Année financière que par défaut , cliquez sur "" Définir par défaut """
+To track any installation or commissioning related work after sales,Pour suivre toute installation ou mise en service après-vente des travaux connexes
+"To track brand name in the following documents<br>
+Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Pour suivre pièce documents de vente et d&#39;achat en fonction de leurs numéros de série. Ce n&#39;est peut également être utilisé pour suivre les détails de la garantie du produit.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,"Pour suivre les articles de chiffre d&#39;affaires et des documents d&#39;achat avec nos lots <br> <b>Industrie préféré: produits chimiques, etc</b>"
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Pour suivre les éléments à l&#39;aide de code à barres. Vous serez en mesure d&#39;entrer dans les articles bon de livraison et la facture de vente par balayage de code à barres de l&#39;article.
+Tools,Outils
+Top,Supérieur
+Total,Total
+Total (sum of) points distribution for all goals should be 100.,Total (somme des) points de distribution pour tous les objectifs devrait être de 100.
+Total Advance,Advance totale
+Total Amount,Montant total
+Total Amount To Pay,Montant total à payer
+Total Amount in Words,Montant total en mots
+Total Billing This Year: ,Facturation totale de cette année:
+Total Claimed Amount,Montant total réclamé
+Total Commission,Total de la Commission
+Total Cost,Coût total
+Total Credit,Crédit total
+Total Debit,Débit total
+Total Deduction,Déduction totale
+Total Earning,Gains totale
+Total Experience,Total Experience
+Total Hours,Total des heures
+Total Hours (Expected),Total des heures (prévue)
+Total Invoiced Amount,Montant total facturé
+Total Leave Days,Total des jours de congé
+Total Leaves Allocated,Feuilles total alloué
+Total Manufactured Qty can not be greater than Planned qty to manufacture,Quantité totale Fabricant ne peut être supérieure à quantité prévue de la production
+Total Operating Cost,Coût d&#39;exploitation total
+Total Points,Total des points
+Total Raw Material Cost,Coût total des matières premières
+Total Sanctioned Amount,Montant total sanctionné
+Total Score (Out of 5),Score total (sur 5)
+Total Tax (Company Currency),Total des Taxes (Société Monnaie)
+Total Taxes and Charges,Total Taxes et frais
+Total Taxes and Charges (Company Currency),Total des taxes et charges (Société Monnaie)
+Total Working Days In The Month,Nombre total de jours ouvrables du mois
+Total amount of invoices received from suppliers during the digest period,Montant total des factures reçues des fournisseurs durant la période digest
+Total amount of invoices sent to the customer during the digest period,Montant total des factures envoyées au client au cours de la période digest
+Total in words,Total en mots
+Total production order qty for item,Totale pour la production de quantité pour l&#39;article
+Totals,Totaux
+Track separate Income and Expense for product verticals or divisions.,Suivre distincte sur le revenu et dépenses pour des produits ou des divisions verticales.
+Track this Delivery Note against any Project,Suivre ce bon de livraison contre tout projet
+Track this Sales Order against any Project,Suivre ce décret ventes contre tout projet
+Transaction,Transaction
+Transaction Date,Date de la transaction
+Transaction not allowed against stopped Production Order,Transaction non autorisée contre arrêté l'ordre de fabrication
+Transfer,Transférer
+Transfer Material,transfert de matériel
+Transfer Raw Materials,Transfert matières premières
+Transferred Qty,transféré Quantité
+Transporter Info,Infos Transporter
+Transporter Name,Nom Transporter
+Transporter lorry number,Numéro camion transporteur
+Trash Reason,Raison Corbeille
+Tree Type,Type d' arbre
+Tree of item classification,Arbre de classification du produit
+Trial Balance,Balance
+Tuesday,Mardi
+Type,Type
+Type of document to rename.,Type de document à renommer.
+Type of employment master.,Type de maître emploi.
+"Type of leaves like casual, sick etc.","Type de feuilles comme occasionnel, etc malades"
+Types of Expense Claim.,Types de demande de remboursement.
+Types of activities for Time Sheets,Types d&#39;activités pour les feuilles de temps
+UOM,Emballage
+UOM Conversion Detail,Détail de conversion Emballage
+UOM Conversion Details,Détails conversion UOM
+UOM Conversion Factor,Facteur de conversion Emballage
+UOM Conversion Factor is mandatory,Facteur de conversion UOM est obligatoire
+UOM Name,Nom UDM
+UOM Replace Utility,Utilitaire Remplacer Emballage
+Under AMC,En vertu de l&#39;AMC
+Under Graduate,Sous Graduate
+Under Warranty,Sous garantie
+Unit of Measure,Unité de mesure
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Unité de mesure de cet article (Kg par exemple, unité, Non, Pair)."
+Units/Hour,Unités / heure
+Units/Shifts,Unités / Quarts de travail
+Unmatched Amount,Montant inégalée
+Unpaid,Non rémunéré
+Unscheduled,Non programmé
+Unstop,déboucher
+Unstop Material Request,Unstop Demande de Matériel
+Unstop Purchase Order,Unstop Commande
+Unsubscribed,Désabonné
+Update,Mettre à jour
+Update Clearance Date,Mettre à jour Date de Garde
+Update Cost,mise à jour des coûts
+Update Finished Goods,Marchandises mise à jour terminée
+Update Landed Cost,Mise à jour d'arrivée Coût
+Update Numbering Series,Mettre à jour la numérotation de la série
+Update Series,Update Series
+Update Series Number,Numéro de série mise à jour
+Update Stock,Mise à jour Stock
+Update Stock should be checked.,Mise à jour Stock doit être vérifiée.
+"Update allocated amount in the above table and then click ""Allocate"" button","Mise à jour montant alloué dans le tableau ci-dessus, puis cliquez sur &quot;Occupation&quot; bouton"
+Update bank payment dates with journals.,Mise à jour bancaire dates de paiement des revues.
+Update clearance date of Journal Entries marked as 'Bank Vouchers',Date d'autorisation de mise à jour des entrées de journal marqué comme « Banque Bons »
+Updated,Mise à jour
+Updated Birthday Reminders,Mise à jour anniversaire rappels
+Upload Attendance,Téléchargez Participation
+Upload Backups to Dropbox,Téléchargez sauvegardes à Dropbox
+Upload Backups to Google Drive,Téléchargez sauvegardes à Google Drive
+Upload HTML,Téléchargez HTML
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,Télécharger un fichier csv avec deux colonnes:. L&#39;ancien nom et le nouveau nom. Max 500 lignes.
+Upload attendance from a .csv file,Téléchargez la présence d&#39;un fichier. Csv
+Upload stock balance via csv.,Téléchargez solde disponible via csv.
+Upload your letter head and logo - you can edit them later.,Téléchargez votre tête et logo lettre - vous pouvez les modifier plus tard .
+Uploaded File Attachments,Pièces jointes téléchargées
+Upper Income,Revenu élevé
+Urgent,Urgent
+Use Multi-Level BOM,Utilisez Multi-Level BOM
+Use SSL,Utiliser SSL
+Use TLS,Utilisez TLS
+User,Utilisateur
+User ID,ID utilisateur
+User Name,Nom d&#39;utilisateur
+User Properties,Propriétés de l'utilisateur
+User Remark,Remarque l&#39;utilisateur
+User Remark will be added to Auto Remark,Remarque l&#39;utilisateur sera ajouté à Remarque Auto
+User Tags,Nuage de Tags
+User must always select,L&#39;utilisateur doit toujours sélectionner
+User settings for Point-of-sale (POS),Les paramètres utilisateur pour point de vente ( POS )
+Username,Nom d&#39;utilisateur
+Users and Permissions,Utilisateurs et autorisations
+Users who can approve a specific employee's leave applications,Les utilisateurs qui peuvent approuver les demandes de congé d&#39;un employé spécifique
+Users with this role are allowed to create / modify accounting entry before frozen date,Les utilisateurs ayant ce rôle sont autorisés à créer / modifier l'entrée de la comptabilité avant la date congelés
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Les utilisateurs ayant ce rôle sont autorisés à fixer les comptes gelés et de créer / modifier des entrées comptables contre les comptes gelés
+Utilities,Utilitaires
+Utility,Utilitaire
+Valid For Territories,Valable pour les territoires
+Valid Upto,Jusqu&#39;à valide
+Valid for Buying or Selling?,Valable pour acheter ou vendre?
+Valid for Territories,Valable pour les Territoires
+Validate,Valider
+Valuation,Évaluation
+Valuation Method,Méthode d&#39;évaluation
+Valuation Rate,Taux d&#39;évaluation
+Valuation and Total,Valorisation et Total
+Value,Valeur
+Value or Qty,Valeur ou Quantité
+Vehicle Dispatch Date,Date de véhicule Dispatch
+Vehicle No,Aucun véhicule
+Verified By,Vérifié par
+View,Voir
+View Ledger,Voir Ledger
+View Now,voir maintenant
+Visit,Visiter
+Visit report for maintenance call.,Visitez le rapport de l&#39;appel d&#39;entretien.
+Voucher #,bon #
+Voucher Detail No,Détail volet n °
+Voucher ID,ID Bon
+Voucher No,Bon Pas
+Voucher Type,Type de Bon
+Voucher Type and Date,Type de chèques et date
+WIP Warehouse required before Submit,WIP Entrepôt nécessaire avant Soumettre
+Walk In,Walk In
+Warehouse,entrepôt
+Warehouse ,
+Warehouse Contact Info,Entrepôt Info Contact
+Warehouse Detail,Détail d&#39;entrepôt
+Warehouse Name,Nom d&#39;entrepôt
+Warehouse User,L&#39;utilisateur d&#39;entrepôt
+Warehouse Users,Les utilisateurs d&#39;entrepôt
+Warehouse and Reference,Entrepôt et référence
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Entrepôt ne peut être modifié via Stock Entrée / bon de livraison / reçu d'achat
+Warehouse cannot be changed for Serial No.,Entrepôt ne peut être modifié pour le numéro de série
+Warehouse does not belong to company.,Entrepôt n&#39;appartient pas à la société.
+Warehouse is missing in Purchase Order,Entrepôt est manquant dans la commande d'achat
+Warehouse where you are maintaining stock of rejected items,Entrepôt où vous êtes maintenant le bilan des éléments rejetés
+Warehouse-Wise Stock Balance,Warehouse-Wise Stock Solde
+Warehouse-wise Item Reorder,Warehouse-sage Réorganiser article
+Warehouses,Entrepôts
+Warn,Avertir
+Warning: Leave application contains following block dates,Attention: la demande d&#39;autorisation contient les dates de blocs suivants
+Warning: Material Requested Qty is less than Minimum Order Qty,Attention: Matériel requis Quantité est inférieure Quantité minimum à commander
+Warranty / AMC Details,Garantie / AMC Détails
+Warranty / AMC Status,Garantie / AMC Statut
+Warranty Expiry Date,Date d&#39;expiration de garantie
+Warranty Period (Days),Période de garantie (jours)
+Warranty Period (in days),Période de garantie (en jours)
+Warranty expiry date and maintenance status mismatched,Garantie date d'expiration et l'état d'entretien correspondent pas
+Website,Site Web
+Website Description,Description du site Web
+Website Item Group,Groupe Article Site
+Website Item Groups,Groupes d&#39;articles Site web
+Website Settings,Réglages Site web
+Website Warehouse,Entrepôt site web
+Wednesday,Mercredi
+Weekly,Hebdomadaire
+Weekly Off,Hebdomadaire Off
+Weight UOM,Poids Emballage
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Le poids est indiqué , \ nVeuillez mentionne "" Poids Emballage « trop"
+Weightage,Weightage
+Weightage (%),Weightage (%)
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,"Bienvenue à ERPNext . Au cours des prochaines minutes, nous allons vous aider à configurer votre compte ERPNext . Essayez de remplir autant d'informations que vous avez même si cela prend un peu plus longtemps . Elle vous fera économiser beaucoup de temps plus tard . Bonne chance !"
+What does it do?,Que faut-il faire ?
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Lorsque l&#39;une des opérations contrôlées sont «soumis», un e-mail pop-up s&#39;ouvre automatiquement pour envoyer un courrier électronique à l&#39;associé &quot;Contact&quot; dans cette transaction, la transaction en pièce jointe. L&#39;utilisateur peut ou ne peut pas envoyer l&#39;e-mail."
+"When submitted, the system creates difference entries ",
+Where items are stored.,Lorsque des éléments sont stockés.
+Where manufacturing operations are carried out.,Lorsque les opérations de fabrication sont réalisées.
+Widowed,Veuf
+Will be calculated automatically when you enter the details,Seront calculés automatiquement lorsque vous entrez les détails
+Will be updated after Sales Invoice is Submitted.,Sera mis à jour après la facture de vente est soumise.
+Will be updated when batched.,Sera mis à jour lorsque lots.
+Will be updated when billed.,Sera mis à jour lorsqu&#39;ils sont facturés.
+With Operations,Avec des opérations
+With period closing entry,Avec l'entrée période de fermeture
+Work Details,Détails de travail
+Work Done,Travaux effectués
+Work In Progress,Work In Progress
+Work-in-Progress Warehouse,Entrepôt Work-in-Progress
+Working,De travail
+Workstation,Workstation
+Workstation Name,Nom de station de travail
+Write Off Account,Ecrire Off compte
+Write Off Amount,Ecrire Off Montant
+Write Off Amount <=,Ecrire Off Montant &lt;=
+Write Off Based On,Ecrire Off Basé sur
+Write Off Cost Center,Ecrire Off Centre de coûts
+Write Off Outstanding Amount,Ecrire Off Encours
+Write Off Voucher,Ecrire Off Bon
+Wrong Template: Unable to find head row.,Modèle tort: ​​Impossible de trouver la ligne de tête.
+Year,Année
+Year Closed,L&#39;année Fermé
+Year End Date,Fin de l'exercice Date de
+Year Name,Nom Année
+Year Start Date,Date de début Année
+Year Start Date and Year End Date are already set in Fiscal Year: ,
+Year Start Date and Year End Date are not within Fiscal Year.,Année Date de début et de fin d'année date ne sont pas dans l'année fiscale .
+Year Start Date should not be greater than Year End Date,Année Date de début ne doit pas être supérieure à fin de l'année Date d'
+Year of Passing,Année de passage
+Yearly,Annuel
+Yes,Oui
+You are not allowed to reply to this ticket.,Vous n'êtes pas autorisé à répondre à ce billet .
+You are not authorized to do/modify back dated entries before ,Vous n&#39;êtes pas autorisé à faire / modifier dos entrées datées avant
+You are not authorized to set Frozen value,Vous n'êtes pas autorisé à mettre en valeur Frozen
+You are the Expense Approver for this record. Please Update the 'Status' and Save,Vous êtes l'approbateur de dépenses pour cet enregistrement . S'il vous plaît mettre à jour le «Status» et Save
+You are the Leave Approver for this record. Please Update the 'Status' and Save,Vous êtes l'approbateur congé pour cet enregistrement . S'il vous plaît mettre à jour le «Status» et Save
+You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total',Vous pouvez entrer Row uniquement si votre type de charge est « Le précédent Montant de la ligne » ou « Précédent Row Total»
+You can enter any date manually,Vous pouvez entrer une date manuellement
+You can enter the minimum quantity of this item to be ordered.,Vous pouvez entrer la quantité minimale de cet élément à commander.
+You can not change rate if BOM mentioned agianst any item,Vous ne pouvez pas modifier le taux si BOM mentionné agianst un article
+You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Vous ne pouvez pas entrer à la fois bon de livraison et la facture de vente n ° n ° S'il vous plaît entrer personne.
+"You can start by selecting backup frequency and \
+					granting access for sync",
+You can submit this Stock Reconciliation.,Vous pouvez soumettre cette Stock réconciliation .
+You can update either Quantity or Valuation Rate or both.,Vous pouvez mettre à jour soit Quantité ou l'évaluation des taux ou les deux.
+You cannot Enter Row no. greater than or equal to current row no. for this Charge type,Vous ne pouvez pas entrer Row pas . supérieure ou égale à la ligne actuelle aucune . pour ce type de charge
+You cannot deduct when category is for 'Valuation' or 'Valuation and Total',"Vous ne pouvez pas déduire lorsqu'une catégorie est pour « évaluation » ou « évaluation et Total """
+You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate,"Vous ne pouvez pas entrer directement Montant et si votre type de charge est réelle , entrez votre montant à taux"
+You cannot give more than ,
+You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row,Vous ne pouvez pas sélectionner Type de charge comme « Sur la ligne précédente Montant » ou « Le précédent Row totale » pour la première rangée
+You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total,Vous ne pouvez pas sélectionner le type de charge comme « Sur la ligne précédente Montant » ou « Le précédent Row totale » pour l'évaluation . Vous ne pouvez sélectionner que l'option «Total» pour le montant de la ligne précédente ou total de la ligne précédente
+You have entered duplicate items. Please rectify and try again.,Vous avez entré les doublons . S'il vous plaît corriger et essayer à nouveau.
+You may need to update: ,Vous devrez peut-être mettre à jour:
+You must ,
+Your Customer's TAX registration numbers (if applicable) or any general information,Votre Client numéros d&#39;immatriculation fiscale (le cas échéant) ou toute autre information générale
+Your Customers,vos clients
+Your ERPNext subscription will,Votre abonnement sera ERPNext
+Your Products or Services,Vos produits ou services
+Your Suppliers,vos fournisseurs
+Your sales person who will contact the customer in future,Votre personne de ventes qui prendra contact avec le client dans le futur
+Your sales person will get a reminder on this date to contact the customer,Votre personne de ventes recevoir un rappel de cette date pour contacter le client
+Your setup is complete. Refreshing...,Votre installation est terminée. Rafraîchissant ...
+Your support email id - must be a valid email - this is where your emails will come!,Votre e-mail id soutien - doit être une adresse email valide - c&#39;est là que vos e-mails viendra!
+already available in Price List,déjà dans la liste de prix
+already returned though some other documents,déjà retourné si certains autres documents
+also be included in Item's rate,également être inclus dans le prix de l&#39;article
+and,et
+"and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","et "" Est- Point de vente "" est ""Oui"" et il n'y a pas d'autre nomenclature ventes"
+"and create a new Account Ledger (by clicking on Add Child) of type ""Bank or Cash""","et créer un nouveau compte Ledger ( en cliquant sur Ajouter un enfant ) de type « bancaire ou en espèces """
+"and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.",et créer un nouveau compte Ledger ( en cliquant sur Ajouter un enfant ) de type « impôt» et ne mentionnent le taux de l'impôt.
+and fiscal year: ,
+are not allowed for,ne sont pas autorisés pour
+are not allowed for ,
+are not allowed.,ne sont pas autorisés .
+assigned by,attribué par
+but entries can be made against Ledger,mais les entrées peuvent être faites contre Ledger
+but is pending to be manufactured.,mais est en attente d'être fabriqué .
+cancel,annuler
+cannot be greater than 100,ne peut pas être supérieure à 100
+dd-mm-yyyy,jj-mm-aaaa
+dd/mm/yyyy,jj / mm / aaaa
+deactivate,désactiver
+discount on Item Code,de réduction sur le Code de l'article
+does not belong to BOM: ,n&#39;appartient pas à la nomenclature:
+does not have role 'Leave Approver',n&#39;a pas de rôle les congés approbateur »
+does not match,ne correspond pas
+"e.g. Bank, Cash, Credit Card","par exemple, bancaire, Carte de crédit"
+"e.g. Kg, Unit, Nos, m","kg par exemple, l&#39;unité, n, m"
+eg. Cheque Number,par exemple. Numéro de chèque
+example: Next Day Shipping,Exemple: Jour suivant Livraison
+has already been submitted.,a déjà été soumis .
+has been entered atleast twice,a été saisi deux fois atleast
+has been made after posting date,a été fait après la date de report
+has expired,a expiré
+have a common territory,avoir un territoire commun
+in the same UOM.,dans la même unité de mesure .
+is a cancelled Item,est un élément annulée
+is not a Stock Item,n&#39;est pas un élément de Stock
+lft,lft
+mm-dd-yyyy,mm-jj-aaaa
+mm/dd/yyyy,jj / mm / aaaa
+must be a Liability account,doit être un compte de la responsabilité
+must be one of,doit être l&#39;un des
+not a purchase item,pas un article d&#39;achat
+not a sales item,pas un point de vente
+not a service item.,pas un élément de service.
+not a sub-contracted item.,pas un élément de sous-traitance.
+not submitted,pas soumis
+not within Fiscal Year,ne relèvent pas de l&#39;exercice
+of,de
+old_parent,old_parent
+reached its end of life on,atteint la fin de sa vie sur
+rgt,rgt
+should be 100%,devrait être de 100%
+the form before proceeding,la forme avant de continuer
+they are created automatically from the Customer and Supplier master,ils sont créés automatiquement à partir du client et le fournisseur maître
+"to be included in Item's rate, it is required that: ","être inclus dans le prix de l&#39;article, il est nécessaire que:"
+to set the given stock and valuation on this date.,pour définir le stock et l'évaluation donnée à cette date .
+usually as per physical inventory.,généralement que par l'inventaire physique .
+website page link,Lien vers page web
+which is greater than sales order qty ,qui est supérieur à l&#39;ordre ventes qté
+yyyy-mm-dd,aaaa-mm-jj

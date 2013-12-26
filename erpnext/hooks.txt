@@ -1,0 +1,64 @@
+app_name				ERPNext
+app_publisher			Web Notes Technologies
+app_description			Open Source Enterprise Resource Planning for Small and Midsized Organizations
+app_icon				icon-th
+app_color				#e74c3c
+app_version				4.0.0-wip
+
+app_include_js 			assets/js/erpnext.min.js
+app_include_css 		assets/css/erpnext.css
+web_include_js			assets/js/erpnext-web.min.js
+
+after_install			erpnext.setup.install.after_install
+
+boot_session			erpnext.startup.boot.boot_session
+notification_config		erpnext.startup.notifications.get_notification_config
+
+dump_report_map			erpnext.startup.report_data_map.data_map
+update_website_context	erpnext.startup.webutils.update_website_context
+
+mail_footer				erpnext.startup.mail_footer
+
+on_session_creation		erpnext.startup.event_handlers.on_session_creation
+on_logout				erpnext.startup.event_handlers.on_logut
+
+# Bean Events
+# -----------
+
+bean_event				*:on_update:erpnext.home.update_feed
+bean_event				*:on_submit:erpnext.home.update_feed
+bean_event				Comment:on_update:erpnext.home.make_comment_feed
+
+bean_event				*:on_update:webnotes.core.doctype.notification_count.notification_count.clear_doctype_notifications
+bean_event				*:on_cancel:webnotes.core.doctype.notification_count.notification_count.clear_doctype_notifications
+bean_event				*:on_trash:webnotes.core.doctype.notification_count.notification_count.clear_doctype_notifications
+
+bean_event 				Stock Entry:on_submit:erpnext.stock.doctype.material_request.material_request.update_completed_qty
+bean_event 				Stock Entry:on_cancel:erpnext.stock.doctype.material_request.material_request.update_completed_qty
+
+standard_queries		Warehouse:erpnext.stock.utils.get_warehouse_list
+standard_queries		Customer:erpnext.selling.utils.get_customer_list
+
+# Schedulers
+# ----------
+
+#### Frequently
+
+scheduler_event			all:erpnext.support.doctype.support_ticket.get_support_mails.get_support_mails
+scheduler_event			all:erpnext.hr.doctype.job_applicant.get_job_applications.get_job_applications
+scheduler_event			all:erpnext.selling.doctype.lead.get_leads.get_leads
+scheduler_event			all:webnotes.utils.email_lib.bulk.flush
+
+#### Daily
+
+scheduler_event			daily:webnotes.core.doctype.event.event.send_event_digest
+scheduler_event			daily:webnotes.core.doctype.notification_count.notification_count.delete_event_notification_count
+scheduler_event			daily:webnotes.utils.email_lib.bulk.clear_outbox
+scheduler_event			daily:erpnext.accounts.doctype.sales_invoice.sales_invoice.manage_recurring_invoices
+scheduler_event			daily:erpnext.setup.doctype.backup_manager.backup_manager.take_backups_daily
+scheduler_event			daily:erpnext.stock.utils.reorder_item
+scheduler_event			daily:erpnext.setup.doctype.email_digest.email_digest.send
+
+#### Weekly
+
+scheduler_event			weekly:erpnext.setup.doctype.backup_manager.backup_manager.take_backups_weekly

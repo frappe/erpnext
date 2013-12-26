@@ -70,7 +70,7 @@ def update_user_match():
 					webnotes.defaults.add_default(doctype, name, profile, "Restriction")
 					
 def add_employee_restrictions_to_leave_approver():
-	from core.page.user_properties import user_properties
+	from webnotes.core.page.user_properties import user_properties
 	
 	# add restrict rights to HR User and HR Manager
 	webnotes.conn.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')

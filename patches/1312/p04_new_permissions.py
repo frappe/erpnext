@@ -6,7 +6,7 @@ import webnotes
 
 def execute():
 	# reset Page perms
-	from core.page.permission_manager.permission_manager import reset
+	from webnotes.core.page.permission_manager.permission_manager import reset
 	reset("Page")
 	reset("Report")
 	

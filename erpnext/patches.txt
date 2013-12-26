@@ -1,0 +1,4 @@
+# patches after permission rewrite
+patches.1312.p02_update_user_properties
+patches.1312.p03_move_warehouse_user_to_restrictions
+patches.1312.p04_new_permissions

@@ -1,0 +1,30 @@
+anguage: python
+
+python:
+  - "2.7"
+
+services:
+  - mysql
+
+install:
+  - pip install https://github.com/webnotes/wnframework/archive/4.0.0-wip.tar.gz &&
+  - pip install --editable .
+
+script: 
+    cd ./test_sites/ &&
+    webnotes --reinstall -v test_site &&
+    webnotes --install_app erpnext -v test_site &&
+    webnotes --run_tests -v test_site --app erpnext
+
+branches:
+  except:
+    - develop
+    - master
+    - 3.x.x
+    - slow
+    - webshop_refactor
+
+before_script:
+  - mysql -e 'create database travis' &&
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('travis') WHERE user='travis';\nFLUSH PRIVILEGES;\n" | mysql -u root
+
