@@ -1,7 +1,3 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
-
-# patches after permission rewrite
-erpnext.patches.1312.p02_update_user_properties
-erpnext.patches.1312.p03_move_warehouse_user_to_restrictions
-erpnext.patches.1312.p04_new_permissions
+erpnext.patches.4_0.update_user_properties
+erpnext.patches.4_0.move_warehouse_user_to_restrictions
+erpnext.patches.4_0.new_permissions
