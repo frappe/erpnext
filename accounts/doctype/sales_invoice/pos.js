@@ -53,7 +53,8 @@ erpnext.POS = Class.extend({
 							<div class="flat-discount-area">\
 								<table class="table table-condensed">\
 									<tr>\
-										<td style="vertical-align: middle;"><b>Flat Discount</b></td>\
+										<td style="vertical-align: middle;" width="50%"><b>Flat Discount</b></td>\
+										<td width="20%"></td>\
 										<td style="text-align: right;">\
 											<input type="text" class="form-control flat-discount" \
 												style="text-align: right;">\
