@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:40", 
+  "modified": "2013-12-27 17:55:48", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -79,22 +79,6 @@
   "fieldtype": "Link", 
   "label": "Parent Account", 
   "options": "Account"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break_4", 
-  "fieldtype": "Section Break", 
-  "label": "Allow For Users", 
-  "read_only": 0
- }, 
- {
-  "description": "If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.", 
-  "doctype": "DocField", 
-  "fieldname": "warehouse_users", 
-  "fieldtype": "Table", 
-  "label": "Warehouse Users", 
-  "options": "Warehouse User", 
-  "read_only": 0
  }, 
  {
   "description": "For Reference Only.", 
