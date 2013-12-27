@@ -237,9 +237,10 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 		])
 	}
 	
+	// products
 	for(var i=1; i<6; i++) {
 		wizard_settings.slides[6].fields = wizard_settings.slides[6].fields.concat([
-			{fieldtype:"Data", fieldname:"item_" + i, label:"Item " + 1, 
+			{fieldtype:"Data", fieldname:"item_" + i, label:"Item " + i, 
 				placeholder:"A Product or Service"},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Attach", fieldname:"item_img_" + i, label:"Attach Image..."},
