@@ -556,12 +556,12 @@ class DocType(SellingController):
 				
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
-			if flt(tax.tax_amount):
+			if flt(tax.tax_amount_after_flat_discount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.doc.debit_to,
-						"credit": flt(tax.tax_amount),
+						"credit": flt(tax.tax_amount_after_flat_discount),
 						"remarks": self.doc.remarks,
 						"cost_center": tax.cost_center
 					})

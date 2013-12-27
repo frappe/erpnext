@@ -360,6 +360,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				});
 			}
 		}
+
+		if(this.frm.tax_doclist.length) {
+			if(!wn.meta.get_docfield(this.frm.tax_doclist[0].doctype, "tax_amount_after_flat_discount", this.frm.doctype)) {
+				$.each(this.frm.tax_doclist, function(i, tax) {
+					delete tax["tax_amount_after_flat_discount"];
+				});
+			}
+		}
 	},
 	
 	calculate_outstanding_amount: function() {

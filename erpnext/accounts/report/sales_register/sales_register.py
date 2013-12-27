@@ -79,7 +79,7 @@ def get_columns(invoice_list):
 	
 		tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
 			from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
-			and docstatus = 1 and ifnull(tax_amount, 0) != 0 
+			and docstatus = 1 and ifnull(tax_amount_after_flat_discount, 0) != 0 
 			and parent in (%s) order by account_head""" % 
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
@@ -126,7 +126,8 @@ def get_invoice_income_map(invoice_list):
 	return invoice_income_map
 	
 def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
-	tax_details = webnotes.conn.sql("""select parent, account_head, sum(tax_amount) as tax_amount
+	tax_details = webnotes.conn.sql("""select parent, account_head, 
+		sum(tax_amount_after_flat_discount) as tax_amount 
 		from `tabSales Taxes and Charges` where parent in (%s) group by parent, account_head""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	

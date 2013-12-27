@@ -19,6 +19,10 @@ cur_frm.pformat.net_total_export = function(doc) {
 	return '';
 }
 
+cur_frm.pformat.flat_discount = function(doc) {
+	return '';
+}
+
 cur_frm.pformat.grand_total_export = function(doc) {
 	return '';
 }
@@ -33,10 +37,10 @@ cur_frm.pformat.in_words_export = function(doc) {
 
 cur_frm.pformat.other_charges= function(doc){
 	//function to make row of table
-	var make_row = function(title,val,bold){
+	var make_row = function(title, val, bold){
 		var bstart = '<b>'; var bend = '</b>';
-		return '<tr><td style="width:50%;">'+(bold?bstart:'')+title+(bold?bend:'')+'</td>'
-		 +'<td style="width:50%;text-align:right;">'+format_currency(val, doc.currency)+'</td>'
+		return '<tr><td style="width:50%;">' + (bold?bstart:'') + title + (bold?bend:'') + '</td>'
+		 +'<td style="width:50%;text-align:right;">' + format_currency(val, doc.currency) + '</td>'
 		 +'</tr>'
 	}
 
@@ -52,7 +56,7 @@ cur_frm.pformat.other_charges= function(doc){
 	
 	out ='';
 	if (!doc.print_without_amount) {
-		var cl = getchildren('Sales Taxes and Charges',doc.name,'other_charges');
+		var cl = getchildren('Sales Taxes and Charges', doc.name, 'other_charges');
 
 		// outer table	
 		var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';
@@ -60,6 +64,7 @@ cur_frm.pformat.other_charges= function(doc){
 		// main table
 
 		out +='<table class="noborder" style="width:100%">';
+
 		if(!print_hide('net_total_export')) {
 			out += make_row('Net Total', doc.net_total_export, 1);
 		}
@@ -68,26 +73,31 @@ cur_frm.pformat.other_charges= function(doc){
 		if(cl.length){
 			for(var i=0;i<cl.length;i++){
 				if(convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate)
-					out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
+					out += make_row(cl[i].description, convert_rate(cl[i].tax_amount), 0);
 			}
+		}
+
+		// flat discount
+		if(!print_hide('flat_discount') && doc.flat_discount) {
+			out += make_row('Flat Discount', doc.flat_discount, 0);
 		}
 
 		// grand total
 		if(!print_hide('grand_total_export')) {
-			out += make_row('Grand Total',doc.grand_total_export,1);
+			out += make_row('Grand Total', doc.grand_total_export, 1);
 		}
 		
 		if(!print_hide('rounded_total_export')) {
-			out += make_row('Rounded Total',doc.rounded_total_export,1);
+			out += make_row('Rounded Total', doc.rounded_total_export, 1);
 		}
 
 		if(doc.in_words_export && !print_hide('in_words_export')){
 			out +='</table></td></tr>';
 			out += '<tr><td colspan = "2">';
 			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'
-			out+= '<td style="width:50%;">'+doc.in_words_export+'</td></tr>'
+			out += '<td style="width:50%;">' + doc.in_words_export + '</td></tr>'
 		}
-		out +='</table></td></tr></table></div>';	 
+		out += '</table></td></tr></table></div>';	 
 	}
 	return out;
 }
@@ -99,7 +109,7 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 		d.charge_type = '';
 	}
 	validated = false;
-	refresh_field('charge_type',d.name,'other_charges');
+	refresh_field('charge_type', d.name, 'other_charges');
 	cur_frm.cscript.row_id(doc, cdt, cdn);
 	cur_frm.cscript.rate(doc, cdt, cdn);
 	cur_frm.cscript.tax_amount(doc, cdt, cdn);
@@ -122,7 +132,7 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 		}
 	}
 	validated = false;
-	refresh_field('row_id',d.name,'other_charges');
+	refresh_field('row_id', d.name, 'other_charges');
 }
 
 /*---------------------- Get rate if account_head has account_type as TAX or CHARGEABLE-------------------------------------*/
@@ -152,7 +162,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 		d.rate = '';
 	}
 	validated = false;
-	refresh_field('rate',d.name,'other_charges');
+	refresh_field('rate', d.name, 'other_charges');
 }
 
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
@@ -166,5 +176,5 @@ cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 		d.tax_amount = '';
 	}
 	validated = false;
-	refresh_field('tax_amount',d.name,'other_charges');
+	refresh_field('tax_amount', d.name, 'other_charges');
 };

@@ -133,10 +133,19 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "tax_amount_after_flat_discount", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Tax Amount After Flat Discount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "item_wise_tax_detail", 
   "fieldtype": "Small Text", 
   "hidden": 1, 
-  "label": "Item Wise Tax Detail ", 
+  "label": "Item Wise Tax Detail", 
   "oldfieldname": "item_wise_tax_detail", 
   "oldfieldtype": "Small Text", 
   "read_only": 1
