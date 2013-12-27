@@ -290,11 +290,12 @@ class DocType(StockController):
 				if not returnable_qty:
 					webnotes.throw("{item}: {item_code} {returned}".format(
 						item=_("Item"), item_code=item.item_code, 
-						returned=_("already returned though some other documents")))
+						returned=_("already returned though some other documents")), 
+						StockOverReturnError)
 				elif item.transfer_qty > returnable_qty:
 					webnotes.throw("{item}: {item_code}, {returned}: {qty}".format(
 						item=_("Item"), item_code=item.item_code,
-						returned=_("Max Returnable Qty"), qty=returnable_qty))
+						returned=_("Max Returnable Qty"), qty=returnable_qty), StockOverReturnError)
 						
 	def get_already_returned_item_qty(self, ref_fieldname):
 		return dict(webnotes.conn.sql("""select item_code, sum(transfer_qty) as qty
