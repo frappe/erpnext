@@ -2,15 +2,13 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2013-09-24 15:35:12", 
+  "modified": "2013-12-20 16:06:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
   "allow_copy": 1, 
-  "allow_email": 1, 
-  "allow_print": 1, 
   "autoname": "SR/.######", 
   "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 
   "doctype": "DocType", 
@@ -78,6 +76,7 @@
   "doctype": "DocField", 
   "fieldname": "amended_from", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Amended From", 
   "no_copy": 1, 
   "options": "Stock Reconciliation", 

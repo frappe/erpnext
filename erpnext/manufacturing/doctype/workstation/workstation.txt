@@ -2,12 +2,12 @@
  {
   "creation": "2013-01-10 16:34:17", 
   "docstatus": 0, 
-  "modified": "2013-10-28 15:42:38", 
+  "modified": "2013-12-20 19:24:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
-  "allow_email": 0, 
+  "allow_import": 1, 
   "autoname": "field:workstation_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -27,11 +27,13 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Workstation", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "role": "Manufacturing User", 

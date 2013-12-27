@@ -2,15 +2,14 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-10-31 19:24:33", 
+  "modified": "2013-12-20 18:28:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
   "allow_copy": 0, 
-  "allow_email": 1, 
-  "allow_print": 1, 
+  "allow_import": 1, 
   "autoname": "field:price_list_name", 
   "description": "Price List Master", 
   "doctype": "DocType", 

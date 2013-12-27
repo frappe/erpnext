@@ -19,10 +19,6 @@ test_records = [
 		"warehouse_name": "_Test Warehouse 2",
 		"create_account_under": "Stock Assets - _TC",
 		"company": "_Test Company 1"
-	}, {
-		"doctype": "Warehouse User",
-		"parentfield": "warehouse_users",
-		"user": "test2@example.com"
 	}],
 	[{
 		"doctype": "Warehouse",

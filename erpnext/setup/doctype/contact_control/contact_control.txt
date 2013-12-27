@@ -2,7 +2,7 @@
  {
   "creation": "2012-03-27 14:36:19", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:06", 
+  "modified": "2013-12-20 19:23:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,11 +27,13 @@
  {
   "create": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Contact Control", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "role": "System Manager", 
   "write": 1

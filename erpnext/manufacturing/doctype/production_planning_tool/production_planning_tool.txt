@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-21 12:03:47", 
   "docstatus": 0, 
-  "modified": "2013-08-08 12:01:02", 
+  "modified": "2013-12-20 19:23:25", 
   "modified_by": "Administrator", 
   "owner": "jai@webnotestech.com"
  }, 
@@ -27,11 +27,13 @@
  {
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Production Planning Tool", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 0, 
   "role": "Manufacturing User", 

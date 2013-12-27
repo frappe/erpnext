@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-19 10:23:30", 
   "docstatus": 0, 
-  "modified": "2013-07-23 12:05:08", 
+  "modified": "2013-12-20 19:24:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "field:country_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -26,11 +27,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Country", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1
  }, 

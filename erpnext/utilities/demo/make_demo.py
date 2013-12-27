@@ -3,7 +3,7 @@
 
 import webnotes, os, datetime
 import webnotes.utils
-from webnotes.utils import random_string
+from webnotes.utils import random_string, cstr
 from webnotes.widgets import query_report
 import random
 import json
@@ -153,7 +153,7 @@ def run_stock(current_date):
 		for po in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Purchase Receipt")]:
 			pr = webnotes.bean(make_purchase_receipt(po))
 			pr.doc.posting_date = current_date
-			pr.doc.fiscal_year = current_date.year
+			pr.doc.fiscal_year = cstr(current_date.year)
 			pr.insert()
 			try:
 				pr.submit()
@@ -169,7 +169,7 @@ def run_stock(current_date):
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Delivery Note")]:
 			dn = webnotes.bean(make_delivery_note(so))
 			dn.doc.posting_date = current_date
-			dn.doc.fiscal_year = current_date.year
+			dn.doc.fiscal_year = cstr(current_date.year)
 			dn.insert()
 			try:
 				dn.submit()
@@ -192,7 +192,7 @@ def run_purchase(current_date):
 			mr = webnotes.new_bean("Material Request")
 			mr.doc.material_request_type = "Purchase"
 			mr.doc.transaction_date = current_date
-			mr.doc.fiscal_year = current_date.year
+			mr.doc.fiscal_year = cstr(current_date.year)
 			mr.doclist.append({
 				"doctype": "Material Request Item",
 				"parentfield": "indent_details",
@@ -211,7 +211,7 @@ def run_purchase(current_date):
 			if row[0] != "Total":
 				sq = webnotes.bean(make_supplier_quotation(row[0]))
 				sq.doc.transaction_date = current_date
-				sq.doc.fiscal_year = current_date.year
+				sq.doc.fiscal_year = cstr(current_date.year)
 				sq.insert()
 				sq.submit()
 				webnotes.conn.commit()
@@ -224,7 +224,7 @@ def run_purchase(current_date):
 			if row[0] != "Total":
 				po = webnotes.bean(make_purchase_order(row[0]))
 				po.doc.transaction_date = current_date
-				po.doc.fiscal_year = current_date.year
+				po.doc.fiscal_year = cstr(current_date.year)
 				po.insert()
 				po.submit()
 				webnotes.conn.commit()
@@ -283,7 +283,7 @@ def make_stock_entry_from_pro(pro_id, purpose, current_date):
 	try:
 		st = webnotes.bean(make_stock_entry(pro_id, purpose))
 		st.doc.posting_date = current_date
-		st.doc.fiscal_year = current_date.year
+		st.doc.fiscal_year = cstr(current_date.year)
 		for d in st.doclist.get({"parentfield": "mtn_details"}):
 			d.expense_account = "Stock Adjustment - " + company_abbr
 			d.cost_center = "Main - " + company_abbr
@@ -303,7 +303,7 @@ def make_quotation(current_date):
 		"customer": get_random("Customer"),
 		"order_type": "Sales",
 		"transaction_date": current_date,
-		"fiscal_year": current_date.year
+		"fiscal_year": cstr(current_date.year)
 	}])
 	
 	add_random_children(b, {

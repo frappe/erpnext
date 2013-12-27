@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:06:04", 
+  "modified": "2013-12-20 19:24:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,18 +24,20 @@
   "permlevel": 0
  }, 
  {
-  "cancel": 1, 
-  "create": 1, 
+  "cancel": 0, 
+  "create": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Newsletter", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "submit": 0, 
-  "write": 1
+  "write": 0
  }, 
  {
   "doctype": "DocType", 

@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-24 11:03:32", 
   "docstatus": 0, 
-  "modified": "2013-12-09 16:24:07", 
+  "modified": "2013-12-20 19:24:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "allow_rename": 1, 
   "autoname": "field:earning_name", 
   "doctype": "DocType", 
@@ -27,11 +28,13 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Earning Type", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "role": "HR User", 

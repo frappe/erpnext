@@ -3,7 +3,6 @@
 
 def execute():
 	import webnotes
-	from webnotes.model import delete_doc
 	from webnotes.model.code import get_obj
 	from webnotes.model.doc import addchild
 	
@@ -12,7 +11,7 @@ def execute():
 			"TDS Rate Chart", "TDS Category", "TDS Control", "TDS Detail", 
 			"TDS Payment Detail", "TDS Rate Detail", "TDS Category Account",
 			"Form 16A Ack Detail", "Form 16A Tax Detail"]:
-		delete_doc("DocType", dt)
+		webnotes.delete_doc("DocType", dt)
 		
 		webnotes.conn.commit()
 		webnotes.conn.sql("drop table if exists `tab%s`" % dt)

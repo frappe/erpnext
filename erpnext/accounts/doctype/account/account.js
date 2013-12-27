@@ -37,7 +37,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 	// read-only for root accounts
 	if(!doc.parent_account) {
-		cur_frm.perm = [[1,0,0], [1,0,0]];
+		cur_frm.set_read_only();
 		cur_frm.set_intro(wn._("This is a root account and cannot be edited."));
 	} else {
 		// credit days and type if customer or supplier

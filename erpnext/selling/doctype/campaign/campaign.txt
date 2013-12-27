@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:18", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:29:57", 
+  "modified": "2013-12-20 19:23:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "field:campaign_name", 
   "description": "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ", 
   "doctype": "DocType", 
@@ -26,13 +27,14 @@
  {
   "amend": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Campaign", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
-  "report": 1, 
   "submit": 0
  }, 
  {
@@ -77,6 +79,8 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "import": 0, 
+  "report": 0, 
   "role": "Sales Manager", 
   "write": 0
  }, 
@@ -84,6 +88,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "role": "Sales User", 
   "write": 0
  }, 
@@ -91,6 +96,7 @@
   "cancel": 1, 
   "create": 1, 
   "doctype": "DocPerm", 
+  "report": 1, 
   "role": "Sales Master Manager", 
   "write": 1
  }

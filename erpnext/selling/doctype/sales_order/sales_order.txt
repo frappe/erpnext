@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:20:16", 
+  "modified": "2013-12-20 19:24:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,11 +30,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Sales Order", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1
  }, 
  {
@@ -149,6 +151,7 @@
   "fieldname": "amended_from", 
   "fieldtype": "Data", 
   "hidden": 1, 
+  "ignore_restrictions": 1, 
   "label": "Amended From", 
   "no_copy": 1, 
   "oldfieldname": "amended_from", 
@@ -921,7 +924,6 @@
  }, 
  {
   "doctype": "DocPerm", 
-  "match": "customer", 
   "role": "Customer"
  }
 ]

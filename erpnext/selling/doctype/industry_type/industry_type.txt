@@ -2,11 +2,12 @@
  {
   "creation": "2012-03-27 14:36:09", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:40:42", 
+  "modified": "2013-12-20 19:24:08", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "field:industry", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -30,11 +31,13 @@
  }, 
  {
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "Industry Type", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1
  }, 

@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:24", 
   "docstatus": 0, 
-  "modified": "2013-10-10 15:06:53", 
+  "modified": "2013-12-20 19:24:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "field:uom_name", 
   "doctype": "DocType", 
   "document_type": "Master", 
@@ -25,11 +26,13 @@
  {
   "amend": 0, 
   "doctype": "DocPerm", 
+  "email": 1, 
   "name": "__common__", 
   "parent": "UOM", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
+  "print": 1, 
   "read": 1, 
   "report": 1, 
   "submit": 0
