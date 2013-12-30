@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr
 from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
@@ -47,6 +46,14 @@ class DocType(TransactionBase):
 	def update_lead_status(self):
 		if self.doc.lead_name:
 			webnotes.conn.sql("update `tabLead` set status='Converted' where name = %s", self.doc.lead_name)
+
+	def update_address(self):
+		webnotes.conn.sql("""update `tabAddress` set customer_name=%s, modified=NOW() 
+			where customer=%s""", (self.doc.customer_name, self.doc.name))
+
+	def update_contact(self):
+		webnotes.conn.sql("""update `tabContact` set customer_name=%s, modified=NOW() 
+			where customer=%s""", (self.doc.customer_name, self.doc.name))
 
 	def create_account_head(self):
 		if self.doc.company :
@@ -100,6 +107,9 @@ class DocType(TransactionBase):
 		self.validate_name_with_customer_group()
 		
 		self.update_lead_status()
+		self.update_address()
+		self.update_contact()
+
 		# create account head
 		self.create_account_head()
 		# update credit days and limit in account
@@ -144,20 +154,22 @@ class DocType(TransactionBase):
 		if self.doc.lead_name:
 			webnotes.conn.sql("update `tabLead` set status='Interested' where name=%s",self.doc.lead_name)
 			
-	def on_rename(self, new, old, merge=False):
-		#update customer_name if not naming series
-		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			webnotes.conn.sql("""update `tabCustomer` set customer_name = %s where name = %s""", 
-				(new, old))
-		
-		for account in webnotes.conn.sql("""select name, account_name from 
-			tabAccount where master_name=%s and master_type='Customer'""", old, as_dict=1):
-			if account.account_name != new:
-				webnotes.rename_doc("Account", account.name, new, merge=merge)
+	def before_rename(self, olddn, newdn, merge=False):
+		from accounts.utils import rename_account_for
+		rename_account_for("Customer", olddn, newdn, merge)
 
-		#update master_name in doctype account
-		webnotes.conn.sql("""update `tabAccount` set master_name = %s, 
-			master_type = 'Customer' where master_name = %s""", (new,old))
+	def after_rename(self, olddn, newdn, merge=False):
+		set_field = ''
+		if webnotes.defaults.get_global_default('cust_master_name') == 'Customer Name':
+			webnotes.conn.set(self.doc, "customer_name", newdn)
+			self.update_contact()
+			set_field = ", customer_name=%(newdn)s"
+		self.update_customer_address(newdn, set_field)
+
+	def update_customer_address(self, newdn, set_field):
+		webnotes.conn.sql("""update `tabAddress` set address_title=%(newdn)s 
+			{set_field} where customer=%(newdn)s"""\
+			.format(set_field=set_field), ({"newdn": newdn}))
 
 @webnotes.whitelist()
 def get_dashboard_info(customer):

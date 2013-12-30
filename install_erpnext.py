@@ -28,7 +28,9 @@ requirements = [
 	"six", 
 	"slugify", 
 	"termcolor", 
-	"werkzeug"
+	"werkzeug",
+	"semantic_version",
+	"gitpython==0.3.2.RC1"
 ]
 
 def install(install_path):

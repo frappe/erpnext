@@ -16,7 +16,7 @@ class BudgetError(webnotes.ValidationError): pass
 
 
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
-	return get_fiscal_years(date, fiscal_year, label, verbose=1)[0]
+	return get_fiscal_years(date, fiscal_year, label, verbose)[0]
 	
 def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
@@ -24,14 +24,10 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	if fiscal_year:
 		cond = "name = '%s'" % fiscal_year
 	else:
-		cond = "'%s' >= year_start_date and '%s' < adddate(year_start_date, interval 1 year)" % \
+		cond = "'%s' >= year_start_date and '%s' <= year_end_date" % \
 			(date, date)
-	fy = webnotes.conn.sql("""select name, year_start_date, 
-		subdate(adddate(year_start_date, interval 1 year), interval 1 day) 
-			as year_end_date
-		from `tabFiscal Year`
-		where %s
-		order by year_start_date desc""" % cond)
+	fy = webnotes.conn.sql("""select name, year_start_date, year_end_date
+		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
 	
 	if not fy:
 		error_msg = """%s %s not in any Fiscal Year""" % (label, formatdate(date))
@@ -349,3 +345,27 @@ def get_actual_expense(args):
 		where account='%(account)s' and cost_center='%(cost_center)s' 
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
 	""" % (args))[0][0]
+	
+def rename_account_for(dt, olddn, newdn, merge):
+	old_account = get_account_for(dt, olddn)
+	if old_account:
+		new_account = None
+		if not merge:
+			if old_account == olddn:
+				new_account = webnotes.rename_doc("Account", olddn, newdn)
+		else:
+			existing_new_account = get_account_for(dt, newdn)
+			new_account = webnotes.rename_doc("Account", old_account, 
+				existing_new_account or newdn, merge=True if existing_new_account else False)
+
+		if new_account:
+			webnotes.conn.set_value("Account", new_account, "master_name", newdn)
+			
+def get_account_for(account_for_doctype, account_for):
+	if account_for_doctype in ["Customer", "Supplier"]:
+		account_for_field = "master_type"
+	elif account_for_doctype == "Warehouse":
+		account_for_field = "account_type"
+		
+	return webnotes.conn.get_value("Account", {account_for_field: account_for_doctype, 
+		"master_name": account_for})

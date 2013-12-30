@@ -34,7 +34,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 		this.frm.clear_custom_buttons();
 
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
-		if(!this.frm.doc.__islocal && !this.frm.__is_customer) {
+		if(!this.frm.doc.__islocal && !this.frm.doc.__is_customer) {
 			this.frm.add_custom_button(wn._("Create Customer"), this.create_customer);
 			this.frm.add_custom_button(wn._("Create Opportunity"), this.create_opportunity);
 			this.frm.appframe.add_button(wn._("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");

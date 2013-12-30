@@ -64,9 +64,14 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 	
 	if not website_send_message(subject, message, sender):
 		return
-	
-	# make lead / communication
-	from selling.doctype.lead.get_leads import add_sales_communication
-	add_sales_communication(subject or "Website Query", message, sender, sender, 
-		mail=None, status=status)
+		
+	if subject=="Support":
+		# create support ticket
+		from support.doctype.support_ticket.get_support_mails import add_support_communication
+		add_support_communication(subject, message, sender, mail=None)
+	else:
+		# make lead / communication
+		from selling.doctype.lead.get_leads import add_sales_communication
+		add_sales_communication(subject or "Website Query", message, sender, sender, 
+			mail=None, status=status)
 	

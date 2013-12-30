@@ -35,15 +35,15 @@ class DocType:
 			webnotes.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
 			
 		# update year start date and year end date from fiscal_year
-		ysd = webnotes.conn.sql("""select year_start_date from `tabFiscal Year` 
-			where name=%s""", self.doc.current_fiscal_year)
-			
-		ysd = ysd and ysd[0][0] or ''
-		from webnotes.utils import get_first_day, get_last_day
-		if ysd:
+		year_start_end_date = webnotes.conn.sql("""select year_start_date, year_end_date 
+			from `tabFiscal Year` where name=%s""", self.doc.current_fiscal_year)
+
+		ysd = year_start_end_date[0][0] or ''
+		yed = year_start_end_date[0][1] or ''
+
+		if ysd and yed:
 			webnotes.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
-			webnotes.conn.set_default('year_end_date', \
-				get_last_day(get_first_day(ysd,0,11)).strftime('%Y-%m-%d'))
+			webnotes.conn.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
 		
 		# enable default currency
 		if self.doc.default_currency:

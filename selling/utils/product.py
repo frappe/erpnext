@@ -16,7 +16,7 @@ def get_product_info(item_code):
 	
 	cart_quotation = _get_cart_quotation()
 	
-	price_list = webnotes.cookies.get("selling_price_list").value
+	price_list = webnotes.local.request.cookies.get("selling_price_list")
 
 	warehouse = webnotes.conn.get_value("Item", item_code, "website_warehouse")
 	if warehouse:

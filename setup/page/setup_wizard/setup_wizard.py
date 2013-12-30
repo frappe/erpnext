@@ -72,18 +72,12 @@ def update_profile_name(args):
 	add_all_roles_to(args.get("name"))
 	
 def create_fiscal_year_and_company(args):
-	curr_fiscal_year, fy_start_date, fy_abbr = get_fy_details(args.get('fy_start'), True)
+	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
 	webnotes.bean([{
 		"doctype":"Fiscal Year",
 		'year': curr_fiscal_year,
-		'year_start_date': fy_start_date
-	}]).insert()
-
-	curr_fiscal_year, fy_start_date, fy_abbr = get_fy_details(args.get('fy_start'))
-	webnotes.bean([{
-		"doctype":"Fiscal Year",
-		'year': curr_fiscal_year,
-		'year_start_date': fy_start_date,
+		'year_start_date': args.get('fy_start_date'),
+		'year_end_date': args.get('fy_end_date'),
 	}]).insert()
 
 	
@@ -164,6 +158,10 @@ def set_defaults(args):
 	hr_settings.doc.emp_created_by = "Naming Series"
 	hr_settings.save()
 
+	email_settings = webnotes.bean("Email Settings")
+	email_settings.doc.send_print_in_body_and_attachment = 1
+	email_settings.save()
+
 	# control panel
 	cp = webnotes.doc("Control Panel", "Control Panel")
 	cp.company_name = args["company_name"]
@@ -177,11 +175,12 @@ def create_feed_and_todo():
 
 def create_email_digest():
 	from webnotes.profile import get_system_managers
-	system_managers = get_system_managers()
+	system_managers = get_system_managers(only_name=True)
 	if not system_managers: 
 		return
 	
-	for company in webnotes.conn.sql_list("select name FROM `tabCompany`"):
+	companies = webnotes.conn.sql_list("select name FROM `tabCompany`")
+	for company in companies:
 		if not webnotes.conn.exists("Email Digest", "Default Weekly Digest - " + company):
 			edigest = webnotes.bean({
 				"doctype": "Email Digest",
@@ -192,29 +191,31 @@ def create_email_digest():
 			})
 
 			for fieldname in edigest.meta.get_fieldnames({"fieldtype": "Check"}):
-				edigest.doc.fields[fieldname] = 1
+				if fieldname != "scheduler_errors":
+					edigest.doc.fields[fieldname] = 1
 		
 			edigest.insert()
-		
-def get_fy_details(fy_start, last_year=False):
-	st = {'1st Jan':'01-01','1st Apr':'04-01','1st Jul':'07-01', '1st Oct': '10-01'}
-	if cint(getdate(nowdate()).month) < cint((st[fy_start].split('-'))[0]):
-		curr_year = getdate(nowdate()).year - 1
-	else:
-		curr_year = getdate(nowdate()).year
 	
-	if last_year:
-		curr_year = curr_year - 1
+	# scheduler errors digest
+	if companies:
+		edigest = webnotes.new_bean("Email Digest")
+		edigest.doc.fields.update({
+			"name": "Scheduler Errors",
+			"company": companies[0],
+			"frequency": "Daily",
+			"recipient_list": "\n".join(system_managers),
+			"scheduler_errors": 1,
+			"enabled": 1
+		})
+		edigest.insert()
 	
-	stdt = cstr(curr_year)+'-'+cstr(st[fy_start])
-
-	if(fy_start == '1st Jan'):
-		fy = cstr(curr_year)
-		abbr = cstr(fy)[-2:]
+def get_fy_details(fy_start_date, fy_end_date):
+	start_year = getdate(fy_start_date).year
+	if start_year == getdate(fy_end_date).year:
+		fy = cstr(start_year)
 	else:
-		fy = cstr(curr_year) + '-' + cstr(curr_year+1)
-		abbr = cstr(curr_year)[-2:] + '-' + cstr(curr_year+1)[-2:]
-	return fy, stdt, abbr
+		fy = cstr(start_year) + '-' + cstr(start_year + 1)
+	return fy
 
 def create_taxes(args):
 	for i in xrange(1,6):

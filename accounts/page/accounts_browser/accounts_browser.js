@@ -175,9 +175,10 @@ erpnext.AccountsChart = Class.extend({
 		wn.route_options = {
 			"account": node.data('label'),
 			"from_date": sys_defaults.year_start_date,
-			"to_date": sys_defaults.year_end_date
+			"to_date": sys_defaults.year_end_date,
+			"company": me.company
 		};
-		wn.set_route("general-ledger");
+		wn.set_route("query-report", "General Ledger");
 	},
 	rename: function() {
 		var node = this.selected_node();

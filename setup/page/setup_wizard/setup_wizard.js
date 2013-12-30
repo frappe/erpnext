@@ -88,9 +88,10 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 						placeholder: 'e.g. "My Company LLC"'},
 					{fieldname:'company_abbr', label: wn._('Company Abbreviation'), fieldtype:'Data',
 						placeholder:'e.g. "MC"',reqd:1},
-					{fieldname:'fy_start', label:'Financial Year Start Date', fieldtype:'Select',
-						description:'Your financial year begins on', reqd:1,
-						options: ['', '1st Jan', '1st Apr', '1st Jul', '1st Oct'] },
+					{fieldname:'fy_start_date', label:'Financial Year Start Date', fieldtype:'Date',
+						description:'Your financial year begins on', reqd:1},
+					{fieldname:'fy_end_date', label:'Financial Year End Date', fieldtype:'Date',
+						description:'Your financial year ends on', reqd:1},
 					{fieldname:'company_tagline', label: wn._('What does it do?'), fieldtype:'Data',
 						placeholder:'e.g. "Build tools for builders"', reqd:1},
 				],
@@ -101,6 +102,12 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
 						slide.get_input("company_abbr").val(abbr.toUpperCase());
 					}).val(wn.boot.control_panel.company_name || "").trigger("change");
+
+					slide.get_input("fy_start_date").on("change", function() {
+						var year_end_date = 
+							wn.datetime.add_days(wn.datetime.add_months(slide.get_input("fy_start_date").val(), 12), -1);
+						slide.get_input("fy_end_date").val(year_end_date);
+					});
 				}
 			},
 			

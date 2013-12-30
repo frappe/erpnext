@@ -38,7 +38,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		// if document is POS then change default print format to "POS Invoice"
 		if(cur_frm.doc.is_pos && cur_frm.doc.docstatus===1) {
 			locals.DocType[cur_frm.doctype].default_print_format = "POS Invoice";
-			cur_frm.setup_print();
+			cur_frm.setup_print_layout();
 		}
 	},
 	
@@ -54,8 +54,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
+					"company": doc.company
 				};
-				wn.set_route("general-ledger");
+				wn.set_route("query-report", "General Ledger");
 			}, "icon-table");
 			
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);

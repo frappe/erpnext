@@ -14,6 +14,19 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
    cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
 }
 
+// For customizing print
+cur_frm.pformat.net_total_import = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.grand_total_import = function(doc) {
+	return '';
+}
+
+cur_frm.pformat.in_words_import = function(doc) {
+	return '';
+}
+
 cur_frm.pformat.purchase_tax_details= function(doc){
  
   //function to make row of table
@@ -29,6 +42,11 @@ cur_frm.pformat.purchase_tax_details= function(doc){
     var new_val = flt(val)/flt(doc.conversion_rate);
     return new_val;
   }
+  
+  function print_hide(fieldname) {
+	var doc_field = wn.meta.get_docfield(doc.doctype, fieldname, doc.name);
+	return doc_field.print_hide;
+  }
 
   var cl = getchildren('Purchase Taxes and Charges',doc.name,'purchase_tax_details');
 
@@ -37,19 +55,22 @@ cur_frm.pformat.purchase_tax_details= function(doc){
 		<tr><td style="width: 60%"></td><td>';
   
   // main table
-  out +='<table class="noborder" style="width:100%">'
-		+make_row('Net Total',convert_rate(doc.net_total),1);
-
+  out +='<table class="noborder" style="width:100%">';
+  if(!print_hide('net_total_import')) {
+	out += make_row('Net Total', doc.net_total_import, 1);
+  }
+  
   // add rows
   if(cl.length){
     for(var i=0;i<cl.length;i++){
       out += make_row(cl[i].description,convert_rate(cl[i].tax_amount),0);
     }
   }
-  
-  // grand total
-  out +=make_row('Grand Total',doc.grand_total_import,1)
-  if(doc.in_words_import){
+	// grand total
+	if(!print_hide('grand_total_import')) {
+		out += make_row('Grand Total', doc.grand_total_import, 1);
+	}
+  if(doc.in_words_import && !print_hide('in_words_import')){
     out +='</table></td></tr>';
     out += '<tr><td colspan = "2">';
     out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';

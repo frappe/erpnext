@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-22 16:50:25", 
   "docstatus": 0, 
-  "modified": "2013-07-23 11:59:11", 
+  "modified": "2013-11-25 11:40:02", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -54,6 +54,14 @@
   "no_copy": 1, 
   "oldfieldname": "year_start_date", 
   "oldfieldtype": "Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "year_end_date", 
+  "fieldtype": "Date", 
+  "label": "Year End Date", 
+  "no_copy": 1, 
   "reqd": 1
  }, 
  {

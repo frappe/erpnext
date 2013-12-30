@@ -287,9 +287,15 @@ class DocType(StockController):
 				# validate quantity <= ref item's qty - qty already returned
 				ref_item = ref.doclist.getone({"item_code": item.item_code})
 				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
-				self.validate_value("transfer_qty", "<=", returnable_qty, item,
-					raise_exception=StockOverReturnError)
-				
+				if not returnable_qty:
+					webnotes.throw("{item}: {item_code} {returned}".format(
+						item=_("Item"), item_code=item.item_code, 
+						returned=_("already returned though some other documents")))
+				elif item.transfer_qty > returnable_qty:
+					webnotes.throw("{item}: {item_code}, {returned}: {qty}".format(
+						item=_("Item"), item_code=item.item_code,
+						returned=_("Max Returnable Qty"), qty=returnable_qty))
+						
 	def get_already_returned_item_qty(self, ref_fieldname):
 		return dict(webnotes.conn.sql("""select item_code, sum(transfer_qty) as qty
 			from `tabStock Entry Detail` where parent in (
@@ -444,6 +450,8 @@ class DocType(StockController):
 				if self.doc.production_order and self.doc.purpose == "Material Transfer":
 					item_dict = self.get_pending_raw_materials(pro_obj)
 				else:
+					if not self.doc.fg_completed_qty:
+						webnotes.throw(_("Manufacturing Quantity is mandatory"))
 					item_dict = self.get_bom_raw_materials(self.doc.fg_completed_qty)
 					for item in item_dict.values():
 						if pro_obj:
@@ -479,7 +487,7 @@ class DocType(StockController):
 					where name=(select item from tabBOM where name=%s)""", 
 					self.doc.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
-					item[0]["item"] : {
+					item[0]["name"] : {
 						"qty": self.doc.fg_completed_qty,
 						"item_name": item[0].item_name,
 						"description": item[0]["description"],

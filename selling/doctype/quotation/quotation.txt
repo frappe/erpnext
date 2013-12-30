@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-11-03 14:20:15", 
+  "modified": "2013-12-14 17:25:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -72,6 +72,7 @@
   "reqd": 1
  }, 
  {
+  "default": "Customer", 
   "doctype": "DocField", 
   "fieldname": "quotation_to", 
   "fieldtype": "Select", 
@@ -836,7 +837,8 @@
   "fieldtype": "Table", 
   "hidden": 1, 
   "label": "Communications", 
-  "options": "Communication"
+  "options": "Communication", 
+  "print_hide": 1
  }, 
  {
   "amend": 1, 
@@ -861,6 +863,7 @@
   "cancel": 0, 
   "create": 0, 
   "doctype": "DocPerm", 
+  "match": "customer", 
   "role": "Customer", 
   "submit": 0, 
   "write": 0

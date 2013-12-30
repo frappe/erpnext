@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt, cint
+from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
@@ -49,6 +49,7 @@ class DocType(DocListController, WebsiteGenerator):
 	def on_update(self):
 		self.validate_name_with_item_group()
 		self.update_website()
+		self.update_item_price()
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.doc.is_stock_item=="Yes" and not self.doc.default_warehouse:
@@ -116,40 +117,29 @@ class DocType(DocListController, WebsiteGenerator):
 			self.doc.is_pro_applicable = "No"
 
 		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_stock_item == 'No':
-			msgprint("As Production Order can be made for this Item, then Is Stock Item Should be 'Yes' as we maintain it's stock. Refer Manufacturing and Inventory section.", raise_exception=1)
+			webnotes.throw(_("As Production Order can be made for this item, \
+				it must be a stock item."))
 
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 			
 	def check_for_active_boms(self):
-		def _check_for_active_boms(field_label):
-			if field_label in ['Is Active', 'Is Purchase Item']:
-				bom_mat = webnotes.conn.sql("""select distinct t1.parent 
-					from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
-					and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
-					and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
-				if bom_mat and bom_mat[0][0]:
-					msgprint(_(field_label) + _(" should be 'Yes'. As Item: ") + self.doc.name + 
-						_(" is present in one or many Active BOMs"), raise_exception=1)
-						
-			if ((field_label == 'Allow Production Order' 
-					and self.doc.is_sub_contracted_item != 'Yes') 
-					or (field_label == 'Is Sub Contracted Item' 
-					and self.doc.is_manufactured_item != 'Yes')):
-				bom = webnotes.conn.sql("""select name from `tabBOM` where item = %s 
-					and is_active = 1""", (self.doc.name,))
-				if bom and bom[0][0]:
-					msgprint(_(field_label) + _(" should be 'Yes'. As Item: ") + self.doc.name + 
-						_(" is present in one or many Active BOMs"), raise_exception=1)
-		
-		if not cint(self.doc.fields.get("__islocal")):
-			fl = {'is_manufactured_item'	:'Allow Bill of Materials',
-					'is_sub_contracted_item':'Is Sub Contracted Item',
-					'is_purchase_item'			:'Is Purchase Item',
-					'is_pro_applicable'		 :'Allow Production Order'}
-			for d in fl:
-				if cstr(self.doc.fields.get(d)) != 'Yes':
-					_check_for_active_boms(fl[d])			
+		if self.doc.is_purchase_item != "Yes":
+			bom_mat = webnotes.conn.sql("""select distinct t1.parent 
+				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
+				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
+				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
+				
+			if bom_mat and bom_mat[0][0]:
+				webnotes.throw(_("Item must be a purchase item, \
+					as it is present in one or many Active BOMs"))
+					
+		if self.doc.is_manufactured_item != "Yes":
+			bom = webnotes.conn.sql("""select name from `tabBOM` where item = %s 
+				and is_active = 1""", (self.doc.name,))
+			if bom and bom[0][0]:
+				webnotes.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many \
+					active BOMs present for this item"""))
 					
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
@@ -207,6 +197,7 @@ class DocType(DocListController, WebsiteGenerator):
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
+		# causes problem with tree build
 		if webnotes.conn.exists("Item Group", self.doc.name):
 			webnotes.msgprint("An item group exists with same name (%s), \
 				please change the item name or rename the item group" % 
@@ -219,6 +210,11 @@ class DocType(DocListController, WebsiteGenerator):
 			self.doclist.get({"doctype":"Website Item Group"})]
 
 		WebsiteGenerator.on_update(self)
+
+	def update_item_price(self):
+		webnotes.conn.sql("""update `tabItem Price` set item_name=%s, 
+			item_description=%s, modified=NOW() where item_code=%s""",
+			(self.doc.item_name, self.doc.description, self.doc.name))
 
 	def get_page_title(self):
 		if self.doc.name==self.doc.item_name:
@@ -253,14 +249,47 @@ class DocType(DocListController, WebsiteGenerator):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
 		WebsiteGenerator.on_trash(self)
 
-	def on_rename(self, newdn, olddn, merge=False):
-		webnotes.conn.sql("update tabItem set item_code = %s where name = %s", (newdn, olddn))
+	def before_rename(self, olddn, newdn, merge=False):
+		if merge:
+			# Validate properties before merging
+			if not webnotes.conn.exists("Item", newdn):
+				webnotes.throw(_("Item ") + newdn +_(" does not exists"))
+			
+			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
+			new_properties = [cstr(d) for d in webnotes.conn.get_value("Item", newdn, field_list)]
+			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:
+				webnotes.throw(_("To merge, following properties must be same for both items")
+					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
+
+			webnotes.conn.sql("delete from `tabBin` where item_code=%s", olddn)
+
+	def after_rename(self, olddn, newdn, merge):
+		webnotes.conn.set_value("Item", newdn, "item_code", newdn)
+		self.update_website_page_name()
+			
+		if merge:
+			self.set_last_purchase_rate(newdn)
+			self.recalculate_bin_qty(newdn)
+			
+	def update_website_page_name(self):
 		if self.doc.page_name:
+			self.update_website()
 			from webnotes.webutils import clear_cache
 			clear_cache(self.doc.page_name)
 			
-		if merge:
-			from stock.stock_ledger import update_entries_after
-			for wh in webnotes.conn.sql("""select warehouse from `tabBin` 
-				where item_code=%s""", newdn):
-					update_entries_after({"item_code": newdn, "warehouse": wh[0]})
+	def set_last_purchase_rate(self, newdn):
+		from buying.utils import get_last_purchase_details
+		last_purchase_rate = get_last_purchase_details(newdn).get("purchase_rate", 0)
+		webnotes.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
+			
+	def recalculate_bin_qty(self, newdn):
+		from utilities.repost_stock import repost_stock
+		webnotes.conn.auto_commit_on_many_writes = 1
+		webnotes.conn.set_default("allow_negative_stock", 1)
+		
+		for warehouse in webnotes.conn.sql("select name from `tabWarehouse`"):
+			repost_stock(newdn, warehouse[0])
+		
+		webnotes.conn.set_default("allow_negative_stock", 
+			webnotes.conn.get_value("Stock Settings", None, "allow_negative_stock"))
+		webnotes.conn.auto_commit_on_many_writes = 0

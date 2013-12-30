@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:16", 
   "docstatus": 0, 
-  "modified": "2013-11-02 14:05:44", 
+  "modified": "2013-12-18 13:22:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -134,6 +134,14 @@
   "no_copy": 1, 
   "oldfieldname": "produced_qty", 
   "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "sales_order", 
+  "doctype": "DocField", 
+  "fieldname": "expected_delivery_date", 
+  "fieldtype": "Date", 
+  "label": "Expected Delivery Date", 
   "read_only": 1
  }, 
  {

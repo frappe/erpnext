@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:44:19", 
+  "modified": "2013-12-12 17:41:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -131,10 +131,12 @@
   "label": "Carry Forward"
  }, 
  {
+  "depends_on": "carry_forward", 
   "doctype": "DocField", 
   "fieldname": "carry_forwarded_leaves", 
   "fieldtype": "Float", 
-  "label": "Carry Forwarded Leaves"
+  "label": "Carry Forwarded Leaves", 
+  "read_only": 1
  }, 
  {
   "allow_on_submit": 1, 

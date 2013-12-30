@@ -23,8 +23,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
 				doc.per_billed);
 
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
-			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript['Send SMS'], "icon-mobile-phone");
 			if(flt(doc.per_received, 2) < 100) 
 				cur_frm.add_custom_button(wn._('Make Purchase Receipt'), this.make_purchase_receipt);	
 			if(flt(doc.per_billed, 2) < 100) 

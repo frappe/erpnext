@@ -20,6 +20,19 @@ class DocType:
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
 				msgprint("Please enter valid Email Id", raise_exception=1)
 				
+		self.update_parent_account()
+				
+	def update_parent_account(self):
+		if not self.doc.__islocal and (self.doc.create_account_under != 
+			webnotes.conn.get_value("Warehouse", self.doc.name, "create_account_under")):
+				warehouse_account = webnotes.conn.get_value("Account", 
+					{"account_type": "Warehouse", "company": self.doc.company, 
+					"master_name": self.doc.name}, ["name", "parent_account"])
+				if warehouse_account and warehouse_account[1] != self.doc.create_account_under:
+					acc_bean = webnotes.bean("Account", warehouse_account[0])
+					acc_bean.doc.parent_account = self.doc.create_account_under
+					acc_bean.save()
+				
 	def on_update(self):
 		self.create_account_head()
 						
@@ -55,47 +68,6 @@ class DocType:
 			else:
 				webnotes.throw(_("Please enter account group under which account \
 					for warehouse ") + self.doc.name +_(" will be created"))
-			
-	def on_rename(self, new, old, merge=False):
-		webnotes.conn.set_value("Account", {"account_type": "Warehouse", "master_name": old}, 
-			"master_name", new)
-			
-		if merge:
-			from stock.stock_ledger import update_entries_after
-			for item_code in webnotes.conn.sql("""select item_code from `tabBin` 
-				where warehouse=%s""", new):
-					update_entries_after({"item_code": item_code, "warehouse": new})
-
-	def merge_warehouses(self):
-		webnotes.conn.auto_commit_on_many_writes = 1
-		
-		# get items which dealt with current warehouse
-		items = webnotes.conn.sql("select item_code from tabBin where warehouse=%s"	, self.doc.name)
-		# delete old bins
-		webnotes.conn.sql("delete from tabBin where warehouse=%s", self.doc.name)
-		
-		# replace link fields
-		from webnotes.model import rename_doc
-		link_fields = rename_doc.get_link_fields('Warehouse')
-		rename_doc.update_link_field_values(link_fields, self.doc.name, self.doc.merge_with)
-		
-		account_link_fields = rename_doc.get_link_fields('Account')
-		old_warehouse_account = webnotes.conn.get_value("Account", {"master_name": self.doc.name})
-		new_warehouse_account = webnotes.conn.get_value("Account", 
-			{"master_name": self.doc.merge_with})
-		rename_doc.update_link_field_values(account_link_fields, old_warehouse_account, 
-			new_warehouse_account)
-			
-		webnotes.conn.delete_doc("Account", old_warehouse_account)
-		
-		from utilities.repost_stock import repost
-		for item_code in items:
-			repost(item_code[0], self.doc.merge_with)
-			
-		webnotes.conn.auto_commit_on_many_writes = 0
-		
-		msgprint("Warehouse %s merged into %s. Now you can delete warehouse: %s" 
-			% (self.doc.name, self.doc.merge_with, self.doc.name))
 		
 	def on_trash(self):
 		# delete bin
@@ -110,15 +82,49 @@ class DocType:
 				webnotes.conn.sql("delete from `tabBin` where name = %s", d['name'])
 				
 		warehouse_account = webnotes.conn.get_value("Account", 
-			{"account_type": "Warehosue", "master_name": self.doc.name})
+			{"account_type": "Warehouse", "master_name": self.doc.name})
 		if warehouse_account:
 			webnotes.delete_doc("Account", warehouse_account)
 				
-		# delete cancelled sle
-		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` where warehouse = %s""", 
-				self.doc.name):
-			msgprint("""Warehosue can not be deleted as stock ledger entry 
+		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
+				where warehouse = %s""", self.doc.name):
+			msgprint("""Warehouse can not be deleted as stock ledger entry 
 				exists for this warehouse.""", raise_exception=1)
-		else:
-			webnotes.conn.sql("delete from `tabStock Ledger Entry` where warehouse = %s", 
-				self.doc.name)
+			
+	def before_rename(self, olddn, newdn, merge=False):
+		# Add company abbr if not provided
+		from setup.doctype.company.company import get_name_with_abbr
+		new_warehouse = get_name_with_abbr(newdn, self.doc.company)
+
+		if merge:
+			if not webnotes.conn.exists("Warehouse", newdn):
+				webnotes.throw(_("Warehouse ") + newdn +_(" does not exists"))
+				
+			if self.doc.company != webnotes.conn.get_value("Warehouse", new_warehouse, "company"):
+				webnotes.throw(_("Both Warehouse must belong to same Company"))
+				
+			webnotes.conn.sql("delete from `tabBin` where warehouse=%s", olddn)
+			
+		from accounts.utils import rename_account_for
+		rename_account_for("Warehouse", olddn, new_warehouse, merge)
+
+		return new_warehouse
+
+	def after_rename(self, olddn, newdn, merge=False):
+		if merge:
+			self.recalculate_bin_qty(newdn)
+			
+	def recalculate_bin_qty(self, newdn):
+		from utilities.repost_stock import repost_stock
+		webnotes.conn.auto_commit_on_many_writes = 1
+		webnotes.conn.set_default("allow_negative_stock", 1)
+		
+		for item in webnotes.conn.sql("""select distinct item_code from (
+			select name as item_code from `tabItem` where ifnull(is_stock_item, 'Yes')='Yes'
+			union 
+			select distinct item_code from tabBin) a"""):
+				repost_stock(item[0], newdn)
+			
+		webnotes.conn.set_default("allow_negative_stock", 
+			webnotes.conn.get_value("Stock Settings", None, "allow_negative_stock"))
+		webnotes.conn.auto_commit_on_many_writes = 0

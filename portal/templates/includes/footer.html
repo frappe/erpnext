@@ -1,16 +1,18 @@
 {% extends "lib/website/templates/includes/footer.html" %}
 
-{% block powered %}<a style="font-size: 90%; color: #aaa;" href="http://erpnext.org">ERPNext Powered</a>{% endblock %}
+{% block powered %}<a href="http://erpnext.org" style="color: #aaa;">ERPNext Powered</a>{% endblock %}
 
 {% block extension %}
-<br>
-<div class="input-group col-md-6 col-md-offset-3">
-	<input class="form-control" type="text" id="footer-subscribe-email" placeholder="Your email address...">
-	<span class="input-group-btn">
-		<button class="btn btn-default" type="button" id="footer-subscribe-button">Stay Updated</button>
-	</span>
+<div class="container">
+	<div class="row">
+		<div class="input-group col-sm-6 col-sm-offset-3" style="margin-top: 7px;">
+			<input class="form-control" type="text" id="footer-subscribe-email" placeholder="Your email address...">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" id="footer-subscribe-button">Stay Updated</button>
+			</span>
+		</div>
+	</div>
 </div>
-<br>
 <script>
 	$("#footer-subscribe-button").click(function() {
 

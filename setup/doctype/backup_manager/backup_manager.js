@@ -87,7 +87,7 @@ $.extend(cur_frm.cscript, {
 		cur_frm.save();
 	},
 	
-	upload_backups_to_gdrive: function() {
-		cur_frm.save();
-	},
+	// upload_backups_to_gdrive: function() {
+	// 	cur_frm.save();
+	// },
 });

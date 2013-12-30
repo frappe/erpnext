@@ -6,8 +6,8 @@ Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on P
 
 ERPNext is built on [wnframework](https://github.com/webnotes/wnframework)
 
-- [User Guide](https://erpnext.org/docs.user.html)
-- [Getting Help](https://erpnext.org/docs.user.help.html)
+- [User Guide](http://erpnext.org/user-guide.html)
+- [Getting Help](http://erpnext.org/getting-help.html)
 - [Developer Forum](http://groups.google.com/group/erpnext-developer-forum)
 - [User Forum](http://groups.google.com/group/erpnext-user-forum)
 

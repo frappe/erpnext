@@ -1,1 +1,0 @@
-Import accounting entries by uploading a csv file.

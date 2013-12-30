@@ -76,7 +76,7 @@ def get_target_distribution_details(filters):
 	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd 
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
-			target_details.setdefault(d.name, {}).setdefault(d.month, d.percentage_allocation)
+			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
 	return target_details
 
@@ -115,8 +115,8 @@ def get_salesperson_item_month_map(filters):
 				}))
 
 			tav_dict = sim_map[sd.name][sd.item_group][month]
-			month_percentage = sd.distribution_id and \
-				tdd.get(sd.distribution_id, {}).get(month, 0) or 100.0/12
+			month_percentage = tdd.get(sd.distribution_id, {}).get(month, 0) \
+				if sd.distribution_id else 100.0/12
 			
 			for ad in achieved_details.get(sd.name, {}).get(sd.item_group, []):
 				if (filters["target_on"] == "Quantity"):

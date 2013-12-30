@@ -56,9 +56,6 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 		pi.batch_no = cstr(line.batch_no)
 	pi.idx = packing_list_idx
 	
-	# saved, since this function is called on_update of delivery note
-	pi.save()
-	
 	packing_list_idx += 1
 
 
@@ -87,19 +84,13 @@ def cleanup_packing_list(obj, parent_items):
 	for d in obj.doclist.get({"parentfield": "packing_details"}):
 		if [d.parent_item, d.parent_detail_docname] not in parent_items:
 			# mark for deletion from doclist
-			delete_list.append(d.name)
+			delete_list.append([d.parent_item, d.parent_detail_docname])
 
 	if not delete_list:
 		return obj.doclist
 	
 	# delete from doclist
-	obj.doclist = webnotes.doclist(filter(lambda d: d.name not in delete_list, obj.doclist))
-	
-	# delete from db
-	webnotes.conn.sql("""\
-		delete from `tabPacked Item`
-		where name in (%s)"""
-		% (", ".join(["%s"] * len(delete_list))),
-		tuple(delete_list))
+	obj.doclist = webnotes.doclist(filter(lambda d: [d.parent_item, d.parent_detail_docname] 
+		not in delete_list, obj.doclist))
 		
 	return obj.doclist

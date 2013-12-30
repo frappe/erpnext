@@ -90,11 +90,6 @@ wn.module_page["Accounts"] = [
 				"doctype": "Period Closing Voucher",
 				description: wn._("Close Balance Sheet and book Profit or Loss.")
 			},
-			{
-				"page":"voucher-import-tool",
-				"label": wn._("Voucher Import Tool"),
-				"description": wn._("Import accounting entries from CSV.")
-			},		
 		]
 	},
 	{
@@ -162,7 +157,8 @@ wn.module_page["Accounts"] = [
 		items: [
 			{
 				"label":wn._("General Ledger"),
-				page: "general-ledger"
+				doctype: "GL Entry",
+				route: "query-report/General Ledger"
 			},
 			{
 				"label":wn._("Trial Balance"),
@@ -246,13 +242,8 @@ wn.module_page["Accounts"] = [
 				doctype: "Journal Voucher"
 			},
 			{
-				"label":wn._("Payment Collection With Ageing"),
-				route: "query-report/Payment Collection With Ageing",
-				doctype: "Journal Voucher"
-			},
-			{
-				"label":wn._("Payment Made With Ageing"),
-				route: "query-report/Payment Made With Ageing",
+				"label":wn._("Payment Period Based On Invoice Date"),
+				route: "query-report/Payment Period Based On Invoice Date",
 				doctype: "Journal Voucher"
 			},
 			{

@@ -138,19 +138,22 @@ wn.module_page["Stock"] = [
 		items: [
 			{
 				"label":wn._("Stock Ledger"),
-				page: "stock-ledger"
+				doctype: "Item",
+				route: "query-report/Stock Ledger"
 			},
 			{
 				"label":wn._("Stock Balance"),
 				page: "stock-balance"
 			},
 			{
-				"page":"stock-level",
-				"label": wn._("Stock Level")
+				"label":wn._("Stock Projected Qty"),
+				doctype: "Item",
+				route: "query-report/Stock Projected Qty"
 			},
 			{
-				"page":"stock-ageing",
-				"label": wn._("Stock Ageing")
+				"label":wn._("Stock Ageing"),
+				doctype: "Item",
+				route: "query-report/Stock Ageing"
 			},
 		]
 	},
@@ -170,11 +173,6 @@ wn.module_page["Stock"] = [
 		right: true,
 		icon: "icon-list",
 		items: [
-			{
-				"label":wn._("Stock Ledger"),
-				route: "Report/Stock Ledger Entry/Stock Ledger",
-				doctype: "Stock Ledger Entry"
-			},
 			{
 				"label":wn._("Ordered Items To Be Delivered"),
 				route: "query-report/Ordered Items To Be Delivered",
