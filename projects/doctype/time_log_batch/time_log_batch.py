@@ -28,7 +28,7 @@ class DocType:
 		})
 
 	def validate_time_log_is_submitted(self, tl):
-		if tl.status != "Submitted":
+		if tl.status != "Submitted" and self.doc.docstatus == 0:
 			webnotes.msgprint(_("Time Log must have status 'Submitted'") + \
 				" :" + tl.name + " (" + _(tl.status) + ")", raise_exception=True)
 	
@@ -58,6 +58,3 @@ class DocType:
 			tl.doc.time_log_batch = time_log_batch
 			tl.doc.sales_invoice = self.doc.sales_invoice
 			tl.update_after_submit()
-		
-
-		
