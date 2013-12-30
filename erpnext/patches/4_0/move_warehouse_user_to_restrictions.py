@@ -8,5 +8,6 @@ def execute():
 	from webnotes.core.page.user_properties import user_properties
 	for warehouse, profile in webnotes.conn.sql("""select parent, user from `tabWarehouse User`"""):
 		user_properties.add(profile, "Warehouse", warehouse)
-		
+	
 	webnotes.delete_doc("DocType", "Warehouse User")
+	webnotes.reload_doc("stock", "doctype", "warehouse")

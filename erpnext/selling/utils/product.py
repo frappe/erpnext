@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import cstr, cint, fmt_money, get_base_path
+from webnotes.utils import cstr, cint, fmt_money
 from webnotes.webutils import delete_page_cache
 from erpnext.selling.utils.cart import _get_cart_quotation
 

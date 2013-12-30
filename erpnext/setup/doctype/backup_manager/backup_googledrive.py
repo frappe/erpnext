@@ -19,7 +19,7 @@ import os
 import mimetypes
 import webnotes
 import oauth2client.client
-from webnotes.utils import get_base_path, cstr
+from webnotes.utils import cstr
 from webnotes import _, msgprint
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
@@ -69,7 +69,7 @@ def backup_to_gdrive():
 
 	# upload database
 	backup = new_backup()
-	path = os.path.join(get_base_path(), "public", "backups")
+	path = os.path.join(webnotes.local.site_path, "public", "backups")
 	filename = os.path.join(path, os.path.basename(backup.backup_path_db))
 	
 	# upload files to database folder
@@ -83,7 +83,7 @@ def backup_to_gdrive():
 	files_folder_id = webnotes.conn.get_value("Backup Manager", None, "files_folder_id")
 	
 	webnotes.conn.close()
-	path = os.path.join(get_base_path(), "public", "files")
+	path = os.path.join(webnotes.local.site_path, "public", "files")
 	for filename in os.listdir(path):
 		filename = cstr(filename)
 		found = False
