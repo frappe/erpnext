@@ -7,10 +7,7 @@ import webnotes
 from webnotes.utils import add_days, cstr, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint
-
-	
-
+from webnotes import msgprint, throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 
 class DocType(TransactionBase):
@@ -19,7 +16,8 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = webnotes.conn.sql("select item_name, description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
+		item = webnotes.conn.sql("""select item_name, description from `tabItem` 
+			where name=%s""", (item_code), as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
 			'description' : item and item[0]['description'] or ''
@@ -28,13 +26,14 @@ class DocType(TransactionBase):
 		
 	def generate_schedule(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
-		count = 0
-		webnotes.conn.sql("delete from `tabMaintenance Schedule Detail` where parent='%s'" %(self.doc.name))
+		webnotes.conn.sql("""delete from `tabMaintenance Schedule Detail` 
+			where parent=%s""", (self.doc.name))
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			self.validate_maintenance_detail()
-			s_list =[]	
+			count = 1
+			s_list = []
 			s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits)
-			for i in range(d.no_of_visits):				
+			for i in range(d.no_of_visits):
 				child = addchild(self.doc, 'maintenance_schedule_detail',
 					'Maintenance Schedule Detail', self.doclist)
 				child.item_code = d.item_code
@@ -43,7 +42,7 @@ class DocType(TransactionBase):
 				if d.serial_no:
 					child.serial_no = d.serial_no
 				child.idx = count
-				count = count+1
+				count = count + 1
 				child.incharge_name = d.incharge_name
 				child.save(1)
 				
@@ -51,8 +50,7 @@ class DocType(TransactionBase):
 
 	def on_submit(self):
 		if not getlist(self.doclist, 'maintenance_schedule_detail'):
-			msgprint("Please click on 'Generate Schedule' to get schedule")
-			raise Exception
+			throw("Please click on 'Generate Schedule' to get schedule")
 		self.check_serial_no_added()
 		self.validate_serial_no_warranty()
 		self.validate_schedule()
@@ -66,9 +64,9 @@ class DocType(TransactionBase):
 				email_map[d.incharge_name] = webnotes.bean("Sales Person", 
 					d.incharge_name).run_method("get_email_id")
 
-			scheduled_date =webnotes.conn.sql("select scheduled_date from `tabMaintenance Schedule Detail` \
-				where incharge_name='%s' and item_code='%s' and parent='%s' " %(d.incharge_name, \
-				d.item_code, self.doc.name), as_dict=1)
+			scheduled_date =webnotes.conn.sql("""select scheduled_date from 
+				`tabMaintenance Schedule Detail` where incharge_name=%s and item_code=%s and 
+				parent=%s""", (d.incharge_name, d.item_code, self.doc.name), as_dict=1)
 
 			for key in scheduled_date:
 				if email_map[d.incharge_name]:
@@ -91,90 +89,80 @@ class DocType(TransactionBase):
 	#----------------------
 	def create_schedule_list(self, start_date, end_date, no_of_visit):
 		schedule_list = []		
-		start_date1 = start_date
+		start_date_copy = start_date
 		date_diff = (getdate(end_date) - getdate(start_date)).days
-		add_by = date_diff/no_of_visit
-		#schedule_list.append(start_date1)
-		while(getdate(start_date1) < getdate(end_date)):
-			start_date1 = add_days(start_date1, add_by)
+		add_by = date_diff / no_of_visit
+
+		while (getdate(start_date_copy) < getdate(end_date)):
+			start_date_copy = add_days(start_date_copy, add_by)
 			if len(schedule_list) < no_of_visit:
-				schedule_list.append(getdate(start_date1))
+				schedule_list.append(getdate(start_date_copy))
 		return schedule_list
 	
 	#validate date range and periodicity selected
 	#-------------------------------------------------
 	def validate_period(self, arg):
-		arg1 = eval(arg)
-		if getdate(arg1['start_date']) >= getdate(arg1['end_date']):
-			msgprint("Start date should be less than end date ")
-			raise Exception
-		
-		period = (getdate(arg1['end_date'])-getdate(arg1['start_date'])).days+1
-		
-		if (arg1['periodicity']=='Yearly' or arg1['periodicity']=='Half Yearly' or arg1['periodicity']=='Quarterly') and period<365:
-			msgprint(cstr(arg1['periodicity'])+ " periodicity can be set for period of atleast 1 year or more only")
-			raise Exception
-		elif arg1['periodicity']=='Monthly' and period<30:
-			msgprint("Monthly periodicity can be set for period of atleast 1 month or more")
-			raise Exception
-		elif arg1['periodicity']=='Weekly' and period<7:
-			msgprint("Weekly periodicity can be set for period of atleast 1 week or more")
-			raise Exception
+		args = eval(arg)
+		if getdate(args['start_date']) >= getdate(args['end_date']):
+			throw(_("Start date should be less than end date."))
+
+		period = (getdate(args['end_date']) - getdate(args['start_date'])).days + 1
+
+		if (args['periodicity'] == 'Yearly' or args['periodicity'] == 'Half Yearly' or 
+			args['periodicity'] == 'Quarterly') and period < 365:
+			throw(cstr(args['periodicity']) + " periodicity can be set for period of atleast 1 year or more only")
+		elif args['periodicity'] == 'Monthly' and period < 30:
+			throw("Monthly periodicity can be set for period of atleast 1 month or more")
+		elif args['periodicity'] == 'Weekly' and period < 7:
+			throw("Weekly periodicity can be set for period of atleast 1 week or more")
 	
 	def get_no_of_visits(self, arg):
-		arg1 = eval(arg)		
+		args = eval(arg)
 		self.validate_period(arg)
-		period = (getdate(arg1['end_date'])-getdate(arg1['start_date'])).days+1
-		
-		count =0
-		if arg1['periodicity'] == 'Weekly':
+		period = (getdate(args['end_date']) - getdate(args['start_date'])).days + 1
+		count = 0
+
+		if args['periodicity'] == 'Weekly':
 			count = period/7
-		elif arg1['periodicity'] == 'Monthly':
+		elif args['periodicity'] == 'Monthly':
 			count = period/30
-		elif arg1['periodicity'] == 'Quarterly':
+		elif args['periodicity'] == 'Quarterly':
 			count = period/91	 
-		elif arg1['periodicity'] == 'Half Yearly':
+		elif args['periodicity'] == 'Half Yearly':
 			count = period/182
-		elif arg1['periodicity'] == 'Yearly':
+		elif args['periodicity'] == 'Yearly':
 			count = period/365
 		
-		ret = {'no_of_visits':count}
+		ret = {'no_of_visits' : count}
 		return ret
-	
-
 
 	def validate_maintenance_detail(self):
 		if not getlist(self.doclist, 'item_maintenance_detail'):
-			msgprint("Please enter Maintaince Details first")
-			raise Exception
+			throw(_("Please enter Maintaince Details first"))
 		
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if not d.item_code:
-				msgprint("Please select item code")
-				raise Exception
+				throw(_("Please select item code"))
 			elif not d.start_date or not d.end_date:
-				msgprint("Please select Start Date and End Date for item "+d.item_code)
-				raise Exception
+				throw(_("Please select Start Date and End Date for item") + " " + d.item_code)
 			elif not d.no_of_visits:
-				msgprint("Please mention no of visits required")
-				raise Exception
+				throw(_("Please mention no of visits required"))
 			elif not d.incharge_name:
-				msgprint("Please select Incharge Person's name")
-				raise Exception
+				throw(_("Please select Incharge Person's name"))
 			
 			if getdate(d.start_date) >= getdate(d.end_date):
-				msgprint("Start date should be less than end date for item "+d.item_code)
-				raise Exception
+				throw(_("Start date should be less than end date for item") + " " + d.item_code)
 	
 	#check if maintenance schedule already created against same sales order
 	#-----------------------------------------------------------------------------------
 	def validate_sales_order(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.prevdoc_docname:
-				chk = webnotes.conn.sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1", d.prevdoc_docname)
+				chk = webnotes.conn.sql("""select ms.name from `tabMaintenance Schedule` ms, 
+					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and 
+					msi.prevdoc_docname=%s and ms.docstatus=1""", d.prevdoc_docname)
 				if chk:
-					msgprint("Maintenance Schedule against "+d.prevdoc_docname+" already exist")
-					raise Exception
+					throw("Maintenance Schedule against " + d.prevdoc_docname + " already exist")
 	
 
 	def validate_serial_no(self):
@@ -185,13 +173,13 @@ class DocType(TransactionBase):
 				cur_s_no = cur_serial_no.split(',')
 				
 				for x in cur_s_no:
-					chk = webnotes.conn.sql("select name, status from `tabSerial No` where docstatus!=2 and name=%s", (x))
+					chk = webnotes.conn.sql("""select name, status from `tabSerial No` 
+						where docstatus!=2 and name=%s""", (x))
 					chk1 = chk and chk[0][0] or ''
 					status = chk and chk[0][1] or ''
 					
 					if not chk1:
-						msgprint("Serial no "+x+" does not exist in system.")
-						raise Exception
+						throw("Serial no " + x + " does not exist in system.")
 	
 	def validate(self):
 		self.validate_maintenance_detail()
@@ -208,13 +196,13 @@ class DocType(TransactionBase):
 				cur_s_no = cur_serial_no.split(',')
 				
 				for x in cur_s_no:
-					dt = webnotes.conn.sql("select delivery_date from `tabSerial No` where name = %s", x)
+					dt = webnotes.conn.sql("""select delivery_date from `tabSerial No` 
+						where name=%s""", x)
 					dt = dt and dt[0][0] or ''
 					
 					if dt:
 						if dt > getdate(d.start_date):
-							msgprint("Maintenance start date can not be before delivery date "+dt.strftime('%Y-%m-%d')+" for serial no "+x)
-							raise Exception
+							throw("Maintenance start date can not be before delivery date " + dt.strftime('%Y-%m-%d') + " for serial no " + x)
 	
 	#update amc expiry date in serial no
 	#------------------------------------------
@@ -224,7 +212,8 @@ class DocType(TransactionBase):
 		cur_s_no = cur_serial_no.split(',')
 		
 		for x in cur_s_no:
-			webnotes.conn.sql("update `tabSerial No` set amc_expiry_date = '%s', maintenance_status = 'Under AMC' where name = '%s'"% (amc_end_date,x))
+			webnotes.conn.sql("""update `tabSerial No` set amc_expiry_date=%s, 
+				maintenance_status='Under AMC' where name=%s""", (amc_end_date, x))
 	
 	def on_update(self):
 		webnotes.conn.set(self.doc, 'status', 'Draft')
@@ -233,16 +222,16 @@ class DocType(TransactionBase):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if cstr(d.serial_no).strip():
 				dt = webnotes.conn.sql("""select warranty_expiry_date, amc_expiry_date 
-					from `tabSerial No` where name = %s""", d.serial_no, as_dict=1)
+					from `tabSerial No` where name=%s""", d.serial_no, as_dict=1)
 				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
-					webnotes.msgprint("""Serial No: %s is already under warranty upto %s. 
+					throw("""Serial No: %s is already under warranty upto %s. 
 						Please check AMC Start Date.""" % 
-						(d.serial_no, dt[0]["warranty_expiry_date"]), raise_exception=1)
+						(d.serial_no, dt[0]["warranty_expiry_date"]))
 						
 				if dt[0]['amc_expiry_date'] and dt[0]['amc_expiry_date'] >= d.start_date:
-					webnotes.msgprint("""Serial No: %s is already under AMC upto %s.
+					throw("""Serial No: %s is already under AMC upto %s.
 						Please check AMC Start Date.""" % 
-						(d.serial_no, dt[0]["amc_expiry_date"]), raise_exception=1)
+						(d.serial_no, dt[0]["amc_expiry_date"]))
 
 	def validate_schedule(self):
 		item_lst1 =[]
@@ -256,13 +245,11 @@ class DocType(TransactionBase):
 				item_lst2.append(m.item_code)
 		
 		if len(item_lst1) != len(item_lst2):
-			msgprint("Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule'")
-			raise Exception
+			throw("Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule'")
 		else:
 			for x in item_lst1:
 				if x not in item_lst2:
-					msgprint("Maintenance Schedule is not generated for item "+x+". Please click on 'Generate Schedule'")
-					raise Exception
+					throw("Maintenance Schedule is not generated for item "+x+". Please click on 'Generate Schedule'")
 	
 	#check if serial no present in item maintenance table
 	#-----------------------------------------------------------
@@ -275,18 +262,15 @@ class DocType(TransactionBase):
 		for m in getlist(self.doclist, 'maintenance_schedule_detail'):
 			if serial_present:
 				if m.item_code in serial_present and not m.serial_no:
-					msgprint("Please click on 'Generate Schedule' to fetch serial no added for item "+m.item_code)
-					raise Exception
-	
-	
-	
+					throw("Please click on 'Generate Schedule' to fetch serial no added for item "+m.item_code)
+
 	def on_cancel(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
 				self.update_amc_date(d.serial_no, '')
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		delete_events(self.doc.doctype, self.doc.name)
-		
+
 	def on_trash(self):
 		delete_events(self.doc.doctype, self.doc.name)
 

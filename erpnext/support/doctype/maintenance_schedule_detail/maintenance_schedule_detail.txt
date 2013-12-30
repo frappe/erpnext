@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:05", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:20", 
+  "modified": "2013-12-30 19:32:30", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,7 @@
   "search_index": 0
  }, 
  {
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "fieldname": "scheduled_date", 
   "fieldtype": "Date", 
@@ -78,6 +79,7 @@
   "report_hide": 1
  }, 
  {
+  "allow_on_submit": 1, 
   "doctype": "DocField", 
   "fieldname": "incharge_name", 
   "fieldtype": "Link", 
