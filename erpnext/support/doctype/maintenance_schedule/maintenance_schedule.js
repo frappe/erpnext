@@ -5,6 +5,8 @@ wn.provide("erpnext.support");
 // TODO commonify this code
 erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 	refresh: function() {
+		var me = this;
+
 		if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(wn._('From Sales Order'), 
 				function() {
@@ -23,7 +25,7 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 			this.frm.add_custom_button(wn._("Make Maintenance Visit"), function() {
 				wn.model.open_mapped_doc({
 					method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
-					source_name: cur_frm.doc.name
+					source_name: me.frm.doc.name
 				})
 			});
 		}
@@ -42,7 +44,7 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new erpnext.support.MaintenanceSchedule({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
-	if(!doc.status)
+	if (!doc.status)
 		set_multiple(dt, dn, { status:'Draft' });
 
 	if (doc.__islocal) {

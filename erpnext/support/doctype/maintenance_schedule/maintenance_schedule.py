@@ -32,7 +32,7 @@ class DocType(TransactionBase):
 			self.validate_maintenance_detail()
 			count = 1
 			s_list = []
-			s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits)
+			s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits, d.sales_person)
 			for i in range(d.no_of_visits):
 				child = addchild(self.doc, 'maintenance_schedule_detail',
 					'Maintenance Schedule Detail', self.doclist)
@@ -43,7 +43,7 @@ class DocType(TransactionBase):
 					child.serial_no = d.serial_no
 				child.idx = count
 				count = count + 1
-				child.incharge_name = d.incharge_name
+				child.sales_person = d.sales_person
 				child.save(1)
 				
 		self.on_update()
@@ -55,26 +55,26 @@ class DocType(TransactionBase):
 		self.validate_serial_no_warranty()
 		self.validate_schedule()
 
-		email_map ={}
+		email_map = {}
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
 				self.update_amc_date(d.serial_no, d.end_date)
 
-			if d.incharge_name not in email_map:
-				email_map[d.incharge_name] = webnotes.bean("Sales Person", 
-					d.incharge_name).run_method("get_email_id")
+			if d.sales_person not in email_map:
+				sp = webnotes.bean("Sales Person", d.sales_person).make_controller()
+				email_map[d.sales_person] = sp.get_email_id()
 
-			scheduled_date =webnotes.conn.sql("""select scheduled_date from 
-				`tabMaintenance Schedule Detail` where incharge_name=%s and item_code=%s and 
-				parent=%s""", (d.incharge_name, d.item_code, self.doc.name), as_dict=1)
+			scheduled_date = webnotes.conn.sql("""select scheduled_date from 
+				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and 
+				parent=%s""", (d.sales_person, d.item_code, self.doc.name), as_dict=1)
 
 			for key in scheduled_date:
-				if email_map[d.incharge_name]:
+				if email_map[d.sales_person]:
 					description = "Reference: %s, Item Code: %s and Customer: %s" % \
 						(self.doc.name, d.item_code, self.doc.customer)
 					webnotes.bean({
 						"doctype": "Event",
-						"owner": email_map[d.incharge_name] or self.doc.owner,
+						"owner": email_map[d.sales_person] or self.doc.owner,
 						"subject": description,
 						"description": description,
 						"starts_on": key["scheduled_date"] + " 10:00:00",
@@ -87,7 +87,7 @@ class DocType(TransactionBase):
 		
 	#get schedule dates
 	#----------------------
-	def create_schedule_list(self, start_date, end_date, no_of_visit):
+	def create_schedule_list(self, start_date, end_date, no_of_visit, sales_person):
 		schedule_list = []		
 		start_date_copy = start_date
 		date_diff = (getdate(end_date) - getdate(start_date)).days
@@ -96,9 +96,29 @@ class DocType(TransactionBase):
 		while (getdate(start_date_copy) < getdate(end_date)):
 			start_date_copy = add_days(start_date_copy, add_by)
 			if len(schedule_list) < no_of_visit:
-				schedule_list.append(getdate(start_date_copy))
+				schedule_date = self.validate_schedule_date_for_holiday_list(getdate(start_date_copy), 
+					sales_person)
+				if schedule_date > getdate(end_date):
+					schedule_date = getdate(end_date)
+				schedule_list.append(schedule_date)
+
 		return schedule_list
-	
+
+	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
+		validated = False
+
+		holiday_list = webnotes.conn.sql_list("""select h.holiday_date from `tabEmployee` emp, 
+			`tabSales Person` sp, `tabHoliday` h where sp.name=%s and emp.name=sp.employee 
+			and h.parent=emp.holiday_list""", sales_person)
+
+		while not validated:
+			if schedule_date in holiday_list:
+				schedule_date = add_days(schedule_date, 1)
+			else:
+				validated = True
+
+		return schedule_date
+
 	#validate date range and periodicity selected
 	#-------------------------------------------------
 	def validate_period(self, arg):
@@ -147,7 +167,7 @@ class DocType(TransactionBase):
 				throw(_("Please select Start Date and End Date for item") + " " + d.item_code)
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
-			elif not d.incharge_name:
+			elif not d.sales_person:
 				throw(_("Please select Incharge Person's name"))
 			
 			if getdate(d.start_date) >= getdate(d.end_date):
@@ -297,7 +317,7 @@ def make_maintenance_visit(source_name, target_doclist=None):
 			"field_map": {
 				"parent": "prevdoc_docname", 
 				"parenttype": "prevdoc_doctype",
-				"incharge_name": "service_person"
+				"sales_person": "service_person"
 			}
 		}
 	}, target_doclist)

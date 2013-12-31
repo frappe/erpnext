@@ -7,18 +7,18 @@
 wn.provide("erpnext");
 erpnext.LeadController = wn.ui.form.Controller.extend({
 	setup: function() {
-		this.frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
+		this.frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
 				return { query: "erpnext.controllers.queries.customer_query" } }
 	},
 	
 	onload: function() {
 		if(cur_frm.fields_dict.lead_owner.df.options.match(/^Profile/)) {
-			cur_frm.fields_dict.lead_owner.get_query = function(doc,cdt,cdn) {
+			cur_frm.fields_dict.lead_owner.get_query = function(doc, cdt, cdn) {
 				return { query:"webnotes.core.doctype.profile.profile.profile_query" } }
 		}
 
 		if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
-			cur_frm.fields_dict.contact_by.get_query = function(doc,cdt,cdn) {
+			cur_frm.fields_dict.contact_by.get_query = function(doc, cdt, cdn) {
 				return { query:"webnotes.core.doctype.profile.profile.profile_query" } }
 		}
 

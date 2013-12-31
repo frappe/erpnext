@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:05", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:20", 
+  "modified": "2013-12-31 12:08:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -112,10 +112,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "incharge_name", 
+  "fieldname": "sales_person", 
   "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Sales Person Incharge", 
+  "label": "Sales Person", 
   "oldfieldname": "incharge_name", 
   "oldfieldtype": "Link", 
   "options": "Sales Person", 
