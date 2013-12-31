@@ -66,12 +66,6 @@ wn.module_page["Selling"] = [
 				"description": wn._("Settings for Selling Module")
 			},
 			{
-				"route":"Form/Shopping Cart Settings",
-				"label":wn._("Shopping Cart Settings"),
-				"description":wn._("Setup of Shopping Cart."),
-				doctype:"Shopping Cart Settings"
-			},
-			{
 				label: wn._("Sales Taxes and Charges Master"),
 				description: wn._("Sales taxes template."),
 				doctype:"Sales Taxes and Charges Master"

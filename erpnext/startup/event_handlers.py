@@ -29,13 +29,6 @@ def on_session_creation(login_manager):
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')
 		webnotes.conn.commit()
 		
-	if webnotes.conn.get_value("Profile", webnotes.session.user, "user_type") == "Website User":
-		from erpnext.selling.utils.cart import set_cart_count
-		set_cart_count()
-		
-def on_logout(login_manager):
-	webnotes._response.set_cookie("cart_count", "")
-		
 def check_if_expired():
 	"""check if account is expired. If expired, do not allow login"""
 	from webnotes import conf
