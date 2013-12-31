@@ -15,8 +15,3 @@ class DocType(DocListController):
 				
 		# at least one territory
 		self.validate_table_has_rows("valid_for_territories")
-		
-	def on_update(self):
-		cart_settings = webnotes.get_obj("Shopping Cart Settings")
-		if cint(cart_settings.doc.enabled):
-			cart_settings.validate_tax_masters()
