@@ -38,7 +38,7 @@ wn.query_reports["General Ledger"] = {
 			"get_query": function() {
 				var company = wn.query_report.filters_by_name.company.get_value();
 				return {
-					"query": "accounts.utils.get_account_list", 
+					"doctype": "Account", 
 					"filters": {
 						"company": company,
 					}

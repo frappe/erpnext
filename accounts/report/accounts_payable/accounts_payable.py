@@ -19,8 +19,8 @@ def execute(filters=None):
 		for gle in get_gl_entries(filters, before_report_date=False)]
 	
 	account_supplier_type_map = get_account_supplier_type_map()
-	pi_map = get_pi_map()
-
+	voucher_detail_map = get_voucher_details()
+	
 	# Age of the invoice on this date
 	age_on = getdate(filters.get("report_date")) > getdate(nowdate()) \
 		and nowdate() or filters.get("report_date")
@@ -29,14 +29,8 @@ def execute(filters=None):
 	for gle in entries:
 		if cstr(gle.against_voucher) == gle.voucher_no or not gle.against_voucher \
 				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date:
-			if gle.voucher_type == "Purchase Invoice":
-				pi_info = pi_map.get(gle.voucher_no)
-				due_date = pi_info.get("due_date")
-				bill_no = pi_info.get("bill_no")
-				bill_date = pi_info.get("bill_date")
-			else:
-				due_date = bill_no = bill_date = ""
-		
+			voucher_details = voucher_detail_map.get(gle.voucher_type, {}).get(gle.voucher_no, {})
+			
 			invoiced_amount = gle.credit > 0 and gle.credit or 0
 			outstanding_amount = get_outstanding_amount(gle, 
 				filters.get("report_date") or nowdate())
@@ -44,13 +38,15 @@ def execute(filters=None):
 			if abs(flt(outstanding_amount)) > 0.01:
 				paid_amount = invoiced_amount - outstanding_amount
 				row = [gle.posting_date, gle.account, account_supplier.get(gle.account, ""),
-					gle.voucher_type, gle.voucher_no, 
-					gle.remarks, account_supplier_type_map.get(gle.account), due_date, bill_no, 
-					bill_date, invoiced_amount, paid_amount, outstanding_amount]
+					gle.voucher_type, gle.voucher_no, gle.remarks, 
+					account_supplier_type_map.get(gle.account), 
+					voucher_details.get("due_date", ""), voucher_details.get("bill_no", ""), 
+					voucher_details.get("bill_date", ""), invoiced_amount, 
+					paid_amount, outstanding_amount]
 				
 				# Ageing
 				if filters.get("ageing_based_on") == "Due Date":
-					ageing_based_on_date = due_date
+					ageing_based_on_date = voucher_details.get("due_date", "")
 				else:
 					ageing_based_on_date = gle.posting_date
 					
@@ -112,14 +108,15 @@ def get_account_supplier_type_map():
 		
 	return account_supplier_type_map
 	
-def get_pi_map():
-	""" get due_date from sales invoice """
-	pi_map = {}
-	for t in webnotes.conn.sql("""select name, due_date, bill_no, bill_date 
-			from `tabPurchase Invoice`""", as_dict=1):
-		pi_map[t.name] = t
+def get_voucher_details():
+	voucher_details = {}
+	for dt in ["Purchase Invoice", "Journal Voucher"]:
+		voucher_details.setdefault(dt, webnotes._dict())
+		for t in webnotes.conn.sql("""select name, due_date, bill_no, bill_date 
+				from `tab%s`""" % dt, as_dict=1):
+			voucher_details[dt].setdefault(t.name, t)
 		
-	return pi_map
+	return voucher_details
 
 def get_outstanding_amount(gle, report_date):
 	payment_amount = webnotes.conn.sql("""
