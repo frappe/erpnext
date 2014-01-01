@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-19 13:30:51", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:21:46", 
+  "modified": "2013-12-31 19:00:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -65,6 +65,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "allocated_percentage", 
   "fieldtype": "Float", 
   "in_list_view": 1, 
@@ -91,6 +96,16 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "incentives", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Incentives", 
+  "oldfieldname": "incentives", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "parenttype", 
   "fieldtype": "Data", 
   "hidden": 1, 
@@ -101,15 +116,5 @@
   "oldfieldtype": "Data", 
   "print_hide": 1, 
   "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "incentives", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Incentives", 
-  "oldfieldname": "incentives", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
  }
 ]

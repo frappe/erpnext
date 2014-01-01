@@ -5,7 +5,7 @@
 wn.provide("erpnext.queries");
 $.extend(erpnext.queries, {
 	profile: function() {
-		return { query: "core.doctype.profile.profile.profile_query" };
+		return { query: "webnotes.core.doctype.profile.profile.profile_query" };
 	},
 	
 	lead: function() {

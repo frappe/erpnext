@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:58", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:21:43", 
+  "modified": "2013-12-31 18:07:50", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -67,6 +67,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Small Text", 
   "in_filter": 1, 
@@ -102,21 +107,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "stock_uom", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "in_list_view": 0, 
-  "label": "UOM", 
-  "oldfieldname": "stock_uom", 
-  "oldfieldtype": "Data", 
-  "options": "UOM", 
-  "print_width": "70px", 
-  "read_only": 1, 
-  "reqd": 0, 
-  "width": "70px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "ref_rate", 
   "fieldtype": "Currency", 
   "in_list_view": 0, 
@@ -142,6 +132,45 @@
   "print_width": "70px", 
   "read_only": 0, 
   "width": "70px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_list_view": 0, 
+  "label": "UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "options": "UOM", 
+  "print_width": "70px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "70px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "base_ref_rate", 
+  "fieldtype": "Currency", 
+  "in_list_view": 0, 
+  "label": "Price List Rate (Company Currency)", 
+  "oldfieldname": "base_ref_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_simple1", 
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -174,17 +203,8 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "base_ref_rate", 
-  "fieldtype": "Currency", 
-  "in_list_view": 0, 
-  "label": "Price List Rate (Company Currency)", 
-  "oldfieldname": "base_ref_rate", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "read_only": 1, 
-  "width": "100px"
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -239,6 +259,71 @@
   "read_only": 0, 
   "reqd": 0, 
   "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_docname", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Quotation", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_docname", 
+  "oldfieldtype": "Link", 
+  "options": "Quotation", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "brand", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Brand Name", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Link", 
+  "options": "Brand", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
+  "options": "Item Group", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "page_break", 
+  "fieldtype": "Check", 
+  "in_list_view": 0, 
+  "label": "Page Break", 
+  "oldfieldname": "page_break", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break4", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -327,66 +412,6 @@
   "read_only": 1, 
   "report_hide": 1, 
   "width": "50px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "brand", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "in_list_view": 0, 
-  "label": "Brand Name", 
-  "oldfieldname": "brand", 
-  "oldfieldtype": "Link", 
-  "options": "Brand", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "search_index": 1
- }, 
- {
-  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
-  "doctype": "DocField", 
-  "fieldname": "item_group", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "in_list_view": 0, 
-  "label": "Item Group", 
-  "oldfieldname": "item_group", 
-  "oldfieldtype": "Link", 
-  "options": "Item Group", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "prevdoc_docname", 
-  "fieldtype": "Link", 
-  "hidden": 0, 
-  "in_filter": 1, 
-  "in_list_view": 0, 
-  "label": "Quotation", 
-  "no_copy": 1, 
-  "oldfieldname": "prevdoc_docname", 
-  "oldfieldtype": "Link", 
-  "options": "Quotation", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "search_index": 1
- }, 
- {
-  "allow_on_submit": 1, 
-  "doctype": "DocField", 
-  "fieldname": "page_break", 
-  "fieldtype": "Check", 
-  "in_list_view": 0, 
-  "label": "Page Break", 
-  "oldfieldname": "page_break", 
-  "oldfieldtype": "Check", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "report_hide": 1
  }, 
  {
   "doctype": "DocField", 
