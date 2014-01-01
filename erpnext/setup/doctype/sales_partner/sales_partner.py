@@ -26,18 +26,3 @@ class DocType(WebsiteGenerator):
 			return contact_details
 		else:
 			return ''
-			
-	def get_context(self):
-		address = webnotes.conn.get_value("Address", 
-			{"sales_partner": self.doc.name, "is_primary_address": 1}, 
-			"*", as_dict=True)
-		if address:
-			city_state = ", ".join(filter(None, [address.city, address.state]))
-			address_rows = [address.address_line1, address.address_line2,
-				city_state, address.pincode, address.country]
-				
-			self.doc.fields.update({
-				"email": address.email_id,
-				"partner_address": filter_strip_join(address_rows, "\n<br>"),
-				"phone": filter_strip_join(cstr(address.phone).split(","), "\n<br>")
-			})

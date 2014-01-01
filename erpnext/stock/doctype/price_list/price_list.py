@@ -29,9 +29,6 @@ class DocType(DocListController):
 	def on_update(self):
 		self.set_default_if_missing()
 		self.update_item_price()
-		cart_settings = webnotes.get_obj("Shopping Cart Settings")
-		if cint(cart_settings.doc.enabled):
-			cart_settings.validate_price_lists()
 				
 	def set_default_if_missing(self):
 		if self.doc.buying_or_selling=="Selling":

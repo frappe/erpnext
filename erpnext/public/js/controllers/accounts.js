@@ -8,7 +8,7 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	} else if(d.account_head && d.charge_type!=="Actual") {
 		wn.call({
 			type:"GET",
-			method: "controllers.accounts_controller.get_tax_rate", 
+			method: "erpnext.controllers.accounts_controller.get_tax_rate", 
 			args: {"account_head":d.account_head},
 			callback: function(r) {
 			  wn.model.set_value(cdt, cdn, "rate", r.message || 0);
