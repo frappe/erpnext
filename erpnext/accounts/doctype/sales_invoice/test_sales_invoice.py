@@ -364,7 +364,6 @@ class TestSalesInvoice(unittest.TestCase):
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
-		# print gl_entries
 		
 		stock_in_hand = webnotes.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
