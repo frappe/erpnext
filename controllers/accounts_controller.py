@@ -231,9 +231,6 @@ class AccountsController(TransactionBase):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
 				
-				if hasattr(self, "set_item_tax_amount"):
-					self.set_item_tax_amount(item, tax, current_tax_amount)
-
 				# case when net total is 0 but there is an actual type charge
 				# in this case add the actual amount to tax.tax_amount
 				# and tax.grand_total_for_current_item for the first such iteration
