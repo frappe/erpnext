@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:02", 
+  "modified": "2014-01-02 11:20:49", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -274,6 +274,7 @@
   "width": "50%"
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
@@ -281,6 +282,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
@@ -291,6 +293,7 @@
   "reqd": 0
  }, 
  {
+  "depends_on": "customer", 
   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
@@ -305,10 +308,27 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
-  "fieldname": "address_display", 
+  "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
-  "label": "Address", 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Data", 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Data", 
+  "label": "Contact Email", 
   "read_only": 1
  }, 
  {
@@ -318,33 +338,23 @@
   "width": "50%"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "contact_display", 
-  "fieldtype": "Small Text", 
-  "label": "Contact", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_mobile", 
-  "fieldtype": "Data", 
-  "label": "Mobile No", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_email", 
-  "fieldtype": "Data", 
-  "label": "Contact Email", 
-  "read_only": 1
- }, 
- {
+  "depends_on": "customer", 
+  "description": "If different than customer address", 
   "doctype": "DocField", 
   "fieldname": "service_address", 
   "fieldtype": "Small Text", 
   "label": "Service Address", 
   "oldfieldname": "service_address", 
   "oldfieldtype": "Small Text"
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 0, 
+  "label": "Address", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

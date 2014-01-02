@@ -3,6 +3,12 @@
 
 {% include 'utilities/doctype/sms_control/sms_control.js' %};
 
+wn.ui.form.on_change("Opportunity", "customer", function(frm) { 
+	erpnext.utils.get_customer_details(frm) });
+wn.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_address_display);
+wn.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);	
+
+
 wn.provide("erpnext.selling");
 // TODO commonify this code
 erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
@@ -12,8 +18,6 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		if(!this.frm.doc.enquiry_from && this.frm.doc.lead)
 			this.frm.doc.enquiry_from = "Lead";
 
-		if(!this.frm.doc.enquiry_from) 
-			hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 		if(!this.frm.doc.status) 
 			set_multiple(cdt,cdn,{status:'Draft'});
 		if(!this.frm.doc.date) 
@@ -23,14 +27,6 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year) 
 			set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
 	
-		if(this.frm.doc.enquiry_from) {
-			if(this.frm.doc.enquiry_from == 'Customer') {
-				hide_field('lead');
-			}
-			else if (this.frm.doc.enquiry_from == 'Lead') {
-				hide_field(['customer', 'customer_address', 'contact_person', 'customer_group']);
-			}
-		} 
 
 		if(!this.frm.doc.__islocal) {
 			cur_frm.communication_view = new wn.views.CommunicationList({
@@ -73,22 +69,7 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},
-	
-	customer: function() {
-		var me = this;
-		if(this.frm.doc.customer) {
-			// TODO shift this to depends_on
-			unhide_field(['customer_address', 'contact_person', 'customer_name',
-				'address_display', 'contact_display', 'contact_mobile', 'contact_email', 
-				'territory', 'customer_group']);
-				
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "set_customer_defaults",
-			});
-		}
-	}, 
-	
+		
 	create_quotation: function() {
 		wn.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
@@ -109,10 +90,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 			cur_frm.add_custom_button(wn._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
 		}
 		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
-	}
-	
-	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
-	
+	}	
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
@@ -128,46 +106,13 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	}
 }
 
-// hide - unhide fields on basis of enquiry_from lead or customer
-cur_frm.cscript.enquiry_from = function(doc,cdt,cdn){
-	cur_frm.cscript.lead_cust_show(doc,cdt,cdn);
-}
-
-// hide - unhide fields based on lead or customer
-cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){	
-	if(doc.enquiry_from == 'Lead'){
-		unhide_field(['lead']);
-		hide_field(['customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
-		doc.lead = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
-	}
-	else if(doc.enquiry_from == 'Customer'){		
-		unhide_field(['customer']);
-		hide_field(['lead', 'address_display', 'contact_display', 'contact_mobile', 
-			'contact_email', 'territory', 'customer_group']);		
-		doc.lead = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
-	}
-}
-
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc, dt, dn) {
-	args = {
-		address: doc.customer_address, 
-		contact: doc.contact_person
-	}
-	if(doc.customer) args.update({customer: doc.customer});
-	
-	return get_server_fields('get_customer_address', JSON.stringify(args),'', doc, dt, dn, 1);
-}
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
-	
 	wn.model.map_current_doc({
 		method: "erpnext.selling.doctype.lead.lead.make_opportunity",
 		source_name: cur_frm.doc.lead
 	})
-	
-	unhide_field(['customer_name', 'address_display','contact_mobile', 'customer_address', 
-		'contact_email', 'territory']);	
 }
 
 

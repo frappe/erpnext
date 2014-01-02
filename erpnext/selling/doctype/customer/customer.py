@@ -10,6 +10,8 @@ import webnotes.defaults
 
 
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.utilities.doctype.address.address import get_address_display
+from erpnext.utilities.doctype.contact.contact import get_contact_details
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -190,3 +192,50 @@ def get_dashboard_info(customer):
 	out["total_unpaid"] = billing[0][1]
 	
 	return out
+
+@webnotes.whitelist()
+def get_customer_details(customer):
+	if not webnotes.has_permission("Customer", "read", customer):
+		webnotes.throw("Not Permitted", webnotes.PermissionError)
+		
+	out = {}
+	customer_bean = webnotes.bean("Customer", customer)
+	customer = customer_bean.doc
+
+	out = webnotes._dict({
+		"customer_address": webnotes.conn.get_value("Address", 
+			{"customer": customer.name, "is_primary_address":1}, "name"),
+		"contact_person": webnotes.conn.get_value("Contact", 
+			{"customer":customer.name, "is_primary_contact":1}, "name")
+	})
+
+	# address display
+	out.address_display = get_address_display(out.customer_address)
+	
+	# primary contact details
+	out.update(get_contact_details(out.contact_person))
+
+	# copy
+	for f in ['customer_name', 'customer_group', 'territory']:
+		out[f] = customer.get(f)
+	
+	# fields prepended with default in Customer doctype
+	for f in ['sales_partner', 'commission_rate', 'currency', 'price_list']:
+		if customer.get("default_" + f):
+			out[f] = customer.get("default_" + f)
+
+	# price list
+	out.selling_price_list = customer.price_list or webnotes.conn.get_value("Customer Group",
+		customer.customer_group, "default_price_list")
+	
+	if out.selling_price_list:
+		out.price_list_currency = webnotes.conn.get_value("Price List", out.selling_price_list, "currency")
+	
+	# sales team
+	out.sales_team = [{
+		"sales_person": d.sales_person, 
+		"sales_designation": d.sales_designation
+	} for d in customer_bean.doclist.get({"doctype":"Sales Team"})]
+	
+	return out
+	

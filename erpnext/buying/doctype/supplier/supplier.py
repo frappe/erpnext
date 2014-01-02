@@ -195,3 +195,26 @@ def get_dashboard_info(supplier):
 	out["total_unpaid"] = billing[0][1]
 	
 	return out
+	
+@webnotes.whitelist()
+def get_supplier_details(supplier):
+	if not webnotes.has_permission("Supplier", "read", supplier):
+		webnotes.msgprint("No Permission", raise_exception=webnotes.PermissionError)
+
+	supplier = webnotes.doc("Supplier", supplier)
+	
+	out = webnotes._dict({
+		"supplier_address": webnotes.conn.get_value("Address", 
+			{"supplier": supplier.name, "is_primary_address":1}, "name"),
+		"contact_person": webnotes.conn.get_value("Contact", 
+			{"supplier":supplier.name, "is_primary_contact":1}, "name")
+	})
+	
+	out.supplier_name = supplier.supplier_name
+	out.currency = supplier.default_currency
+	out.buying_price_list = supplier.default_price_list
+		
+	return out
+		
+	
+	

@@ -33,9 +33,10 @@ class SellingController(StockController):
 			self.set_taxes("other_charges", "charge")
 					
 	def set_missing_lead_customer_details(self):
+		from erpnext.selling.doctype.customer.customer import get_customer_details
 		if self.doc.customer:
 			if not (self.doc.contact_person and self.doc.customer_address and self.doc.customer_name):
-				for fieldname, val in self.get_customer_defaults().items():
+				for fieldname, val in get_customer_details(self.doc.customer).iteritems():
 					if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
 						self.doc.fields[fieldname] = val
 		

@@ -10,6 +10,7 @@
 
 wn.provide("erpnext.selling");
 wn.require("assets/erpnext/js/transaction.js");
+
 {% include "public/js/controllers/accounts.js" %}
 
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
@@ -103,47 +104,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	customer: function() {
-		var me = this;
-		if(this.frm.doc.customer || this.frm.doc.debit_to) {
-			if(!this.frm.doc.company) {
-				this.frm.set_value("customer", null);
-				msgprint(wn._("Please specify Company"));
-			} else {
-				var selling_price_list = this.frm.doc.selling_price_list;
-				return this.frm.call({
-					doc: this.frm.doc,
-					method: "set_customer_defaults",
-					freeze: true,
-					callback: function(r) {
-						if(!r.exc) {
-							(me.frm.doc.selling_price_list !== selling_price_list) ? 
-								me.selling_price_list() :
-								me.price_list_currency();
-						}
-					}
-				});
-			}
-		}
+		erpnext.utils.get_customer_details(this.frm);
 	},
 	
 	customer_address: function() {
-		var me = this;
-		if(this.frm.doc.customer) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				args: {
-					customer: this.frm.doc.customer, 
-					address: this.frm.doc.customer_address, 
-					contact: this.frm.doc.contact_person
-				},
-				method: "set_customer_address",
-				freeze: true,
-			});
-		}
+		erpnext.utils.get_address_display(this.frm, "customer_address");
 	},
 	
 	contact_person: function() {
-		this.customer_address();
+		erpnext.utils.get_contact_details(this.frm);
 	},
 	
 	barcode: function(doc, cdt, cdn) {

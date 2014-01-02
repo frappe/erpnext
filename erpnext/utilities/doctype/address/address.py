@@ -51,3 +51,26 @@ class DocType:
 				webnotes.conn.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
 					(is_address_type, fieldname, "%s", "%s"), (self.doc.fields[fieldname], self.doc.name))
 				break
+
+@webnotes.whitelist()
+def get_address_display(address_dict):
+	if not isinstance(address_dict, dict):
+		address_dict = webnotes.conn.get_value("Address", address_dict, "*", as_dict=True) or {}
+	
+	meta = webnotes.get_doctype("Address")
+	sequence = (("", "address_line1"), 
+		("\n", "address_line2"), 
+		("\n", "city"),
+		("\n", "state"), 
+		("\n" + meta.get_label("pincode") + ": ", "pincode"), 
+		("\n", "country"),
+		("\n" + meta.get_label("phone") + ": ", "phone"), 
+		("\n" + meta.get_label("fax") + ": ", "fax"))
+	
+	display = ""
+	for separator, fieldname in sequence:
+		if address_dict.get(fieldname):
+			display += separator + address_dict.get(fieldname)
+		
+	return display.strip()
+

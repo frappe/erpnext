@@ -147,23 +147,13 @@ class DocType(SellingController):
 		self.set_pos_fields(for_validate)
 		
 		if not self.doc.debit_to:
-			self.doc.debit_to = self.get_customer_account()
+			self.doc.debit_to = get_customer_account(self.doc.company, self.doc.customer)
 		if not self.doc.due_date:
-			self.doc.due_date = self.get_due_date()
+			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.customer, 
+				self.doc.debit_to, self.doc.company)
 		
 		super(DocType, self).set_missing_values(for_validate)
-		
-	def set_customer_defaults(self):
-		# TODO cleanup these methods
-		if self.doc.customer:
-			self.doc.debit_to = self.get_customer_account()
-		elif self.doc.debit_to:
-			self.doc.customer = webnotes.conn.get_value('Account', self.doc.debit_to, 'master_name')
-		
-		self.doc.due_date = self.get_due_date()
-		
-		super(DocType, self).set_customer_defaults()
-			
+					
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
@@ -190,7 +180,7 @@ class DocType(SellingController):
 		if pos:
 			if not for_validate and not self.doc.customer:
 				self.doc.customer = pos.customer
-				self.set_customer_defaults()
+				# self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
@@ -214,44 +204,6 @@ class DocType(SellingController):
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
 				self.set_taxes("other_charges", "charge")
-
-	def get_customer_account(self):
-		"""Get Account Head to which amount needs to be Debited based on Customer"""
-		if not self.doc.company:
-			msgprint("Please select company first and re-select the customer after doing so",
-			 	raise_exception=1)
-		if self.doc.customer:
-			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
-				where (name = %s or (master_name = %s and master_type = 'customer')) 
-				and docstatus != 2 and company = %s""", 
-				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), 
-				self.doc.customer, self.doc.company))
-			
-			if acc_head and acc_head[0][0]:
-				return acc_head[0][0]
-			else:
-				msgprint("%s does not have an Account Head in %s. \
-					You must first create it from the Customer Master" % 
-					(self.doc.customer, self.doc.company))
-
-	def get_due_date(self):
-		"""Set Due Date = Posting Date + Credit Days"""
-		due_date = None
-		if self.doc.posting_date:
-			credit_days = 0
-			if self.doc.debit_to:
-				credit_days = webnotes.conn.get_value("Account", self.doc.debit_to, "credit_days")
-			if self.doc.customer and not credit_days:
-				credit_days = webnotes.conn.get_value("Customer", self.doc.customer, "credit_days")
-			if self.doc.company and not credit_days:
-				credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
-				
-			if credit_days:
-				due_date = add_days(self.doc.posting_date, credit_days)
-			else:
-				due_date = self.doc.posting_date
-
-		return due_date	
 	
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.debit_to, 
@@ -892,6 +844,59 @@ def assign_task_to_owner(inv, msg, users):
 			'priority'		:	'Urgent'
 		}
 		assign_to.add(args)
+
+@webnotes.whitelist()
+def get_customer_details(company, customer, debit_to, posting_date):
+	if not webnotes.has_permission("Customer", "read", customer):
+		webnotes.throw("No Permission")
+		
+	from erpnext.selling.doctype.customer.customer import get_customer_details
+	
+	if customer:
+		debit_to = get_customer_account(company, customer)
+	elif debit_to:
+		customer = webnotes.conn.get_value('Account',debit_to, 'master_name')
+
+	out = {
+		"customer": customer,
+		"debit_to": debit_to,
+		"due_date": get_due_date(posting_date, customer, debit_to, company)
+	}	
+	out.update(get_customer_details(customer))
+	return out
+	
+def get_customer_account(company, customer):
+	if not company:
+		webnotes.throw(_("Please select company first."))
+
+	if customer:
+		acc_head = webnotes.conn.get_value("Account", {"master_name":customer,
+			"master_type":"Customer", "company": company})
+
+		if not acc_head:
+			webnotes.throw(_("Customer has no account head in selected Company. Open the customer record and create an Account Head first."))
+	
+		return acc_head		
+
+def get_due_date(posting_date, customer, debit_to, company):
+	"""Set Due Date = Posting Date + Credit Days"""
+	due_date = None
+	if posting_date:
+		credit_days = 0
+		if debit_to:
+			credit_days = webnotes.conn.get_value("Account", debit_to, "credit_days")
+		if customer and not credit_days:
+			credit_days = webnotes.conn.get_value("Customer", customer, "credit_days")
+		if company and not credit_days:
+			credit_days = webnotes.conn.get_value("Company", company, "credit_days")
+			
+		if credit_days:
+			due_date = add_days(posting_date, credit_days)
+		else:
+			due_date = posting_date
+
+	return due_date	
+
 
 @webnotes.whitelist()
 def get_bank_cash_account(mode_of_payment):

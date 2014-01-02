@@ -5,20 +5,8 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return{	query: "erpnext.controllers.queries.customer_query" } }
 
 wn.provide("erpnext.support");
-// TODO commonify this code
-erpnext.support.SupportTicket = wn.ui.form.Controller.extend({
-	customer: function() {
-		var me = this;
-		if(this.frm.doc.customer) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "set_customer_defaults",
-			});			
-		}
-	}
-});
 
-$.extend(cur_frm.cscript, new erpnext.support.SupportTicket({frm: cur_frm}));
+cur_frm.add_fetch("customer", "customer_name", "customer_name")
 
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
