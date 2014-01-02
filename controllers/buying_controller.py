@@ -163,30 +163,36 @@ class BuyingController(StockController):
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:
 				del item.fields["item_tax_amount"]
-				
-	def set_item_tax_amount(self, item, tax, current_tax_amount):
+							
+	# update valuation rate
+	def update_valuation_rate(self, parentfield):
 		"""
 			item_tax_amount is the total tax amount applied on that item
 			stored for valuation 
 			
 			TODO: rename item_tax_amount to valuation_tax_amount
 		"""
-		if tax.category in ["Valuation", "Valuation and Total"] and \
-			self.meta.get_field("item_tax_amount", parentfield=self.fname):
-				item.item_tax_amount += flt(current_tax_amount, self.precision("item_tax_amount", item))
-				
-	# update valuation rate
-	def update_valuation_rate(self, parentfield):
-		for item in self.doclist.get({"parentfield": parentfield}):
-			item.conversion_factor = item.conversion_factor or flt(webnotes.conn.get_value(
-				"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
-				"conversion_factor")) or 1
+		stock_items = self.get_stock_items()
+		
+		stock_items_amount = sum([flt(d.amount) for d in 
+			self.doclist.get({"parentfield": parentfield}) 
+			if d.item_code and d.item_code in stock_items])
 			
-			if item.item_code and item.qty:
+		total_valuation_amount = sum([flt(d.tax_amount) for d in 
+			self.doclist.get({"parentfield": "purchase_tax_details"}) 
+			if d.category in ["Valuation", "Valuation and Total"]])
+			
+			
+		for item in self.doclist.get({"parentfield": parentfield}):
+			if item.item_code and item.qty and item.item_code in stock_items:
+				item.item_tax_amount = flt(flt(item.amount) * total_valuation_amount \
+					/ stock_items_amount, self.precision("item_tax_amount", item))
+
 				self.round_floats_in(item)
-								
-				# if no item code, which is sometimes the case in purchase invoice, 
-				# then it is not possible to track valuation against it
+				
+				item.conversion_factor = item.conversion_factor or flt(webnotes.conn.get_value(
+					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
+					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				item.valuation_rate = ((item.amount + item.item_tax_amount + item.rm_supp_cost)
 					/ qty_in_stock_uom)
