@@ -12,7 +12,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		var me = this;
 		
 		this.frm.fields_dict.delivery_note_no.get_query = function() {
-			return { query: "stock.doctype.stock_entry.stock_entry.query_sales_return_doc" };
+			return { query: "erpnext.stock.doctype.stock_entry.stock_entry.query_sales_return_doc" };
 		};
 		
 		this.frm.fields_dict.sales_invoice_no.get_query = 
@@ -28,7 +28,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) && 
 				me.get_doctype_docname()) {
 					return {
-						query: "stock.doctype.stock_entry.stock_entry.query_return_item",
+						query: "erpnext.stock.doctype.stock_entry.stock_entry.query_return_item",
 						filters: {
 							purpose: me.frm.doc.purpose,
 							delivery_note_no: me.frm.doc.delivery_note_no,
@@ -309,7 +309,7 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 	var d = locals[cdt][cdn];		
 	if(d.item_code) {
 		return{
-			query: "stock.doctype.stock_entry.stock_entry.get_batch_no",
+			query: "erpnext.stock.doctype.stock_entry.stock_entry.get_batch_no",
 			filters:{
 				'item_code': d.item_code,
 				's_warehouse': d.s_warehouse,

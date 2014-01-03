@@ -42,7 +42,6 @@ class DocType(AccountsController):
 	def on_submit(self):
 		if self.doc.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
 			self.check_credit_days()
-		self.check_account_against_entries()
 		self.make_gl_entries()
 		self.check_credit_limit()
 
@@ -232,14 +231,20 @@ class DocType(AccountsController):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.against_invoice and webnotes.conn.get_value("Sales Invoice", 
 					d.against_invoice, "debit_to") != d.account:
-				webnotes.throw(_("Credited account (Customer) is not matching with Sales Invoice"))
+				webnotes.throw(_("Row #") + cstr(d.idx) +  ": " +
+					_("Account is not matching with Debit To account of Sales Invoice"))
 			
 			if d.against_voucher and webnotes.conn.get_value("Purchase Invoice", 
-						d.against_voucher, "credit_to") != d.account:
-				webnotes.throw(_("Debited account (Supplier) is not matching with Purchase Invoice"))
+					d.against_voucher, "credit_to") != d.account:
+				webnotes.throw(_("Row #") + cstr(d.idx) + ": " +
+					_("Account is not matching with Credit To account of Purchase Invoice"))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
+		
+		if not cancel:
+			self.check_account_against_entries()
+		
 		gl_map = []
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.debit or d.credit:

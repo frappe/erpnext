@@ -198,7 +198,7 @@ class DocType(DocListController, WebsiteGenerator):
 				self.doc.name, raise_exception=1)
 
 	def update_website(self):
-		from erpnext.selling.utils.product import invalidate_cache_for
+		from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
 		invalidate_cache_for(self.doc.item_group)
 		[invalidate_cache_for(d.item_group) for d in \
 			self.doclist.get({"doctype":"Website Item Group"})]
@@ -220,15 +220,6 @@ class DocType(DocListController, WebsiteGenerator):
 		
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
-
-	def get_context(self):
-		from erpnext.selling.utils.product import get_parent_item_groups
-		self.parent_groups = get_parent_item_groups(self.doc.item_group) + [{"name":self.doc.name}]
-		self.doc.title = self.doc.item_name
-
-		if self.doc.slideshow:
-			from webnotes.website.doctype.website_slideshow.website_slideshow import get_slideshow
-			get_slideshow(self)								
 
 	def get_file_details(self, arg = ''):
 		file = webnotes.conn.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
