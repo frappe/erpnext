@@ -15,26 +15,28 @@ class AccountsReceivableReport(object):
 			else self.filters.report_date
 			
 	def run(self):
-		return self.get_columns(), self.get_data()
+		customer_naming_by = webnotes.conn.get_value("Selling Settings", None, "cust_master_name")
+		return self.get_columns(customer_naming_by), self.get_data(customer_naming_by)
 		
-	def get_columns(self):
+	def get_columns(self, customer_naming_by):
 		columns = [
 			"Posting Date:Date:80", "Account:Link/Account:150",
 			"Voucher Type::110", "Voucher No::120", "::30",
 			"Due Date:Date:80",  
 			"Invoiced Amount:Currency:100", "Payment Received:Currency:100", 
 			"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100",
-			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100"
+			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100",
+			"Customer:Link/Customer:200"
 		]
 
-		if self.get_customer_naming() == "Naming Series":
-			columns += ["Customer:Link/Customer:200"]
+		if customer_naming_by == "Naming Series":
+			columns += ["Customer Name::110"]
 
-		columns += ["Customer Name::110", "Territory:Link/Territory:80", "Remarks::200"]
+		columns += ["Territory:Link/Territory:80", "Remarks::200"]
 
 		return columns
 
-	def get_data(self):
+	def get_data(self, customer_naming_by):
 		data = []
 		future_vouchers = self.get_entries_after(self.filters.report_date)
 		for gle in self.get_entries_till(self.filters.report_date):
@@ -50,22 +52,20 @@ class AccountsReceivableReport(object):
 						outstanding_amount]
 					entry_date = due_date if self.filters.ageing_based_on == "Due Date" \
 						else gle.posting_date
-					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount)
+					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount) + \
+						[self.get_customer(gle.account)]
 
-					if self.get_customer_naming() == "Naming Series":
-						row += [self.get_customer(gle.account)]
+					if customer_naming_by == "Naming Series":
+						row += [self.get_customer_name(gle.account)]
 
-					row += [self.get_customer_name(gle.account), self.get_territory(gle.account), gle.remarks]
+					row += [self.get_territory(gle.account), gle.remarks]
 					data.append(row)
 		
-		for i in range(0,len(data)):
+		for i in range(0, len(data)):
 			data[i].insert(4, """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
 				% ("/".join(["#Form", data[i][2], data[i][3]]),))
 		
 		return data
-
-	def get_customer_naming(self):
-		return webnotes.conn.get_value("Selling Settings", None, "cust_master_name")
 
 	def get_entries_after(self, report_date):
 		# returns a distinct list
@@ -163,7 +163,7 @@ class AccountsReceivableReport(object):
 
 def execute(filters=None):
 	return AccountsReceivableReport(filters).run()
-	
+
 def get_ageing_data(age_as_on, entry_date, outstanding_amount):
 	# [0-30, 30-60, 60-90, 90-above]
 	outstanding_range = [0.0, 0.0, 0.0, 0.0]
