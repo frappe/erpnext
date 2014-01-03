@@ -151,7 +151,9 @@ class StatusUpdater(DocListController):
 		"""
 	
 		# check if overflow is within tolerance
-		tolerance = self.get_tolerance_for(item['item_code'])
+		tolerance, self.tolerance, self.global_tolerance = get_tolerance_for(item['item_code'], 
+			self.tolerance, self.global_tolerance)
+			
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) / 
 		 	item[args['target_ref_field']]) * 100
 	
@@ -170,23 +172,6 @@ class StatusUpdater(DocListController):
 				
 				Also, please check if the order item has already been billed in the Sales Order""" % 
 				item, raise_exception=1)
-				
-	def get_tolerance_for(self, item_code):
-		"""
-			Returns the tolerance for the item, if not set, returns global tolerance
-		"""
-		if self.tolerance.get(item_code): return self.tolerance[item_code]
-		
-		tolerance = flt(webnotes.conn.get_value('Item',item_code,'tolerance') or 0)
-
-		if not tolerance:
-			if self.global_tolerance == None:
-				self.global_tolerance = flt(webnotes.conn.get_value('Global Defaults', None, 
-					'tolerance'))
-			tolerance = self.global_tolerance
-		
-		self.tolerance[item_code] = tolerance
-		return tolerance
 	
 
 	def update_qty(self, change_modified=True):
@@ -246,3 +231,21 @@ class StatusUpdater(DocListController):
 								'Not %(keyword)s', if(%(target_parent_field)s>=99.99, 
 								'Fully %(keyword)s', 'Partly %(keyword)s'))
 							where name='%(name)s'""" % args)
+							
+def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
+	"""
+		Returns the tolerance for the item, if not set, returns global tolerance
+	"""
+	if item_tolerance.get(item_code):
+		return item_tolerance[item_code], item_tolerance, global_tolerance
+	
+	tolerance = flt(webnotes.conn.get_value('Item',item_code,'tolerance') or 0)
+
+	if not tolerance:
+		if global_tolerance == None:
+			global_tolerance = flt(webnotes.conn.get_value('Global Defaults', None, 
+				'tolerance'))
+		tolerance = global_tolerance
+	
+	item_tolerance[item_code] = tolerance
+	return tolerance, item_tolerance, global_tolerance

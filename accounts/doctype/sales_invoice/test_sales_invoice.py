@@ -565,16 +565,17 @@ class TestSalesInvoice(unittest.TestCase):
 			where against_invoice=%s""", si.doc.name))
 			
 	def test_recurring_invoice(self):
-		from webnotes.utils import now_datetime, get_first_day, get_last_day, add_to_date
-		today = now_datetime().date()
-		
+		from webnotes.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
+		from accounts.utils import get_fiscal_year
+		today = nowdate()
 		base_si = webnotes.bean(copy=test_records[0])
 		base_si.doc.fields.update({
 			"convert_into_recurring_invoice": 1,
 			"recurring_type": "Monthly",
 			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
-			"repeat_on_day_of_month": today.day,
+			"repeat_on_day_of_month": getdate(today).day,
 			"posting_date": today,
+			"fiscal_year": get_fiscal_year(today)[0],
 			"invoice_period_from_date": get_first_day(today),
 			"invoice_period_to_date": get_last_day(today)
 		})

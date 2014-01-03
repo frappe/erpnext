@@ -22,7 +22,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		
 		pr = make_purchase_receipt(po.doc.name)
 		pr[0]["supplier_warehouse"] = "_Test Warehouse 1 - _TC"
-		
+		pr[0]["posting_date"] = "2013-05-12"
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
 		self.assertEquals(len(pr), len(test_records[0]))
 		
@@ -52,7 +52,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
 		self.assertEquals(len(pr), len(test_records[0]))
-		
+		pr[0]["posting_date"] = "2013-05-12"
 		pr[0].naming_series = "_T-Purchase Receipt-"
 		pr[1].qty = 4.0
 		pr_bean = webnotes.bean(pr)
@@ -66,6 +66,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			
 		pr1 = make_purchase_receipt(po.doc.name)
 		pr1[0].naming_series = "_T-Purchase Receipt-"
+		pr1[0]["posting_date"] = "2013-05-12"
 		pr1[1].qty = 8
 		pr1_bean = webnotes.bean(pr1)
 		pr1_bean.insert()
@@ -88,7 +89,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(test_records[0]))
-
+		pi[0]["posting_date"] = "2013-05-12"
 		pi[0].bill_no = "NA"
 		webnotes.bean(pi).insert()
 		
