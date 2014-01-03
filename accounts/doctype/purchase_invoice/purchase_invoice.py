@@ -350,7 +350,6 @@ class DocType(BuyingController):
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
-		# rounding_diff = 0.0
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if auto_accounting_for_stock and item.item_code in stock_items:
 				if flt(item.valuation_rate):
@@ -360,11 +359,6 @@ class DocType(BuyingController):
 					stock_item_and_auto_accounting_for_stock = True
 					
 					valuation_amt = item.amount + item.item_tax_amount + item.rm_supp_cost
-					
-					# rounding_diff += (flt(item.amount, self.precision("amount", item)) + 
-					# 	flt(item.item_tax_amount, self.precision("item_tax_amount", item)) + 
-					# 	flt(item.rm_supp_cost, self.precision("rm_supp_cost", item)) - 
-					# 	valuation_amt)
 					
 					gl_entries.append(
 						self.get_gl_dict({
@@ -392,12 +386,6 @@ class DocType(BuyingController):
 			# this will balance out valuation amount included in cost of goods sold
 			expenses_included_in_valuation = \
 				self.get_company_default("expenses_included_in_valuation")
-				
-			# if rounding_diff:
-			# 	import operator
-			# 	cost_center_with_max_value = max(valuation_tax.iteritems(), 
-			# 		key=operator.itemgetter(1))[0]
-			# 	valuation_tax[cost_center_with_max_value] -= flt(rounding_diff)
 			
 			for cost_center, amount in valuation_tax.items():
 				gl_entries.append(
