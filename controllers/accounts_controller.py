@@ -381,24 +381,41 @@ class AccountsController(TransactionBase):
 			})
 			
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
+		from controllers.status_updater import get_tolerance_for
+		item_tolerance = {}
+		global_tolerance = None
+		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get(item_ref_dn):
 				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
 					where %s=%s and docstatus=1""" % (based_on, self.tname, item_ref_dn, '%s'), 
 					item.fields[item_ref_dn])[0][0]
 				
-				max_allowed_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
-					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
-				
 				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
 					self.precision(based_on, item))
+				
+				ref_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
+					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
+				
+				tolerance, item_tolerance, global_tolerance = get_tolerance_for(item.item_code, 
+					item_tolerance, global_tolerance)
 					
-				if max_allowed_amt and total_billed_amt - max_allowed_amt > 0.02:
-					webnotes.msgprint(_("Row ")+ cstr(item.idx) + ": " + cstr(item.item_code) + 
-						_(" will be over-billed against mentioned ") + cstr(ref_dt) +  
-						_(". Max allowed " + cstr(based_on) + ": " + cstr(max_allowed_amt)), 
-						raise_exception=1)
-		
+				max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
+				
+				if total_billed_amt - max_allowed_amt > 0.01:
+					reduce_by = total_billed_amt - max_allowed_amt
+					
+					webnotes.throw(_("Row #") + cstr(item.idx) + ": " + 
+						_(" Max amount allowed for Item ") + cstr(item.item_code) + 
+						_(" against ") + ref_dt + " " + 
+						cstr(item.fields[ref_dt.lower().replace(" ", "_")]) + _(" is ") + 
+						cstr(max_allowed_amt) + ". \n" + 
+						_("""If you want to increase your overflow tolerance, please increase \
+						tolerance % in Global Defaults or Item master. 				
+						Or, you must reduce the amount by """) + cstr(reduce_by) + "\n" + 
+						_("""Also, please check if the order item has already been billed \
+							in the Sales Order"""))
+				
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default
 		return get_company_default(self.doc.company, fieldname)
