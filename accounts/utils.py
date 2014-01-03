@@ -31,6 +31,8 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	
 	if not fy:
 		error_msg = """%s %s not in any Fiscal Year""" % (label, formatdate(date))
+		error_msg = """{msg}: {date}""".format(msg=_("Fiscal Year does not exist for date"), 
+			date=formatdate(date))
 		if verbose: webnotes.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	

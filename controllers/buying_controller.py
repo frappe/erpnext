@@ -174,9 +174,11 @@ class BuyingController(StockController):
 		"""
 		stock_items = self.get_stock_items()
 		
-		stock_items_amount = sum([flt(d.amount) for d in 
-			self.doclist.get({"parentfield": parentfield}) 
-			if d.item_code and d.item_code in stock_items])
+		stock_items_qty, stock_items_amount = 0, 0
+		for d in self.doclist.get({"parentfield": parentfield}):
+			if d.item_code and d.item_code in stock_items:
+				stock_items_qty += flt(d.qty)
+				stock_items_amount += flt(d.amount)
 			
 		total_valuation_amount = sum([flt(d.tax_amount) for d in 
 			self.doclist.get({"parentfield": "purchase_tax_details"}) 
@@ -184,9 +186,12 @@ class BuyingController(StockController):
 			
 			
 		for item in self.doclist.get({"parentfield": parentfield}):
-			if item.item_code and item.qty and stock_items_amount and item.item_code in stock_items:
-				item.item_tax_amount = flt(flt(item.amount) * total_valuation_amount \
-					/ stock_items_amount, self.precision("item_tax_amount", item))
+			if item.item_code and item.qty and item.item_code in stock_items:
+				item_proportion = flt(item.amount) / stock_items_amount if stock_items_amount \
+					else flt(item.qty) / stock_items_qty
+				
+				item.item_tax_amount = flt(item_proportion * total_valuation_amount, 
+					self.precision("item_tax_amount", item))
 
 				self.round_floats_in(item)
 				
