@@ -26,9 +26,8 @@ class AccountsReceivableReport(object):
 			"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100",
 			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100"
 		]
-		
-		naming_by = self.get_selling_settings()
-		if naming_by[0].value == "Naming Series":
+
+		if self.get_customer_naming() == "Naming Series":
 			columns += ["Customer:Link/Customer:200"]
 
 		columns += ["Customer Name::110", "Territory:Link/Territory:80", "Remarks::200"]
@@ -53,8 +52,7 @@ class AccountsReceivableReport(object):
 						else gle.posting_date
 					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount)
 
-					naming_by = self.get_selling_settings()
-					if naming_by[0].value == "Naming Series":
+					if self.get_customer_naming() == "Naming Series":
 						row += [self.get_customer(gle.account)]
 
 					row += [self.get_customer_name(gle.account), self.get_territory(gle.account), gle.remarks]
@@ -66,9 +64,8 @@ class AccountsReceivableReport(object):
 		
 		return data
 
-	def get_selling_settings(self):
-		return webnotes.conn.sql("""select value from `tabSingles` where 
-			doctype='Selling Settings' and field='cust_master_name'""", as_dict=1)
+	def get_customer_naming(self):
+		return webnotes.conn.get_value("Selling Settings", None, "cust_master_name")
 
 	def get_entries_after(self, report_date):
 		# returns a distinct list
