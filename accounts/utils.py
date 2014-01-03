@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import webnotes
-from webnotes.utils import nowdate, nowtime, cstr, flt, now, getdate, add_months
+from webnotes.utils import nowdate, cstr, flt, now, getdate, add_months
 from webnotes.model.doc import addchild
 from webnotes import msgprint, _
 from webnotes.utils import formatdate
@@ -64,7 +64,6 @@ def get_balance_on(account=None, date=None):
 	try:
 		year_start_date = get_fiscal_year(date, verbose=0)[1]
 	except FiscalYearError, e:
-		from webnotes.utils import getdate
 		if getdate(date) > getdate(nowdate()):
 			# if fiscal year not found and the date is greater than today
 			# get fiscal year for today's date and its corresponding year start date
@@ -222,17 +221,26 @@ def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
 		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
 		
 def remove_against_link_from_jv(ref_type, ref_no, against_field):
-	webnotes.conn.sql("""update `tabJournal Voucher Detail` set `%s`=null,
-		modified=%s, modified_by=%s
-		where `%s`=%s and docstatus < 2""" % (against_field, "%s", "%s", against_field, "%s"), 
-		(now(), webnotes.session.user, ref_no))
+	linked_jv = webnotes.conn.sql_list("""select parent from `tabJournal Voucher Detail` 
+		where `%s`=%s and docstatus < 2""" % (against_field, "%s"), (ref_no))
+		
+	if linked_jv:	
+		webnotes.conn.sql("""update `tabJournal Voucher Detail` set `%s`=null,
+			modified=%s, modified_by=%s
+			where `%s`=%s and docstatus < 2""" % (against_field, "%s", "%s", against_field, "%s"), 
+			(now(), webnotes.session.user, ref_no))
 	
-	webnotes.conn.sql("""update `tabGL Entry`
-		set against_voucher_type=null, against_voucher=null,
-		modified=%s, modified_by=%s
-		where against_voucher_type=%s and against_voucher=%s
-		and voucher_no != ifnull(against_voucher, '')""",
-		(now(), webnotes.session.user, ref_type, ref_no))
+		webnotes.conn.sql("""update `tabGL Entry`
+			set against_voucher_type=null, against_voucher=null,
+			modified=%s, modified_by=%s
+			where against_voucher_type=%s and against_voucher=%s
+			and voucher_no != ifnull(against_voucher, '')""",
+			(now(), webnotes.session.user, ref_type, ref_no))
+			
+		webnotes.msgprint("{msg} {linked_jv}".format(msg = _("""Following linked Journal Vouchers \
+			made against this transaction has been unlinked. You can link them again with other \
+			transactions via Payment Reconciliation Tool."""), linked_jv="\n".join(linked_jv)))
+		
 
 @webnotes.whitelist()
 def get_company_default(company, fieldname):
