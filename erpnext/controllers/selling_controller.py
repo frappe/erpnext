@@ -121,7 +121,7 @@ class SellingController(StockController):
 						
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 			
-			if cumulated_tax_fraction and not self.flat_discount_applied:
+			if cumulated_tax_fraction and not self.discount_amount_applied:
 				item.amount = flt((item.export_amount * self.doc.conversion_rate) /
 					(1 + cumulated_tax_fraction), self.precision("amount", item))
 					
@@ -158,7 +158,7 @@ class SellingController(StockController):
 		return current_tax_fraction
 		
 	def calculate_item_values(self):
-		if not self.flat_discount_applied:
+		if not self.discount_amount_applied:
 			for item in self.item_doclist:
 				self.round_floats_in(item)
 
@@ -193,25 +193,25 @@ class SellingController(StockController):
 		self.doc.other_charges_total = flt(self.doc.grand_total - self.doc.net_total,
 			self.precision("other_charges_total"))
 		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - 
-			self.doc.net_total_export + flt(self.doc.flat_discount), self.precision("other_charges_total_export"))
+			self.doc.net_total_export + flt(self.doc.discount_amount), self.precision("other_charges_total_export"))
 		
 		self.doc.rounded_total = _round(self.doc.grand_total)
 		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
 
-	def apply_flat_discount(self):
-		if self.doc.flat_discount:
-			total_amount_for_flat_discount = self.get_flat_discountable_amount()
+	def apply_discount_amount(self):
+		if self.doc.discount_amount:
+			grand_total_for_discount_amount = self.get_grand_total_for_discount_amount()
 
-			if total_amount_for_flat_discount:
-				# calculate item amount after flat discount
+			if grand_total_for_discount_amount:
+				# calculate item amount after Discount Amount
 				for item in self.item_doclist:
-					distributed_amount = self.doc.flat_discount * item.amount / total_amount_for_flat_discount
+					distributed_amount = flt(self.doc.discount_amount) * item.amount / grand_total_for_discount_amount
 					item.amount = flt(item.amount - distributed_amount, self.precision("amount", item))
 
-				self.flat_discount_applied = True
-				self.calculate_taxes_and_totals()
+				self.discount_amount_applied = True
+				self._calculate_taxes_and_totals()
 
-	def get_flat_discountable_amount(self):
+	def get_grand_total_for_discount_amount(self):
 		actual_taxes_dict = {}
 
 		for tax in self.tax_doclist:
@@ -222,9 +222,9 @@ class SellingController(StockController):
 					flt(tax.rate) / 100
 				actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
 
-		total_amount_for_flat_discount = flt(self.doc.grand_total - sum(actual_taxes_dict.values()), 
+		grand_total_for_discount_amount = flt(self.doc.grand_total - sum(actual_taxes_dict.values()), 
 			self.precision("grand_total"))
-		return total_amount_for_flat_discount
+		return grand_total_for_discount_amount
 
 	def calculate_outstanding_amount(self):
 		# NOTE: 

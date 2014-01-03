@@ -146,9 +146,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	validate: function() {
-		this.flat_discount_applied = false;
 		this.calculate_taxes_and_totals();
-		this.apply_flat_discount && this.apply_flat_discount();
 	},
 	
 	set_default_values: function() {
@@ -513,6 +511,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	calculate_taxes_and_totals: function() {
+		this.discount_amount_applied = false;
+		this._calculate_taxes_and_totals();
+		if (wn.meta.get_docfield(this.frm.doc.doctype, "discount_amount"))
+			this.apply_discount_amount();
+	},
+
+	_calculate_taxes_and_totals: function() {
 		this.validate_conversion_rate();
 		this.frm.item_doclist = this.get_item_doclist();
 		this.frm.tax_doclist = this.get_tax_doclist();
@@ -524,7 +529,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes();
 		this.calculate_totals();
 		this._cleanup();
-		
+
 		this.show_item_wise_taxes();
 	},
 	
@@ -533,11 +538,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			tax.item_wise_tax_detail = {};
-			tax_fields = ["total", "tax_amount_after_flat_discount", 
+			tax_fields = ["total", "tax_amount_after_discount_amount", 
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if (!me.flat_discount_applied)
+			if (!me.discount_amount_applied)
 				tax_fields.push("tax_amount");
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
@@ -581,10 +586,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				tax.tax_amount_for_current_item = current_tax_amount;
 				
 				// accumulate tax amount into tax.tax_amount
-				if (!me.flat_discount_applied)
+				if (!me.discount_amount_applied)
 					tax.tax_amount += current_tax_amount;
 
-				tax.tax_amount_after_flat_discount += current_tax_amount;
+				tax.tax_amount_after_discount_amount += current_tax_amount;
 				
 				// for buying
 				if(tax.category) {
@@ -614,9 +619,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				if (n == me.frm.item_doclist.length - 1) {
 					me.round_off_totals(tax);
 
-					// adjust flat discount loss in last tax iteration
-					if ((i == me.frm.tax_doclist.length - 1) && me.flat_discount_applied)
-						me.adjust_flat_discount_loss(tax);
+					// adjust Discount Amount loss in last tax iteration
+					if ((i == me.frm.tax_doclist.length - 1) && me.discount_amount_applied)
+						me.adjust_discount_amount_loss(tax);
 				}
 			});
 		});
@@ -625,15 +630,15 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	round_off_totals: function(tax) {
 		tax.total = flt(tax.total, precision("total", tax));
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
-		tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount, 
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, 
 			precision("tax_amount", tax));
 	},
 
-	adjust_flat_discount_loss: function(tax) {
-		var flat_discount_loss = this.frm.doc.grand_total - this.frm.doc.flat_discount - tax.total;
-		tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount + 
-			flat_discount_loss, precision("tax_amount", tax));
-		tax.total = flt(tax.total + flat_discount_loss, precision("total", tax));
+	adjust_discount_amount_loss: function(tax) {
+		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.discount_amount) - tax.total;
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount + 
+			discount_amount_loss, precision("tax_amount", tax));
+		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
 	},
 	
 	get_current_tax_amount: function(item, tax, item_tax_map) {

@@ -50,13 +50,13 @@ erpnext.POS = Class.extend({
 									</tbody>\
 								</table>\
 							</div>\
-							<div class="flat-discount-area">\
+							<div class="discount-amount-area">\
 								<table class="table table-condensed">\
 									<tr>\
-										<td style="vertical-align: middle;" width="50%"><b>Flat Discount</b></td>\
+										<td style="vertical-align: middle;" width="50%"><b>Discount Amount</b></td>\
 										<td width="20%"></td>\
 										<td style="text-align: right;">\
-											<input type="text" class="form-control flat-discount" \
+											<input type="text" class="form-control discount-amount" \
 												style="text-align: right;">\
 										</td>\
 									</tr>\
@@ -96,8 +96,8 @@ erpnext.POS = Class.extend({
 			me.refresh();
 		});
 
-		this.wrapper.find('input.flat-discount').on("change", function() {
-			wn.model.set_value(me.frm.doctype, me.frm.docname, "flat_discount", this.value);
+		this.wrapper.find('input.discount-amount').on("change", function() {
+			wn.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", this.value);
 		});
 
 		this.call_function("delete-items", function() {me.remove_selected_item();});
@@ -339,7 +339,7 @@ erpnext.POS = Class.extend({
 	refresh: function() {
 		var me = this;
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
-		this.wrapper.find('input.flat-discount').val(this.frm.doc.flat_discount);
+		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 		this.barcode.set_input("");
 
 		this.show_items_in_item_cart();

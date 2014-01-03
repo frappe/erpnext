@@ -226,10 +226,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	flat_discount: function() {
-		this.flat_discount_applied = false;
+	discount_amount: function() {
 		this.calculate_taxes_and_totals();
-		this.apply_flat_discount();
 	},
 	
 	commission_rate: function() {
@@ -317,7 +315,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	calculate_item_values: function() {
 		var me = this;
 		
-		if (!this.flat_discount_applied) {
+		if (!this.discount_amount_applied) {
 			$.each(this.frm.item_doclist, function(i, item) {
 				wn.model.round_floats_in(item);
 				item.export_amount = flt(item.export_rate * item.qty, precision("export_amount", item));
@@ -349,7 +347,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item;
 			});
 			
-			if(cumulated_tax_fraction && !me.flat_discount_applied) {
+			if(cumulated_tax_fraction && !me.discount_amount_applied) {
 				item.amount = flt(
 					(item.export_amount * me.frm.doc.conversion_rate) / (1 + cumulated_tax_fraction),
 					precision("amount", item));
@@ -416,31 +414,33 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("other_charges_total"));
 		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export - 
-			this.frm.doc.net_total_export + this.frm.doc.flat_discount,
+			this.frm.doc.net_total_export + flt(this.frm.doc.discount_amount),
 			precision("other_charges_total_export"));
 			
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
 		this.frm.doc.rounded_total_export = Math.round(this.frm.doc.grand_total_export);
 	},
 
-	apply_flat_discount: function() {
+	apply_discount_amount: function() {
 		var me = this;
 		var distributed_amount = 0.0;
 
-		if (this.frm.doc.flat_discount) {
-			var total_amount_for_flat_discount = this.get_flat_discountable_amount();
-			// calculate item amount after flat discount
-			$.each(this.frm.item_doclist, function(i, item) {
-				distributed_amount = me.frm.doc.flat_discount * item.amount / total_amount_for_flat_discount;
-				item.amount = flt(item.amount - distributed_amount, precision("amount", item));
-			});
+		if (this.frm.doc.discount_amount) {
+			var grand_total_for_discount_amount = this.get_grand_total_for_discount_amount();
+			// calculate item amount after Discount Amount
+			if (grand_total_for_discount_amount) {
+				$.each(this.frm.item_doclist, function(i, item) {
+					distributed_amount = flt(me.frm.doc.discount_amount) * item.amount / grand_total_for_discount_amount;
+					item.amount = flt(item.amount - distributed_amount, precision("amount", item));
+				});
 
-			this.flat_discount_applied = true;
-			this.calculate_taxes_and_totals();
+				this.discount_amount_applied = true;
+				this._calculate_taxes_and_totals();
+			}
 		}
 	},
 
-	get_flat_discountable_amount: function() {
+	get_grand_total_for_discount_amount: function() {
 		var me = this;
 		var total_actual_tax = 0.0;
 		var actual_taxes_dict = {};
@@ -459,9 +459,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				total_actual_tax += value;
 		});
 
-		total_amount_for_flat_discount = flt(this.frm.doc.grand_total - total_actual_tax, 
+		grand_total_for_discount_amount = flt(this.frm.doc.grand_total - total_actual_tax, 
 			precision("grand_total"));
-		return total_amount_for_flat_discount;
+		return grand_total_for_discount_amount;
 	},
 	
 	calculate_outstanding_amount: function() {

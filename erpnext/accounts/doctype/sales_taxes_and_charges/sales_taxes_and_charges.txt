@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-24 11:39:32", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:21:45", 
+  "modified": "2014-01-03 15:04:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -133,10 +133,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "tax_amount_after_flat_discount", 
+  "fieldname": "tax_amount_after_discount_amount", 
   "fieldtype": "Currency", 
   "hidden": 1, 
-  "label": "Tax Amount After Flat Discount", 
+  "label": "Tax Amount After Discount Amount", 
   "options": "Company:company:default_currency", 
   "read_only": 1
  }, 

@@ -19,7 +19,7 @@ cur_frm.pformat.net_total_export = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.flat_discount = function(doc) {
+cur_frm.pformat.discount_amount = function(doc) {
 	return '';
 }
 
@@ -77,9 +77,9 @@ cur_frm.pformat.other_charges= function(doc){
 			}
 		}
 
-		// flat discount
-		if(!print_hide('flat_discount') && doc.flat_discount) {
-			out += make_row('Flat Discount', doc.flat_discount, 0);
+		// Discount Amount
+		if(!print_hide('discount_amount') && doc.discount_amount) {
+			out += make_row('Discount Amount', convert_rate(doc.discount_amount), 0);
 		}
 
 		// grand total

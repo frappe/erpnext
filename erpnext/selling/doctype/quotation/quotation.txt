@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2013-12-26 17:54:55", 
+  "modified": "2014-01-03 14:54:05", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -462,9 +462,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "flat_discount", 
+  "fieldname": "discount_amount", 
   "fieldtype": "Currency", 
-  "label": "Flat Discount", 
+  "label": "Discount Amount", 
   "options": "Company:company:default_currency"
  }, 
  {

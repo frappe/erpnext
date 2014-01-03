@@ -136,9 +136,9 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.doc.grand_total, 1627.05)
 		self.assertEquals(si.doc.grand_total_export, 32.54)
 
-	def test_sales_invoice_flat_discount(self):
+	def test_sales_invoice_discount_amount(self):
 		si = webnotes.bean(copy=test_records[3])
-		si.doc.flat_discount = 104.95
+		si.doc.discount_amount = 104.95
 		si.doclist.append({
 			"doctype": "Sales Taxes and Charges",
 			"parentfield": "other_charges",
@@ -174,7 +174,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# check tax calculation
 		expected_values = {
-			"keys": ["tax_amount", "tax_amount_after_flat_discount", "total"],
+			"keys": ["tax_amount", "tax_amount_after_discount_amount", "total"],
 			"_Test Account Excise Duty - _TC": [140, 130.31, 1293.76],
 			"_Test Account Education Cess - _TC": [2.8, 2.61, 1296.37],
 			"_Test Account S&H Education Cess - _TC": [1.4, 1.31, 1297.68],
@@ -193,9 +193,9 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.doc.grand_total, 1500)
 		self.assertEquals(si.doc.grand_total_export, 1500)
 
-	def test_flat_discount_gl_entry(self):
+	def test_discount_amount_gl_entry(self):
 		si = webnotes.bean(copy=test_records[3])
-		si.doc.flat_discount = 104.95
+		si.doc.discount_amount = 104.95
 		si.doclist.append({
 			"doctype": "Sales Taxes and Charges",
 			"parentfield": "other_charges",

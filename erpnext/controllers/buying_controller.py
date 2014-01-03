@@ -147,7 +147,7 @@ class BuyingController(StockController):
 	def _cleanup(self):
 		super(BuyingController, self)._cleanup()
 			
-		# except in purchase invoice, rate field is purchase_rate		
+		# except in purchase invoice, rate field is purchase_rate
 		# reset fieldname of rate
 		if self.doc.doctype != "Purchase Invoice":
 			df = self.meta.get_field("rate", parentfield=self.fname)
@@ -161,9 +161,9 @@ class BuyingController(StockController):
 			for item in self.item_doclist:
 				del item.fields["item_tax_amount"]
 
-		if not self.meta.get_field("tax_amount_after_flat_discount", parentfield=self.other_fname):
+		if not self.meta.get_field("tax_amount_after_discount_amount", parentfield=self.other_fname):
 			for tax in self.tax_doclist:
-				del tax.fields["tax_amount_after_flat_discount"]
+				del tax.fields["tax_amount_after_discount_amount"]
 				
 	def set_item_tax_amount(self, item, tax, current_tax_amount):
 		"""

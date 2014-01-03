@@ -16,10 +16,7 @@ class AccountsController(TransactionBase):
 		self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
-			self.flat_discount_applied = False
 			self.calculate_taxes_and_totals()
-			if hasattr(self, "apply_flat_discount"):
-				self.apply_flat_discount()
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 			
@@ -136,6 +133,12 @@ class AccountsController(TransactionBase):
 				self.doclist.append(tax)
 					
 	def calculate_taxes_and_totals(self):
+		self.discount_amount_applied = False
+		self._calculate_taxes_and_totals()
+		if self.meta.get_field(self.doc.doctype, "discount_amount"):
+			self.apply_discount_amount()
+
+	def _calculate_taxes_and_totals(self):
 		# validate conversion rate
 		company_currency = get_company_currency(self.doc.company)
 		if not self.doc.currency or self.doc.currency == company_currency:
@@ -148,10 +151,6 @@ class AccountsController(TransactionBase):
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 		self.item_doclist = self.doclist.get({"parentfield": self.fname})
 		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
-
-		# for buying
-		if not hasattr(self, "flat_discount_applied"):
-			self.flat_discount_applied = False
 		
 		self.calculate_item_values()
 		self.initialize_taxes()
@@ -164,17 +163,14 @@ class AccountsController(TransactionBase):
 		self.calculate_totals()
 		self._cleanup()
 		
-		# TODO
-		# print format: show net_total_export instead of net_total
-		
 	def initialize_taxes(self):
 		for tax in self.tax_doclist:
 			tax.item_wise_tax_detail = {}
-			tax_fields = ["total", "tax_amount_after_flat_discount", 
+			tax_fields = ["total", "tax_amount_after_discount_amount", 
 				"tax_amount_for_current_item", "grand_total_for_current_item", 
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if not self.flat_discount_applied:
+			if not self.discount_amount_applied:
 				tax_fields.append("tax_amount")
 
 			for fieldname in tax_fields:
@@ -261,10 +257,10 @@ class AccountsController(TransactionBase):
 				tax.tax_amount_for_current_item = current_tax_amount
 
 				# accumulate tax amount into tax.tax_amount
-				if not self.flat_discount_applied:
+				if not self.discount_amount_applied:
 					tax.tax_amount += current_tax_amount
 
-				tax.tax_amount_after_flat_discount += current_tax_amount
+				tax.tax_amount_after_discount_amount += current_tax_amount
 				
 				if tax.category:
 					# if just for valuation, do not add the tax amount in total
@@ -291,21 +287,21 @@ class AccountsController(TransactionBase):
 				if n == len(self.item_doclist) - 1:
 					self.round_off_totals(tax)
 
-					# adjust flat discount loss in last tax iteration
-					if i == (len(self.tax_doclist) - 1) and self.flat_discount_applied:
-						self.adjust_flat_discount_loss(tax)
+					# adjust Discount Amount loss in last tax iteration
+					if i == (len(self.tax_doclist) - 1) and self.discount_amount_applied:
+						self.adjust_discount_amount_loss(tax)
 
 	def round_off_totals(self, tax):
 		tax.total = flt(tax.total, self.precision("total", tax))
 		tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
-		tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount, 
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, 
 			self.precision("tax_amount", tax))
 
-	def adjust_flat_discount_loss(self, tax):
-		flat_discount_loss = self.doc.grand_total - self.doc.flat_discount - tax.total
-		tax.tax_amount_after_flat_discount = flt(tax.tax_amount_after_flat_discount + 
-			flat_discount_loss, self.precision("tax_amount", tax))
-		tax.total = flt(tax.total + flat_discount_loss, self.precision("total", tax))
+	def adjust_discount_amount_loss(self, tax):
+		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount + 
+			discount_amount_loss, self.precision("tax_amount", tax))
+		tax.total = flt(tax.total + discount_amount_loss, self.precision("total", tax))
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
