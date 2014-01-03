@@ -28,9 +28,9 @@ class DocType(TransactionBase):
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
 		webnotes.conn.sql("""delete from `tabMaintenance Schedule Detail` 
 			where parent=%s""", (self.doc.name))
+		count = 1
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			self.validate_maintenance_detail()
-			count = 1
 			s_list = []
 			s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits, d.sales_person)
 			for i in range(d.no_of_visits):
@@ -105,17 +105,33 @@ class DocType(TransactionBase):
 		return schedule_list
 
 	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
+		from erpnext.accounts.utils import get_fiscal_year
 		validated = False
+		fy_details = ""
 
-		holiday_list = webnotes.conn.sql_list("""select h.holiday_date from `tabEmployee` emp, 
-			`tabSales Person` sp, `tabHoliday` h where sp.name=%s and emp.name=sp.employee 
-			and h.parent=emp.holiday_list""", sales_person)
+		try:
+			fy_details = get_fiscal_year(date=schedule_date, verbose=0)
+		except Exception:
+			pass
 
-		while not validated:
-			if schedule_date in holiday_list:
-				schedule_date = add_days(schedule_date, 1)
-			else:
-				validated = True
+		if fy_details and fy_details[0]:
+			holiday_list = webnotes.conn.sql_list("""select h.holiday_date from `tabEmployee` emp, 
+				`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl 
+				where sp.name=%s and emp.name=sp.employee 
+				and hl.name=emp.holiday_list and 
+				h.parent=hl.name and 
+				hl.fiscal_year=%s""", (sales_person, fy_details[0]))
+			if not holiday_list:
+				holiday_list = webnotes.conn.sql("""select h.holiday_date from 
+					`tabHoliday` h, `tabHoliday List` hl 
+					where h.parent=hl.name and ifnull(hl.is_default, 0) = 1 
+					and hl.fiscal_year=%s""", fy_details[0])
+
+			while not validated and holiday_list:
+				if schedule_date in holiday_list:
+					schedule_date = add_days(schedule_date, -1)
+				else:
+					validated = True
 
 		return schedule_date
 
