@@ -184,7 +184,7 @@ class BuyingController(StockController):
 			
 			
 		for item in self.doclist.get({"parentfield": parentfield}):
-			if item.item_code and item.qty and item.item_code in stock_items:
+			if item.item_code and item.qty and stock_items_amount and item.item_code in stock_items:
 				item.item_tax_amount = flt(flt(item.amount) * total_valuation_amount \
 					/ stock_items_amount, self.precision("item_tax_amount", item))
 
