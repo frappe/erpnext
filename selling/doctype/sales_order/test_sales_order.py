@@ -53,6 +53,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len([d for d in si if d["doctype"]=="Sales Invoice Item"]), 1)
 		
 		si = webnotes.bean(si)
+		si.doc.posting_date = "2013-10-10"
 		si.insert()
 		si.submit()
 

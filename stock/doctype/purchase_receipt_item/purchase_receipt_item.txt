@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2013-12-18 10:38:39", 
+  "modified": "2014-01-03 18:28:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -333,6 +333,16 @@
   "read_only": 0, 
   "report_hide": 0, 
   "reqd": 0
+ }, 
+ {
+  "default": ":Company", 
+  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "options": "Cost Center", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
