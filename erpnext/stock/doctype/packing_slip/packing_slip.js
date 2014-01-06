@@ -11,7 +11,7 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = 
 		function(doc, cdt, cdn) {
 			return {
-				query: "stock.doctype.packing_slip.packing_slip.item_details",
+				query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",
 				filters:{ 'delivery_note': doc.delivery_note}
 			}
 }

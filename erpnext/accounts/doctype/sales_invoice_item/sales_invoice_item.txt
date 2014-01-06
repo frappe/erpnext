@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-04 11:02:19", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:21:40", 
+  "modified": "2013-12-31 18:27:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -51,16 +51,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "customer_item_code", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "in_list_view": 0, 
-  "label": "Customer's Item Code", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "item_name", 
   "fieldtype": "Data", 
   "in_filter": 0, 
@@ -72,6 +62,21 @@
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_item_code", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Customer's Item Code", 
+  "print_hide": 1, 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -106,15 +111,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "stock_uom", 
-  "fieldtype": "Link", 
-  "in_list_view": 0, 
-  "label": "UOM", 
-  "options": "UOM", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "ref_rate", 
   "fieldtype": "Currency", 
   "in_list_view": 0, 
@@ -136,6 +132,37 @@
   "oldfieldtype": "Float", 
   "print_hide": 1, 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "UOM", 
+  "options": "UOM", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "base_ref_rate", 
+  "fieldtype": "Currency", 
+  "in_list_view": 0, 
+  "label": "Price List Rate (Company Currency)", 
+  "oldfieldname": "base_ref_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -163,15 +190,8 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "base_ref_rate", 
-  "fieldtype": "Currency", 
-  "in_list_view": 0, 
-  "label": "Price List Rate (Company Currency)", 
-  "oldfieldname": "base_ref_rate", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 1
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -236,6 +256,11 @@
   "print_hide": 1, 
   "read_only": 0, 
   "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break4", 
+  "fieldtype": "Column Break"
  }, 
  {
   "default": ":Company", 
@@ -324,6 +349,22 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "item_tax_rate", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Item Tax Rate", 
+  "oldfieldname": "item_tax_rate", 
+  "oldfieldtype": "Small Text", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break5", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "actual_qty", 
   "fieldtype": "Float", 
   "label": "Available Qty at Warehouse", 
@@ -334,13 +375,11 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "delivered_qty", 
-  "fieldtype": "Float", 
-  "label": "Delivered Qty", 
-  "oldfieldname": "delivered_qty", 
-  "oldfieldtype": "Currency", 
-  "print_hide": 1, 
-  "read_only": 1
+  "fieldname": "time_log_batch", 
+  "fieldtype": "Link", 
+  "label": "Time Log Batch", 
+  "options": "Time Log Batch", 
+  "read_only": 0
  }, 
  {
   "doctype": "DocField", 
@@ -400,20 +439,11 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "time_log_batch", 
-  "fieldtype": "Link", 
-  "label": "Time Log Batch", 
-  "options": "Time Log Batch", 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_tax_rate", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "Item Tax Rate", 
-  "oldfieldname": "item_tax_rate", 
-  "oldfieldtype": "Small Text", 
+  "fieldname": "delivered_qty", 
+  "fieldtype": "Float", 
+  "label": "Delivered Qty", 
+  "oldfieldname": "delivered_qty", 
+  "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
