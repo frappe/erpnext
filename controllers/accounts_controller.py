@@ -388,8 +388,9 @@ class AccountsController(TransactionBase):
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get(item_ref_dn):
 				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
-					where %s=%s and docstatus=1""" % (based_on, self.tname, item_ref_dn, '%s'), 
-					item.fields[item_ref_dn])[0][0]
+					where %s=%s and docstatus=1 and parent != %s""" % 
+					(based_on, self.tname, item_ref_dn, '%s', '%s'), 
+					(item.fields[item_ref_dn], self.doc.name), debug=1)[0][0]
 				
 				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
 					self.precision(based_on, item))
