@@ -11,7 +11,8 @@ def execute(filters=None):
 	last_col = len(columns)
 
 	item_list = get_items(filters)
-	item_tax, tax_accounts = get_tax_accounts(item_list, columns)
+	if item_list:
+		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
 	
 	data = []
 	for d in item_list:
@@ -38,7 +39,6 @@ def get_columns():
 		"Delivery Note:Link/Delivery Note:100", "Income Account:Link/Account:140", 
 		"Qty:Float:120", "Rate:Currency:120", "Amount:Currency:120"
 	]
-	
 	
 def get_conditions(filters):
 	conditions = ""
