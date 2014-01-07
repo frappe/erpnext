@@ -19,7 +19,7 @@ requirements = [
 	"jinja2", 
 	"markdown2", 
 	"markupsafe", 
-	"mysql-python", 
+	"mysql-python==1.2.4", 
 	"pygeoip", 
 	"python-dateutil", 
 	"python-memcached", 
@@ -148,13 +148,13 @@ def install_python_modules():
 	print "Installing Python Modules: (This may take some time)"
 	print "-"*80
 	
-	if not exec_in_shell("which pip"):
-		exec_in_shell("easy_install pip")
+	if not exec_in_shell("which pip-2.7"):
+		exec_in_shell("easy_install-2.7 pip")
 	
-	exec_in_shell("pip install --upgrade pip")
-	exec_in_shell("pip install --upgrade setuptools")
-	exec_in_shell("pip install --upgrade virtualenv")
-	exec_in_shell("pip install {}".format(' '.join(requirements)))
+	exec_in_shell("pip-2.7 install --upgrade pip")
+	exec_in_shell("pip-2.7 install --upgrade setuptools")
+	exec_in_shell("pip-2.7 install --upgrade virtualenv")
+	exec_in_shell("pip-2.7 install {}".format(' '.join(requirements)))
 	
 def install_erpnext(install_path):
 	print
@@ -200,7 +200,7 @@ def setup_folders(install_path):
 	app = os.path.join(install_path, "app")
 	if not os.path.exists(app):
 		print "Cloning erpnext"
-		exec_in_shell("cd %s && git clone https://github.com/webnotes/erpnext.git app" % install_path)
+		exec_in_shell("cd %s && git clone --branch master https://github.com/webnotes/erpnext.git app" % install_path)
 		exec_in_shell("cd app && git config core.filemode false")
 		if not os.path.exists(app):
 			raise Exception, "Couldn't clone erpnext repository"
@@ -208,7 +208,7 @@ def setup_folders(install_path):
 	lib = os.path.join(install_path, "lib")
 	if not os.path.exists(lib):
 		print "Cloning wnframework"
-		exec_in_shell("cd %s && git clone https://github.com/webnotes/wnframework.git lib" % install_path)
+		exec_in_shell("cd %s && git clone --branch master https://github.com/webnotes/wnframework.git lib" % install_path)
 		exec_in_shell("cd lib && git config core.filemode false")
 		if not os.path.exists(lib):
 			raise Exception, "Couldn't clone wnframework repository"
