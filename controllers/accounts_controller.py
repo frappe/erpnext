@@ -387,35 +387,38 @@ class AccountsController(TransactionBase):
 		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get(item_ref_dn):
-				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
-					where %s=%s and docstatus=1 and parent != %s""" % 
-					(based_on, self.tname, item_ref_dn, '%s', '%s'), 
-					(item.fields[item_ref_dn], self.doc.name))[0][0]
-				
-				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
-					self.precision(based_on, item))
-				
 				ref_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
 					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
+				if not ref_amt:
+					webnotes.msgprint(_("As amount for item") + ": " + item.item_code + _(" in ") + 
+						ref_dt + _(" is zero, system will not check for over-billed"))
+				else:
+					already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
+						where %s=%s and docstatus=1 and parent != %s""" % 
+						(based_on, self.tname, item_ref_dn, '%s', '%s'), 
+						(item.fields[item_ref_dn], self.doc.name))[0][0]
 				
-				tolerance, item_tolerance, global_tolerance = get_tolerance_for(item.item_code, 
-					item_tolerance, global_tolerance)
-					
-				max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
+					total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
+						self.precision(based_on, item))
 				
-				if total_billed_amt - max_allowed_amt > 0.01:
-					reduce_by = total_billed_amt - max_allowed_amt
+					tolerance, item_tolerance, global_tolerance = get_tolerance_for(item.item_code, 
+						item_tolerance, global_tolerance)
 					
-					webnotes.throw(_("Row #") + cstr(item.idx) + ": " + 
-						_(" Max amount allowed for Item ") + cstr(item.item_code) + 
-						_(" against ") + ref_dt + " " + 
-						cstr(item.fields[ref_dt.lower().replace(" ", "_")]) + _(" is ") + 
-						cstr(max_allowed_amt) + ". \n" + 
-						_("""If you want to increase your overflow tolerance, please increase \
-						tolerance % in Global Defaults or Item master. 				
-						Or, you must reduce the amount by """) + cstr(reduce_by) + "\n" + 
-						_("""Also, please check if the order item has already been billed \
-							in the Sales Order"""))
+					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
+				
+					if total_billed_amt - max_allowed_amt > 0.01:
+						reduce_by = total_billed_amt - max_allowed_amt
+					
+						webnotes.throw(_("Row #") + cstr(item.idx) + ": " + 
+							_(" Max amount allowed for Item ") + cstr(item.item_code) + 
+							_(" against ") + ref_dt + " " + 
+							cstr(item.fields[ref_dt.lower().replace(" ", "_")]) + _(" is ") + 
+							cstr(max_allowed_amt) + ". \n" + 
+							_("""If you want to increase your overflow tolerance, please increase \
+							tolerance % in Global Defaults or Item master. 				
+							Or, you must reduce the amount by """) + cstr(reduce_by) + "\n" + 
+							_("""Also, please check if the order item has already been billed \
+								in the Sales Order"""))
 				
 	def get_company_default(self, fieldname):
 		from accounts.utils import get_company_default
