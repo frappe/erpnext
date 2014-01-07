@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2014-01-07 18:11:10", 
+  "modified": "2014-01-07 19:16:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -64,14 +64,16 @@
   "fieldname": "buying", 
   "fieldtype": "Check", 
   "in_list_view": 1, 
-  "label": "Buying"
+  "label": "Buying", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "selling", 
   "fieldtype": "Check", 
   "in_list_view": 1, 
-  "label": "Selling"
+  "label": "Selling", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

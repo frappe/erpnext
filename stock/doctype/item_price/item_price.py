@@ -17,11 +17,8 @@ class DocType:
 		self.update_item_details()
 
 	def update_price_list_details(self):
-		if not self.doc.selling and not self.doc.buying:
-			self.doc.buying, self.doc.selling = webnotes.conn.get_value("Price List", 
-				self.doc.price_list, ["buying", "selling"])
-
-		self.doc.currency = webnotes.conn.get_value("Price List", self.doc.price_list, "currency")
+		self.doc.buying, self.doc.selling, self.doc.currency = webnotes.conn.get_value("Price List", 
+			self.doc.price_list, ["buying", "selling", "currency"])
 
 	def update_item_details(self):
 		self.doc.item_name, self.doc.item_description = webnotes.conn.get_value("Item", 
