@@ -22,7 +22,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict.buying_price_list) {
 			this.frm.set_query("buying_price_list", function() {
 				return{
-					filters: { 'buying_or_selling': "Buying" }
+					filters: { 'buying': 1 }
 				}
 			});
 		}

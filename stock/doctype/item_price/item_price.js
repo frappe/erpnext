@@ -2,11 +2,10 @@
 // License: GNU General Public License v3. See license.txt
 
 $.extend(cur_frm.cscript, {
-	
 	onload: function () {
-
 		// Fetch price list details
-		cur_frm.add_fetch("price_list", "buying_or_selling", "buying_or_selling");
+		cur_frm.add_fetch("price_list", "buying", "buying");
+		cur_frm.add_fetch("price_list", "selling", "selling");
 		cur_frm.add_fetch("price_list", "currency", "currency");
 
 		// Fetch item details

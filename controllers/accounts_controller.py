@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
+from webnotes import _, msgprint, throw
 from webnotes.utils import flt, cint, today, cstr
 from webnotes.model.code import get_obj
 from setup.utils import get_company_currency
@@ -50,8 +50,8 @@ class AccountsController(TransactionBase):
 				
 				if accounts:
 					if not filter(lambda x: cstr(x.freeze_account) in ["", "No"], accounts):
-						msgprint(_("Account for this ") + fieldname + _(" has been freezed. ") + 
-							self.doc.doctype + _(" can not be made."), raise_exception=1)
+						throw(_("Account for this ") + fieldname + _(" has been freezed. ") + 
+							self.doc.doctype + _(" can not be made."))
 			
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
@@ -179,17 +179,17 @@ class AccountsController(TransactionBase):
 		"""
 		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"] and \
 				(not tax.row_id or cint(tax.row_id) >= tax.idx):
-			msgprint((_("Row") + " # %(idx)s [%(taxes_doctype)s]: " + \
+			throw((_("Row") + " # %(idx)s [%(taxes_doctype)s]: " + \
 				_("Please specify a valid") + " %(row_id_label)s") % {
 					"idx": tax.idx,
 					"taxes_doctype": tax.doctype,
 					"row_id_label": self.meta.get_label("row_id",
 						parentfield=self.other_fname)
-				}, raise_exception=True)
+				})
 				
 	def validate_inclusive_tax(self, tax):
 		def _on_previous_row_error(row_range):
-			msgprint((_("Row") + " # %(idx)s [%(doctype)s]: " +
+			throw((_("Row") + " # %(idx)s [%(doctype)s]: " +
 				_("to be included in Item's rate, it is required that: ") +
 				" [" + _("Row") + " # %(row_range)s] " + _("also be included in Item's rate")) % {
 					"idx": tax.idx,
@@ -200,12 +200,12 @@ class AccountsController(TransactionBase):
 						parentfield=self.other_fname),
 					"charge_type": tax.charge_type,
 					"row_range": row_range
-				}, raise_exception=True)
+				})
 		
 		if cint(tax.included_in_print_rate):
 			if tax.charge_type == "Actual":
 				# inclusive tax cannot be of type Actual
-				msgprint((_("Row") 
+				throw((_("Row") 
 					+ " # %(idx)s [%(doctype)s]: %(charge_type_label)s = \"%(charge_type)s\" " 
 					+ "cannot be included in Item's rate") % {
 						"idx": tax.idx,
@@ -213,7 +213,7 @@ class AccountsController(TransactionBase):
 						"charge_type_label": self.meta.get_label("charge_type",
 							parentfield=self.other_fname),
 						"charge_type": tax.charge_type,
-					}, raise_exception=True)
+					})
 			elif tax.charge_type == "On Previous Row Amount" and \
 					not cint(self.tax_doclist[tax.row_id - 1].included_in_print_rate):
 				# referred row should also be inclusive

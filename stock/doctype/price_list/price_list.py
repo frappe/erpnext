@@ -3,16 +3,15 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, _
+from webnotes import msgprint, _, throw
 from webnotes.utils import comma_or, cint
 from webnotes.model.controller import DocListController
 import webnotes.defaults
 
 class DocType(DocListController):
 	def validate(self):
-		if self.doc.buying_or_selling not in ["Buying", "Selling"]:
-			msgprint(_(self.meta.get_label("buying_or_selling")) + " " + _("must be one of") + " " +
-				comma_or(["Buying", "Selling"]), raise_exception=True)
+		if not self.doc.buying and not self.doc.selling:
+			throw(_("Price List must be one of Buying or Selling"))
 				
 		if not self.doclist.get({"parentfield": "valid_for_territories"}):
 			# if no territory, set default territory
@@ -34,15 +33,15 @@ class DocType(DocListController):
 			cart_settings.validate_price_lists()
 				
 	def set_default_if_missing(self):
-		if self.doc.buying_or_selling=="Selling":
+		if self.doc.selling:
 			if not webnotes.conn.get_value("Selling Settings", None, "selling_price_list"):
 				webnotes.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.doc.name)
 
-		elif self.doc.buying_or_selling=="Buying":
+		elif self.doc.buying:
 			if not webnotes.conn.get_value("Buying Settings", None, "buying_price_list"):
 				webnotes.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)
 
 	def update_item_price(self):
 		webnotes.conn.sql("""update `tabItem Price` set currency=%s, 
-			buying_or_selling=%s, modified=NOW() where price_list=%s""", 
-			(self.doc.currency, self.doc.buying_or_selling, self.doc.name))
+			buying=%s, selling=%s, modified=NOW() where price_list=%s""", 
+			(self.doc.currency, self.doc.buying, self.doc.selling, self.doc.name))

@@ -7,7 +7,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 	});
 	
 	cur_frm.set_query("selling_price_list", function() {
-		return { filters: { buying_or_selling: "Selling" } };
+		return { filters: { selling: 1 } };
 	});
 }
 

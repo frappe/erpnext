@@ -1,7 +1,5 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
-# MIT License. See license.txt
-
-# For license information, please see license.txt
+# License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import webnotes
@@ -19,8 +17,11 @@ class DocType:
 		self.update_item_details()
 
 	def update_price_list_details(self):
-		self.doc.buying_or_selling, self.doc.currency = webnotes.conn.get_value("Price List", 
-			self.doc.price_list, ["buying_or_selling", "currency"])
+		if not self.doc.selling and not self.doc.buying:
+			self.doc.buying, self.doc.selling = webnotes.conn.get_value("Price List", 
+				self.doc.price_list, ["buying", "selling"])
+
+		self.doc.currency = webnotes.conn.get_value("Price List", self.doc.price_list, "currency")
 
 	def update_item_details(self):
 		self.doc.item_name, self.doc.item_description = webnotes.conn.get_value("Item", 

@@ -263,4 +263,5 @@ patch_list = [
 	"patches.1311.p08_email_digest_recipients",
 	"execute:webnotes.delete_doc('DocType', 'Warehouse Type')",
 	"patches.1312.p02_update_item_details_in_item_price",
+	"patches.1401.p01_make_buying_selling_as_check_box_in_price_list",
 ]
