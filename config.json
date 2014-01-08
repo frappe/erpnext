@@ -1,6 +1,6 @@
 {
  "app_name": "ERPNext", 
- "app_version": "3.4.6", 
+ "app_version": "3.4.9", 
  "base_template": "app/portal/templates/base.html", 
  "modules": {
   "Accounts": {
@@ -74,5 +74,5 @@
    "type": "module"
   }
  }, 
- "requires_framework_version": "==3.4.3"
+ "requires_framework_version": "==3.4.4"
 }
