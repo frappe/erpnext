@@ -330,8 +330,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						doctype: tax.doctype,
 						row_id_label: wn.meta.get_label(tax.doctype, "row_id", tax.name)
 					});
-				msgprint(msg);
-				throw msg;
+				wn.throw(msg);
 			}
 	},
 	
@@ -347,8 +346,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					charge_type_label: wn.meta.get_label(tax.doctype, "charge_type", tax.name),
 					charge_type: tax.charge_type
 				});
-			msgprint(msg);
-			throw msg;
+			wn.throw(msg);
 		};
 		
 		var on_previous_row_error = function(row_range) {
@@ -363,8 +361,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					row_range: row_range,
 				});
 			
-			msgprint(msg);
-			throw msg;
+			wn.throw(msg);
 		};
 		
 		if(cint(tax.included_in_print_rate)) {
