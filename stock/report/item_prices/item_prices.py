@@ -65,13 +65,13 @@ def get_price_list():
 
 	rate = {}
 
-	price_list = webnotes.conn.sql("""select item_code, buying_or_selling, 
+	price_list = webnotes.conn.sql("""select item_code, buying, selling, 
 		concat(price_list, " - ", currency, " ", ref_rate) as price 
 		from `tabItem Price`""", as_dict=1)
 
 	for j in price_list:
 		if j.price:
-			rate.setdefault(j.item_code, {}).setdefault(j.buying_or_selling, []).append(j.price)
+			rate.setdefault(j.item_code, {}).setdefault("Buying" if j.buying else "Selling", []).append(j.price)
 	item_rate_map = {}
 	
 	for item in rate:
