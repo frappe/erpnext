@@ -72,6 +72,11 @@ def get_conditions(filters):
 		
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+		
+		
+	from webnotes.widgets.reportview import build_match_conditions
+	match_conditions = build_match_conditions("GL Entry")
+	if match_conditions: conditions.append(match_conditions)
 	
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
