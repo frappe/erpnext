@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, _
+from webnotes import msgprint, _, throw
 from webnotes.utils import getdate, flt, add_days, cstr
 import json
 
@@ -90,7 +90,7 @@ def _get_price_list_rate(args, item_bean, meta):
 	# try fetching from price list
 	if args.buying_price_list and args.price_list_currency:
 		price_list_rate = webnotes.conn.sql("""select ref_rate from `tabItem Price` 
-			where price_list=%s and item_code=%s and buying_or_selling='Buying'""", 
+			where price_list=%s and item_code=%s and buying=1""", 
 			(args.buying_price_list, args.item_code), as_dict=1)
 		
 		if price_list_rate:
@@ -122,14 +122,12 @@ def _validate_item_details(args, item):
 	
 	# validate if purchase item or subcontracted item
 	if item.is_purchase_item != "Yes":
-		msgprint(_("Item") + (" %s: " % item.name) + _("not a purchase item"),
-			raise_exception=True)
+		throw(_("Item") + (" %s: " % item.name) + _("not a purchase item"))
 	
 	if args.is_subcontracted == "Yes" and item.is_sub_contracted_item != "Yes":
-		msgprint(_("Item") + (" %s: " % item.name) + 
+		throw(_("Item") + (" %s: " % item.name) + 
 			_("not a sub-contracted item.") +
-			_("Please select a sub-contracted item or do not sub-contract the transaction."), 
-			raise_exception=True)
+			_("Please select a sub-contracted item or do not sub-contract the transaction."))
 
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""

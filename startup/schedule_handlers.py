@@ -53,6 +53,10 @@ def execute_daily():
 	# email digest
 	from setup.doctype.email_digest.email_digest import send
 	run_fn(send)
+	
+	# auto close support tickets
+	from support.doctype.support_ticket.support_ticket import auto_close_tickets
+	run_fn(auto_close_tickets)
 		
 def execute_weekly():
 	from setup.doctype.backup_manager.backup_manager import take_backups_weekly

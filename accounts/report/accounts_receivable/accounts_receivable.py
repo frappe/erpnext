@@ -78,15 +78,23 @@ class AccountsReceivableReport(object):
 			if getdate(e.posting_date) <= report_date)
 			
 	def is_receivable(self, gle, future_vouchers):
-		return ((not gle.against_voucher) or (gle.against_voucher==gle.voucher_no) or 
-			((gle.against_voucher_type, gle.against_voucher) in future_vouchers))
+		return (
+			# advance
+			(not gle.against_voucher) or 
+			
+			# sales invoice
+			(gle.against_voucher==gle.voucher_no and gle.debit > 0) or 
+			
+			# entries adjusted with future vouchers
+			((gle.against_voucher_type, gle.against_voucher) in future_vouchers)
+		)
 			
 	def get_outstanding_amount(self, gle, report_date):
 		payment_received = 0.0
 		for e in self.get_gl_entries_for(gle.account, gle.voucher_type, gle.voucher_no):
 			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
 				payment_received += (flt(e.credit) - flt(e.debit))
-					
+
 		return flt(gle.debit) - flt(gle.credit) - payment_received
 		
 	def get_customer(self, account):

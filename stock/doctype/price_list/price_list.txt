@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-10-31 19:24:33", 
+  "modified": "2014-01-06 18:28:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,14 +61,19 @@
   "reqd": 1
  }, 
  {
-  "default": "Selling", 
   "doctype": "DocField", 
-  "fieldname": "buying_or_selling", 
-  "fieldtype": "Select", 
+  "fieldname": "buying", 
+  "fieldtype": "Check", 
   "in_list_view": 1, 
-  "label": "Valid for Buying or Selling?", 
-  "options": "Buying\nSelling", 
-  "reqd": 1
+  "label": "Buying"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Selling", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 

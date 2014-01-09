@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2013-10-31 12:59:02", 
+  "modified": "2014-01-07 19:16:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -45,12 +45,42 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "price_list_details", 
+  "fieldtype": "Section Break", 
+  "label": "Price List", 
+  "options": "icon-tags"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "price_list", 
   "fieldtype": "Link", 
   "in_filter": 1, 
   "label": "Price List", 
   "options": "Price List", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Buying", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Selling", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_details", 
+  "fieldtype": "Section Break", 
+  "label": "Item", 
+  "options": "icon-tag"
  }, 
  {
   "doctype": "DocField", 
@@ -82,16 +112,6 @@
   "doctype": "DocField", 
   "fieldname": "col_br_1", 
   "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "buying_or_selling", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Valid for Buying or Selling?", 
-  "options": "Selling\nBuying", 
-  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
