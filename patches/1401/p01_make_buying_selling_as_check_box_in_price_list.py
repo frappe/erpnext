@@ -25,5 +25,5 @@ def execute():
 			set ip.buying=pl.buying, ip.selling=pl.selling
 			where ip.price_list=pl.name""")
 
-	webnotes.conn.sql("""udpate `tabItem Price` set selling=1 where ifnull(selling, 0)=0 and 
+	webnotes.conn.sql("""update `tabItem Price` set selling=1 where ifnull(selling, 0)=0 and 
 		ifnull(buying, 0)=0""")
