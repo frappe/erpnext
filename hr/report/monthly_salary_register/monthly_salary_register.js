@@ -7,7 +7,7 @@ wn.query_reports["Monthly Salary Register"] = {
 			"fieldname":"month",
 			"label": wn._("Month"),
 			"fieldtype": "Select",
-			"options": "Jan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec",
+			"options": "\nJan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec",
 			"default": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", 
 				"Dec"][wn.datetime.str_to_obj(wn.datetime.get_today()).getMonth()],
 		},
