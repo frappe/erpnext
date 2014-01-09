@@ -1,3 +1,21 @@
 erpnext.patches.4_0.update_user_properties
 erpnext.patches.4_0.move_warehouse_user_to_restrictions
 erpnext.patches.4_0.new_permissions
+
+execute:webnotes.reload_doc('accounts', 'doctype', 'sales_invoice') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'doctype', 'sales_order') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'doctype', 'quotation') # 2014-01-03
+execute:webnotes.reload_doc('stock', 'doctype', 'delivery_note') # 2014-01-03
+execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2014-01-03
+execute:webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Classic') # 2014-01-03
+execute:webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Modern') # 2014-01-03
+execute:webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Spartan') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'Print Format', 'Quotation Classic') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'Print Format', 'Quotation Modern') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'Print Format', 'Quotation Spartan') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'Print Format', 'Sales Order Classic') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'Print Format', 'Sales Order Modern') # 2014-01-03
+execute:webnotes.reload_doc('selling', 'Print Format', 'Sales Order Spartan') # 2014-01-03
+execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Classic') # 2014-01-03
+execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Modern') # 2014-01-03
+execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Spartan') # 2014-01-03
