@@ -15,20 +15,28 @@ class AccountsReceivableReport(object):
 			else self.filters.report_date
 			
 	def run(self):
-		return self.get_columns(), self.get_data()
+		customer_naming_by = webnotes.conn.get_value("Selling Settings", None, "cust_master_name")
+		return self.get_columns(customer_naming_by), self.get_data(customer_naming_by)
 		
-	def get_columns(self):
-		return [
+	def get_columns(self, customer_naming_by):
+		columns = [
 			"Posting Date:Date:80", "Account:Link/Account:150",
 			"Voucher Type::110", "Voucher No::120", "::30",
 			"Due Date:Date:80",  
 			"Invoiced Amount:Currency:100", "Payment Received:Currency:100", 
 			"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100",
 			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100",
-			"Customer:Link/Customer:200", "Territory:Link/Territory:80", "Remarks::200"
+			"Customer:Link/Customer:200"
 		]
-		
-	def get_data(self):
+
+		if customer_naming_by == "Naming Series":
+			columns += ["Customer Name::110"]
+
+		columns += ["Territory:Link/Territory:80", "Remarks::200"]
+
+		return columns
+
+	def get_data(self, customer_naming_by):
 		data = []
 		future_vouchers = self.get_entries_after(self.filters.report_date)
 		for gle in self.get_entries_till(self.filters.report_date):
@@ -42,18 +50,23 @@ class AccountsReceivableReport(object):
 						gle.voucher_type, gle.voucher_no, due_date,
 						invoiced_amount, payment_received,
 						outstanding_amount]
-					entry_date = due_date if self.filters.ageing_based_on=="Due Date" \
+					entry_date = due_date if self.filters.ageing_based_on == "Due Date" \
 						else gle.posting_date
-					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount)
-					row += [self.get_customer(gle.account), self.get_territory(gle.account), gle.remarks]
+					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount) + \
+						[self.get_customer(gle.account)]
+
+					if customer_naming_by == "Naming Series":
+						row += [self.get_customer_name(gle.account)]
+
+					row += [self.get_territory(gle.account), gle.remarks]
 					data.append(row)
 		
-		for i in range(0,len(data)):
+		for i in range(0, len(data)):
 			data[i].insert(4, """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
 				% ("/".join(["#Form", data[i][2], data[i][3]]),))
 		
 		return data
-				
+
 	def get_entries_after(self, report_date):
 		# returns a distinct list
 		return list(set([(e.voucher_type, e.voucher_no) for e in self.get_gl_entries()
@@ -85,18 +98,21 @@ class AccountsReceivableReport(object):
 		return flt(gle.debit) - flt(gle.credit) - payment_received
 		
 	def get_customer(self, account):
+		return self.get_account_map().get(account).get("customer") or ""
+
+	def get_customer_name(self, account):
 		return self.get_account_map().get(account).get("customer_name") or ""
-		
+
 	def get_territory(self, account):
 		return self.get_account_map().get(account).get("territory") or ""
 		
 	def get_account_map(self):
 		if not hasattr(self, "account_map"):
 			self.account_map = dict(((r.name, r) for r in webnotes.conn.sql("""select 
-				account.name, customer.name as customer_name, customer.territory
-				from `tabAccount` account, `tabCustomer` customer 
-				where account.master_type="Customer" 
-				and customer.name=account.master_name""", as_dict=True)))
+				acc.name, cust.name as customer, cust.customer_name, cust.territory
+				from `tabAccount` acc, `tabCustomer` cust 
+				where acc.master_type="Customer" 
+				and cust.name=acc.master_name""", as_dict=True)))
 				
 		return self.account_map
 		
@@ -155,7 +171,7 @@ class AccountsReceivableReport(object):
 
 def execute(filters=None):
 	return AccountsReceivableReport(filters).run()
-	
+
 def get_ageing_data(age_as_on, entry_date, outstanding_amount):
 	# [0-30, 30-60, 60-90, 90-above]
 	outstanding_range = [0.0, 0.0, 0.0, 0.0]
