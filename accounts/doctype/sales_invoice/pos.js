@@ -60,10 +60,16 @@ erpnext.POS = Class.extend({
 						</div>\
 					</div>\
 					<br><br>\
-					<button class="btn btn-success btn-lg make-payment">\
-					<i class="icon-money"></i> Make Payment</button>\
-					<button class="btn btn-default btn-lg delete-items pull-right" style="display: none;">\
-					<i class="icon-trash"></i> Del</button>\
+					<div class="row">\
+						<div class="col-sm-9">\
+							<button class="btn btn-success btn-lg make-payment">\
+								<i class="icon-money"></i> Make Payment</button>\
+						</div>\
+						<div class="col-sm-3">\
+							<button class="btn btn-default btn-lg remove-items" style="display: none;">\
+								<i class="icon-trash"></i> Del</button>\
+						</div>\
+					</div>\
 					<br><br>\
 				</div>\
 				<div class="col-sm-6">\
@@ -82,7 +88,7 @@ erpnext.POS = Class.extend({
 			me.refresh();
 		});
 
-		this.call_function("delete-items", function() {me.remove_selected_item();});
+		this.call_function("remove-items", function() {me.remove_selected_items();});
 		this.call_function("make-payment", function() {me.make_payment();});
 	},
 	check_transaction_type: function() {
@@ -333,7 +339,7 @@ erpnext.POS = Class.extend({
 		}
 
 		this.disable_text_box_and_button();
-		this.make_payment_button();
+		this.hide_payment_button();
 
 		// If quotation to is not Customer then remove party
 		if (this.frm.doctype == "Quotation") {
@@ -370,21 +376,21 @@ erpnext.POS = Class.extend({
 		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
 		$(this.wrapper).find(".tax-table")
-			.toggle((taxes && taxes.length && 
-				flt(me.frm.doc.other_charges_total_export || 
-					me.frm.doc.other_charges_added_import) != 0.0) ? true : false)
+			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
-			$(repl('<tr>\
-				<td>%(description)s %(rate)s</td>\
-				<td style="text-align: right;">%(tax_amount)s</td>\
-			<tr>', {
-				description: d.description,
-				rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
-				tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
-					me.frm.doc.currency)
-			})).appendTo(".tax-table tbody");
+			if (d.tax_amount) {
+				$(repl('<tr>\
+					<td>%(description)s %(rate)s</td>\
+					<td style="text-align: right;">%(tax_amount)s</td>\
+				<tr>', {
+					description: d.description,
+					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
+					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+						me.frm.doc.currency)
+				})).appendTo(".tax-table tbody");
+			}
 		});
 	},
 	set_totals: function() {
@@ -427,7 +433,7 @@ erpnext.POS = Class.extend({
 			$(this.wrapper).find('input, button').each(function () {
 				$(this).prop('disabled', true);
 			});
-			$(this.wrapper).find(".delete-items").hide();
+			$(this.wrapper).find(".remove-items").hide();
 			$(this.wrapper).find(".make-payment").hide();
 		}
 		else {
@@ -437,14 +443,14 @@ erpnext.POS = Class.extend({
 			$(this.wrapper).find(".make-payment").show();
 		}
 	},
-	make_payment_button: function() {
+	hide_payment_button: function() {
 		var me = this;
 		// Show Make Payment button only in Sales Invoice
 		if (this.frm.doctype != "Sales Invoice")
 			$(this.wrapper).find(".make-payment").hide();
 	},
 	refresh_delete_btn: function() {
-		$(this.wrapper).find(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
+		$(this.wrapper).find(".remove-items").toggle($(".item-cart .warning").length ? true : false);
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
@@ -466,7 +472,7 @@ erpnext.POS = Class.extend({
 			}
 		});
 	},
-	remove_selected_item: function() {
+	remove_selected_items: function() {
 		var me = this;
 		var selected_items = [];
 		var no_of_items = $(this.wrapper).find("#cart tbody tr").length;
@@ -487,6 +493,7 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
+
 		this.refresh_grid();
 	},
 	refresh_grid: function() {
