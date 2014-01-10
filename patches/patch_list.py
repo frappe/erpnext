@@ -263,4 +263,5 @@ patch_list = [
 	"patches.1311.p08_email_digest_recipients",
 	"execute:webnotes.delete_doc('DocType', 'Warehouse Type')",
 	"patches.1312.p02_update_item_details_in_item_price",
+	"patches.1401.p01_move_related_property_setters_to_custom_field",
 ]
