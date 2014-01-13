@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 
-from webnotes.utils import cstr
+from webnotes.utils import cstr, cint
 import webnotes.defaults
 
 
@@ -237,21 +237,28 @@ class DocType:
 		account.insert()
 
 	def set_default_accounts(self):
-		accounts = {
+		def _set_default_accounts(accounts):
+			for a in accounts:
+				account_name = accounts[a] + " - " + self.doc.abbr
+				if not self.doc.fields.get(a) and webnotes.conn.exists("Account", account_name):
+					webnotes.conn.set(self.doc, a, account_name)
+			
+		_set_default_accounts({
 			"default_income_account": "Sales",
 			"default_expense_account": "Cost of Goods Sold",
 			"receivables_group": "Accounts Receivable",
 			"payables_group": "Accounts Payable",
-			"default_cash_account": "Cash",
-			"stock_received_but_not_billed": "Stock Received But Not Billed",
-			"stock_adjustment_account": "Stock Adjustment",
-			"expenses_included_in_valuation": "Expenses Included In Valuation"
-		}
+			"default_cash_account": "Cash"
+		})
 		
-		for a in accounts:
-			account_name = accounts[a] + " - " + self.doc.abbr
-			if not self.doc.fields.get(a) and webnotes.conn.exists("Account", account_name):
-				webnotes.conn.set(self.doc, a, account_name)
+		if cint(webnotes.conn.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+			_set_default_accounts({
+				"stock_received_but_not_billed": "Stock Received But Not Billed",
+				"stock_adjustment_account": "Stock Adjustment",
+				"expenses_included_in_valuation": "Expenses Included In Valuation"
+			})
+		
+		
 
 	def create_default_cost_center(self):
 		cc_list = [

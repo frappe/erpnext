@@ -59,8 +59,8 @@ def get_columns(salary_slips):
 	
 def get_salary_slips(filters):
 	conditions, filters = get_conditions(filters)
-	salary_slips = webnotes.conn.sql("""select * from `tabSalary Slip` where docstatus = 1 %s""" % 
-		conditions, filters, as_dict=1)
+	salary_slips = webnotes.conn.sql("""select * from `tabSalary Slip` where docstatus = 1 %s
+		order by employee, month""" % conditions, filters, as_dict=1)
 	
 	if not salary_slips:
 		msgprint(_("No salary slip found for month: ") + cstr(filters.get("month")) + 

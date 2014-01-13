@@ -146,11 +146,12 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		webnotes.conn.sql("update `tab%s` set outstanding_amount=%s where name='%s'" %
 		 	(against_voucher_type, bal, against_voucher))
 			
-def validate_frozen_account(account, adv_adj):
+def validate_frozen_account(account, adv_adj=None):
 	frozen_account = webnotes.conn.get_value("Account", account, "freeze_account")
 	if frozen_account == 'Yes' and not adv_adj:
 		frozen_accounts_modifier = webnotes.conn.get_value( 'Accounts Settings', None, 
 			'frozen_accounts_modifier')
+		
 		if not frozen_accounts_modifier:
 			webnotes.throw(account + _(" is a frozen account. \
 				Either make the account active or assign role in Accounts Settings \
