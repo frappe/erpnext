@@ -8,6 +8,7 @@ wn.query_reports["Bank Reconciliation Statement"] = {
 			"label": wn._("Bank Account"),
 			"fieldtype": "Link",
 			"options": "Account",
+			"reqd": 1,
 			"get_query": function() {
 				return {
 					"query": "accounts.utils.get_account_list", 
@@ -22,7 +23,8 @@ wn.query_reports["Bank Reconciliation Statement"] = {
 			"fieldname":"report_date",
 			"label": wn._("Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": get_today(),
+			"reqd": 1
 		},
 	]
 }
