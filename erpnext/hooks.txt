@@ -46,13 +46,9 @@ standard_queries = Customer:erpnext.selling.utils.get_customer_list
 scheduler_event = all:erpnext.support.doctype.support_ticket.get_support_mails.get_support_mails
 scheduler_event = all:erpnext.hr.doctype.job_applicant.get_job_applications.get_job_applications
 scheduler_event = all:erpnext.selling.doctype.lead.get_leads.get_leads
-scheduler_event = all:webnotes.utils.email_lib.bulk.flush
 
 #### Daily
 
-scheduler_event = daily:webnotes.core.doctype.event.event.send_event_digest
-scheduler_event = daily:webnotes.core.doctype.notification_count.notification_count.delete_event_notification_count
-scheduler_event = daily:webnotes.utils.email_lib.bulk.clear_outbox
 scheduler_event = daily:erpnext.accounts.doctype.sales_invoice.sales_invoice.manage_recurring_invoices
 scheduler_event = daily:erpnext.setup.doctype.backup_manager.backup_manager.take_backups_daily
 scheduler_event = daily:erpnext.stock.utils.reorder_item
