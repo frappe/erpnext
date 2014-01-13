@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint, throw
+from webnotes import _, throw
 from webnotes.utils import flt, cint, today, cstr
 from webnotes.model.code import get_obj
 from setup.utils import get_company_currency
@@ -44,14 +44,13 @@ class AccountsController(TransactionBase):
 	def validate_for_freezed_account(self):
 		for fieldname in ["customer", "supplier"]:
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				accounts = webnotes.conn.get_values("Account", {"master_type": fieldname.title(), 
-					"master_name": self.doc.fields[fieldname], "company": self.doc.company}, 
-					"freeze_account", as_dict=1)
-				
+				accounts = webnotes.conn.get_values("Account", 
+					{"master_type": fieldname.title(), "master_name": self.doc.fields[fieldname], 
+					"company": self.doc.company}, "name")
 				if accounts:
-					if not filter(lambda x: cstr(x.freeze_account) in ["", "No"], accounts):
-						throw(_("Account for this ") + fieldname + _(" has been freezed. ") + 
-							self.doc.doctype + _(" can not be made."))
+					from accounts.doctype.gl_entry.gl_entry import validate_frozen_account
+					for account in accounts:						
+						validate_frozen_account(account[0])
 			
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
