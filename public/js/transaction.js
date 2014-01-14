@@ -540,6 +540,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	calculate_taxes: function() {
 		var me = this;
+		var actual_tax_dict = {};
+
+		// maintain actual tax rate based on idx
+		$.each(this.frm.tax_doclist, function(i, tax) {
+			if (tax.charge_type == "Actual") {
+				actual_tax_dict[tax.idx] = flt(tax.rate);
+			}
+		});
 		
 		$.each(this.frm.item_doclist, function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
@@ -549,15 +557,15 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
 
 				me.set_item_tax_amount && me.set_item_tax_amount(item, tax, current_tax_amount);
-				
-				// case when net total is 0 but there is an actual type charge
-				// in this case add the actual amount to tax.tax_amount
-				// and tax.grand_total_for_current_item for the first such iteration
-				if(tax.charge_type == "Actual" && 
-					!(current_tax_amount || me.frm.doc.net_total || tax.tax_amount)) {
-						var zero_net_total_adjustment = flt(tax.rate, precision("tax_amount", tax));
-						current_tax_amount += zero_net_total_adjustment;
+					
+				// Adjust divisional loss to the last item
+				if (tax.charge_type == "Actual") {
+					actual_tax_dict[tax.idx] -= current_tax_amount;
+					if (n == me.frm.item_doclist.length - 1) {
+						current_tax_amount += actual_tax_dict[tax.idx]
 					}
+				}
+
 				
 				// store tax_amount for current item as it will be used for
 				// charge type = 'On Previous Row Amount'
@@ -589,6 +597,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				
 				// in tax.total, accumulate grand total for each item
 				tax.total += tax.grand_total_for_current_item;
+				
+				if (n == me.frm.item_doclist.length - 1) {
+					tax.total = flt(tax.total, precision("total", tax));
+					tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
+				}
 			});
 		});
 	},

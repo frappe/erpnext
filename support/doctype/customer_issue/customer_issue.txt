@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-11-02 16:59:22", 
+  "modified": "2014-01-14 15:56:22", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "icon": "icon-bug", 

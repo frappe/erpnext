@@ -175,23 +175,31 @@ class BuyingController(StockController):
 		stock_items = self.get_stock_items()
 		
 		stock_items_qty, stock_items_amount = 0, 0
+		last_stock_item_idx = 1
 		for d in self.doclist.get({"parentfield": parentfield}):
 			if d.item_code and d.item_code in stock_items:
 				stock_items_qty += flt(d.qty)
 				stock_items_amount += flt(d.amount)
+				last_stock_item_idx = d.idx
 			
 		total_valuation_amount = sum([flt(d.tax_amount) for d in 
 			self.doclist.get({"parentfield": "purchase_tax_details"}) 
 			if d.category in ["Valuation", "Valuation and Total"]])
 			
-			
-		for item in self.doclist.get({"parentfield": parentfield}):
+		
+		valuation_amount_adjustment = total_valuation_amount
+		for i, item in enumerate(self.doclist.get({"parentfield": parentfield})):
 			if item.item_code and item.qty and item.item_code in stock_items:
 				item_proportion = flt(item.amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
 				
-				item.item_tax_amount = flt(item_proportion * total_valuation_amount, 
-					self.precision("item_tax_amount", item))
+				if i == (last_stock_item_idx - 1):
+					item.item_tax_amount = flt(valuation_amount_adjustment, 
+						self.precision("item_tax_amount", item))
+				else:
+					item.item_tax_amount = flt(item_proportion * total_valuation_amount, 
+						self.precision("item_tax_amount", item))
+					valuation_amount_adjustment -= item.item_tax_amount
 
 				self.round_floats_in(item)
 				

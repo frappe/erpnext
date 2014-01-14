@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, _, throw
-from webnotes.utils import flt, cint, comma_and
+from webnotes import _, throw
+from webnotes.utils import flt, cint
 import json
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
@@ -121,10 +121,16 @@ def _validate_item_details(args, item):
 def _get_basic_details(args, item_bean, warehouse_fieldname):
 	item = item_bean.doc
 	
+	from webnotes.defaults import get_user_default_as_list
+	user_default_warehouse_list = get_user_default_as_list('warehouse')
+	user_default_warehouse = user_default_warehouse_list[0] \
+		if len(user_default_warehouse_list)==1 else ""
+	
 	out = webnotes._dict({
 			"item_code": item.name,
 			"description": item.description_html or item.description,
-			warehouse_fieldname: item.default_warehouse or args.get(warehouse_fieldname),
+			warehouse_fieldname: user_default_warehouse or item.default_warehouse \
+				or args.get(warehouse_fieldname),
 			"income_account": item.default_income_account or args.income_account \
 				or webnotes.conn.get_value("Company", args.company, "default_income_account"),
 			"expense_account": item.purchase_account or args.expense_account \
