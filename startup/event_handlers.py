@@ -70,6 +70,6 @@ def on_build():
 
 def comment_added(doc):
 	"""add comment to feed"""
-	home.make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
-		'<i>"' + doc.comment + '"</i>', '#6B24B3')
+	home.make_feed('Comment', doc.comment_doctype, doc.comment_docname, 
+		doc.comment_by or doc.owner, '<i>"' + doc.comment + '"</i>', '#6B24B3')
 	
