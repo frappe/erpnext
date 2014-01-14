@@ -19,8 +19,10 @@ erpnext.POS = Class.extend({
 							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
 								<thead>\
 									<tr>\
-										<th style="width: 50%">Item</th>\
-										<th style="width: 25%; text-align: right;">Qty</th>\
+										<th style="width: 40%">Item</th>\
+										<th style="width: 9%"></th>\
+										<th style="width: 17%; text-align: right;">Qty</th>\
+										<th style="width: 9%"></th>\
 										<th style="width: 25%; text-align: right;">Rate</th>\
 									</tr>\
 								</thead>\
@@ -357,8 +359,18 @@ erpnext.POS = Class.extend({
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
-					<td><input type="text" value="%(qty)s" \
+					<td style="vertical-align:middle;" align="right">\
+						<div class="decrease-qty" style="cursor:pointer;">\
+							<i class="icon-minus-sign icon-large text-danger"></i>\
+						</div>\
+					</td>\
+					<td style="vertical-align:middle;"><input type="text" value="%(qty)s" \
 						class="form-control qty" style="text-align: right;"></td>\
+					<td style="vertical-align:middle;cursor:pointer;">\
+						<div class="increase-qty" style="cursor:pointer;">\
+							<i class="icon-plus-sign icon-large text-success"></i>\
+						</div>\
+					</td>\
 					<td style="text-align: right;"><b>%(amount)s</b><br>%(rate)s</td>\
 				</tr>',
 				{
@@ -369,6 +381,11 @@ erpnext.POS = Class.extend({
 					amount: format_currency(d[me.amount], me.frm.doc.currency)
 				}
 			)).appendTo($items);
+		});
+
+		this.wrapper.find(".increase-qty, .decrease-qty").on("click", function() {
+			var item_code = $(this).closest("tr").attr("id");
+			me.selected_item_qty_operation(item_code, $(this).attr("class"));
 		});
 	},
 	show_taxes: function() {
@@ -500,6 +517,22 @@ erpnext.POS = Class.extend({
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		this.refresh();
+	},
+	selected_item_qty_operation: function(item_code, operation) {
+		var me = this;
+		var child = wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+			this.frm.cscript.fname, this.frm.doctype);
+
+		$.each(child, function(i, d) {
+			if (d.item_code == item_code) {
+				if (operation == "increase-qty")
+					d.qty += 1;
+				else if (operation == "decrease-qty")
+					d.qty != 1 ? d.qty -= 1 : d.qty = 1;
+
+				me.refresh();
+			}
+		});
 	},
 	make_payment: function() {
 		var me = this;
