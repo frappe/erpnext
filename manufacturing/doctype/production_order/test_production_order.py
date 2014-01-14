@@ -35,6 +35,7 @@ class TestProductionOrder(unittest.TestCase):
 		
 		stock_entry.doc.fg_completed_qty = 4
 		stock_entry.doc.posting_date = "2013-05-12"
+		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.run_method("get_items")
 		stock_entry.submit()
 		
@@ -52,6 +53,7 @@ class TestProductionOrder(unittest.TestCase):
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")
 		stock_entry = webnotes.bean(stock_entry)
 		stock_entry.doc.posting_date = "2013-05-12"
+		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.doc.fg_completed_qty = 15
 		stock_entry.run_method("get_items")
 		stock_entry.insert()
