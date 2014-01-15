@@ -232,6 +232,43 @@ class StatusUpdater(DocListController):
 								'Fully %(keyword)s', 'Partly %(keyword)s'))
 							where name='%(name)s'""" % args)
 							
+							
+	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
+		ref_fieldname = ref_dt.lower().replace(" ", "_")
+		zero_amount_refdoc = []
+		all_zero_amount_refdoc = webnotes.conn.sql_list("""select name from `tab%s` 
+			where docstatus=1 and net_total = 0""" % ref_dt)
+	
+		for item in self.doclist.get({"parentfield": "entries"}):
+			if item.fields.get(ref_fieldname) \
+				and item.fields.get(ref_fieldname) in all_zero_amount_refdoc \
+				and item.fields.get(ref_fieldname) not in zero_amount_refdoc:
+					zero_amount_refdoc.append(item.fields[ref_fieldname])
+		
+		if zero_amount_refdoc:
+			self.update_biling_status(zero_amount_refdoc, ref_dt, ref_fieldname)
+	
+	def update_biling_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
+		for ref_dn in zero_amount_refdoc:
+			ref_doc_qty = flt(webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tab%s Item` 
+				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])
+			
+			billed_qty = flt(webnotes.conn.sql("""select sum(ifnull(qty, 0)) 
+				from `tab%s Item` where %s=%s and docstatus=1""" % 
+				(self.doc.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
+			
+			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
+				/ ref_doc_qty)*100
+			webnotes.conn.set_value(ref_dt, ref_dn, "per_billed", per_billed)
+			
+			from webnotes.model.meta import has_field
+			if has_field(ref_dt, "billing_status"):
+				if per_billed < 0.001: billing_status = "Not Billed"
+				elif per_billed >= 99.99: billing_status = "Fully Billed"
+				else: billing_status = "Partly Billed"
+			
+				webnotes.conn.set_value(ref_dt, ref_dn, "billing_status", billing_status)
+							
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""
 		Returns the tolerance for the item, if not set, returns global tolerance
