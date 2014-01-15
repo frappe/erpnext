@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2014-01-03 18:28:20", 
+  "modified": "2014-01-15 16:00:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -336,7 +336,7 @@
  }, 
  {
   "default": ":Company", 
-  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
+  "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 

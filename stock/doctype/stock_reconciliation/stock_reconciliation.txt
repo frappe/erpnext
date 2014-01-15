@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2013-09-24 15:35:12", 
+  "modified": "2014-01-15 15:45:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -102,7 +102,7 @@
   "reqd": 1
  }, 
  {
-  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
+  "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
@@ -110,6 +110,7 @@
   "options": "Account"
  }, 
  {
+  "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 
