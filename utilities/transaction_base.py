@@ -79,9 +79,10 @@ class TransactionBase(StatusUpdater):
 		"""
 		customer_defaults = self.get_customer_defaults()
 					
-		customer_defaults["selling_price_list"] = customer_defaults.get("price_list") or \
-			webnotes.conn.get_value("Customer Group", self.doc.customer_group, "default_price_list") or \
-			self.doc.selling_price_list
+		customer_defaults["selling_price_list"] = self.get_user_default_price_list("Selling") or \
+			customer_defaults.get("price_list") or \
+			webnotes.conn.get_value("Customer Group", self.doc.customer_group, 
+				"default_price_list") or self.doc.selling_price_list
 			
 		for fieldname, val in customer_defaults.items():
 			if self.meta.get_field(fieldname):
@@ -89,6 +90,12 @@ class TransactionBase(StatusUpdater):
 			
 		if self.meta.get_field("sales_team") and self.doc.customer:
 			self.set_sales_team_for_customer()
+			
+	def get_user_default_price_list(self, price_list_for):
+		from webnotes.defaults import get_user_default_as_list
+		user_default_price_list = get_user_default_as_list("selling_price_list" 
+			if price_list_for=="Selling" else "buying_price_list")
+		return user_default_price_list[0] if len(user_default_price_list)==1 else ""
 			
 	def set_sales_team_for_customer(self):
 		from webnotes.model import default_fields
@@ -120,8 +127,9 @@ class TransactionBase(StatusUpdater):
 		out["supplier_name"] = supplier.supplier_name
 		if supplier.default_currency:
 			out["currency"] = supplier.default_currency
-		if supplier.default_price_list:
-			out["buying_price_list"] = supplier.default_price_list
+			
+		out["buying_price_list"] = self.get_user_default_price_list("Buying") or \
+			supplier.default_price_list or self.doc.buying_price_list
 		
 		return out
 		
