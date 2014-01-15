@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import add_days, cstr, getdate
+from webnotes.utils import add_days, cstr, getdate, cint
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, throw, _
@@ -93,14 +93,15 @@ class DocType(TransactionBase):
 		date_diff = (getdate(end_date) - getdate(start_date)).days
 		add_by = date_diff / no_of_visit
 
-		while (getdate(start_date_copy) < getdate(end_date)):
-			start_date_copy = add_days(start_date_copy, add_by)
-			if len(schedule_list) < no_of_visit:
-				schedule_date = self.validate_schedule_date_for_holiday_list(getdate(start_date_copy), 
-					sales_person)
-				if schedule_date > getdate(end_date):
-					schedule_date = getdate(end_date)
-				schedule_list.append(schedule_date)
+		for visit in range(0, cint(no_of_visit)):
+			if (getdate(start_date_copy) < getdate(end_date)):
+				start_date_copy = add_days(start_date_copy, add_by)
+				if len(schedule_list) < no_of_visit:
+					schedule_date = self.validate_schedule_date_for_holiday_list(getdate(start_date_copy), 
+						sales_person)
+					if schedule_date > getdate(end_date):
+						schedule_date = getdate(end_date)
+					schedule_list.append(schedule_date)
 
 		return schedule_list
 
@@ -115,6 +116,7 @@ class DocType(TransactionBase):
 			pass
 
 		if fy_details and fy_details[0]:
+			# check holiday list in employee master
 			holiday_list = webnotes.conn.sql_list("""select h.holiday_date from `tabEmployee` emp, 
 				`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl 
 				where sp.name=%s and emp.name=sp.employee 
@@ -122,12 +124,13 @@ class DocType(TransactionBase):
 				h.parent=hl.name and 
 				hl.fiscal_year=%s""", (sales_person, fy_details[0]))
 			if not holiday_list:
+				# check global holiday list
 				holiday_list = webnotes.conn.sql("""select h.holiday_date from 
 					`tabHoliday` h, `tabHoliday List` hl 
 					where h.parent=hl.name and ifnull(hl.is_default, 0) = 1 
 					and hl.fiscal_year=%s""", fy_details[0])
 
-			while not validated and holiday_list:
+			if not validated and holiday_list:
 				if schedule_date in holiday_list:
 					schedule_date = add_days(schedule_date, -1)
 				else:
