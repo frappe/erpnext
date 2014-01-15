@@ -50,9 +50,9 @@ def get_columns(salary_slips):
 		where ifnull(d_modified_amount, 0) != 0 and parent in (%s)""" % 
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]))
 		
-	columns = columns + [(e + ":Link/Earning Type:120") for e in earning_types] + \
+	columns = columns + [(e + ":Currency:120") for e in earning_types] + \
 		["Arrear Amount:Currency:120", "Leave Encashment Amount:Currency:150", 
-		"Gross Pay:Currency:120"] + [(d + ":Link/Deduction Type:120") for d in ded_types] + \
+		"Gross Pay:Currency:120"] + [(d + ":Currency:120") for d in ded_types] + \
 		["Total Deduction:Currency:120", "Net Pay:Currency:120"]
 
 	return columns, earning_types, ded_types
@@ -102,6 +102,6 @@ def get_ss_ded_map(salary_slips):
 	ss_ded_map = {}
 	for d in ss_deductions:
 		ss_ded_map.setdefault(d.parent, webnotes._dict()).setdefault(d.d_type, [])
-		ss_ded_map[d.parent][d.e_type] = flt(d.d_modified_amount)
+		ss_ded_map[d.parent][d.d_type] = flt(d.d_modified_amount)
 	
 	return ss_ded_map
