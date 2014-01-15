@@ -93,7 +93,7 @@ class DocType(TransactionBase):
 		date_diff = (getdate(end_date) - getdate(start_date)).days
 		add_by = date_diff / no_of_visit
 
-		for visit in range(0, cint(no_of_visit)):
+		for visit in range(cint(no_of_visit)):
 			if (getdate(start_date_copy) < getdate(end_date)):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:

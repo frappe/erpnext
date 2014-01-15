@@ -25,8 +25,7 @@ class DocType(DocTypeNestedSet):
 	def get_email_id(self):
 		profile = webnotes.conn.get_value("Employee", self.doc.employee, "user_id")
 		if not profile:
-			webnotes.msgprint("User ID (Profile) not set for Employee %s" % self.doc.employee, 
-				raise_exception=True)
+			webnotes.throw("User ID (Profile) not set for Employee %s" % self.doc.employee)
 		else:
 			return webnotes.conn.get_value("Profile", profile, "email") or profile
 		
