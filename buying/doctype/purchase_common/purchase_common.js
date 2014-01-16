@@ -302,11 +302,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	
 	calculate_totals: function() {
 		var tax_count = this.frm.tax_doclist.length;
-		this.frm.doc.grand_total = flt(
-			tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total,
+		this.frm.doc.grand_total = flt(tax_count ? 
+			this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total,
 			precision("grand_total"));
-		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate,
-			precision("grand_total_import"));
+		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total / 
+			this.frm.doc.conversion_rate, precision("grand_total_import"));
 			
 		this.frm.doc.total_tax = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("total_tax"));
@@ -321,20 +321,26 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 		
 		// other charges added/deducted
+		this.frm.doc.other_charges_added = 0.0
+		this.frm.doc.other_charges_deducted = 0.0
 		if(tax_count) {
 			this.frm.doc.other_charges_added = wn.utils.sum($.map(this.frm.tax_doclist, 
-				function(tax) { return (tax.add_deduct_tax == "Add" && in_list(["Valuation and Total", "Total"], tax.category)) ? tax.tax_amount : 0.0; }));
+				function(tax) { return (tax.add_deduct_tax == "Add" 
+					&& in_list(["Valuation and Total", "Total"], tax.category)) ? 
+					tax.tax_amount : 0.0; }));
 		
 			this.frm.doc.other_charges_deducted = wn.utils.sum($.map(this.frm.tax_doclist, 
-				function(tax) { return (tax.add_deduct_tax == "Deduct" && in_list(["Valuation and Total", "Total"], tax.category)) ? tax.tax_amount : 0.0; }));
+				function(tax) { return (tax.add_deduct_tax == "Deduct" 
+					&& in_list(["Valuation and Total", "Total"], tax.category)) ? 
+					tax.tax_amount : 0.0; }));
 			
-			wn.model.round_floats_in(this.frm.doc, ["other_charges_added", "other_charges_deducted"]);
-			
-			this.frm.doc.other_charges_added_import = flt(this.frm.doc.other_charges_added / this.frm.doc.conversion_rate,
-				precision("other_charges_added_import"));
-			this.frm.doc.other_charges_deducted_import = flt(this.frm.doc.other_charges_deducted / this.frm.doc.conversion_rate,
-				precision("other_charges_deducted_import"));
+			wn.model.round_floats_in(this.frm.doc,
+				["other_charges_added", "other_charges_deducted"]);
 		}
+		this.frm.doc.other_charges_added_import = flt(this.frm.doc.other_charges_added /
+			this.frm.doc.conversion_rate, precision("other_charges_added_import"));
+		this.frm.doc.other_charges_deducted_import = flt(this.frm.doc.other_charges_deducted / 
+			this.frm.doc.conversion_rate, precision("other_charges_deducted_import"));
 	},
 	
 	_cleanup: function() {
