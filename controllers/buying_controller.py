@@ -124,8 +124,8 @@ class BuyingController(StockController):
 		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
 		
 	def calculate_totals(self):
-		self.doc.grand_total = flt(self.tax_doclist and \
-			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))
+		self.doc.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist 
+			else self.doc.net_total, self.precision("grand_total"))
 		self.doc.grand_total_import = flt(self.doc.grand_total / self.doc.conversion_rate,
 			self.precision("grand_total_import"))
 
@@ -137,6 +137,24 @@ class BuyingController(StockController):
 		
 		if self.meta.get_field("rounded_total_import"):
 			self.doc.rounded_total_import = _round(self.doc.grand_total_import)
+				
+		if self.meta.get_field("other_charges_added"):
+			self.doc.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.tax_doclist 
+				if d.add_deduct_tax=="Add" and d.category in ["Valuation and Total", "Total"]]), 
+				self.precision("other_charges_added"))
+				
+		if self.meta.get_field("other_charges_deducted"):
+			self.doc.other_charges_deducted = flt(sum([flt(d.tax_amount) for d in self.tax_doclist 
+				if d.add_deduct_tax=="Deduct" and d.category in ["Valuation and Total", "Total"]]), 
+				self.precision("other_charges_deducted"))
+				
+		if self.meta.get_field("other_charges_added_import"):
+			self.doc.other_charges_added_import = flt(self.doc.other_charges_added / 
+				self.doc.conversion_rate, self.precision("other_charges_added_import"))
+				
+		if self.meta.get_field("other_charges_deducted_import"):
+			self.doc.other_charges_deducted_import = flt(self.doc.other_charges_deducted / 
+				self.doc.conversion_rate, self.precision("other_charges_deducted_import"))
 			
 	def calculate_outstanding_amount(self):
 		if self.doc.doctype == "Purchase Invoice" and self.doc.docstatus < 2:
