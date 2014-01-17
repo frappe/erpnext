@@ -43,7 +43,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		jv = locals['Journal Voucher'][jv];
 		jv.voucher_type = 'Bank Voucher';
 		jv.user_remark = wn._('Payment of salary for the month: ') + doc.month + 
-			wn._('and fiscal year: ') + doc.fiscal_year;
+			wn._(' and fiscal year: ') + doc.fiscal_year;
 		jv.fiscal_year = doc.fiscal_year;
 		jv.company = doc.company;
 		jv.posting_date = dateutil.obj_to_str(new Date());
