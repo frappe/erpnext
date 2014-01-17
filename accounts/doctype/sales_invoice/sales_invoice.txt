@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2013-11-18 15:16:50", 
+  "modified": "2014-01-16 15:36:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -1091,7 +1091,7 @@
   "fieldtype": "Select", 
   "label": "Recurring Type", 
   "no_copy": 1, 
-  "options": "Monthly\nQuarterly\nHalf-yearly\nYearly", 
+  "options": "\nMonthly\nQuarterly\nHalf-yearly\nYearly", 
   "print_hide": 1, 
   "read_only": 0
  }, 

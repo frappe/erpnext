@@ -20,7 +20,7 @@ requirements = [
 	"jinja2", 
 	"markdown2", 
 	"markupsafe", 
-	"mysql-python==1.2.4", 
+	"mysql-python",
 	"pygeoip", 
 	"python-dateutil", 
 	"python-memcached", 
