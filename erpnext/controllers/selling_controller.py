@@ -121,7 +121,7 @@ class SellingController(StockController):
 						
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 			
-			if cumulated_tax_fraction:
+			if cumulated_tax_fraction and not self.discount_amount_applied:
 				item.amount = flt((item.export_amount * self.doc.conversion_rate) /
 					(1 + cumulated_tax_fraction), self.precision("amount", item))
 					
@@ -158,22 +158,23 @@ class SellingController(StockController):
 		return current_tax_fraction
 		
 	def calculate_item_values(self):
-		for item in self.item_doclist:
-			self.round_floats_in(item)
-			
-			if item.adj_rate == 100:
-				item.export_rate = 0
-			elif not item.export_rate:
-				item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
-					self.precision("export_rate", item))
-						
-			item.export_amount = flt(item.export_rate * item.qty,
-				self.precision("export_amount", item))
+		if not self.discount_amount_applied:
+			for item in self.item_doclist:
+				self.round_floats_in(item)
 
-			self._set_in_company_currency(item, "ref_rate", "base_ref_rate")
-			self._set_in_company_currency(item, "export_rate", "basic_rate")
-			self._set_in_company_currency(item, "export_amount", "amount")
-			
+				if item.adj_rate == 100:
+					item.export_rate = 0
+				elif not item.export_rate:
+					item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
+						self.precision("export_rate", item))
+
+				item.export_amount = flt(item.export_rate * item.qty,
+					self.precision("export_amount", item))
+
+				self._set_in_company_currency(item, "ref_rate", "base_ref_rate")
+				self._set_in_company_currency(item, "export_rate", "basic_rate")
+				self._set_in_company_currency(item, "export_amount", "amount")
+
 	def calculate_net_total(self):
 		self.doc.net_total = self.doc.net_total_export = 0.0
 
@@ -191,13 +192,42 @@ class SellingController(StockController):
 			
 		self.doc.other_charges_total = flt(self.doc.grand_total - self.doc.net_total,
 			self.precision("other_charges_total"))
-		self.doc.other_charges_total_export = flt(
-			self.doc.grand_total_export - self.doc.net_total_export,
+
+		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - 
+			self.doc.net_total_export + flt(self.doc.discount_amount), 
 			self.precision("other_charges_total_export"))
 		
 		self.doc.rounded_total = _round(self.doc.grand_total)
 		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
-		
+
+	def apply_discount_amount(self):
+		if self.doc.discount_amount:
+			grand_total_for_discount_amount = self.get_grand_total_for_discount_amount()
+
+			if grand_total_for_discount_amount:
+				# calculate item amount after Discount Amount
+				for item in self.item_doclist:
+					distributed_amount = flt(self.doc.discount_amount) * item.amount / grand_total_for_discount_amount
+					item.amount = flt(item.amount - distributed_amount, self.precision("amount", item))
+
+				self.discount_amount_applied = True
+				self._calculate_taxes_and_totals()
+
+	def get_grand_total_for_discount_amount(self):
+		actual_taxes_dict = {}
+
+		for tax in self.tax_doclist:
+			if tax.charge_type == "Actual":
+				actual_taxes_dict.setdefault(tax.idx, tax.tax_amount)
+			elif tax.row_id in actual_taxes_dict:
+				actual_tax_amount = flt(actual_taxes_dict.get(tax.row_id, 0)) * \
+					flt(tax.rate) / 100
+				actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
+
+		grand_total_for_discount_amount = flt(self.doc.grand_total - sum(actual_taxes_dict.values()), 
+			self.precision("grand_total"))
+		return grand_total_for_discount_amount
+
 	def calculate_outstanding_amount(self):
 		# NOTE: 
 		# write_off_amount is only for POS Invoice

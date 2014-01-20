@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:09", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:02", 
+  "modified": "2014-01-03 14:53:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -468,7 +468,7 @@
   "fieldname": "other_charges_total_export", 
   "fieldtype": "Currency", 
   "label": "Taxes and Charges Total", 
-  "options": "company", 
+  "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "read_only": 1
  }, 
@@ -489,6 +489,13 @@
   "print_width": "150px", 
   "read_only": 1, 
   "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "discount_amount", 
+  "fieldtype": "Currency", 
+  "label": "Discount Amount", 
+  "options": "Company:company:default_currency"
  }, 
  {
   "doctype": "DocField", 

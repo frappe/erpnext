@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
-
 from erpnext.buying.utils import get_item_details
 from erpnext.setup.utils import get_company_currency
 
@@ -166,7 +165,7 @@ class BuyingController(StockController):
 	def _cleanup(self):
 		super(BuyingController, self)._cleanup()
 			
-		# except in purchase invoice, rate field is purchase_rate		
+		# except in purchase invoice, rate field is purchase_rate
 		# reset fieldname of rate
 		if self.doc.doctype != "Purchase Invoice":
 			df = self.meta.get_field("rate", parentfield=self.fname)
@@ -179,7 +178,12 @@ class BuyingController(StockController):
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:
 				del item.fields["item_tax_amount"]
-							
+				
+		if not self.meta.get_field("tax_amount_after_discount_amount", 
+				parentfield=self.other_fname):
+			for tax in self.tax_doclist:
+				del tax.fields["tax_amount_after_discount_amount"]
+				
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
 		"""

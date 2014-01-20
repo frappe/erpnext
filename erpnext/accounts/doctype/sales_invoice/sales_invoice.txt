@@ -457,6 +457,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "discount_amount", 
+  "fieldtype": "Currency", 
+  "label": "Discount Amount", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
