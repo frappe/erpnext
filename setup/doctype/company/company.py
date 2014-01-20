@@ -244,8 +244,6 @@ class DocType:
 					webnotes.conn.set(self.doc, a, account_name)
 			
 		_set_default_accounts({
-			"default_income_account": "Sales",
-			"default_expense_account": "Cost of Goods Sold",
 			"receivables_group": "Accounts Receivable",
 			"payables_group": "Accounts Payable",
 			"default_cash_account": "Cash"
@@ -257,8 +255,6 @@ class DocType:
 				"stock_adjustment_account": "Stock Adjustment",
 				"expenses_included_in_valuation": "Expenses Included In Valuation"
 			})
-		
-		
 
 	def create_default_cost_center(self):
 		cc_list = [
