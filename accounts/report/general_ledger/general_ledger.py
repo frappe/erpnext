@@ -34,7 +34,7 @@ def validate_filters(filters, account_details):
 def get_columns():
 	return ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Float:100", 
 		"Credit:Float:100", "Voucher Type::120", "Voucher No::160", "Link::20", 
-		"Against Account::120", "Cost Center:Link/Cost Center:100", "Remarks::200"]
+		"Against Account::120", "Cost Center:Link/Cost Center:100", "Remarks::400"]
 		
 def get_result(filters, account_details):	
 	gl_entries = get_gl_entries(filters)
