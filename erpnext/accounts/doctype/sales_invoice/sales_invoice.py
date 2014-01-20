@@ -88,6 +88,7 @@ class DocType(SellingController):
 		
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -114,6 +115,7 @@ class DocType(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 		
 		self.make_cancel_gl_entries()
 		
@@ -556,12 +558,12 @@ class DocType(SellingController):
 				
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
-			if flt(tax.tax_amount):
+			if flt(tax.tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.doc.debit_to,
-						"credit": flt(tax.tax_amount),
+						"credit": flt(tax.tax_amount_after_discount_amount),
 						"remarks": self.doc.remarks,
 						"cost_center": tax.cost_center
 					})

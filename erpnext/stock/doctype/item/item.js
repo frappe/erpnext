@@ -29,10 +29,7 @@ cur_frm.cscript.make_dashboard = function() {
 
 cur_frm.cscript.edit_prices_button = function() {
 	cur_frm.add_custom_button("Add / Edit Prices", function() {
-		wn.route_options = {
-			"item_code": cur_frm.doc.name
-		};
-		wn.set_route("Report", "Item Price");
+		wn.set_route("Report", "Item Price", {"item_code": cur_frm.doc.name});
 	}, "icon-money");
 }
 
@@ -97,7 +94,8 @@ cur_frm.fields_dict['default_sales_cost_center'].get_query = function(doc) {
 cur_frm.fields_dict['item_tax'].grid.get_field("tax_type").get_query = function(doc, cdt, cdn) {
 	return{
 		filters:[
-			['Account', 'account_type', 'in', 'Tax, Chargeable'],
+			['Account', 'account_type', 'in',
+				'Tax, Chargeable, Income Account, Expense Account'],
 			['Account', 'docstatus', '!=', 2]
 		]
 	}

@@ -28,7 +28,8 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
-					company: me.frm.doc.company
+					company: me.frm.doc.company,
+					group_by_voucher: false
 				};
 				wn.set_route("query-report", "General Ledger");
 			}, "icon-table");

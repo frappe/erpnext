@@ -25,7 +25,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		
 		// toggle to pos view if is_pos is 1 in user_defaults
-		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || cur_frm.doc.is_pos)) {
+		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || this.frm.doc.is_pos)) {
 			if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
 				this.frm.set_value("is_pos", 1);
 				this.is_pos(function() {
@@ -54,7 +54,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
-					"company": doc.company
+					"company": doc.company,
+					group_by_voucher: 0
 				};
 				wn.set_route("query-report", "General Ledger");
 			}, "icon-table");
@@ -145,8 +146,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 							me.set_default_values();
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();
-
-							if(callback_fn) callback_fn()
+							
+							if(callback_fn) callback_fn();
 						}
 					}
 				});
@@ -334,7 +335,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 // --------------------------------
 cur_frm.set_query("income_account", "entries", function(doc) {
 	return{
-		query: "accounts.doctype.sales_invoice.sales_invoice.get_income_account",
+		query: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_income_account",
 		filters: {'company': doc.company}
 	}
 });

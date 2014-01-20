@@ -44,7 +44,6 @@ class TestSalesInvoice(unittest.TestCase):
 		
 	def test_sales_invoice_calculation_base_currency(self):
 		si = webnotes.bean(copy=test_records[2])
-		si.run_method("calculate_taxes_and_totals")
 		si.insert()
 		
 		expected_values = {
@@ -136,7 +135,114 @@ class TestSalesInvoice(unittest.TestCase):
 				
 		self.assertEquals(si.doc.grand_total, 1627.05)
 		self.assertEquals(si.doc.grand_total_export, 32.54)
+
+	def test_sales_invoice_discount_amount(self):
+		si = webnotes.bean(copy=test_records[3])
+		si.doc.discount_amount = 104.95
+		si.doclist.append({
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 10,
+			"row_id": 8,
+			"idx": 9
+		})
+		si.insert()
+		
+		expected_values = {
+			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
+				"base_ref_rate", "basic_rate", "amount"],
+			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 465.37],
+			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 698.08],
+		}
+		
+		# check if children are saved
+		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+			len(expected_values)-1)
+		
+		# check if item values are calculated
+		for d in si.doclist.get({"parentfield": "entries"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+		
+		# check net total
+		self.assertEquals(si.doc.net_total, 1163.45)
+		self.assertEquals(si.doc.net_total_export, 1578.3)
+		
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "tax_amount_after_discount_amount", "total"],
+			"_Test Account Excise Duty - _TC": [140, 130.31, 1293.76],
+			"_Test Account Education Cess - _TC": [2.8, 2.61, 1296.37],
+			"_Test Account S&H Education Cess - _TC": [1.4, 1.31, 1297.68],
+			"_Test Account CST - _TC": [27.88, 25.96, 1323.64],
+			"_Test Account VAT - _TC": [156.25, 145.43, 1469.07],
+			"_Test Account Customs Duty - _TC": [125, 116.35, 1585.42],
+			"_Test Account Shipping Charges - _TC": [100, 100, 1685.42],
+			"_Test Account Discount - _TC": [-180.33, -168.54, 1516.88],
+			"_Test Account Service Tax - _TC": [-18.03, -16.88, 1500]
+		}
+		
+		for d in si.doclist.get({"parentfield": "other_charges"}):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 				
+		self.assertEquals(si.doc.grand_total, 1500)
+		self.assertEquals(si.doc.grand_total_export, 1500)
+
+	def test_discount_amount_gl_entry(self):
+		si = webnotes.bean(copy=test_records[3])
+		si.doc.discount_amount = 104.95
+		si.doclist.append({
+			"doctype": "Sales Taxes and Charges",
+			"parentfield": "other_charges",
+			"charge_type": "On Previous Row Amount",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 10,
+			"row_id": 8,
+			"idx": 9
+		})
+		si.insert()
+		si.submit()
+
+		gl_entries = webnotes.conn.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.doc.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = sorted([
+			[si.doc.debit_to, 1500, 0.0],
+			[test_records[3][1]["income_account"], 0.0, 1163.45],
+			[test_records[3][3]["account_head"], 0.0, 130.31],
+			[test_records[3][4]["account_head"], 0.0, 2.61],
+			[test_records[3][5]["account_head"], 0.0, 1.31],
+			[test_records[3][6]["account_head"], 0.0, 25.96],
+			[test_records[3][7]["account_head"], 0.0, 145.43],
+			[test_records[3][8]["account_head"], 0.0, 116.35],
+			[test_records[3][9]["account_head"], 0.0, 100],
+			[test_records[3][10]["account_head"], 168.54, 0.0],
+			["_Test Account Service Tax - _TC", 16.88, 0.0],
+		])
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals(expected_values[i][0], gle.account)
+			self.assertEquals(expected_values[i][1], gle.debit)
+			self.assertEquals(expected_values[i][2], gle.credit)
+
+		# cancel
+		si.cancel()
+
+		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+
+		self.assertFalse(gle)
+
 	def test_inclusive_rate_validations(self):
 		si = webnotes.bean(copy=test_records[2])
 		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
@@ -148,16 +254,15 @@ class TestSalesInvoice(unittest.TestCase):
 			si.doclist[i].included_in_print_rate = 1
 		
 		# tax type "Actual" cannot be inclusive
-		self.assertRaises(webnotes.ValidationError, si.run_method, "calculate_taxes_and_totals")
+		self.assertRaises(webnotes.ValidationError, si.insert)
 		
 		# taxes above included type 'On Previous Row Total' should also be included
 		si.doclist[3].included_in_print_rate = 0
-		self.assertRaises(webnotes.ValidationError, si.run_method, "calculate_taxes_and_totals")
+		self.assertRaises(webnotes.ValidationError, si.insert)
 		
 	def test_sales_invoice_calculation_base_currency_with_tax_inclusive_price(self):
 		# prepare
 		si = webnotes.bean(copy=test_records[3])
-		si.run_method("calculate_taxes_and_totals")
 		si.insert()
 		
 		expected_values = {
@@ -195,7 +300,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.doclist.get({"parentfield": "other_charges"}):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(flt(d.fields.get(k), 6), expected_values[d.account_head][i])
+				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 		
 		self.assertEquals(si.doc.grand_total, 1622.98)
 		self.assertEquals(si.doc.grand_total_export, 1622.98)
@@ -211,7 +316,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.doclist[2].adj_rate = 20
 		si.doclist[9].rate = 5000
 		
-		si.run_method("calculate_taxes_and_totals")
 		si.insert()
 		
 		expected_values = {
@@ -249,7 +353,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.doclist.get({"parentfield": "other_charges"}):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(flt(d.fields.get(k), 6), expected_values[d.account_head][i])
+				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 		
 		self.assertEquals(si.doc.grand_total, 65205.16)
 		self.assertEquals(si.doc.grand_total_export, 1304.1)
@@ -364,7 +468,6 @@ class TestSalesInvoice(unittest.TestCase):
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
-		# print gl_entries
 		
 		stock_in_hand = webnotes.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
@@ -404,7 +507,6 @@ class TestSalesInvoice(unittest.TestCase):
 		pr = webnotes.bean(copy=pr_test_records[0])
 		pr.doc.naming_series = "_T-Purchase Receipt-"
 		pr.doclist[1].warehouse = "_Test Warehouse No Account - _TC"
-		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
 		
@@ -449,7 +551,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 		set_perpetual_inventory(0)
 		
-	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):	
+	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
 				
@@ -509,7 +611,6 @@ class TestSalesInvoice(unittest.TestCase):
 			as pr_test_records
 		pr = webnotes.bean(copy=pr_test_records[0])
 		pr.doc.naming_series = "_T-Purchase Receipt-"
-		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		pr.submit()
 		
@@ -566,16 +667,17 @@ class TestSalesInvoice(unittest.TestCase):
 			where against_invoice=%s""", si.doc.name))
 			
 	def test_recurring_invoice(self):
-		from webnotes.utils import now_datetime, get_first_day, get_last_day, add_to_date
-		today = now_datetime().date()
-		
+		from webnotes.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
+		from accounts.utils import get_fiscal_year
+		today = nowdate()
 		base_si = webnotes.bean(copy=test_records[0])
 		base_si.doc.fields.update({
 			"convert_into_recurring_invoice": 1,
 			"recurring_type": "Monthly",
 			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
-			"repeat_on_day_of_month": today.day,
+			"repeat_on_day_of_month": getdate(today).day,
 			"posting_date": today,
+			"fiscal_year": get_fiscal_year(today)[0],
 			"invoice_period_from_date": get_first_day(today),
 			"invoice_period_to_date": get_last_day(today)
 		})
