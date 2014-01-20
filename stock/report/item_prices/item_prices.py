@@ -15,7 +15,7 @@ def execute(filters=None):
 	bom_rate = get_item_bom_rate()
 	val_rate_map = get_valuation_rate()
 
-	precision = get_currency_precision or 2
+	precision = get_currency_precision() or 2
 		
 	data = []
 	for item in sorted(item_map):
