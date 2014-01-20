@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:54", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:58", 
+  "modified": "2014-01-20 17:48:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,6 +62,7 @@
  {
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Material Master Manager", 
   "write": 1
@@ -70,20 +71,24 @@
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Material User", 
   "submit": 0, 
   "write": 0
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase User"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts User"
  }

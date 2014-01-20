@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:23", 
+  "modified": "2014-01-20 17:49:12", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -809,6 +809,7 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Material Manager", 
   "submit": 1, 
@@ -818,6 +819,7 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Material User", 
   "submit": 1, 
@@ -827,12 +829,14 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Purchase User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Supplier"
  }

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:12", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:55", 
+  "modified": "2014-01-20 17:48:22", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -230,6 +230,8 @@
   "width": "150px"
  }, 
  {
+  "cancel": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "match": "owner", 
   "role": "Employee", 
@@ -238,6 +240,7 @@
  {
   "amend": 1, 
   "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "System Manager", 
   "submit": 1
@@ -245,6 +248,7 @@
  {
   "amend": 1, 
   "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "HR User", 
   "submit": 1

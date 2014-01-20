@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2014-01-06 18:28:23", 
+  "modified": "2014-01-20 17:48:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -92,6 +92,7 @@
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User", 
   "submit": 0, 
@@ -99,20 +100,23 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
   "submit": 0, 
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase User"
  }, 
  {
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Purchase Master Manager", 
   "write": 1

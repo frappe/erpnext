@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:07", 
+  "modified": "2014-01-20 17:48:44", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -221,6 +221,7 @@
   "width": "160px"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "match": "owner", 
   "role": "Employee"
@@ -228,6 +229,7 @@
  {
   "amend": 1, 
   "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Expense Approver", 
   "submit": 1
@@ -235,6 +237,7 @@
  {
   "amend": 1, 
   "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "HR User", 
   "submit": 1

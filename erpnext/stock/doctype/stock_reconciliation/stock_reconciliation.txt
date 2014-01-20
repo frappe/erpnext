@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
-  "modified": "2014-01-15 15:45:07", 
+  "modified": "2014-01-20 17:49:28", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -32,6 +32,7 @@
   "amend": 0, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Stock Reconciliation", 
