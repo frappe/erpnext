@@ -15,8 +15,7 @@ def execute(filters=None):
 	bom_rate = get_item_bom_rate()
 	val_rate_map = get_valuation_rate()
 
-	precision = get_currency_precision or 2
-		
+	precision = get_currency_precision() or 2
 	data = []
 	for item in sorted(item_map):
 		data.append([item, item_map[item]["item_name"], 
@@ -65,9 +64,10 @@ def get_price_list():
 
 	rate = {}
 
-	price_list = webnotes.conn.sql("""select item_code, buying, selling, 
-		concat(price_list, " - ", currency, " ", ref_rate) as price 
-		from `tabItem Price`""", as_dict=1)
+	price_list = webnotes.conn.sql("""select ip.item_code, ip.buying, ip.selling, 
+		concat(ip.price_list, " - ", ip.currency, " ", ip.ref_rate) as price 
+		from `tabItem Price` ip, `tabPrice List` pl 
+		where ip.price_list=pl.name and pl.enabled=1""", as_dict=1)
 
 	for j in price_list:
 		if j.price:
