@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
+from webnotes import _, throw
 from webnotes.utils import flt, cint, today, cstr
 from webnotes.model.code import get_obj
 from erpnext.setup.utils import get_company_currency
@@ -44,14 +44,13 @@ class AccountsController(TransactionBase):
 	def validate_for_freezed_account(self):
 		for fieldname in ["customer", "supplier"]:
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				accounts = webnotes.conn.get_values("Account", {"master_type": fieldname.title(), 
-					"master_name": self.doc.fields[fieldname], "company": self.doc.company}, 
-					"freeze_account", as_dict=1)
-				
+				accounts = webnotes.conn.get_values("Account", 
+					{"master_type": fieldname.title(), "master_name": self.doc.fields[fieldname], 
+					"company": self.doc.company}, "name")
 				if accounts:
-					if not filter(lambda x: cstr(x.freeze_account) in ["", "No"], accounts):
-						msgprint(_("Account for this ") + fieldname + _(" has been freezed. ") + 
-							self.doc.doctype + _(" can not be made."), raise_exception=1)
+					from accounts.doctype.gl_entry.gl_entry import validate_frozen_account
+					for account in accounts:						
+						validate_frozen_account(account[0])
 			
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
@@ -179,17 +178,17 @@ class AccountsController(TransactionBase):
 		"""
 		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"] and \
 				(not tax.row_id or cint(tax.row_id) >= tax.idx):
-			msgprint((_("Row") + " # %(idx)s [%(taxes_doctype)s]: " + \
+			throw((_("Row") + " # %(idx)s [%(taxes_doctype)s]: " + \
 				_("Please specify a valid") + " %(row_id_label)s") % {
 					"idx": tax.idx,
 					"taxes_doctype": tax.doctype,
 					"row_id_label": self.meta.get_label("row_id",
 						parentfield=self.other_fname)
-				}, raise_exception=True)
+				})
 				
 	def validate_inclusive_tax(self, tax):
 		def _on_previous_row_error(row_range):
-			msgprint((_("Row") + " # %(idx)s [%(doctype)s]: " +
+			throw((_("Row") + " # %(idx)s [%(doctype)s]: " +
 				_("to be included in Item's rate, it is required that: ") +
 				" [" + _("Row") + " # %(row_range)s] " + _("also be included in Item's rate")) % {
 					"idx": tax.idx,
@@ -200,12 +199,12 @@ class AccountsController(TransactionBase):
 						parentfield=self.other_fname),
 					"charge_type": tax.charge_type,
 					"row_range": row_range
-				}, raise_exception=True)
+				})
 		
 		if cint(tax.included_in_print_rate):
 			if tax.charge_type == "Actual":
 				# inclusive tax cannot be of type Actual
-				msgprint((_("Row") 
+				throw((_("Row") 
 					+ " # %(idx)s [%(doctype)s]: %(charge_type_label)s = \"%(charge_type)s\" " 
 					+ "cannot be included in Item's rate") % {
 						"idx": tax.idx,
@@ -213,7 +212,7 @@ class AccountsController(TransactionBase):
 						"charge_type_label": self.meta.get_label("charge_type",
 							parentfield=self.other_fname),
 						"charge_type": tax.charge_type,
-					}, raise_exception=True)
+					})
 			elif tax.charge_type == "On Previous Row Amount" and \
 					not cint(self.tax_doclist[tax.row_id - 1].included_in_print_rate):
 				# referred row should also be inclusive
@@ -224,23 +223,22 @@ class AccountsController(TransactionBase):
 				_on_previous_row_error("1 - %d" % (tax.row_id,))
 				
 	def calculate_taxes(self):
-		for item in self.item_doclist:
+		# maintain actual tax rate based on idx
+		actual_tax_dict = dict([[tax.idx, tax.rate] for tax in self.tax_doclist 
+			if tax.charge_type == "Actual"])
+			
+		for n, item in enumerate(self.item_doclist):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 
 			for i, tax in enumerate(self.tax_doclist):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
-				
-				if hasattr(self, "set_item_tax_amount"):
-					self.set_item_tax_amount(item, tax, current_tax_amount)
-
-				# case when net total is 0 but there is an actual type charge
-				# in this case add the actual amount to tax.tax_amount
-				# and tax.grand_total_for_current_item for the first such iteration
-				if tax.charge_type=="Actual" and \
-						not (current_tax_amount or self.doc.net_total or tax.tax_amount):
-					zero_net_total_adjustment = flt(tax.rate, self.precision("tax_amount", tax))
-					current_tax_amount += zero_net_total_adjustment
+					
+				# Adjust divisional loss to the last item
+				if tax.charge_type == "Actual":
+					actual_tax_dict[tax.idx] -= current_tax_amount
+					if n == len(self.item_doclist) - 1:
+						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
@@ -252,7 +250,8 @@ class AccountsController(TransactionBase):
 				if tax.category:
 					# if just for valuation, do not add the tax amount in total
 					# hence, setting it as 0 for further steps
-					current_tax_amount = 0.0 if (tax.category == "Valuation") else current_tax_amount
+					current_tax_amount = 0.0 if (tax.category == "Valuation") \
+						else current_tax_amount
 					
 					current_tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
 				
@@ -270,6 +269,11 @@ class AccountsController(TransactionBase):
 				
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
+				
+				# set precision in the last item iteration
+				if n == len(self.item_doclist) - 1:
+					tax.total = flt(tax.total, self.precision("total", tax))
+					tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
 				
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -384,24 +388,45 @@ class AccountsController(TransactionBase):
 			})
 			
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
+		from controllers.status_updater import get_tolerance_for
+		item_tolerance = {}
+		global_tolerance = None
+		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get(item_ref_dn):
-				already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
-					where %s=%s and docstatus=1""" % (based_on, self.tname, item_ref_dn, '%s'), 
-					item.fields[item_ref_dn])[0][0]
-				
-				max_allowed_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
+				ref_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
 					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
+				if not ref_amt:
+					webnotes.msgprint(_("As amount for item") + ": " + item.item_code + _(" in ") + 
+						ref_dt + _(" is zero, system will not check for over-billed"))
+				else:
+					already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
+						where %s=%s and docstatus=1 and parent != %s""" % 
+						(based_on, self.tname, item_ref_dn, '%s', '%s'), 
+						(item.fields[item_ref_dn], self.doc.name))[0][0]
 				
-				total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
-					self.precision(based_on, item))
+					total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
+						self.precision(based_on, item))
+				
+					tolerance, item_tolerance, global_tolerance = get_tolerance_for(item.item_code, 
+						item_tolerance, global_tolerance)
 					
-				if max_allowed_amt and total_billed_amt - max_allowed_amt > 0.02:
-					webnotes.msgprint(_("Row ")+ cstr(item.idx) + ": " + cstr(item.item_code) + 
-						_(" will be over-billed against mentioned ") + cstr(ref_dt) +  
-						_(". Max allowed " + cstr(based_on) + ": " + cstr(max_allowed_amt)), 
-						raise_exception=1)
-		
+					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
+				
+					if total_billed_amt - max_allowed_amt > 0.01:
+						reduce_by = total_billed_amt - max_allowed_amt
+					
+						webnotes.throw(_("Row #") + cstr(item.idx) + ": " + 
+							_(" Max amount allowed for Item ") + cstr(item.item_code) + 
+							_(" against ") + ref_dt + " " + 
+							cstr(item.fields[ref_dt.lower().replace(" ", "_")]) + _(" is ") + 
+							cstr(max_allowed_amt) + ". \n" + 
+							_("""If you want to increase your overflow tolerance, please increase \
+							tolerance % in Global Defaults or Item master. 				
+							Or, you must reduce the amount by """) + cstr(reduce_by) + "\n" + 
+							_("""Also, please check if the order item has already been billed \
+								in the Sales Order"""))
+				
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
 		return get_company_default(self.doc.company, fieldname)

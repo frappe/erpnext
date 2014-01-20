@@ -88,6 +88,7 @@ class DocType(SellingController):
 		
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -114,6 +115,7 @@ class DocType(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 		
 		self.make_cancel_gl_entries()
 		

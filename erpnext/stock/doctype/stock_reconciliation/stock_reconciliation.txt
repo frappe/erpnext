@@ -2,7 +2,11 @@
  {
   "creation": "2013-03-28 10:35:31", 
   "docstatus": 0, 
+<<<<<<< HEAD:erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.txt
   "modified": "2013-12-20 16:06:50", 
+=======
+  "modified": "2014-01-15 15:45:07", 
+>>>>>>> dbb495548352d46b30bf84fb4b29ef4a247cb21c:stock/doctype/stock_reconciliation/stock_reconciliation.txt
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -101,7 +105,7 @@
   "reqd": 1
  }, 
  {
-  "depends_on": "eval:sys_defaults.auto_accounting_for_stock", 
+  "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
@@ -109,6 +113,7 @@
   "options": "Account"
  }, 
  {
+  "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
   "doctype": "DocField", 
   "fieldname": "cost_center", 
   "fieldtype": "Link", 

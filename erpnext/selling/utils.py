@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import msgprint, _
-from webnotes.utils import flt, cint, comma_and
+from webnotes import _, throw
+from webnotes.utils import flt, cint
 import json
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
@@ -100,7 +100,7 @@ def _get_item_code(barcode=None, serial_no=None):
 			where name=%s""", serial_no)
 			
 	if not item_code:
-		msgprint(_("No Item found with ") + input_type + ": %s" % (barcode or serial_no), raise_exception=True)
+		throw(_("No Item found with ") + input_type + ": %s" % (barcode or serial_no))
 	
 	return item_code[0]
 	
@@ -111,22 +111,26 @@ def _validate_item_details(args, item):
 	# validate if sales item or service item
 	if args.order_type == "Maintenance":
 		if item.is_service_item != "Yes":
-			msgprint(_("Item") + (" %s: " % item.name) + 
+			throw(_("Item") + (" %s: " % item.name) + 
 				_("not a service item.") +
-				_("Please select a service item or change the order type to Sales."), 
-				raise_exception=True)
+				_("Please select a service item or change the order type to Sales."))
 		
 	elif item.is_sales_item != "Yes":
-		msgprint(_("Item") + (" %s: " % item.name) + _("not a sales item"),
-			raise_exception=True)
+		throw(_("Item") + (" %s: " % item.name) + _("not a sales item"))
 			
 def _get_basic_details(args, item_bean, warehouse_fieldname):
 	item = item_bean.doc
 	
+	from webnotes.defaults import get_user_default_as_list
+	user_default_warehouse_list = get_user_default_as_list('warehouse')
+	user_default_warehouse = user_default_warehouse_list[0] \
+		if len(user_default_warehouse_list)==1 else ""
+	
 	out = webnotes._dict({
 			"item_code": item.name,
 			"description": item.description_html or item.description,
-			warehouse_fieldname: item.default_warehouse or args.get(warehouse_fieldname),
+			warehouse_fieldname: user_default_warehouse or item.default_warehouse \
+				or args.get(warehouse_fieldname),
 			"income_account": item.default_income_account or args.income_account \
 				or webnotes.conn.get_value("Company", args.company, "default_income_account"),
 			"expense_account": item.purchase_account or args.expense_account \
@@ -147,7 +151,7 @@ def _get_basic_details(args, item_bean, warehouse_fieldname):
 	
 def _get_price_list_rate(args, item_bean, meta):
 	ref_rate = webnotes.conn.sql("""select ref_rate from `tabItem Price` 
-		where price_list=%s and item_code=%s and buying_or_selling='Selling'""", 
+		where price_list=%s and item_code=%s and selling=1""", 
 		(args.selling_price_list, args.item_code), as_dict=1)
 
 	if not ref_rate:

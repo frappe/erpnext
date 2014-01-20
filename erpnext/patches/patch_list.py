@@ -262,4 +262,7 @@ patch_list = [
 	"execute:webnotes.delete_doc('DocType', 'Warehouse Type')",
 	"patches.1312.p01_delete_old_stock_reports",
 	"patches.1312.p02_update_item_details_in_item_price",
+	"patches.1401.p01_move_related_property_setters_to_custom_field",
+	"patches.1401.p01_make_buying_selling_as_check_box_in_price_list",
+	"patches.1401.update_billing_status_for_zero_value_order",
 ]

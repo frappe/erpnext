@@ -67,3 +67,8 @@ def set_status(name, status):
 	st = webnotes.bean("Support Ticket", name)
 	st.doc.status = status
 	st.save()
+		
+def auto_close_tickets():
+	webnotes.conn.sql("""update `tabSupport Ticket` set status = 'Closed' 
+		where status = 'Replied' 
+		and date_sub(curdate(),interval 15 Day) > modified""")

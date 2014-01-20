@@ -191,7 +191,8 @@ class SellingController(StockController):
 			
 		self.doc.other_charges_total = flt(self.doc.grand_total - self.doc.net_total,
 			self.precision("other_charges_total"))
-		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - self.doc.net_total_export,
+		self.doc.other_charges_total_export = flt(
+			self.doc.grand_total_export - self.doc.net_total_export,
 			self.precision("other_charges_total_export"))
 		
 		self.doc.rounded_total = _round(self.doc.grand_total)

@@ -12,7 +12,8 @@ def execute(filters=None):
 	
 	item_list = get_items(filters)
 	aii_account_map = get_aii_accounts()
-	item_tax, tax_accounts = get_tax_accounts(item_list, columns)
+	if item_list:
+		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
 	
 	data = []
 	for d in item_list:

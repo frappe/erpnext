@@ -29,10 +29,7 @@ cur_frm.cscript.make_dashboard = function() {
 
 cur_frm.cscript.edit_prices_button = function() {
 	cur_frm.add_custom_button("Add / Edit Prices", function() {
-		wn.route_options = {
-			"item_code": cur_frm.doc.name
-		};
-		wn.set_route("Report", "Item Price");
+		wn.set_route("Report", "Item Price", {"item_code": cur_frm.doc.name});
 	}, "icon-money");
 }
 

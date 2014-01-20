@@ -72,6 +72,11 @@ def get_conditions(filters):
 		
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+		
+		
+	from webnotes.widgets.reportview import build_match_conditions
+	match_conditions = build_match_conditions("GL Entry")
+	if match_conditions: conditions.append(match_conditions)
 	
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -136,7 +141,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 				or cstr(gle.is_advance) == "Yes"):
 			gle_map[gle.account].opening += amount
 			opening += amount
-		elif gle.posting_date < filters.to_date:
+		elif gle.posting_date <= filters.to_date:
 			gle_map[gle.account].entries.append(gle)
 			gle_map[gle.account].total_debit += flt(gle.debit)
 			gle_map[gle.account].total_credit += flt(gle.credit)
