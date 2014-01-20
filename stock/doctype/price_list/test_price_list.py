@@ -11,6 +11,7 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List",
+			"enabled": 1,
 			"currency": "INR",
 			"selling": 1
 		},
@@ -24,6 +25,7 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List 2",
+			"enabled": 1,
 			"currency": "INR",
 			"selling": 1
 		},
@@ -37,6 +39,7 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List India",
+			"enabled": 1,
 			"currency": "INR",
 			"selling": 1
 		},
@@ -50,6 +53,7 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List Rest of the World",
+			"enabled": 1,
 			"currency": "USD",
 			"selling": 1
 		},

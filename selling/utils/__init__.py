@@ -150,8 +150,10 @@ def _get_basic_details(args, item_bean, warehouse_fieldname):
 	return out
 	
 def _get_price_list_rate(args, item_bean, meta):
-	ref_rate = webnotes.conn.sql("""select ref_rate from `tabItem Price` 
-		where price_list=%s and item_code=%s and selling=1""", 
+	ref_rate = webnotes.conn.sql("""select ip.ref_rate from 
+		`tabItem Price` ip, `tabPrice List` pl 
+		where ip.price_list=pl.name and ip.price_list=%s and 
+		ip.item_code=%s and ip.selling=1 and pl.enabled=1""", 
 		(args.selling_price_list, args.item_code), as_dict=1)
 
 	if not ref_rate:

@@ -266,4 +266,5 @@ patch_list = [
 	"patches.1401.p01_move_related_property_setters_to_custom_field",
 	"patches.1401.p01_make_buying_selling_as_check_box_in_price_list",
 	"patches.1401.update_billing_status_for_zero_value_order",
+	"patches.1401.enable_all_price_list",
 ]

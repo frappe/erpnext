@@ -530,6 +530,7 @@ erpnext.POS = Class.extend({
 				else if (operation == "decrease-qty")
 					d.qty != 1 ? d.qty -= 1 : d.qty = 1;
 
+				me.frm.script_manager.trigger("qty", d.doctype, d.name);
 				me.refresh();
 			}
 		});

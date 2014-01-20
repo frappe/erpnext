@@ -3,7 +3,7 @@
 
 wn.require('app/setup/doctype/contact_control/contact_control.js');
 
-cur_frm.cscript.refresh = function(doc,dt,dn) {
+cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.cscript.make_dashboard(doc);
 	erpnext.hide_naming_series();
     
@@ -93,7 +93,7 @@ cur_frm.cscript.make_contact = function() {
 	cur_frm.contact_list.run();
 }
 
-cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+cur_frm.fields_dict['default_price_list'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{'buying': 1}
 	}

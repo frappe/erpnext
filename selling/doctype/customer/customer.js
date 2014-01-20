@@ -18,7 +18,7 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 
-cur_frm.cscript.refresh = function(doc,dt,dn) {
+cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.cscript.setup_dashboard(doc);
 	erpnext.hide_naming_series();
 
@@ -107,20 +107,20 @@ cur_frm.cscript.make_contact = function() {
 
 }
 
-cur_frm.fields_dict['customer_group'].get_query = function(doc,dt,dn) {
+cur_frm.fields_dict['customer_group'].get_query = function(doc, dt, dn) {
 	return{
 		filters:{'is_group': 'No'}
 	}
 }
 
 
-cur_frm.fields_dict.lead_name.get_query = function(doc,cdt,cdn) {
+cur_frm.fields_dict.lead_name.get_query = function(doc, cdt, cdn) {
 	return{
 		query:"controllers.queries.lead_query"
 	}
 }
 
-cur_frm.fields_dict['default_price_list'].get_query = function(doc,cdt,cdn) {
+cur_frm.fields_dict['default_price_list'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{'selling': 1}
 	}
