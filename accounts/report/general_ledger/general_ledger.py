@@ -138,7 +138,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 	for gle in gl_entries:
 		amount = flt(gle.debit) - flt(gle.credit)
 		if filters.get("account") and (gle.posting_date < filters.from_date 
-				or cstr(gle.is_advance) == "Yes"):
+				or cstr(gle.is_opening) == "Yes"):
 			gle_map[gle.account].opening += amount
 			opening += amount
 		elif gle.posting_date <= filters.to_date:
