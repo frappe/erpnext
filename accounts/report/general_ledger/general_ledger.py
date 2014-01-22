@@ -51,7 +51,7 @@ def get_gl_entries(filters):
 		
 	gl_entries = webnotes.conn.sql("""select posting_date, account, 
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit, 
-			voucher_type, voucher_no, cost_center, remarks, is_advance, against 
+			voucher_type, voucher_no, cost_center, remarks, is_opening, against 
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{group_by_condition}
