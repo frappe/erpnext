@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2014-01-16 15:36:16", 
+  "modified": "2014-01-20 17:49:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -1214,6 +1214,7 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Accounts Manager", 
   "submit": 1, 
@@ -1223,12 +1224,14 @@
   "amend": 1, 
   "cancel": 0, 
   "create": 1, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts User", 
   "submit": 1, 
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Customer"
  }

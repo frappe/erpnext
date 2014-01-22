@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:55", 
+  "modified": "2014-01-20 17:48:23", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -28,6 +28,7 @@
  {
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 

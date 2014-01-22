@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:54", 
+  "modified": "2014-01-20 17:48:20", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,6 +28,7 @@
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Account", 
@@ -254,8 +255,8 @@
   "read_only": 1
  }, 
  {
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "permlevel": 0, 
@@ -264,8 +265,8 @@
   "write": 1
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "permlevel": 0, 
@@ -274,8 +275,8 @@
   "write": 0
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "permlevel": 0, 
@@ -284,8 +285,8 @@
   "write": 0
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "permlevel": 0, 
@@ -294,16 +295,16 @@
   "write": 0
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "permlevel": 2, 
   "role": "Auditor", 
   "write": 0
  }, 
  {
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "export": 0, 
@@ -315,16 +316,16 @@
   "write": 1
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "permlevel": 2, 
   "role": "Accounts Manager", 
   "write": 1
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "permlevel": 2, 
   "role": "Accounts User", 

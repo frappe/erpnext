@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:32", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:59", 
+  "modified": "2014-01-20 17:48:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,6 +26,7 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
@@ -242,50 +243,58 @@
   "print_hide": 1
  }, 
  {
-  "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "System Manager"
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Master Manager"
  }, 
  {
-  "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Purchase Master Manager"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Sales Manager"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase Manager"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Maintenance Manager"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts Manager"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase User"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Maintenance User"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts User"
  }

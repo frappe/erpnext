@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2013-12-23 19:35:27", 
+  "modified": "2014-01-20 17:48:40", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,6 +28,7 @@
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
@@ -750,23 +751,23 @@
   "read_only": 1
  }, 
  {
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Employee", 
   "write": 0
  }, 
  {
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "restrict": 0, 
   "role": "HR User", 
   "write": 1
  }, 
  {
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "restrict": 1, 
   "role": "HR Manager", 
