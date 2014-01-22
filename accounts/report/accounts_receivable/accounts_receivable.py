@@ -37,12 +37,15 @@ class AccountsReceivableReport(object):
 		return columns
 
 	def get_data(self, customer_naming_by):
+		from accounts.utils import get_currency_precision
+		currency_precision = get_currency_precision() or 2
+
 		data = []
 		future_vouchers = self.get_entries_after(self.filters.report_date)
 		for gle in self.get_entries_till(self.filters.report_date):
 			if self.is_receivable(gle, future_vouchers):
 				outstanding_amount = self.get_outstanding_amount(gle, self.filters.report_date)
-				if abs(outstanding_amount) > 0.0:
+				if abs(outstanding_amount) > 0.1/10**currency_precision:
 					due_date = self.get_due_date(gle)
 					invoiced_amount = gle.debit if (gle.debit > 0) else 0
 					payment_received = invoiced_amount - outstanding_amount
