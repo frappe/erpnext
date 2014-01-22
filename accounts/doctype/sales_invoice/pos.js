@@ -109,6 +109,7 @@ erpnext.POS = Class.extend({
 		this.party = party;
 		this.price_list = (party == "Customer" ? 
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list);
+		this.price_list_field = (party == "Customer" ? "selling_price_list" : "buying_price_list");
 		this.sales_or_purchase = (party == "Customer" ? "Sales" : "Purchase");
 		this.net_total = "net_total_" + export_or_import;
 		this.grand_total = "grand_total_" + export_or_import;
@@ -324,10 +325,12 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
-		me.refresh();
+		this.refresh();
 	},
 	refresh: function() {
 		var me = this;
+
+		this.refresh_item_list();
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.barcode.set_input("");
 
@@ -348,6 +351,14 @@ erpnext.POS = Class.extend({
 			this.party_field.$wrapper.remove();
 			if (this.frm.doc.quotation_to == "Customer")
 				this.make_party();
+		}
+	},
+	refresh_item_list: function() {
+		var me = this;
+		// refresh item list on change of price list
+		if (this.frm.doc[this.price_list_field] != this.price_list) {
+			this.price_list = this.frm.doc[this.price_list_field];
+			this.make_item_list();
 		}
 	},
 	show_items_in_item_cart: function() {
@@ -383,9 +394,8 @@ erpnext.POS = Class.extend({
 			)).appendTo($items);
 		});
 
-		this.wrapper.find(".increase-qty, .decrease-qty").on("click", function() {
-			var item_code = $(this).closest("tr").attr("id");
-			me.selected_item_qty_operation(item_code, $(this).attr("class"));
+		this.wrapper.find("input.qty").on("focus", function() {
+			$(this).select();
 		});
 	},
 	show_taxes: function() {
@@ -422,8 +432,14 @@ erpnext.POS = Class.extend({
 
 		// append quantity to the respective item after change from input box
 		$(this.wrapper).find("input.qty").on("change", function() {
-			var item_code = $(this).closest("tr")[0].id;
+			var item_code = $(this).closest("tr").attr("id");
 			me.update_qty(item_code, $(this).val());
+		});
+
+		// increase/decrease qty on plus/minus button
+		$(this.wrapper).find(".increase-qty, .decrease-qty").on("click", function() {
+			var tr = $(this).closest("tr");
+			me.increase_decrease_qty(tr, $(this).attr("class"));
 		});
 
 		// on td click toggle the highlighting of row
@@ -442,6 +458,15 @@ erpnext.POS = Class.extend({
 
 		me.refresh_delete_btn();
 		this.barcode.$input.focus();
+	},
+	increase_decrease_qty: function(tr, operation) {
+		var item_code = tr.attr("id");
+		var item_qty = cint(tr.find("input.qty").val());
+
+		if (operation == "increase-qty")
+			this.update_qty(item_code, item_qty + 1);
+		else if (operation == "decrease-qty" && item_qty != 1)
+			this.update_qty(item_code, item_qty - 1);
 	},
 	disable_text_box_and_button: function() {
 		var me = this;
@@ -517,23 +542,6 @@ erpnext.POS = Class.extend({
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		this.refresh();
-	},
-	selected_item_qty_operation: function(item_code, operation) {
-		var me = this;
-		var child = wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
-			this.frm.cscript.fname, this.frm.doctype);
-
-		$.each(child, function(i, d) {
-			if (d.item_code == item_code) {
-				if (operation == "increase-qty")
-					d.qty += 1;
-				else if (operation == "decrease-qty")
-					d.qty != 1 ? d.qty -= 1 : d.qty = 1;
-
-				me.frm.script_manager.trigger("qty", d.doctype, d.name);
-				me.refresh();
-			}
-		});
 	},
 	make_payment: function() {
 		var me = this;
