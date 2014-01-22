@@ -92,23 +92,19 @@ class DocType:
 				exists for this warehouse."""))
 			
 	def before_rename(self, olddn, newdn, merge=False):
-		# Add company abbr if not provided
-		from setup.doctype.company.company import get_name_with_abbr
-		new_warehouse = get_name_with_abbr(newdn, self.doc.company)
-
 		if merge:
 			if not webnotes.conn.exists("Warehouse", newdn):
 				webnotes.throw(_("Warehouse ") + newdn +_(" does not exists"))
 				
-			if self.doc.company != webnotes.conn.get_value("Warehouse", new_warehouse, "company"):
+			if self.doc.company != webnotes.conn.get_value("Warehouse", newdn, "company"):
 				webnotes.throw(_("Both Warehouse must belong to same Company"))
 				
 			webnotes.conn.sql("delete from `tabBin` where warehouse=%s", olddn)
 			
 		from accounts.utils import rename_account_for
-		rename_account_for("Warehouse", olddn, new_warehouse, merge)
+		rename_account_for("Warehouse", olddn, newdn, merge)
 
-		return new_warehouse
+		return newdn
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if merge:
