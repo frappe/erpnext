@@ -270,22 +270,17 @@ erpnext.POS = Class.extend({
 				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
 				if (d.item_code == item_code) {
 					caught = true;
-					if (serial_no) {
-						d.serial_no += '\n' + serial_no;
-						me.frm.script_manager.trigger("serial_no", d.doctype, d.name);
-					}
-					else {
-						d.qty += 1;
-						me.frm.script_manager.trigger("qty", d.doctype, d.name);
-					}
+					if (serial_no)
+						wn.model.set_value(d.doctype, d.name, "serial_no", d.serial_no + '\n' + serial_no);
+					else
+						wn.model.set_value(d.doctype, d.name, "qty", d.qty + 1);
 				}
 			});
 		}
 		
 		// if item not found then add new item
-		if (!caught) {
+		if (!caught)
 			this.add_new_item_to_grid(item_code, serial_no);
-		}
 
 		this.refresh();
 		this.refresh_search_box();
@@ -320,8 +315,7 @@ erpnext.POS = Class.extend({
 					wn.model.clear_doc(d.doctype, d.name);
 					me.refresh_grid();
 				} else {
-					d.qty = qty;
-					me.frm.script_manager.trigger("qty", d.doctype, d.name);
+					wn.model.set_value(d.doctype, d.name, "qty", qty);
 				}
 			}
 		});
@@ -539,6 +533,7 @@ erpnext.POS = Class.extend({
 		this.refresh_grid();
 	},
 	refresh_grid: function() {
+		this.frm.dirty();
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		this.refresh();
