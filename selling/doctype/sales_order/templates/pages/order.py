@@ -10,11 +10,12 @@ no_cache = True
 def get_context():
 	from portal.utils import get_transaction_context
 	context = get_transaction_context("Sales Order", webnotes.form_dict.name)
-	modify_status(context.get("doc"))
-	context.update({
-		"parent_link": "orders",
-		"parent_title": "My Orders"
-	})
+	if context.get("doc").get("name") != "Not Allowed":
+		modify_status(context.get("doc"))
+		context.update({
+			"parent_link": "orders",
+			"parent_title": "My Orders"
+		})
 	return context
 	
 def modify_status(doc):
