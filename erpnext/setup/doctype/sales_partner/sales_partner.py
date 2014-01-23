@@ -4,9 +4,8 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, cstr, filter_strip_join
-from webnotes.webutils import WebsiteGenerator, clear_cache
 
-class DocType(WebsiteGenerator):
+class DocType():
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist
@@ -15,11 +14,6 @@ class DocType(WebsiteGenerator):
 		if self.doc.partner_website and not self.doc.partner_website.startswith("http"):
 			self.doc.partner_website = "http://" + self.doc.partner_website
 
-	def on_update(self):
-		WebsiteGenerator.on_update(self)
-		if self.doc.page_name:
-			clear_cache("partners")
-		
 	def get_contacts(self,nm):
 		if nm:
 			contact_details =webnotes.conn.convert_to_lists(webnotes.conn.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where sales_partner = '%s'"%nm))

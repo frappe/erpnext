@@ -48,7 +48,7 @@ class AccountsController(TransactionBase):
 					{"master_type": fieldname.title(), "master_name": self.doc.fields[fieldname], 
 					"company": self.doc.company}, "name")
 				if accounts:
-					from accounts.doctype.gl_entry.gl_entry import validate_frozen_account
+					from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
 					for account in accounts:						
 						validate_frozen_account(account[0])
 			
@@ -413,7 +413,7 @@ class AccountsController(TransactionBase):
 			})
 			
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
-		from controllers.status_updater import get_tolerance_for
+		from erpnext.controllers.status_updater import get_tolerance_for
 		item_tolerance = {}
 		global_tolerance = None
 		
