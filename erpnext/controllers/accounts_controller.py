@@ -134,7 +134,8 @@ class AccountsController(TransactionBase):
 	def calculate_taxes_and_totals(self):
 		self.discount_amount_applied = False
 		self._calculate_taxes_and_totals()
-		if self.meta.get_field(self.doc.doctype, "discount_amount"):
+		
+		if self.meta.get_field("discount_amount"):
 			self.apply_discount_amount()
 
 	def _calculate_taxes_and_totals(self):
