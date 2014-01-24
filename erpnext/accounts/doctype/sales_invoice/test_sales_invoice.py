@@ -668,7 +668,7 @@ class TestSalesInvoice(unittest.TestCase):
 			
 	def test_recurring_invoice(self):
 		from webnotes.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
-		from accounts.utils import get_fiscal_year
+		from erpnext.accounts.utils import get_fiscal_year
 		today = nowdate()
 		base_si = webnotes.bean(copy=test_records[0])
 		base_si.doc.fields.update({

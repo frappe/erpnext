@@ -74,7 +74,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)
 		
-	def test_make_purchase_invocie(self):
+	def test_make_purchase_invoice(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
 		po = webnotes.bean(copy=test_records[0]).insert()

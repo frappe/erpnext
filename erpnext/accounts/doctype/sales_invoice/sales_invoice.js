@@ -241,8 +241,8 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 cur_frm.cscript.mode_of_payment = function(doc) {
 	return cur_frm.call({
-		method: "get_bank_cash_account",
-		args: { mode_of_payment: doc.mode_of_payment }
+		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+		args: { mode_of_payment: doc.mode_of_payment },
 	});
 }
 
@@ -254,9 +254,6 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	hide_field('aging_date');
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
-
-//Make Delivery Note Button
-//-----------------------------
 
 cur_frm.cscript['Make Delivery Note'] = function() {
 	wn.model.open_mapped_doc({
