@@ -98,6 +98,7 @@ def create_price_lists(args):
 			{
 				"doctype": "Price List",
 				"price_list_name": "Standard " + pl_type,
+				"enabled": 1,
 				"buying": 1 if pl_type == "Buying" else 0,
 				"selling": 1 if pl_type == "Selling" else 0,
 				"currency": args["currency"]

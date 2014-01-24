@@ -1,3 +1,4 @@
+erpnext.patches.1401.enable_all_price_list
 erpnext.patches.4_0.update_user_properties
 erpnext.patches.4_0.move_warehouse_user_to_restrictions
 erpnext.patches.4_0.new_permissions

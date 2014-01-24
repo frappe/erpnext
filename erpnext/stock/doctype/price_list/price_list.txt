@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:59", 
+  "modified": "2014-01-20 17:50:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,6 +40,18 @@
  {
   "doctype": "DocType", 
   "name": "Price List"
+ }, 
+ {
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "label": "Enabled"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb_1", 
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
