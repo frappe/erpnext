@@ -7,17 +7,17 @@ import webnotes
 
 @webnotes.whitelist()
 def get_children():
-	ctype = webnotes.form_dict.get('ctype')
-	webnotes.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
+	ctype = webnotes.local.form_dict.get('ctype')
+	webnotes.local.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
 	if not webnotes.form_dict.get('parent'):
-		webnotes.form_dict['parent'] = ''
+		webnotes.local.form_dict['parent'] = ''
 		
 	return webnotes.conn.sql("""select name as value, 
 		if(is_group='Yes', 1, 0) as expandable
 		from `tab%(ctype)s`
 		where docstatus < 2
 		and ifnull(%(parent_field)s,'') = "%(parent)s"
-		order by name""" % webnotes.form_dict, as_dict=1)
+		order by name""" % webnotes.local.form_dict, as_dict=1)
 		
 @webnotes.whitelist()
 def add_node():

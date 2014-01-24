@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-03 16:38:41", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:34", 
+  "modified": "2014-01-22 16:05:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -205,7 +205,7 @@
  {
   "create": 1, 
   "doctype": "DocPerm", 
-  "match": "owner", 
+  "restricted": 1, 
   "role": "Projects User"
  }, 
  {
