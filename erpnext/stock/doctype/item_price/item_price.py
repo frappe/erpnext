@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _
+from webnotes import throw, _
 
 class ItemPriceDuplicateItem(webnotes.ValidationError): pass
 
@@ -28,7 +28,7 @@ class DocType:
 		if webnotes.conn.sql("""select name from `tabItem Price` 
 			where item_code=%s and price_list=%s and name!=%s""", 
 			(self.doc.item_code, self.doc.price_list, self.doc.name)):
-				webnotes.throw("{duplicate_item}: {item_code}, {already}: {price_list}".format(**{
+				throw("{duplicate_item}: {item_code}, {already}: {price_list}".format(**{
 					"duplicate_item": _("Duplicate Item"),
 					"item_code": self.doc.item_code,
 					"already": _("already available in Price List"),
