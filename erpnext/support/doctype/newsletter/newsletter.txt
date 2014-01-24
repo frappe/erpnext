@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:14", 
+  "modified": "2014-01-24 13:00:11", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -13,7 +13,8 @@
   "document_type": "Other", 
   "icon": "icon-envelope", 
   "module": "Support", 
-  "name": "__common__"
+  "name": "__common__", 
+  "title_field": "subject"
  }, 
  {
   "doctype": "DocField", 
@@ -26,6 +27,7 @@
  {
   "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
