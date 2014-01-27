@@ -5,18 +5,23 @@
 
 from __future__ import unicode_literals
 import webnotes
-
+from webnotes import _
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-	
+
 	def validate(self):
-		for key in ["item_naming_by", "item_group", "stock_uom", 
+		for key in ["item_naming_by", "item_group", "stock_uom",
 			"allow_negative_stock"]:
 			webnotes.conn.set_default(key, self.doc.fields.get(key, ""))
-			
+
 		from setup.doctype.naming_series.naming_series import set_by_naming_series
-		set_by_naming_series("Item", "item_code", 
+		set_by_naming_series("Item", "item_code",
 			self.doc.get("item_naming_by")=="Naming Series", hide_name_field=True)
-			
+
+                stock_frozen_limit = 356
+                submitted_stock_frozen = self.doc.fields.get("stock_frozen_upto")
+                if submitted_stock_frozen > stock_frozen_limit:
+                        self.doc.fields["stock_frozen_upto"] = stock_frozen_limit
+                        webnotes.msgprint (_("Stocks cannot be freezed for days larger than %d.") %stock_frozen_limit)
