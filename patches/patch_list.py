@@ -268,4 +268,5 @@ patch_list = [
 	"patches.1401.update_billing_status_for_zero_value_order",
 	"patches.1401.enable_all_price_list",
 	"patches.1401.fix_serial_no_status_and_warehouse",
+	"patches.1401.fix_planned_qty",
 ]
