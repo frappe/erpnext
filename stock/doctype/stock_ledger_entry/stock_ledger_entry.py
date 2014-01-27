@@ -5,9 +5,9 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint
-from webnotes.utils import flt, getdate
+from webnotes.utils import flt, getdate, add_date
 from webnotes.model.controller import DocListController
-from datetime import timedelta, date
+from datetime import date
 
 class DocType(DocListController):
 	def __init__(self, doc, doclist=[]):
