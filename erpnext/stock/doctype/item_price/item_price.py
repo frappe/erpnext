@@ -12,17 +12,19 @@ class DocType:
 		self.doc, self.doclist = d, dl
 
 	def validate(self):
+		self.validate_price_list()
 		self.check_duplicate_item()
 		self.update_price_list_details()
 		self.update_item_details()
 
-	def update_price_list_details(self):
-		self.doc.buying, self.doc.selling, self.doc.currency = webnotes.conn.get_value("Price List", 
-			self.doc.price_list, ["buying", "selling", "currency"])
-
-	def update_item_details(self):
-		self.doc.item_name, self.doc.item_description = webnotes.conn.get_value("Item", 
-			self.doc.item_code, ["item_name", "description"])
+	def validate_price_list(self):
+		enabled = webnotes.conn.get_value("Price List", self.doc.price_list, "enabled")
+		if not enabled:
+			throw("{message}: {price_list} {disabled}".format(**{
+				"message": _("Price List"),
+				"price_list": self.doc.price_list,
+				"disabled": _("is disabled.")
+			}))
 
 	def check_duplicate_item(self):
 		if webnotes.conn.sql("""select name from `tabItem Price` 
@@ -34,4 +36,12 @@ class DocType:
 					"already": _("already available in Price List"),
 					"price_list": self.doc.price_list
 				}), ItemPriceDuplicateItem)
+
+	def update_price_list_details(self):
+		self.doc.buying, self.doc.selling, self.doc.currency = webnotes.conn.get_value("Price List", 
+			{"name": self.doc.price_list, "enabled": 1}, ["buying", "selling", "currency"])
+
+	def update_item_details(self):
+		self.doc.item_name, self.doc.item_description = webnotes.conn.get_value("Item", 
+			self.doc.item_code, ["item_name", "description"])
 				

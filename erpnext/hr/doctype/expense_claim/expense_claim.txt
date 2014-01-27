@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:44", 
+  "modified": "2014-01-22 16:05:34", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -223,7 +223,7 @@
  {
   "delete": 0, 
   "doctype": "DocPerm", 
-  "match": "owner", 
+  "restricted": 1, 
   "role": "Employee"
  }, 
  {

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
+from webnotes import _, msgprint, throw
 import json
 
 def get_company_currency(company):
@@ -11,8 +11,8 @@ def get_company_currency(company):
 	if not currency:
 		currency = webnotes.conn.get_default("currency")
 	if not currency:
-		msgprint(_('Please specify Default Currency in Company Master \
-			and Global Defaults'), raise_exception=True)
+		throw(_('Please specify Default Currency in Company Master \
+			and Global Defaults'))
 		
 	return currency
 
@@ -32,5 +32,14 @@ def get_ancestors_of(doctype, name):
 
 @webnotes.whitelist()
 def get_price_list_currency(price_list):
-	return {"price_list_currency": webnotes.conn.get_value("Price List", price_list, 
-		"currency")}
+	price_list_currency = webnotes.conn.get_value("Price List", {"name": price_list, 
+		"enabled": 1}, "currency")
+
+	if not price_list_currency:
+		throw("{message}: {price_list} {disabled}".format(**{
+			"message": _("Price List"),
+			"price_list": price_list,
+			"disabled": _("is disabled.")
+		}))
+	else:
+		return {"price_list_currency": price_list_currency}

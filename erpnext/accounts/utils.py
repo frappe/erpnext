@@ -379,3 +379,12 @@ def get_account_for(account_for_doctype, account_for):
 		
 	return webnotes.conn.get_value("Account", {account_for_field: account_for_doctype, 
 		"master_name": account_for})
+		
+def get_currency_precision(currency=None):
+	if not currency:
+		currency = webnotes.conn.get_value("Company", 
+			webnotes.conn.get_default("company"), "default_currency")
+	currency_format = webnotes.conn.get_value("Currency", currency, "number_format")
+	
+	from webnotes.utils import get_number_format_info
+	return get_number_format_info(currency_format)[2]

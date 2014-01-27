@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-29 19:25:50", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:32", 
+  "modified": "2014-01-24 13:01:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -15,7 +15,9 @@
   "icon": "icon-check", 
   "max_attachments": 5, 
   "module": "Projects", 
-  "name": "__common__"
+  "name": "__common__", 
+  "search_fields": "subject", 
+  "title_field": "subject"
  }, 
  {
   "doctype": "DocField", 
