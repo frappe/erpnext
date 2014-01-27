@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:05", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:20", 
+  "modified": "2013-12-31 12:13:38", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,7 @@
   "search_index": 0
  }, 
  {
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
   "fieldname": "scheduled_date", 
   "fieldtype": "Date", 
@@ -78,12 +79,13 @@
   "report_hide": 1
  }, 
  {
+  "allow_on_submit": 0, 
   "doctype": "DocField", 
-  "fieldname": "incharge_name", 
+  "fieldname": "sales_person", 
   "fieldtype": "Link", 
   "in_filter": 1, 
   "in_list_view": 1, 
-  "label": "Incharge Name", 
+  "label": "Sales Person", 
   "oldfieldname": "incharge_name", 
   "oldfieldtype": "Link", 
   "options": "Sales Person", 
