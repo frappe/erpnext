@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-24 16:37:54",
   "docstatus": 0,
-  "modified": "2014-01-27 17:29:56",
+  "modified": "2014-01-27 20:00:56",
   "modified_by": "Administrator",
   "owner": "Administrator"
  },
@@ -119,7 +119,7 @@
   "doctype": "DocField",
   "fieldname": "stock_frozen_upto_days",
   "fieldtype": "Int",
-  "label": "Stock Frozen Upto [Days Ago]"
+  "label": "Freeze Stocks Older Than [Days]"
  },
  {
   "doctype": "DocField",
