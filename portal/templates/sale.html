@@ -10,9 +10,9 @@
     	<li class="active"><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</li>
     </ul>
 	<h3><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</h3>
-	{% if doc.name == "Not Allowed" -%}
+	{% if session_user == "Guest" -%}
 		<script>ask_to_login();</script>
-	{% else %}
+	{% elif doc.name != "Not Allowed"%}
 	<hr>
 	<div>
 	<div class="row">

@@ -282,7 +282,7 @@ def apply_cart_settings(party=None, quotation=None):
 		party = get_lead_or_customer()
 	if not quotation:
 		quotation = _get_cart_quotation(party)
-	
+
 	cart_settings = webnotes.get_obj("Shopping Cart Settings")
 	
 	billing_territory = get_address_territory(quotation.doc.customer_address) or \
@@ -310,7 +310,8 @@ def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	quotation.run_method("set_price_list_and_item_details")
 	
 	# set it in cookies for using in product page
-	webnotes.local._response.set_cookie("selling_price_list", quotation.doc.selling_price_list)
+	if quotation.doc.selling_price_list:
+		webnotes.local._response.set_cookie("selling_price_list", quotation.doc.selling_price_list)
 	
 def set_taxes(quotation, cart_settings, billing_territory):
 	"""set taxes based on billing territory"""

@@ -243,10 +243,10 @@ class DocType:
 				"item_code": [qty_required, description, stock_uom, min_order_qty]
 			}
 		"""
-		bom_wise_item_details = {}
 		item_list = []
 
 		for bom, so_wise_qty in bom_dict.items():
+			bom_wise_item_details = {}
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
 				for d in webnotes.conn.sql("""select fb.item_code, 

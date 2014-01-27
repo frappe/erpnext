@@ -36,6 +36,7 @@ test_records = [
 		"stock_uom": "_Test UOM",
 		"default_income_account": "Sales - _TC",
 		"default_warehouse": "_Test Warehouse - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC"
 	}, {
 		"doctype": "Item Reorder",
 		"parentfield": "item_reorder",
@@ -64,6 +65,7 @@ test_records = [
 		"stock_uom": "_Test UOM",
 		"default_income_account": "Sales - _TC",
 		"default_warehouse": "_Test Warehouse - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC"
 	}],	
 	[{
 		"doctype": "Item",
@@ -73,6 +75,7 @@ test_records = [
 		"item_group": "_Test Item Group Desktops",
 		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -99,6 +102,7 @@ test_records = [
 		"item_group": "_Test Item Group Desktops",
 		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -119,6 +123,7 @@ test_records = [
 		"description": "_Test Sales BOM Item",
 		"item_group": "_Test Item Group Desktops",
 		"default_income_account": "Sales - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
 		"is_stock_item": "No",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -140,6 +145,7 @@ test_records = [
 		"is_stock_item": "Yes",
 		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
 		"has_serial_no": "No",
@@ -216,6 +222,7 @@ test_records = [
 		"item_group": "_Test Item Group Desktops",
 		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
 		"is_stock_item": "Yes",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
@@ -238,6 +245,7 @@ test_records = [
 		"is_stock_item": "Yes",
 		"default_warehouse": "_Test Warehouse - _TC",
 		"default_income_account": "Sales - _TC",
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
 		"is_asset_item": "No",
 		"has_batch_no": "No",
 		"has_serial_no": "No",
