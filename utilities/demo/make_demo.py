@@ -19,7 +19,7 @@ company_abbr = "WP"
 country = "United States"
 currency = "USD"
 time_zone = "America/New_York"
-start_date = '2013-01-01'
+start_date = '2014-01-01'
 bank_name = "Citibank"
 runs_for = None
 prob = {
@@ -105,6 +105,10 @@ def run_accounts(current_date):
 		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:how_many("Sales Invoice")]:
 			si = webnotes.bean(make_sales_invoice(so))
 			si.doc.posting_date = current_date
+			for d in si.doclist.get({"parentfield": "entries"}):
+				if not d.income_account:
+					d.income_account = "Sales - {}".format(company_abbr)
+			
 			si.insert()
 			si.submit()
 			webnotes.conn.commit()
@@ -170,6 +174,9 @@ def run_stock(current_date):
 			dn = webnotes.bean(make_delivery_note(so))
 			dn.doc.posting_date = current_date
 			dn.doc.fiscal_year = current_date.year
+			for d in dn.doclist.get({"parentfield": "delivery_note_details"}):
+				d.expense_account = "Cost of Goods Sold - {}".format(company_abbr)
+				
 			dn.insert()
 			try:
 				dn.submit()
@@ -236,7 +243,7 @@ def run_manufacturing(current_date):
 	ppt = webnotes.bean("Production Planning Tool", "Production Planning Tool")
 	ppt.doc.company = company
 	ppt.doc.use_multi_level_bom = 1
-	ppt.doc.purchase_request_for_warehouse = "Stores - WP"
+	ppt.doc.purchase_request_for_warehouse = "Stores - {}".format(company_abbr)
 	ppt.run_method("get_open_sales_orders")
 	ppt.run_method("get_items_from_so")
 	ppt.run_method("raise_production_order")
@@ -380,8 +387,8 @@ def complete_setup():
 	setup_account({
 		"first_name": "Test",
 		"last_name": "User",
-		"fy_start_date": "2013-01-01",
-		"fy_end_date": "2013-12-31",
+		"fy_start_date": "2014-01-01",
+		"fy_end_date": "2014-12-31",
 		"industry": "Manufacturing",
 		"company_name": company,
 		"company_abbr": company_abbr,

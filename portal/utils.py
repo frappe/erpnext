@@ -41,21 +41,23 @@ def get_currency_context():
 	}
 
 def get_transaction_context(doctype, name):
+	context = {"session_user": webnotes.session.user}
+	
 	customer = webnotes.conn.get_value("Contact", {"email_id": webnotes.session.user}, 
 		"customer")
 		
 	bean = webnotes.bean(doctype, name)
 	if bean.doc.customer != customer:
-		return {
-			"doc": {"name": "Not Allowed"}
-		}
+		context.update({"doc": {"name": "Not Allowed"}})
 	else:
-		return {
+		context.update({
 			"doc": bean.doc,
 			"doclist": bean.doclist,
 			"webnotes": webnotes,
 			"utils": webnotes.utils
-		}
+		})
+	
+	return context
 
 @webnotes.whitelist(allow_guest=True)
 def send_message(subject="Website Query", message="", sender="", status="Open"):
