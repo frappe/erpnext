@@ -7,7 +7,7 @@ import webnotes, json
 from webnotes.utils import nowdate, cstr
 from webnotes.model.code import get_obj
 from webnotes.model.doc import Document
-from webnotes import msgprint
+from webnotes import msgprint, throw, _
 from webnotes.model.bean import getlist, copy_doclist
 
 class DocType:
@@ -26,7 +26,7 @@ class DocType:
 			validated_receiver_list.append(d)
 
 		if not validated_receiver_list:
-			msgprint("Please enter valid mobile nos", raise_exception=1)
+			throw(_("Please enter valid mobile nos"))
 
 		return validated_receiver_list
 
@@ -37,12 +37,12 @@ class DocType:
 			'ERPNXT'
 		if len(sender_name) > 6 and \
 				webnotes.conn.get_value("Control Panel", None, "country") == "India":
-			msgprint("""
+			throw(_("""
 				As per TRAI rule, sender name must be exactly 6 characters.
 				Kindly change sender name in Setup --> Global Defaults.
 				
 				Note: Hyphen, space, numeric digit, special characters are not allowed.
-			""", raise_exception=1)
+			"""))
 		return sender_name
 	
 	def get_contact_number(self, arg):
