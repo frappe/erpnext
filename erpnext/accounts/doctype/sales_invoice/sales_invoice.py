@@ -88,6 +88,7 @@ class DocType(SellingController):
 		
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 		
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -114,6 +115,7 @@ class DocType(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 		
 		self.make_cancel_gl_entries()
 		
@@ -318,12 +320,9 @@ class DocType(SellingController):
 			item = webnotes.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
 			acc =	webnotes.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
 			if not acc:
-				msgprint("Account: "+d.income_account+" does not exist in the system")
-				raise Exception
+				msgprint("Account: "+d.income_account+" does not exist in the system", raise_exception=True)
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
-				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code)
-				raise Exception
-				
+				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code, raise_exception=True)				
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -556,12 +555,12 @@ class DocType(SellingController):
 				
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.doclist.get({"parentfield": "other_charges"}):
-			if flt(tax.tax_amount):
+			if flt(tax.tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.doc.debit_to,
-						"credit": flt(tax.tax_amount),
+						"credit": flt(tax.tax_amount_after_discount_amount),
 						"remarks": self.doc.remarks,
 						"cost_center": tax.cost_center
 					})

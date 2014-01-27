@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-21 14:15:31", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:05", 
+  "modified": "2014-01-20 17:48:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,6 +24,7 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Email Digest", 
@@ -348,8 +349,8 @@
   "label": "Stub"
  }, 
  {
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "permlevel": 0, 
@@ -359,8 +360,8 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "permlevel": 1
  }

@@ -11,8 +11,9 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List",
+			"enabled": 1,
 			"currency": "INR",
-			"buying_or_selling": "Selling"
+			"selling": 1
 		},
 		{
 			"doctype": "Applicable Territory",
@@ -24,8 +25,9 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List 2",
+			"enabled": 1,
 			"currency": "INR",
-			"buying_or_selling": "Selling"
+			"selling": 1
 		},
 		{
 			"doctype": "Applicable Territory",
@@ -37,8 +39,9 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List India",
+			"enabled": 1,
 			"currency": "INR",
-			"buying_or_selling": "Selling"
+			"selling": 1
 		},
 		{
 			"doctype": "Applicable Territory",
@@ -50,8 +53,9 @@ test_records = [
 		{
 			"doctype": "Price List",
 			"price_list_name": "_Test Price List Rest of the World",
+			"enabled": 1,
 			"currency": "USD",
-			"buying_or_selling": "Selling"
+			"selling": 1
 		},
 		{
 			"doctype": "Applicable Territory",

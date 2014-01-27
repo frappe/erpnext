@@ -34,7 +34,7 @@ def validate_filters(filters, account_details):
 def get_columns():
 	return ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Float:100", 
 		"Credit:Float:100", "Voucher Type::120", "Voucher No::160", "Link::20", 
-		"Against Account::120", "Cost Center:Link/Cost Center:100", "Remarks::200"]
+		"Against Account::120", "Cost Center:Link/Cost Center:100", "Remarks::400"]
 		
 def get_result(filters, account_details):	
 	gl_entries = get_gl_entries(filters)
@@ -51,7 +51,7 @@ def get_gl_entries(filters):
 		
 	gl_entries = webnotes.conn.sql("""select posting_date, account, 
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit, 
-			voucher_type, voucher_no, cost_center, remarks, is_advance, against 
+			voucher_type, voucher_no, cost_center, remarks, is_opening, against 
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{group_by_condition}
@@ -72,6 +72,11 @@ def get_conditions(filters):
 		
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+		
+		
+	from webnotes.widgets.reportview import build_match_conditions
+	match_conditions = build_match_conditions("GL Entry")
+	if match_conditions: conditions.append(match_conditions)
 	
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -133,10 +138,10 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 	for gle in gl_entries:
 		amount = flt(gle.debit) - flt(gle.credit)
 		if filters.get("account") and (gle.posting_date < filters.from_date 
-				or cstr(gle.is_advance) == "Yes"):
+				or cstr(gle.is_opening) == "Yes"):
 			gle_map[gle.account].opening += amount
 			opening += amount
-		elif gle.posting_date < filters.to_date:
+		elif gle.posting_date <= filters.to_date:
 			gle_map[gle.account].entries.append(gle)
 			gle_map[gle.account].total_debit += flt(gle.debit)
 			gle_map[gle.account].total_credit += flt(gle.credit)

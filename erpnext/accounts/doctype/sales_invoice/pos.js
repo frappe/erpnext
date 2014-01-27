@@ -19,8 +19,10 @@ erpnext.POS = Class.extend({
 							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
 								<thead>\
 									<tr>\
-										<th style="width: 50%">Item</th>\
-										<th style="width: 25%; text-align: right;">Qty</th>\
+										<th style="width: 40%">Item</th>\
+										<th style="width: 9%"></th>\
+										<th style="width: 17%; text-align: right;">Qty</th>\
+										<th style="width: 9%"></th>\
 										<th style="width: 25%; text-align: right;">Rate</th>\
 									</tr>\
 								</thead>\
@@ -30,12 +32,14 @@ erpnext.POS = Class.extend({
 						</div>\
 						<br>\
 						<div class="totals-area" style="margin-left: 40%;">\
-							<table class="table table-condensed">\
-								<tr>\
-									<td><b>Net Total</b></td>\
-									<td style="text-align: right;" class="net-total"></td>\
-								</tr>\
-							</table>\
+							<div class="net-total-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td><b>Net Total</b></td>\
+										<td style="text-align: right;" class="net-total"></td>\
+									</tr>\
+								</table>\
+							</div>\
 							<div class="tax-table" style="display: none;">\
 								<table class="table table-condensed">\
 									<thead>\
@@ -46,6 +50,18 @@ erpnext.POS = Class.extend({
 									</thead>\
 									<tbody>\
 									</tbody>\
+								</table>\
+							</div>\
+							<div class="discount-amount-area">\
+								<table class="table table-condensed">\
+									<tr>\
+										<td style="vertical-align: middle;" width="50%"><b>Discount Amount</b></td>\
+										<td width="20%"></td>\
+										<td style="text-align: right;">\
+											<input type="text" class="form-control discount-amount" \
+												style="text-align: right;">\
+										</td>\
+									</tr>\
 								</table>\
 							</div>\
 							<div class="grand-total-area">\
@@ -60,10 +76,16 @@ erpnext.POS = Class.extend({
 						</div>\
 					</div>\
 					<br><br>\
-					<button class="btn btn-success btn-lg make-payment">\
-					<i class="icon-money"></i> Make Payment</button>\
-					<button class="btn btn-default btn-lg delete-items pull-right" style="display: none;">\
-					<i class="icon-trash"></i> Del</button>\
+					<div class="row">\
+						<div class="col-sm-9">\
+							<button class="btn btn-success btn-lg make-payment">\
+								<i class="icon-money"></i> Make Payment</button>\
+						</div>\
+						<div class="col-sm-3">\
+							<button class="btn btn-default btn-lg remove-items" style="display: none;">\
+								<i class="icon-trash"></i> Del</button>\
+						</div>\
+					</div>\
 					<br><br>\
 				</div>\
 				<div class="col-sm-6">\
@@ -82,7 +104,11 @@ erpnext.POS = Class.extend({
 			me.refresh();
 		});
 
-		this.call_function("delete-items", function() {me.remove_selected_item();});
+		this.wrapper.find('input.discount-amount').on("change", function() {
+			wn.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", this.value);
+		});
+
+		this.call_function("remove-items", function() {me.remove_selected_items();});
 		this.call_function("make-payment", function() {me.make_payment();});
 	},
 	check_transaction_type: function() {
@@ -101,6 +127,7 @@ erpnext.POS = Class.extend({
 		this.party = party;
 		this.price_list = (party == "Customer" ? 
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list);
+		this.price_list_field = (party == "Customer" ? "selling_price_list" : "buying_price_list");
 		this.sales_or_purchase = (party == "Customer" ? "Sales" : "Purchase");
 		this.net_total = "net_total_" + export_or_import;
 		this.grand_total = "grand_total_" + export_or_import;
@@ -112,9 +139,9 @@ erpnext.POS = Class.extend({
 	},
 	make: function() {
 		this.make_party();
-		this.make_item_group();
-		this.make_search();
 		this.make_barcode();
+		this.make_search();
+		this.make_item_group();
 		this.make_item_list();
 	},
 	make_party: function() {
@@ -137,23 +164,23 @@ erpnext.POS = Class.extend({
 					me.party.toLowerCase(), this.value);
 		});
 	},
-	make_item_group: function() {
+	make_barcode: function() {
 		var me = this;
-		this.item_group = wn.ui.form.make_control({
+		this.barcode = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Link",
-				"options": "Item Group",
-				"label": "Item Group",
-				"fieldname": "pos_item_group",
-				"placeholder": "Item Group"
+				"fieldtype": "Data",
+				"label": "Barcode",
+				"fieldname": "pos_barcode",
+				"placeholder": "Barcode / Serial No"
 			},
-			parent: this.wrapper.find(".item-group-area"),
+			parent: this.wrapper.find(".barcode-area"),
 			only_input: true,
 		});
-		this.item_group.make_input();
-		this.item_group.$input.on("change", function() {
-			if(!me.item_group.autocomplete_open)
-				me.make_item_list();
+		this.barcode.make_input();
+		this.barcode.$input.on("keypress", function() {
+			if(me.barcode_timeout)
+				clearTimeout(me.barcode_timeout);
+			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
 		});
 	},
 	make_search: function() {
@@ -176,23 +203,23 @@ erpnext.POS = Class.extend({
 				me.item_timeout = setTimeout(function() { me.make_item_list(); }, 1000);
 		});
 	},
-	make_barcode: function() {
+	make_item_group: function() {
 		var me = this;
-		this.barcode = wn.ui.form.make_control({
+		this.item_group = wn.ui.form.make_control({
 			df: {
-				"fieldtype": "Data",
-				"label": "Barcode",
-				"fieldname": "pos_barcode",
-				"placeholder": "Barcode / Serial No"
+				"fieldtype": "Link",
+				"options": "Item Group",
+				"label": "Item Group",
+				"fieldname": "pos_item_group",
+				"placeholder": "Item Group"
 			},
-			parent: this.wrapper.find(".barcode-area"),
+			parent: this.wrapper.find(".item-group-area"),
 			only_input: true,
 		});
-		this.barcode.make_input();
-		this.barcode.$input.on("keypress", function() {
-			if(me.barcode_timeout)
-				clearTimeout(me.barcode_timeout);
-			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
+		this.item_group.make_input();
+		this.item_group.$input.on("change", function() {
+			if(!me.item_group.autocomplete_open)
+				me.make_item_list();
 		});
 	},
 	make_item_list: function() {
@@ -261,22 +288,17 @@ erpnext.POS = Class.extend({
 				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
 				if (d.item_code == item_code) {
 					caught = true;
-					if (serial_no) {
-						d.serial_no += '\n' + serial_no;
-						me.frm.script_manager.trigger("serial_no", d.doctype, d.name);
-					}
-					else {
-						d.qty += 1;
-						me.frm.script_manager.trigger("qty", d.doctype, d.name);
-					}
+					if (serial_no)
+						wn.model.set_value(d.doctype, d.name, "serial_no", d.serial_no + '\n' + serial_no);
+					else
+						wn.model.set_value(d.doctype, d.name, "qty", d.qty + 1);
 				}
 			});
 		}
 		
 		// if item not found then add new item
-		if (!caught) {
+		if (!caught)
 			this.add_new_item_to_grid(item_code, serial_no);
-		}
 
 		this.refresh();
 		this.refresh_search_box();
@@ -311,16 +333,18 @@ erpnext.POS = Class.extend({
 					wn.model.clear_doc(d.doctype, d.name);
 					me.refresh_grid();
 				} else {
-					d.qty = qty;
-					me.frm.script_manager.trigger("qty", d.doctype, d.name);
+					wn.model.set_value(d.doctype, d.name, "qty", qty);
 				}
 			}
 		});
-		me.refresh();
+		this.refresh();
 	},
 	refresh: function() {
 		var me = this;
+
+		this.refresh_item_list();
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
+		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
 		this.barcode.set_input("");
 
 		this.show_items_in_item_cart();
@@ -333,13 +357,21 @@ erpnext.POS = Class.extend({
 		}
 
 		this.disable_text_box_and_button();
-		this.make_payment_button();
+		this.hide_payment_button();
 
 		// If quotation to is not Customer then remove party
 		if (this.frm.doctype == "Quotation") {
 			this.party_field.$wrapper.remove();
 			if (this.frm.doc.quotation_to == "Customer")
 				this.make_party();
+		}
+	},
+	refresh_item_list: function() {
+		var me = this;
+		// refresh item list on change of price list
+		if (this.frm.doc[this.price_list_field] != this.price_list) {
+			this.price_list = this.frm.doc[this.price_list_field];
+			this.make_item_list();
 		}
 	},
 	show_items_in_item_cart: function() {
@@ -351,8 +383,18 @@ erpnext.POS = Class.extend({
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
-					<td><input type="text" value="%(qty)s" \
+					<td style="vertical-align:middle;" align="right">\
+						<div class="decrease-qty" style="cursor:pointer;">\
+							<i class="icon-minus-sign icon-large text-danger"></i>\
+						</div>\
+					</td>\
+					<td style="vertical-align:middle;"><input type="text" value="%(qty)s" \
 						class="form-control qty" style="text-align: right;"></td>\
+					<td style="vertical-align:middle;cursor:pointer;">\
+						<div class="increase-qty" style="cursor:pointer;">\
+							<i class="icon-plus-sign icon-large text-success"></i>\
+						</div>\
+					</td>\
 					<td style="text-align: right;"><b>%(amount)s</b><br>%(rate)s</td>\
 				</tr>',
 				{
@@ -364,27 +406,31 @@ erpnext.POS = Class.extend({
 				}
 			)).appendTo($items);
 		});
+
+		this.wrapper.find("input.qty").on("focus", function() {
+			$(this).select();
+		});
 	},
 	show_taxes: function() {
 		var me = this;
 		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
 		$(this.wrapper).find(".tax-table")
-			.toggle((taxes && taxes.length && 
-				flt(me.frm.doc.other_charges_total_export || 
-					me.frm.doc.other_charges_added_import) != 0.0) ? true : false)
+			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
 		
 		$.each(taxes, function(i, d) {
-			$(repl('<tr>\
-				<td>%(description)s %(rate)s</td>\
-				<td style="text-align: right;">%(tax_amount)s</td>\
-			<tr>', {
-				description: d.description,
-				rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
-				tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
-					me.frm.doc.currency)
-			})).appendTo(".tax-table tbody");
+			if (d.tax_amount) {
+				$(repl('<tr>\
+					<td>%(description)s %(rate)s</td>\
+					<td style="text-align: right;">%(tax_amount)s</td>\
+				<tr>', {
+					description: d.description,
+					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
+					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+						me.frm.doc.currency)
+				})).appendTo(".tax-table tbody");
+			}
 		});
 	},
 	set_totals: function() {
@@ -399,8 +445,14 @@ erpnext.POS = Class.extend({
 
 		// append quantity to the respective item after change from input box
 		$(this.wrapper).find("input.qty").on("change", function() {
-			var item_code = $(this).closest("tr")[0].id;
+			var item_code = $(this).closest("tr").attr("id");
 			me.update_qty(item_code, $(this).val());
+		});
+
+		// increase/decrease qty on plus/minus button
+		$(this.wrapper).find(".increase-qty, .decrease-qty").on("click", function() {
+			var tr = $(this).closest("tr");
+			me.increase_decrease_qty(tr, $(this).attr("class"));
 		});
 
 		// on td click toggle the highlighting of row
@@ -420,6 +472,15 @@ erpnext.POS = Class.extend({
 		me.refresh_delete_btn();
 		this.barcode.$input.focus();
 	},
+	increase_decrease_qty: function(tr, operation) {
+		var item_code = tr.attr("id");
+		var item_qty = cint(tr.find("input.qty").val());
+
+		if (operation == "increase-qty")
+			this.update_qty(item_code, item_qty + 1);
+		else if (operation == "decrease-qty" && item_qty != 1)
+			this.update_qty(item_code, item_qty - 1);
+	},
 	disable_text_box_and_button: function() {
 		var me = this;
 		// if form is submitted & cancelled then disable all input box & buttons
@@ -427,7 +488,7 @@ erpnext.POS = Class.extend({
 			$(this.wrapper).find('input, button').each(function () {
 				$(this).prop('disabled', true);
 			});
-			$(this.wrapper).find(".delete-items").hide();
+			$(this.wrapper).find(".remove-items").hide();
 			$(this.wrapper).find(".make-payment").hide();
 		}
 		else {
@@ -437,14 +498,14 @@ erpnext.POS = Class.extend({
 			$(this.wrapper).find(".make-payment").show();
 		}
 	},
-	make_payment_button: function() {
+	hide_payment_button: function() {
 		var me = this;
 		// Show Make Payment button only in Sales Invoice
 		if (this.frm.doctype != "Sales Invoice")
 			$(this.wrapper).find(".make-payment").hide();
 	},
 	refresh_delete_btn: function() {
-		$(this.wrapper).find(".delete-items").toggle($(".item-cart .warning").length ? true : false);		
+		$(this.wrapper).find(".remove-items").toggle($(".item-cart .warning").length ? true : false);
 	},
 	add_item_thru_barcode: function() {
 		var me = this;
@@ -466,7 +527,7 @@ erpnext.POS = Class.extend({
 			}
 		});
 	},
-	remove_selected_item: function() {
+	remove_selected_items: function() {
 		var me = this;
 		var selected_items = [];
 		var no_of_items = $(this.wrapper).find("#cart tbody tr").length;
@@ -487,9 +548,11 @@ erpnext.POS = Class.extend({
 				}
 			}
 		});
+
 		this.refresh_grid();
 	},
 	refresh_grid: function() {
+		this.frm.dirty();
 		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		this.refresh();

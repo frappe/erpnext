@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-def make_test_records(verbose):
+def _make_test_records(verbose):
 	from webnotes.test_runner import make_test_objects
 		
 	accounts = [

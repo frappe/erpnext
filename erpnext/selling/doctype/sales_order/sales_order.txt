@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-18 12:39:59", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:32", 
+  "modified": "2014-01-20 17:49:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -482,6 +482,13 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "discount_amount", 
+  "fieldtype": "Currency", 
+  "label": "Discount Amount", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "totals", 
   "fieldtype": "Section Break", 
   "label": "Totals", 
@@ -902,6 +909,7 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "report": 1, 
   "role": "Sales User", 
@@ -912,6 +920,7 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "report": 1, 
   "role": "Maintenance User", 
@@ -919,10 +928,12 @@
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Accounts User"
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Customer"
  }

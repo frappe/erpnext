@@ -52,11 +52,6 @@ Original Query:
 			subject = '['+cstr(d.name)+'] ' + cstr(d.subject), \
 			msg = cstr(response))
 		
-	def auto_close_tickets(self):
-		webnotes.conn.sql("""update `tabSupport Ticket` set status = 'Closed' 
-			where status = 'Replied' 
-			and date_sub(curdate(),interval 15 Day) > modified""")
-
 def get_support_mails():
 	if cint(webnotes.conn.get_value('Email Settings', None, 'sync_support_mails')):
 		SupportMailbox()

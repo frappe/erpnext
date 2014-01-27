@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:05", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:58", 
+  "modified": "2014-01-20 17:48:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,6 +24,7 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Budget Distribution", 
@@ -79,8 +80,8 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "permlevel": 0, 
@@ -88,6 +89,7 @@
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "permlevel": 2
  }

@@ -2,11 +2,12 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:02", 
+  "modified": "2014-01-20 17:48:34", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
  {
+  "allow_import": 1, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
   "icon": "icon-bug", 
@@ -25,8 +26,9 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 

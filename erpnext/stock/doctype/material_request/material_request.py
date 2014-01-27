@@ -37,16 +37,16 @@ class DocType(BuyingController):
 		
 		for so_no in so_items.keys():
 			for item in so_items[so_no].keys():
-				already_indented = webnotes.conn.sql("""select sum(qty) from `tabMaterial Request Item` 
+				already_indented = webnotes.conn.sql("""select sum(ifnull(qty, 0)) 
+					from `tabMaterial Request Item` 
 					where item_code = %s and sales_order_no = %s and 
 					docstatus = 1 and parent != %s""", (item, so_no, self.doc.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 				
-				actual_so_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
-					where parent = %s and item_code = %s and docstatus = 1 
-					group by parent""", (so_no, item))
+				actual_so_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Order Item` 
+					where parent = %s and item_code = %s and docstatus = 1""", (so_no, item))
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
-
+				
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
 					webnotes.throw("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
 						\n Anyway, you can add more qty in new row for the same item."
