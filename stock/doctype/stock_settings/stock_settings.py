@@ -21,7 +21,7 @@ class DocType:
 			self.doc.get("item_naming_by")=="Naming Series", hide_name_field=True)
 
                 stock_frozen_limit = 356
-                submitted_stock_frozen = self.doc.fields.get("stock_frozen_upto")
+                submitted_stock_frozen = self.doc.fields.get("stock_frozen_upto_days")
                 if submitted_stock_frozen > stock_frozen_limit:
-                        self.doc.fields["stock_frozen_upto"] = stock_frozen_limit
+                        self.doc.fields["stock_frozen_upto_days"] = stock_frozen_limit
                         webnotes.msgprint (_("Stocks cannot be freezed for days larger than %d.") %stock_frozen_limit)
