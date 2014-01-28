@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 13:41:00", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:14", 
+  "modified": "2014-01-22 16:05:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -25,8 +25,9 @@
   "permlevel": 0
  }, 
  {
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
@@ -36,6 +37,7 @@
   "permlevel": 0, 
   "print": 1, 
   "read": 1, 
+  "restricted": 1, 
   "role": "All", 
   "write": 1
  }, 

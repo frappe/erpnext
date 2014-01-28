@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, validate_email_add
-from webnotes import msgprint, _
+from webnotes import throw, msgprint, _
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -18,7 +18,7 @@ class DocType:
 
 	def validate(self):
 		if self.doc.email_id and not validate_email_add(self.doc.email_id):
-				msgprint("Please enter valid Email Id", raise_exception=1)
+				throw(_("Please enter valid Email Id"))
 				
 		self.update_parent_account()
 				
@@ -76,8 +76,8 @@ class DocType:
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
-				msgprint("""Warehouse: %s can not be deleted as qty exists for item: %s""" 
-					% (self.doc.name, d['item_code']), raise_exception=1)
+				throw("""Warehouse: %s can not be deleted as qty exists for item: %s""" 
+					% (self.doc.name, d['item_code']))
 			else:
 				webnotes.conn.sql("delete from `tabBin` where name = %s", d['name'])
 				
@@ -88,8 +88,8 @@ class DocType:
 				
 		if webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
 				where warehouse = %s""", self.doc.name):
-			msgprint("""Warehouse can not be deleted as stock ledger entry 
-				exists for this warehouse.""", raise_exception=1)
+			throw(_("""Warehouse can not be deleted as stock ledger entry 
+				exists for this warehouse."""))
 			
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
@@ -97,8 +97,8 @@ class DocType:
 		new_warehouse = get_name_with_abbr(newdn, self.doc.company)
 
 		if merge:
-			if not webnotes.conn.exists("Warehouse", newdn):
-				webnotes.throw(_("Warehouse ") + newdn +_(" does not exists"))
+			if not webnotes.conn.exists("Warehouse", new_warehouse):
+				webnotes.throw(_("Warehouse ") + new_warehouse +_(" does not exists"))
 				
 			if self.doc.company != webnotes.conn.get_value("Warehouse", new_warehouse, "company"):
 				webnotes.throw(_("Both Warehouse must belong to same Company"))

@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:12", 
+  "modified": "2014-01-20 17:48:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,6 +26,7 @@
  }, 
  {
   "amend": 0, 
+  "cancel": 0, 
   "create": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
@@ -398,12 +399,12 @@
   "print_hide": 1
  }, 
  {
-  "cancel": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Manager"
  }, 
  {
-  "cancel": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User"
  }

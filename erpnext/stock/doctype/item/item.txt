@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:09", 
+  "modified": "2014-01-20 17:48:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -30,6 +30,7 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
@@ -847,8 +848,8 @@
   "read_only": 0
  }, 
  {
-  "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "import": 1, 
   "role": "Material Master Manager", 
@@ -856,16 +857,16 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Material Manager", 
   "write": 0
  }, 
  {
   "amend": 0, 
-  "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Material User", 
   "write": 0

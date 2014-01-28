@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-
+from webnotes.utils import cstr
 from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
@@ -225,7 +225,12 @@ def get_customer_details(customer):
 			out[f] = customer.get("default_" + f)
 
 	# price list
-	out.selling_price_list = customer.price_list or webnotes.conn.get_value("Customer Group",
+	from webnotes.defaults import get_defaults_for
+	user_default_price_list = get_defaults_for(webnotes.session.user).get("selling_price_list")
+	user_default_price_list = cstr(user_default_price_list) \
+		if not isinstance(user_default_price_list, list) else ""
+	
+	out.selling_price_list = user_default_price_list or customer.price_list or webnotes.conn.get_value("Customer Group",
 		customer.customer_group, "default_price_list")
 	
 	if out.selling_price_list:
@@ -238,4 +243,3 @@ def get_customer_details(customer):
 	} for d in customer_bean.doclist.get({"doctype":"Sales Team"})]
 	
 	return out
-	

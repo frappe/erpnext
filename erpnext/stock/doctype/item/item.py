@@ -8,13 +8,12 @@ from webnotes.utils import cstr, flt
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
-from webnotes.webutils import WebsiteGenerator
 
 from webnotes.model.controller import DocListController
 
 class WarehouseNotSet(Exception): pass
 
-class DocType(DocListController, WebsiteGenerator):
+class DocType(DocListController):
 	def onload(self):
 		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
 	
@@ -48,7 +47,6 @@ class DocType(DocListController, WebsiteGenerator):
 			
 	def on_update(self):
 		self.validate_name_with_item_group()
-		self.update_website()
 		self.update_item_price()
 
 	def check_warehouse_is_set_for_stock_item(self):
@@ -151,8 +149,8 @@ class DocType(DocListController, WebsiteGenerator):
 			if d.tax_type:
 				account_type = webnotes.conn.get_value("Account", d.tax_type, "account_type")
 				
-				if account_type not in ['Tax', 'Chargeable']:
-					msgprint("'%s' is not Tax / Chargeable Account" % d.tax_type, raise_exception=1)
+				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
+					msgprint("'%s' is not Tax / Chargeable / Income / Expense Account" % d.tax_type, raise_exception=1)
 				else:
 					if d.tax_type in check_list:
 						msgprint("Rate is entered twice for: '%s'" % d.tax_type, raise_exception=1)
@@ -197,14 +195,6 @@ class DocType(DocListController, WebsiteGenerator):
 				please change the item name or rename the item group" % 
 				self.doc.name, raise_exception=1)
 
-	def update_website(self):
-		from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
-		invalidate_cache_for(self.doc.item_group)
-		[invalidate_cache_for(d.item_group) for d in \
-			self.doclist.get({"doctype":"Website Item Group"})]
-
-		WebsiteGenerator.on_update(self)
-
 	def update_item_price(self):
 		webnotes.conn.sql("""update `tabItem Price` set item_name=%s, 
 			item_description=%s, modified=NOW() where item_code=%s""",
@@ -232,7 +222,6 @@ class DocType(DocListController, WebsiteGenerator):
 		
 	def on_trash(self):
 		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
-		WebsiteGenerator.on_trash(self)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
@@ -250,17 +239,10 @@ class DocType(DocListController, WebsiteGenerator):
 
 	def after_rename(self, olddn, newdn, merge):
 		webnotes.conn.set_value("Item", newdn, "item_code", newdn)
-		self.update_website_page_name()
 			
 		if merge:
 			self.set_last_purchase_rate(newdn)
 			self.recalculate_bin_qty(newdn)
-			
-	def update_website_page_name(self):
-		if self.doc.page_name:
-			self.update_website()
-			from webnotes.webutils import clear_cache
-			clear_cache(self.doc.page_name)
 			
 	def set_last_purchase_rate(self, newdn):
 		from erpnext.buying.utils import get_last_purchase_details

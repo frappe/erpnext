@@ -8,9 +8,7 @@ from webnotes.utils import add_days, add_years, cint, getdate
 from webnotes.model import db_exists
 from webnotes.model.doc import addchild, make_autoname
 from webnotes.model.bean import copy_doclist
-from webnotes import msgprint
-
-
+from webnotes import msgprint, throw, _
 import datetime
 
 class DocType:
@@ -19,7 +17,7 @@ class DocType:
 		self.doclist = doclist
 
 	def autoname(self):
-		self.doc.name = make_autoname(self.doc.fiscal_year +"/"+ self.doc.holiday_list_name+"/.###")
+		self.doc.name = make_autoname(self.doc.fiscal_year + "/" + self.doc.holiday_list_name + "/.###")
 		
 	def validate(self):
 		self.update_default_holiday_list()
@@ -38,11 +36,9 @@ class DocType:
 
 	def validate_values(self):
 		if not self.doc.fiscal_year:
-			msgprint("Please select Fiscal Year")
-			raise Exception
+			throw(_("Please select Fiscal Year"))
 		if not self.doc.weekly_off:
-			msgprint("Please select weekly off day")
-			raise Exception
+			throw(_("Please select weekly off day"))
 
 	def get_fy_start_end_dates(self):
 		return webnotes.conn.sql("""select year_start_date, year_end_date

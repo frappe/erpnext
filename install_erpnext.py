@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import os, sys
 import argparse
+import subprocess
 
 is_redhat = is_debian = None
 root_password = None
@@ -19,7 +20,7 @@ requirements = [
 	"jinja2", 
 	"markdown2", 
 	"markupsafe", 
-	"mysql-python", 
+	"mysql-python",
 	"pygeoip", 
 	"python-dateutil", 
 	"python-memcached", 
@@ -80,7 +81,7 @@ def validate_install():
 	return is_redhat, is_debian
 		
 def install_using_yum():
-	packages = "python python-setuptools gcc python-devel MySQL-python git memcached ntp vim-enhanced screen"
+	packages = "gcc MySQL-python git memcached ntp vim-enhanced screen"
 	
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
@@ -88,7 +89,10 @@ def install_using_yum():
 	print "-"*80
 	exec_in_shell("yum install -y %s" % packages)
 	
-	if not exec_in_shell("which mysql"):
+
+	try:
+		exec_in_shell("which mysql")
+	except subprocess.CalledProcessError:
 		packages = "mysql mysql-server mysql-devel"
 		print "Installing Packages:", packages
 		exec_in_shell("yum install -y %s" % packages)
@@ -101,26 +105,19 @@ def install_using_yum():
 		exec_in_shell('mysqladmin -u root password "%s"' % (root_password,))
 		print "Root password set as", root_password
 	
-	# install htop
-	if not exec_in_shell("which htop"):
-		try:
-			exec_in_shell("cd /tmp && rpm -i --force http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm && yum install -y htop")
-		except:
-			pass
-	
 	update_config_for_redhat()
 	
 def update_config_for_redhat():
 	import re
 	
 	# set to autostart on startup
-	for service in ("mysqld", "memcached", "ntpd"):
+	for service in ("mysqld", "memcached"):
 		exec_in_shell("chkconfig --level 2345 %s on" % service)
 		exec_in_shell("service %s restart" % service)
 	
 def install_using_apt():
 	exec_in_shell("apt-get update")
-	packages = "python python-setuptools python-dev build-essential python-pip python-mysqldb git memcached ntp vim screen htop"
+	packages = "python python-setuptools python-dev build-essential python-mysqldb git memcached ntp vim screen htop"
 	print "-"*80
 	print "Installing Packages: (This may take some time)"
 	print packages
@@ -132,7 +129,9 @@ def install_using_apt():
 	exec_in_shell("echo mysql-server mysql-server/root_password password %s | sudo debconf-set-selections" % root_password)
 	exec_in_shell("echo mysql-server mysql-server/root_password_again password %s | sudo debconf-set-selections" % root_password)
 	
-	if not exec_in_shell("which mysql"):
+	try:
+		exec_in_shell("which mysql")
+	except subprocess.CalledProcessError:
 		packages = "mysql-server libmysqlclient-dev"
 		print "Installing Packages:", packages
 		exec_in_shell("apt-get install -y %s" % packages)
@@ -140,7 +139,7 @@ def install_using_apt():
 	update_config_for_debian()
 	
 def update_config_for_debian():
-	for service in ("mysql", "ntpd"):
+	for service in ("mysql",):
 		exec_in_shell("service %s restart" % service)
 	
 def install_python_modules():
@@ -148,13 +147,14 @@ def install_python_modules():
 	print "Installing Python Modules: (This may take some time)"
 	print "-"*80
 	
-	if not exec_in_shell("which pip"):
-		exec_in_shell("easy_install pip")
+	try:
+		exec_in_shell("which pip2.7")	
+	except subprocess.CalledProcessError:
+		exec_in_shell("easy_install-2.7 pip")
 	
-	exec_in_shell("pip install --upgrade pip")
-	exec_in_shell("pip install --upgrade setuptools")
-	exec_in_shell("pip install --upgrade virtualenv")
-	exec_in_shell("pip install {}".format(' '.join(requirements)))
+	exec_in_shell("pip2.7 install --upgrade setuptools --no-use-wheel")
+	exec_in_shell("pip2.7 install --upgrade setuptools")
+	exec_in_shell("pip2.7 install {}".format(' '.join(requirements)))
 	
 def install_erpnext(install_path):
 	print
@@ -200,7 +200,7 @@ def setup_folders(install_path):
 	app = os.path.join(install_path, "app")
 	if not os.path.exists(app):
 		print "Cloning erpnext"
-		exec_in_shell("cd %s && git clone https://github.com/webnotes/erpnext.git app" % install_path)
+		exec_in_shell("cd %s && git clone --branch master https://github.com/webnotes/erpnext.git app" % install_path)
 		exec_in_shell("cd app && git config core.filemode false")
 		if not os.path.exists(app):
 			raise Exception, "Couldn't clone erpnext repository"
@@ -208,7 +208,7 @@ def setup_folders(install_path):
 	lib = os.path.join(install_path, "lib")
 	if not os.path.exists(lib):
 		print "Cloning wnframework"
-		exec_in_shell("cd %s && git clone https://github.com/webnotes/wnframework.git lib" % install_path)
+		exec_in_shell("cd %s && git clone --branch master https://github.com/webnotes/wnframework.git lib" % install_path)
 		exec_in_shell("cd lib && git config core.filemode false")
 		if not os.path.exists(lib):
 			raise Exception, "Couldn't clone wnframework repository"
@@ -243,28 +243,8 @@ def post_install(install_path):
 
 def exec_in_shell(cmd):
 	# using Popen instead of os.system - as recommended by python docs
-	from subprocess import Popen
-	import tempfile
-
-	with tempfile.TemporaryFile() as stdout:
-		with tempfile.TemporaryFile() as stderr:
-			p = Popen(cmd, shell=True, stdout=stdout, stderr=stderr)
-			p.wait()
-
-			stdout.seek(0)
-			out = stdout.read()
-			if out: out = out.decode('utf-8')
-
-			stderr.seek(0)
-			err = stderr.read()
-			if err: err = err.decode('utf-8')
-
-	if err and any((kw in err.lower() for kw in ["traceback", "error", "exception"])):
-		print out
-		raise Exception, err
-	else:
-		print "."
-
+	import subprocess
+	out = subprocess.check_output(cmd, shell=True)
 	return out
 
 def parse_args():

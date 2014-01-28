@@ -12,9 +12,7 @@ def execute():
 		where ip.item_code=i.name""")
 
 	webnotes.conn.sql("""update `tabItem Price` ip, `tabPrice List` pl 
-		set ip.price_list=pl.name, ip.currency=pl.currency, 
-		ip.buying_or_selling=pl.buying_or_selling 
-		where ip.parent=pl.name""")
+		set ip.price_list=pl.name, ip.currency=pl.currency where ip.parent=pl.name""")
 
 	webnotes.conn.sql("""update `tabItem Price` 
 		set parent=null, parenttype=null, parentfield=null, idx=null""")

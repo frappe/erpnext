@@ -215,6 +215,3 @@ def get_supplier_details(supplier):
 	out.buying_price_list = supplier.default_price_list
 		
 	return out
-		
-	
-	

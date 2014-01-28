@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-25 11:35:09", 
   "docstatus": 0, 
-  "modified": "2013-12-20 18:28:50", 
+  "modified": "2014-01-20 17:50:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,6 +42,18 @@
   "name": "Price List"
  }, 
  {
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "label": "Enabled"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb_1", 
+  "fieldtype": "Section Break"
+ }, 
+ {
   "doctype": "DocField", 
   "fieldname": "price_list_name", 
   "fieldtype": "Data", 
@@ -60,14 +72,19 @@
   "reqd": 1
  }, 
  {
-  "default": "Selling", 
   "doctype": "DocField", 
-  "fieldname": "buying_or_selling", 
-  "fieldtype": "Select", 
+  "fieldname": "buying", 
+  "fieldtype": "Check", 
   "in_list_view": 1, 
-  "label": "Valid for Buying or Selling?", 
-  "options": "Buying\nSelling", 
-  "reqd": 1
+  "label": "Buying"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Selling", 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -87,6 +104,7 @@
   "amend": 0, 
   "cancel": 0, 
   "create": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Sales User", 
   "submit": 0, 
@@ -94,20 +112,23 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
   "submit": 0, 
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase User"
  }, 
  {
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Purchase Master Manager", 
   "write": 1

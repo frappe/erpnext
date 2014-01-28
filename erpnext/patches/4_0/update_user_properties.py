@@ -45,7 +45,11 @@ def update_user_match():
 		for profile in webnotes.conn.sql_list("""select name from `tabProfile`
 			where enabled=1 and user_type='System User'"""):
 			
-			perms = webnotes.permissions.get_user_perms(meta, "read", profile)
+			user_roles = webnotes.get_roles(profile)
+			
+			perms = meta.get({"doctype": "DocPerm", "permlevel": 0, 
+				"role": ["in", [["All"] + user_roles]], "read": 1})
+
 			# user does not have required roles
 			if not perms:
 				continue

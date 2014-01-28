@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-28 10:06:02", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:00", 
+  "modified": "2014-01-20 17:48:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -90,8 +90,9 @@
   "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###"
  }, 
  {
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Accounts Manager", 
   "submit": 0, 
@@ -99,8 +100,9 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "role": "Sales Master Manager", 
   "submit": 0, 
@@ -110,12 +112,14 @@
   "amend": 0, 
   "cancel": 0, 
   "create": 1, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Purchase Master Manager", 
   "submit": 0, 
   "write": 1
  }, 
  {
+  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "All"
  }

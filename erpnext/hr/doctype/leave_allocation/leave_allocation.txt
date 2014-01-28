@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:12", 
+  "modified": "2014-01-22 16:05:35", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,6 +28,7 @@
   "amend": 1, 
   "cancel": 1, 
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
@@ -170,7 +171,7 @@
  }, 
  {
   "doctype": "DocPerm", 
-  "match": "owner", 
+  "restricted": 1, 
   "role": "HR User"
  }, 
  {
