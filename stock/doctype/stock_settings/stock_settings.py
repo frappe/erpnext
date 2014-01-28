@@ -24,4 +24,4 @@ class DocType:
 		submitted_stock_frozen = self.doc.stock_frozen_upto_days
 		if submitted_stock_frozen > stock_frozen_limit:
 			self.doc.stock_frozen_upto_days = stock_frozen_limit
-			webnotes.msgprint (_("`Stocks Freeze Older Than` should be smaller than %d days.") %stock_frozen_limit)
+			webnotes.msgprint (_("`Freeze Stocks Older Than` should be smaller than %d days.") %stock_frozen_limit)
