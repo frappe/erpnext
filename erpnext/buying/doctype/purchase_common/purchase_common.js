@@ -241,9 +241,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	purchase_other_charges: function() {
+	taxes_and_charges: function() {
 		var me = this;
-		if(this.frm.doc.purchase_other_charges) {
+		if(this.frm.doc.taxes_and_charges) {
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "get_purchase_tax_details",

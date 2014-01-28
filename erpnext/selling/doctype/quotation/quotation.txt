@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:16", 
+  "modified": "2014-01-28 18:50:17", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -373,17 +373,17 @@
   "doctype": "DocField", 
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
-  "label": "Taxes", 
+  "label": "Taxes and Charges", 
   "oldfieldtype": "Section Break", 
   "options": "icon-money", 
   "read_only": 0
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "charge", 
+  "fieldname": "taxes_and_charges", 
   "fieldtype": "Link", 
   "hidden": 0, 
-  "label": "Tax Master", 
+  "label": "Taxes and Charges", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 

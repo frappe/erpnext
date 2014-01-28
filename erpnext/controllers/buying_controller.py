@@ -38,7 +38,7 @@ class BuyingController(StockController):
 
 		self.set_missing_item_details(get_item_details)
 		if self.doc.fields.get("__islocal"):
-			self.set_taxes("purchase_tax_details", "purchase_other_charges")
+			self.set_taxes("purchase_tax_details", "taxes_and_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.doc.supplier:
@@ -59,7 +59,7 @@ class BuyingController(StockController):
 
 	def get_purchase_tax_details(self):
 		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
-		self.set_taxes("purchase_tax_details", "purchase_other_charges")
+		self.set_taxes("purchase_tax_details", "taxes_and_charges")
 
 	def validate_stock_or_nonstock_items(self):
 		if not self.get_stock_items():

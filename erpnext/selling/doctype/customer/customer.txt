@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-11 14:26:44", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:32", 
+  "modified": "2014-01-28 19:06:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -26,6 +26,7 @@
   "parenttype": "DocType"
  }, 
  {
+  "cancel": 0, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Customer", 
@@ -254,6 +255,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "default_taxes_and_charges", 
+  "fieldtype": "Link", 
+  "label": "Taxes and Charges", 
+  "options": "Sales Taxes and Charges Master", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "credit_days", 
   "fieldtype": "Int", 
   "label": "Credit Days", 
@@ -343,7 +352,6 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "delete": 0, 
   "doctype": "DocPerm", 
@@ -363,7 +371,6 @@
  }, 
  {
   "amend": 0, 
-  "cancel": 0, 
   "create": 1, 
   "delete": 1, 
   "doctype": "DocPerm", 

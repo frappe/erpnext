@@ -30,7 +30,7 @@ class SellingController(StockController):
 		self.set_missing_lead_customer_details()
 		self.set_price_list_and_item_details()
 		if self.doc.fields.get("__islocal"):
-			self.set_taxes("other_charges", "charge")
+			self.set_taxes("other_charges", "taxes_and_charges")
 					
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
@@ -52,7 +52,7 @@ class SellingController(StockController):
 										
 	def get_other_charges(self):
 		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
-		self.set_taxes("other_charges", "charge")
+		self.set_taxes("other_charges", "taxes_and_charges")
 		
 	def apply_shipping_rule(self):
 		if self.doc.shipping_rule:

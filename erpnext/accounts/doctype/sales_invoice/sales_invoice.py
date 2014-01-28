@@ -215,7 +215,7 @@ class DocType(SellingController):
 			
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
-				self.set_taxes("other_charges", "charge")
+				self.set_taxes("other_charges", "taxes_and_charges")
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""
