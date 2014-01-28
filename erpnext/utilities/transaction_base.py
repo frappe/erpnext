@@ -45,16 +45,6 @@ class TransactionBase(StatusUpdater):
 					break
 
 		return self._party_type_and_name
-						
-	def get_supplier_defaults(self):
-		from erpnext.buying.doctype.supplier.supplier import get_supplier_details
-		return get_supplier_details(self.doc.supplier)
-		
-	def set_supplier_defaults(self):
-		from erpnext.buying.doctype.supplier.supplier import get_supplier_details
-		for fieldname, val in get_supplier_details(self.doc.supplier).iteritems():
-			if self.meta.get_field(fieldname):
-				self.doc.fields[fieldname] = val
 				
 	def get_lead_defaults(self):
 		out = self.get_default_address_and_contact("lead")

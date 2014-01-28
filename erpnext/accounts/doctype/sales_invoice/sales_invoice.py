@@ -15,6 +15,8 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
 
+from erpnext.accounts.party import get_party_account, get_due_date
+
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 from erpnext.controllers.selling_controller import SellingController
@@ -149,7 +151,7 @@ class DocType(SellingController):
 		self.set_pos_fields(for_validate)
 		
 		if not self.doc.debit_to:
-			self.doc.debit_to = get_customer_account(self.doc.company, self.doc.customer)
+			self.doc.debit_to = get_party_account(self.doc.company, self.doc.customer, "Customer")
 		if not self.doc.due_date:
 			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.customer, 
 				self.doc.debit_to, self.doc.company)
@@ -843,59 +845,6 @@ def assign_task_to_owner(inv, msg, users):
 			'priority'		:	'Urgent'
 		}
 		assign_to.add(args)
-
-@webnotes.whitelist()
-def get_customer_details(company, customer, debit_to, posting_date):
-	if not webnotes.has_permission("Customer", "read", customer):
-		webnotes.throw("No Permission")
-		
-	from erpnext.selling.doctype.customer.customer import get_customer_details
-	
-	if customer:
-		debit_to = get_customer_account(company, customer)
-	elif debit_to:
-		customer = webnotes.conn.get_value('Account',debit_to, 'master_name')
-
-	out = {
-		"customer": customer,
-		"debit_to": debit_to,
-		"due_date": get_due_date(posting_date, customer, debit_to, company)
-	}	
-	out.update(get_customer_details(customer))
-	return out
-	
-def get_customer_account(company, customer):
-	if not company:
-		webnotes.throw(_("Please select company first."))
-
-	if customer:
-		acc_head = webnotes.conn.get_value("Account", {"master_name":customer,
-			"master_type":"Customer", "company": company})
-
-		if not acc_head:
-			webnotes.throw(_("Customer has no account head in selected Company. Open the customer record and create an Account Head first."))
-	
-		return acc_head		
-
-def get_due_date(posting_date, customer, debit_to, company):
-	"""Set Due Date = Posting Date + Credit Days"""
-	due_date = None
-	if posting_date:
-		credit_days = 0
-		if debit_to:
-			credit_days = webnotes.conn.get_value("Account", debit_to, "credit_days")
-		if customer and not credit_days:
-			credit_days = webnotes.conn.get_value("Customer", customer, "credit_days")
-		if company and not credit_days:
-			credit_days = webnotes.conn.get_value("Company", company, "credit_days")
-			
-		if credit_days:
-			due_date = add_days(posting_date, credit_days)
-		else:
-			due_date = posting_date
-
-	return due_date	
-
 
 @webnotes.whitelist()
 def get_bank_cash_account(mode_of_payment):

@@ -156,10 +156,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	customer: function() {
-		if(this.frm.updating_customer_details)
+		if(this.frm.updating_party_details)
 			return;
-		erpnext.selling.get_customer_details(this.frm, 
-			"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_customer_details",
+		erpnext.selling.get_party_details(this.frm, 
+			"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
 				company: this.frm.doc.company,

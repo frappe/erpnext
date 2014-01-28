@@ -7,6 +7,7 @@ from webnotes import _, msgprint
 from webnotes.utils import flt, _round
 from erpnext.buying.utils import get_item_details
 from erpnext.setup.utils import get_company_currency
+from erpnext.buying.doctype.supplier.supplier import get_supplier_details
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -31,10 +32,8 @@ class BuyingController(StockController):
 		self.set_price_list_currency("Buying")
 		
 		# set contact and address details for supplier, if they are not mentioned
-		if self.doc.supplier and not (self.doc.contact_person and self.doc.supplier_address):
-			for fieldname, val in self.get_supplier_defaults().items():
-				if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
-					self.doc.fields[fieldname] = val
+		if self.doc.supplier:
+			self.doc.update_if_not_set(get_supplier_details(self.doc.supplier))
 
 		self.set_missing_item_details(get_item_details)
 		if self.doc.fields.get("__islocal"):

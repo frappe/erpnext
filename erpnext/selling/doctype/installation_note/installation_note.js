@@ -6,7 +6,7 @@ cur_frm.cscript.fname = "installed_item_details";
 
 
 wn.ui.form.on_change("Installation Note", "customer", 
-	function(frm) { erpnext.utils.get_customer_details(frm); });
+	function(frm) { erpnext.utils.get_party_details(frm); });
 
 wn.ui.form.on_change("Installation Note", "customer_address", 
 	function(frm) { erpnext.utils.get_address_display(frm); });

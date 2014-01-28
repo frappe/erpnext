@@ -12,6 +12,7 @@ import webnotes.defaults
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
+from erpnext.accounts.party import create_party_account
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -29,14 +30,6 @@ class DocType(TransactionBase):
 
 	def get_company_abbr(self):
 		return webnotes.conn.get_value('Company', self.doc.company, 'abbr')
-
-	def get_receivables_group(self):
-		g = webnotes.conn.sql("select receivables_group from tabCompany where name=%s", self.doc.company)
-		g = g and g[0][0] or '' 
-		if not g:
-			msgprint("Update Company master, assign a default group for Receivables")
-			raise Exception
-		return g
 	
 	def validate_values(self):
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.doc.naming_series:
@@ -56,29 +49,6 @@ class DocType(TransactionBase):
 	def update_contact(self):
 		webnotes.conn.sql("""update `tabContact` set customer_name=%s, modified=NOW() 
 			where customer=%s""", (self.doc.customer_name, self.doc.name))
-
-	def create_account_head(self):
-		if self.doc.company :
-			abbr = self.get_company_abbr()
-			if not webnotes.conn.exists("Account", (self.doc.name + " - " + abbr)):
-				parent_account = self.get_receivables_group()
-				# create
-				ac_bean = webnotes.bean({
-					"doctype": "Account",
-					'account_name': self.doc.name,
-					'parent_account': parent_account, 
-					'group_or_ledger':'Ledger',
-					'company':self.doc.company, 
-					'master_type':'Customer', 
-					'master_name':self.doc.name,
-					"freeze_account": "No"
-				})
-				ac_bean.ignore_permissions = True
-				ac_bean.insert()
-				
-				msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
-		else :
-			msgprint(_("Please Select Company under which you want to create account head"))
 
 	def update_credit_days_limit(self):
 		webnotes.conn.sql("""update tabAccount set credit_days = %s, credit_limit = %s 
@@ -113,7 +83,8 @@ class DocType(TransactionBase):
 		self.update_contact()
 
 		# create account head
-		self.create_account_head()
+		create_party_account(self.doc.name, "Customer", self.doc.company)
+
 		# update credit days and limit in account
 		self.update_credit_days_limit()
 		#create address and contact from lead

@@ -62,42 +62,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	supplier: function() {
-		if(this.frm.doc.supplier || this.frm.doc.credit_to) {
-			if(!this.frm.doc.company) {
-				this.frm.set_value("supplier", null);
-				msgprint(wn._("Please specify Company"));
-			} else {
-				var me = this;
-				var buying_price_list = this.frm.doc.buying_price_list;
-
-				return this.frm.call({
-					doc: this.frm.doc,
-					method: "set_supplier_defaults",
-					freeze: true,
-					callback: function(r) {
-						if(!r.exc) {
-							if(me.frm.doc.buying_price_list !== buying_price_list) me.buying_price_list();
-						}
-					}
-				});
-			}
-		}
+		erpnext.utils.get_party_details(this.frm);
 	},
 	
 	supplier_address: function() {
-		var me = this;
-		if (this.frm.doc.supplier) {
-			return wn.call({
-				doc: this.frm.doc,
-				method: "set_supplier_address",
-				freeze: true,
-				args: {
-					supplier: this.frm.doc.supplier,
-					address: this.frm.doc.supplier_address, 
-					contact: this.frm.doc.contact_person
-				},
-			});
-		}
+		erpnext.utils.get_address_display(this.frm);
 	},
 	
 	contact_person: function() { 

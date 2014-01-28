@@ -4,7 +4,7 @@
 wn.provide("erpnext.support");
 
 wn.ui.form.on_change("Maintenance Visit", "customer", function(frm) { 
-	erpnext.utils.get_customer_details(frm) });
+	erpnext.utils.get_party_details(frm) });
 wn.ui.form.on_change("Maintenance Visit", "customer_address", 
 	erpnext.utils.get_address_display);
 wn.ui.form.on_change("Maintenance Visit", "contact_person", 

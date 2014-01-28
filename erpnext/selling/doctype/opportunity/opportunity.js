@@ -4,7 +4,7 @@
 {% include 'utilities/doctype/sms_control/sms_control.js' %};
 
 wn.ui.form.on_change("Opportunity", "customer", function(frm) { 
-	erpnext.utils.get_customer_details(frm) });
+	erpnext.utils.get_party_details(frm) });
 wn.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_address_display);
 wn.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);	
 

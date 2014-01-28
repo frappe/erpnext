@@ -104,7 +104,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	customer: function() {
-		erpnext.utils.get_customer_details(this.frm);
+		erpnext.utils.get_party_details(this.frm);
 	},
 	
 	customer_address: function() {
