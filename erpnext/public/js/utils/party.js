@@ -48,24 +48,29 @@ erpnext.utils.get_address_display = function(frm, address_field) {
 			address_field = "supplier_address";
 		}
 	} 
-	wn.call({
-		method: "erpnext.utilities.doctype.address.address.get_address_display",
-		args: {address: frm.doc[address_field] },
-		callback: function(r) {
-			if(r.message)
-				frm.set_value("address_display", r.message)
-		}
-	})
+	if(frm.doc[address_field]) {
+		wn.call({
+			method: "erpnext.utilities.doctype.address.address.get_address_display",
+			args: {address: frm.doc[address_field] },
+			callback: function(r) {
+				if(r.message)
+					frm.set_value("address_display", r.message)
+			}
+		})
+	}
 }
 
 erpnext.utils.get_contact_details = function(frm) {
 	if(frm.updating_party_details) return;
-	wn.call({
-		method: "erpnext.utilities.doctype.contact.contact.get_contact_details",
-		args: {address: frm.doc.contact_person },
-		callback: function(r) {
-			if(r.message)
-				frm.set_value(r.message);
-		}
-	})
+	
+	if(frm.doc[address_field]) {
+		wn.call({
+			method: "erpnext.utilities.doctype.contact.contact.get_contact_details",
+			args: {contact: frm.doc.contact_person },
+			callback: function(r) {
+				if(r.message)
+					frm.set_value(r.message);
+			}
+		})
+	}
 }
