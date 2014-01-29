@@ -115,7 +115,7 @@ class TransactionBase(StatusUpdater):
 			sales_person.update({
 				"doctype": "Sales Team",
 				"parentfield": "sales_team",
-				"idx": i+1
+				"idx": i + 1
 			})
 			
 			# add child
@@ -138,11 +138,15 @@ class TransactionBase(StatusUpdater):
 			supplier.default_price_list or self.doc.buying_price_list
 		
 		return out
-		
+
 	def set_supplier_defaults(self):
 		for fieldname, val in self.get_supplier_defaults().items():
 			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
+
+	def get_other_charges(self):
+		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
+		self.set_taxes("other_charges", "taxes_and_charges")
 				
 	def get_lead_defaults(self):
 		out = self.get_default_address_and_contact("lead")

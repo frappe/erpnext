@@ -35,8 +35,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 		
-		if(this.frm.fields_dict.charge) {
-			this.frm.set_query("charge", function() {
+		if(this.frm.fields_dict.taxes_and_charges) {
+			this.frm.set_query("taxes_and_charges", function() {
 				return {
 					filters: [
 						['Sales Taxes and Charges Master', 'company', '=', me.frm.doc.company],
@@ -80,7 +80,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					if(item.warehouse) filters["warehouse"] = item.warehouse
 					
 					return {
-						query : "controllers.queries.get_batch_no",
+						query : "erpnext.controllers.queries.get_batch_no",
 						filters: filters
 					}
 				}
@@ -119,6 +119,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							(me.frm.doc.selling_price_list !== selling_price_list) ? 
 								me.selling_price_list() :
 								me.price_list_currency();
+							if (me.frm.doc.taxes_and_charges)
+								me.frm.script_manager.trigger("taxes_and_charges")
 						}
 					}
 				});
@@ -511,28 +513,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.doc.in_words = this.frm.doc.in_words_export = "";
 	},
 
-	show_item_wise_taxes: function() {
-		if(this.frm.fields_dict.other_charges_calculation) {
-			$(this.get_item_wise_taxes_html())
-				.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
-		}
-	},
-	
-	taxes_and_charges: function() {
-		var me = this;
-		if(this.frm.doc.charge) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "get_other_charges",
-				callback: function(r) {
-					if(!r.exc) {
-						me.calculate_taxes_and_totals();
-					}
-				}
-			});
-		}
-	},
-	
 	shipping_rule: function() {
 		var me = this;
 		if(this.frm.doc.shipping_rule) {

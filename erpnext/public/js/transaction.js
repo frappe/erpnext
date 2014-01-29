@@ -708,4 +708,26 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			});
 		}
 	},
+
+	taxes_and_charges: function() {
+		var me = this;
+		if(this.frm.doc.taxes_and_charges) {
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "get_other_charges",
+				callback: function(r) {
+					if(!r.exc) {
+						me.calculate_taxes_and_totals();
+					}
+				}
+			});
+		}
+	},
+
+	show_item_wise_taxes: function() {
+		if(this.frm.fields_dict.other_charges_calculation) {
+			$(this.get_item_wise_taxes_html())
+				.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
+		}
+	},
 });

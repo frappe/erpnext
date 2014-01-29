@@ -325,7 +325,7 @@ class DocType(BuyingController):
 	
 		# tax table gl entries
 		valuation_tax = {}
-		for tax in self.doclist.get({"parentfield": "purchase_tax_details"}):
+		for tax in self.doclist.get({"parentfield": "other_charges"}):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
 				gl_entries.append(
 					self.get_gl_dict({

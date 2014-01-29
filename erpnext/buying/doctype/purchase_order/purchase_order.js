@@ -5,7 +5,7 @@ wn.provide("erpnext.buying");
 
 cur_frm.cscript.tname = "Purchase Order Item";
 cur_frm.cscript.fname = "po_details";
-cur_frm.cscript.other_fname = "purchase_tax_details";
+cur_frm.cscript.other_fname = "other_charges";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}

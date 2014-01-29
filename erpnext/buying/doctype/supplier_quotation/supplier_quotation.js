@@ -4,7 +4,7 @@
 // define defaults for purchase common
 cur_frm.cscript.tname = "Supplier Quotation Item";
 cur_frm.cscript.fname = "quotation_items";
-cur_frm.cscript.other_fname = "purchase_tax_details";
+cur_frm.cscript.other_fname = "other_charges";
 
 // attach required files
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};

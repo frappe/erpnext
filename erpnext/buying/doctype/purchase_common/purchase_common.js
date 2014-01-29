@@ -62,14 +62,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	supplier: function() {
+		var me = this;
 		if(this.frm.doc.supplier || this.frm.doc.credit_to) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("supplier", null);
 				msgprint(wn._("Please specify Company"));
 			} else {
-				var me = this;
 				var buying_price_list = this.frm.doc.buying_price_list;
-
 				return this.frm.call({
 					doc: this.frm.doc,
 					method: "set_supplier_defaults",
@@ -77,6 +76,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					callback: function(r) {
 						if(!r.exc) {
 							if(me.frm.doc.buying_price_list !== buying_price_list) me.buying_price_list();
+							if (me.frm.doc.taxes_and_charges)
+								me.frm.script_manager.trigger("taxes_and_charges")
 						}
 					}
 				});
@@ -241,21 +242,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	taxes_and_charges: function() {
-		var me = this;
-		if(this.frm.doc.taxes_and_charges) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "get_purchase_tax_details",
-				callback: function(r) {
-					if(!r.exc) {
-						me.calculate_taxes_and_totals();
-					}
-				}
-			});
-		}
-	},
-	
 	calculate_taxes_and_totals: function() {
 		this._super();
 		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");
@@ -395,13 +381,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			wn.meta.get_docfield(item.doctype, "item_tax_amount", item.parent || item.name)) {
 				// accumulate only if tax is for Valuation / Valuation and Total
 				item.item_tax_amount += flt(current_tax_amount, precision("item_tax_amount", item));
-		}
-	},
-	
-	show_item_wise_taxes: function() {
-		if(this.frm.fields_dict.tax_calculation) {
-			$(this.get_item_wise_taxes_html())
-				.appendTo($(this.frm.fields_dict.tax_calculation.wrapper).empty());
 		}
 	},
 	

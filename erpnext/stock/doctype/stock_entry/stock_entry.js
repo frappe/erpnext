@@ -7,7 +7,7 @@ cur_frm.cscript.fname = "mtn_details";
 wn.require("assets/erpnext/js/controllers/stock_controller.js");
 wn.provide("erpnext.stock");
 
-erpnext.stock.StockEntry = erpnext.stock.StockController.extend({		
+erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
 		
@@ -54,11 +54,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		}
 	},
-	
+
 	onload_post_render: function() {
 		this.set_default_account();
 	},
-	
+
 	refresh: function() {
 		var me = this;
 		erpnext.hide_naming_series();
@@ -79,11 +79,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		
 	},
-	
+
 	on_submit: function() {
 		this.clean_up();
 	},
-	
+
 	after_cancel: function() {
 		this.clean_up();
 	},
@@ -114,7 +114,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			});
 		}
 	},
-	
+
 	clean_up: function() {
 		// Clear Production Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.production_order && 
@@ -123,7 +123,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				this.frm.doc.production_order);
 		}
 	},
-	
+
 	get_items: function() {
 		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
 			// if production order / bom is mentioned, get items
@@ -136,13 +136,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			});
 		}
 	},
-	
+
 	qty: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
 		refresh_field('mtn_details');
 	},
-	
+
 	production_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
@@ -158,11 +158,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		});
 	},
-	
+
 	toggle_enable_bom: function() {
 		this.frm.toggle_enable("bom_no", !this.frm.doc.production_order);
 	},
-	
+
 	get_doctype_docname: function() {
 		if(this.frm.doc.purpose === "Sales Return") {
 			if(this.frm.doc.delivery_note_no && this.frm.doc.sales_invoice_no) {
@@ -191,7 +191,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			}
 		}
 	},
-	
+
 	add_excise_button: function() {
 		if(wn.boot.control_panel.country === "India")
 			this.frm.add_custom_button(wn._("Make Excise Invoice"), function() {
@@ -201,7 +201,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				loaddoc('Journal Voucher', excise.name);
 			});
 	},
-	
+
 	make_return_jv: function() {
 		if(this.get_doctype_docname()) {
 			return this.frm.call({
@@ -233,7 +233,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
-	
+
 	mtn_details_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	}
@@ -288,12 +288,11 @@ cur_frm.cscript.purchase_receipt_no = function(doc, cdt, cdn) {
 cur_frm.cscript.supplier = function(doc, cdt, cdn) {
 	if(doc.supplier) 
 		return get_server_fields('get_supp_addr', '', '', doc, cdt, cdn, 1);
-
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
-	return{
-		filters:[
+	return {
+		filters: [
 			['Production Order', 'docstatus', '=', 1],
 			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty']
 		]
@@ -306,7 +305,7 @@ cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 
 // Overloaded query for link batch_no
 cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];		
+	var d = locals[cdt][cdn];
 	if(d.item_code) {
 		return{
 			query: "erpnext.stock.doctype.stock_entry.stock_entry.get_batch_no",
@@ -371,7 +370,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 cur_frm.cscript.validate_items = function(doc) {
 	cl = getchildren('Stock Entry Detail', doc.name, 'mtn_details');
 	if (!cl.length) {
-		alert(wn._("Item table can not be blank"));
+		msgprint(wn._("Item table can not be blank"));
 		validated = false;
 	}
 }
@@ -385,9 +384,9 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
-	return{ query: "erpnext.controllers.queries.customer_query" }
+	return { query: "erpnext.controllers.queries.customer_query" }
 }
 
 cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
-	return{	query: "erpnext.controllers.queries.supplier_query" }
+	return { query: "erpnext.controllers.queries.supplier_query" }
 }

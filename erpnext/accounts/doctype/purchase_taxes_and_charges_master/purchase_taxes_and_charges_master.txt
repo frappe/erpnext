@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:08", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:14", 
+  "modified": "2014-01-29 12:26:38", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -70,7 +70,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "purchase_tax_details", 
+  "fieldname": "other_charges", 
   "fieldtype": "Table", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 

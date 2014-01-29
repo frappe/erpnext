@@ -50,10 +50,6 @@ class SellingController(StockController):
 		self.set_price_list_currency("Selling")
 		self.set_missing_item_details(get_item_details)
 										
-	def get_other_charges(self):
-		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
-		self.set_taxes("other_charges", "taxes_and_charges")
-		
 	def apply_shipping_rule(self):
 		if self.doc.shipping_rule:
 			shipping_rule = webnotes.bean("Shipping Rule", self.doc.shipping_rule)
