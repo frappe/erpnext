@@ -33,7 +33,7 @@ class BuyingController(StockController):
 		
 		# set contact and address details for supplier, if they are not mentioned
 		if self.doc.supplier:
-			self.doc.update_if_not_set(get_supplier_details(self.doc.supplier))
+			self.doc.update_if_missing(get_supplier_details(self.doc.supplier))
 
 		self.set_missing_item_details(get_item_details)
 		if self.doc.fields.get("__islocal"):

@@ -75,6 +75,19 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		this.is_opening(doc);
 	},
+
+	supplier: function() {
+		if(this.frm.updating_party_details)
+			return;
+		erpnext.selling.get_party_details(this.frm, 
+			"erpnext.accounts.party.get_party_details", {
+				posting_date: this.frm.doc.posting_date,
+				company: this.frm.doc.company,
+				party: this.frm.doc.supplier,
+				party_type: "Supplier",
+				account: this.frm.doc.debit_to
+			})
+	},
 	
 	credit_to: function() {
 		this.supplier();

@@ -6,16 +6,25 @@ erpnext.utils.get_party_details = function(frm, method, args) {
 	if(!method) {
 		if(frm.doc.customer) {
 			method = "erpnext.selling.doctype.customer.customer.get_customer_details";
+			var price_list_field = "selling_price_list";
 		} else {
 			method = "erpnext.buying.doctype.supplier.supplier.get_supplier_details";
+			var price_list_field = "buying_price_list";
 		}
 	}
 	if(!args) {
 		if(frm.doc.customer) {
-			args = { customer: frm.doc.customer };
+			args = { 
+				customer: frm.doc.customer,
+				price_list: frm.doc.selling_price_list
+			};
 		} else {
-			args = { supplier: frm.doc.supplier };
+			args = { 
+				supplier: frm.doc.supplier,
+				price_list: frm.doc.buying_price_list
+			};
 		}
+		args.currency = frm.doc.currency;
 	}
 	wn.call({
 		method: method,

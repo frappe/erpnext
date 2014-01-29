@@ -129,7 +129,7 @@ def get_dashboard_info(supplier):
 	return out
 	
 @webnotes.whitelist()
-def get_supplier_details(supplier):
+def get_supplier_details(supplier, price_list=None, currency=None):
 	if not webnotes.has_permission("Supplier", "read", supplier):
 		webnotes.msgprint("No Permission", raise_exception=webnotes.PermissionError)
 
@@ -143,7 +143,7 @@ def get_supplier_details(supplier):
 	})
 	
 	out.supplier_name = supplier.supplier_name
-	out.currency = supplier.default_currency
-	out.buying_price_list = supplier.default_price_list
+	out.currency = supplier.default_currency or currency
+	out.buying_price_list = supplier.default_price_list or price_list
 		
 	return out

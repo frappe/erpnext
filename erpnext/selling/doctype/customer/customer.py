@@ -165,7 +165,7 @@ def get_dashboard_info(customer):
 	return out
 
 @webnotes.whitelist()
-def get_customer_details(customer):
+def get_customer_details(customer, price_list=None, currency=None):
 	if not webnotes.has_permission("Customer", "read", customer):
 		webnotes.throw("Not Permitted", webnotes.PermissionError)
 		
@@ -196,16 +196,19 @@ def get_customer_details(customer):
 			out[f] = customer.get("default_" + f)
 
 	# price list
-	from webnotes.defaults import get_defaults_for
-	user_default_price_list = get_defaults_for(webnotes.session.user).get("selling_price_list")
-	user_default_price_list = cstr(user_default_price_list) \
-		if not isinstance(user_default_price_list, list) else ""
+	out.selling_price_list = webnotes.conn.get_defaults("selling_price_list", webnotes.session.user)
+	if isinstance(out.selling_price_list, list):
+		out.selling_price_list = None
 	
-	out.selling_price_list = user_default_price_list or customer.price_list or webnotes.conn.get_value("Customer Group",
-		customer.customer_group, "default_price_list")
+	out.selling_price_list = out.selling_price_list or customer.price_list \
+		or webnotes.conn.get_value("Customer Group", customer.customer_group, "default_price_list")
+		or price_list
 	
 	if out.selling_price_list:
 		out.price_list_currency = webnotes.conn.get_value("Price List", out.selling_price_list, "currency")
+	
+	if not out.currency:
+		out.currency = currency
 	
 	# sales team
 	out.sales_team = [{

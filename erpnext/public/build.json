@@ -12,6 +12,6 @@
 		"public/js/feature_setup.js",
 		"public/js/utils.js",
 		"public/js/queries.js",
-		"public/js/utils/customer_supplier.js"
+		"public/js/utils/party.js"
 	]
 }

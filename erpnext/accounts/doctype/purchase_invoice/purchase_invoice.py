@@ -12,8 +12,9 @@ from erpnext.setup.utils import get_company_currency
 
 import webnotes.defaults
 
-	
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.accounts.party import get_party_account, get_due_date
+
 class DocType(BuyingController):
 	def __init__(self,d,dl):
 		self.doc, self.doclist = d, dl 
@@ -59,31 +60,16 @@ class DocType(BuyingController):
 		self.update_valuation_rate("entries")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "import_amount", 
 			"purchase_receipt_details")
-
-	def get_credit_to(self):
-		ret = {}
-		if self.doc.supplier:
-			acc_head = webnotes.conn.sql("""select name, credit_days from `tabAccount` 
-				where (name = %s or (master_name = %s and master_type = 'supplier')) 
-				and docstatus != 2 and company = %s""", 
-				(cstr(self.doc.supplier) + " - " + self.company_abbr, 
-				self.doc.supplier, self.doc.company))
+	
+	def set_missing_values(self, for_validate=False):
+		if not self.doc.credit_to:
+			self.doc.credit_to = get_party_account(self.doc.company, self.doc.supplier, "Supplier")
+		if not self.doc.due_date:
+			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.supplier, "Supplier",
+				self.doc.credit_to, self.doc.company)
 		
-			if acc_head and acc_head[0][0]:
-				ret['credit_to'] = acc_head[0][0]
-				if not self.doc.due_date:
-					ret['due_date'] = add_days(cstr(self.doc.posting_date), 
-						acc_head and cint(acc_head[0][1]) or 0)
-			elif not acc_head:
-				msgprint("%s does not have an Account Head in %s. \
-					You must first create it from the Supplier Master" % \
-					(self.doc.supplier, self.doc.company))
-		return ret
-		
-	def set_supplier_defaults(self):
-		self.doc.fields.update(self.get_credit_to())
-		super(DocType, self).set_supplier_defaults()
-		
+		super(DocType, self).set_missing_values(for_validate)
+	
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")

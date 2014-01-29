@@ -7,7 +7,7 @@ import webnotes
 from webnotes import _
 
 @webnotes.whitelist()
-def get_party_details(party=None, account=None, party_type="Customer"):
+def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None):
 	if not webnotes.has_permission(party_type, "read", party):
 		webnotes.throw("No Permission")
 	
@@ -49,7 +49,7 @@ def get_due_date(posting_date, party, party_type, account, company):
 	due_date = None
 	if posting_date:
 		credit_days = 0
-		if debit_to:
+		if account:
 			credit_days = webnotes.conn.get_value("Account", account, "credit_days")
 		if party and not credit_days:
 			credit_days = webnotes.conn.get_value(party_type, party, "credit_days")
@@ -66,7 +66,7 @@ def create_party_account(party, party_type, company):
 		
 	company_details = webnotes.conn.get_value("Company", company, 
 		["abbr", "receivables_group", "payables_group"], as_dict=True)
-	if not webnotes.conn.exists("Account", (party + " - " + abbr)):
+	if not webnotes.conn.exists("Account", (party + " - " + company_details.abbr)):
 		parent_account = company_details.receivables_group \
 			if party_type=="Customer" else company_details.payables_group
 
@@ -82,4 +82,4 @@ def create_party_account(party, party_type, company):
 			"freeze_account": "No"
 		}).insert(ignore_permissions=True)
 		
-		msgprint(_("Account Created") + ": " + account.doc.name)
+		webnotes.msgprint(_("Account Created") + ": " + account.doc.name)

@@ -153,7 +153,7 @@ class DocType(SellingController):
 		if not self.doc.debit_to:
 			self.doc.debit_to = get_party_account(self.doc.company, self.doc.customer, "Customer")
 		if not self.doc.due_date:
-			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.customer, 
+			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.customer, "Customer",
 				self.doc.debit_to, self.doc.company)
 		
 		super(DocType, self).set_missing_values(for_validate)

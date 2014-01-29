@@ -159,12 +159,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(this.frm.updating_party_details)
 			return;
 		erpnext.selling.get_party_details(this.frm, 
-			"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_party_details",
-			{
+			"erpnext.accounts.party.get_party_details", {
 				posting_date: this.frm.doc.posting_date,
 				company: this.frm.doc.company,
-				customer: this.frm.doc.customer,
-				debit_to: this.frm.doc.debit_to
+				party: this.frm.doc.customer,
+				party_type: "Customer",
+				account: this.frm.doc.debit_to
 			})
 	},
 	
