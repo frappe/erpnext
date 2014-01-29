@@ -16,10 +16,11 @@
 <script>
 	$("#footer-subscribe-button").click(function() {
 
+		$("#footer-subscribe-email").attr('disabled', true);
+		$("#footer-subscribe-button").html("Sending...")
+			.attr("disabled", true);
+
 		if($("#footer-subscribe-email").val()) {
-			$("#footer-subscribe-email").attr('disabled', true);
-			$("#footer-subscribe-button").html("Sending...")
-				.attr("disabled", true);
 			erpnext.send_message({
 				subject:"Subscribe me",
 				sender: $("#footer-subscribe-email").val(),
@@ -36,8 +37,6 @@
 				}
 			});
 		}
-		else
-			wn.msgprint("Please enter email address");
 	});
 </script>
 {% endblock %}
