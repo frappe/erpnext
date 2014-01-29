@@ -3,20 +3,8 @@ erpnext.patches.4_0.update_user_properties
 erpnext.patches.4_0.move_warehouse_user_to_restrictions
 erpnext.patches.4_0.new_permissions
 erpnext.patches.4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
-execute:webnotes.reload_doc('accounts', 'doctype', 'sales_invoice') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'doctype', 'sales_order') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'doctype', 'quotation') # 2014-01-03
-execute:webnotes.reload_doc('stock', 'doctype', 'delivery_note') # 2014-01-03
-execute:webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice') # 2014-01-03
-execute:webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Classic') # 2014-01-03
-execute:webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Modern') # 2014-01-03
-execute:webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Spartan') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'Print Format', 'Quotation Classic') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'Print Format', 'Quotation Modern') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'Print Format', 'Quotation Spartan') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'Print Format', 'Sales Order Classic') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'Print Format', 'Sales Order Modern') # 2014-01-03
-execute:webnotes.reload_doc('selling', 'Print Format', 'Sales Order Spartan') # 2014-01-03
-execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Classic') # 2014-01-03
-execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Modern') # 2014-01-03
-execute:webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Spartan') # 2014-01-03
+erpnext.patches.4_0.reload_sales_doctype_and_print_format
+erpnext.patches.4_0.reload_purchase_doctype_and_print_format
+execute:webnotes.reload_doc('accounts', 'doctype', 'pos_setting') # 2014-01-29
+execute:webnotes.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
+execute:webnotes.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
