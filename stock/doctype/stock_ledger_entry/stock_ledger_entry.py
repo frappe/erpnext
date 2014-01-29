@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import webnotes
 from webnotes import msgprint
-from webnotes.utils import flt, getdate, add_date
+from webnotes.utils import flt, getdate, add_days
 from webnotes.model.controller import DocListController
 from datetime import date
 
@@ -93,7 +93,7 @@ class DocType(DocListController):
 		stock_frozen_upto_days = webnotes.conn.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0
 		if stock_frozen_upto_days:
 			stock_auth_role = webnotes.conn.get_value('Stock Settings', None,'stock_auth_role')
-			older_than_x_days_ago = (add_date(getdate(self.doc.posting_date), stock_frozen_upto_days) <= date.today())
+			older_than_x_days_ago = (add_days(getdate(self.doc.posting_date), stock_frozen_upto_days) <= date.today())
 			if older_than_x_days_ago and not stock_auth_role in webnotes.user.get_roles():
 				msgprint("You are not authorized to do / modify back dated stock entries older than %d days ago" %stock_frozen_upto_days, raise_exception=1)
 
