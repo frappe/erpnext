@@ -6,7 +6,7 @@ import webnotes, unittest
 from webnotes.utils import flt
 from stock.doctype.serial_no.serial_no import *
 from stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-
+from stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
@@ -802,18 +802,19 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_freeze_stocks (self):
 		self._clear_stock_account_balance()
+		stock_auth_role = webnotes.conn.set_value('Stock Settings', None,'stock_auth_role', '')
 
 		# test freeze_stocks_upto
 		date_newer_than_test_records = add_days(getdate(test_records[0][0]['posting_date']), 5)
 		webnotes.conn.set_value("Stock Settings", None, "stock_frozen_upto", date_newer_than_test_records)
 		se = webnotes.bean(copy=test_records[0]).insert()
-		self.assertRaises (ValidationError, se.submit)
+		self.assertRaises (StockFreezeError, se.submit)
 		webnotes.conn.set_value("Stock Settings", None, "stock_frozen_upto", '')
 
 		# test freeze_stocks_upto_days
 		webnotes.conn.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
 		se = webnotes.bean(copy=test_records[0]).insert()
-		self.assertRaises (ValidationError, se.submit)
+		self.assertRaises (StockFreezeError, se.submit)
 		webnotes.conn.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 def make_serialized_item():
