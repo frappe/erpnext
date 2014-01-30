@@ -32,6 +32,9 @@ class DocType(BuyingController):
 		}]
 		
 	def validate(self):
+		if not self.doc.is_opening:
+			self.doc.is_opening = 'No'
+			
 		super(DocType, self).validate()
 		
 		self.po_required()
@@ -45,15 +48,8 @@ class DocType(BuyingController):
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-
-		if not self.doc.is_opening:
-			self.doc.is_opening = 'No'
-
 		self.set_aging_date()
-
-		#set against account for credit to
 		self.set_against_expense_account()
-		
 		self.validate_write_off_account()
 		self.update_raw_material_cost()
 		self.update_valuation_rate("entries")
@@ -215,7 +211,8 @@ class DocType(BuyingController):
 		against_accounts = []
 		stock_items = self.get_stock_items()
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if auto_accounting_for_stock and item.item_code in stock_items:
+			if auto_accounting_for_stock and item.item_code in stock_items \
+					and self.doc.is_opening == 'No':
 				# in case of auto inventory accounting, against expense account is always
 				# Stock Received But Not Billed for a stock item
 				item.expense_head = stock_not_billed_account

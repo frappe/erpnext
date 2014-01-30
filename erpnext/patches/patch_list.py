@@ -271,4 +271,6 @@ patch_list = [
 	"execute:webnotes.reload_doc('selling', 'doctype', 'quotation') # 2013-12-26",
 	"execute:webnotes.reload_doc('stock', 'doctype', 'delivery_note') # 2013-12-26",
 	"patches.1401.enable_all_price_list",
+	"patches.1401.fix_serial_no_status_and_warehouse",
+	"patches.1401.fix_planned_qty",
 ]
