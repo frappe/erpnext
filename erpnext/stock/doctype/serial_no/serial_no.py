@@ -87,8 +87,6 @@ class DocType(StockController):
 					self.doc.status = "Sales Returned"
 				else:
 					self.doc.status = "Available"
-				if not self.doc.warehouse:
-					self.doc.warehouse = last_sle.warehouse
 			else:
 				if document_type == "Purchase Return":
 					self.doc.status = "Purchase Returned"
