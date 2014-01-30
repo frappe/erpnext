@@ -143,10 +143,6 @@ class TransactionBase(StatusUpdater):
 		for fieldname, val in self.get_supplier_defaults().items():
 			if self.meta.get_field(fieldname):
 				self.doc.fields[fieldname] = val
-
-	def get_other_charges(self):
-		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
-		self.set_taxes("other_charges", "taxes_and_charges")
 				
 	def get_lead_defaults(self):
 		out = self.get_default_address_and_contact("lead")

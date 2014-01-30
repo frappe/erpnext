@@ -5,10 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 
 def execute():
-	webnotes.reload_doc('accounts', 'doctype', 'sales_invoice')
-	webnotes.reload_doc('selling', 'doctype', 'sales_order')
-	webnotes.reload_doc('selling', 'doctype', 'quotation')
-	webnotes.reload_doc('stock', 'doctype', 'delivery_note')
 	webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice')
 	webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Classic')
 	webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Modern')
