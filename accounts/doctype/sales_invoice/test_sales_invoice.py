@@ -654,7 +654,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def _test_recurring_invoice(self, base_si, first_and_last_day):
 		from webnotes.utils import add_months, get_last_day
-		from accounts.doctype.sales_invoice.sales_invoice import manage_recurring_invoices
+		from accounts.doctype.sales_invoice.sales_invoice \
+			import manage_recurring_invoices, get_next_date
 		
 		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]
 		
@@ -662,7 +663,8 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(i+1, webnotes.conn.sql("""select count(*) from `tabSales Invoice`
 				where recurring_id=%s and docstatus=1""", base_si.doc.recurring_id)[0][0])
 				
-			next_date = add_months(base_si.doc.posting_date, no_of_months)
+			next_date = get_next_date(base_si.doc.posting_date, no_of_months, 
+				base_si.doc.repeat_on_day_of_month)
 			
 			manage_recurring_invoices(next_date=next_date, commit=False)
 			
