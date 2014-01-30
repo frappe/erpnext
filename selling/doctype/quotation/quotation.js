@@ -24,7 +24,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		// to overwrite the customer_filter trigger from queries.js
 		if (doc.lead) {
-			$.each(["customer_address", "shipping_address_name", "contact_person"], 
+			$.each(["customer_address", "shipping_address_name"], 
 				function(i, opts) {
 					me.frm.set_query(opts, erpnext.queries["lead_filter"]);
 				}
