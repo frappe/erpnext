@@ -132,8 +132,8 @@ class AccountsReceivableReport(object):
 		if not hasattr(self, "gl_entries"):
 			conditions, values = self.prepare_conditions()
 			self.gl_entries = webnotes.conn.sql("""select * from `tabGL Entry`
-				where docstatus < 2 {} order by posting_date, account""".format(conditions),
-				values, as_dict=True)
+				where docstatus < 2 {0} order by posting_date, account""".format(conditions),
+				values, as_dict=True, debug=1)
 				
 		return self.gl_entries
 		
@@ -153,8 +153,8 @@ class AccountsReceivableReport(object):
 			if not account_map:
 				webnotes.throw(_("No Customer Accounts found."))
 			else:
-				accounts_list = ['"{}"'.format(ac) for ac in account_map]
-				conditions.append("account in ({})".format(", ".join(accounts_list)))
+				accounts_list = ['"{0}"'.format(ac) for ac in account_map]
+				conditions.append("account in ({0})".format(", ".join(accounts_list)))
 		
 		return " and ".join(conditions), values
 		
