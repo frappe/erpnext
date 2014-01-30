@@ -15,13 +15,13 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 		if(!this.frm.doc.enquiry_from) 
 			hide_field(['customer', 'customer_address', 'contact_person', 'customer_name','lead', 'address_display', 'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
 		if(!this.frm.doc.status) 
-			set_multiple(cdt,cdn,{status:'Draft'});
+			set_multiple(cdt, cdn, { status:'Draft' });
 		if(!this.frm.doc.date) 
 			this.frm.doc.transaction_date = date.obj_to_str(new Date());
 		if(!this.frm.doc.company && wn.defaults.get_default("company")) 
-			set_multiple(cdt,cdn,{company:wn.defaults.get_default("company")});
-		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year) 
-			set_multiple(cdt,cdn,{fiscal_year:sys_defaults.fiscal_year});		
+			set_multiple(cdt, cdn, { company:wn.defaults.get_default("company") });
+		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year)
+			set_multiple(cdt, cdn, { fiscal_year:sys_defaults.fiscal_year });
 	
 		if(this.frm.doc.enquiry_from) {
 			if(this.frm.doc.enquiry_from == 'Customer') {
@@ -99,15 +99,15 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 
 $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 
-cur_frm.cscript.refresh = function(doc, cdt, cdn){
+cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.hide_naming_series();
 	cur_frm.clear_custom_buttons();
 	
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
 		cur_frm.add_custom_button(wn._('Create Quotation'), cur_frm.cscript.create_quotation);
-		if(doc.status!=="Quotation") {
+		if(doc.status!=="Quotation")
 			cur_frm.add_custom_button(wn._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
-		}
+
 		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 	}
 	
@@ -116,31 +116,29 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn){
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	if(doc.enquiry_from == 'Lead' && doc.lead) {
-	 	cur_frm.cscript.lead(doc,cdt,cdn);
-	}
+	if(doc.enquiry_from == 'Lead' && doc.lead)
+		cur_frm.cscript.lead(doc, cdt, cdn);
 }
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		return get_server_fields('get_item_details',d.item_code, 'enquiry_details',doc, cdt,cdn,1);
-	}
+	if (d.item_code)
+		return get_server_fields('get_item_details', d.item_code, 'enquiry_details', doc, cdt, cdn, 1);
 }
 
 // hide - unhide fields on basis of enquiry_from lead or customer
-cur_frm.cscript.enquiry_from = function(doc,cdt,cdn){
-	cur_frm.cscript.lead_cust_show(doc,cdt,cdn);
+cur_frm.cscript.enquiry_from = function(doc, cdt, cdn) {
+	cur_frm.cscript.lead_cust_show(doc, cdt, cdn);
 }
 
 // hide - unhide fields based on lead or customer
-cur_frm.cscript.lead_cust_show = function(doc,cdt,cdn){	
-	if(doc.enquiry_from == 'Lead'){
+cur_frm.cscript.lead_cust_show = function(doc, cdt, cdn) {
+	if(doc.enquiry_from == 'Lead') {
 		unhide_field(['lead']);
 		hide_field(['customer','customer_address','contact_person','customer_name','address_display','contact_display','contact_mobile','contact_email','territory','customer_group']);
 		doc.lead = doc.customer = doc.customer_address = doc.contact_person = doc.address_display = doc.contact_display = doc.contact_mobile = doc.contact_email = doc.territory = doc.customer_group = "";
 	}
-	else if(doc.enquiry_from == 'Customer'){		
+	else if(doc.enquiry_from == 'Customer') {
 		unhide_field(['customer']);
 		hide_field(['lead', 'address_display', 'contact_display', 'contact_mobile', 
 			'contact_email', 'territory', 'customer_group']);		
@@ -164,15 +162,13 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	wn.model.map_current_doc({
 		method: "selling.doctype.lead.lead.make_opportunity",
 		source_name: cur_frm.doc.lead
-	})
+	});
 	
 	unhide_field(['customer_name', 'address_display','contact_mobile', 'customer_address', 
-		'contact_email', 'territory']);	
+		'contact_email', 'territory']);
 }
 
-
-
-cur_frm.cscript['Declare Opportunity Lost'] = function(){
+cur_frm.cscript['Declare Opportunity Lost'] = function() {
 	var dialog = new wn.ui.Dialog({
 		title: wn._("Set as Lost"),
 		fields: [
@@ -200,5 +196,4 @@ cur_frm.cscript['Declare Opportunity Lost'] = function(){
 		})
 	});
 	dialog.show();
-	
 }

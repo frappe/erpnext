@@ -3,14 +3,10 @@
 
 from __future__ import unicode_literals
 import webnotes
-
 from webnotes.utils import cstr
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
-
-	
-
 from controllers.selling_controller import SellingController
 
 class DocType(SellingController):

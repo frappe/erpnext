@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes import msgprint
+from webnotes import msgprint, throw, _
 from webnotes.utils import cstr, cint
 
 class DocType:
@@ -16,11 +16,11 @@ class DocType:
 		if not self.doc.address_title:
 			self.doc.address_title = self.doc.customer \
 				or self.doc.supplier or self.doc.sales_partner or self.doc.lead
-				
+
 		if self.doc.address_title:
 			self.doc.name = cstr(self.doc.address_title).strip() + "-" + cstr(self.doc.address_type).strip()
 		else:
-			webnotes.msgprint("""Address Title is mandatory.""" + self.doc.customer, raise_exception=True)
+			throw(_("Address Title is mandatory."))
 		
 	def validate(self):
 		self.validate_primary_address()

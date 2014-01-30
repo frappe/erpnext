@@ -15,12 +15,21 @@ wn.require('app/accounts/doctype/sales_invoice/pos.js');
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
+		var me = this;
 		this._super(doc, dt, dn);
 		if(doc.customer && !doc.quotation_to)
 			doc.quotation_to = "Customer";
 		else if(doc.lead && !doc.quotation_to)
 			doc.quotation_to = "Lead";
-	
+
+		// to overwrite the customer_filter trigger from queries.js
+		if (doc.lead) {
+			$.each(["customer_address", "shipping_address_name"], 
+				function(i, opts) {
+					me.frm.set_query(opts, erpnext.queries["lead_filter"]);
+				}
+			);
+		}
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
@@ -68,6 +77,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	quotation_to: function() {
 		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
 		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
+		if (this.frm.doc.quotation_to == "Lead") {
+			this.frm.set_value("customer", null);
+			this.frm.set_value("contact_person", null);
+		}
+		else if (this.frm.doc.quotation_to == "Customer")
+			this.frm.set_value("lead", null);
 	},
 
 	tc_name: function() {
@@ -89,7 +104,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
 
-cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
+cur_frm.fields_dict.lead.get_query = function(doc, cdt, cdn) {
 	return{	query:"controllers.queries.lead_query" } }
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
@@ -152,7 +167,6 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.quotation)) {
+	if(cint(wn.boot.notification_settings.quotation))
 		cur_frm.email_doc(wn.boot.notification_settings.quotation_message);
-	}
 }
