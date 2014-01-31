@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2014-01-31 17:32:47", 
+  "modified": "2014-01-31 18:47:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -66,7 +66,7 @@
   "fieldname": "send_to_type", 
   "fieldtype": "Select", 
   "label": "Send To Type", 
-  "options": "Lead\nContact\nCustom"
+  "options": "Lead\nContact\nEmployee\nCustom"
  }, 
  {
   "doctype": "DocField", 
@@ -93,7 +93,7 @@
   "fieldname": "contact_type", 
   "fieldtype": "Select", 
   "label": "Contact Type", 
-  "options": "Customer\nSupplier\nCustom"
+  "options": "Customer\nSupplier"
  }, 
  {
   "depends_on": "eval:doc.send_to_type==\"Custom\"", 
