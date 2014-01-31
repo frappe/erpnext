@@ -194,7 +194,7 @@ class DocType(SellingController):
 				self.doc.customer = pos.customer
 				self.set_customer_defaults()
 
-			for fieldname in ('territory', 'naming_series', 'currency', 'charge', 'letter_head', 'tc_name',
+			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
 					if (not for_validate) or (for_validate and not self.doc.fields.get(fieldname)):
 						self.doc.fields[fieldname] = pos.get(fieldname)
@@ -214,8 +214,8 @@ class DocType(SellingController):
 				self.doc.terms = webnotes.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
 			# fetch charges
-			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
-				self.set_taxes("other_charges", "charge")
+			if self.doc.taxes_and_charges and not len(self.doclist.get({"parentfield": "other_charges"})):
+				self.set_taxes("other_charges", "taxes_and_charges")
 
 	def get_customer_account(self):
 		"""Get Account Head to which amount needs to be Debited based on Customer"""

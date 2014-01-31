@@ -54,9 +54,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		function() { wn.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 
-cur_frm.cscript.parent_cost_center = function(doc,cdt,cdn){
+cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
 	if(!doc.company){
-		alert(wn._('Please enter company name first'));
+		msgprint(wn._('Please enter company name first'));
 	}
 }
 

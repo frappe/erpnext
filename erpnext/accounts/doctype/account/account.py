@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import flt, fmt_money, cstr, cint
-from webnotes import msgprint, _
+from webnotes import msgprint, throw, _
 
 get_value = webnotes.conn.get_value
 
@@ -43,7 +43,7 @@ class DocType:
 				msgprint(_("Please enter Master Name once the account is created."))
 			elif not webnotes.conn.exists(self.doc.master_type or self.doc.account_type, 
 					self.doc.master_name):
-				webnotes.throw(_("Invalid Master Name"))
+				throw(_("Invalid Master Name"))
 			
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
@@ -51,14 +51,19 @@ class DocType:
 			par = webnotes.conn.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
-				msgprint("Parent account does not exists", raise_exception=1)
+				throw(_("Parent account does not exists"))
 			elif par[0][0] == self.doc.name:
-				msgprint("You can not assign itself as parent account", raise_exception=1)
+				throw(_("You can not assign itself as parent account"))
 			elif par[0][1] != 'Group':
-				msgprint("Parent account can not be a ledger", raise_exception=1)
+				throw(_("Parent account can not be a ledger"))
 			elif self.doc.debit_or_credit and par[0][3] != self.doc.debit_or_credit:
-				msgprint("You can not move a %s account under %s account" % 
-					(self.doc.debit_or_credit, par[0][3]), raise_exception=1)
+				throw("{msg} {debit_or_credit} {under} {account} {acc}".format(**{
+					"msg": _("You cannot move a"),
+					"debit_or_credit": self.doc.debit_or_credit,
+					"under": _("account under"),
+					"account": par[0][3],
+					"acc": _("account")
+				}))
 			
 			if not self.doc.is_pl_account:
 				self.doc.is_pl_account = par[0][2]
@@ -70,22 +75,25 @@ class DocType:
 		if webnotes.conn.sql("""select count(*) from tabAccount where
 			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
 			self.doc.company)[0][0] > 4:
-			webnotes.msgprint("One company cannot have more than 4 root Accounts",
-				raise_exception=1)
+			throw(_("One company cannot have more than 4 root Accounts"))
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
 			company_abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
 			if webnotes.conn.sql("""select name from tabAccount where name=%s""", 
 				(self.doc.account_name + " - " + company_abbr)):
-					msgprint("Account Name: %s already exists, please rename" 
-						% self.doc.account_name, raise_exception=1)
+					throw("{name}: {acc_name} {exist}, {rename}".format(**{
+						"name": _("Account Name"),
+						"acc_name": self.doc.account_name,
+						"exist": _("already exists"),
+						"rename": _("please rename")
+					}))
 				
 	def validate_root_details(self):
 		#does not exists parent
 		if webnotes.conn.exists("Account", self.doc.name):
 			if not webnotes.conn.get_value("Account", self.doc.name, "parent_account"):
-				webnotes.msgprint("Root cannot be edited.", raise_exception=1)
+				throw(_("Root cannot be edited."))
 				
 	def validate_frozen_accounts_modifier(self):
 		old_value = webnotes.conn.get_value("Account", self.doc.name, "freeze_account")
@@ -94,15 +102,18 @@ class DocType:
 				'frozen_accounts_modifier')
 			if not frozen_accounts_modifier or \
 				frozen_accounts_modifier not in webnotes.user.get_roles():
-					webnotes.throw(_("You are not authorized to set Frozen value"))
+					throw(_("You are not authorized to set Frozen value"))
 			
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
-			msgprint("Account: %s has existing child. You can not convert this account to ledger" % 
-				(self.doc.name), raise_exception=1)
+			throw("{acc}: {account_name} {child}. {msg}".format(**{
+				"acc": _("Account"),
+				"account_name": self.doc.name,
+				"child": _("has existing child"),
+				"msg": _("You can not convert this account to ledger")
+			}))
 		elif self.check_gle_exists():
-			msgprint("Account with existing transaction can not be converted to ledger.", 
-				raise_exception=1)
+			throw(_("Account with existing transaction can not be converted to ledger."))
 		else:
 			self.doc.group_or_ledger = 'Ledger'
 			self.doc.save()
@@ -110,11 +121,9 @@ class DocType:
 
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
-			msgprint("Account with existing transaction can not be converted to group.", 
-				raise_exception=1)
+			throw(_("Account with existing transaction can not be converted to group."))
 		elif self.doc.master_type or self.doc.account_type:
-			msgprint("Cannot covert to Group because Master Type or Account Type is selected.", 
-				raise_exception=1)
+			throw(_("Cannot covert to Group because Master Type or Account Type is selected."))
 		else:
 			self.doc.group_or_ledger = 'Group'
 			self.doc.save()
@@ -130,9 +139,9 @@ class DocType:
 	
 	def validate_mandatory(self):
 		if not self.doc.debit_or_credit:
-			msgprint("Debit or Credit field is mandatory", raise_exception=1)
+			throw(_("Debit or Credit field is mandatory"))
 		if not self.doc.is_pl_account:
-			msgprint("Is PL Account field is mandatory", raise_exception=1)
+			throw(_("Is PL Account field is mandatory"))
 			
 	def validate_warehouse_account(self):
 		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
@@ -146,11 +155,11 @@ class DocType:
 				if self.doc.master_name:
 					self.validate_warehouse(self.doc.master_name)
 				else:
-					webnotes.throw(_("Master Name is mandatory if account type is Warehouse"))
+					throw(_("Master Name is mandatory if account type is Warehouse"))
 		
 	def validate_warehouse(self, warehouse):
 		if webnotes.conn.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
-			webnotes.throw(_("Stock transactions exist against warehouse ") + warehouse + 
+			throw(_("Stock transactions exist against warehouse ") + warehouse + 
 				_(" .You can not assign / modify / remove Master Name"))
 
 	def update_nsm_model(self):
@@ -183,22 +192,21 @@ class DocType:
 		# If outstanding greater than credit limit and not authorized person raise exception
 		if credit_limit > 0 and flt(total_outstanding) > credit_limit \
 				and not self.get_authorized_user():
-			msgprint("""Total Outstanding amount (%s) for <b>%s</b> can not be \
+			throw("""Total Outstanding amount (%s) for <b>%s</b> can not be \
 				greater than credit limit (%s). To change your credit limit settings, \
 				please update in the <b>%s</b> master""" % (fmt_money(total_outstanding), 
-				self.doc.name, fmt_money(credit_limit), credit_limit_from), raise_exception=1)
+				self.doc.name, fmt_money(credit_limit), credit_limit_from))
 			
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""
 		if not self.doc.parent_account:
-			msgprint("Root account can not be deleted", raise_exception=1)
+			throw(_("Root account can not be deleted"))
 			
 		if self.check_gle_exists():
-			msgprint("""Account with existing transaction (Sales Invoice / Purchase Invoice / \
-				Journal Voucher) can not be deleted""", raise_exception=1)
+			throw("""Account with existing transaction (Sales Invoice / Purchase Invoice / \
+				Journal Voucher) can not be deleted""")
 		if self.check_if_child_exists():
-			msgprint("Child account exists for this account. You can not delete this account.",
-			 	raise_exception=1)
+			throw(_("Child account exists for this account. You can not delete this account."))
 
 	def on_trash(self): 
 		self.validate_trash()
@@ -212,13 +220,13 @@ class DocType:
 		# Validate properties before merging
 		if merge:
 			if not webnotes.conn.exists("Account", new):
-				webnotes.throw(_("Account ") + new +_(" does not exists"))
+				throw(_("Account ") + new +_(" does not exists"))
 				
 			val = list(webnotes.conn.get_value("Account", new_account, 
 				["group_or_ledger", "debit_or_credit", "is_pl_account"]))
 			
 			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account]:
-				webnotes.throw(_("""Merging is only possible if following \
+				throw(_("""Merging is only possible if following \
 					properties are same in both records.
 					Group or Ledger, Debit or Credit, Is PL Account"""))
 					

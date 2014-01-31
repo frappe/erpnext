@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:11", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:29", 
+  "modified": "2014-01-28 19:05:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -159,6 +159,14 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "no_copy": 1, 
+  "options": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "default_price_list", 
   "fieldtype": "Link", 
   "label": "Price List", 
@@ -166,11 +174,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "default_currency", 
+  "fieldname": "default_taxes_and_charges", 
   "fieldtype": "Link", 
-  "label": "Default Currency", 
-  "no_copy": 1, 
-  "options": "Currency"
+  "label": "Taxes and Charges", 
+  "options": "Purchase Taxes and Charges Master"
  }, 
  {
   "doctype": "DocField", 

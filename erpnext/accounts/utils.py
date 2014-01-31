@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import nowdate, cstr, flt, now, getdate, add_months
 from webnotes.model.doc import addchild
-from webnotes import msgprint, _
+from webnotes import msgprint, throw, _
 from webnotes.utils import formatdate
 from erpnext.utilities import build_filter_conditions
 
@@ -41,12 +41,12 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 def validate_fiscal_year(date, fiscal_year, label="Date"):
 	years = [f[0] for f in get_fiscal_years(date, label=label)]
 	if fiscal_year not in years:
-		webnotes.msgprint(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
+		throw(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
 			": '%(fiscal_year)s'") % {
 				"label": label,
 				"posting_date": formatdate(date),
 				"fiscal_year": fiscal_year
-			}, raise_exception=1)
+			})
 
 @webnotes.whitelist()
 def get_balance_on(account=None, date=None):
@@ -169,8 +169,7 @@ def check_if_jv_modified(args):
 		and t1.docstatus=1 and t2.%(dr_or_cr)s = %(unadjusted_amt)s""" % args)
 	
 	if not ret:
-		msgprint(_("""Payment Entry has been modified after you pulled it. 
-			Please pull it again."""), raise_exception=1)
+		throw(_("""Payment Entry has been modified after you pulled it. Please pull it again."""))
 
 def update_against_doc(d, jv_obj):
 	"""
@@ -247,9 +246,9 @@ def get_company_default(company, fieldname):
 	value = webnotes.conn.get_value("Company", company, fieldname)
 	
 	if not value:
-		msgprint(_("Please mention default value for '") + 
+		throw(_("Please mention default value for '") + 
 			_(webnotes.get_doctype("company").get_label(fieldname) + 
-			_("' in Company: ") + company), raise_exception=True)
+			_("' in Company: ") + company))
 			
 	return value
 
@@ -318,11 +317,11 @@ def validate_expense_against_budget(args):
 				if action_for:
 					actual_expense = get_actual_expense(args)
 					if actual_expense > budget_amount:
-						webnotes.msgprint(action_for + _(" budget ") + cstr(budget_amount) + 
+						throw(action_for + _(" budget ") + cstr(budget_amount) + 
 							_(" for account ") + args.account + _(" against cost center ") + 
 							args.cost_center + _(" will exceed by ") + 
 							cstr(actual_expense - budget_amount) + _(" after this transaction.")
-							, raise_exception=BudgetError if action=="Stop" else False)
+							, exc=BudgetError if action=="Stop" else False)
 					
 def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
 	if distribution_id:
