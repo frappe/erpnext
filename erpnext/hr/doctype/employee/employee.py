@@ -6,7 +6,7 @@ import webnotes
 
 from webnotes.utils import getdate, validate_email_add, cstr, cint
 from webnotes.model.doc import make_autoname
-from webnotes import msgprint, _
+from webnotes import msgprint, throw, _
 import webnotes.permissions
 from webnotes.defaults import get_restrictions
 from webnotes.model.controller import DocListController
@@ -15,7 +15,7 @@ class DocType(DocListController):
 	def autoname(self):
 		naming_method = webnotes.conn.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
-			webnotes.throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
+			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
 			if naming_method=='Naming Series':
 				self.doc.name = make_autoname(self.doc.naming_series + '.####')
@@ -33,7 +33,10 @@ class DocType(DocListController):
 		self.validate_email()
 		self.validate_status()
 		self.validate_employee_leave_approver()
-		self.update_dob_event()
+
+		if self.doc.user_id:
+			self.validate_for_enabled_user_id()
+			self.validate_duplicate_user_id()
 		
 	def on_update(self):
 		if self.doc.user_id:
@@ -41,6 +44,7 @@ class DocType(DocListController):
 			self.update_user_default()
 			self.update_profile()
 		
+		self.update_dob_event()
 		self.restrict_leave_approver()
 				
 	def restrict_user(self):
@@ -111,41 +115,53 @@ class DocType(DocListController):
 		
 	def validate_date(self):
 		if self.doc.date_of_birth and self.doc.date_of_joining and getdate(self.doc.date_of_birth) >= getdate(self.doc.date_of_joining):
-			msgprint('Date of Joining must be greater than Date of Birth')
-			raise Exception
+			throw(_("Date of Joining must be greater than Date of Birth"))
 
 		elif self.doc.scheduled_confirmation_date and self.doc.date_of_joining and (getdate(self.doc.scheduled_confirmation_date) < getdate(self.doc.date_of_joining)):
-			msgprint('Scheduled Confirmation Date must be greater than Date of Joining')
-			raise Exception
+			throw(_("Scheduled Confirmation Date must be greater than Date of Joining"))
 		
 		elif self.doc.final_confirmation_date and self.doc.date_of_joining and (getdate(self.doc.final_confirmation_date) < getdate(self.doc.date_of_joining)):
-			msgprint('Final Confirmation Date must be greater than Date of Joining')
-			raise Exception
+			throw(_("Final Confirmation Date must be greater than Date of Joining"))
 		
 		elif self.doc.date_of_retirement and self.doc.date_of_joining and (getdate(self.doc.date_of_retirement) <= getdate(self.doc.date_of_joining)):
-			msgprint('Date Of Retirement must be greater than Date of Joining')
-			raise Exception
+			throw(_("Date Of Retirement must be greater than Date of Joining"))
 		
 		elif self.doc.relieving_date and self.doc.date_of_joining and (getdate(self.doc.relieving_date) <= getdate(self.doc.date_of_joining)):
-			msgprint('Relieving Date must be greater than Date of Joining')
-			raise Exception
+			throw(_("Relieving Date must be greater than Date of Joining"))
 		
 		elif self.doc.contract_end_date and self.doc.date_of_joining and (getdate(self.doc.contract_end_date)<=getdate(self.doc.date_of_joining)):
-			msgprint('Contract End Date must be greater than Date of Joining')
-			raise Exception
+			throw(_("Contract End Date must be greater than Date of Joining"))
 	 
 	def validate_email(self):
 		if self.doc.company_email and not validate_email_add(self.doc.company_email):
-			msgprint("Please enter valid Company Email")
-			raise Exception
+			throw(_("Please enter valid Company Email"))
 		if self.doc.personal_email and not validate_email_add(self.doc.personal_email):
-			msgprint("Please enter valid Personal Email")
-			raise Exception
+			throw(_("Please enter valid Personal Email"))
 				
 	def validate_status(self):
 		if self.doc.status == 'Left' and not self.doc.relieving_date:
-			msgprint("Please enter relieving date.")
-			raise Exception
+			throw(_("Please enter relieving date."))
+
+	def validate_for_enabled_user_id(self):
+		enabled = webnotes.conn.sql("""select name from `tabProfile` where 
+			name=%s and enabled=1""", self.doc.user_id)
+		if not enabled:
+			throw("{id}: {user_id} {msg}".format(**{
+				"id": _("User ID"),
+				"user_id": self.doc.user_id,
+				"msg": _("is disabled.")
+			}))
+
+	def validate_duplicate_user_id(self):
+		employee = webnotes.conn.sql_list("""select name from `tabEmployee` where 
+			user_id=%s and status='Active' and name!=%s""", (self.doc.user_id, self.doc.name))
+		if employee:
+			throw("{id}: {user_id} {msg}: {employee}".format(**{
+				"id": _("User ID"),
+				"user_id": self.doc.user_id,
+				"msg": _("is already assigned to Employee"),
+				"employee": employee[0]
+			}))
 			
 	def validate_employee_leave_approver(self):
 		from webnotes.profile import Profile
@@ -153,8 +169,8 @@ class DocType(DocListController):
 		
 		for l in self.doclist.get({"parentfield": "employee_leave_approvers"}):
 			if "Leave Approver" not in Profile(l.leave_approver).get_roles():
-				msgprint(_("Invalid Leave Approver") + ": \"" + l.leave_approver + "\"",
-					raise_exception=InvalidLeaveApproverError)
+				throw(_("Invalid Leave Approver") + ": \"" + l.leave_approver + "\"",
+					exc=InvalidLeaveApproverError)
 
 	def update_dob_event(self):
 		if self.doc.status == "Active" and self.doc.date_of_birth \
