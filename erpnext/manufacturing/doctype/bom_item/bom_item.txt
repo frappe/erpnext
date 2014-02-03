@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:49", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:22:58", 
+  "modified": "2014-02-03 12:47:39", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -64,6 +64,28 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "label": "Item Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "250px", 
+  "reqd": 0, 
+  "width": "250px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "qty", 
   "fieldtype": "Float", 
   "in_list_view": 1, 
@@ -71,6 +93,19 @@
   "oldfieldname": "qty", 
   "oldfieldtype": "Currency", 
   "reqd": 1
+ }, 
+ {
+  "description": "See \"Rate Of Materials Based On\" in Costing Section", 
+  "doctype": "DocField", 
+  "fieldname": "rate", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Rate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -83,14 +118,6 @@
   "options": "UOM", 
   "read_only": 1, 
   "reqd": 1
- }, 
- {
-  "description": "See \"Rate Of Materials Based On\" in Costing Section", 
-  "doctype": "DocField", 
-  "fieldname": "rate", 
-  "fieldtype": "Float", 
-  "in_list_view": 1, 
-  "label": "Rate"
  }, 
  {
   "doctype": "DocField", 
@@ -112,17 +139,6 @@
   "oldfieldname": "scrap", 
   "oldfieldtype": "Currency", 
   "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "description", 
-  "fieldtype": "Text", 
-  "label": "Item Description", 
-  "oldfieldname": "description", 
-  "oldfieldtype": "Text", 
-  "print_width": "250px", 
-  "reqd": 0, 
-  "width": "250px"
  }, 
  {
   "doctype": "DocField", 

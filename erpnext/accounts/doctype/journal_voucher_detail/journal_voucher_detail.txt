@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:39", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:18", 
+  "modified": "2014-02-03 12:44:31", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -58,23 +58,8 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "debit", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Debit", 
-  "oldfieldname": "debit", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "credit", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Credit", 
-  "oldfieldname": "credit", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -90,9 +75,52 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "sec_break1", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "debit", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Debit", 
+  "oldfieldname": "debit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Credit", 
+  "oldfieldname": "credit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "reference", 
   "fieldtype": "Section Break", 
   "label": "Reference"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "against_invoice", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Against Sales Invoice", 
+  "no_copy": 1, 
+  "oldfieldname": "against_invoice", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Invoice", 
+  "print_hide": 0, 
+  "search_index": 1
  }, 
  {
   "doctype": "DocField", 
@@ -110,16 +138,8 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "against_invoice", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Against Sales Invoice", 
-  "no_copy": 1, 
-  "oldfieldname": "against_invoice", 
-  "oldfieldtype": "Link", 
-  "options": "Sales Invoice", 
-  "print_hide": 0, 
-  "search_index": 1
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 

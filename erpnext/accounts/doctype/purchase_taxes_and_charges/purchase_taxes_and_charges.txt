@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:04", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:38", 
+  "modified": "2014-02-03 12:36:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,11 +31,23 @@
   "doctype": "DocField", 
   "fieldname": "category", 
   "fieldtype": "Select", 
-  "in_list_view": 1, 
+  "in_list_view": 0, 
   "label": "Consider Tax or Charge for", 
   "oldfieldname": "category", 
   "oldfieldtype": "Select", 
   "options": "Valuation and Total\nValuation\nTotal", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "default": "Add", 
+  "doctype": "DocField", 
+  "fieldname": "add_deduct_tax", 
+  "fieldtype": "Select", 
+  "label": "Add or Deduct", 
+  "oldfieldname": "add_deduct_tax", 
+  "oldfieldtype": "Select", 
+  "options": "Add\nDeduct", 
   "read_only": 0, 
   "reqd": 1
  }, 
@@ -53,26 +65,12 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "account_head", 
-  "fieldtype": "Link", 
-  "in_list_view": 1, 
-  "label": "Account Head", 
-  "oldfieldname": "account_head", 
-  "oldfieldtype": "Link", 
-  "options": "Account", 
-  "read_only": 0, 
-  "reqd": 1
- }, 
- {
-  "default": ":Company", 
-  "doctype": "DocField", 
-  "fieldname": "cost_center", 
-  "fieldtype": "Link", 
-  "in_list_view": 1, 
-  "label": "Cost Center", 
-  "oldfieldname": "cost_center", 
-  "oldfieldtype": "Link", 
-  "options": "Cost Center", 
+  "fieldname": "row_id", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Enter Row", 
+  "oldfieldname": "row_id", 
+  "oldfieldtype": "Data", 
   "read_only": 0
  }, 
  {
@@ -90,6 +88,35 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account_head", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "Account Head", 
+  "oldfieldname": "account_head", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "default": ":Company", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "oldfieldtype": "Link", 
+  "options": "Cost Center", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Float", 
   "in_list_view": 1, 
@@ -103,6 +130,7 @@
   "doctype": "DocField", 
   "fieldname": "tax_amount", 
   "fieldtype": "Currency", 
+  "in_list_view": 1, 
   "label": "Amount", 
   "oldfieldname": "tax_amount", 
   "oldfieldtype": "Currency", 
@@ -119,28 +147,6 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "row_id", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "label": "Enter Row", 
-  "oldfieldname": "row_id", 
-  "oldfieldtype": "Data", 
-  "read_only": 0
- }, 
- {
-  "default": "Add", 
-  "doctype": "DocField", 
-  "fieldname": "add_deduct_tax", 
-  "fieldtype": "Select", 
-  "label": "Add or Deduct", 
-  "oldfieldname": "add_deduct_tax", 
-  "oldfieldtype": "Select", 
-  "options": "Add\nDeduct", 
-  "read_only": 0, 
-  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

@@ -269,6 +269,7 @@
   "search_index": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_info_section", 
   "fieldtype": "Section Break", 

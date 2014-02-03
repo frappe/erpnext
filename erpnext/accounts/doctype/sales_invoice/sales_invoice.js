@@ -155,6 +155,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 	},
 	
+	customer: function() {
+		if(this.frm.updating_party_details)
+			return;
+		erpnext.selling.get_party_details(this.frm, 
+			"erpnext.accounts.party.get_party_details", {
+				posting_date: this.frm.doc.posting_date,
+				company: this.frm.doc.company,
+				party: this.frm.doc.customer,
+				party_type: "Customer",
+				account: this.frm.doc.debit_to
+			})
+	},
+	
 	debit_to: function() {
 		this.customer();
 	},

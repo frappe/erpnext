@@ -56,12 +56,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
-  "oldfieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -76,82 +70,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "customer_address", 
-  "fieldtype": "Link", 
-  "label": "Customer Address", 
-  "options": "Address", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_person", 
-  "fieldtype": "Link", 
-  "label": "Contact Person", 
-  "options": "Contact", 
-  "print_hide": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "customer_name", 
-  "fieldtype": "Data", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Customer Name", 
-  "oldfieldname": "customer_name", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "reqd": 0, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "address_display", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "Address", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_display", 
-  "fieldtype": "Small Text", 
-  "hidden": 1, 
-  "label": "Contact", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_mobile", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Mobile No", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "contact_email", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "label": "Contact Email", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "column_break1", 
+  "fieldname": "column_break0", 
   "fieldtype": "Column Break", 
   "oldfieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "transaction_date", 
-  "fieldtype": "Date", 
-  "in_filter": 1, 
-  "label": "Transaction Date", 
-  "oldfieldname": "transaction_date", 
-  "oldfieldtype": "Date", 
-  "reqd": 1, 
-  "search_index": 0
  }, 
  {
   "default": "Draft", 
@@ -170,48 +91,14 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "amended_from", 
-  "fieldtype": "Data", 
-  "ignore_restrictions": 1, 
-  "label": "Amended From", 
-  "no_copy": 1, 
-  "oldfieldname": "amended_from", 
-  "oldfieldtype": "Data", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Link", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
   "in_filter": 1, 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "oldfieldtype": "Link", 
-  "options": "Company", 
+  "label": "Transaction Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
   "reqd": 1, 
   "search_index": 0
- }, 
- {
-  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
-  "doctype": "DocField", 
-  "fieldname": "territory", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Territory", 
-  "oldfieldname": "territory", 
-  "oldfieldtype": "Link", 
-  "options": "Territory", 
-  "reqd": 1, 
-  "search_index": 0
- }, 
- {
-  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
-  "doctype": "DocField", 
-  "fieldname": "customer_group", 
-  "fieldtype": "Link", 
-  "label": "Customer Group", 
-  "options": "Customer Group", 
-  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -254,6 +141,120 @@
   "oldfieldtype": "Table", 
   "options": "Maintenance Schedule Detail", 
   "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_info", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info"
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Contact Email", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_17", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Link", 
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Address", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "customer", 
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "depends_on": "customer", 
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 1, 
+  "search_index": 0
  }, 
  {
   "doctype": "DocPerm"

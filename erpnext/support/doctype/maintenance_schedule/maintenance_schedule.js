@@ -2,6 +2,14 @@
 // License: GNU General Public License v3. See license.txt
 
 wn.provide("erpnext.support");
+
+wn.ui.form.on_change("Maintenance Schedule", "customer", function(frm) { 
+	erpnext.utils.get_party_details(frm) });
+wn.ui.form.on_change("Maintenance Schedule", "customer_address", 
+	erpnext.utils.get_address_display);
+wn.ui.form.on_change("Maintenance Schedule", "contact_person", 
+	erpnext.utils.get_contact_details);	
+
 // TODO commonify this code
 erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 	refresh: function() {
@@ -30,36 +38,16 @@ erpnext.support.MaintenanceSchedule = wn.ui.form.Controller.extend({
 			});
 		}
 	},
-	customer: function() {
-		var me = this;
-		if(this.frm.doc.customer) {
-			return this.frm.call({
-				doc: me.frm.doc,
-				method: "set_customer_defaults",
-			});
-		}
-	},
 });
 
 $.extend(cur_frm.cscript, new erpnext.support.MaintenanceSchedule({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
-	if (!doc.status)
-		set_multiple(dt, dn, { status:'Draft' });
-
-	if (doc.__islocal) {
-		set_multiple(dt, dn, { transaction_date:get_today() });
-		hide_field(['customer_address', 'contact_person', 'customer_name', 'address_display', 
-			'contact_display', 'contact_mobile', 'contact_email', 'territory', 'customer_group']);
-	}
-}
-
-cur_frm.cscript.customer_address = cur_frm.cscript.contact_person = function(doc, dt, dn) {    
-	if (doc.customer) {
-		return get_server_fields('get_customer_address', 
-			JSON.stringify({customer: doc.customer, address: doc.customer_address, 
-			contact: doc.contact_person}), '', doc, dt, dn, 1);
-	}
+  if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
+  
+  if(doc.__islocal){
+    set_multiple(dt,dn,{transaction_date:get_today()});
+  }   
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {

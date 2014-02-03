@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:41", 
   "docstatus": 0, 
-  "modified": "2013-12-31 18:29:19", 
+  "modified": "2014-02-03 12:38:53", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,38 +40,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "advance_amount", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Advance amount", 
-  "no_copy": 1, 
-  "oldfieldname": "advance_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_width": "120px", 
-  "read_only": 1, 
-  "width": "120px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "allocated_amount", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Allocated amount", 
-  "no_copy": 1, 
-  "oldfieldname": "allocated_amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "print_width": "120px", 
-  "width": "120px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break1", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "remarks", 
   "fieldtype": "Small Text", 
   "in_list_view": 1, 
@@ -96,6 +64,38 @@
   "print_hide": 1, 
   "print_width": "120px", 
   "read_only": 1, 
+  "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "advance_amount", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Advance amount", 
+  "no_copy": 1, 
+  "oldfieldname": "advance_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "120px", 
+  "read_only": 1, 
+  "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allocated_amount", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Allocated amount", 
+  "no_copy": 1, 
+  "oldfieldname": "allocated_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "120px", 
   "width": "120px"
  }
 ]

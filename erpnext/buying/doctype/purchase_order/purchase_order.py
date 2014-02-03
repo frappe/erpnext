@@ -225,7 +225,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 	def set_missing_values(source, target):
 		bean = webnotes.bean(target)
 		bean.run_method("set_missing_values")
-		bean.run_method("set_supplier_defaults")
 
 	def update_item(obj, target, source_parent):
 		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)

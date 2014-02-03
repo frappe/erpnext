@@ -6,7 +6,38 @@ from __future__ import unicode_literals
 import webnotes
 import unittest
 
+from webnotes.test_runner import make_test_records
+
+
 class TestCustomer(unittest.TestCase):
+	def test_get_customer_details(self):
+		from erpnext.selling.doctype.customer.customer import get_customer_details
+		
+		to_check = {
+			'address_display': '_Test Address Line 1\n_Test City\nIndia\nPhone: +91 0000000000', 
+			'selling_price_list': None, 
+			'customer_group': '_Test Customer Group', 
+			'contact_designation': None, 
+			'customer_address': '_Test Address-Office', 
+			'contact_department': None, 
+			'contact_email': 'test_contact_customer@example.com', 
+			'contact_mobile': None, 
+			'_sales_team': [], 
+			'contact_display': '_Test Contact For _Test Customer', 
+			'contact_person': '_Test Contact For _Test Customer-_Test Customer', 
+			'territory': u'_Test Territory', 
+			'contact_phone': '+91 0000000000', 
+			'customer_name': '_Test Customer'
+		}
+		
+		make_test_records("Address")
+		make_test_records("Contact")
+				
+		details = get_customer_details("_Test Customer")
+
+		for key, value in to_check.iteritems():
+			self.assertEquals(value, details.get(key))
+		
 	def test_rename(self):
 		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1"), 
 			(("_Test Customer 1",),))
@@ -20,7 +51,6 @@ class TestCustomer(unittest.TestCase):
 		webnotes.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 		
 	def test_merge(self):
-		from webnotes.test_runner import make_test_records
 		make_test_records("Sales Invoice")
 		
 		# clear transactions for new name

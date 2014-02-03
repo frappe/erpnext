@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, extract_email_id
 
-from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.controllers.status_updater import StatusUpdater
 
-class DocType(TransactionBase):
+class DocType(StatusUpdater):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
@@ -49,3 +49,19 @@ class DocType(TransactionBase):
 	def on_trash(self):
 		webnotes.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
 			self.doc.name)
+
+@webnotes.whitelist()
+def get_contact_details(contact):
+	contact = webnotes.doc("Contact", contact)
+	out = {
+		"contact_person": contact.get("name"),
+		"contact_display": " ".join(filter(None, 
+			[contact.get("first_name"), contact.get("last_name")])),
+		"contact_email": contact.get("email_id"),
+		"contact_mobile": contact.get("mobile_no"),
+		"contact_phone": contact.get("phone"),
+		"contact_designation": contact.get("designation"),
+		"contact_department": contact.get("department")
+	}
+	
+	return out

@@ -8,7 +8,7 @@ import webnotes.defaults
 from webnotes.utils import cint
 from webnotes import msgprint, _
 from webnotes.model.doc import make_autoname
-
+from erpnext.accounts.party import create_party_account
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -47,88 +47,20 @@ class DocType(TransactionBase):
 		self.update_contact()
 
 		# create account head
-		self.create_account_head()
+		create_party_account(self.doc.name, "Supplier", self.doc.company)
 
 		# update credit days and limit in account
 		self.update_credit_days_limit()
-	
-	def get_payables_group(self):
-		g = webnotes.conn.sql("select payables_group from tabCompany where name=%s", self.doc.company)
-		g = g and g[0][0] or ''
-		if not g:
-			msgprint("Update Company master, assign a default group for Payables")
-			raise Exception
-		return g
-
-	def add_account(self, ac, par, abbr):
-		ac_bean = webnotes.bean({
-			"doctype": "Account",
-			'account_name':ac,
-			'parent_account':par,
-			'group_or_ledger':'Group',
-			'company':self.doc.company,
-			"freeze_account": "No",
-		})
-		ac_bean.ignore_permissions = True
-		ac_bean.insert()
 		
-		msgprint(_("Created Group ") + ac)
-	
 	def get_company_abbr(self):
 		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 	
-	def get_parent_account(self, abbr):
-		if (not self.doc.supplier_type):
-			msgprint("Supplier Type is mandatory")
-			raise Exception
-		
-		if not webnotes.conn.sql("select name from tabAccount where name=%s and debit_or_credit = 'Credit' and ifnull(is_pl_account, 'No') = 'No'", (self.doc.supplier_type + " - " + abbr)):
-
-			# if not group created , create it
-			self.add_account(self.doc.supplier_type, self.get_payables_group(), abbr)
-		
-		return self.doc.supplier_type + " - " + abbr
-
 	def validate(self):
 		#validation for Naming Series mandatory field...
 		if webnotes.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.doc.naming_series:
 				msgprint("Series is Mandatory.", raise_exception=1)
-	
-	def create_account_head(self):
-		if self.doc.company :
-			abbr = self.get_company_abbr() 
-			parent_account = self.get_parent_account(abbr)
-						
-			if not webnotes.conn.sql("select name from tabAccount where name=%s", (self.doc.name + " - " + abbr)):
-				ac_bean = webnotes.bean({
-					"doctype": "Account",
-					'account_name': self.doc.name,
-					'parent_account': parent_account,
-					'group_or_ledger':'Ledger',
-					'company': self.doc.company,
-					'account_type': '',
-					'tax_rate': '0',
-					'master_type': 'Supplier',
-					'master_name': self.doc.name,
-					"freeze_account": "No"
-				})
-				ac_bean.ignore_permissions = True
-				ac_bean.insert()
-				
-				msgprint(_("Created Account Head: ") + ac_bean.doc.name)
-			else:
-				self.check_parent_account(parent_account, abbr)
-		else : 
-			msgprint("Please select Company under which you want to create account head")
-	
-	def check_parent_account(self, parent_account, abbr):
-		if webnotes.conn.get_value("Account", self.doc.name + " - " + abbr, 
-			"parent_account") != parent_account:
-			ac = webnotes.bean("Account", self.doc.name + " - " + abbr)
-			ac.doc.parent_account = parent_account
-			ac.save()
-	
+			
 	def get_contacts(self,nm):
 		if nm:
 			contact_details =webnotes.conn.convert_to_lists(webnotes.conn.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where supplier = '%s'"%nm))
@@ -194,4 +126,28 @@ def get_dashboard_info(supplier):
 	out["total_billing"] = billing[0][0]
 	out["total_unpaid"] = billing[0][1]
 	
+	return out
+	
+@webnotes.whitelist()
+def get_supplier_details(supplier, price_list=None, currency=None):
+	if not webnotes.has_permission("Supplier", "read", supplier):
+		webnotes.msgprint("No Permission", raise_exception=webnotes.PermissionError)
+
+	supplier = webnotes.doc("Supplier", supplier)
+	
+	out = webnotes._dict({
+		"supplier_address": webnotes.conn.get_value("Address", 
+			{"supplier": supplier.name, "is_primary_address":1}, "name"),
+		"contact_person": webnotes.conn.get_value("Contact", 
+			{"supplier":supplier.name, "is_primary_contact":1}, "name")
+	})
+
+	for f in ['currency', 'taxes_and_charges']:
+		if supplier.fields.get("default_" + f):
+			out[f] = supplier.fields.get("default_" + f)
+	
+	out.supplier_name = supplier.supplier_name
+	out.currency = supplier.default_currency or currency
+	out.buying_price_list = supplier.default_price_list or price_list
+		
 	return out

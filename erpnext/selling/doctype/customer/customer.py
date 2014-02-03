@@ -3,13 +3,16 @@
 
 from __future__ import unicode_literals
 import webnotes
-
+from webnotes.utils import cstr
 from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
 
 
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.utilities.doctype.address.address import get_address_display
+from erpnext.utilities.doctype.contact.contact import get_contact_details
+from erpnext.accounts.party import create_party_account
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -27,14 +30,6 @@ class DocType(TransactionBase):
 
 	def get_company_abbr(self):
 		return webnotes.conn.get_value('Company', self.doc.company, 'abbr')
-
-	def get_receivables_group(self):
-		g = webnotes.conn.sql("select receivables_group from tabCompany where name=%s", self.doc.company)
-		g = g and g[0][0] or '' 
-		if not g:
-			msgprint("Update Company master, assign a default group for Receivables")
-			raise Exception
-		return g
 	
 	def validate_values(self):
 		if webnotes.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.doc.naming_series:
@@ -54,29 +49,6 @@ class DocType(TransactionBase):
 	def update_contact(self):
 		webnotes.conn.sql("""update `tabContact` set customer_name=%s, modified=NOW() 
 			where customer=%s""", (self.doc.customer_name, self.doc.name))
-
-	def create_account_head(self):
-		if self.doc.company :
-			abbr = self.get_company_abbr()
-			if not webnotes.conn.exists("Account", (self.doc.name + " - " + abbr)):
-				parent_account = self.get_receivables_group()
-				# create
-				ac_bean = webnotes.bean({
-					"doctype": "Account",
-					'account_name': self.doc.name,
-					'parent_account': parent_account, 
-					'group_or_ledger':'Ledger',
-					'company':self.doc.company, 
-					'master_type':'Customer', 
-					'master_name':self.doc.name,
-					"freeze_account": "No"
-				})
-				ac_bean.ignore_permissions = True
-				ac_bean.insert()
-				
-				msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
-		else :
-			msgprint(_("Please Select Company under which you want to create account head"))
 
 	def update_credit_days_limit(self):
 		webnotes.conn.sql("""update tabAccount set credit_days = %s, credit_limit = %s 
@@ -111,7 +83,8 @@ class DocType(TransactionBase):
 		self.update_contact()
 
 		# create account head
-		self.create_account_head()
+		create_party_account(self.doc.name, "Customer", self.doc.company)
+
 		# update credit days and limit in account
 		self.update_credit_days_limit()
 		#create address and contact from lead
@@ -188,5 +161,60 @@ def get_dashboard_info(customer):
 	
 	out["total_billing"] = billing[0][0]
 	out["total_unpaid"] = billing[0][1]
+	
+	return out
+
+@webnotes.whitelist()
+def get_customer_details(customer, price_list=None, currency=None):
+	if not webnotes.has_permission("Customer", "read", customer):
+		webnotes.throw("Not Permitted", webnotes.PermissionError)
+		
+	out = {}
+	customer_bean = webnotes.bean("Customer", customer)
+	customer = customer_bean.doc
+
+	out = webnotes._dict({
+		"customer_address": webnotes.conn.get_value("Address", 
+			{"customer": customer.name, "is_primary_address":1}, "name"),
+		"contact_person": webnotes.conn.get_value("Contact", 
+			{"customer":customer.name, "is_primary_contact":1}, "name")
+	})
+
+	# address display
+	out.address_display = get_address_display(out.customer_address)
+	
+	# primary contact details
+	out.update(get_contact_details(out.contact_person))
+
+	# copy
+	for f in ['customer_name', 'customer_group', 'territory']:
+		out[f] = customer.get(f)
+	
+	# fields prepended with default in Customer doctype
+	for f in ['sales_partner', 'commission_rate', 'currency', 'price_list', 'taxes_and_charges']:
+		if customer.get("default_" + f):
+			out[f] = customer.get("default_" + f)
+
+	# price list
+	from webnotes.defaults import get_defaults_for
+	out.selling_price_list = get_defaults_for(webnotes.session.user).get(price_list)
+	if isinstance(out.selling_price_list, list):
+		out.selling_price_list = None
+	
+	out.selling_price_list = out.selling_price_list or customer.price_list \
+		or webnotes.conn.get_value("Customer Group", 
+			customer.customer_group, "default_price_list") or price_list
+	
+	if out.selling_price_list:
+		out.price_list_currency = webnotes.conn.get_value("Price List", out.selling_price_list, "currency")
+	
+	if not out.currency:
+		out.currency = currency
+	
+	# sales team
+	out.sales_team = [{
+		"sales_person": d.sales_person, 
+		"sales_designation": d.sales_designation
+	} for d in customer_bean.doclist.get({"doctype":"Sales Team"})]
 	
 	return out

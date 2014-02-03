@@ -590,56 +590,6 @@ class DocType(StockController):
 			# increment idx by 1
 			idx += 1
 		return idx
-
-	def get_cust_values(self):
-		"""fetches customer details"""
-		if self.doc.delivery_note_no:
-			doctype = "Delivery Note"
-			name = self.doc.delivery_note_no
-		else:
-			doctype = "Sales Invoice"
-			name = self.doc.sales_invoice_no
-		
-		result = webnotes.conn.sql("""select customer, customer_name,
-			address_display as customer_address
-			from `tab%s` where name=%s""" % (doctype, "%s"), (name,), as_dict=1)
-		
-		return result and result[0] or {}
-		
-	def get_cust_addr(self):
-		from erpnext.utilities.transaction_base import get_default_address, get_address_display
-		res = webnotes.conn.sql("select customer_name from `tabCustomer` where name = '%s'"%self.doc.customer)
-		address_display = None
-		customer_address = get_default_address("customer", self.doc.customer)
-		if customer_address:
-			address_display = get_address_display(customer_address)
-		ret = { 
-			'customer_name'		: res and res[0][0] or '',
-			'customer_address' : address_display}
-
-		return ret
-
-	def get_supp_values(self):
-		result = webnotes.conn.sql("""select supplier, supplier_name,
-			address_display as supplier_address
-			from `tabPurchase Receipt` where name=%s""", (self.doc.purchase_receipt_no,),
-			as_dict=1)
-		
-		return result and result[0] or {}
-		
-	def get_supp_addr(self):
-		from erpnext.utilities.transaction_base import get_default_address, get_address_display
-		res = webnotes.conn.sql("""select supplier_name from `tabSupplier`
-			where name=%s""", self.doc.supplier)
-		address_display = None
-		supplier_address = get_default_address("customer", self.doc.customer)
-		if supplier_address:
-			address_display = get_address_display(supplier_address)	
-		
-		ret = {
-			'supplier_name' : res and res[0][0] or '',
-			'supplier_address' : address_display }
-		return ret
 		
 	def validate_with_material_request(self):
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
@@ -652,6 +602,17 @@ class DocType(StockController):
 						+ " " + _("Row #") + (" %d %s " % (mreq_item.idx, _("of")))
 						+ _("Material Request") + (" - %s" % item.material_request), 
 						raise_exception=webnotes.MappingMismatchError)
+	
+@webnotes.whitelist()					
+def get_party_details(ref_dt, ref_dn):
+	if ref_dt in ["Delivery Note", "Sales Invoice"]:
+		res = webnotes.conn.get_value(ref_dt, ref_dn, 
+			["customer", "customer_name", "address_display as customer_address"], as_dict=1)
+	else:
+		res = webnotes.conn.get_value(ref_dt, ref_dn, 
+			["supplier", "supplier_name", "address_display as supplier_address"], as_dict=1)
+		print ref_dt, ref_dn, res
+	return res or {}
 	
 @webnotes.whitelist()
 def get_production_order_details(production_order):
@@ -966,4 +927,3 @@ def make_return_jv_from_purchase_receipt(se, ref):
 	result = [parent] + [{"account": account} for account in children]
 	
 	return result
-		
