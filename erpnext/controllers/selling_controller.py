@@ -33,9 +33,9 @@ class SellingController(StockController):
 			self.set_taxes("other_charges", "taxes_and_charges")
 					
 	def set_missing_lead_customer_details(self):
-		from erpnext.selling.doctype.customer.customer import get_customer_details
+		from erpnext.accounts.party import get_party_details
 		if self.doc.customer:
-			self.doc.update_if_missing(get_customer_details(self.doc.customer))
+			self.doc.update_if_missing(get_party_details(self.doc.customer))
 		
 		elif self.doc.lead:
 			self.doc.update_if_missing(self.get_lead_defaults())

@@ -5,17 +5,98 @@ from __future__ import unicode_literals
 
 import webnotes
 from webnotes import _
+from webnotes.defaults import get_restrictions
+from erpnext.utilities.doctype.address.address import get_address_display
+from erpnext.utilities.doctype.contact.contact import get_contact_details
 
 @webnotes.whitelist()
-def get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None):
-	if not webnotes.has_permission(party_type, "read", party):
-		webnotes.throw("No Permission")
+def get_party_details(party=None, account=None, party_type="Customer", company=None, 
+	posting_date=None, price_list=None, currency=None):
+	out = webnotes._dict(set_account_and_due_date(party, account, party_type, company, posting_date))
 	
+	party = out[party_type.lower()]
+
+	if not webnotes.has_permission(party_type, "read", party):
+		webnotes.throw("Not Permitted", webnotes.PermissionError)
+
+	party_bean = webnotes.bean(party_type, party)
+	party = party_bean.doc
+
+	set_address_and_contact(out, party, party_type)
+	set_other_values(out, party, party_type)
+	set_price_list(out, party, price_list)
+	
+	if not out.get("currency"):
+		out["currency"] = currency
+	
+	# sales team
 	if party_type=="Customer":
-		get_party_details = webnotes.get_attr("erpnext.selling.doctype.customer.customer.get_customer_details")
+		out["sales_team"] = [{
+			"sales_person": d.sales_person, 
+			"sales_designation": d.sales_designation
+		} for d in party_bean.doclist.get({"doctype":"Sales Team"})]
+	
+	return out
+
+def set_address_and_contact(out, party, party_type):
+	out.update({
+		party_type.lower() + "_address": webnotes.conn.get_value("Address", 
+			{party_type.lower(): party.name, "is_primary_address":1}, "name"),
+		"contact_person": webnotes.conn.get_value("Contact", 
+			{party_type.lower(): party.name, "is_primary_contact":1}, "name")
+	})
+	
+	# address display
+	out.address_display = get_address_display(out[party_type.lower() + "_address"])
+	
+	# primary contact details
+	out.update(get_contact_details(out.contact_person))
+	
+
+def set_other_values(out, party, party_type):
+	# copy
+	if party_type=="Customer":
+		to_copy = ["customer_name", "customer_group", "territory"]
 	else:
-		get_party_details = webnotes.get_attr("erpnext.buying.doctype.supplier.supplier.get_supplier_details")
-				
+		to_copy = ["supplier_name", "supplier_type"]
+	for f in to_copy:
+		out[f] = party.get(f)
+	
+	# fields prepended with default in Customer doctype
+	for f in ['currency', 'taxes_and_charges'] \
+		+ (['sales_partner', 'commission_rate'] if party_type=="Customer" else []):
+		if party.get("default_" + f):
+			out[f] = party.get("default_" + f)
+
+def set_price_list(out, party, given_price_list):
+	# price list	
+	price_list = get_restrictions().get("Price List")
+	if isinstance(price_list, list):
+		price_list = None
+
+	if not price_list:
+		price_list = party.default_price_list
+		
+	if not price_list and party.party_type=="Customer":
+		price_list =  webnotes.conn.get_value("Customer Group", 
+			party.customer_group, "default_price_list")
+
+	if not price_list:
+		price_list = given_price_list
+
+	if price_list:
+		out.price_list_currency = webnotes.conn.get_value("Price List", price_list, "currency")
+		
+	out["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
+	
+
+def set_account_and_due_date(party, account, party_type, company, posting_date):
+	if not posting_date:
+		# not an invoice
+		return {
+			party_type.lower(): party
+		}
+	
 	if party:
 		account = get_party_account(company, party, party_type)
 	elif account:
@@ -27,8 +108,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 		party_type.lower(): party,
 		account_fieldname : account,
 		"due_date": get_due_date(posting_date, party, party_type, account, company)
-	}	
-	out.update(get_party_details(party))
+	}
 	return out
 
 def get_party_account(company, party, party_type):
