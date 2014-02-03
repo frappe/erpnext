@@ -70,6 +70,8 @@ class DocType():
 
 		elif self.doc.send_to_type=="Employee":
 			self.send_to_doctype = "Employee"
+			self.email_field = "company_email"
+
 			return webnotes.conn.sql_list("""select 
 				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id 
 				from `tabEmployee` where status='Active'""")
@@ -94,7 +96,7 @@ class DocType():
 
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
-			doctype = self.send_to_doctype, email_field = "email_id",
+			doctype = self.send_to_doctype, email_field = self.email_field or "email_id",
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
 		if not webnotes.flags.in_test:
