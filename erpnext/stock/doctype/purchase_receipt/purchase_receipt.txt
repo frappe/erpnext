@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:12", 
+  "modified": "2014-01-29 15:25:14", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -329,16 +329,16 @@
   "doctype": "DocField", 
   "fieldname": "taxes", 
   "fieldtype": "Section Break", 
-  "label": "Taxes", 
+  "label": "Taxes and Charges", 
   "oldfieldtype": "Section Break", 
   "options": "icon-money"
  }, 
  {
   "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
   "doctype": "DocField", 
-  "fieldname": "purchase_other_charges", 
+  "fieldname": "taxes_and_charges", 
   "fieldtype": "Link", 
-  "label": "Purchase Taxes and Charges", 
+  "label": "Taxes and Charges", 
   "oldfieldname": "purchase_other_charges", 
   "oldfieldtype": "Link", 
   "options": "Purchase Taxes and Charges Master", 
@@ -346,7 +346,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "purchase_tax_details", 
+  "fieldname": "other_charges", 
   "fieldtype": "Table", 
   "label": "Purchase Taxes and Charges", 
   "oldfieldname": "purchase_tax_details", 
@@ -355,9 +355,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "tax_calculation", 
+  "fieldname": "other_charges_calculation", 
   "fieldtype": "HTML", 
-  "label": "Tax Calculation", 
+  "label": "Taxes and Charges Calculation", 
   "oldfieldtype": "HTML", 
   "print_hide": 1
  }, 
@@ -836,6 +836,7 @@
   "write": 1
  }, 
  {
+  "cancel": 0, 
   "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Supplier"

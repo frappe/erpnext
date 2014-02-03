@@ -40,6 +40,14 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 					}
 				}
 			}
+			this.frm.fields_dict["cost_center"].get_query = function() {
+				return {
+					"filters": {
+						'company': me.frm.doc.company,
+						'group_or_ledger': 'Ledger'
+					}
+				}
+			}
 		}
 	},
 	

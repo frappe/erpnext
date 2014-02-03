@@ -94,6 +94,8 @@ class DocType(StockController):
 					self.doc.status = "Delivered"
 				else:
 					self.doc.status = "Not Available"
+		else:
+			self.doc.status = "Not Available"
 		
 	def set_purchase_details(self, purchase_sle):
 		if purchase_sle:
@@ -185,10 +187,9 @@ class DocType(StockController):
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.doc.fields.get("__islocal"):
 			last_sle = self.get_last_sle()
-			if last_sle:
-				self.set_status(last_sle.get("last_sle"))
-				self.set_purchase_details(last_sle.get("purchase_sle"))
-				self.set_sales_details(last_sle.get("delivery_sle"))
+			self.set_status(last_sle.get("last_sle"))
+			self.set_purchase_details(last_sle.get("purchase_sle"))
+			self.set_sales_details(last_sle.get("delivery_sle"))
 			
 	def on_communication(self):
 		return

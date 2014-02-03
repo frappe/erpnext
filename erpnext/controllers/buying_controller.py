@@ -38,7 +38,7 @@ class BuyingController(StockController):
 
 		self.set_missing_item_details(get_item_details)
 		if self.doc.fields.get("__islocal"):
-			self.set_taxes("purchase_tax_details", "purchase_other_charges")
+			self.set_taxes("other_charges", "taxes_and_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.doc.supplier:
@@ -57,14 +57,10 @@ class BuyingController(StockController):
 		for w in warehouses:
 			validate_warehouse_company(w, self.doc.company)
 
-	def get_purchase_tax_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, "purchase_tax_details")
-		self.set_taxes("purchase_tax_details", "purchase_other_charges")
-
 	def validate_stock_or_nonstock_items(self):
 		if not self.get_stock_items():
 			tax_for_valuation = [d.account_head for d in 
-				self.doclist.get({"parentfield": "purchase_tax_details"}) 
+				self.doclist.get({"parentfield": "other_charges"}) 
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
 				webnotes.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"""), raise_exception=1)
@@ -79,7 +75,7 @@ class BuyingController(StockController):
 		 		self.doc.currency)
 		
 	def calculate_taxes_and_totals(self):
-		self.other_fname = "purchase_tax_details"
+		self.other_fname = "other_charges"
 		super(BuyingController, self).calculate_taxes_and_totals()
 		self.calculate_total_advance("Purchase Invoice", "advance_allocation_details")
 		
@@ -203,7 +199,7 @@ class BuyingController(StockController):
 				last_stock_item_idx = d.idx
 			
 		total_valuation_amount = sum([flt(d.tax_amount) for d in 
-			self.doclist.get({"parentfield": "purchase_tax_details"}) 
+			self.doclist.get({"parentfield": "other_charges"}) 
 			if d.category in ["Valuation", "Valuation and Total"]])
 			
 		

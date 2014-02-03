@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 12:15:51", 
   "docstatus": 0, 
-  "modified": "2014-01-15 16:23:58", 
+  "modified": "2014-01-29 13:08:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -22,6 +22,8 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
@@ -191,9 +193,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "charge", 
+  "fieldname": "taxes_and_charges", 
   "fieldtype": "Link", 
-  "label": "Charge", 
+  "label": "Taxes and Charges", 
   "oldfieldname": "charge", 
   "oldfieldtype": "Link", 
   "options": "Sales Taxes and Charges Master", 

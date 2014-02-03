@@ -39,13 +39,13 @@ class DocType:
 		
 		for pr in purchase_receipts:
 			pr_bean = webnotes.bean('Purchase Receipt', pr)
-			idx = max([d.idx for d in pr_bean.doclist.get({"parentfield": "purchase_tax_details"})])
+			idx = max([d.idx for d in pr_bean.doclist.get({"parentfield": "other_charges"})])
 			
 			for lc in self.doclist.get({"parentfield": "landed_cost_details"}):
 				amt = flt(lc.amount) * flt(pr_bean.doc.net_total)/ flt(total_amt)
 				
 				matched_row = pr_bean.doclist.get({
-					"parentfield": "purchase_tax_details", 
+					"parentfield": "other_charges", 
 					"category": "Valuation",
 					"add_deduct_tax": "Add",
 					"charge_type": "Actual",
@@ -53,7 +53,7 @@ class DocType:
 				})
 				
 				if not matched_row:	# add if not exists
-					ch = addchild(pr_bean.doc, 'purchase_tax_details', 'Purchase Taxes and Charges')
+					ch = addchild(pr_bean.doc, 'other_charges', 'Purchase Taxes and Charges')
 					ch.category = 'Valuation'
 					ch.add_deduct_tax = 'Add'
 					ch.charge_type = 'Actual'

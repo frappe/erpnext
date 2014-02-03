@@ -130,7 +130,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test Account Discount - _TC", 168.03, 1512.30],
 		]
 		
-		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "purchase_tax_details"})):
+		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "other_charges"})):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
@@ -165,7 +165,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test Account Discount - _TC", 168.03, 1512.30],
 		]
 
-		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "purchase_tax_details"})):
+		for i, tax in enumerate(wrapper.doclist.get({"parentfield": "other_charges"})):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
@@ -258,7 +258,7 @@ test_records = [
 		# taxes
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "Actual",
 			"account_head": "_Test Account Shipping Charges - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -269,7 +269,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Net Total",
 			"account_head": "_Test Account Customs Duty - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -280,7 +280,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Net Total",
 			"account_head": "_Test Account Excise Duty - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -291,7 +291,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Previous Row Amount",
 			"account_head": "_Test Account Education Cess - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -303,7 +303,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Previous Row Amount",
 			"account_head": "_Test Account S&H Education Cess - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -315,7 +315,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Previous Row Total",
 			"account_head": "_Test Account CST - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -327,7 +327,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Net Total",
 			"account_head": "_Test Account VAT - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -338,7 +338,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "On Previous Row Total",
 			"account_head": "_Test Account Discount - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -380,7 +380,7 @@ test_records = [
 		# taxes
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "Actual",
 			"account_head": "_Test Account Shipping Charges - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -391,7 +391,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "Actual",
 			"account_head": "_Test Account VAT - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -402,7 +402,7 @@ test_records = [
 		},
 		{
 			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "purchase_tax_details",
+			"parentfield": "other_charges",
 			"charge_type": "Actual",
 			"account_head": "_Test Account Customs Duty - _TC",
 			"cost_center": "_Test Cost Center - _TC",

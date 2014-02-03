@@ -2,15 +2,13 @@
  {
   "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:55:36", 
+  "modified": "2014-01-30 15:29:04", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
   "allow_copy": 1, 
-  "allow_email": 1, 
-  "allow_print": 1, 
   "doctype": "DocType", 
   "hide_heading": 0, 
   "hide_toolbar": 0, 
@@ -30,15 +28,19 @@
   "permlevel": 0
  }, 
  {
+  "cancel": 0, 
   "create": 1, 
+  "delete": 0, 
   "doctype": "DocPerm", 
+  "export": 0, 
+  "import": 0, 
   "name": "__common__", 
   "parent": "SMS Center", 
   "parentfield": "permissions", 
   "parenttype": "DocType", 
   "permlevel": 0, 
   "read": 1, 
-  "report": 1, 
+  "report": 0, 
   "role": "System Manager", 
   "submit": 0, 
   "write": 1
@@ -118,6 +120,20 @@
   "fieldtype": "Text", 
   "label": "Message", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_words", 
+  "fieldtype": "Int", 
+  "label": "Total Words", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_messages", 
+  "fieldtype": "Int", 
+  "label": "Total Message(s)", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

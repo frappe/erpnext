@@ -1,8 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-//--------- ONLOAD -------------
-
 {% include "public/js/controllers/accounts.js" %}
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -11,7 +9,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	 cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
+	cur_frm.set_footnote(wn.markdown(cur_frm.meta.description));
 }
 
 // For customizing print
@@ -40,11 +38,11 @@ cur_frm.pformat.other_charges= function(doc){
 	var make_row = function(title, val, bold){
 		var bstart = '<b>'; var bend = '</b>';
 		return '<tr><td style="width:50%;">' + (bold?bstart:'') + title + (bold?bend:'') + '</td>'
-		 +'<td style="width:50%;text-align:right;">' + format_currency(val, doc.currency) + '</td>'
-		 +'</tr>'
+			+ '<td style="width:50%;text-align:right;">' + format_currency(val, doc.currency) + '</td>'
+			+ '</tr>';
 	}
 
-	function convert_rate(val){
+	function convert_rate(val) {
 		var new_val = flt(val)/flt(doc.conversion_rate);
 		return new_val;
 	}
@@ -71,31 +69,28 @@ cur_frm.pformat.other_charges= function(doc){
 
 		// add rows
 		if(cl.length){
-			for(var i=0;i<cl.length;i++){
+			for(var i=0;i<cl.length;i++) {
 				if(convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate)
 					out += make_row(cl[i].description, convert_rate(cl[i].tax_amount), 0);
 			}
 		}
 
 		// Discount Amount
-		if(!print_hide('discount_amount') && doc.discount_amount) {
+		if(!print_hide('discount_amount') && doc.discount_amount)
 			out += make_row('Discount Amount', convert_rate(doc.discount_amount), 0);
-		}
 
 		// grand total
-		if(!print_hide('grand_total_export')) {
+		if(!print_hide('grand_total_export'))
 			out += make_row('Grand Total', doc.grand_total_export, 1);
-		}
 		
-		if(!print_hide('rounded_total_export')) {
+		if(!print_hide('rounded_total_export'))
 			out += make_row('Rounded Total', doc.rounded_total_export, 1);
-		}
 
-		if(doc.in_words_export && !print_hide('in_words_export')){
+		if(doc.in_words_export && !print_hide('in_words_export')) {
 			out +='</table></td></tr>';
 			out += '<tr><td colspan = "2">';
-			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>'
-			out += '<td style="width:50%;">' + doc.in_words_export + '</td></tr>'
+			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
+			out += '<td style="width:50%;">' + doc.in_words_export + '</td></tr>';
 		}
 		out += '</table></td></tr></table></div>';	 
 	}
@@ -104,8 +99,8 @@ cur_frm.pformat.other_charges= function(doc){
 
 cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')){
-		alert(wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
+	if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')) {
+		msgprint(wn._("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
 		d.charge_type = '';
 	}
 	validated = false;
@@ -117,17 +112,17 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 
 cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(!d.charge_type && d.row_id){
-		alert(wn._("Please select Charge Type first"));
+	if(!d.charge_type && d.row_id) {
+		msgprint(wn._("Please select Charge Type first"));
 		d.row_id = '';
 	}
 	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
-		alert(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
+		msgprint(wn._("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
 		d.row_id = '';
 	}
-	else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id){
+	else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
 		if(d.row_id >= d.idx){
-			alert(wn._("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
+			msgprint(wn._("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
 			d.row_id = '';
 		}
 	}
@@ -158,7 +153,7 @@ cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = f
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.rate) {
-		alert(wn._("Please select Charge Type first"));
+		msgprint(wn._("Please select Charge Type first"));
 		d.rate = '';
 	}
 	validated = false;
@@ -167,12 +162,12 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(!d.charge_type && d.tax_amount){
-		alert(wn._("Please select Charge Type first"));
+	if(!d.charge_type && d.tax_amount) {
+		msgprint(wn._("Please select Charge Type first"));
 		d.tax_amount = '';
 	}
 	else if(d.charge_type && d.tax_amount) {
-		alert(wn._("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
+		msgprint(wn._("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
 		d.tax_amount = '';
 	}
 	validated = false;

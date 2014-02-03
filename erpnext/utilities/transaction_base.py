@@ -64,7 +64,7 @@ class TransactionBase(StatusUpdater):
 			out[f] = customer.fields.get(f)
 		
 		# fields prepended with default in Customer doctype
-		for f in ['sales_partner', 'commission_rate', 'currency', 'price_list']:
+		for f in ['sales_partner', 'commission_rate', 'currency', 'price_list', 'taxes_and_charges']:
 			if customer.fields.get("default_" + f):
 				out[f] = customer.fields.get("default_" + f)
 			
@@ -115,7 +115,7 @@ class TransactionBase(StatusUpdater):
 			sales_person.update({
 				"doctype": "Sales Team",
 				"parentfield": "sales_team",
-				"idx": i+1
+				"idx": i + 1
 			})
 			
 			# add child
@@ -128,12 +128,17 @@ class TransactionBase(StatusUpdater):
 		out["supplier_name"] = supplier.supplier_name
 		if supplier.default_currency:
 			out["currency"] = supplier.default_currency
+
+		# fields prepended with default in Customer doctype
+		for f in ['currency', 'taxes_and_charges']:
+			if supplier.fields.get("default_" + f):
+				out[f] = supplier.fields.get("default_" + f)
 			
 		out["buying_price_list"] = self.get_user_default_price_list("buying_price_list") or \
 			supplier.default_price_list or self.doc.buying_price_list
 		
 		return out
-		
+
 	def set_supplier_defaults(self):
 		for fieldname, val in self.get_supplier_defaults().items():
 			if self.meta.get_field(fieldname):

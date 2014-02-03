@@ -3,7 +3,7 @@
 
 cur_frm.cscript.tname = "Purchase Receipt Item";
 cur_frm.cscript.fname = "purchase_receipt_details";
-cur_frm.cscript.other_fname = "purchase_tax_details";
+cur_frm.cscript.other_fname = "other_charges";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
@@ -106,27 +106,28 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 $.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{ 'supplier': doc.supplier}
+	return {
+		filters: { 'supplier': doc.supplier}
 	}
 }
 
 cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{ 'supplier': doc.supplier}
+	return {
+		filters: { 'supplier': doc.supplier }
 	}
 }
 
-cur_frm.cscript.new_contact = function(){
+cur_frm.cscript.new_contact = function() {
 	tn = wn.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_supplier = 1;
-	if(doc.supplier) locals['Contact'][tn].supplier = doc.supplier;
+	if(doc.supplier)
+		locals['Contact'][tn].supplier = doc.supplier;
 	loaddoc('Contact', tn);
 }
 
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
-	return{
-		filters:[
+	return {
+		filters: [
 			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
 	}
@@ -134,28 +135,25 @@ cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').g
 
 cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(d.item_code){
-		return{
-			filters:{'item': d.item_code}
+	if(d.item_code) {
+		return {
+			filters: {'item': d.item_code}
 		}
 	}
-	else{
-		alert(wn._("Please enter Item Code."));
-	}
+	else
+		msgprint(wn._("Please enter Item Code."));
 }
 
-cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
-	if(doc.select_print_heading){
-		// print heading
+cur_frm.cscript.select_print_heading = function(doc, cdt, cdn) {
+	if(doc.select_print_heading)
 		cur_frm.pformat.print_heading = doc.select_print_heading;
-	}
 	else
 		cur_frm.pformat.print_heading = "Purchase Receipt";
 }
 
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:[
+	return {
+		filters: [
 			['Print Heading', 'docstatus', '!=', '2']
 		]
 	}
@@ -170,7 +168,6 @@ cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query =
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.purchase_receipt)) {
+	if(cint(wn.boot.notification_settings.purchase_receipt))
 		cur_frm.email_doc(wn.boot.notification_settings.purchase_receipt_message);
-	}
 }

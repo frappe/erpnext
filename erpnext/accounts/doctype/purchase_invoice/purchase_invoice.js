@@ -3,7 +3,7 @@
 
 cur_frm.cscript.tname = "Purchase Invoice Item";
 cur_frm.cscript.fname = "entries";
-cur_frm.cscript.other_fname = "purchase_tax_details";
+cur_frm.cscript.other_fname = "other_charges";
 
 wn.provide("erpnext.accounts");
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};

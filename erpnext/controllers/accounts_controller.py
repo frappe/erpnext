@@ -130,6 +130,10 @@ class AccountsController(TransactionBase):
 				})
 				
 				self.doclist.append(tax)
+
+	def get_other_charges(self):
+		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
+		self.set_taxes("other_charges", "taxes_and_charges")
 					
 	def calculate_taxes_and_totals(self):
 		self.discount_amount_applied = False
