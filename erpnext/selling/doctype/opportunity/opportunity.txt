@@ -81,6 +81,7 @@
   "reqd": 1
  }, 
  {
+  "depends_on": "eval:doc.enquiry_from===\"Customer\"", 
   "doctype": "DocField", 
   "fieldname": "customer", 
   "fieldtype": "Link", 
@@ -97,6 +98,7 @@
   "search_index": 0
  }, 
  {
+  "depends_on": "eval:doc.enquiry_from===\"Lead\"", 
   "doctype": "DocField", 
   "fieldname": "lead", 
   "fieldtype": "Link", 
@@ -184,6 +186,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "eval:doc.lead || doc.customer", 
   "doctype": "DocField", 
   "fieldname": "contact_info", 
   "fieldtype": "Section Break", 
@@ -192,6 +195,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "eval:doc.customer || doc.lead", 
   "doctype": "DocField", 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
@@ -205,13 +209,14 @@
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
-  "hidden": 0, 
+  "hidden": 1, 
   "label": "Address", 
   "oldfieldname": "address", 
   "oldfieldtype": "Small Text", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
@@ -225,7 +230,7 @@
   "search_index": 1
  }, 
  {
-  "depends_on": "eval:doc.enquiry_from==\"Customer\"", 
+  "depends_on": "customer", 
   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 
@@ -248,6 +253,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_name", 
   "fieldtype": "Data", 
@@ -256,6 +262,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "eval:doc.lead || doc.customer", 
   "doctype": "DocField", 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
@@ -266,6 +273,7 @@
   "read_only": 0
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
@@ -273,6 +281,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "eval:doc.lead || doc.customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
@@ -280,6 +289,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "eval:doc.lead || doc.customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 

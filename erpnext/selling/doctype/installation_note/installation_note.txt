@@ -74,6 +74,7 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "customer_address", 
   "fieldtype": "Link", 
@@ -82,6 +83,7 @@
   "print_hide": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_person", 
   "fieldtype": "Link", 
@@ -104,6 +106,7 @@
   "doctype": "DocField", 
   "fieldname": "address_display", 
   "fieldtype": "Small Text", 
+  "hidden": 1, 
   "label": "Address", 
   "read_only": 1
  }, 
@@ -111,10 +114,12 @@
   "doctype": "DocField", 
   "fieldname": "contact_display", 
   "fieldtype": "Small Text", 
+  "hidden": 1, 
   "label": "Contact", 
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_mobile", 
   "fieldtype": "Text", 
@@ -122,6 +127,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "doctype": "DocField", 
   "fieldname": "contact_email", 
   "fieldtype": "Text", 
@@ -130,6 +136,7 @@
   "read_only": 1
  }, 
  {
+  "depends_on": "customer", 
   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "territory", 
@@ -142,6 +149,7 @@
   "search_index": 1
  }, 
  {
+  "depends_on": "customer", 
   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "customer_group", 

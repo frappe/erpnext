@@ -2,36 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes, json
+import webnotes
 from webnotes import msgprint, _
 from webnotes.utils import cstr, flt, now_datetime, cint
-from webnotes.model.doc import addchild
 
 from erpnext.controllers.status_updater import StatusUpdater
 
+
 class TransactionBase(StatusUpdater):
-	def get_default_address_and_contact(self, party_field, party_name=None):
-		"""get a dict of default field values of address and contact for a given party type
-			party_type can be one of: customer, supplier"""
-		if not party_name:
-			party_name = self.doc.fields.get(party_field)
-		
-		return get_default_address_and_contact(party_field, party_name,
-			fetch_shipping_address=True if self.meta.get_field("shipping_address_name") else False)
-			
-	def set_address_fields(self):
-		party_type, party_name = self.get_party_type_and_name()
-		
-		if party_type in ("Customer", "Lead"):
-			if self.doc.customer_address:
-				self.doc.address_display = get_address_display(self.doc.customer_address)
-				
-			if self.doc.shipping_address_name:
-				self.doc.shipping_address = get_address_display(self.doc.shipping_address_name)
-			
-		elif self.doc.supplier_address:
-			self.doc.address_display = get_address_display(self.doc.supplier_address)
-		
 	def set_contact_fields(self):
 		party_type, party_name = self.get_party_type_and_name()
 		
@@ -53,96 +31,6 @@ class TransactionBase(StatusUpdater):
 					break
 
 		return self._party_type_and_name
-			
-	def get_customer_defaults(self):
-		if not self.doc.customer: return {}
-		
-		out = self.get_default_address_and_contact("customer")
-
-		customer = webnotes.doc("Customer", self.doc.customer)
-		for f in ['customer_name', 'customer_group', 'territory']:
-			out[f] = customer.fields.get(f)
-		
-		# fields prepended with default in Customer doctype
-		for f in ['sales_partner', 'commission_rate', 'currency', 'price_list', 'taxes_and_charges']:
-			if customer.fields.get("default_" + f):
-				out[f] = customer.fields.get("default_" + f)
-			
-		return out
-				
-	def set_customer_defaults(self):
-		"""
-			For a customer:
-			1. Sets default address and contact
-			2. Sets values like Territory, Customer Group, etc.
-			3. Clears existing Sales Team and fetches the one mentioned in Customer
-		"""
-		customer_defaults = self.get_customer_defaults()
-
-		customer_defaults["selling_price_list"] = \
-			self.get_user_default_price_list("selling_price_list") or \
-			customer_defaults.get("price_list") or \
-			webnotes.conn.get_value("Customer Group", self.doc.customer_group, 
-				"default_price_list") or self.doc.selling_price_list
-			
-		for fieldname, val in customer_defaults.items():
-			if self.meta.get_field(fieldname):
-				self.doc.fields[fieldname] = val
-			
-		if self.meta.get_field("sales_team") and self.doc.customer:
-			self.set_sales_team_for_customer()
-			
-	def get_user_default_price_list(self, price_list):
-		from webnotes.defaults import get_defaults_for
-		user_default_price_list = get_defaults_for(webnotes.session.user).get(price_list)
-		return cstr(user_default_price_list) \
-			if not isinstance(user_default_price_list, list) else ""
-			
-	def set_sales_team_for_customer(self):
-		from webnotes.model import default_fields
-		
-		# clear table
-		self.doclist = self.doc.clear_table(self.doclist, "sales_team")
-
-		sales_team = webnotes.conn.sql("""select * from `tabSales Team`
-			where parenttype="Customer" and parent=%s""", self.doc.customer, as_dict=True)
-		for i, sales_person in enumerate(sales_team):
-			# remove default fields
-			for fieldname in default_fields:
-				if fieldname in sales_person:
-					del sales_person[fieldname]
-			
-			sales_person.update({
-				"doctype": "Sales Team",
-				"parentfield": "sales_team",
-				"idx": i + 1
-			})
-			
-			# add child
-			self.doclist.append(sales_person)
-			
-	def get_supplier_defaults(self):
-		out = self.get_default_address_and_contact("supplier")
-
-		supplier = webnotes.doc("Supplier", self.doc.supplier)
-		out["supplier_name"] = supplier.supplier_name
-		if supplier.default_currency:
-			out["currency"] = supplier.default_currency
-
-		# fields prepended with default in Customer doctype
-		for f in ['currency', 'taxes_and_charges']:
-			if supplier.fields.get("default_" + f):
-				out[f] = supplier.fields.get("default_" + f)
-			
-		out["buying_price_list"] = self.get_user_default_price_list("buying_price_list") or \
-			supplier.default_price_list or self.doc.buying_price_list
-		
-		return out
-
-	def set_supplier_defaults(self):
-		for fieldname, val in self.get_supplier_defaults().items():
-			if self.meta.get_field(fieldname):
-				self.doc.fields[fieldname] = val
 				
 	def get_lead_defaults(self):
 		out = self.get_default_address_and_contact("lead")
@@ -157,88 +45,6 @@ class TransactionBase(StatusUpdater):
 		
 	def set_lead_defaults(self):
 		self.doc.fields.update(self.get_lead_defaults())
-	
-	def get_customer_address(self, args):
-		args = json.loads(args)
-		ret = {
-			'customer_address' : args["address"],
-			'address_display' : get_address_display(args["address"]),
-		}
-		if args.get('contact'):
-			ret.update(map_party_contact_details(args['contact']))
-		
-		return ret
-		
-	def set_customer_address(self, args):
-		self.doc.fields.update(self.get_customer_address(args))
-		
-	# TODO deprecate this - used only in sales_order.js
-	def get_shipping_address(self, name):
-		shipping_address = get_default_address("customer", name, is_shipping_address=True)
-		return {
-			'shipping_address_name' : shipping_address,
-			'shipping_address' : get_address_display(shipping_address) if shipping_address else None
-		}
-		
-	# Get Supplier Default Primary Address - first load
-	# -----------------------
-	def get_default_supplier_address(self, args):
-		if isinstance(args, basestring):
-			args = json.loads(args)
-			
-		address_name = get_default_address("supplier", args["supplier"])
-		ret = {
-			'supplier_address' : address_name,
-			'address_display' : get_address_display(address_name),
-		}
-		ret.update(map_party_contact_details(None, "supplier", args["supplier"]))
-		ret.update(self.get_supplier_details(args['supplier']))
-		return ret
-		
-	# Get Supplier Address
-	# -----------------------
-	def get_supplier_address(self, args):
-		args = json.loads(args)
-		ret = {
-			'supplier_address' : args['address'],
-			'address_display' : get_address_display(args["address"]),
-		}
-		ret.update(map_party_contact_details(contact_name=args['contact']))
-		return ret
-		
-	def set_supplier_address(self, args):
-		self.doc.fields.update(self.get_supplier_address(args))
-	
-	# Get Supplier Details
-	# -----------------------
-	def get_supplier_details(self, name):
-		supplier_details = webnotes.conn.sql("""\
-			select supplier_name, default_currency
-			from `tabSupplier`
-			where name = %s and docstatus < 2""", name, as_dict=1)
-		if supplier_details:
-			return {
-				'supplier_name': (supplier_details[0]['supplier_name']
-					or self.doc.fields.get('supplier_name')),
-				'currency': (supplier_details[0]['default_currency']
-					or self.doc.fields.get('currency')),
-			}
-		else:
-			return {}
-		
-	# Get Sales Person Details of Customer
-	# ------------------------------------
-	def get_sales_person(self, name):			
-		self.doclist = self.doc.clear_table(self.doclist,'sales_team')
-		idx = 0
-		for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % name):
-			ch = addchild(self.doc, 'sales_team', 'Sales Team', self.doclist)
-			ch.sales_person = d and cstr(d[0]) or ''
-			ch.allocated_percentage = d and flt(d[1]) or 0
-			ch.allocated_amount = d and flt(d[2]) or 0
-			ch.incentives = d and flt(d[3]) or 0
-			ch.idx = idx
-			idx += 1
 
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")
@@ -321,68 +127,13 @@ class TransactionBase(StatusUpdater):
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
-def get_default_address_and_contact(party_field, party_name, fetch_shipping_address=False):
-	out = {}
-	
-	# get addresses
-	billing_address = get_default_address(party_field, party_name)
-	if billing_address:
-		out[party_field + "_address"] = billing_address
-		out["address_display"] = get_address_display(billing_address)
-	else:
-		out[party_field + "_address"] = out["address_display"] = None
-	
-	if fetch_shipping_address:
-		shipping_address = get_default_address(party_field, party_name, is_shipping_address=True)
-		if shipping_address:
-			out["shipping_address_name"] = shipping_address
-			out["shipping_address"] = get_address_display(shipping_address)
-		else:
-			out["shipping_address_name"] = out["shipping_address"] = None
-	
-	# get contact
-	if party_field == "lead":
-		out["customer_address"] = out.get("lead_address")
-		out.update(map_lead_contact_details(party_name))
-	else:
-		out.update(map_party_contact_details(None, party_field, party_name))
-	
-	return out
-	
-def get_default_address(party_field, party_name, is_shipping_address=False):
-	if is_shipping_address:
-		order_by = "is_shipping_address desc, is_primary_address desc, name asc"
-	else:
-		order_by = "is_primary_address desc, name asc"
-		
-	address = webnotes.conn.sql("""select name from `tabAddress` where `%s`=%s order by %s
-		limit 1""" % (party_field, "%s", order_by), party_name)
-	
-	return address[0][0] if address else None
-
 def get_default_contact(party_field, party_name):
 	contact = webnotes.conn.sql("""select name from `tabContact` where `%s`=%s
 		order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
 		(party_name,))
 		
 	return contact[0][0] if contact else None
-	
-def get_address_display(address_dict):
-	if not isinstance(address_dict, dict):
-		address_dict = webnotes.conn.get_value("Address", address_dict, "*", as_dict=True) or {}
-	
-	meta = webnotes.get_doctype("Address")
-	sequence = (("", "address_line1"), ("\n", "address_line2"), ("\n", "city"),
-		("\n", "state"), ("\n" + meta.get_label("pincode") + ": ", "pincode"), ("\n", "country"),
-		("\n" + meta.get_label("phone") + ": ", "phone"), ("\n" + meta.get_label("fax") + ": ", "fax"))
-	
-	display = ""
-	for separator, fieldname in sequence:
-		if address_dict.get(fieldname):
-			display += separator + address_dict.get(fieldname)
 		
-	return display.strip()
-	
 def map_lead_contact_details(party_name):
 	out = {}
 	for fieldname in ["contact_display", "contact_email", "contact_mobile", "contact_phone"]:

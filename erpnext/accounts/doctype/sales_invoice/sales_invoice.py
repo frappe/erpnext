@@ -8,12 +8,13 @@ import webnotes.defaults
 from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
 	get_first_day, get_last_day
 
-from webnotes.utils.email_lib import sendmail
 from webnotes.utils import comma_and, get_url
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import _, msgprint
+
+from erpnext.accounts.party import get_party_account, get_due_date
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
@@ -149,23 +150,13 @@ class DocType(SellingController):
 		self.set_pos_fields(for_validate)
 		
 		if not self.doc.debit_to:
-			self.doc.debit_to = self.get_customer_account()
+			self.doc.debit_to = get_party_account(self.doc.company, self.doc.customer, "Customer")
 		if not self.doc.due_date:
-			self.doc.due_date = self.get_due_date()
+			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.customer, "Customer",
+				self.doc.debit_to, self.doc.company)
 		
 		super(DocType, self).set_missing_values(for_validate)
-		
-	def set_customer_defaults(self):
-		# TODO cleanup these methods
-		if self.doc.customer:
-			self.doc.debit_to = self.get_customer_account()
-		elif self.doc.debit_to:
-			self.doc.customer = webnotes.conn.get_value('Account', self.doc.debit_to, 'master_name')
-		
-		self.doc.due_date = self.get_due_date()
-		
-		super(DocType, self).set_customer_defaults()
-			
+					
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
@@ -192,7 +183,7 @@ class DocType(SellingController):
 		if pos:
 			if not for_validate and not self.doc.customer:
 				self.doc.customer = pos.customer
-				self.set_customer_defaults()
+				# self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
 				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
@@ -214,46 +205,8 @@ class DocType(SellingController):
 				self.doc.terms = webnotes.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
 			# fetch charges
-			if self.doc.taxes_and_charges and not len(self.doclist.get({"parentfield": "other_charges"})):
+			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
 				self.set_taxes("other_charges", "taxes_and_charges")
-
-	def get_customer_account(self):
-		"""Get Account Head to which amount needs to be Debited based on Customer"""
-		if not self.doc.company:
-			msgprint("Please select company first and re-select the customer after doing so",
-			 	raise_exception=1)
-		if self.doc.customer:
-			acc_head = webnotes.conn.sql("""select name from `tabAccount` 
-				where (name = %s or (master_name = %s and master_type = 'customer')) 
-				and docstatus != 2 and company = %s""", 
-				(cstr(self.doc.customer) + " - " + self.get_company_abbr(), 
-				self.doc.customer, self.doc.company))
-			
-			if acc_head and acc_head[0][0]:
-				return acc_head[0][0]
-			else:
-				msgprint("%s does not have an Account Head in %s. \
-					You must first create it from the Customer Master" % 
-					(self.doc.customer, self.doc.company))
-
-	def get_due_date(self):
-		"""Set Due Date = Posting Date + Credit Days"""
-		due_date = None
-		if self.doc.posting_date:
-			credit_days = 0
-			if self.doc.debit_to:
-				credit_days = webnotes.conn.get_value("Account", self.doc.debit_to, "credit_days")
-			if self.doc.customer and not credit_days:
-				credit_days = webnotes.conn.get_value("Customer", self.doc.customer, "credit_days")
-			if self.doc.company and not credit_days:
-				credit_days = webnotes.conn.get_value("Company", self.doc.company, "credit_days")
-				
-			if credit_days:
-				due_date = add_days(self.doc.posting_date, credit_days)
-			else:
-				due_date = self.doc.posting_date
-
-		return due_date	
 	
 	def get_advances(self):
 		super(DocType, self).get_advances(self.doc.debit_to, 
@@ -735,7 +688,7 @@ def manage_recurring_invoices(next_date=None, commit=True):
 					webnotes.conn.begin()
 					webnotes.conn.sql("update `tabSales Invoice` set \
 						convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
-					notify_errors(ref_invoice, ref_wrapper.doc.owner)
+					notify_errors(ref_invoice, ref_wrapper.doc.customer, ref_wrapper.doc.owner)
 					webnotes.conn.commit()
 
 				exception_list.append(webnotes.get_traceback())
@@ -784,101 +737,23 @@ def make_new_invoice(ref_wrapper, posting_date):
 	
 def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
-	subject = "Invoice : " + new_rv.doc.name
-
-	com = new_rv.doc.company
-
-	hd = '''<div><h2>%s</h2></div>
-			<div><h3>Invoice: %s</h3></div>
-			<table cellspacing= "5" cellpadding="5"  width = "100%%">
-				<tr>
-					<td width = "50%%"><b>Customer</b><br>%s<br>%s</td>
-					<td width = "50%%">Invoice Date	   : %s<br>Invoice Period : %s to %s <br>Due Date	   : %s</td>
-				</tr>
-			</table>
-		''' % (com, new_rv.doc.name, new_rv.doc.customer_name, new_rv.doc.address_display, getdate(new_rv.doc.posting_date).strftime("%d-%m-%Y"), \
-		getdate(new_rv.doc.invoice_period_from_date).strftime("%d-%m-%Y"), getdate(new_rv.doc.invoice_period_to_date).strftime("%d-%m-%Y"),\
-		getdate(new_rv.doc.due_date).strftime("%d-%m-%Y"))
 	
-	
-	tbl = '''<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
-				<tr>
-					<td width = "15%%" bgcolor="#CCC" align="left"><b>Item</b></td>
-					<td width = "40%%" bgcolor="#CCC" align="left"><b>Description</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Qty</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Rate</b></td>
-					<td width = "15%%" bgcolor="#CCC" align="center"><b>Amount</b></td>
-				</tr>
-		'''
-	for d in getlist(new_rv.doclist, 'entries'):
-		tbl += '<tr><td>' + cstr(d.item_code) +'</td><td>' + cstr(d.description) + \
-			'</td><td>' + cstr(d.qty) +'</td><td>' + cstr(d.basic_rate) + \
-			'</td><td>' + cstr(d.amount) +'</td></tr>'
-	tbl += '</table>'
-
-	totals ='''<table cellspacing= "5" cellpadding="5"  width = "100%%">
-					<tr>
-						<td width = "50%%"></td>
-						<td width = "50%%">
-							<table width = "100%%">
-								<tr>
-									<td width = "50%%">Net Total: </td><td>%s </td>
-								</tr><tr>
-									<td width = "50%%">Total Tax: </td><td>%s </td>
-								</tr><tr>
-									<td width = "50%%">Grand Total: </td><td>%s</td>
-								</tr><tr>
-									<td width = "50%%">In Words: </td><td>%s</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr><td>Terms and Conditions:</td></tr>
-					<tr><td>%s</td></tr>
-				</table>
-			''' % (new_rv.doc.net_total,
-			new_rv.doc.other_charges_total,new_rv.doc.grand_total,
-			new_rv.doc.in_words,new_rv.doc.terms)
-
-
-	msg = hd + tbl + totals
-	
-	sendmail(new_rv.doc.notification_email_address, subject=subject, msg = msg)
+	from webnotes.core.doctype.print_format.print_format import get_html
+	webnotes.sendmail(new_rv.doc.notification_email_address, 
+		subject="New Invoice : " + new_rv.doc.name, 
+		message = get_html(new_rv.doc, new_rv.doclist, "SalesInvoice"))
 		
-def notify_errors(inv, owner):
-	import webnotes
-		
-	exception_msg = """
-		Dear User,
-
-		An error occured while creating recurring invoice from %s (at %s).
-
-		May be there are some invalid email ids mentioned in the invoice.
-
-		To stop sending repetitive error notifications from the system, we have unchecked
-		"Convert into Recurring" field in the invoice %s.
-
-
-		Please correct the invoice and make the invoice recurring again. 
-
-		<b>It is necessary to take this action today itself for the above mentioned recurring invoice \
-		to be generated. If delayed, you will have to manually change the "Repeat on Day of Month" field \
-		of this invoice for generating the recurring invoice.</b>
-
-		Regards,
-		Administrator
-		
-	""" % (inv, get_url(), inv)
-	subj = "[Urgent] Error while creating recurring invoice from %s" % inv
-
+def notify_errors(inv, customer, owner):
 	from webnotes.profile import get_system_managers
-	recipients = get_system_managers()
-	owner_email = webnotes.conn.get_value("Profile", owner, "email")
-	if not owner_email in recipients:
-		recipients.append(owner_email)
-
-	assign_task_to_owner(inv, exception_msg, recipients)
-	sendmail(recipients, subject=subj, msg = exception_msg)
+	
+	webnotes.sendmail(recipients=get_system_managers() + [webnotes.conn.get_value("Profile", owner, "email")],
+		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
+		message = webnotes.get_template("template/emails/recurring_invoice_failed.html").render({
+			"name": inv,
+			"customer": customer
+		})
+	
+	assign_task_to_owner(inv, "Recurring Invoice Failed", recipients)
 
 def assign_task_to_owner(inv, msg, users):
 	for d in users:

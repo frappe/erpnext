@@ -93,9 +93,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		
 		if(cint(wn.defaults.get_default("auto_accounting_for_stock"))) {
 			var account_for = "stock_adjustment_account";
-			if (this.frm.doc.purpose == "Sales Return")
-				account_for = "stock_in_hand_account";
-			else if (this.frm.doc.purpose == "Purchase Return") 
+
+			if (this.frm.doc.purpose == "Purchase Return") 
 				account_for = "stock_received_but_not_billed";
 			
 			return this.frm.call({
@@ -236,7 +235,50 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	mtn_details_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
+	},
+	
+	customer: function() {
+		return this.frm.call({
+			method: "erpnext.selling.doctype.customer.customer.get_customer_details",
+			args: { customer: this.frm.doc.customer }
+		});
+	},
+	
+	supplier: function() {
+		return this.frm.call({
+			method: "erpnext.buying.doctype.supplier.supplier.get_supplier_details",
+			args: { supplier: this.frm.doc.supplier }
+		});
+	},
+	
+	delivery_note_no: function() {
+		this.get_party_details({
+			ref_dt: "Delivery Note",
+			ref_dn: this.frm.doc.delivery_note_no
+		})
+	},
+	
+	sales_invoice_no: function() {
+		this.get_party_details({
+			ref_dt: "Sales Invoice",
+			ref_dn: this.frm.doc.sales_invoice_no
+		})
+	},
+	
+	purchase_receipt_no: function() {
+		this.get_party_details({
+			ref_dt: "Purchase Receipt",
+			ref_dn: this.frm.doc.purchase_receipt_no
+		})
+	},
+	
+	get_party_details: function(args) {
+		return this.frm.call({
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_party_details",
+			args: args,
+		})
 	}
+	
 });
 
 cur_frm.script_manager.make(erpnext.stock.StockEntry);
@@ -263,31 +305,6 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier = 
 			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 	}
-}
-
-cur_frm.cscript.delivery_note_no = function(doc, cdt, cdn) {
-	if(doc.delivery_note_no)
-		return get_server_fields('get_cust_values', '', '', doc, cdt, cdn, 1);
-}
-
-cur_frm.cscript.sales_invoice_no = function(doc, cdt, cdn) {
-	if(doc.sales_invoice_no) 
-		return get_server_fields('get_cust_values', '', '', doc, cdt, cdn, 1);
-}
-
-cur_frm.cscript.customer = function(doc, cdt, cdn) {
-	if(doc.customer) 
-		return get_server_fields('get_cust_addr', '', '', doc, cdt, cdn, 1);
-}
-
-cur_frm.cscript.purchase_receipt_no = function(doc, cdt, cdn) {
-	if(doc.purchase_receipt_no)	
-		return get_server_fields('get_supp_values', '', '', doc, cdt, cdn, 1);
-}
-
-cur_frm.cscript.supplier = function(doc, cdt, cdn) {
-	if(doc.supplier) 
-		return get_server_fields('get_supp_addr', '', '', doc, cdt, cdn, 1);
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
