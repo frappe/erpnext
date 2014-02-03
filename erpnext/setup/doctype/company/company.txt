@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:28", 
+  "modified": "2014-01-30 16:32:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -110,6 +110,7 @@
   "fieldname": "default_cash_account", 
   "fieldtype": "Link", 
   "label": "Default Cash Account", 
+  "no_copy": 1, 
   "options": "Account", 
   "read_only": 0
  }, 
@@ -142,6 +143,7 @@
   "fieldname": "default_expense_account", 
   "fieldtype": "Link", 
   "label": "Default Expense Account", 
+  "no_copy": 1, 
   "options": "Account"
  }, 
  {
@@ -149,6 +151,7 @@
   "fieldname": "default_income_account", 
   "fieldtype": "Link", 
   "label": "Default Income Account", 
+  "no_copy": 1, 
   "options": "Account"
  }, 
  {

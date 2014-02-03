@@ -196,13 +196,14 @@ def get_customer_details(customer, price_list=None, currency=None):
 			out[f] = customer.get("default_" + f)
 
 	# price list
-	out.selling_price_list = webnotes.conn.get_defaults("selling_price_list", webnotes.session.user)
+	from webnotes.defaults import get_defaults_for
+	out.selling_price_list = get_defaults_for(webnotes.session.user).get(price_list)
 	if isinstance(out.selling_price_list, list):
 		out.selling_price_list = None
 	
 	out.selling_price_list = out.selling_price_list or customer.price_list \
-		or webnotes.conn.get_value("Customer Group", customer.customer_group, "default_price_list")
-		or price_list
+		or webnotes.conn.get_value("Customer Group", 
+			customer.customer_group, "default_price_list") or price_list
 	
 	if out.selling_price_list:
 		out.price_list_currency = webnotes.conn.get_value("Price List", out.selling_price_list, "currency")

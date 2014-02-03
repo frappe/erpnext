@@ -2,28 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes, json
+import webnotes
 from webnotes import msgprint, _
 from webnotes.utils import cstr, flt, now_datetime, cint
-from webnotes.model.doc import addchild
 
 from erpnext.controllers.status_updater import StatusUpdater
 
 
-class TransactionBase(StatusUpdater):			
-	def set_address_fields(self):
-		party_type, party_name = self.get_party_type_and_name()
-		
-		if party_type in ("Customer", "Lead"):
-			if self.doc.customer_address:
-				self.doc.address_display = get_address_display(self.doc.customer_address)
-				
-			if self.doc.shipping_address_name:
-				self.doc.shipping_address = get_address_display(self.doc.shipping_address_name)
-			
-		elif self.doc.supplier_address:
-			self.doc.address_display = get_address_display(self.doc.supplier_address)
-		
+class TransactionBase(StatusUpdater):
 	def set_contact_fields(self):
 		party_type, party_name = self.get_party_type_and_name()
 		
@@ -59,74 +45,6 @@ class TransactionBase(StatusUpdater):
 		
 	def set_lead_defaults(self):
 		self.doc.fields.update(self.get_lead_defaults())
-			
-	# TODO deprecate this - used only in sales_order.js
-	def get_shipping_address(self, name):
-		shipping_address = get_default_address("customer", name, is_shipping_address=True)
-		return {
-			'shipping_address_name' : shipping_address,
-			'shipping_address' : get_address_display(shipping_address) if shipping_address else None
-		}
-		
-	# Get Supplier Default Primary Address - first load
-	# -----------------------
-	def get_default_supplier_address(self, args):
-		if isinstance(args, basestring):
-			args = json.loads(args)
-			
-		address_name = get_default_address("supplier", args["supplier"])
-		ret = {
-			'supplier_address' : address_name,
-			'address_display' : get_address_display(address_name),
-		}
-		ret.update(map_party_contact_details(None, "supplier", args["supplier"]))
-		ret.update(self.get_supplier_details(args['supplier']))
-		return ret
-		
-	# Get Supplier Address
-	# -----------------------
-	def get_supplier_address(self, args):
-		args = json.loads(args)
-		ret = {
-			'supplier_address' : args['address'],
-			'address_display' : get_address_display(args["address"]),
-		}
-		ret.update(map_party_contact_details(contact_name=args['contact']))
-		return ret
-		
-	def set_supplier_address(self, args):
-		self.doc.fields.update(self.get_supplier_address(args))
-	
-	# Get Supplier Details
-	# -----------------------
-	def get_supplier_details(self, name):
-		supplier_details = webnotes.conn.sql("""\
-			select supplier_name, default_currency
-			from `tabSupplier`
-			where name = %s and docstatus < 2""", name, as_dict=1)
-		if supplier_details:
-			return {
-				'supplier_name': (supplier_details[0]['supplier_name']
-					or self.doc.fields.get('supplier_name')),
-				'currency': (supplier_details[0]['default_currency']
-					or self.doc.fields.get('currency')),
-			}
-		else:
-			return {}
-		
-	# Get Sales Person Details of Customer
-	# ------------------------------------
-	def get_sales_person(self, name):			
-		self.doclist = self.doc.clear_table(self.doclist,'sales_team')
-		idx = 0
-		for d in webnotes.conn.sql("select sales_person, allocated_percentage, allocated_amount, incentives from `tabSales Team` where parent = '%s'" % name):
-			ch = addchild(self.doc, 'sales_team', 'Sales Team', self.doclist)
-			ch.sales_person = d and cstr(d[0]) or ''
-			ch.allocated_percentage = d and flt(d[1]) or 0
-			ch.allocated_amount = d and flt(d[2]) or 0
-			ch.incentives = d and flt(d[3]) or 0
-			ch.idx = idx
-			idx += 1
 
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")
@@ -208,17 +126,6 @@ class TransactionBase(StatusUpdater):
 				for field, condition in fields:
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
-	
-def get_default_address(party_field, party_name, is_shipping_address=False):
-	if is_shipping_address:
-		order_by = "is_shipping_address desc, is_primary_address desc, name asc"
-	else:
-		order_by = "is_primary_address desc, name asc"
-		
-	address = webnotes.conn.sql("""select name from `tabAddress` where `%s`=%s order by %s
-		limit 1""" % (party_field, "%s", order_by), party_name)
-	
-	return address[0][0] if address else None
 
 def get_default_contact(party_field, party_name):
 	contact = webnotes.conn.sql("""select name from `tabContact` where `%s`=%s

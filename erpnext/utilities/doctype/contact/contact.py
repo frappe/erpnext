@@ -65,4 +65,3 @@ def get_contact_details(contact):
 	}
 	
 	return out
-	
