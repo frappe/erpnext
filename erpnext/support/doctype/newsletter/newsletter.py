@@ -91,7 +91,7 @@ class DocType():
 		
 		if not webnotes.flags.in_test:
 			webnotes.conn.auto_commit_on_many_writes = True
-		
+
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = self.send_to_doctype, email_field = "email_id",

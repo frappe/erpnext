@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:31", 
   "docstatus": 0, 
-  "modified": "2014-01-31 18:47:03", 
+  "modified": "2014-02-03 11:32:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -27,7 +27,7 @@
  {
   "cancel": 0, 
   "create": 1, 
-  "delete": 0, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "email": 0, 
   "name": "__common__", 
