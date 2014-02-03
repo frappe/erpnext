@@ -3,7 +3,7 @@
 
 {% include 'setup/doctype/contact_control/contact_control.js' %};
 
-cur_frm.cscript.onload = function(doc,dt,dn){
+cur_frm.cscript.onload = function(doc, dt, dn) {
 	cur_frm.cscript.load_defaults(doc, dt, dn);
 }
 
@@ -27,8 +27,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}else{		
 		unhide_field(['address_html','contact_html']);
 		// make lists
-		cur_frm.cscript.make_address(doc,dt,dn);
-		cur_frm.cscript.make_contact(doc,dt,dn);
+		cur_frm.cscript.make_address(doc, dt, dn);
+		cur_frm.cscript.make_contact(doc, dt, dn);
 
 		cur_frm.communication_view = new wn.views.CommunicationList({
 			parent: cur_frm.fields_dict.communication_html.wrapper,
@@ -67,7 +67,7 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 			}
 			cur_frm.dashboard.set_badge_count(r.message);
 		}
-	})
+	});
 }
 
 cur_frm.cscript.make_address = function() {
@@ -104,7 +104,6 @@ cur_frm.cscript.make_contact = function() {
 		// note: render_contact_row is defined in contact_control.js
 	}
 	cur_frm.contact_list.run();
-
 }
 
 cur_frm.fields_dict['customer_group'].get_query = function(doc, dt, dn) {
@@ -112,7 +111,6 @@ cur_frm.fields_dict['customer_group'].get_query = function(doc, dt, dn) {
 		filters:{'is_group': 'No'}
 	}
 }
-
 
 cur_frm.fields_dict.lead_name.get_query = function(doc, cdt, cdn) {
 	return{

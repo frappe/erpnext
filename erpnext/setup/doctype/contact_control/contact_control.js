@@ -1,32 +1,21 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// common partner functions
-// =========================
-
-
-// get sates on country trigger
-// -----------------------------
-cur_frm.cscript.get_states=function(doc,dt,dn){
-   return $c('runserverobj', args={'method':'check_state', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
-    function(r,rt){
-      if(r.message) {
-        set_field_options('state', r.message);
-      }
-    }  
-  );
-
+cur_frm.cscript.get_states=function(doc, dt, dn) {
+	return $c('runserverobj', args={'method': 'check_state', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
+		function(r, rt) {
+			if(r.message)
+				set_field_options('state', r.message);
+		}
+	);
 }
 
 cur_frm.cscript.country = function(doc, dt, dn) {
-  cur_frm.cscript.get_states(doc, dt, dn);
+	cur_frm.cscript.get_states(doc, dt, dn);
 }
 
-
-// get query select Territory
-// ---------------------------
-if(cur_frm.fields_dict['territory']){
-	cur_frm.fields_dict['territory'].get_query = function(doc,dt,dn) {
+if(cur_frm.fields_dict['territory']) {
+	cur_frm.fields_dict['territory'].get_query = function(doc, dt, dn) {
 		return {
 			filters: {
 				'is_group': "No" 
@@ -58,7 +47,7 @@ cur_frm.cscript.render_contact_row = function(wrapper, data) {
 			}
 		});
 	data.description = description.join('<br />');
-	
+
 	cur_frm.cscript.render_row_in_wrapper(wrapper, data, 'Contact');
 }
 
@@ -68,17 +57,17 @@ cur_frm.cscript.render_address_row = function(wrapper, data) {
 	data.primary = '';
 	if (data.is_primary_address) data.primary += ' [Preferred for Billing]';
 	if (data.is_shipping_address) data.primary += ' [Preferred for Shipping]';
-	
+
 	// prepare address
 	var address = [];
 	$.each(['address_line1', 'address_line2', 'city', 'state', 'country', 'pincode'],
 		function(i, v) {
 			if(data[v]) address.push(data[v]);
 		});
-	
+
 	data.address = address.join('<br />');
 	data.address = "<p class='address-list'>" + data.address + "</p>";
-	
+
 	// prepare description
 	var description = [];
 	$.each([
@@ -95,9 +84,9 @@ cur_frm.cscript.render_address_row = function(wrapper, data) {
 			}
 		});
 	data.description = description.join('<br />');
-	
+
 	cur_frm.cscript.render_row_in_wrapper(wrapper, data, 'Address');
-	
+
 	$(wrapper).find('p.address-list').css({
 		'padding-left': '10px',
 		'margin-bottom': '-10px'
@@ -107,21 +96,21 @@ cur_frm.cscript.render_address_row = function(wrapper, data) {
 cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 	// render
 	var $wrapper = $(wrapper);
-	
+
 	data.doctype = doctype.toLowerCase();
-	
+
 	$wrapper.append(repl("\
 		<h4><a class='link_type'>%(fullname)s</a>%(primary)s</h4>\
 		<div class='description'>\
 			<p>%(description)s</p>\
 			<p><a class='delete link_type'>delete this %(doctype)s</a></p>\
 		</div>", data));
-	
+
 	// make link
 	$wrapper.find('h4 a.link_type').click(function() {
 		loaddoc(doctype, data.name);
 	});
-	
+
 	// css
 	$wrapper.css({ 'margin': '0px' });
 	$wrapper.find('div.description').css({
@@ -129,17 +118,15 @@ cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 		'line-height': '150%',
 	});
 	$wrapper.find('h6').css({ 'display': 'inline-block' });
-	
+
 	// show delete
 	var $delete_doc = $wrapper.find('a.delete');
-	if (wn.model.can_delete(doctype)) {
+	if (wn.model.can_delete(doctype))
 		$delete_doc.toggle(true);
-	} else {
+	else
 		$delete_doc.toggle(false);
-	}
-	$delete_doc.css({
-		'padding-left': '0px'
-	});
+
+	$delete_doc.css({ 'padding-left': '0px' });
 
 	$delete_doc.click(function() {
 		cur_frm.cscript.delete_doc(doctype, data.name);
@@ -184,17 +171,16 @@ cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new
 				[doctype, doc.doctype.toLowerCase().replace(" ", "_"), '=', doc.name],
 			],
 		});
-		
+
 		if (make_new_doc) {
 			RecordListView = RecordListView.extend({
 				make_new_doc: make_new_doc,
 			});
 		}
-		
+
 		var record_list_view = new RecordListView(doctype, wrapper, ListView);
 		if (!cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"]) {
 			cur_frm[doctype.toLowerCase().replace(" ", "_") + "_list"] = record_list_view;
 		}
 	});
 }
-
