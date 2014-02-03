@@ -751,7 +751,7 @@ def notify_errors(inv, customer, owner):
 		message = webnotes.get_template("template/emails/recurring_invoice_failed.html").render({
 			"name": inv,
 			"customer": customer
-		})
+		}))
 	
 	assign_task_to_owner(inv, "Recurring Invoice Failed", recipients)
 

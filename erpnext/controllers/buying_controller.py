@@ -7,7 +7,7 @@ from webnotes import _, msgprint
 from webnotes.utils import flt, _round
 from erpnext.buying.utils import get_item_details
 from erpnext.setup.utils import get_company_currency
-from erpnext.buying.doctype.supplier.supplier import get_supplier_details
+from erpnext.accounts.party import get_party_details
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -33,7 +33,7 @@ class BuyingController(StockController):
 		
 		# set contact and address details for supplier, if they are not mentioned
 		if self.doc.supplier:
-			self.doc.update_if_missing(get_supplier_details(self.doc.supplier))
+			self.doc.update_if_missing(get_party_details(self.doc.supplier, party_type="Supplier"))
 
 		self.set_missing_item_details(get_item_details)
 		if self.doc.fields.get("__islocal"):

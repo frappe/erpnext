@@ -128,26 +128,3 @@ def get_dashboard_info(supplier):
 	
 	return out
 	
-@webnotes.whitelist()
-def get_supplier_details(supplier, price_list=None, currency=None):
-	if not webnotes.has_permission("Supplier", "read", supplier):
-		webnotes.msgprint("No Permission", raise_exception=webnotes.PermissionError)
-
-	supplier = webnotes.doc("Supplier", supplier)
-	
-	out = webnotes._dict({
-		"supplier_address": webnotes.conn.get_value("Address", 
-			{"supplier": supplier.name, "is_primary_address":1}, "name"),
-		"contact_person": webnotes.conn.get_value("Contact", 
-			{"supplier":supplier.name, "is_primary_contact":1}, "name")
-	})
-
-	for f in ['currency', 'taxes_and_charges']:
-		if supplier.fields.get("default_" + f):
-			out[f] = supplier.fields.get("default_" + f)
-	
-	out.supplier_name = supplier.supplier_name
-	out.currency = supplier.default_currency or currency
-	out.buying_price_list = supplier.default_price_list or price_list
-		
-	return out
