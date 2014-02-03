@@ -3,7 +3,7 @@
 {%- endif -%}
 <!-- Page Layout Settings -->
 <div class='common page-header'>
-	<table class='header-table' cellspacing=0>
+	<table class='header-table' cellspacing=0 style="width: 100%">
 		<thead>
 			<tr><td colspan="2"><h1>{{ doc.select_print_heading or 'Invoice' }}</h1></td></tr>
 			<tr><td colspan="2"><h3>{{ doc.name }}</h3></td></tr>
@@ -28,18 +28,18 @@
 					<tr>
 						<td width=40%><b>Invoice Date</b></td>
 						<td>{{ utils.formatdate(doc.posting_date) }}</td>
-					<tr>
+					</tr>
 					{%- if doc.convert_into_recurring_invoice and doc.recurring_id -%}
                     <tr>
     					<td width=40%><b>Invoice Period</b></td>
 						<td>{{ (utils.formatdate(doc.invoice_period_from_date)) +
 							' to ' + utils.formatdate(doc.invoice_period_to_date) }}</td>
-					<tr>
+					</tr>
 					{%- endif -%}
 					<tr>
 						<td><b>Due Date</b></td>
 						<td>{{ utils.formatdate(doc.due_date) }}</td>
-					<tr>					
+					</tr>					
 				</tbody></table></td>
 			</tr>
 		</tbody>
