@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:51", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:22", 
+  "modified": "2014-02-03 12:40:44", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -46,18 +46,6 @@
   "reqd": 1
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "description", 
-  "fieldtype": "Text", 
-  "in_list_view": 1, 
-  "label": "Description", 
-  "oldfieldname": "description", 
-  "oldfieldtype": "Text", 
-  "print_width": "300px", 
-  "reqd": 1, 
-  "width": "300px"
- }, 
- {
   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
   "doctype": "DocField", 
   "fieldname": "item_group", 
@@ -86,6 +74,23 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "reqd": 1, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "quantity_and_rate", 
   "fieldtype": "Section Break", 
   "in_list_view": 0, 
@@ -111,6 +116,11 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:28:02", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:21", 
+  "modified": "2014-02-03 11:35:26", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -41,19 +41,23 @@
   "width": "100px"
  }, 
  {
-  "allow_on_submit": 0, 
   "doctype": "DocField", 
-  "fieldname": "schedule_date", 
-  "fieldtype": "Date", 
-  "in_list_view": 1, 
-  "label": "Required Date", 
-  "no_copy": 0, 
-  "oldfieldname": "schedule_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 0, 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
   "print_width": "100px", 
-  "reqd": 1, 
+  "reqd": 0, 
+  "search_index": 1, 
   "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -89,21 +93,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "uom", 
-  "fieldtype": "Link", 
-  "in_list_view": 0, 
-  "label": "Stock UOM", 
-  "no_copy": 0, 
-  "oldfieldname": "uom", 
-  "oldfieldtype": "Link", 
-  "options": "UOM", 
-  "print_width": "70px", 
-  "read_only": 1, 
-  "reqd": 1, 
-  "width": "70px"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "in_list_view": 1, 
@@ -118,35 +107,44 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Stock UOM", 
+  "no_copy": 0, 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "print_width": "70px", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "width": "70px"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "schedule_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Required Date", 
+  "no_copy": 0, 
+  "oldfieldname": "schedule_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "print_width": "100px", 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "more_info", 
   "fieldtype": "Section Break", 
   "label": "More Info"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "lead_time_date", 
-  "fieldtype": "Date", 
-  "in_list_view": 0, 
-  "label": "Lead Time Date", 
-  "no_copy": 1, 
-  "oldfieldname": "lead_time_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "item_name", 
-  "fieldtype": "Data", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Item Name", 
-  "oldfieldname": "item_name", 
-  "oldfieldtype": "Data", 
-  "print_width": "100px", 
-  "reqd": 0, 
-  "search_index": 1, 
-  "width": "100px"
  }, 
  {
   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
@@ -176,6 +174,33 @@
   "print_width": "100px", 
   "read_only": 1, 
   "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lead_time_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 0, 
+  "label": "Lead Time Date", 
+  "no_copy": 1, 
+  "oldfieldname": "lead_time_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_order_no", 
+  "fieldtype": "Link", 
+  "label": "Sales Order No", 
+  "no_copy": 0, 
+  "options": "Sales Order", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -212,16 +237,6 @@
   "no_copy": 1, 
   "oldfieldname": "ordered_qty", 
   "oldfieldtype": "Currency", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "sales_order_no", 
-  "fieldtype": "Link", 
-  "label": "Sales Order No", 
-  "no_copy": 0, 
-  "options": "Sales Order", 
-  "print_hide": 1, 
   "read_only": 1
  }, 
  {

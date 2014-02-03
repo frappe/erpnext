@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-29 18:22:12", 
   "docstatus": 0, 
-  "modified": "2014-01-15 16:08:45", 
+  "modified": "2014-02-03 12:59:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -40,6 +40,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "t_warehouse", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -50,6 +55,11 @@
   "oldfieldtype": "Link", 
   "options": "Warehouse", 
   "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sec_break1", 
+  "fieldtype": "Section Break"
  }, 
  {
   "doctype": "DocField", 
@@ -75,6 +85,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "description", 
   "fieldtype": "Text", 
   "in_list_view": 1, 
@@ -84,6 +99,12 @@
   "print_width": "300px", 
   "read_only": 0, 
   "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "label": "Quantity and Rate"
  }, 
  {
   "doctype": "DocField", 
@@ -110,6 +131,58 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "incoming_rate", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Valuation Rate", 
+  "oldfieldname": "incoming_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "in_filter": 0, 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "label": "Conversion Factor", 
+  "oldfieldname": "conversion_factor", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amount", 
+  "fieldtype": "Currency", 
+  "label": "Amount", 
+  "oldfieldname": "amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "serial_no_batch", 
   "fieldtype": "Section Break", 
   "label": "Serial No / Batch"
@@ -124,6 +197,11 @@
   "oldfieldtype": "Text", 
   "read_only": 0, 
   "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break4", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -143,28 +221,6 @@
   "label": "Accounting"
  }, 
  {
-  "doctype": "DocField", 
-  "fieldname": "incoming_rate", 
-  "fieldtype": "Currency", 
-  "in_list_view": 1, 
-  "label": "Valuation Rate", 
-  "oldfieldname": "incoming_rate", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "read_only": 0, 
-  "reqd": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "amount", 
-  "fieldtype": "Currency", 
-  "label": "Amount", 
-  "oldfieldname": "amount", 
-  "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency", 
-  "read_only": 1
- }, 
- {
   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
   "doctype": "DocField", 
   "fieldname": "expense_account", 
@@ -172,6 +228,11 @@
   "label": "Difference Account", 
   "options": "Account", 
   "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break5", 
+  "fieldtype": "Column Break"
  }, 
  {
   "default": ":Company", 
@@ -207,15 +268,21 @@
   "search_index": 1
  }, 
  {
+  "description": "BOM No. for a Finished Good Item", 
   "doctype": "DocField", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Float", 
-  "label": "Conversion Factor", 
-  "oldfieldname": "conversion_factor", 
-  "oldfieldtype": "Currency", 
+  "fieldname": "bom_no", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "BOM No", 
+  "no_copy": 0, 
+  "options": "BOM", 
   "print_hide": 1, 
-  "read_only": 1, 
-  "reqd": 1
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break6", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -227,32 +294,6 @@
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "stock_uom", 
-  "fieldtype": "Link", 
-  "in_filter": 0, 
-  "label": "Stock UOM", 
-  "oldfieldname": "stock_uom", 
-  "oldfieldtype": "Link", 
-  "options": "UOM", 
-  "print_hide": 1, 
-  "read_only": 1, 
-  "reqd": 1, 
-  "search_index": 0
- }, 
- {
-  "description": "BOM No. for a Finished Good Item", 
-  "doctype": "DocField", 
-  "fieldname": "bom_no", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "label": "BOM No", 
-  "no_copy": 0, 
-  "options": "BOM", 
-  "print_hide": 1, 
-  "read_only": 0
  }, 
  {
   "description": "Material Request used to make this Stock Entry", 

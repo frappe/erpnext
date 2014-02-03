@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:10", 
   "docstatus": 0, 
-  "modified": "2014-01-15 16:00:44", 
+  "modified": "2014-02-03 12:18:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -54,6 +54,11 @@
   "read_only": 0, 
   "reqd": 1, 
   "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -118,6 +123,11 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "uom", 
   "fieldtype": "Link", 
   "in_list_view": 0, 
@@ -125,6 +135,35 @@
   "oldfieldname": "uom", 
   "oldfieldtype": "Link", 
   "options": "UOM", 
+  "print_hide": 1, 
+  "print_width": "100px", 
+  "read_only": 0, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "options": "UOM", 
+  "print_hide": 1, 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "in_list_view": 0, 
+  "label": "Conversion Factor", 
+  "oldfieldname": "conversion_factor", 
+  "oldfieldtype": "Currency", 
   "print_hide": 1, 
   "print_width": "100px", 
   "read_only": 0, 
@@ -159,6 +198,26 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "purchase_ref_rate", 
+  "fieldtype": "Currency", 
+  "in_list_view": 0, 
+  "label": "Price List Rate (Company Currency)", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sec_break1", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "import_rate", 
   "fieldtype": "Currency", 
   "in_list_view": 1, 
@@ -184,13 +243,8 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "purchase_ref_rate", 
-  "fieldtype": "Currency", 
-  "in_list_view": 0, 
-  "label": "Price List Rate (Company Currency)", 
-  "options": "Company:company:default_currency", 
-  "print_hide": 1, 
-  "read_only": 0
+  "fieldname": "col_break4", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -203,7 +257,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 1, 
   "width": "100px"
  }, 
@@ -218,7 +272,7 @@
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
   "print_width": "100px", 
-  "read_only": 0, 
+  "read_only": 1, 
   "reqd": 0, 
   "width": "100px"
  }, 
@@ -246,68 +300,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Float", 
-  "in_list_view": 0, 
-  "label": "Conversion Factor", 
-  "oldfieldname": "conversion_factor", 
-  "oldfieldtype": "Currency", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "read_only": 0, 
-  "reqd": 1, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "stock_uom", 
-  "fieldtype": "Link", 
-  "in_list_view": 0, 
-  "label": "Stock UOM", 
-  "oldfieldname": "stock_uom", 
-  "oldfieldtype": "Data", 
-  "options": "UOM", 
-  "print_hide": 1, 
-  "print_width": "100px", 
-  "read_only": 1, 
-  "reqd": 1, 
-  "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "serial_no", 
-  "fieldtype": "Text", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Serial No", 
-  "no_copy": 1, 
-  "oldfieldname": "serial_no", 
-  "oldfieldtype": "Text", 
-  "print_hide": 0, 
-  "read_only": 0, 
-  "report_hide": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "rejected_serial_no", 
-  "fieldtype": "Text", 
-  "label": "Rejected Serial No", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "batch_no", 
-  "fieldtype": "Link", 
-  "label": "Batch No", 
-  "oldfieldname": "batch_no", 
-  "oldfieldtype": "Link", 
-  "options": "Batch", 
-  "print_hide": 1, 
-  "read_only": 0
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "rejected_warehouse", 
   "fieldtype": "Link", 
   "hidden": 0, 
@@ -320,19 +312,6 @@
   "print_width": "100px", 
   "read_only": 0, 
   "width": "100px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "schedule_date", 
-  "fieldtype": "Date", 
-  "label": "Required By", 
-  "no_copy": 0, 
-  "oldfieldname": "schedule_date", 
-  "oldfieldtype": "Date", 
-  "print_hide": 1, 
-  "read_only": 0, 
-  "report_hide": 0, 
-  "reqd": 0
  }, 
  {
   "default": ":Company", 
@@ -368,36 +347,22 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "brand", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "label": "Brand", 
-  "oldfieldname": "brand", 
-  "oldfieldtype": "Link", 
-  "options": "Brand", 
-  "print_hide": 1, 
-  "read_only": 1
- }, 
- {
-  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
-  "doctype": "DocField", 
-  "fieldname": "item_group", 
-  "fieldtype": "Link", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "label": "Item Group", 
-  "oldfieldname": "item_group", 
-  "oldfieldtype": "Link", 
-  "options": "Item Group", 
+  "fieldname": "schedule_date", 
+  "fieldtype": "Date", 
+  "label": "Required By", 
+  "no_copy": 0, 
+  "oldfieldname": "schedule_date", 
+  "oldfieldtype": "Date", 
   "print_hide": 1, 
   "read_only": 1, 
-  "search_index": 1
+  "report_hide": 0, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "stock_qty", 
   "fieldtype": "Float", 
-  "label": "Stock Qty", 
+  "label": "Qty as per Stock UOM", 
   "oldfieldname": "stock_qty", 
   "oldfieldtype": "Currency", 
   "print_hide": 1, 
@@ -437,6 +402,87 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "prevdoc_detail_docname", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "Purchase Order Item No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break5", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Text", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Serial No", 
+  "no_copy": 1, 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Text", 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rejected_serial_no", 
+  "fieldtype": "Text", 
+  "label": "Rejected Serial No", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "batch_no", 
+  "fieldtype": "Link", 
+  "label": "Batch No", 
+  "oldfieldname": "batch_no", 
+  "oldfieldtype": "Link", 
+  "options": "Batch", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "brand", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Brand", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Link", 
+  "options": "Brand", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
+  "options": "Item Group", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "rm_supp_cost", 
   "fieldtype": "Currency", 
   "hidden": 1, 
@@ -466,22 +512,6 @@
   "read_only": 1, 
   "reqd": 0, 
   "search_index": 0, 
-  "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "prevdoc_detail_docname", 
-  "fieldtype": "Data", 
-  "hidden": 1, 
-  "in_filter": 1, 
-  "label": "Purchase Order Item No", 
-  "no_copy": 1, 
-  "oldfieldname": "prevdoc_detail_docname", 
-  "oldfieldtype": "Data", 
-  "print_hide": 1, 
-  "print_width": "150px", 
-  "read_only": 1, 
-  "search_index": 1, 
   "width": "150px"
  }, 
  {
