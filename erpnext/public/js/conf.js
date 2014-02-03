@@ -15,7 +15,6 @@ $(document).bind('toolbar_setup', function() {
 	.addClass("navbar-icon-home")
 	.css({
 		"max-width": "200px",
-		"overflow": "hidden",
 		"text-overflow": "ellipsis",
 		"white-space": "nowrap"
 	});
