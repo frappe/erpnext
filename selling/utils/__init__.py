@@ -63,7 +63,7 @@ def get_item_details(args):
 		if args.selling_price_list and args.price_list_currency:
 			out.update(_get_price_list_rate(args, item_bean, meta))
 
-	out.update(_get_item_discount(out.item_code, out.item_group, args.customer))
+	out.update(_get_item_discount(out.item_code, out.item_group, args.selling_price_list, args.customer))
 
 	if out.get(warehouse_fieldname):
 		out.update(get_available_qty(args.item_code, out.get(warehouse_fieldname)))
@@ -165,10 +165,10 @@ def _get_price_list_rate(args, item_bean, meta):
 
 	return {"ref_rate": flt(ref_rate[0].ref_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)}
 
-def _get_item_discount(item_code, item_group, customer):
+def _get_item_discount(item_code, item_group, price_list, customer):
         # Check item discount
         item_discount = webnotes.conn.sql("""SELECT item_discount, name FROM `tabItem Discount`
-                                          WHERE parent = %s AND item = %s""", (customer, item_code))
+                                          WHERE parent = %s AND item = %s AND price_list = %s """, (customer, item_code, price_list))
         if item_discount:
                 discount = flt(item_discount[0][0])
                 return {'adj_rate': discount}
@@ -182,8 +182,8 @@ def _get_item_discount(item_code, item_group, customer):
 
         item_group_discount = 0
         for d in parent_item_groups:
-                res = webnotes.conn.sql("""select item_group_discount, name from `tabItem Group Discount`
-                                        where parent = %s and item_group = %s""", (customer, d))
+                res = webnotes.conn.sql("""SELECT item_group_discount, name FROM `tabItem Group Discount`
+                                        WHERE parent = %s AND item_group = %s AND price_list = %s """, (customer, d, price_list))
                 if res:
                         item_group_discount = flt(res[0][0])
                         break
@@ -191,7 +191,6 @@ def _get_item_discount(item_code, item_group, customer):
         if item_group_discount:
                 return {"adj_rate": item_group_discount}
 
-        #FIXME: ...
         return {"adj_rate": 0}
 
 @webnotes.whitelist()
