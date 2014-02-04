@@ -2,7 +2,7 @@
  {
   "creation": "2013-07-22 12:43:40",
   "docstatus": 0,
-  "modified": "2014-02-04 01:15:05",
+  "modified": "2014-02-04 11:15:05",
   "modified_by": "Administrator",
   "owner": "Administrator"
  },
@@ -36,7 +36,7 @@
  },
  {
   "doctype": "DocField",
-  "fieldname": "discount",
+  "fieldname": "item_group_discount",
   "fieldtype": "Float",
   "label": "Discount (%)"
  }
