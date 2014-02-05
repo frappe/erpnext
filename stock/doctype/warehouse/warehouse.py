@@ -102,7 +102,7 @@ class DocType:
 			webnotes.conn.sql("delete from `tabBin` where warehouse=%s", olddn)
 			
 		from accounts.utils import rename_account_for
-		rename_account_for("Warehouse", olddn, newdn, merge)
+		rename_account_for("Warehouse", olddn, newdn, merge, self.doc.company)
 
 		return newdn
 

@@ -356,20 +356,23 @@ def get_actual_expense(args):
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
 	""" % (args))[0][0]
 	
-def rename_account_for(dt, olddn, newdn, merge):
+def rename_account_for(dt, olddn, newdn, merge, company):
 	old_account = get_account_for(dt, olddn)
 	if old_account:
 		new_account = None
 		if not merge:
-			if old_account == olddn:
-				new_account = webnotes.rename_doc("Account", olddn, newdn)
+			if old_account == add_abbr_if_missing(olddn, company):
+				new_account = webnotes.rename_doc("Account", old_account, newdn)
 		else:
 			existing_new_account = get_account_for(dt, newdn)
 			new_account = webnotes.rename_doc("Account", old_account, 
 				existing_new_account or newdn, merge=True if existing_new_account else False)
 
-		if new_account:
-			webnotes.conn.set_value("Account", new_account, "master_name", newdn)
+		webnotes.conn.set_value("Account", new_account or old_account, "master_name", newdn)
+		
+def add_abbr_if_missing(dn, company):
+	from setup.doctype.company.company import get_name_with_abbr
+	return get_name_with_abbr(dn, company)
 			
 def get_account_for(account_for_doctype, account_for):
 	if account_for_doctype in ["Customer", "Supplier"]:

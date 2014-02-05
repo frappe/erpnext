@@ -156,7 +156,7 @@ class DocType(TransactionBase):
 			
 	def before_rename(self, olddn, newdn, merge=False):
 		from accounts.utils import rename_account_for
-		rename_account_for("Customer", olddn, newdn, merge)
+		rename_account_for("Customer", olddn, newdn, merge, self.doc.company)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''
