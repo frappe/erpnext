@@ -55,7 +55,7 @@ class DocType:
 	def send_form_sms(self, arg):
 		"called from client side"
 		args = load_json(arg)
-		self.send_sms([str(args['number'])], str(args['message']))
+		self.send_sms([cstr(args['number'])], cstr(args['message']))
 
 	def send_sms(self, receiver_list, msg, sender_name = ''):
 		receiver_list = self.validate_receiver_nos(receiver_list)
