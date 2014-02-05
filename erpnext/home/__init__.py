@@ -82,7 +82,7 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 	f.full_name = get_fullname(owner)
 	f.save()
 
-def update_feed(controller, method=None):   
+def update_feed(bean, method=None):   
 	"adds a new feed"
 	doc = controller.doc
 	if method in ['on_update', 'on_submit']:

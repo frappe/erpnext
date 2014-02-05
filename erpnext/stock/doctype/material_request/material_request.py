@@ -168,14 +168,14 @@ class DocType(BuyingController):
 		self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
 		webnotes.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
 		
-def update_completed_qty(controller, caller_method):
-	if controller.doc.doctype == "Stock Entry":
+def update_completed_qty(bean, method):
+	if bean.doc.doctype == "Stock Entry":
 		material_request_map = {}
 		
-		for d in controller.doclist.get({"parentfield": "mtn_details"}):
+		for d in bean.doclist.get({"parentfield": "mtn_details"}):
 			if d.material_request:
 				if d.material_request not in material_request_map:
-					material_request_map[d.material_request] = []
+					material_request_map[d.material_request] = []):
 				material_request_map[d.material_request].append(d.material_request_item)
 			
 		for mr_name, mr_items in material_request_map.items():
@@ -187,17 +187,17 @@ def update_completed_qty(controller, caller_method):
 					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.doc.status)
 					+ _("Cannot continue."), exc=webnotes.InvalidStatusError)
 				
-			_update_requested_qty(controller, mr_obj, mr_items)
+			_update_requested_qty(bean, mr_obj, mr_items)
 			
 			# update ordered percentage and qty
 			mr_obj.update_completed_qty(mr_items)
 			
-def _update_requested_qty(controller, mr_obj, mr_items):
+def _update_requested_qty(bean, mr_obj, mr_items):
 	"""update requested qty (before ordered_qty is updated)"""
 	from erpnext.stock.utils import update_bin
 	for mr_item_name in mr_items:
 		mr_item = mr_obj.doclist.getone({"parentfield": "indent_details", "name": mr_item_name})
-		se_detail = controller.doclist.getone({"parentfield": "mtn_details",
+		se_detail = bean.doclist.getone({"parentfield": "mtn_details",
 			"material_request": mr_obj.doc.name, "material_request_item": mr_item_name})
 	
 		mr_item.ordered_qty = flt(mr_item.ordered_qty)
@@ -217,7 +217,7 @@ def _update_requested_qty(controller, mr_obj, mr_items):
 			"item_code": se_detail.item_code,
 			"warehouse": se_detail.t_warehouse,
 			"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
-			"posting_date": controller.doc.posting_date,
+			"posting_date": bean.doc.posting_date,
 		})
 
 def set_missing_values(source, target_doclist):
