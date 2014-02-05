@@ -166,32 +166,32 @@ def _get_price_list_rate(args, item_bean, meta):
 	return {"ref_rate": flt(ref_rate[0].ref_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)}
 
 def _get_item_discount(item_code, item_group, price_list, customer):
-        # Check item discount
-        item_discount = webnotes.conn.sql("""SELECT item_discount, name FROM `tabItem Discount`
-                                          WHERE parent = %s AND item = %s AND price_list = %s """, (customer, item_code, price_list))
-        if item_discount:
-                discount = flt(item_discount[0][0])
-                return {'adj_rate': discount}
+	# Check item discount
+	item_discount = webnotes.conn.sql("""SELECT item_discount, name FROM `tabItem Discount`
+					  WHERE parent = %s AND item = %s AND price_list = %s """, (customer, item_code, price_list))
+	if item_discount:
+		discount = flt(item_discount[0][0])
+		return {'adj_rate': discount}
 
-        # Check Item group discount
-        parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name
+	# Check Item group discount
+	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name
 		FROM `tabItem Group` AS node, `tabItem Group` AS parent
 		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
 		GROUP BY parent.name
 		ORDER BY parent.lft desc""", (item_group,))]
 
-        item_group_discount = 0
-        for d in parent_item_groups:
-                res = webnotes.conn.sql("""SELECT item_group_discount, name FROM `tabItem Group Discount`
-                                        WHERE parent = %s AND item_group = %s AND price_list = %s """, (customer, d, price_list))
-                if res:
-                        item_group_discount = flt(res[0][0])
-                        break
+	item_group_discount = 0
+	for d in parent_item_groups:
+		res = webnotes.conn.sql("""SELECT item_group_discount, name FROM `tabItem Group Discount`
+					WHERE parent = %s AND item_group = %s AND price_list = %s """, (customer, d, price_list))
+		if res:
+			item_group_discount = flt(res[0][0])
+			break
 
-        if item_group_discount:
-                return {"adj_rate": item_group_discount}
+	if item_group_discount:
+		return {"adj_rate": item_group_discount}
 
-        return {"adj_rate": 0}
+	return {"adj_rate": 0}
 
 @webnotes.whitelist()
 def get_available_qty(item_code, warehouse):
