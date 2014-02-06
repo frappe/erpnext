@@ -71,7 +71,7 @@ erpnext.SalesFunnel = Class.extend({
 	get_data: function(btn) {
 		var me = this;
 		wn.call({
-			method: "erpnext.selling.sales_funnel.get_funnel_data",
+			method: "erpnext.selling.page.sales_funnel.sales_funnel.get_funnel_data",
 			args: {
 				from_date: this.options.from_date,
 				to_date: this.options.to_date
