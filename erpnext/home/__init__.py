@@ -84,7 +84,7 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 
 def update_feed(bean, method=None):   
 	"adds a new feed"
-	doc = controller.doc
+	doc = bean.doc
 	if method in ['on_update', 'on_submit']:
 		subject, color = feed_dict.get(doc.doctype, [None, None])
 		if subject:
