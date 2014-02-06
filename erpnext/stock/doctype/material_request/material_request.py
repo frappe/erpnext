@@ -174,9 +174,7 @@ def update_completed_qty(bean, method):
 		
 		for d in bean.doclist.get({"parentfield": "mtn_details"}):
 			if d.material_request:
-				if d.material_request not in material_request_map:
-					material_request_map[d.material_request] = []):
-				material_request_map[d.material_request].append(d.material_request_item)
+				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 			
 		for mr_name, mr_items in material_request_map.items():
 			mr_obj = webnotes.get_obj("Material Request", mr_name, with_children=1)
