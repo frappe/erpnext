@@ -223,9 +223,9 @@ class DocType:
 				throw(_("Account ") + new +_(" does not exists"))
 				
 			val = list(webnotes.conn.get_value("Account", new_account, 
-				["group_or_ledger", "debit_or_credit", "is_pl_account"]))
+				["group_or_ledger", "debit_or_credit", "is_pl_account", "company"]))
 			
-			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account]:
+			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account, self.doc.company]:
 				throw(_("""Merging is only possible if following \
 					properties are same in both records.
 					Group or Ledger, Debit or Credit, Is PL Account"""))

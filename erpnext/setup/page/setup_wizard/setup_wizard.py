@@ -344,7 +344,7 @@ def add_all_roles_to(name):
 			
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
-	from erpnext.setup.utils import get_root_of
+	from webnotes.utils.nestedset import get_root_of
 	country = webnotes.conn.get_value("Control Panel", None, "country")
 	root_territory = get_root_of("Territory")
 	for name in (country, "Rest Of The World"):

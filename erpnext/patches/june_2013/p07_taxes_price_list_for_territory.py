@@ -9,7 +9,7 @@ def execute():
 	webnotes.reload_doc("accounts", "doctype", "sales_taxes_and_charges_master")
 	webnotes.reload_doc("accounts", "doctype", "shipping_rule")
 	
-	from erpnext.setup.utils import get_root_of
+	from webnotes.utils.nestedset import get_root_of
 	root_territory = get_root_of("Territory")
 	
 	for parenttype in ["Sales Taxes and Charges Master", "Price List", "Shipping Rule"]:
