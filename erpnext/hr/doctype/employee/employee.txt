@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:40", 
+  "modified": "2014-02-03 18:06:03", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -456,6 +456,12 @@
   "fieldname": "personal_email", 
   "fieldtype": "Data", 
   "label": "Personal Email"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "unsubscribed", 
+  "fieldtype": "Check", 
+  "label": "Unsubscribed"
  }, 
  {
   "doctype": "DocField", 

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import webnotes
 import webnotes.utils
 from webnotes.utils import cstr
-from webnotes import _
+from webnotes import msgprint, throw, _
 
 class DocType():
 	def __init__(self, d, dl):
@@ -22,18 +22,24 @@ class DocType():
 		self.recipients = self.doc.test_email_id.split(",")
 		self.send_to_doctype = "Lead"
 		self.send_bulk()
-		webnotes.msgprint("""Scheduled to send to %s""" % self.doc.test_email_id)
+		msgprint("{send} {email}".format**{
+			"send": _("Scheduled to send to"),
+			"email": self.doc.test_email_id
+		})
 
 	def send_emails(self):
 		"""send emails to leads and customers"""
 		if self.doc.email_sent:
-			webnotes.msgprint("""Newsletter has already been sent""", raise_exception=1)
+			throw(_("Newsletter has already been sent"))
 
 		self.recipients = self.get_recipients()
 		self.send_bulk()
 		
-		webnotes.msgprint("""Scheduled to send to %d %s(s)""" % (len(self.recipients), 
-			self.send_to_doctype))
+		msgprint("{send} {recipients} {doctype}(s)".format(**{
+			"send": _("Scheduled to send to"),
+			"recipients": len(self.recipients),
+			"doctype": self.send_to_doctype
+		}))
 
 		webnotes.conn.set(self.doc, "email_sent", 1)
 	
@@ -62,6 +68,14 @@ class DocType():
 			return webnotes.conn.sql_list("""select email_id from tabLead 
 				where ifnull(email_id, '') != '' %s""" % (conditions or ""))
 
+		elif self.doc.send_to_type=="Employee":
+			self.send_to_doctype = "Employee"
+			self.email_field = "company_email"
+
+			return webnotes.conn.sql_list("""select 
+				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id 
+				from `tabEmployee` where status='Active'""")
+
 		elif self.doc.email_list:
 			email_list = [cstr(email).strip() for email in self.doc.email_list.split(",")]
 			for email in email_list:
@@ -79,10 +93,10 @@ class DocType():
 		
 		if not webnotes.flags.in_test:
 			webnotes.conn.auto_commit_on_many_writes = True
-		
+
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
-			doctype = self.send_to_doctype, email_field = "email_id",
+			doctype = self.send_to_doctype, email_field = self.email_field or "email_id",
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
 		if not webnotes.flags.in_test:
@@ -90,13 +104,12 @@ class DocType():
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
-			webnotes.msgprint(_("""Please save the Newsletter before sending."""),
-				raise_exception=1)
+			throw(_("Please save the Newsletter before sending."))
 
 		from webnotes import conf
 		if (conf.get("status") or None) == "Trial":
-			webnotes.msgprint(_("""Sending newsletters is not allowed for Trial users, \
-				to prevent abuse of this feature."""), raise_exception=1)
+			throw(_("Sending newsletters is not allowed for Trial users, \
+				to prevent abuse of this feature."))
 
 @webnotes.whitelist()
 def get_lead_options():
