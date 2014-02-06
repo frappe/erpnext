@@ -7,7 +7,7 @@ services:
   - mysql
 
 install:
-  - pip install https://github.com/webnotes/wnframework/archive/4.0.0-wip.tar.gz &&
+  - pip install git+https://github.com/webnotes/wnframework.git@4.0.0-wip &&
   - pip install --editable .
 
 script: 
