@@ -63,50 +63,6 @@ def update_bin(args):
 		msgprint("[Stock Update] Ignored %s since it is not a stock item" 
 			% args.get("item_code"))
 
-def validate_end_of_life(item_code, end_of_life=None, verbose=1):
-	if not end_of_life:
-		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
-	
-	from webnotes.utils import getdate, now_datetime, formatdate
-	if end_of_life and getdate(end_of_life) <= now_datetime().date():
-		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
-			" %(date)s. " + _("Please check") + ": %(end_of_life_label)s " + \
-			"in Item master") % {
-				"item_code": item_code,
-				"date": formatdate(end_of_life),
-				"end_of_life_label": webnotes.get_doctype("Item").get_label("end_of_life")
-			}
-		
-		_msgprint(msg, verbose)
-			
-def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
-	if not is_stock_item:
-		is_stock_item = webnotes.conn.get_value("Item", item_code, "is_stock_item")
-		
-	if is_stock_item != "Yes":
-		msg = (_("Item") + " %(item_code)s: " + _("is not a Stock Item")) % {
-			"item_code": item_code,
-		}
-		
-		_msgprint(msg, verbose)
-		
-def validate_cancelled_item(item_code, docstatus=None, verbose=1):
-	if docstatus is None:
-		docstatus = webnotes.conn.get_value("Item", item_code, "docstatus")
-	
-	if docstatus == 2:
-		msg = (_("Item") + " %(item_code)s: " + _("is a cancelled Item")) % {
-			"item_code": item_code,
-		}
-		
-		_msgprint(msg, verbose)
-
-def _msgprint(msg, verbose):
-	if verbose:
-		msgprint(msg, raise_exception=True)
-	else:
-		raise webnotes.ValidationError, msg
-
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle

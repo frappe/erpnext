@@ -113,9 +113,8 @@ class AccountsReceivableReport(object):
 		if not hasattr(self, "account_map"):
 			self.account_map = dict(((r.name, r) for r in webnotes.conn.sql("""select 
 				acc.name, cust.name as customer, cust.customer_name, cust.territory
-				from `tabAccount` acc, `tabCustomer` cust 
-				where acc.master_type="Customer" 
-				and cust.name=acc.master_name""", as_dict=True)))
+				from `tabAccount` acc left join `tabCustomer` cust 
+				on cust.name=acc.master_name where acc.master_type="Customer" """, as_dict=True)))
 				
 		return self.account_map
 		
@@ -134,7 +133,6 @@ class AccountsReceivableReport(object):
 			self.gl_entries = webnotes.conn.sql("""select * from `tabGL Entry`
 				where docstatus < 2 {0} order by posting_date, account""".format(conditions),
 				values, as_dict=True)
-				
 		return self.gl_entries
 		
 	def prepare_conditions(self):

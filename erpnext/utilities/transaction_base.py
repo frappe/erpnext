@@ -201,14 +201,6 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 				"from_currency": currency,
 				"to_currency": company_currency
 		}, raise_exception=True)
-			
-def validate_item_fetch(args, item):
-	from erpnext.stock.utils import validate_end_of_life
-	validate_end_of_life(item.name, item.end_of_life)
-	
-	# validate company
-	if not args.company:
-		msgprint(_("Please specify Company"), raise_exception=True)
 	
 def validate_currency(args, item, meta=None):
 	from webnotes.model.meta import get_field_precision

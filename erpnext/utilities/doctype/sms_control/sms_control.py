@@ -8,7 +8,7 @@ from webnotes.utils import nowdate, cstr
 from webnotes.model.code import get_obj
 from webnotes.model.doc import Document
 from webnotes import msgprint, throw, _
-from webnotes.model.bean import getlist, copy_doclist
+from webnotes.model.bean import getlist
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -55,7 +55,7 @@ class DocType:
 	def send_form_sms(self, arg):
 		"called from client side"
 		args = json.loads(arg)
-		self.send_sms([str(args['number'])], str(args['message']))
+		self.send_sms([cstr(args['number'])], cstr(args['message']))
 
 	def send_sms(self, receiver_list, msg, sender_name = ''):
 		receiver_list = self.validate_receiver_nos(receiver_list)

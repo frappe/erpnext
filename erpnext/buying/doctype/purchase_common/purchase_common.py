@@ -93,7 +93,7 @@ class DocType(BuyingController):
 			if not item:
 				webnotes.throw("Item %s does not exist in Item Master." % cstr(d.item_code))
 			
-			from erpnext.stock.utils import validate_end_of_life
+			from erpnext.stock.doctype.item.item import validate_end_of_life
 			validate_end_of_life(d.item_code, item[0][3])
 			
 			# validate stock item

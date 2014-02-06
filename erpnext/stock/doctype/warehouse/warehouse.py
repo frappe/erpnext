@@ -106,7 +106,7 @@ class DocType:
 			webnotes.conn.sql("delete from `tabBin` where warehouse=%s", olddn)
 			
 		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Warehouse", olddn, new_warehouse, merge)
+		rename_account_for("Warehouse", olddn, newdn, merge, self.doc.company)
 
 		return new_warehouse
 

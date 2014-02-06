@@ -3,15 +3,12 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes.utils import cstr
 from webnotes.model.doc import Document, make_autoname
 from webnotes import msgprint, _
 import webnotes.defaults
 
 
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.utilities.doctype.address.address import get_address_display
-from erpnext.utilities.doctype.contact.contact import get_contact_details
 from erpnext.accounts.party import create_party_account
 
 class DocType(TransactionBase):
@@ -128,7 +125,7 @@ class DocType(TransactionBase):
 			
 	def before_rename(self, olddn, newdn, merge=False):
 		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Customer", olddn, newdn, merge)
+		rename_account_for("Customer", olddn, newdn, merge, self.doc.company)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''

@@ -90,8 +90,8 @@ class DocType(StockController):
 			raise webnotes.ValidationError
 						
 	def validate_item(self, item_code, row_num):
-		from erpnext.stock.utils import validate_end_of_life, validate_is_stock_item, \
-			validate_cancelled_item
+		from erpnext.stock.doctype.item.item import validate_end_of_life, \
+			validate_is_stock_item, validate_cancelled_item
 		
 		# using try except to catch all validation msgs and display together
 		
