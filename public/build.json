@@ -2,8 +2,14 @@
 	"public/css/all-web.css": [
 		"app/public/js/startup.css",
 	],
+	"public/css/all-web_ar.css": [
+		"app/public/js/startup_ar.css",
+	],
 	"public/css/all-app.css": [
 		"app/public/js/startup.css"
+	],
+	"public/css/all-app_ar.css": [
+		"app/public/js/startup_ar.css"
 	],
 	"public/js/all-web.min.js": [
 		"app/public/js/website_utils.js"

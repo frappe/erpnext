@@ -1,0 +1,9 @@
+#page-activity .label {
+    margin-left: 7px;
+    margin-right: 0px;
+}
+
+#page-activity .user-info {
+    float: left;
+    float: right;
+}

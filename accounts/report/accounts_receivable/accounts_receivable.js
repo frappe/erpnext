@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 wn.query_reports["Accounts Receivable"] = {
+	"title" : wn._("Accounts Receivable"),
 	"filters": [
 		{
 			"fieldname":"company",
