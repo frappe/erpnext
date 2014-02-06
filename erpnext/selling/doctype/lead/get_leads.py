@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cstr, cint
 from webnotes.utils.email_lib.receive import POP3Mailbox
-from webnotes.core.doctype.communication.communication import make
+from webnotes.core.doctype.communication.communication import _make
 
 def add_sales_communication(subject, content, sender, real_name, mail=None, 
 	status="Open", date=None):
@@ -28,7 +28,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 	parent_doctype = "Contact" if contact_name else "Lead"
 	parent_name = contact_name or lead_name
 
-	message = make(content=content, sender=sender, subject=subject,
+	message = _make(content=content, sender=sender, subject=subject,
 		doctype = parent_doctype, name = parent_name, date=date, sent_or_received="Received")
 	
 	if mail:

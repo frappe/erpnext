@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-28 10:35:29", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:49", 
+  "modified": "2014-02-05 17:36:23", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -110,6 +110,14 @@
   "label": "Show in Website", 
   "no_copy": 0, 
   "search_index": 0
+ }, 
+ {
+  "depends_on": "show_in_website", 
+  "doctype": "DocField", 
+  "fieldname": "parent_website_sitemap", 
+  "fieldtype": "Link", 
+  "label": "Parent Website Page", 
+  "options": "Website Sitemap"
  }, 
  {
   "depends_on": "show_in_website", 
