@@ -1,4 +1,6 @@
-{
+from webnotes import _
+
+data = {
 	"Accounts": {
 		"color": "#3498db", 
 		"icon": "icon-money", 
@@ -8,7 +10,7 @@
 	"Activity": {
 		"color": "#e67e22", 
 		"icon": "icon-play", 
-		"label": "Activity", 
+		"label": _("Activity"), 
 		"link": "activity", 
 		"type": "page"
 	}, 
@@ -21,7 +23,7 @@
 	"HR": {
 		"color": "#2ecc71", 
 		"icon": "icon-group", 
-		"label": "Human Resources", 
+		"label": _("Human Resources"), 
 		"link": "hr-home", 
 		"type": "module"
 	}, 
@@ -35,7 +37,7 @@
 		"color": "#95a5a6", 
 		"doctype": "Note", 
 		"icon": "icon-file-alt", 
-		"label": "Notes", 
+		"label": _("Notes"), 
 		"link": "List/Note", 
 		"type": "list"
 	}, 

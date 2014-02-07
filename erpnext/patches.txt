@@ -19,3 +19,4 @@ execute:webnotes.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
 erpnext.patches.4_0.map_charge_to_taxes_and_charges
 execute:webnotes.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:webnotes.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
+execute:webnotes.conn.sql("update tabPage set module='Core' where name='Setup'")

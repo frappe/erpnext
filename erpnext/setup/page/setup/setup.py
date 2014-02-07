@@ -2,8 +2,20 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import webnotes, json
 from webnotes import _
+
+@webnotes.whitelist()
+def get():
+	setup = []
+	for app in webnotes.get_installed_apps():
+		setupfilename = webnotes.get_app_path(app, "setup.json")
+		if os.path.exists(setupfilename):
+			with open(setupfilename, "r") as f:
+				setup.append(json.loads(f))
+
+	return setup
+
 
 items = [
 	{
@@ -233,28 +245,31 @@ items = [
 		"route": "Report/Scheduler Log", "type": "Link", "icon": "icon-exclamation-sign" },
 ]
 
-@webnotes.whitelist()
-def get():
-	webnotes.only_for("System Manager")
-	for item in items:
-		if item.get("type")=="Section":
-			continue
-		set_count(item)
-		
-		if item.get("dependencies"):
-			for d in item["dependencies"]:
-				set_count(d)
-	
-	return items
 
-def set_count(item):
-	if "query" in item:
-		item["count"] = webnotes.conn.sql(item["query"])[0][0]
-	elif "filter" in item:
-		key = item["filter"].keys()[0]
-		item["count"] = webnotes.conn.sql("""select count(*) from `tab%s` where
-			%s = %s and docstatus < 2""" % (item["doctype"], key, "%s"),
-			item["filter"][key])[0][0]
-	elif "doctype" in item:
-		item["count"] = webnotes.conn.sql("select count(*) from `tab%s` where docstatus<2" \
-			% item["doctype"])[0][0]
+
+
+# @webnotes.whitelist()
+# def get():
+# 	webnotes.only_for("System Manager")
+# 	for item in items:
+# 		if item.get("type")=="Section":
+# 			continue
+# 		set_count(item)
+# 		
+# 		if item.get("dependencies"):
+# 			for d in item["dependencies"]:
+# 				set_count(d)
+# 	
+# 	return items
+# 
+# def set_count(item):
+# 	if "query" in item:
+# 		item["count"] = webnotes.conn.sql(item["query"])[0][0]
+# 	elif "filter" in item:
+# 		key = item["filter"].keys()[0]
+# 		item["count"] = webnotes.conn.sql("""select count(*) from `tab%s` where
+# 			%s = %s and docstatus < 2""" % (item["doctype"], key, "%s"),
+# 			item["filter"][key])[0][0]
+# 	elif "doctype" in item:
+# 		item["count"] = webnotes.conn.sql("select count(*) from `tab%s` where docstatus<2" \
+# 			% item["doctype"])[0][0]
