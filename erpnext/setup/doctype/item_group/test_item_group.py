@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import webnotes
 from webnotes.utils.nestedset import NestedSetRecursionError, NestedSetMultipleRootsError, \
-	rebuild_tree, get_ancestors_of
+	NestedSetChildExistsError, NestedSetInvalidMergeError, rebuild_tree, get_ancestors_of
 
 test_records = [
 	[{
@@ -106,14 +106,34 @@ class TestItem(unittest.TestCase):
 			self.assertTrue(lft >= min_lft)
 			self.assertTrue(rgt <= max_rgt)
 			
-			children = webnotes.conn.sql("""select count(name) from `tabItem Group`
-				where lft>%s and rgt<%s""", (lft, rgt))[0][0]
-			self.assertTrue(rgt == (lft + 1 + (2 * children)))
+			no_of_children = self.get_no_of_children(item_group["item_group_name"])
+			self.assertTrue(rgt == (lft + 1 + (2 * no_of_children)))
+			
+			no_of_children = self.get_no_of_children(parent_item_group)
+			self.assertTrue(parent_rgt == (parent_lft + 1 + (2 * no_of_children)))
+			
+	def get_no_of_children(self, item_group):
+		def get_no_of_children(item_groups, no_of_children):
+			children = []
+			for ig in item_groups:
+				children += webnotes.conn.sql_list("""select name from `tabItem Group`
+				where ifnull(parent_item_group, '')=%s""", ig or '')
+			
+			if len(children):
+				return get_no_of_children(children, no_of_children + len(children))
+			else:
+				return no_of_children
+			
+		return get_no_of_children([item_group], 0)
 			
 	def test_recursion(self):
 		group_b = webnotes.bean("Item Group", "_Test Item Group B")
 		group_b.doc.parent_item_group = "_Test Item Group B - 3"
 		self.assertRaises(NestedSetRecursionError, group_b.save)
+		
+		# cleanup
+		group_b.doc.parent_item_group = "All Item Groups"
+		group_b.save()
 	
 	def test_rebuild_tree(self):
 		rebuild_tree("Item Group", "parent_item_group")
@@ -126,34 +146,27 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 		
 	def test_move_group_into_another(self):
-		previous_lft_rgt = self.get_lft_rgt(get_ancestors_of("Item Group", "_Test Item Group B"))
+		# before move
+		old_lft, old_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# put B under C
 		group_b = webnotes.bean("Item Group", "_Test Item Group B")
+		lft, rgt = group_b.doc.lft, group_b.doc.rgt
+		
 		group_b.doc.parent_item_group = "_Test Item Group C"
 		group_b.save()
 		self.test_basic_tree()
 		
-		# TODO check rgt of old parent and new parent
-		# check_ancestors_rgt(previous_lft_rgt, "_Test Item Group C", pass)
+		# after move
+		new_lft, new_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		
+		# lft should reduce
+		self.assertEquals(old_lft - new_lft, rgt - lft + 1)
+		
+		# adjacent siblings, hence rgt diff will be 0
+		self.assertEquals(new_rgt - old_rgt, 0)
 		
 		self.move_it_back()
-		
-	def check_ancestors_rgt(self, previous_lft_rgt, new_parent, increment):
-		if new_parent in previous_lft_rgt:
-			pass
-		else:
-			pass
-		
-	def get_lft_rgt(self, item_groups):
-		item_groups = webnotes.conn.sql("""select name, lft, rgt from `tabItem Group`
-			where name in ({})""".format(", ".join(["%s"*len(item_groups)])), tuple(item_groups), as_dict=True)
-		
-		out = {}
-		for item_group in item_groups:
-			out[item_group.name] = item_group
-		
-		return out
 		
 	def test_move_group_into_root(self):
 		group_b = webnotes.bean("Item Group", "_Test Item Group B")
@@ -163,17 +176,31 @@ class TestItem(unittest.TestCase):
 		# trick! works because it hasn't been rolled back :D
 		self.test_basic_tree()
 		
-		# TODO check rgt of old parent and new parent
-		
 		self.move_it_back()
 		
+	def print_tree(self):
+		import json
+		print json.dumps(webnotes.conn.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
+		
 	def test_move_leaf_into_another_group(self):
+		# before move
+		old_lft, old_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		
 		group_b_3 = webnotes.bean("Item Group", "_Test Item Group B - 3")
+		lft, rgt = group_b_3.doc.lft, group_b_3.doc.rgt
+		
+		# child of right sibling is moved into it
 		group_b_3.doc.parent_item_group = "_Test Item Group C"
 		group_b_3.save()
 		self.test_basic_tree()
 		
-		# TODO check rgt of old parent and new parent
+		new_lft, new_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		
+		# lft should remain the same
+		self.assertEquals(old_lft - new_lft, 0)
+		
+		# rgt should increase
+		self.assertEquals(new_rgt - old_rgt, rgt - lft + 1)
 		
 		# move it back
 		group_b_3 = webnotes.bean("Item Group", "_Test Item Group B - 3")
@@ -186,33 +213,63 @@ class TestItem(unittest.TestCase):
 		parent_item_group = webnotes.conn.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
 		rgt = webnotes.conn.get_value("Item Group", parent_item_group, "rgt")
 		
+		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
+		ancestors = webnotes.conn.sql("""select name, rgt from `tabItem Group`
+			where name in ({})""".format(", ".join(["%s"]*len(ancestors))), tuple(ancestors), as_dict=True)
+		
 		webnotes.delete_doc("Item Group", "_Test Item Group B - 3")
 		records_to_test = test_records[2:]
 		del records_to_test[4]
 		self.test_basic_tree(records=records_to_test)
 		
-		# TODO rgt of all ancestors should reduce by 2
-		new_rgt = webnotes.conn.get_value("Item Group", parent_item_group, "rgt")
-		self.assertEquals(new_rgt, rgt - 2)
+		# rgt of each ancestor would reduce by 2
+		for item_group in ancestors:
+			new_lft, new_rgt = webnotes.conn.get_value("Item Group", item_group.name, ["lft", "rgt"])
+			self.assertEquals(new_rgt, item_group.rgt - 2)
 		
 		# insert it back
 		webnotes.bean(copy=test_records[6]).insert()
+		
 		self.test_basic_tree()
 		
 	def test_delete_group(self):
-		# TODO cannot delete group with child, but can delete leaf
-		pass
+		# cannot delete group with child, but can delete leaf
+		self.assertRaises(NestedSetChildExistsError, webnotes.delete_doc, "Item Group", "_Test Item Group B")
 		
 	def test_merge_groups(self):
-		pass
+		webnotes.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
+		records_to_test = test_records[2:]
+		del records_to_test[1]
+		self.test_basic_tree(records=records_to_test)
+		
+		# insert Group B back
+		webnotes.bean(copy=test_records[3]).insert()
+		self.test_basic_tree()
+		
+		# move its children back
+		for name in webnotes.conn.sql_list("""select name from `tabItem Group`
+			where parent_item_group='_Test Item Group C'"""):
+			
+			bean = webnotes.bean("Item Group", name)
+			bean.doc.parent_item_group = "_Test Item Group B"
+			bean.save()
+
+		self.test_basic_tree()
 		
 	def test_merge_leaves(self):
-		pass
+		webnotes.rename_doc("Item Group", "_Test Item Group B - 2", "_Test Item Group B - 1", merge=True)
+		records_to_test = test_records[2:]
+		del records_to_test[3]
+		self.test_basic_tree(records=records_to_test)
+		
+		# insert Group B - 2back
+		webnotes.bean(copy=test_records[5]).insert()
+		self.test_basic_tree()
 		
 	def test_merge_leaf_into_group(self):
-		# should raise exception
-		pass
+		self.assertRaises(NestedSetInvalidMergeError, webnotes.rename_doc, "Item Group", "_Test Item Group B - 3", 
+			"_Test Item Group B", merge=True)
 		
 	def test_merge_group_into_leaf(self):
-		# should raise exception
-		pass
+		self.assertRaises(NestedSetInvalidMergeError, webnotes.rename_doc, "Item Group", "_Test Item Group B", 
+			"_Test Item Group B - 3", merge=True)
