@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2014-01-22 16:05:35", 
+  "modified": "2014-02-07 17:43:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -101,25 +101,15 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
+  "fieldname": "period", 
+  "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Fiscal Year", 
+  "label": "Period", 
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Data", 
-  "options": "link:Fiscal Year", 
+  "options": "Period", 
   "reqd": 1, 
   "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "description", 
-  "fieldtype": "Small Text", 
-  "hidden": 0, 
-  "label": "Description", 
-  "oldfieldname": "reason", 
-  "oldfieldtype": "Small Text", 
-  "width": "300px"
  }, 
  {
   "doctype": "DocField", 
@@ -155,6 +145,16 @@
   "label": "Total Leaves Allocated", 
   "read_only": 1, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "hidden": 0, 
+  "label": "Description", 
+  "oldfieldname": "reason", 
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
  }, 
  {
   "doctype": "DocField", 

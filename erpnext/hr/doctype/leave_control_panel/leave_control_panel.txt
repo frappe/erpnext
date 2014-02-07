@@ -2,14 +2,12 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2013-07-05 14:44:50", 
+  "modified": "2014-02-07 17:42:55", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_copy": 1, 
-  "allow_email": 1, 
-  "allow_print": 1, 
   "doctype": "DocType", 
   "hide_heading": 0, 
   "hide_toolbar": 0, 
@@ -99,11 +97,11 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
+  "fieldname": "period", 
+  "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Fiscal Year", 
-  "options": "link:Fiscal Year", 
+  "label": "Period", 
+  "options": "Period", 
   "reqd": 1
  }, 
  {

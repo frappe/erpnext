@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:23", 
+  "modified": "2014-02-07 12:51:05", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -84,7 +84,8 @@
   "in_list_view": 1, 
   "label": "Employee Name", 
   "oldfieldname": "employee_name", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "default": "Present", 
@@ -134,24 +135,13 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "oldfieldtype": "Select", 
-  "options": "link:Fiscal Year", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "company", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "in_filter": 1, 
   "label": "Company", 
   "oldfieldname": "company", 
   "oldfieldtype": "Link", 
-  "options": "link:Company", 
+  "options": "Company", 
   "reqd": 1
  }, 
  {

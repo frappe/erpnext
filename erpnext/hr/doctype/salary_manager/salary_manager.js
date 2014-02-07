@@ -4,12 +4,14 @@
 var display_activity_log = function(msg) {
 	if(!pscript.ss_html)
 		pscript.ss_html = $a(cur_frm.fields_dict['activity_log'].wrapper,'div');
-	pscript.ss_html.innerHTML = 
-		'<div class="panel"><div class="panel-heading">'+wn._("Activity Log:")+'</div>'+msg+'</div>';
+	pscript.ss_html.innerHTML = '<div class="panel"><div class="panel-heading">' + wn._("Activity Log:") + 
+		'</div>' + msg + '</div>';
 }
 
-//Create salary slip
-//-----------------------
+cur_frm.cscript.refresh = function() {
+	cur_frm.set_intro(wn._("Generate, submit & mail multiple salary slips based on selected criteria for employee."));
+}
+
 cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 	var callback = function(r, rt){
 		if (r.message)
@@ -19,9 +21,9 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
-	var check = confirm(wn._("Do you really want to Submit all Salary Slip for month : ") + doc.month+ wn._(" and fiscal year : ")+doc.fiscal_year);
-	if(check){
-		var callback = function(r, rt){
+	var check = confirm(wn._("Do you really want to Submit all Salary Slip for month : ") + doc.month + wn._(" and fiscal year : ") + doc.fiscal_year);
+	if(check) {
+		var callback = function(r, rt) {
 			if (r.message)
 				display_activity_log(r.message);
 		}
@@ -29,16 +31,15 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.make_bank_voucher = function(doc,cdt,cdn){
-    if(doc.company && doc.month && doc.fiscal_year){
-    	cur_frm.cscript.make_jv(doc, cdt, cdn);
-    } else {
-  	  msgprint(wn._("Company, Month and Fiscal Year is mandatory"));
-    }
+cur_frm.cscript.make_bank_voucher = function(doc, cdt, cdn) {
+	if(doc.company && doc.month && doc.fiscal_year)
+		cur_frm.cscript.make_jv(doc, cdt, cdn);
+	else
+		msgprint(wn._("Company, Month and Fiscal Year is mandatory"));
 }
 
 cur_frm.cscript.make_jv = function(doc, dt, dn) {
-	var call_back = function(r, rt){
+	var call_back = function(r, rt) {
 		var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
 		jv = locals['Journal Voucher'][jv];
 		jv.voucher_type = 'Bank Voucher';

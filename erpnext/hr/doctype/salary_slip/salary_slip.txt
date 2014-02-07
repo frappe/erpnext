@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:18", 
+  "modified": "2014-02-07 13:22:07", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,8 +42,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break0", 
-  "fieldtype": "Column Break", 
+  "fieldname": "employee_details", 
+  "fieldtype": "Section Break", 
+  "label": "Employee Details", 
   "oldfieldtype": "Column Break", 
   "width": "50%"
  }, 
@@ -73,6 +74,18 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Branch", 
+  "oldfieldname": "branch", 
+  "oldfieldtype": "Link", 
+  "options": "Branch", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "department", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -98,15 +111,8 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "branch", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "label": "Branch", 
-  "oldfieldname": "branch", 
-  "oldfieldtype": "Link", 
-  "options": "Branch", 
-  "read_only": 1, 
-  "search_index": 0
+  "fieldname": "cb_1", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -140,6 +146,15 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "letter_head", 
   "fieldtype": "Link", 
   "label": "Letter Head", 
@@ -147,32 +162,11 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "column_break1", 
-  "fieldtype": "Column Break", 
+  "fieldname": "salary_details", 
+  "fieldtype": "Section Break", 
+  "label": "Salary Details", 
   "oldfieldtype": "Column Break", 
   "width": "50%"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Link", 
-  "in_filter": 1, 
-  "in_list_view": 1, 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "oldfieldtype": "Data", 
-  "options": "Fiscal Year", 
-  "reqd": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Company", 
-  "options": "link:Company", 
-  "reqd": 1
  }, 
  {
   "doctype": "DocField", 
@@ -190,6 +184,20 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "label": "From Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "label": "To Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "total_days_in_month", 
   "fieldtype": "Data", 
   "label": "Total Working Days In The Month", 
@@ -197,6 +205,11 @@
   "oldfieldtype": "Int", 
   "read_only": 1, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb_2", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
