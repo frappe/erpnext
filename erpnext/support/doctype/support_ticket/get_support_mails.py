@@ -6,7 +6,7 @@ import webnotes
 from webnotes.utils import cstr, cint, decode_dict, today
 from webnotes.utils.email_lib import sendmail		
 from webnotes.utils.email_lib.receive import POP3Mailbox
-from webnotes.core.doctype.communication.communication import make
+from webnotes.core.doctype.communication.communication import _make
 
 class SupportMailbox(POP3Mailbox):	
 	def setup(self, args=None):
@@ -74,7 +74,7 @@ def add_support_communication(subject, content, sender, docname=None, mail=None)
 		ticket.ignore_permissions = True
 		ticket.insert()
 	
-	make(content=content, sender=sender, subject = subject,
+	_make(content=content, sender=sender, subject = subject,
 		doctype="Support Ticket", name=ticket.doc.name,
 		date=mail.date if mail else today(), sent_or_received="Received")
 
