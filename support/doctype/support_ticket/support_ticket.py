@@ -49,10 +49,6 @@ class DocType(TransactionBase):
 				self.doc.company = webnotes.conn.get_value("Lead", self.doc.lead, "company") or \
 					webnotes.conn.get_default("company")
 
-	def on_trash(self):
-		webnotes.conn.sql("""update `tabCommunication` set support_ticket=NULL 
-			where support_ticket=%s""", (self.doc.name,))
-
 	def update_status(self):
 		status = webnotes.conn.get_value("Support Ticket", self.doc.name, "status")
 		if self.doc.status!="Open" and status =="Open" and not self.doc.first_responded_on:
