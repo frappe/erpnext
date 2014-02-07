@@ -213,6 +213,10 @@ def validate_serial_no(sle, item_det):
 			if len(serial_nos) and len(serial_nos) != abs(cint(sle.actual_qty)):
 				webnotes.throw(_("Serial Nos do not match with qty") + \
 					(": %s (%s)" % (sle.item_code, sle.actual_qty)), SerialNoQtyError)
+					
+			if len(serial_nos) != len(set(serial_nos)):
+				webnotes.throw(_("Duplicate Serial No entered against item") + 
+					(": %s" % sle.item_code), SerialNoDuplicateError)
 			
 			for serial_no in serial_nos:
 				if webnotes.conn.exists("Serial No", serial_no):
