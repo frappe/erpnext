@@ -52,7 +52,7 @@ cur_frm.fields_dict['default_bom'].get_query = function(doc) {
 
 // Expense Account
 // ---------------------------------
-cur_frm.fields_dict['purchase_account'].get_query = function(doc) {
+cur_frm.fields_dict['expense_account'].get_query = function(doc) {
 	return {
 		filters: {
 			'debit_or_credit': "Debit",
@@ -76,7 +76,7 @@ cur_frm.fields_dict['default_income_account'].get_query = function(doc) {
 
 // Purchase Cost Center
 // -----------------------------
-cur_frm.fields_dict['cost_center'].get_query = function(doc) {
+cur_frm.fields_dict['buying_cost_center'].get_query = function(doc) {
 	return {
 		filters:{ 'group_or_ledger': "Ledger" }
 	}
@@ -85,7 +85,7 @@ cur_frm.fields_dict['cost_center'].get_query = function(doc) {
 
 // Sales Cost Center
 // -----------------------------
-cur_frm.fields_dict['default_sales_cost_center'].get_query = function(doc) {
+cur_frm.fields_dict['selling_cost_center'].get_query = function(doc) {
 	return {
 		filters:{ 'group_or_ledger': "Ledger" }
 	}

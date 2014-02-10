@@ -77,7 +77,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		pi = webnotes.bean(copy=test_records[1])
 		pi.doclist[1].item_code = "_Test Non Stock Item"
-		pi.doclist[1].expense_head = "_Test Account Cost for Goods Sold - _TC"
+		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
 		pi.doclist.pop(3)
 		pi.run_method("calculate_taxes_and_totals")
@@ -235,7 +235,7 @@ test_records = [
 			"amount": 500,
 			"uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
-			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"conversion_factor": 1.0,
 		
@@ -251,7 +251,7 @@ test_records = [
 			"rate": 150,
 			"amount": 750,
 			"uom": "_Test UOM",
-			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"conversion_factor": 1.0,
 		},
@@ -373,7 +373,7 @@ test_records = [
 			"qty": 10.0,
 			"import_rate": 50.0,
 			"uom": "_Test UOM",
-			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"conversion_factor": 1.0,
 		},

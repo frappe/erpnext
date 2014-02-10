@@ -480,7 +480,7 @@ class TestStockEntry(unittest.TestCase):
 		pi.doc.posting_date = pr.doc.posting_date
 		pi.doc.credit_to = "_Test Supplier - _TC"
 		for d in pi.doclist.get({"parentfield": "entries"}):
-			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
+			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 
 		for d in pi.doclist.get({"parentfield": "other_charges"}):
@@ -583,7 +583,7 @@ class TestStockEntry(unittest.TestCase):
 		pi.doc.posting_date = pr.doc.posting_date
 		pi.doc.credit_to = "_Test Supplier - _TC"
 		for d in pi.doclist.get({"parentfield": "entries"}):
-			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
+			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		for d in pi.doclist.get({"parentfield": "other_charges"}):
 			d.cost_center = "_Test Cost Center - _TC"

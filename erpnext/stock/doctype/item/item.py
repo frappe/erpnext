@@ -310,8 +310,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	# get last purchase order item details
 	last_purchase_order = webnotes.conn.sql("""\
 		select po.name, po.transaction_date, po.conversion_rate,
-			po_item.conversion_factor, po_item.purchase_ref_rate, 
-			po_item.discount_rate, po_item.purchase_rate
+			po_item.conversion_factor, po_item.base_price_list_rate, 
+			po_item.discount_percentage, po_item.purchase_rate
 		from `tabPurchase Order` po, `tabPurchase Order Item` po_item
 		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and 
 			po.name = po_item.parent
@@ -321,7 +321,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	# get last purchase receipt item details		
 	last_purchase_receipt = webnotes.conn.sql("""\
 		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
-			pr_item.conversion_factor, pr_item.purchase_ref_rate, pr_item.discount_rate,
+			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
 			pr_item.purchase_rate
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
@@ -351,15 +351,15 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	
 	conversion_factor = flt(last_purchase.conversion_factor)
 	out = webnotes._dict({
-		"purchase_ref_rate": flt(last_purchase.purchase_ref_rate) / conversion_factor,
+		"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
 		"purchase_rate": flt(last_purchase.purchase_rate) / conversion_factor,
-		"discount_rate": flt(last_purchase.discount_rate),
+		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
-		"import_ref_rate": out.purchase_ref_rate / conversion_rate,
+		"price_list_rate": out.base_price_list_rate / conversion_rate,
 		"import_rate": out.purchase_rate / conversion_rate,
 		"rate": out.purchase_rate
 	})

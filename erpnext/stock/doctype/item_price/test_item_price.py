@@ -17,7 +17,7 @@ test_records = [
 			"doctype": "Item Price",
 			"price_list": "_Test Price List",
 			"item_code": "_Test Item",
-			"ref_rate": 100
+			"price_list_rate": 100
 		}
 	]
 ]

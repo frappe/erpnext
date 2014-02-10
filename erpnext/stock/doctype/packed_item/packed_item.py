@@ -65,7 +65,7 @@ def make_packing_list(obj, item_table_fieldname):
 	parent_items = []
 	for d in obj.doclist.get({"parentfield": item_table_fieldname}):
 		warehouse = (item_table_fieldname == "sales_order_details") \
-			and d.reserved_warehouse or d.warehouse
+			and d.warehouse or d.warehouse
 		if webnotes.conn.get_value("Sales BOM", {"new_item_code": d.item_code}):
 			for i in get_sales_bom_items(d.item_code):
 				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), 

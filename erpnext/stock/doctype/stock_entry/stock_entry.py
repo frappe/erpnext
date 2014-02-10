@@ -373,7 +373,7 @@ class DocType(StockController):
 	def get_item_details(self, arg):
 		arg = json.loads(arg)
 		item = webnotes.conn.sql("""select stock_uom, description, item_name, 
-			purchase_account, cost_center from `tabItem` 
+			expense_account, buying_cost_center from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
 			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
 		if not item: 
@@ -384,9 +384,9 @@ class DocType(StockController):
 			'stock_uom'			  	: item and item[0]['stock_uom'] or '',
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
-			'expense_account'		: item and item[0]['purchase_account'] or arg.get("expense_account") \
+			'expense_account'		: item and item[0]['expense_account'] or arg.get("expense_account") \
 				or webnotes.conn.get_value("Company", arg.get("company"), "default_expense_account"),
-			'cost_center'			: item and item[0]['cost_center'] or arg.get("cost_center"),
+			'cost_center'			: item and item[0]['buying_cost_center'] or arg.get("cost_center"),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
 			'conversion_factor'		: 1,
@@ -464,7 +464,7 @@ class DocType(StockController):
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
 				item = webnotes.conn.get_value("Item", pro_obj.doc.production_item, ["item_name", 
-					"description", "stock_uom", "purchase_account", "cost_center"], as_dict=1)
+					"description", "stock_uom", "expense_account", "buying_cost_center"], as_dict=1)
 				self.add_to_stock_entry_detail({
 					cstr(pro_obj.doc.production_item): {
 						"to_warehouse": pro_obj.doc.fg_warehouse,
@@ -473,8 +473,8 @@ class DocType(StockController):
 						"item_name": item.item_name,
 						"description": item.description,
 						"stock_uom": item.stock_uom,
-						"expense_account": item.purchase_account,
-						"cost_center": item.cost_center,
+						"expense_account": item.expense_account,
+						"cost_center": item.buying_cost_center,
 					}
 				}, bom_no=pro_obj.doc.bom_no, idx=idx)
 								
@@ -483,7 +483,7 @@ class DocType(StockController):
 					self.doc.from_warehouse = ""
 					
 				item = webnotes.conn.sql("""select name, item_name, description, 
-					stock_uom, purchase_account, cost_center from `tabItem` 
+					stock_uom, expense_account, buying_cost_center from `tabItem` 
 					where name=(select item from tabBOM where name=%s)""", 
 					self.doc.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
@@ -493,8 +493,8 @@ class DocType(StockController):
 						"description": item[0]["description"],
 						"stock_uom": item[0]["stock_uom"],
 						"from_warehouse": "",
-						"expense_account": item[0].purchase_account,
-						"cost_center": item[0].cost_center,
+						"expense_account": item[0].expense_account,
+						"cost_center": item[0].buying_cost_center,
 					}
 				}, bom_no=self.doc.bom_no, idx=idx)
 		
@@ -911,7 +911,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 				
 			ref_item = ref_item[0]
 			
-			account = ref_item.expense_head
+			account = ref_item.expense_account
 			
 			if account not in children:
 				children.append(account)

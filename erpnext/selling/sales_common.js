@@ -151,7 +151,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					},
 					callback: function(r) {
 						if(!r.exc) {
-							me.frm.script_manager.trigger("ref_rate", cdt, cdn);
+							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 						}
 					}
 				});
@@ -163,34 +163,34 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.get_price_list_currency("Selling");
 	},
 	
-	ref_rate: function(doc, cdt, cdn) {
+	price_list_rate: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		wn.model.round_floats_in(item, ["ref_rate", "adj_rate"]);
+		wn.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
-		item.export_rate = flt(item.ref_rate * (1 - item.adj_rate / 100.0),
+		item.export_rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 			precision("export_rate", item));
 		
 		this.calculate_taxes_and_totals();
 	},
 	
-	adj_rate: function(doc, cdt, cdn) {
+	discount_percentage: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		if(!item.ref_rate) {
-			item.adj_rate = 0.0;
+		if(!item.price_list_rate) {
+			item.discount_percentage = 0.0;
 		} else {
-			this.ref_rate(doc, cdt, cdn);
+			this.price_list_rate(doc, cdt, cdn);
 		}
 	},
 	
 	export_rate: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		wn.model.round_floats_in(item, ["export_rate", "ref_rate"]);
+		wn.model.round_floats_in(item, ["export_rate", "price_list_rate"]);
 		
-		if(item.ref_rate) {
-			item.adj_rate = flt((1 - item.export_rate / item.ref_rate) * 100.0,
-				precision("adj_rate", item));
+		if(item.price_list_rate) {
+			item.discount_percentage = flt((1 - item.export_rate / item.price_list_rate) * 100.0,
+				precision("discount_percentage", item));
 		} else {
-			item.adj_rate = 0.0;
+			item.discount_percentage = 0.0;
 		}
 		
 		this.calculate_taxes_and_totals();
@@ -263,7 +263,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	toggle_editable_price_list_rate: function() {
-		var df = wn.meta.get_docfield(this.tname, "ref_rate", this.frm.doc.name);
+		var df = wn.meta.get_docfield(this.tname, "price_list_rate", this.frm.doc.name);
 		var editable_price_list_rate = cint(wn.defaults.get_default("editable_price_list_rate"));
 		
 		if(df && editable_price_list_rate) {
@@ -290,7 +290,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				wn.model.round_floats_in(item);
 				item.export_amount = flt(item.export_rate * item.qty, precision("export_amount", item));
 
-				me._set_in_company_currency(item, "ref_rate", "base_ref_rate");
+				me._set_in_company_currency(item, "price_list_rate", "base_price_list_rate");
 				me._set_in_company_currency(item, "export_rate", "basic_rate");
 				me._set_in_company_currency(item, "export_amount", "amount");
 			});
@@ -324,12 +324,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 				item.basic_rate = flt(item.amount / item.qty, precision("basic_rate", item));
 				
-				if(item.adj_rate == 100) {
-					item.base_ref_rate = item.basic_rate;
+				if(item.discount_percentage == 100) {
+					item.base_price_list_rate = item.basic_rate;
 					item.basic_rate = 0.0;
 				} else {
-					item.base_ref_rate = flt(item.basic_rate / (1 - item.adj_rate / 100.0),
-						precision("base_ref_rate", item));
+					item.base_price_list_rate = flt(item.basic_rate / (1 - item.discount_percentage / 100.0),
+						precision("base_price_list_rate", item));
 				}
 			}
 		});
@@ -560,10 +560,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 		
-		setup_field_label_map(["basic_rate", "base_ref_rate", "amount"],
+		setup_field_label_map(["basic_rate", "base_price_list_rate", "amount"],
 			company_currency, this.fname);
 		
-		setup_field_label_map(["export_rate", "ref_rate", "export_amount"],
+		setup_field_label_map(["export_rate", "price_list_rate", "export_amount"],
 			this.frm.doc.currency, this.fname);
 		
 		setup_field_label_map(["tax_amount", "total"], company_currency, "other_charges");
@@ -579,7 +579,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			(wn.model.get_doclist(cur_frm.doctype, cur_frm.docname, 
 				{parentfield: "other_charges", included_in_print_rate: 1}).length);
 		
-		$.each(["basic_rate", "base_ref_rate", "amount"], function(i, fname) {
+		$.each(["basic_rate", "base_price_list_rate", "amount"], function(i, fname) {
 			if(wn.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, show);
 		});

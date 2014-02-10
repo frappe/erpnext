@@ -252,7 +252,7 @@ erpnext.POS = Class.extend({
 								</div>', 
 							{
 								item_code: obj.name,
-								item_price: format_currency(obj.ref_rate, obj.currency),
+								item_price: format_currency(obj.price_list_rate, obj.currency),
 								item_name: obj.name===obj.item_name ? "" : obj.item_name,
 								item_image: image
 							})).appendTo($wrap);

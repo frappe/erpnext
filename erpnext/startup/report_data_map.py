@@ -132,11 +132,10 @@ data_map = {
 	},
 	
 	"Sales Order Item": {
-		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", 
-			"reserved_warehouse as warehouse"],
+		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", "warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
-			"ifnull(reserved_warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]

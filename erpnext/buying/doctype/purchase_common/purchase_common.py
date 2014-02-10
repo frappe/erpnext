@@ -55,19 +55,19 @@ class DocType(BuyingController):
 				last_purchase_details = get_last_purchase_details(d.item_code, doc_name)
 
 				if last_purchase_details:
-					d.purchase_ref_rate = last_purchase_details['purchase_ref_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.discount_rate = last_purchase_details['discount_rate']
+					d.base_price_list_rate = last_purchase_details['base_price_list_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.discount_percentage = last_purchase_details['discount_percentage']
 					d.purchase_rate = last_purchase_details['purchase_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.import_ref_rate = d.purchase_ref_rate / conversion_rate
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.import_rate = d.purchase_rate / conversion_rate
 				else:
 					# if no last purchase found, reset all values to 0
-					d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate = d.import_rate = d.discount_rate = 0
+					d.base_price_list_rate = d.purchase_rate = d.price_list_rate = d.import_rate = d.discount_percentage = 0
 					
 					item_last_purchase_rate = webnotes.conn.get_value("Item",
 						d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
-						d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate \
+						d.base_price_list_rate = d.purchase_rate = d.price_list_rate \
 							= d.import_rate = item_last_purchase_rate
 			
 	def validate_for_items(self, obj):

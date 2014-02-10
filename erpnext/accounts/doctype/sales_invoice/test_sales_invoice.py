@@ -47,8 +47,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
-				"base_ref_rate", "basic_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "export_rate", "export_amount", 
+				"base_price_list_rate", "basic_rate", "amount"],
 			"_Test Item Home Desktop 100": [50, 0, 50, 500, 50, 50, 500],
 			"_Test Item Home Desktop 200": [150, 0, 150, 750, 150, 150, 750],
 		}
@@ -91,14 +91,14 @@ class TestSalesInvoice(unittest.TestCase):
 		si.doc.currency = "USD"
 		si.doc.conversion_rate = 50
 		si.doclist[1].export_rate = 1
-		si.doclist[1].ref_rate = 1
+		si.doclist[1].price_list_rate = 1
 		si.doclist[2].export_rate = 3
-		si.doclist[2].ref_rate = 3
+		si.doclist[2].price_list_rate = 3
 		si.insert()
 		
 		expected_values = {
-			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
-				"base_ref_rate", "basic_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "export_rate", "export_amount", 
+				"base_price_list_rate", "basic_rate", "amount"],
 			"_Test Item Home Desktop 100": [1, 0, 1, 10, 50, 50, 500],
 			"_Test Item Home Desktop 200": [3, 0, 3, 15, 150, 150, 750],
 		}
@@ -153,8 +153,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
-				"base_ref_rate", "basic_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "export_rate", "export_amount", 
+				"base_price_list_rate", "basic_rate", "amount"],
 			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 465.37],
 			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 698.08],
 		}
@@ -248,8 +248,8 @@ class TestSalesInvoice(unittest.TestCase):
 		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
 			tax.idx = i+1
 		
-		si.doclist[1].ref_rate = 62.5
-		si.doclist[1].ref_rate = 191
+		si.doclist[1].price_list_rate = 62.5
+		si.doclist[1].price_list_rate = 191
 		for i in [3, 5, 6, 7, 8, 9]:
 			si.doclist[i].included_in_print_rate = 1
 		
@@ -266,8 +266,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
-				"base_ref_rate", "basic_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "export_rate", "export_amount", 
+				"base_price_list_rate", "basic_rate", "amount"],
 			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 499.98],
 			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 750],
 		}
@@ -310,17 +310,17 @@ class TestSalesInvoice(unittest.TestCase):
 		si = webnotes.bean(copy=test_records[3])
 		si.doc.currency = "USD"
 		si.doc.conversion_rate = 50
-		si.doclist[1].ref_rate = 55.56
-		si.doclist[1].adj_rate = 10
-		si.doclist[2].ref_rate = 187.5
-		si.doclist[2].adj_rate = 20
+		si.doclist[1].price_list_rate = 55.56
+		si.doclist[1].discount_percentage = 10
+		si.doclist[2].price_list_rate = 187.5
+		si.doclist[2].discount_percentage = 20
 		si.doclist[9].rate = 5000
 		
 		si.insert()
 		
 		expected_values = {
-			"keys": ["ref_rate", "adj_rate", "export_rate", "export_amount", 
-				"base_ref_rate", "basic_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "export_rate", "export_amount", 
+				"base_price_list_rate", "basic_rate", "amount"],
 			"_Test Item Home Desktop 100": [55.56, 10, 50, 500, 2222.11, 1999.9, 19999.04],
 			"_Test Item Home Desktop 200": [187.5, 20, 150, 750, 7375.66, 5900.53, 29502.66],
 		}
@@ -961,7 +961,7 @@ test_records = [
 			"qty": 1.0,
 			"basic_rate": 500.0,
 			"amount": 500.0, 
-			"ref_rate": 500.0, 
+			"price_list_rate": 500.0, 
 			"export_amount": 500.0, 
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
@@ -1011,7 +1011,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 100",
 			"item_name": "_Test Item Home Desktop 100",
 			"qty": 10,
-			"ref_rate": 50,
+			"price_list_rate": 50,
 			"export_rate": 50,
 			"stock_uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
@@ -1025,7 +1025,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 200",
 			"item_name": "_Test Item Home Desktop 200",
 			"qty": 5,
-			"ref_rate": 150,
+			"price_list_rate": 150,
 			"export_rate": 150,
 			"stock_uom": "_Test UOM",
 			"income_account": "Sales - _TC",
@@ -1137,7 +1137,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 100",
 			"item_name": "_Test Item Home Desktop 100",
 			"qty": 10,
-			"ref_rate": 62.5,
+			"price_list_rate": 62.5,
 			"stock_uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
 			"income_account": "Sales - _TC",
@@ -1150,7 +1150,7 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 200",
 			"item_name": "_Test Item Home Desktop 200",
 			"qty": 5,
-			"ref_rate": 190.66,
+			"price_list_rate": 190.66,
 			"stock_uom": "_Test UOM",
 			"income_account": "Sales - _TC",
 			"cost_center": "_Test Cost Center - _TC",

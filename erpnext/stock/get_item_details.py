@@ -132,7 +132,7 @@ def get_basic_details(args, item_bean):
 			"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
 			"income_account": item.default_income_account or args.income_account \
 				or webnotes.conn.get_value("Company", args.company, "default_income_account"),
-			"expense_account": item.purchase_account or args.expense_account \
+			"expense_account": item.expense_account or args.expense_account \
 				or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
 			"cost_center": item.selling_cost_center \
 				if args.transaction_type == "selling" else args.buying_cost_center,
@@ -165,7 +165,7 @@ def get_price_list_rate(args, item_bean, out):
 		validate_conversion_rate(args, meta)
 
 		price_list_rate = webnotes.conn.get_value("Item Price", 
-			{"price_list": args.price_list, "item_code": args.item_code}, "ref_rate")
+			{"price_list": args.price_list, "item_code": args.item_code}, "price_list_rate")
 			
 		if not price_list_rate: return {}
 		
@@ -223,7 +223,7 @@ def validate_conversion_rate(args, meta):
 # 			discount = flt(res[0][0])
 # 			break
 # 			
-# 	return {"adj_rate": discount}
+# 	return {"discount_percentage": discount}
 	
 def get_party_item_code(args, item_bean, out):
 	if args.transaction_type == "selling":

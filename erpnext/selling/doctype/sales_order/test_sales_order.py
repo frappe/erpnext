@@ -106,20 +106,20 @@ class TestSalesOrder(unittest.TestCase):
 		
 	def test_reserved_qty_for_so(self):
 		# reset bin
-		self.delete_bin(test_records[0][1]["item_code"], test_records[0][1]["reserved_warehouse"])
+		self.delete_bin(test_records[0][1]["item_code"], test_records[0][1]["warehouse"])
 		
 		# submit
 		so = self.create_so()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 10.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 10.0)
 		
 		# cancel
 		so.cancel()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 0.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 0.0)
 		
 	
 	def test_reserved_qty_for_partial_delivery(self):
 		# reset bin
-		self.delete_bin(test_records[0][1]["item_code"], test_records[0][1]["reserved_warehouse"])
+		self.delete_bin(test_records[0][1]["item_code"], test_records[0][1]["warehouse"])
 		
 		# submit so
 		so = self.create_so()
@@ -130,25 +130,25 @@ class TestSalesOrder(unittest.TestCase):
 		# submit dn
 		dn = self.create_dn_against_so(so)
 		
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 5.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 5.0)
 		
 		# stop so
 		so.load_from_db()
 		so.obj.stop_sales_order()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 0.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 0.0)
 		
 		# unstop so
 		so.load_from_db()
 		so.obj.unstop_sales_order()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 5.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 5.0)
 		
 		# cancel dn
 		dn.cancel()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 10.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 10.0)
 		
 	def test_reserved_qty_for_over_delivery(self):
 		# reset bin
-		self.delete_bin(test_records[0][1]["item_code"], test_records[0][1]["reserved_warehouse"])
+		self.delete_bin(test_records[0][1]["item_code"], test_records[0][1]["warehouse"])
 		
 		# submit so
 		so = self.create_so()
@@ -161,11 +161,11 @@ class TestSalesOrder(unittest.TestCase):
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 0.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 0.0)
 
 		# cancel dn
 		dn.cancel()
-		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].reserved_warehouse, 10.0)
+		self.check_reserved_qty(so.doclist[1].item_code, so.doclist[1].warehouse, 10.0)
 		
 	def test_reserved_qty_for_so_with_packing_list(self):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
@@ -175,24 +175,24 @@ class TestSalesOrder(unittest.TestCase):
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 		
 		# reset bin
-		self.delete_bin(sbom_test_records[0][1]["item_code"], test_record[1]["reserved_warehouse"])
-		self.delete_bin(sbom_test_records[0][2]["item_code"], test_record[1]["reserved_warehouse"])
+		self.delete_bin(sbom_test_records[0][1]["item_code"], test_record[1]["warehouse"])
+		self.delete_bin(sbom_test_records[0][2]["item_code"], test_record[1]["warehouse"])
 		
 		# submit
 		so = self.create_so(test_record)
 		
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 50.0)
+			so.doclist[1].warehouse, 50.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 20.0)
+			so.doclist[1].warehouse, 20.0)
 		
 		# cancel
 		so.cancel()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 0.0)
+			so.doclist[1].warehouse, 0.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 0.0)
+			so.doclist[1].warehouse, 0.0)
 			
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
@@ -203,8 +203,8 @@ class TestSalesOrder(unittest.TestCase):
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 
 		# reset bin
-		self.delete_bin(sbom_test_records[0][1]["item_code"], test_record[1]["reserved_warehouse"])
-		self.delete_bin(sbom_test_records[0][2]["item_code"], test_record[1]["reserved_warehouse"])
+		self.delete_bin(sbom_test_records[0][1]["item_code"], test_record[1]["warehouse"])
+		self.delete_bin(sbom_test_records[0][2]["item_code"], test_record[1]["warehouse"])
 		
 		# submit
 		so = self.create_so(test_record)
@@ -216,33 +216,33 @@ class TestSalesOrder(unittest.TestCase):
 		dn = self.create_dn_against_so(so)
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 25.0)
+			so.doclist[1].warehouse, 25.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 10.0)
+			so.doclist[1].warehouse, 10.0)
 				
 		# stop so
 		so.load_from_db()
 		so.obj.stop_sales_order()
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 0.0)
+			so.doclist[1].warehouse, 0.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 0.0)
+			so.doclist[1].warehouse, 0.0)
 		
 		# unstop so
 		so.load_from_db()
 		so.obj.unstop_sales_order()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 25.0)
+			so.doclist[1].warehouse, 25.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 10.0)
+			so.doclist[1].warehouse, 10.0)
 		
 		# cancel dn
 		dn.cancel()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 50.0)
+			so.doclist[1].warehouse, 50.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 20.0)
+			so.doclist[1].warehouse, 20.0)
 			
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
@@ -252,8 +252,8 @@ class TestSalesOrder(unittest.TestCase):
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 
 		# reset bin
-		self.delete_bin(sbom_test_records[0][1]["item_code"], test_record[1]["reserved_warehouse"])
-		self.delete_bin(sbom_test_records[0][2]["item_code"], test_record[1]["reserved_warehouse"])
+		self.delete_bin(sbom_test_records[0][1]["item_code"], test_record[1]["warehouse"])
+		self.delete_bin(sbom_test_records[0][2]["item_code"], test_record[1]["warehouse"])
 		
 		# submit
 		so = self.create_so(test_record)
@@ -268,16 +268,16 @@ class TestSalesOrder(unittest.TestCase):
 		dn = self.create_dn_against_so(so, 15)
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 0.0)
+			so.doclist[1].warehouse, 0.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 0.0)
+			so.doclist[1].warehouse, 0.0)
 
 		# cancel dn
 		dn.cancel()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so.doclist[1].reserved_warehouse, 50.0)
+			so.doclist[1].warehouse, 50.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so.doclist[1].reserved_warehouse, 20.0)
+			so.doclist[1].warehouse, 20.0)
 
 	def test_warehouse_user(self):
 		webnotes.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
@@ -294,7 +294,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.doc.company = "_Test Company 1"
 		so.doc.conversion_rate = 0.02
 		so.doc.plc_conversion_rate = 0.02
-		so.doclist[1].reserved_warehouse = "_Test Warehouse 2 - _TC1"
+		so.doclist[1].warehouse = "_Test Warehouse 2 - _TC1"
 		self.assertRaises(BeanPermissionError, so.insert)
 
 		webnotes.set_user("test2@example.com")
@@ -336,7 +336,7 @@ test_records = [
 			"basic_rate": 100.0,
 			"export_rate": 100.0,
 			"amount": 1000.0,
-			"reserved_warehouse": "_Test Warehouse - _TC",
+			"warehouse": "_Test Warehouse - _TC",
 		}
 	],	
 ]

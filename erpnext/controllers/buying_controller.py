@@ -91,10 +91,10 @@ class BuyingController(StockController):
 				
 			self.round_floats_in(item)
 
-			if item.discount_rate == 100.0:
+			if item.discount_percentage == 100.0:
 				item.import_rate = 0.0
 			elif not item.import_rate:
-				item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
+				item.import_rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
 					self.precision("import_rate", item))
 						
 			item.import_amount = flt(item.import_rate * item.qty,
@@ -102,7 +102,7 @@ class BuyingController(StockController):
 			item.item_tax_amount = 0.0;
 
 			self._set_in_company_currency(item, "import_amount", "amount")
-			self._set_in_company_currency(item, "import_ref_rate", "purchase_ref_rate")
+			self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
 			self._set_in_company_currency(item, "import_rate", "rate")
 			
 			

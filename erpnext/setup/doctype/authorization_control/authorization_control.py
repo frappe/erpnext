@@ -89,7 +89,7 @@ class DocType(TransactionBase):
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
 				for t in getlist(doc_obj.doclist, doc_obj.fname):
-					self.validate_auth_rule(doctype_name, t.adj_rate, based_on, add_cond, company,t.item_code )
+					self.validate_auth_rule(doctype_name, t.discount_percentage, based_on, add_cond, company,t.item_code )
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
 
@@ -99,12 +99,12 @@ class DocType(TransactionBase):
 	def validate_approving_authority(self, doctype_name,company, total, doc_obj = ''):
 		av_dis = 0
 		if doc_obj:
-			ref_rate, basic_rate = 0, 0
+			price_list_rate, basic_rate = 0, 0
 			for d in getlist(doc_obj.doclist, doc_obj.fname):
-				if d.base_ref_rate and d.basic_rate:
-					ref_rate += flt(d.base_ref_rate)
+				if d.base_price_list_rate and d.basic_rate:
+					price_list_rate += flt(d.base_price_list_rate)
 					basic_rate += flt(d.basic_rate)
-			if ref_rate: av_dis = 100 - flt(basic_rate * 100 / ref_rate)
+			if price_list_rate: av_dis = 100 - flt(basic_rate * 100 / price_list_rate)
 
 		final_based_on = ['Grand Total','Average Discount','Customerwise Discount','Itemwise Discount']
 		# Individual User

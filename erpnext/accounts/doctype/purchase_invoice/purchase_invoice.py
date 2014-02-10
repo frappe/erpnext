@@ -201,19 +201,19 @@ class DocType(BuyingController):
 					and self.doc.is_opening == 'No':
 				# in case of auto inventory accounting, against expense account is always
 				# Stock Received But Not Billed for a stock item
-				item.expense_head = stock_not_billed_account
+				item.expense_account = stock_not_billed_account
 				item.cost_center = None
 				
 				if stock_not_billed_account not in against_accounts:
 					against_accounts.append(stock_not_billed_account)
 			
-			elif not item.expense_head:
+			elif not item.expense_account:
 				msgprint(_("Expense account is mandatory for item") + ": " + 
 					(item.item_code or item.item_name), raise_exception=1)
 			
-			elif item.expense_head not in against_accounts:
+			elif item.expense_account not in against_accounts:
 				# if no auto_accounting_for_stock or not a stock item
-				against_accounts.append(item.expense_head)
+				against_accounts.append(item.expense_account)
 				
 		self.doc.against_expense_account = ",".join(against_accounts)
 
@@ -347,7 +347,7 @@ class DocType(BuyingController):
 					
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_head,
+							"account": item.expense_account,
 							"against": self.doc.credit_to,
 							"debit": valuation_amt,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock"
@@ -358,7 +358,7 @@ class DocType(BuyingController):
 				# if not a stock item or auto inventory accounting disabled, book the expense
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": item.expense_head,
+						"account": item.expense_account,
 						"against": self.doc.credit_to,
 						"debit": item.amount,
 						"remarks": self.doc.remarks,

@@ -117,12 +117,12 @@ class SellingController(StockController):
 					
 				item.basic_rate = flt(item.amount / item.qty, self.precision("basic_rate", item))
 				
-				if item.adj_rate == 100:
-					item.base_ref_rate = item.basic_rate
+				if item.discount_percentage == 100:
+					item.base_price_list_rate = item.basic_rate
 					item.basic_rate = 0.0
 				else:
-					item.base_ref_rate = flt(item.basic_rate / (1 - (item.adj_rate / 100.0)),
-						self.precision("base_ref_rate", item))
+					item.base_price_list_rate = flt(item.basic_rate / (1 - (item.discount_percentage / 100.0)),
+						self.precision("base_price_list_rate", item))
 			
 	def get_current_tax_fraction(self, tax, item_tax_map):
 		"""
@@ -152,16 +152,16 @@ class SellingController(StockController):
 			for item in self.item_doclist:
 				self.round_floats_in(item)
 
-				if item.adj_rate == 100:
+				if item.discount_percentage == 100:
 					item.export_rate = 0
 				elif not item.export_rate:
-					item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
+					item.export_rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
 						self.precision("export_rate", item))
 
 				item.export_amount = flt(item.export_rate * item.qty,
 					self.precision("export_amount", item))
 
-				self._set_in_company_currency(item, "ref_rate", "base_ref_rate")
+				self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
 				self._set_in_company_currency(item, "export_rate", "basic_rate")
 				self._set_in_company_currency(item, "export_amount", "amount")
 
@@ -281,22 +281,22 @@ class SellingController(StockController):
 		for d in self.doclist.get({"parentfield": self.fname}):
 			discount = flt(webnotes.conn.get_value("Item", d.item_code, "max_discount"))
 			
-			if discount and flt(d.adj_rate) > discount:
+			if discount and flt(d.discount_percentage) > discount:
 				webnotes.throw(_("You cannot give more than ") + cstr(discount) + "% " + 
 					_("discount on Item Code") + ": " + cstr(d.item_code))
 					
 	def get_item_list(self):
 		il = []
 		for d in self.doclist.get({"parentfield": self.fname}):
-			reserved_warehouse = ""
+			warehouse = ""
 			reserved_qty_for_main_item = 0
 			
 			if self.doc.doctype == "Sales Order":
 				if (webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
-					self.has_sales_bom(d.item_code)) and not d.reserved_warehouse:
+					self.has_sales_bom(d.item_code)) and not d.warehouse:
 						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
 							d.item_code + _(" as it is stock Item or packing item"))
-				reserved_warehouse = d.reserved_warehouse
+				warehouse = d.warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 				
@@ -306,7 +306,7 @@ class SellingController(StockController):
 				
 				already_delivered_qty = self.get_already_delivered_qty(self.doc.name, 
 					d.against_sales_order, d.prevdoc_detail_docname)
-				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
+				so_qty, warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
 				
 				if already_delivered_qty + d.qty > so_qty:
 					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
@@ -319,7 +319,7 @@ class SellingController(StockController):
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(webnotes._dict({
 							'warehouse': p.warehouse,
-							'reserved_warehouse': reserved_warehouse,
+							'warehouse': warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
 							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
@@ -331,7 +331,7 @@ class SellingController(StockController):
 			else:
 				il.append(webnotes._dict({
 					'warehouse': d.warehouse,
-					'reserved_warehouse': reserved_warehouse,
+					'warehouse': warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
 					'reserved_qty': reserved_qty_for_main_item,
@@ -354,10 +354,10 @@ class SellingController(StockController):
 		return qty and flt(qty[0][0]) or 0.0
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = webnotes.conn.sql("""select qty, reserved_warehouse from `tabSales Order Item`
+		so_item = webnotes.conn.sql("""select qty, warehouse from `tabSales Order Item`
 			where name = %s and docstatus = 1""", so_detail, as_dict=1)
 		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
-		so_warehouse = so_item and so_item[0]["reserved_warehouse"] or ""
+		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 		
 	def check_stop_sales_order(self, ref_fieldname):

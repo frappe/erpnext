@@ -85,15 +85,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this.get_terms();
 	},
 	
-	reserved_warehouse: function(doc, cdt, cdn) {
+	warehouse: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		if(item.item_code && item.reserved_warehouse) {
+		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.selling.utils.get_available_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
-					warehouse: item.reserved_warehouse,
+					warehouse: item.warehouse,
 				},
 			});
 		}

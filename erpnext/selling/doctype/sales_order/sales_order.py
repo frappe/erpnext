@@ -49,11 +49,11 @@ class DocType(SellingController):
 		check_list, flag = [], 0
 		chk_dupl_itm = []
 		for d in getlist(self.doclist, 'sales_order_details'):
-			e = [d.item_code, d.description, d.reserved_warehouse, d.prevdoc_docname or '']
+			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '']
 			f = [d.item_code, d.description]
 
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
-				if not d.reserved_warehouse:
+				if not d.warehouse:
 					msgprint("""Please enter Reserved Warehouse for item %s 
 						as it is stock Item""" % d.item_code, raise_exception=1)
 				
@@ -71,7 +71,7 @@ class DocType(SellingController):
 			d.transaction_date = self.doc.transaction_date
 			
 			tot_avail_qty = webnotes.conn.sql("select projected_qty from `tabBin` \
-				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.reserved_warehouse))
+				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
 	def validate_sales_mntc_quotation(self):
@@ -130,8 +130,8 @@ class DocType(SellingController):
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
 		
-		warehouses = list(set([d.reserved_warehouse for d in 
-			self.doclist.get({"doctype": self.tname}) if d.reserved_warehouse]))
+		warehouses = list(set([d.warehouse for d in 
+			self.doclist.get({"doctype": self.tname}) if d.warehouse]))
 				
 		for w in warehouses:
 			validate_warehouse_company(w, self.doc.company)
@@ -235,7 +235,7 @@ class DocType(SellingController):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				args = {
 					"item_code": d['item_code'],
-					"warehouse": d['reserved_warehouse'], 
+					"warehouse": d['warehouse'], 
 					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 					"posting_date": self.doc.transaction_date,
 					"voucher_type": self.doc.doctype,
@@ -270,7 +270,7 @@ def make_material_request(source_name, target_doclist=None):
 			"doctype": "Material Request Item", 
 			"field_map": {
 				"parent": "sales_order_no", 
-				"reserved_warehouse": "warehouse", 
+				"warehouse": "warehouse", 
 				"stock_uom": "uom"
 			}
 		}
@@ -302,7 +302,7 @@ def make_delivery_note(source_name, target_doclist=None):
 				"export_rate": "export_rate", 
 				"name": "prevdoc_detail_docname", 
 				"parent": "against_sales_order", 
-				"reserved_warehouse": "warehouse"
+				"warehouse": "warehouse"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.delivered_qty < doc.qty
@@ -343,7 +343,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 			"field_map": {
 				"name": "so_detail", 
 				"parent": "sales_order", 
-				"reserved_warehouse": "warehouse"
+				"warehouse": "warehouse"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.export_amount

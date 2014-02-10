@@ -108,7 +108,7 @@ class DocType:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
 			
-		items = webnotes.conn.sql("""select distinct parent, item_code, reserved_warehouse,
+		items = webnotes.conn.sql("""select distinct parent, item_code, warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
@@ -140,7 +140,7 @@ class DocType:
 				from tabItem where name=%s""", p['item_code'])
 			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
 			pi.sales_order				= p['parent']
-			pi.warehouse				= p['reserved_warehouse']
+			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
 			pi.description				= item_details and item_details[0][0] or ''
 			pi.stock_uom				= item_details and item_details[0][1] or ''

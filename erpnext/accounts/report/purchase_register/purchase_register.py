@@ -72,9 +72,9 @@ def get_columns(invoice_list):
 	expense_accounts = tax_accounts = expense_columns = tax_columns = []
 	
 	if invoice_list:	
-		expense_accounts = webnotes.conn.sql_list("""select distinct expense_head 
-			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_head, '') != '' 
-			and parent in (%s) order by expense_head""" % 
+		expense_accounts = webnotes.conn.sql_list("""select distinct expense_account 
+			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_account, '') != '' 
+			and parent in (%s) order by expense_account""" % 
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 		
 		tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
@@ -116,14 +116,14 @@ def get_invoices(filters):
 	
 	
 def get_invoice_expense_map(invoice_list):
-	expense_details = webnotes.conn.sql("""select parent, expense_head, sum(amount) as amount
-		from `tabPurchase Invoice Item` where parent in (%s) group by parent, expense_head""" % 
+	expense_details = webnotes.conn.sql("""select parent, expense_account, sum(amount) as amount
+		from `tabPurchase Invoice Item` where parent in (%s) group by parent, expense_account""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
 	invoice_expense_map = {}
 	for d in expense_details:
-		invoice_expense_map.setdefault(d.parent, webnotes._dict()).setdefault(d.expense_head, [])
-		invoice_expense_map[d.parent][d.expense_head] = flt(d.amount)
+		invoice_expense_map.setdefault(d.parent, webnotes._dict()).setdefault(d.expense_account, [])
+		invoice_expense_map[d.parent][d.expense_account] = flt(d.amount)
 	
 	return invoice_expense_map
 	
