@@ -119,8 +119,9 @@ def _get_supplier_part_no(args, item_bean):
 	return item_supplier and item_supplier[0].supplier_part_no or None
 
 def _validate_item_details(args, item):
-	from erpnext.utilities.transaction_base import validate_item_fetch
-	validate_item_fetch(args, item)
+	# TODO
+	# from erpnext.utilities.transaction_base import validate_item_fetch
+	# validate_item_fetch(args, item)
 	
 	# validate if purchase item or subcontracted item
 	if item.is_purchase_item != "Yes":

@@ -105,8 +105,9 @@ def _get_item_code(barcode=None, serial_no=None):
 	return item_code[0]
 	
 def _validate_item_details(args, item):
-	from erpnext.utilities.transaction_base import validate_item_fetch
-	validate_item_fetch(args, item)
+	# TODO
+	# from erpnext.utilities.transaction_base import validate_item_fetch
+	# validate_item_fetch(args, item)
 	
 	# validate if sales item or service item
 	if args.order_type == "Maintenance":

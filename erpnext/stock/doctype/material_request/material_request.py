@@ -75,8 +75,10 @@ class DocType(BuyingController):
 
 		pc_obj = get_obj(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
-
-		self.validate_qty_against_so()
+		
+		# self.validate_qty_against_so()
+		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
+		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 	
 	def update_bin(self, is_submit, is_stopped):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
