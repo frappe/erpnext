@@ -114,12 +114,12 @@ pscript.feature_dict = {
 		'Sales Order': {'sales_order_details':['page_break']}
 	},
 	'fs_exports': {
-		'Delivery Note': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'delivery_note_details':['base_price_list_rate','amount','base_rate']},
+		'Delivery Note': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'delivery_note_details':['base_price_list_rate','base_amount','base_rate']},
 		'POS Setting': {'fields':['conversion_rate','currency']},
-		'Quotation': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'quotation_details':['base_price_list_rate','amount','base_rate']},
-		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'entries':['base_price_list_rate','amount','base_rate']},
+		'Quotation': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'quotation_details':['base_price_list_rate','base_amount','base_rate']},
+		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'entries':['base_price_list_rate','base_amount','base_rate']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'sales_order_details':['base_price_list_rate','amount','base_rate']}
+		'Sales Order': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'sales_order_details':['base_price_list_rate','base_amount','base_rate']}
 	},
 	
 	'fs_imports': {
@@ -127,18 +127,18 @@ pscript.feature_dict = {
 			'fields': ['conversion_rate', 'currency', 'grand_total',
 		 		'in_words', 'net_total', 'other_charges_added',
 		 		'other_charges_deducted'], 
-			'entries': ['base_price_list_rate', 'amount','rate']
+			'entries': ['base_price_list_rate', 'base_amount','base_rate']
 		},
 		'Purchase Order': {
 			'fields': ['conversion_rate','currency', 'grand_total',
 			'in_words', 'net_total', 'other_charges_added',
 			 'other_charges_deducted'],
-			'po_details': ['base_price_list_rate', 'amount','base_rate']
+			'po_details': ['base_price_list_rate', 'base_amount','base_rate']
 		},
 		'Purchase Receipt': {
 			'fields': ['conversion_rate', 'currency','grand_total', 'in_words',
 			 	'net_total', 'other_charges_added', 'other_charges_deducted'],
-			'purchase_receipt_details': ['base_price_list_rate','amount','base_rate']
+			'purchase_receipt_details': ['base_price_list_rate','base_amount','base_rate']
 		},
 		'Supplier Quotation': {
 			'fields':['conversion_rate','currency']

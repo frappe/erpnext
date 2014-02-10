@@ -190,8 +190,8 @@ def make_purchase_receipt(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.import_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.base_rate)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.base_rate)
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -227,10 +227,10 @@ def make_purchase_invoice(source_name, target_doclist=None):
 		bean.run_method("set_missing_values")
 
 	def update_item(obj, target, source_parent):
-		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)
-		target.amount = target.import_amount * flt(source_parent.conversion_rate)
+		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		if flt(obj.base_rate):
-			target.qty = target.amount / flt(obj.base_rate)
+			target.qty = target.base_amount / flt(obj.base_rate)
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -246,7 +246,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 				"parent": "purchase_order", 
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.import_amount 
+			"condition": lambda doc: doc.base_amount==0 or doc.billed_amt < doc.amount 
 		}, 
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges", 

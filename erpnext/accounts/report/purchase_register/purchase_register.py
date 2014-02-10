@@ -116,7 +116,7 @@ def get_invoices(filters):
 	
 	
 def get_invoice_expense_map(invoice_list):
-	expense_details = webnotes.conn.sql("""select parent, expense_account, sum(amount) as amount
+	expense_details = webnotes.conn.sql("""select parent, expense_account, sum(base_amount) as amount
 		from `tabPurchase Invoice Item` where parent in (%s) group by parent, expense_account""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	

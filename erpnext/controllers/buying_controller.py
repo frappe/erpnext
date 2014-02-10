@@ -88,11 +88,11 @@ class BuyingController(StockController):
 				item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
 					self.precision("rate", item))
 						
-			item.import_amount = flt(item.rate * item.qty,
-				self.precision("import_amount", item))
+			item.amount = flt(item.rate * item.qty,
+				self.precision("amount", item))
 			item.item_tax_amount = 0.0;
 
-			self._set_in_company_currency(item, "import_amount", "amount")
+			self._set_in_company_currency(item, "amount", "base_amount")
 			self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
 			self._set_in_company_currency(item, "rate", "base_rate")
 			
@@ -101,8 +101,8 @@ class BuyingController(StockController):
 		self.doc.net_total = self.doc.net_total_import = 0.0
 
 		for item in self.item_doclist:
-			self.doc.net_total += item.amount
-			self.doc.net_total_import += item.import_amount
+			self.doc.net_total += item.base_amount
+			self.doc.net_total_import += item.amount
 			
 		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
 		
@@ -175,7 +175,7 @@ class BuyingController(StockController):
 		for d in self.doclist.get({"parentfield": parentfield}):
 			if d.item_code and d.item_code in stock_items:
 				stock_items_qty += flt(d.qty)
-				stock_items_amount += flt(d.amount)
+				stock_items_amount += flt(d.base_amount)
 				last_stock_item_idx = d.idx
 			
 		total_valuation_amount = sum([flt(d.tax_amount) for d in 
@@ -186,7 +186,7 @@ class BuyingController(StockController):
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.doclist.get({"parentfield": parentfield})):
 			if item.item_code and item.qty and item.item_code in stock_items:
-				item_proportion = flt(item.amount) / stock_items_amount if stock_items_amount \
+				item_proportion = flt(item.base_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
 				
 				if i == (last_stock_item_idx - 1):
@@ -203,7 +203,7 @@ class BuyingController(StockController):
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				item.valuation_rate = ((item.amount + item.item_tax_amount + item.rm_supp_cost)
+				item.valuation_rate = ((item.base_amount + item.item_tax_amount + item.rm_supp_cost)
 					/ qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0

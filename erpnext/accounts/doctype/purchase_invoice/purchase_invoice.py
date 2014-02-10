@@ -27,8 +27,8 @@ class DocType(BuyingController):
 			'target_field': 'billed_amt',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_billed',
-			'target_ref_field': 'import_amount',
-			'source_field': 'import_amount',
+			'target_ref_field': 'amount',
+			'source_field': 'amount',
 			'percent_join_field': 'purchase_order',
 		}]
 		
@@ -54,7 +54,7 @@ class DocType(BuyingController):
 		self.validate_write_off_account()
 		self.update_raw_material_cost()
 		self.update_valuation_rate("entries")
-		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "import_amount", 
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", 
 			"purchase_receipt_details")
 	
 	def set_missing_values(self, for_validate=False):
@@ -342,8 +342,8 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 					
-					valuation_amt = flt(item.amount + item.item_tax_amount + item.rm_supp_cost, 
-						self.precision("amount", item))
+					valuation_amt = flt(item.base_amount + item.item_tax_amount + item.rm_supp_cost, 
+						self.precision("base_amount", item))
 					
 					gl_entries.append(
 						self.get_gl_dict({
@@ -354,13 +354,13 @@ class DocType(BuyingController):
 						})
 					)
 			
-			elif flt(item.amount):
+			elif flt(item.base_amount):
 				# if not a stock item or auto inventory accounting disabled, book the expense
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
 						"against": self.doc.credit_to,
-						"debit": item.amount,
+						"debit": item.base_amount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
 					})

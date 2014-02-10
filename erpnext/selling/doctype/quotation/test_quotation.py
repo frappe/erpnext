@@ -62,7 +62,7 @@ test_records = [
 			"qty": 10.0,
 			"base_rate": 100.0,
 			"rate": 100.0,
-			"amount": 1000.0,
+			"base_amount": 1000.0,
 		}
 	],	
 ]

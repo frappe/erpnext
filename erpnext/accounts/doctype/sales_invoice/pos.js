@@ -131,8 +131,8 @@ erpnext.POS = Class.extend({
 		this.sales_or_purchase = (party == "Customer" ? "Sales" : "Purchase");
 		this.net_total = "net_total_" + export_or_import;
 		this.grand_total = "grand_total_" + export_or_import;
-		this.amount = export_or_import + "_amount";
-		this.rate = export_or_import + "_rate";
+		// this.amount = export_or_import + "_amount";
+		// this.rate = export_or_import + "_rate";
 	},
 	call_function: function(class_name, fn, event_name) {
 		this.wrapper.find("." + class_name).on(event_name || "click", fn);
@@ -401,8 +401,8 @@ erpnext.POS = Class.extend({
 					item_code: d.item_code,
 					item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
 					qty: d.qty,
-					rate: format_currency(d[me.rate], me.frm.doc.currency),
-					amount: format_currency(d[me.amount], me.frm.doc.currency)
+					rate: format_currency(d.rate, me.frm.doc.currency),
+					amount: format_currency(d.amount, me.frm.doc.currency)
 				}
 			)).appendTo($items);
 		});

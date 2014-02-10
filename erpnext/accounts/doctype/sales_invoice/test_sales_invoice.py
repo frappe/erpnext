@@ -47,8 +47,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "export_amount", 
-				"base_price_list_rate", "base_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount", 
+				"base_price_list_rate", "base_rate", "base_amount"],
 			"_Test Item Home Desktop 100": [50, 0, 50, 500, 50, 50, 500],
 			"_Test Item Home Desktop 200": [150, 0, 150, 750, 150, 150, 750],
 		}
@@ -97,8 +97,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "export_amount", 
-				"base_price_list_rate", "base_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount", 
+				"base_price_list_rate", "base_rate", "base_amount"],
 			"_Test Item Home Desktop 100": [1, 0, 1, 10, 50, 50, 500],
 			"_Test Item Home Desktop 200": [3, 0, 3, 15, 150, 150, 750],
 		}
@@ -153,8 +153,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "export_amount", 
-				"base_price_list_rate", "base_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount", 
+				"base_price_list_rate", "base_rate", "base_amount"],
 			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 465.37],
 			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 698.08],
 		}
@@ -266,8 +266,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "export_amount", 
-				"base_price_list_rate", "base_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount", 
+				"base_price_list_rate", "base_rate", "base_amount"],
 			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 499.98],
 			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 750],
 		}
@@ -319,8 +319,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		
 		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "export_amount", 
-				"base_price_list_rate", "base_rate", "amount"],
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount", 
+				"base_price_list_rate", "base_rate", "base_amount"],
 			"_Test Item Home Desktop 100": [55.56, 10, 50, 500, 2222.11, 1999.9, 19999.04],
 			"_Test Item Home Desktop 200": [187.5, 20, 150, 750, 7375.66, 5900.53, 29502.66],
 		}
@@ -889,11 +889,11 @@ test_records = [
 			"territory": "_Test Territory"
 		}, 
 		{
-			"amount": 500.0, 
+			"base_amount": 500.0, 
 			"base_rate": 500.0, 
 			"description": "138-CMS Shoe", 
 			"doctype": "Sales Invoice Item", 
-			"export_amount": 500.0, 
+			"amount": 500.0, 
 			"rate": 500.0, 
 			"income_account": "Sales - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -960,9 +960,9 @@ test_records = [
 			"parentfield": "entries",
 			"qty": 1.0,
 			"base_rate": 500.0,
-			"amount": 500.0, 
+			"base_amount": 500.0, 
 			"price_list_rate": 500.0, 
-			"export_amount": 500.0, 
+			"amount": 500.0, 
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",

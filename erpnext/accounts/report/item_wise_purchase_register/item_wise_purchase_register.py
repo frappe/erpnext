@@ -20,12 +20,12 @@ def execute(filters=None):
 		expense_account = d.expense_account or aii_account_map.get(d.company)
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, 
 			d.supplier_name, d.credit_to, d.project_name, d.company, d.purchase_order, 
-			d.purchase_receipt, expense_account, d.qty, d.base_rate, d.amount]
+			d.purchase_receipt, expense_account, d.qty, d.base_rate, d.base_amount]
 		for tax in tax_accounts:
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
-		row += [total_tax, d.amount + total_tax]
+		row += [total_tax, d.base_amount + total_tax]
 		
 		data.append(row)
 	
@@ -60,7 +60,7 @@ def get_items(filters):
 	return webnotes.conn.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.company, 
 		pi.supplier, pi.remarks, pi_item.item_code, pi_item.item_name, pi_item.item_group, 
 		pi_item.project_name, pi_item.purchase_order, pi_item.purchase_receipt, 
-		pi_item.expense_account, pi_item.qty, pi_item.base_rate, pi_item.amount, pi.supplier_name
+		pi_item.expense_account, pi_item.qty, pi_item.base_rate, pi_item.base_amount, pi.supplier_name
 		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item 
 		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
 		order by pi.posting_date desc, pi_item.item_code desc""" % (conditions, match_conditions), filters, as_dict=1)

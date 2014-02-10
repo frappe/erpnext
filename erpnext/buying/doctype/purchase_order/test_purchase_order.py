@@ -139,7 +139,7 @@ test_records = [
 			"parentfield": "po_details", 
 			"qty": 10.0,
 			"rate": 500.0,
-			"amount": 5000.0,
+			"base_amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"stock_uom": "_Test UOM", 
 			"uom": "_Test UOM",

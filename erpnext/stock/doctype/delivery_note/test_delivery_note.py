@@ -36,7 +36,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		self.assertEquals(len(si), len(dn.doclist))
 		
-		# modify export_amount
+		# modify amount
 		si[1].rate = 200
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).insert)
 		
@@ -98,7 +98,7 @@ class TestDeliveryNote(unittest.TestCase):
 		pr = webnotes.bean(copy=pr_test_records[0])
 		pr.doc.posting_date = "2013-01-01"
 		pr.doclist[1].rate = 100
-		pr.doclist[1].amount = 100
+		pr.doclist[1].base_amount = 100
 		
 		pr.insert()
 		pr.submit()
@@ -245,7 +245,7 @@ test_records = [
 			"qty": 5.0, 
 			"base_rate": 100.0,
 			"rate": 100.0,
-			"amount": 500.0,
+			"base_amount": 500.0,
 			"warehouse": "_Test Warehouse - _TC",
 			"stock_uom": "_Test UOM",
 			"expense_account": "Cost of Goods Sold - _TC",

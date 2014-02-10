@@ -599,7 +599,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				// note: grand_total_for_current_item contains the contribution of 
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					tax.grand_total_for_current_item = flt(item.amount + current_tax_amount,
+					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount,
 						precision("total", tax));
 				} else {
 					tax.grand_total_for_current_item = 
@@ -644,11 +644,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.frm.doc.net_total ?
-				((item.amount / this.frm.doc.net_total) * actual) :
+				((item.base_amount / this.frm.doc.net_total) * actual) :
 				0.0;
 			
 		} else if(tax.charge_type == "On Net Total") {
-			current_tax_amount = (tax_rate / 100.0) * item.amount;
+			current_tax_amount = (tax_rate / 100.0) * item.base_amount;
 			
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *

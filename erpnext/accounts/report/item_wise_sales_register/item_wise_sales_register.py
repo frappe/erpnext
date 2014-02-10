@@ -18,13 +18,13 @@ def execute(filters=None):
 	for d in item_list:
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, 
 			d.customer_name, d.debit_to, d.territory, d.project_name, d.company, d.sales_order, 
-			d.delivery_note, d.income_account, d.qty, d.base_rate, d.amount]
+			d.delivery_note, d.income_account, d.qty, d.base_rate, d.base_amount]
 			
 		for tax in tax_accounts:
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
-		row += [total_tax, d.amount + total_tax]
+		row += [total_tax, d.base_amount + total_tax]
 		
 		data.append(row)
 	
@@ -58,7 +58,7 @@ def get_items(filters):
 	return webnotes.conn.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name, 
 		si.customer, si.remarks, si.territory, si.company, si_item.item_code, si_item.item_name, 
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account, 
-		si_item.qty, si_item.base_rate, si_item.amount, si.customer_name
+		si_item.qty, si_item.base_rate, si_item.base_amount, si.customer_name
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item 
 		where si.name = si_item.parent and si.docstatus = 1 %s 
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)

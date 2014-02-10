@@ -276,7 +276,7 @@ class AccountsController(TransactionBase):
 				# note: grand_total_for_current_item contains the contribution of 
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.amount + current_tax_amount,
+					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount,
 						self.precision("total", tax))
 				else:
 					tax.grand_total_for_current_item = \
@@ -314,10 +314,10 @@ class AccountsController(TransactionBase):
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.rate, self.precision("tax_amount", tax))
 			current_tax_amount = (self.doc.net_total
-				and ((item.amount / self.doc.net_total) * actual)
+				and ((item.base_amount / self.doc.net_total) * actual)
 				or 0)
 		elif tax.charge_type == "On Net Total":
-			current_tax_amount = (tax_rate / 100.0) * item.amount
+			current_tax_amount = (tax_rate / 100.0) * item.base_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item

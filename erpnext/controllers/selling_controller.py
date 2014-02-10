@@ -112,10 +112,10 @@ class SellingController(StockController):
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 			
 			if cumulated_tax_fraction and not self.discount_amount_applied:
-				item.amount = flt((item.export_amount * self.doc.conversion_rate) /
-					(1 + cumulated_tax_fraction), self.precision("amount", item))
+				item.base_amount = flt((item.amount * self.doc.conversion_rate) /
+					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 					
-				item.base_rate = flt(item.amount / item.qty, self.precision("base_rate", item))
+				item.base_rate = flt(item.base_amount / item.qty, self.precision("base_rate", item))
 				
 				if item.discount_percentage == 100:
 					item.base_price_list_rate = item.base_rate
@@ -158,19 +158,19 @@ class SellingController(StockController):
 					item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
 						self.precision("rate", item))
 
-				item.export_amount = flt(item.rate * item.qty,
-					self.precision("export_amount", item))
+				item.amount = flt(item.rate * item.qty,
+					self.precision("amount", item))
 
 				self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
 				self._set_in_company_currency(item, "rate", "base_rate")
-				self._set_in_company_currency(item, "export_amount", "amount")
+				self._set_in_company_currency(item, "amount", "base_amount")
 
 	def calculate_net_total(self):
 		self.doc.net_total = self.doc.net_total_export = 0.0
 
 		for item in self.item_doclist:
-			self.doc.net_total += item.amount
-			self.doc.net_total_export += item.export_amount
+			self.doc.net_total += item.base_amount
+			self.doc.net_total_export += item.amount
 		
 		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
 				
@@ -197,8 +197,8 @@ class SellingController(StockController):
 			if grand_total_for_discount_amount:
 				# calculate item amount after Discount Amount
 				for item in self.item_doclist:
-					distributed_amount = flt(self.doc.discount_amount) * item.amount / grand_total_for_discount_amount
-					item.amount = flt(item.amount - distributed_amount, self.precision("amount", item))
+					distributed_amount = flt(self.doc.discount_amount) * item.base_amount / grand_total_for_discount_amount
+					item.base_amount = flt(item.base_amount - distributed_amount, self.precision("base_amount", item))
 
 				self.discount_amount_applied = True
 				self._calculate_taxes_and_totals()

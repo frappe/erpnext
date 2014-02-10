@@ -221,12 +221,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		$.each(this.frm.item_doclist, function(i, item) {
 			wn.model.round_floats_in(item);
-			item.import_amount = flt(item.rate * item.qty, precision("import_amount", item));
+			item.amount = flt(item.rate * item.qty, precision("amount", item));
 			item.item_tax_amount = 0.0;
 			
 			me._set_in_company_currency(item, "price_list_rate", "base_price_list_rate");
 			me._set_in_company_currency(item, "rate", "base_rate");
-			me._set_in_company_currency(item, "import_amount", "amount");
+			me._set_in_company_currency(item, "amount", "base_amount");
 		});
 		
 	},
@@ -236,8 +236,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		this.frm.doc.net_total = this.frm.doc.net_total_import = 0.0;
 		$.each(this.frm.item_doclist, function(i, item) {
-			me.frm.doc.net_total += item.amount;
-			me.frm.doc.net_total_import += item.import_amount;
+			me.frm.doc.net_total += item.base_amount;
+			me.frm.doc.net_total_import += item.amount;
 		});
 		
 		wn.model.round_floats_in(this.frm.doc, ["net_total", "net_total_import"]);
@@ -391,10 +391,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		};
 		
-		setup_field_label_map(["base_rate", "base_price_list_rate", "amount", "base_rate"],
+		setup_field_label_map(["base_rate", "base_price_list_rate", "base_amount", "base_rate"],
 			company_currency, this.fname);
 		
-		setup_field_label_map(["rate", "price_list_rate", "import_amount"],
+		setup_field_label_map(["rate", "price_list_rate", "amount"],
 			this.frm.doc.currency, this.fname);
 		
 		if(this.frm.fields_dict[this.other_fname]) {
@@ -408,7 +408,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
-		var fieldnames = $.map(["base_rate", "base_price_list_rate", "amount", "base_rate"], function(fname) {
+		var fieldnames = $.map(["base_rate", "base_price_list_rate", "base_amount", "base_rate"], function(fname) {
 			return wn.meta.get_docfield(item_grid.doctype, fname, me.frm.docname) ? fname : null;
 		});
 		

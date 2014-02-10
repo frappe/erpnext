@@ -56,7 +56,7 @@ test_records = [
 			"parentfield": "quotation_items", 
 			"qty": 10.0,
 			"rate": 500.0,
-			"amount": 5000.0,
+			"base_amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"uom": "_Test UOM",
 		}

@@ -281,8 +281,8 @@ def make_material_request(source_name, target_doclist=None):
 @webnotes.whitelist()
 def make_delivery_note(source_name, target_doclist=None):	
 	def update_item(obj, target, source_parent):
-		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.base_rate)
-		target.export_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.rate)
+		target.base_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.base_rate)
+		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.rate)
 		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
 			
 	doclist = get_mapped_doclist("Sales Order", source_name, {
@@ -327,9 +327,9 @@ def make_sales_invoice(source_name, target_doclist=None):
 		bean.run_method("onload_post_render")
 		
 	def update_item(obj, target, source_parent):
-		target.export_amount = flt(obj.export_amount) - flt(obj.billed_amt)
-		target.amount = target.export_amount * flt(source_parent.conversion_rate)
-		target.qty = obj.rate and target.export_amount / flt(obj.rate) or obj.qty
+		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+		target.base_amount = target.amount * flt(source_parent.conversion_rate)
+		target.qty = obj.rate and target.amount / flt(obj.rate) or obj.qty
 			
 	doclist = get_mapped_doclist("Sales Order", source_name, {
 		"Sales Order": {
@@ -346,7 +346,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 				"warehouse": "warehouse"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.export_amount
+			"condition": lambda doc: doc.base_amount==0 or doc.billed_amt < doc.amount
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 

@@ -27,8 +27,8 @@ def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
 	conditions, items = get_conditions(filters, date_field)
 	entries = webnotes.conn.sql("""select dt.name, dt.customer, dt.territory, dt.%s, 
-		dt_item.item_code, dt_item.qty, dt_item.amount, st.sales_person, 
-		st.allocated_percentage, dt_item.amount*st.allocated_percentage/100
+		dt_item.item_code, dt_item.qty, dt_item.base_amount, st.sales_person, 
+		st.allocated_percentage, dt_item.base_amount*st.allocated_percentage/100
 		from `tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st 
 		where st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = '%s' 
 		and dt.docstatus = 1 %s order by st.sales_person, dt.name desc""" % 

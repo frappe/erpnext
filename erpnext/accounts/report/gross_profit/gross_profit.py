@@ -20,7 +20,7 @@ def execute(filters=None):
 		"Gross Profit:Currency", "Gross Profit %:Percent", "Project:Link/Project"]
 	data = []
 	for row in source:
-		selling_amount = flt(row.amount)
+		selling_amount = flt(row.base_amount)
 		
 		item_sales_bom_map = item_sales_bom.get(row.parenttype, {}).get(row.name, webnotes._dict())
 		
@@ -43,7 +43,7 @@ def execute(filters=None):
 			% ("/".join(["#Form", row.parenttype, row.name]),)
 		data.append([row.name, icon, row.posting_date, row.posting_time, row.item_code, row.item_name,
 			row.description, row.warehouse, row.qty, row.base_rate, 
-			row.qty and (buying_amount / row.qty) or 0, row.amount, buying_amount,
+			row.qty and (buying_amount / row.qty) or 0, row.base_amount, buying_amount,
 			gross_profit, gross_profit_percent, row.project])
 			
 	return columns, data
@@ -93,7 +93,7 @@ def get_source_data(filters):
 	delivery_note_items = webnotes.conn.sql("""select item.parenttype, dn.name, 
 		dn.posting_date, dn.posting_time, dn.project_name, 
 		item.item_code, item.item_name, item.description, item.warehouse,
-		item.qty, item.base_rate, item.amount, item.name as "item_row",
+		item.qty, item.base_rate, item.base_amount, item.name as "item_row",
 		timestamp(dn.posting_date, dn.posting_time) as posting_datetime
 		from `tabDelivery Note` dn, `tabDelivery Note Item` item
 		where item.parent = dn.name and dn.docstatus = 1 %s
@@ -102,7 +102,7 @@ def get_source_data(filters):
 	sales_invoice_items = webnotes.conn.sql("""select item.parenttype, si.name, 
 		si.posting_date, si.posting_time, si.project_name,
 		item.item_code, item.item_name, item.description, item.warehouse,
-		item.qty, item.base_rate, item.amount, item.name as "item_row",
+		item.qty, item.base_rate, item.base_amount, item.name as "item_row",
 		timestamp(si.posting_date, si.posting_time) as posting_datetime
 		from `tabSales Invoice` si, `tabSales Invoice Item` item
 		where item.parent = si.name and si.docstatus = 1 %s

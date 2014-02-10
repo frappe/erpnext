@@ -261,7 +261,7 @@ class DocType(SellingController):
 		amount, total = 0, 0
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if not (d.against_sales_order or d.against_sales_invoice):
-				amount += d.amount
+				amount += d.base_amount
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			self.check_credit(total)

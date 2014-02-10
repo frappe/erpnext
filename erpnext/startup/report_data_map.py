@@ -173,7 +173,7 @@ data_map = {
 		}
 	},
 	"Sales Invoice Item": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -191,7 +191,7 @@ data_map = {
 		}
 	},
 	"Sales Order Item[Sales Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -209,7 +209,7 @@ data_map = {
 		}
 	},
 	"Delivery Note Item[Sales Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -241,7 +241,7 @@ data_map = {
 		}
 	},
 	"Purchase Invoice Item": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -259,7 +259,7 @@ data_map = {
 		}
 	},
 	"Purchase Order Item[Purchase Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -277,7 +277,7 @@ data_map = {
 		}
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
