@@ -190,44 +190,6 @@ def get_address_territory(address_doc):
 	
 	return territory
 	
-def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
-	"""common validation for currency and price list currency"""
-
-	company_currency = webnotes.conn.get_value("Company", company, "default_currency")
-
-	if not conversion_rate:
-		msgprint(_('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s') % {
-				"conversion_rate_label": conversion_rate_label,
-				"from_currency": currency,
-				"to_currency": company_currency
-		}, raise_exception=True)
-	
-def validate_currency(args, item, meta=None):
-	from webnotes.model.meta import get_field_precision
-	if not meta:
-		meta = webnotes.get_doctype(args.doctype)
-		
-	# validate conversion rate
-	if meta.get_field("currency"):
-		validate_conversion_rate(args.currency, args.conversion_rate, 
-			meta.get_label("conversion_rate"), args.company)
-		
-		# round it
-		args.conversion_rate = flt(args.conversion_rate, 
-			get_field_precision(meta.get_field("conversion_rate"), 
-				webnotes._dict({"fields": args})))
-	
-	# validate price list conversion rate
-	if meta.get_field("price_list_currency") and (args.selling_price_list or args.buying_price_list) \
-		and args.price_list_currency:
-		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate, 
-			meta.get_label("plc_conversion_rate"), args.company)
-		
-		# round it
-		args.plc_conversion_rate = flt(args.plc_conversion_rate, 
-			get_field_precision(meta.get_field("plc_conversion_rate"), 
-				webnotes._dict({"fields": args})))
-	
 def delete_events(ref_type, ref_name):
 	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)

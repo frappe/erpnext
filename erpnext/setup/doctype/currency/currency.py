@@ -3,7 +3,20 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes import throw, _
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		
+def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
+	"""common validation for currency and price list currency"""
+
+	company_currency = webnotes.conn.get_value("Company", company, "default_currency")
+
+	if not conversion_rate:
+		throw(_('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s') % {
+			"conversion_rate_label": conversion_rate_label,
+			"from_currency": currency,
+			"to_currency": company_currency
+		})

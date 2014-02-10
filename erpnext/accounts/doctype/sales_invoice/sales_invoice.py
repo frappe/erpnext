@@ -177,7 +177,7 @@ class DocType(SellingController):
 		if cint(self.doc.is_pos) != 1:
 			return
 		
-		from erpnext.selling.utils import get_pos_settings, apply_pos_settings	
+		from erpnext.selling.utils import get_pos_settings_item_details, get_pos_settings	
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
@@ -196,9 +196,9 @@ class DocType(SellingController):
 			# set pos values in items
 			for item in self.doclist.get({"parentfield": "entries"}):
 				if item.fields.get('item_code'):
-					for fieldname, val in apply_pos_settings(pos, item.fields).items():
-						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
-							item.fields[fieldname] = val
+					for fname, val in get_pos_settings_item_details(pos, item.fields, pos).items():
+						if (not for_validate) or (for_validate and not item.fields.get(fname)):
+							item.fields[fname] = val
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:

@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import unittest
 import webnotes
 
+from webnotes.test_runner import make_test_records
+
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
@@ -15,6 +17,49 @@ class TestItem(unittest.TestCase):
 		item.doc.is_stock_item = "Yes"
 		item.doc.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)
+		
+	def test_get_item_details(self):
+		from erpnext.stock.get_item_details import get_item_details
+		to_check = {
+			"item_code": "_Test Item",
+			"item_name": "_Test Item",
+			"description": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"income_account": "Sales - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"qty": 1.0,
+			"price_list_rate": 100.0,
+			"base_price_list_rate": 0.0,
+			"discount_percentage": 0.0,
+			"rate": 0.0,
+			"base_rate": 0.0,
+			"amount": 0.0,
+			"base_amount": 0.0,
+			"batch_no": None,
+			"item_tax_rate": {},
+			"uom": "_Test UOM",
+			"conversion_factor": 1.0,
+		}
+		
+		make_test_records("Item Price")
+		
+		details = get_item_details({
+			"item_code": "_Test Item",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Order",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"transaction_type": "selling"
+		})
+		
+		for key, value in to_check.iteritems():
+			print key
+			self.assertEquals(value, details.get(key))
 
 test_records = [
 	[{
@@ -36,7 +81,8 @@ test_records = [
 		"stock_uom": "_Test UOM",
 		"default_income_account": "Sales - _TC",
 		"default_warehouse": "_Test Warehouse - _TC",
-		"purchase_account": "_Test Account Cost for Goods Sold - _TC"
+		"purchase_account": "_Test Account Cost for Goods Sold - _TC",
+		"selling_cost_center": "_Test Cost Center - _TC",
 	}, {
 		"doctype": "Item Reorder",
 		"parentfield": "item_reorder",

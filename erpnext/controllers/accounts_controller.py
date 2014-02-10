@@ -8,7 +8,7 @@ from webnotes.utils import flt, cint, today, cstr
 from webnotes.model.code import get_obj
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
-from erpnext.utilities.transaction_base import TransactionBase, validate_conversion_rate
+from erpnext.utilities.transaction_base import TransactionBase
 import json
 
 class AccountsController(TransactionBase):
@@ -149,6 +149,7 @@ class AccountsController(TransactionBase):
 			self.doc.currency = company_currency
 			self.doc.conversion_rate = 1.0
 		else:
+			from erpnext.setup.doctype.currency.currency import validate_conversion_rate
 			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
 				self.meta.get_label("conversion_rate"), self.doc.company)
 

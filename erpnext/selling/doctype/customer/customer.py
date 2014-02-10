@@ -160,3 +160,18 @@ def get_dashboard_info(customer):
 	out["total_unpaid"] = billing[0][1]
 	
 	return out
+
+
+def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
+	if webnotes.conn.get_default("cust_master_name") == "Customer Name":
+		fields = ["name", "customer_group", "territory"]
+	else:
+		fields = ["name", "customer_name", "customer_group", "territory"]
+		
+	return webnotes.conn.sql("""select %s from `tabCustomer` where docstatus < 2 
+		and (%s like %s or customer_name like %s) order by 
+		case when name like %s then 0 else 1 end,
+		case when customer_name like %s then 0 else 1 end,
+		name, customer_name limit %s, %s""" % 
+		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"), 
+		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))

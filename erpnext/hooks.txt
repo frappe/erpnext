@@ -36,7 +36,7 @@ bean_event:*:on_trash = webnotes.core.doctype.notification_count.notification_co
 bean_event:Stock Entry:on_submit = erpnext.stock.doctype.material_request.material_request.update_completed_qty
 bean_event:Stock Entry:on_cancel = erpnext.stock.doctype.material_request.material_request.update_completed_qty
 
-standard_queries = Customer:erpnext.selling.utils.get_customer_list
+standard_queries = Customer:erpnext.selling.doctype.customer.customer.get_customer_list
 
 # Schedulers
 # -------------------------

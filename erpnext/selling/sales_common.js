@@ -127,7 +127,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
-					method: "erpnext.selling.utils.get_item_details",
+					method: "erpnext.stock.get_item_details.get_item_details",
 					child: item,
 					args: {
 						args: {
@@ -140,12 +140,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							customer: me.frm.doc.customer,
 							currency: me.frm.doc.currency,
 							conversion_rate: me.frm.doc.conversion_rate,
-							selling_price_list: me.frm.doc.selling_price_list,
+							price_list: me.frm.doc.selling_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
 							company: me.frm.doc.company,
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
+							"transaction_type": "selling"
 						}
 					},
 					callback: function(r) {

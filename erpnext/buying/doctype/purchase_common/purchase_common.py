@@ -8,7 +8,7 @@ from webnotes.utils import cstr, flt
 from webnotes.model.utils import getlist
 from webnotes import msgprint, _
 
-from erpnext.buying.utils import get_last_purchase_details
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.controllers.buying_controller import BuyingController
 
 class DocType(BuyingController):
