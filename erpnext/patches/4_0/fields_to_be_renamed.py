@@ -93,6 +93,9 @@ def execute():
 			["default_sales_cost_center", "selling_cost_center"],
 			["cost_center", "buying_cost_center"]
 		],
+		"Item Price": [
+			["ref_rate", "price_list_rate"]
+		]
 	}
 
 	from webnotes.model import rename_field

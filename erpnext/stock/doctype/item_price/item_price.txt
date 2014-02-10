@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 16:29:48", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:50", 
+  "modified": "2014-02-10 17:27:32", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -28,7 +28,7 @@
   "permlevel": 0
  }, 
  {
-  "cancel": 1, 
+  "cancel": 0, 
   "create": 1, 
   "delete": 1, 
   "doctype": "DocPerm", 
@@ -101,7 +101,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "ref_rate", 
+  "fieldname": "price_list_rate", 
   "fieldtype": "Currency", 
   "in_filter": 1, 
   "in_list_view": 1, 

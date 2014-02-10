@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:47", 
+  "modified": "2014-02-10 17:27:49", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -438,7 +438,7 @@
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "description": "Default Purchase Account in which cost of the item will be debited.", 
   "doctype": "DocField", 
-  "fieldname": "purchase_account", 
+  "fieldname": "expense_account", 
   "fieldtype": "Link", 
   "label": "Default Expense Account", 
   "oldfieldname": "purchase_account", 
@@ -450,9 +450,9 @@
   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
   "description": "Default Cost Center for tracking expense for this item.", 
   "doctype": "DocField", 
-  "fieldname": "cost_center", 
+  "fieldname": "buying_cost_center", 
   "fieldtype": "Link", 
-  "label": "Default Cost Center", 
+  "label": "Default Buying Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
   "options": "Cost Center", 
@@ -576,7 +576,7 @@
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "fieldname": "default_income_account", 
+  "fieldname": "income_account", 
   "fieldtype": "Link", 
   "label": "Default Income Account", 
   "options": "Account", 
@@ -585,9 +585,9 @@
  {
   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
   "doctype": "DocField", 
-  "fieldname": "default_sales_cost_center", 
+  "fieldname": "selling_cost_center", 
   "fieldtype": "Link", 
-  "label": "Cost Center", 
+  "label": "Default Selling Cost Center", 
   "options": "Cost Center", 
   "read_only": 0
  }, 
