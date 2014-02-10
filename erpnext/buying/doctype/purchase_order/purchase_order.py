@@ -58,7 +58,7 @@ class DocType(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
+				"compare_fields": [["rate", "="], ["project_name", "="], ["item_code", "="], 
 					["uom", "="]],
 				"is_child_table": True
 			}
@@ -190,8 +190,8 @@ def make_purchase_receipt(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.import_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.import_rate)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.purchase_rate)
+		target.import_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.base_rate)
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -229,8 +229,8 @@ def make_purchase_invoice(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.import_amount = flt(obj.import_amount) - flt(obj.billed_amt)
 		target.amount = target.import_amount * flt(source_parent.conversion_rate)
-		if flt(obj.purchase_rate):
-			target.qty = target.amount / flt(obj.purchase_rate)
+		if flt(obj.base_rate):
+			target.qty = target.amount / flt(obj.base_rate)
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -244,7 +244,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 			"field_map": {
 				"name": "po_detail", 
 				"parent": "purchase_order", 
-				"purchase_rate": "rate"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.import_amount 

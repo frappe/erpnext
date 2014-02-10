@@ -37,7 +37,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(len(si), len(dn.doclist))
 		
 		# modify export_amount
-		si[1].export_rate = 200
+		si[1].rate = 200
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).insert)
 		
 	
@@ -97,7 +97,7 @@ class TestDeliveryNote(unittest.TestCase):
 		# back dated purchase receipt
 		pr = webnotes.bean(copy=pr_test_records[0])
 		pr.doc.posting_date = "2013-01-01"
-		pr.doclist[1].import_rate = 100
+		pr.doclist[1].rate = 100
 		pr.doclist[1].amount = 100
 		
 		pr.insert()
@@ -243,8 +243,8 @@ test_records = [
 			"item_name": "_Test Item", 
 			"parentfield": "delivery_note_details", 
 			"qty": 5.0, 
-			"basic_rate": 100.0,
-			"export_rate": 100.0,
+			"base_rate": 100.0,
+			"rate": 100.0,
 			"amount": 500.0,
 			"warehouse": "_Test Warehouse - _TC",
 			"stock_uom": "_Test UOM",

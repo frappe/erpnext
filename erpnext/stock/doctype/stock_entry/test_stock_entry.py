@@ -562,7 +562,7 @@ class TestStockEntry(unittest.TestCase):
 		po = webnotes.bean(copy=purchase_order_test_records[0])
 		po.doc.is_subcontracted = None
 		po.doclist[1].item_code = "_Test Item"
-		po.doclist[1].import_rate = 50
+		po.doclist[1].rate = 50
 		po.insert()
 		po.submit()
 

@@ -80,7 +80,7 @@ def get_last_purchase_rate():
 
 	query = """select * from (select 
 					result.item_code,
-					result.purchase_rate
+					result.base_rate
 					from (
 						(select 
 							po_item.item_code,
@@ -88,7 +88,7 @@ def get_last_purchase_rate():
 							po.transaction_date as posting_date,
 							po_item.base_price_list_rate, 
 							po_item.discount_percentage, 
-							po_item.purchase_rate
+							po_item.base_rate
 						from `tabPurchase Order` po, `tabPurchase Order Item` po_item
 						where po.name = po_item.parent and po.docstatus = 1)
 						union
@@ -98,7 +98,7 @@ def get_last_purchase_rate():
 							pr.posting_date,
 							pr_item.base_price_list_rate,
 							pr_item.discount_percentage,
-							pr_item.purchase_rate
+							pr_item.base_rate
 						from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 						where pr.name = pr_item.parent and pr.docstatus = 1)
 				) result
@@ -106,7 +106,7 @@ def get_last_purchase_rate():
 				group by item_code"""
 
 	for d in webnotes.conn.sql(query, as_dict=1):
-		item_last_purchase_rate_map.setdefault(d.item_code, d.purchase_rate)
+		item_last_purchase_rate_map.setdefault(d.item_code, d.base_rate)
 
 	return item_last_purchase_rate_map
 

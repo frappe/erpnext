@@ -138,7 +138,7 @@ test_records = [
 			"item_name": "_Test FG Item", 
 			"parentfield": "po_details", 
 			"qty": 10.0,
-			"import_rate": 500.0,
+			"rate": 500.0,
 			"amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"stock_uom": "_Test UOM", 

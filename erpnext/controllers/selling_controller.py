@@ -115,13 +115,13 @@ class SellingController(StockController):
 				item.amount = flt((item.export_amount * self.doc.conversion_rate) /
 					(1 + cumulated_tax_fraction), self.precision("amount", item))
 					
-				item.basic_rate = flt(item.amount / item.qty, self.precision("basic_rate", item))
+				item.base_rate = flt(item.amount / item.qty, self.precision("base_rate", item))
 				
 				if item.discount_percentage == 100:
-					item.base_price_list_rate = item.basic_rate
-					item.basic_rate = 0.0
+					item.base_price_list_rate = item.base_rate
+					item.base_rate = 0.0
 				else:
-					item.base_price_list_rate = flt(item.basic_rate / (1 - (item.discount_percentage / 100.0)),
+					item.base_price_list_rate = flt(item.base_rate / (1 - (item.discount_percentage / 100.0)),
 						self.precision("base_price_list_rate", item))
 			
 	def get_current_tax_fraction(self, tax, item_tax_map):
@@ -153,16 +153,16 @@ class SellingController(StockController):
 				self.round_floats_in(item)
 
 				if item.discount_percentage == 100:
-					item.export_rate = 0
-				elif not item.export_rate:
-					item.export_rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
-						self.precision("export_rate", item))
+					item.rate = 0
+				elif not item.rate:
+					item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
+						self.precision("rate", item))
 
-				item.export_amount = flt(item.export_rate * item.qty,
+				item.export_amount = flt(item.rate * item.qty,
 					self.precision("export_amount", item))
 
 				self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
-				self._set_in_company_currency(item, "export_rate", "basic_rate")
+				self._set_in_company_currency(item, "rate", "base_rate")
 				self._set_in_company_currency(item, "export_amount", "amount")
 
 	def calculate_net_total(self):

@@ -121,7 +121,7 @@ class DocType(BuyingController):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "prevdoc_detail_docname",
-					"compare_fields": [["import_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True
 				}
 			})
@@ -316,7 +316,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 				"parent": "purchase_receipt", 
 				"prevdoc_detail_docname": "po_detail", 
 				"prevdoc_docname": "purchase_order", 
-				"purchase_rate": "rate"
 			},
 		}, 
 		"Purchase Taxes and Charges": {

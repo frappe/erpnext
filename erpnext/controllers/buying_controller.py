@@ -79,31 +79,22 @@ class BuyingController(StockController):
 		self.calculate_total_advance("Purchase Invoice", "advance_allocation_details")
 		
 	def calculate_item_values(self):
-		# hack! - cleaned up in _cleanup()
-		if self.doc.doctype != "Purchase Invoice":
-			df = self.meta.get_field("purchase_rate", parentfield=self.fname)
-			df.fieldname = "rate"
-			
 		for item in self.item_doclist:
-			# hack! - cleaned up in _cleanup()
-			if self.doc.doctype != "Purchase Invoice":
-				item.rate = item.purchase_rate
-				
 			self.round_floats_in(item)
 
 			if item.discount_percentage == 100.0:
-				item.import_rate = 0.0
-			elif not item.import_rate:
-				item.import_rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
-					self.precision("import_rate", item))
+				item.rate = 0.0
+			elif not item.rate:
+				item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
+					self.precision("rate", item))
 						
-			item.import_amount = flt(item.import_rate * item.qty,
+			item.import_amount = flt(item.rate * item.qty,
 				self.precision("import_amount", item))
 			item.item_tax_amount = 0.0;
 
 			self._set_in_company_currency(item, "import_amount", "amount")
 			self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
-			self._set_in_company_currency(item, "import_rate", "rate")
+			self._set_in_company_currency(item, "rate", "base_rate")
 			
 			
 	def calculate_net_total(self):
@@ -159,16 +150,6 @@ class BuyingController(StockController):
 			
 	def _cleanup(self):
 		super(BuyingController, self)._cleanup()
-			
-		# except in purchase invoice, rate field is purchase_rate
-		# reset fieldname of rate
-		if self.doc.doctype != "Purchase Invoice":
-			df = self.meta.get_field("rate", parentfield=self.fname)
-			df.fieldname = "purchase_rate"
-			
-			for item in self.item_doclist:
-				item.purchase_rate = item.rate
-				del item.fields["rate"]
 		
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:

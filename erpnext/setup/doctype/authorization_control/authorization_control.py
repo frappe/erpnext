@@ -99,12 +99,12 @@ class DocType(TransactionBase):
 	def validate_approving_authority(self, doctype_name,company, total, doc_obj = ''):
 		av_dis = 0
 		if doc_obj:
-			price_list_rate, basic_rate = 0, 0
+			price_list_rate, base_rate = 0, 0
 			for d in getlist(doc_obj.doclist, doc_obj.fname):
-				if d.base_price_list_rate and d.basic_rate:
+				if d.base_price_list_rate and d.base_rate:
 					price_list_rate += flt(d.base_price_list_rate)
-					basic_rate += flt(d.basic_rate)
-			if price_list_rate: av_dis = 100 - flt(basic_rate * 100 / price_list_rate)
+					base_rate += flt(d.base_rate)
+			if price_list_rate: av_dis = 100 - flt(base_rate * 100 / price_list_rate)
 
 		final_based_on = ['Grand Total','Average Discount','Customerwise Discount','Itemwise Discount']
 		# Individual User

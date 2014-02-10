@@ -167,8 +167,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		wn.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
-		item.export_rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("export_rate", item));
+		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+			precision("rate", item));
 		
 		this.calculate_taxes_and_totals();
 	},
@@ -182,12 +182,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 	
-	export_rate: function(doc, cdt, cdn) {
+	rate: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		wn.model.round_floats_in(item, ["export_rate", "price_list_rate"]);
+		wn.model.round_floats_in(item, ["rate", "price_list_rate"]);
 		
 		if(item.price_list_rate) {
-			item.discount_percentage = flt((1 - item.export_rate / item.price_list_rate) * 100.0,
+			item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
 				precision("discount_percentage", item));
 		} else {
 			item.discount_percentage = 0.0;
@@ -288,10 +288,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.item_doclist, function(i, item) {
 				wn.model.round_floats_in(item);
-				item.export_amount = flt(item.export_rate * item.qty, precision("export_amount", item));
+				item.export_amount = flt(item.rate * item.qty, precision("export_amount", item));
 
 				me._set_in_company_currency(item, "price_list_rate", "base_price_list_rate");
-				me._set_in_company_currency(item, "export_rate", "basic_rate");
+				me._set_in_company_currency(item, "rate", "base_rate");
 				me._set_in_company_currency(item, "export_amount", "amount");
 			});
 		}
@@ -322,13 +322,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					(item.export_amount * me.frm.doc.conversion_rate) / (1 + cumulated_tax_fraction),
 					precision("amount", item));
 
-				item.basic_rate = flt(item.amount / item.qty, precision("basic_rate", item));
+				item.base_rate = flt(item.amount / item.qty, precision("base_rate", item));
 				
 				if(item.discount_percentage == 100) {
-					item.base_price_list_rate = item.basic_rate;
-					item.basic_rate = 0.0;
+					item.base_price_list_rate = item.base_rate;
+					item.base_rate = 0.0;
 				} else {
-					item.base_price_list_rate = flt(item.basic_rate / (1 - item.discount_percentage / 100.0),
+					item.base_price_list_rate = flt(item.base_rate / (1 - item.discount_percentage / 100.0),
 						precision("base_price_list_rate", item));
 				}
 			}
@@ -560,10 +560,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 		
-		setup_field_label_map(["basic_rate", "base_price_list_rate", "amount"],
+		setup_field_label_map(["base_rate", "base_price_list_rate", "amount"],
 			company_currency, this.fname);
 		
-		setup_field_label_map(["export_rate", "price_list_rate", "export_amount"],
+		setup_field_label_map(["rate", "price_list_rate", "export_amount"],
 			this.frm.doc.currency, this.fname);
 		
 		setup_field_label_map(["tax_amount", "total"], company_currency, "other_charges");
@@ -579,7 +579,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			(wn.model.get_doclist(cur_frm.doctype, cur_frm.docname, 
 				{parentfield: "other_charges", included_in_print_rate: 1}).length);
 		
-		$.each(["basic_rate", "base_price_list_rate", "amount"], function(i, fname) {
+		$.each(["base_rate", "base_price_list_rate", "amount"], function(i, fname) {
 			if(wn.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, show);
 		});

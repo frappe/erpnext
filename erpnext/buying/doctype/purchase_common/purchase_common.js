@@ -118,8 +118,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = wn.model.get_doc(cdt, cdn);
 		wn.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
-		item.import_rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("import_rate", item));
+		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+			precision("rate", item));
 		
 		this.calculate_taxes_and_totals();
 	},
@@ -128,12 +128,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.price_list_rate(doc, cdt, cdn);
 	},
 	
-	import_rate: function(doc, cdt, cdn) {
+	rate: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
-		wn.model.round_floats_in(item, ["import_rate", "discount_percentage"]);
+		wn.model.round_floats_in(item, ["rate", "discount_percentage"]);
 		
 		if(item.price_list_rate) {
-			item.discount_percentage = flt((1 - item.import_rate / item.price_list_rate) * 100.0,
+			item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
 				precision("discount_percentage", item));
 		} else {
 			item.discount_percentage = 0.0;
@@ -219,24 +219,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	calculate_item_values: function() {
 		var me = this;
 		
-		if(this.frm.doc.doctype != "Purchase Invoice") {
-			// hack!
-			var purchase_rate_df = wn.meta.get_docfield(this.tname, "rate", this.frm.doc.name);
-			wn.meta.docfield_copy[this.tname][this.frm.doc.name]["rate"] = 
-				$.extend({}, purchase_rate_df);
-		}
-		
 		$.each(this.frm.item_doclist, function(i, item) {
-			if(me.frm.doc.doctype != "Purchase Invoice") {
-				item.rate = item.purchase_rate;
-			}
-			
 			wn.model.round_floats_in(item);
-			item.import_amount = flt(item.import_rate * item.qty, precision("import_amount", item));
+			item.import_amount = flt(item.rate * item.qty, precision("import_amount", item));
 			item.item_tax_amount = 0.0;
 			
 			me._set_in_company_currency(item, "price_list_rate", "base_price_list_rate");
-			me._set_in_company_currency(item, "import_rate", "rate");
+			me._set_in_company_currency(item, "rate", "base_rate");
 			me._set_in_company_currency(item, "import_amount", "amount");
 		});
 		
@@ -300,18 +289,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	_cleanup: function() {
 		this._super();
 		this.frm.doc.in_words = this.frm.doc.in_words_import = "";
-
-		// except in purchase invoice, rate field is purchase_rate		
-		// reset fieldname of rate
-		if(this.frm.doc.doctype != "Purchase Invoice") {
-			// clear hack
-			delete wn.meta.docfield_copy[this.tname][this.frm.doc.name]["rate"];
-			
-			$.each(this.frm.item_doclist, function(i, item) {
-				item.purchase_rate = item.rate;
-				delete item["rate"];
-			});
-		}
 		
 		if(this.frm.item_doclist.length) {
 			if(!wn.meta.get_docfield(this.frm.item_doclist[0].doctype, "item_tax_amount", this.frm.doctype)) {
@@ -414,10 +391,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		};
 		
-		setup_field_label_map(["purchase_rate", "base_price_list_rate", "amount", "rate"],
+		setup_field_label_map(["base_rate", "base_price_list_rate", "amount", "base_rate"],
 			company_currency, this.fname);
 		
-		setup_field_label_map(["import_rate", "price_list_rate", "import_amount"],
+		setup_field_label_map(["rate", "price_list_rate", "import_amount"],
 			this.frm.doc.currency, this.fname);
 		
 		if(this.frm.fields_dict[this.other_fname]) {
@@ -431,7 +408,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
-		var fieldnames = $.map(["purchase_rate", "base_price_list_rate", "amount", "rate"], function(fname) {
+		var fieldnames = $.map(["base_rate", "base_price_list_rate", "amount", "base_rate"], function(fname) {
 			return wn.meta.get_docfield(item_grid.doctype, fname, me.frm.docname) ? fname : null;
 		});
 		

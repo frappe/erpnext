@@ -96,7 +96,7 @@ class DocType(SellingController):
 					super(DocType, self).validate_with_previous_doc(self.tname, {
 						fn[0] + " Item": {
 							"ref_dn_field": "prevdoc_detail_docname",
-							"compare_fields": [["export_rate", "="]],
+							"compare_fields": [["rate", "="]],
 							"is_child_table": True
 						}
 					})

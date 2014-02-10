@@ -169,13 +169,13 @@ class DocType(BuyingController):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
-					"compare_fields": [["import_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True
 				},
 				"Purchase Receipt Item": {
 					"ref_dn_field": "pr_detail",
-					"compare_fields": [["import_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True
 				}
 			})

@@ -295,13 +295,13 @@ class DocType(SellingController):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
-					"compare_fields": [["export_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True
 				},
 				"Delivery Note Item": {
 					"ref_dn_field": "dn_detail",
-					"compare_fields": [["export_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True
 				}
 			})
@@ -806,9 +806,9 @@ def make_delivery_note(source_name, target_doclist=None):
 		
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.basic_rate)
+			flt(source_doc.base_rate)
 		target_doc.export_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.export_rate)
+			flt(source_doc.rate)
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 	
 	doclist = get_mapped_doclist("Sales Invoice", source_name, 	{
