@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 import webnotes
+from webnotes.model import rename_field
+
 
 def execute():
 	rename_map = {
@@ -98,13 +100,24 @@ def execute():
 		]
 	}
 
-	from webnotes.model import rename_field
+	reload_docs(rename_map)
 	
 	for dt, field_list in rename_map.items():
-		# reload doctype
-		webnotes.reload_doc(webnotes.conn.get_value("DocType", dt, "module").lower(), 
-			"doctype", dt.lower().replace(" ", "_"))
-		
-		# rename field
 		for field in field_list:
 			rename_field(dt, field[0], field[1])
+			
+def reload_docs(docs):
+	for dn in docs:
+		module = webnotes.conn.get_value("DocType", dn, "module").lower().replace(" ", "_")
+		webnotes.reload_doc(module,	"doctype", dn.lower().replace(" ", "_"))
+	
+	# reload all standard print formats
+	for pf in webnotes.conn.sql("""select name, module from `tabPrint Format` 
+			where ifnull(standard, 'No') = 'Yes'""", as_dict=1):
+		webnotes.reload_doc(pf.module, "Print Format", pf.name)
+		
+	# reload all standard reports
+	for r in webnotes.conn.sql("""select name, module from `tabReport` 
+		where ifnull(is_standard, 'No') = 'Yes'
+		and report_type in ('Report Builder', 'Query Report')""", as_dict=1):
+			webnotes.reload_doc(r.module, "Report", r.name)

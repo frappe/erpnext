@@ -72,8 +72,8 @@
 				<td style="width: 37%;">{{ row.description }}</td>
 				<td style="width: 5%; text-align: right;">{{ row.qty }}</td>
 				<td style="width: 5%;">{{ row.stock_uom }}</td>
-				<td style="width: 15%; text-align: right;">{{ utils.fmt_money(row.export_rate, currency=doc.currency) }}</td>
-				<td style="width: 15%; text-align: right;">{{ utils.fmt_money(row.export_amount, currency=doc.currency) }}</td>
+				<td style="width: 15%; text-align: right;">{{ utils.fmt_money(row.rate, currency=doc.currency) }}</td>
+				<td style="width: 15%; text-align: right;">{{ utils.fmt_money(row.amount, currency=doc.currency) }}</td>
 			</tr>
 			{% endfor -%}
 		</tbody>
