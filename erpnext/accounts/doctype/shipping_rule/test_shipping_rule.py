@@ -36,6 +36,7 @@ test_records = [
 		{
 			"doctype": "Shipping Rule",
 			"label": "_Test Shipping Rule",
+			"name": "_Test Shipping Rule",
 			"calculate_based_on": "Net Total",
 			"company": "_Test Company",
 			"account": "_Test Account Shipping Charges - _TC",
@@ -66,5 +67,77 @@ test_records = [
 			"parentfield": "valid_for_territories",
 			"territory": "_Test Territory"
 		}
-	]
+	],
+	[
+		{
+			"doctype": "Shipping Rule",
+			"name": "_Test Shipping Rule - India",
+			"label": "_Test Shipping Rule - India",
+			"calculate_based_on": "Net Total",
+			"company": "_Test Company",
+			"account": "_Test Account Shipping Charges - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		},
+		{
+			"doctype": "Shipping Rule Condition",
+			"parentfield": "shipping_rule_conditions",
+			"from_value": 0,
+			"to_value": 100,
+			"shipping_amount": 50.0
+		},
+		{
+			"doctype": "Shipping Rule Condition",
+			"parentfield": "shipping_rule_conditions",
+			"from_value": 101,
+			"to_value": 200,
+			"shipping_amount": 100.0
+		},
+		{
+			"doctype": "Shipping Rule Condition",
+			"parentfield": "shipping_rule_conditions",
+			"from_value": 201,
+			"shipping_amount": 0.0
+		},
+		{
+			"doctype": "Applicable Territory",
+			"parentfield": "valid_for_territories",
+			"territory": "_Test Territory India"
+		}
+	],
+	[
+		{
+			"doctype": "Shipping Rule",
+			"name": "_Test Shipping Rule - Rest of the World",
+			"label": "_Test Shipping Rule - Rest of the World",
+			"calculate_based_on": "Net Total",
+			"company": "_Test Company",
+			"account": "_Test Account Shipping Charges - _TC",
+			"cost_center": "_Test Cost Center - _TC"
+		},
+		{
+			"doctype": "Shipping Rule Condition",
+			"parentfield": "shipping_rule_conditions",
+			"from_value": 0,
+			"to_value": 1000,
+			"shipping_amount": 500.0
+		},
+		{
+			"doctype": "Shipping Rule Condition",
+			"parentfield": "shipping_rule_conditions",
+			"from_value": 1001,
+			"to_value": 2000,
+			"shipping_amount": 1000.0
+		},
+		{
+			"doctype": "Shipping Rule Condition",
+			"parentfield": "shipping_rule_conditions",
+			"from_value": 2001,
+			"shipping_amount": 1500.0
+		},
+		{
+			"doctype": "Applicable Territory",
+			"parentfield": "valid_for_territories",
+			"territory": "_Test Territory Rest Of The World"
+		}
+	],
 ]

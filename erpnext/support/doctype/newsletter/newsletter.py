@@ -44,6 +44,7 @@ class DocType():
 		webnotes.conn.set(self.doc, "email_sent", 1)
 	
 	def get_recipients(self):
+		self.email_field = None
 		if self.doc.send_to_type=="Contact":
 			self.send_to_doctype = "Contact"
 			if self.doc.contact_type == "Customer":		

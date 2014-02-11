@@ -22,7 +22,7 @@ test_records = [
 	}],
 	[{
 		"doctype": "Territory",
-		"territory_name": "_Test Territory Rest of the World",
+		"territory_name": "_Test Territory Rest Of The World",
 		"parent_territory": "All Territories",
 		"is_group": "No",
 	}],

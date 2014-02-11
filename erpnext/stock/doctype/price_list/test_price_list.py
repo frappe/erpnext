@@ -32,7 +32,7 @@ test_records = [
 		{
 			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
-			"territory": "_Test Territory Rest of the World"
+			"territory": "_Test Territory Rest Of The World"
 		}
 	],
 	[
@@ -60,7 +60,7 @@ test_records = [
 		{
 			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
-			"territory": "_Test Territory Rest of the World"
+			"territory": "_Test Territory Rest Of The World"
 		},
 		{
 			"doctype": "Applicable Territory",
