@@ -370,7 +370,7 @@ def rename_account_for(dt, olddn, newdn, merge, company):
 		webnotes.conn.set_value("Account", new_account or old_account, "master_name", newdn)
 		
 def add_abbr_if_missing(dn, company):
-	from ..setup.doctype.company.company import get_name_with_abbr
+	from erpnext.setup.doctype.company.company import get_name_with_abbr
 	return get_name_with_abbr(dn, company)
 			
 def get_account_for(account_for_doctype, account_for):
