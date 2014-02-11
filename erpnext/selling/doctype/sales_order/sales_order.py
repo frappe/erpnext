@@ -235,7 +235,7 @@ class DocType(SellingController):
 			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				args = {
 					"item_code": d['item_code'],
-					"warehouse": d['warehouse'], 
+					"warehouse": d['reserved_warehouse'], 
 					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
 					"posting_date": self.doc.transaction_date,
 					"voucher_type": self.doc.doctype,
@@ -270,7 +270,6 @@ def make_material_request(source_name, target_doclist=None):
 			"doctype": "Material Request Item", 
 			"field_map": {
 				"parent": "sales_order_no", 
-				"warehouse": "warehouse", 
 				"stock_uom": "uom"
 			}
 		}
@@ -302,7 +301,6 @@ def make_delivery_note(source_name, target_doclist=None):
 				"rate": "rate", 
 				"name": "prevdoc_detail_docname", 
 				"parent": "against_sales_order", 
-				"warehouse": "warehouse"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.delivered_qty < doc.qty
@@ -343,7 +341,6 @@ def make_sales_invoice(source_name, target_doclist=None):
 			"field_map": {
 				"name": "so_detail", 
 				"parent": "sales_order", 
-				"warehouse": "warehouse"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.base_amount==0 or doc.billed_amt < doc.amount

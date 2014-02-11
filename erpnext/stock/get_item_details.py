@@ -33,6 +33,9 @@ def get_item_details(args):
 		args = json.loads(args)
 	args = webnotes._dict(args)
 	
+	if not args.get("transaction_type"):
+		args.transaction_type = "selling" if args.get("customer") else "buying"
+	
 	if args.barcode:
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
@@ -64,11 +67,11 @@ def get_item_details(args):
 		
 	if args.doctype in ("Sales Invoice", "Delivery Note"):
 		if item_bean.doc.has_serial_no == "Yes" and not args.serial_no:
-			out.serial_no = _get_serial_nos_by_fifo(args, item_bean)
+			out.serial_no = get_serial_nos_by_fifo(args, item_bean)
 	
 	return out
 
-def _get_serial_nos_by_fifo(args, item_bean):
+def get_serial_nos_by_fifo(args, item_bean):
 	return "\n".join(webnotes.conn.sql_list("""select name from `tabSerial No` 
 		where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available' 
 		order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {

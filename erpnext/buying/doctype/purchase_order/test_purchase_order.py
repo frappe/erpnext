@@ -129,6 +129,7 @@ test_records = [
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
 			"grand_total_import": 5000.0,
+			"buying_price_list": "_Test Price List"
 		}, 
 		{
 			"conversion_factor": 1.0, 

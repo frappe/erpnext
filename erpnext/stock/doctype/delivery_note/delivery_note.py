@@ -242,12 +242,12 @@ class DocType(SellingController):
 	def update_reserved_qty(self, d):
 		if d['reserved_qty'] < 0 :
 			# Reduce reserved qty from reserved warehouse mentioned in so
-			if not d["warehouse"]:
+			if not d["reserved_warehouse"]:
 				webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
 				
 			args = {
 				"item_code": d['item_code'],
-				"warehouse": d["warehouse"],
+				"warehouse": d["reserved_warehouse"],
 				"voucher_type": self.doc.doctype,
 				"voucher_no": self.doc.name,
 				"reserved_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),

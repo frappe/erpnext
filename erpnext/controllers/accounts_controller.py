@@ -84,11 +84,13 @@ class AccountsController(TransactionBase):
 		exchange = "%s-%s" % (from_currency, to_currency)
 		return flt(webnotes.conn.get_value("Currency Exchange", exchange, "exchange_rate"))
 
-	def set_missing_item_details(self, get_item_details):
+	def set_missing_item_details(self):
 		"""set missing item values"""
+		from erpnext.stock.get_item_details import get_item_details
 		for item in self.doclist.get({"parentfield": self.fname}):
 			if item.fields.get("item_code"):
 				args = item.fields.copy().update(self.doc.fields)
+				args.price_list = args.selling_price_list or args.buying_price_list
 				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield=self.fname) and \

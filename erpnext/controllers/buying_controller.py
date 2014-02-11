@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
-from erpnext.buying.utils import get_item_details
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 
@@ -35,7 +34,7 @@ class BuyingController(StockController):
 		if self.doc.supplier:
 			self.doc.update_if_missing(get_party_details(self.doc.supplier, party_type="Supplier"))
 
-		self.set_missing_item_details(get_item_details)
+		self.set_missing_item_details()
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "taxes_and_charges")
 
@@ -257,7 +256,6 @@ class BuyingController(StockController):
 			d.rm_supp_cost = raw_materials_cost
 
 	def get_items_from_default_bom(self, item_code):
-		# print webnotes.conn.sql("""select name from `tabBOM` where item = '_Test FG Item'""")
 		bom_items = webnotes.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
 			t2.rate, t2.stock_uom, t2.name, t2.description 
 			from `tabBOM` t1, `tabBOM Item` t2 

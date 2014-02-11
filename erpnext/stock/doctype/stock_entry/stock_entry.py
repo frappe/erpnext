@@ -578,7 +578,7 @@ class DocType(StockController):
 			se_child.stock_uom = item_dict[d]["stock_uom"]
 			se_child.qty = flt(item_dict[d]["qty"])
 			se_child.expense_account = item_dict[d]["expense_account"] or expense_account
-			se_child.cost_center = item_dict[d]["cost_center"] or cost_center
+			se_child.cost_center = item_dict[d]["buying_cost_center"] or cost_center
 			
 			# in stock uom
 			se_child.transfer_qty = flt(item_dict[d]["qty"])
@@ -611,7 +611,6 @@ def get_party_details(ref_dt, ref_dn):
 	else:
 		res = webnotes.conn.get_value(ref_dt, ref_dn, 
 			["supplier", "supplier_name", "address_display as supplier_address"], as_dict=1)
-		print ref_dt, ref_dn, res
 	return res or {}
 	
 @webnotes.whitelist()

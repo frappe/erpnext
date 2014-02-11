@@ -220,7 +220,8 @@ test_records = [
 			"company": "_Test Company",
 			"currency": "INR",
 			"conversion_rate": 1,
-			"grand_total_import": 0 # for feed
+			"grand_total_import": 0, # for feed
+			"buying_price_list": "_Test Price List"
 		},
 		# items
 		{
@@ -362,7 +363,8 @@ test_records = [
 			"company": "_Test Company",
 			"currency": "INR",
 			"conversion_rate": 1.0,
-			"grand_total_import": 0 # for feed
+			"grand_total_import": 0, # for feed
+			"buying_price_list": "_Test Price List"
 		},
 		# items
 		{

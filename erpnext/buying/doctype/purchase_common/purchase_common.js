@@ -81,7 +81,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
-					method: "erpnext.buying.utils.get_item_details",
+					method: "erpnext.stock.get_item_details.get_item_details",
 					child: item,
 					args: {
 						args: {

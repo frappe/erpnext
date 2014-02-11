@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, flt, comma_or, _round, cstr
 from erpnext.setup.utils import get_company_currency
-from erpnext.selling.utils import get_item_details
 from webnotes import msgprint, _
 
 from erpnext.controllers.stock_controller import StockController
@@ -42,7 +41,7 @@ class SellingController(StockController):
 						
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")
-		self.set_missing_item_details(get_item_details)
+		self.set_missing_item_details()
 										
 	def apply_shipping_rule(self):
 		if self.doc.shipping_rule:
@@ -288,7 +287,7 @@ class SellingController(StockController):
 	def get_item_list(self):
 		il = []
 		for d in self.doclist.get({"parentfield": self.fname}):
-			warehouse = ""
+			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
 			
 			if self.doc.doctype == "Sales Order":
@@ -296,7 +295,7 @@ class SellingController(StockController):
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
 						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
 							d.item_code + _(" as it is stock Item or packing item"))
-				warehouse = d.warehouse
+				reserved_warehouse = d.warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 				
@@ -306,7 +305,7 @@ class SellingController(StockController):
 				
 				already_delivered_qty = self.get_already_delivered_qty(self.doc.name, 
 					d.against_sales_order, d.prevdoc_detail_docname)
-				so_qty, warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
+				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
 				
 				if already_delivered_qty + d.qty > so_qty:
 					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
@@ -319,7 +318,7 @@ class SellingController(StockController):
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(webnotes._dict({
 							'warehouse': p.warehouse,
-							'warehouse': warehouse,
+							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
 							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
@@ -331,7 +330,7 @@ class SellingController(StockController):
 			else:
 				il.append(webnotes._dict({
 					'warehouse': d.warehouse,
-					'warehouse': warehouse,
+					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
 					'reserved_qty': reserved_qty_for_main_item,

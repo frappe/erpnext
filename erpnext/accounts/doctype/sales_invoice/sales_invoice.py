@@ -177,7 +177,7 @@ class DocType(SellingController):
 		if cint(self.doc.is_pos) != 1:
 			return
 		
-		from erpnext.selling.utils import get_pos_settings_item_details, get_pos_settings	
+		from erpnext.stock.get_item_details import get_pos_settings_item_details, get_pos_settings	
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:

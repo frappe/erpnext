@@ -46,7 +46,8 @@ test_records = [
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
 			"grand_total_import": 5000.0,
-			"naming_series": "_T-Supplier Quotation-"
+			"naming_series": "_T-Supplier Quotation-",
+			"buying_price_list": "_Test Price List"
 		}, 
 		{
 			"description": "_Test FG Item", 
