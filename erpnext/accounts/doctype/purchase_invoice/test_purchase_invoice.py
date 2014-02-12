@@ -77,7 +77,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		pi = webnotes.bean(copy=test_records[1])
 		pi.doclist[1].item_code = "_Test Non Stock Item"
-		pi.doclist[1].expense_head = "_Test Account Cost for Goods Sold - _TC"
+		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
 		pi.doclist.pop(3)
 		pi.run_method("calculate_taxes_and_totals")
@@ -220,7 +220,8 @@ test_records = [
 			"company": "_Test Company",
 			"currency": "INR",
 			"conversion_rate": 1,
-			"grand_total_import": 0 # for feed
+			"grand_total_import": 0, # for feed
+			"buying_price_list": "_Test Price List"
 		},
 		# items
 		{
@@ -229,13 +230,13 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 100",
 			"item_name": "_Test Item Home Desktop 100",
 			"qty": 10,
-			"import_rate": 50,
-			"import_amount": 500,
 			"rate": 50,
 			"amount": 500,
+			"base_rate": 50,
+			"base_amount": 500,
 			"uom": "_Test UOM",
 			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
-			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"conversion_factor": 1.0,
 		
@@ -246,12 +247,12 @@ test_records = [
 			"item_code": "_Test Item Home Desktop 200",
 			"item_name": "_Test Item Home Desktop 200",
 			"qty": 5,
-			"import_rate": 150,
-			"import_amount": 750,
 			"rate": 150,
 			"amount": 750,
+			"base_rate": 150,
+			"base_amount": 750,
 			"uom": "_Test UOM",
-			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"conversion_factor": 1.0,
 		},
@@ -362,7 +363,8 @@ test_records = [
 			"company": "_Test Company",
 			"currency": "INR",
 			"conversion_rate": 1.0,
-			"grand_total_import": 0 # for feed
+			"grand_total_import": 0, # for feed
+			"buying_price_list": "_Test Price List"
 		},
 		# items
 		{
@@ -371,9 +373,9 @@ test_records = [
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
 			"qty": 10.0,
-			"import_rate": 50.0,
+			"rate": 50.0,
 			"uom": "_Test UOM",
-			"expense_head": "_Test Account Cost for Goods Sold - _TC",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"conversion_factor": 1.0,
 		},

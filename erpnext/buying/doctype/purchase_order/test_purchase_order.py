@@ -129,6 +129,7 @@ test_records = [
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
 			"grand_total_import": 5000.0,
+			"buying_price_list": "_Test Price List"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -138,8 +139,8 @@ test_records = [
 			"item_name": "_Test FG Item", 
 			"parentfield": "po_details", 
 			"qty": 10.0,
-			"import_rate": 500.0,
-			"amount": 5000.0,
+			"rate": 500.0,
+			"base_amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"stock_uom": "_Test UOM", 
 			"uom": "_Test UOM",

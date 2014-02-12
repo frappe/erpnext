@@ -28,6 +28,11 @@ test_records = [
 			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
 			"territory": "All Territories"
+		},
+		{
+			"doctype": "Applicable Territory",
+			"parentfield": "valid_for_territories",
+			"territory": "_Test Territory Rest Of The World"
 		}
 	],
 	[
@@ -121,7 +126,7 @@ test_records = [
 	[
 		{
 			"doctype": "Sales Taxes and Charges Master",
-			"title": "_Test Sales Taxes and Charges Master 2",
+			"title": "_Test Sales Taxes and Charges Master - Rest of the World",
 			"company": "_Test Company"
 		},
 		{
@@ -143,7 +148,7 @@ test_records = [
 		{
 			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
-			"territory": "All Territories"
+			"territory": "_Test Territory Rest Of The World"
 		}
 	],
 ]

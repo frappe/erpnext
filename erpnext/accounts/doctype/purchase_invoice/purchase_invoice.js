@@ -109,7 +109,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	
 	entries_add: function(doc, cdt, cdn) {
 		var row = wn.model.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_head", "cost_center"]);
+		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_account", "cost_center"]);
 	}
 });
 
@@ -175,19 +175,19 @@ return{
 	}	
 }
 
-cur_frm.set_query("expense_head", "entries", function(doc) {
+cur_frm.set_query("expense_account", "entries", function(doc) {
 	return{
 		query: "accounts.doctype.purchase_invoice.purchase_invoice.get_expense_account",
 		filters: {'company': doc.company}
 	}
 });
 
-cur_frm.cscript.expense_head = function(doc, cdt, cdn){
+cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
-	if(d.idx == 1 && d.expense_head){
+	if(d.idx == 1 && d.expense_account){
 		var cl = getchildren('Purchase Invoice Item', doc.name, 'entries', doc.doctype);
 		for(var i = 0; i < cl.length; i++){
-			if(!cl[i].expense_head) cl[i].expense_head = d.expense_head;
+			if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
 		}
 	}
 	refresh_field('entries');

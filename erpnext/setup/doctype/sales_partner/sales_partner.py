@@ -20,3 +20,6 @@ class DocType():
 			return contact_details
 		else:
 			return ''
+
+	def get_page_title(self):
+		return self.doc.partner_name

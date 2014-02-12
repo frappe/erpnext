@@ -60,9 +60,9 @@ test_records = [
 			"item_name": "CPU", 
 			"parentfield": "quotation_details", 
 			"qty": 10.0,
-			"basic_rate": 100.0,
-			"export_rate": 100.0,
-			"amount": 1000.0,
+			"base_rate": 100.0,
+			"rate": 100.0,
+			"base_amount": 1000.0,
 		}
 	],	
 ]

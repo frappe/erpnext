@@ -132,11 +132,10 @@ data_map = {
 	},
 	
 	"Sales Order Item": {
-		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", 
-			"reserved_warehouse as warehouse"],
+		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", "warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
-			"ifnull(reserved_warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
+			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -174,7 +173,7 @@ data_map = {
 		}
 	},
 	"Sales Invoice Item": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -192,7 +191,7 @@ data_map = {
 		}
 	},
 	"Sales Order Item[Sales Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -210,7 +209,7 @@ data_map = {
 		}
 	},
 	"Delivery Note Item[Sales Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -242,7 +241,7 @@ data_map = {
 		}
 	},
 	"Purchase Invoice Item": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -260,7 +259,7 @@ data_map = {
 		}
 	},
 	"Purchase Order Item[Purchase Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
@@ -278,7 +277,7 @@ data_map = {
 		}
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
-		"columns": ["name", "parent", "item_code", "qty", "amount"],
+		"columns": ["name", "parent", "item_code", "qty", "base_amount"],
 		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {

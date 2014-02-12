@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 11:42:58", 
   "docstatus": 0, 
-  "modified": "2013-12-31 18:07:50", 
+  "modified": "2014-02-10 17:28:08", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -107,7 +107,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "ref_rate", 
+  "fieldname": "price_list_rate", 
   "fieldtype": "Currency", 
   "in_list_view": 0, 
   "label": "Price List Rate", 
@@ -122,7 +122,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "adj_rate", 
+  "fieldname": "discount_percentage", 
   "fieldtype": "Float", 
   "in_list_view": 0, 
   "label": "Discount(%)", 
@@ -155,7 +155,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "base_ref_rate", 
+  "fieldname": "base_price_list_rate", 
   "fieldtype": "Currency", 
   "in_list_view": 0, 
   "label": "Price List Rate (Company Currency)", 
@@ -174,7 +174,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "export_rate", 
+  "fieldname": "rate", 
   "fieldtype": "Currency", 
   "in_list_view": 1, 
   "label": "Rate", 
@@ -188,7 +188,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "export_amount", 
+  "fieldname": "amount", 
   "fieldtype": "Currency", 
   "in_list_view": 1, 
   "label": "Amount", 
@@ -208,7 +208,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "basic_rate", 
+  "fieldname": "base_rate", 
   "fieldtype": "Currency", 
   "in_list_view": 0, 
   "label": "Basic Rate (Company Currency)", 
@@ -223,7 +223,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "amount", 
+  "fieldname": "base_amount", 
   "fieldtype": "Currency", 
   "in_list_view": 0, 
   "label": "Amount (Company Currency)", 
@@ -246,7 +246,7 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "reserved_warehouse", 
+  "fieldname": "warehouse", 
   "fieldtype": "Link", 
   "in_list_view": 0, 
   "label": "Reserved Warehouse", 

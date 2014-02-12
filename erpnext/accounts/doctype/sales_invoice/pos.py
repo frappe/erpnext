@@ -22,9 +22,9 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 		args["name"] = "%%%s%%" % item
 
 	return webnotes.conn.sql("""select i.name, i.item_name, i.image, 
-		item_det.ref_rate, item_det.currency 
+		item_det.price_list_rate, item_det.currency 
 		from `tabItem` i LEFT JOIN 
-			(select item_code, ref_rate, currency from 
+			(select item_code, price_list_rate, currency from 
 				`tabItem Price`	where price_list=%s) item_det
 		ON
 			item_det.item_code=i.name

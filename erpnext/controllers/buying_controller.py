@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes import _, msgprint
 from webnotes.utils import flt, _round
-from erpnext.buying.utils import get_item_details
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 
@@ -35,7 +34,7 @@ class BuyingController(StockController):
 		if self.doc.supplier:
 			self.doc.update_if_missing(get_party_details(self.doc.supplier, party_type="Supplier"))
 
-		self.set_missing_item_details(get_item_details)
+		self.set_missing_item_details()
 		if self.doc.fields.get("__islocal"):
 			self.set_taxes("other_charges", "taxes_and_charges")
 
@@ -79,39 +78,30 @@ class BuyingController(StockController):
 		self.calculate_total_advance("Purchase Invoice", "advance_allocation_details")
 		
 	def calculate_item_values(self):
-		# hack! - cleaned up in _cleanup()
-		if self.doc.doctype != "Purchase Invoice":
-			df = self.meta.get_field("purchase_rate", parentfield=self.fname)
-			df.fieldname = "rate"
-			
 		for item in self.item_doclist:
-			# hack! - cleaned up in _cleanup()
-			if self.doc.doctype != "Purchase Invoice":
-				item.rate = item.purchase_rate
-				
 			self.round_floats_in(item)
 
-			if item.discount_rate == 100.0:
-				item.import_rate = 0.0
-			elif not item.import_rate:
-				item.import_rate = flt(item.import_ref_rate * (1.0 - (item.discount_rate / 100.0)),
-					self.precision("import_rate", item))
+			if item.discount_percentage == 100.0:
+				item.rate = 0.0
+			elif not item.rate:
+				item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
+					self.precision("rate", item))
 						
-			item.import_amount = flt(item.import_rate * item.qty,
-				self.precision("import_amount", item))
+			item.amount = flt(item.rate * item.qty,
+				self.precision("amount", item))
 			item.item_tax_amount = 0.0;
 
-			self._set_in_company_currency(item, "import_amount", "amount")
-			self._set_in_company_currency(item, "import_ref_rate", "purchase_ref_rate")
-			self._set_in_company_currency(item, "import_rate", "rate")
+			self._set_in_company_currency(item, "amount", "base_amount")
+			self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
+			self._set_in_company_currency(item, "rate", "base_rate")
 			
 			
 	def calculate_net_total(self):
 		self.doc.net_total = self.doc.net_total_import = 0.0
 
 		for item in self.item_doclist:
-			self.doc.net_total += item.amount
-			self.doc.net_total_import += item.import_amount
+			self.doc.net_total += item.base_amount
+			self.doc.net_total_import += item.amount
 			
 		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
 		
@@ -159,16 +149,6 @@ class BuyingController(StockController):
 			
 	def _cleanup(self):
 		super(BuyingController, self)._cleanup()
-			
-		# except in purchase invoice, rate field is purchase_rate
-		# reset fieldname of rate
-		if self.doc.doctype != "Purchase Invoice":
-			df = self.meta.get_field("rate", parentfield=self.fname)
-			df.fieldname = "purchase_rate"
-			
-			for item in self.item_doclist:
-				item.purchase_rate = item.rate
-				del item.fields["rate"]
 		
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:
@@ -194,7 +174,7 @@ class BuyingController(StockController):
 		for d in self.doclist.get({"parentfield": parentfield}):
 			if d.item_code and d.item_code in stock_items:
 				stock_items_qty += flt(d.qty)
-				stock_items_amount += flt(d.amount)
+				stock_items_amount += flt(d.base_amount)
 				last_stock_item_idx = d.idx
 			
 		total_valuation_amount = sum([flt(d.tax_amount) for d in 
@@ -205,7 +185,7 @@ class BuyingController(StockController):
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.doclist.get({"parentfield": parentfield})):
 			if item.item_code and item.qty and item.item_code in stock_items:
-				item_proportion = flt(item.amount) / stock_items_amount if stock_items_amount \
+				item_proportion = flt(item.base_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
 				
 				if i == (last_stock_item_idx - 1):
@@ -222,7 +202,7 @@ class BuyingController(StockController):
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				item.valuation_rate = ((item.amount + item.item_tax_amount + item.rm_supp_cost)
+				item.valuation_rate = ((item.base_amount + item.item_tax_amount + item.rm_supp_cost)
 					/ qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
@@ -276,7 +256,6 @@ class BuyingController(StockController):
 			d.rm_supp_cost = raw_materials_cost
 
 	def get_items_from_default_bom(self, item_code):
-		# print webnotes.conn.sql("""select name from `tabBOM` where item = '_Test FG Item'""")
 		bom_items = webnotes.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
 			t2.rate, t2.stock_uom, t2.name, t2.description 
 			from `tabBOM` t1, `tabBOM Item` t2 

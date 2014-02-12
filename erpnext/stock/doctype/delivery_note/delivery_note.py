@@ -96,7 +96,7 @@ class DocType(SellingController):
 					super(DocType, self).validate_with_previous_doc(self.tname, {
 						fn[0] + " Item": {
 							"ref_dn_field": "prevdoc_detail_docname",
-							"compare_fields": [["export_rate", "="]],
+							"compare_fields": [["rate", "="]],
 							"is_child_table": True
 						}
 					})
@@ -261,7 +261,7 @@ class DocType(SellingController):
 		amount, total = 0, 0
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if not (d.against_sales_order or d.against_sales_invoice):
-				amount += d.amount
+				amount += d.base_amount
 		if amount != 0:
 			total = (amount/self.doc.net_total)*self.doc.grand_total
 			self.check_credit(total)

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import cstr, flt
+from webnotes.utils import cstr, flt, getdate, now_datetime, formatdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
 from webnotes import msgprint, _
@@ -245,8 +245,7 @@ class DocType(DocListController):
 			self.recalculate_bin_qty(newdn)
 			
 	def set_last_purchase_rate(self, newdn):
-		from erpnext.buying.utils import get_last_purchase_details
-		last_purchase_rate = get_last_purchase_details(newdn).get("purchase_rate", 0)
+		last_purchase_rate = get_last_purchase_details(newdn).get("base_rate", 0)
 		webnotes.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
 			
 	def recalculate_bin_qty(self, newdn):
@@ -265,7 +264,6 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
 	
-	from webnotes.utils import getdate, now_datetime, formatdate
 	if end_of_life and getdate(end_of_life) <= now_datetime().date():
 		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
 			" %(date)s. " + _("Please check") + ": %(end_of_life_label)s " + \
@@ -304,3 +302,65 @@ def _msgprint(msg, verbose):
 		msgprint(msg, raise_exception=True)
 	else:
 		raise webnotes.ValidationError, msg
+		
+		
+def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
+	"""returns last purchase details in stock uom"""
+	# get last purchase order item details
+	last_purchase_order = webnotes.conn.sql("""\
+		select po.name, po.transaction_date, po.conversion_rate,
+			po_item.conversion_factor, po_item.base_price_list_rate, 
+			po_item.discount_percentage, po_item.base_rate
+		from `tabPurchase Order` po, `tabPurchase Order Item` po_item
+		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and 
+			po.name = po_item.parent
+		order by po.transaction_date desc, po.name desc
+		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
+
+	# get last purchase receipt item details		
+	last_purchase_receipt = webnotes.conn.sql("""\
+		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
+			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
+			pr_item.base_rate
+		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
+		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
+			pr.name = pr_item.parent
+		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
+		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
+
+	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date \
+		or "1900-01-01")
+	purchase_receipt_date = getdate(last_purchase_receipt and \
+		last_purchase_receipt[0].posting_date or "1900-01-01")
+
+	if (purchase_order_date > purchase_receipt_date) or \
+			(last_purchase_order and not last_purchase_receipt):
+		# use purchase order
+		last_purchase = last_purchase_order[0]
+		purchase_date = purchase_order_date
+		
+	elif (purchase_receipt_date > purchase_order_date) or \
+			(last_purchase_receipt and not last_purchase_order):
+		# use purchase receipt
+		last_purchase = last_purchase_receipt[0]
+		purchase_date = purchase_receipt_date
+		
+	else:
+		return webnotes._dict()
+	
+	conversion_factor = flt(last_purchase.conversion_factor)
+	out = webnotes._dict({
+		"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
+		"base_rate": flt(last_purchase.base_rate) / conversion_factor,
+		"discount_percentage": flt(last_purchase.discount_percentage),
+		"purchase_date": purchase_date
+	})
+
+	conversion_rate = flt(conversion_rate) or 1.0
+	out.update({
+		"price_list_rate": out.base_price_list_rate / conversion_rate,
+		"rate": out.base_rate / conversion_rate,
+		"base_rate": out.base_rate
+	})
+	
+	return out

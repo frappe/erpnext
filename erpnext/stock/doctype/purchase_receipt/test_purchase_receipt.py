@@ -26,8 +26,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(pr.doclist))
 		
-		# modify import_rate
-		pi[1].import_rate = 200
+		# modify rate
+		pi[1].rate = 200
 		self.assertRaises(webnotes.ValidationError, webnotes.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
@@ -144,6 +144,7 @@ test_records = [
 			"net_total": 500.0, 
 			"grand_total": 720.0,
 			"naming_series": "_T-Purchase Receipt-",
+			"buying_price_list": "_Test Price List"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -155,8 +156,8 @@ test_records = [
 			"received_qty": 5.0,
 			"qty": 5.0,
 			"rejected_qty": 0.0,
-			"import_rate": 50.0,
-			"amount": 250.0,
+			"rate": 50.0,
+			"base_amount": 250.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",
@@ -171,8 +172,8 @@ test_records = [
 			"received_qty": 5.0,
 			"qty": 5.0,
 			"rejected_qty": 0.0,
-			"import_rate": 50.0,
-			"amount": 250.0,
+			"rate": 50.0,
+			"base_amount": 250.0,
 			"warehouse": "_Test Warehouse 1 - _TC", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",
@@ -225,6 +226,7 @@ test_records = [
 			"supplier": "_Test Supplier",
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
+			"buying_price_list": "_Test Price List"
 		}, 
 		{
 			"conversion_factor": 1.0, 
@@ -236,8 +238,8 @@ test_records = [
 			"received_qty": 10.0,
 			"qty": 10.0,
 			"rejected_qty": 0.0,
-			"import_rate": 500.0,
-			"amount": 5000.0,
+			"rate": 500.0,
+			"base_amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"stock_uom": "Nos", 
 			"uom": "_Test UOM",

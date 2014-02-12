@@ -110,6 +110,50 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.refresh();
 		}
 	},
+	
+	
+	item_code: function(doc, cdt, cdn) {
+		var me = this;
+		var item = wn.model.get_doc(cdt, cdn);
+		if(item.item_code || item.barcode || item.serial_no) {
+			if(!this.validate_company_and_party()) {
+				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
+			} else {
+				return this.frm.call({
+					method: "erpnext.stock.get_item_details.get_item_details",
+					child: item,
+					args: {
+						args: {
+							item_code: item.item_code,
+							barcode: item.barcode,
+							serial_no: item.serial_no,
+							warehouse: item.warehouse,
+							doctype: me.frm.doc.doctype,
+							docname: me.frm.doc.name,
+							customer: me.frm.doc.customer,
+							supplier: me.frm.doc.supplier,
+							currency: me.frm.doc.currency,
+							conversion_rate: me.frm.doc.conversion_rate,
+							price_list: me.frm.doc.selling_price_list ||
+								 me.frm.doc.buying_price_list,
+							price_list_currency: me.frm.doc.price_list_currency,
+							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
+							company: me.frm.doc.company,
+							order_type: me.frm.doc.order_type,
+							is_pos: cint(me.frm.doc.is_pos),
+							is_subcontracted: me.frm.doc.is_subcontracted,
+							transaction_date: me.frm.doc.transaction_date
+						}
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+						}
+					}
+				});
+			}
+		}
+	},	
 
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
@@ -455,25 +499,18 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		</table></div>';
 	},
 	
-	_validate_before_fetch: function(fieldname) {
-		var me = this;
-		if(!me.frm.doc[fieldname]) {
-			return (wn._("Please specify") + ": " + 
-				wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
-				". " + wn._("It is needed to fetch Item Details."));
-		}
-		return null;
-	},
-	
-	validate_company_and_party: function(party_field) {
+	validate_company_and_party: function() {
 		var me = this;
 		var valid = true;
-		var msg = "";
-		$.each(["company", party_field], function(i, fieldname) {
-			var msg_for_fieldname = me._validate_before_fetch(fieldname);
-			if(msg_for_fieldname) {
-				msgprint(msg_for_fieldname);
-				valid = false;
+		
+		$.each(["company", "customer", "supplier"], function(i, fieldname) {
+			if(wn.meta.has_field(me.frm.doc.doctype, fieldname)) {
+				if (!me.frm.doc[fieldname]) {
+					msgprint(wn._("Please specify") + ": " + 
+						wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+						". " + wn._("It is needed to fetch Item Details."));
+						valid = false;
+				}
 			}
 		});
 		return valid;
@@ -599,7 +636,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				// note: grand_total_for_current_item contains the contribution of 
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					tax.grand_total_for_current_item = flt(item.amount + current_tax_amount,
+					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount,
 						precision("total", tax));
 				} else {
 					tax.grand_total_for_current_item = 
@@ -644,11 +681,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.frm.doc.net_total ?
-				((item.amount / this.frm.doc.net_total) * actual) :
+				((item.base_amount / this.frm.doc.net_total) * actual) :
 				0.0;
 			
 		} else if(tax.charge_type == "On Net Total") {
-			current_tax_amount = (tax_rate / 100.0) * item.amount;
+			current_tax_amount = (tax_rate / 100.0) * item.base_amount;
 			
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *

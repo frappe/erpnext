@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import webnotes
 from webnotes.utils import cint, flt, comma_or, _round, cstr
 from erpnext.setup.utils import get_company_currency
-from erpnext.selling.utils import get_item_details
 from webnotes import msgprint, _
 
 from erpnext.controllers.stock_controller import StockController
@@ -42,7 +41,7 @@ class SellingController(StockController):
 						
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")
-		self.set_missing_item_details(get_item_details)
+		self.set_missing_item_details()
 										
 	def apply_shipping_rule(self):
 		if self.doc.shipping_rule:
@@ -112,17 +111,17 @@ class SellingController(StockController):
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 			
 			if cumulated_tax_fraction and not self.discount_amount_applied:
-				item.amount = flt((item.export_amount * self.doc.conversion_rate) /
-					(1 + cumulated_tax_fraction), self.precision("amount", item))
+				item.base_amount = flt((item.amount * self.doc.conversion_rate) /
+					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 					
-				item.basic_rate = flt(item.amount / item.qty, self.precision("basic_rate", item))
+				item.base_rate = flt(item.base_amount / item.qty, self.precision("base_rate", item))
 				
-				if item.adj_rate == 100:
-					item.base_ref_rate = item.basic_rate
-					item.basic_rate = 0.0
+				if item.discount_percentage == 100:
+					item.base_price_list_rate = item.base_rate
+					item.base_rate = 0.0
 				else:
-					item.base_ref_rate = flt(item.basic_rate / (1 - (item.adj_rate / 100.0)),
-						self.precision("base_ref_rate", item))
+					item.base_price_list_rate = flt(item.base_rate / (1 - (item.discount_percentage / 100.0)),
+						self.precision("base_price_list_rate", item))
 			
 	def get_current_tax_fraction(self, tax, item_tax_map):
 		"""
@@ -152,25 +151,25 @@ class SellingController(StockController):
 			for item in self.item_doclist:
 				self.round_floats_in(item)
 
-				if item.adj_rate == 100:
-					item.export_rate = 0
-				elif not item.export_rate:
-					item.export_rate = flt(item.ref_rate * (1.0 - (item.adj_rate / 100.0)),
-						self.precision("export_rate", item))
+				if item.discount_percentage == 100:
+					item.rate = 0
+				elif not item.rate:
+					item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
+						self.precision("rate", item))
 
-				item.export_amount = flt(item.export_rate * item.qty,
-					self.precision("export_amount", item))
+				item.amount = flt(item.rate * item.qty,
+					self.precision("amount", item))
 
-				self._set_in_company_currency(item, "ref_rate", "base_ref_rate")
-				self._set_in_company_currency(item, "export_rate", "basic_rate")
-				self._set_in_company_currency(item, "export_amount", "amount")
+				self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
+				self._set_in_company_currency(item, "rate", "base_rate")
+				self._set_in_company_currency(item, "amount", "base_amount")
 
 	def calculate_net_total(self):
 		self.doc.net_total = self.doc.net_total_export = 0.0
 
 		for item in self.item_doclist:
-			self.doc.net_total += item.amount
-			self.doc.net_total_export += item.export_amount
+			self.doc.net_total += item.base_amount
+			self.doc.net_total_export += item.amount
 		
 		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
 				
@@ -197,8 +196,8 @@ class SellingController(StockController):
 			if grand_total_for_discount_amount:
 				# calculate item amount after Discount Amount
 				for item in self.item_doclist:
-					distributed_amount = flt(self.doc.discount_amount) * item.amount / grand_total_for_discount_amount
-					item.amount = flt(item.amount - distributed_amount, self.precision("amount", item))
+					distributed_amount = flt(self.doc.discount_amount) * item.base_amount / grand_total_for_discount_amount
+					item.base_amount = flt(item.base_amount - distributed_amount, self.precision("base_amount", item))
 
 				self.discount_amount_applied = True
 				self._calculate_taxes_and_totals()
@@ -281,7 +280,7 @@ class SellingController(StockController):
 		for d in self.doclist.get({"parentfield": self.fname}):
 			discount = flt(webnotes.conn.get_value("Item", d.item_code, "max_discount"))
 			
-			if discount and flt(d.adj_rate) > discount:
+			if discount and flt(d.discount_percentage) > discount:
 				webnotes.throw(_("You cannot give more than ") + cstr(discount) + "% " + 
 					_("discount on Item Code") + ": " + cstr(d.item_code))
 					
@@ -293,10 +292,10 @@ class SellingController(StockController):
 			
 			if self.doc.doctype == "Sales Order":
 				if (webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
-					self.has_sales_bom(d.item_code)) and not d.reserved_warehouse:
+					self.has_sales_bom(d.item_code)) and not d.warehouse:
 						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
 							d.item_code + _(" as it is stock Item or packing item"))
-				reserved_warehouse = d.reserved_warehouse
+				reserved_warehouse = d.warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 				
@@ -354,10 +353,10 @@ class SellingController(StockController):
 		return qty and flt(qty[0][0]) or 0.0
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = webnotes.conn.sql("""select qty, reserved_warehouse from `tabSales Order Item`
+		so_item = webnotes.conn.sql("""select qty, warehouse from `tabSales Order Item`
 			where name = %s and docstatus = 1""", so_detail, as_dict=1)
 		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
-		so_warehouse = so_item and so_item[0]["reserved_warehouse"] or ""
+		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 		
 	def check_stop_sales_order(self, ref_fieldname):
@@ -373,10 +372,10 @@ def check_active_sales_items(obj):
 	for d in obj.doclist.get({"parentfield": obj.fname}):
 		if d.item_code:
 			item = webnotes.conn.sql("""select docstatus, is_sales_item, 
-				is_service_item, default_income_account from tabItem where name = %s""", 
+				is_service_item, income_account from tabItem where name = %s""", 
 				d.item_code, as_dict=True)[0]
 			if item.is_sales_item == 'No' and item.is_service_item == 'No':
 				webnotes.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
-			if d.income_account and not item.default_income_account:
-				webnotes.conn.set_value("Item", d.item_code, "default_income_account", 
+			if d.income_account and not item.income_account:
+				webnotes.conn.set_value("Item", d.item_code, "income_account", 
 					d.income_account)

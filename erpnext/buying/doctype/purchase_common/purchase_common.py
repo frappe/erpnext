@@ -8,7 +8,7 @@ from webnotes.utils import cstr, flt
 from webnotes.model.utils import getlist
 from webnotes import msgprint, _
 
-from erpnext.buying.utils import get_last_purchase_details
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.controllers.buying_controller import BuyingController
 
 class DocType(BuyingController):
@@ -30,12 +30,12 @@ class DocType(BuyingController):
 			last_purchase_rate = None
 			if last_purchase_details and \
 					(last_purchase_details.purchase_date > this_purchase_date):
-				last_purchase_rate = last_purchase_details['purchase_rate']
+				last_purchase_rate = last_purchase_details['base_rate']
 			elif is_submit == 1:
 				# even if this transaction is the latest one, it should be submitted
 				# for it to be considered for latest purchase rate
 				if flt(d.conversion_factor):
-					last_purchase_rate = flt(d.purchase_rate) / flt(d.conversion_factor)
+					last_purchase_rate = flt(d.base_rate) / flt(d.conversion_factor)
 				else:
 					webnotes.throw(_("Row ") + cstr(d.idx) + ": " + 
 						_("UOM Conversion Factor is mandatory"))
@@ -55,20 +55,20 @@ class DocType(BuyingController):
 				last_purchase_details = get_last_purchase_details(d.item_code, doc_name)
 
 				if last_purchase_details:
-					d.purchase_ref_rate = last_purchase_details['purchase_ref_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.discount_rate = last_purchase_details['discount_rate']
-					d.purchase_rate = last_purchase_details['purchase_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.import_ref_rate = d.purchase_ref_rate / conversion_rate
-					d.import_rate = d.purchase_rate / conversion_rate
+					d.base_price_list_rate = last_purchase_details['base_price_list_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.discount_percentage = last_purchase_details['discount_percentage']
+					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
+					d.rate = d.base_rate / conversion_rate
 				else:
 					# if no last purchase found, reset all values to 0
-					d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate = d.import_rate = d.discount_rate = 0
+					d.base_price_list_rate = d.base_rate = d.price_list_rate = d.rate = d.discount_percentage = 0
 					
 					item_last_purchase_rate = webnotes.conn.get_value("Item",
 						d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
-						d.purchase_ref_rate = d.purchase_rate = d.import_ref_rate \
-							= d.import_rate = item_last_purchase_rate
+						d.base_price_list_rate = d.base_rate = d.price_list_rate \
+							= d.rate = item_last_purchase_rate
 			
 	def validate_for_items(self, obj):
 		check_list, chk_dupl_itm=[],[]

@@ -8,7 +8,7 @@ from webnotes.utils import flt, cint, today, cstr
 from webnotes.model.code import get_obj
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
-from erpnext.utilities.transaction_base import TransactionBase, validate_conversion_rate
+from erpnext.utilities.transaction_base import TransactionBase
 import json
 
 class AccountsController(TransactionBase):
@@ -84,8 +84,9 @@ class AccountsController(TransactionBase):
 		exchange = "%s-%s" % (from_currency, to_currency)
 		return flt(webnotes.conn.get_value("Currency Exchange", exchange, "exchange_rate"))
 
-	def set_missing_item_details(self, get_item_details):
+	def set_missing_item_details(self):
 		"""set missing item values"""
+		from erpnext.stock.get_item_details import get_item_details
 		for item in self.doclist.get({"parentfield": self.fname}):
 			if item.fields.get("item_code"):
 				args = item.fields.copy().update(self.doc.fields)
@@ -149,6 +150,7 @@ class AccountsController(TransactionBase):
 			self.doc.currency = company_currency
 			self.doc.conversion_rate = 1.0
 		else:
+			from erpnext.setup.doctype.currency.currency import validate_conversion_rate
 			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
 				self.meta.get_label("conversion_rate"), self.doc.company)
 
@@ -275,7 +277,7 @@ class AccountsController(TransactionBase):
 				# note: grand_total_for_current_item contains the contribution of 
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.amount + current_tax_amount,
+					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount,
 						self.precision("total", tax))
 				else:
 					tax.grand_total_for_current_item = \
@@ -313,10 +315,10 @@ class AccountsController(TransactionBase):
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.rate, self.precision("tax_amount", tax))
 			current_tax_amount = (self.doc.net_total
-				and ((item.amount / self.doc.net_total) * actual)
+				and ((item.base_amount / self.doc.net_total) * actual)
 				or 0)
 		elif tax.charge_type == "On Net Total":
-			current_tax_amount = (tax_rate / 100.0) * item.amount
+			current_tax_amount = (tax_rate / 100.0) * item.base_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item

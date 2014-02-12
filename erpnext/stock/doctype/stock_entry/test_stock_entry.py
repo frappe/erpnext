@@ -480,7 +480,7 @@ class TestStockEntry(unittest.TestCase):
 		pi.doc.posting_date = pr.doc.posting_date
 		pi.doc.credit_to = "_Test Supplier - _TC"
 		for d in pi.doclist.get({"parentfield": "entries"}):
-			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
+			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 
 		for d in pi.doclist.get({"parentfield": "other_charges"}):
@@ -562,7 +562,7 @@ class TestStockEntry(unittest.TestCase):
 		po = webnotes.bean(copy=purchase_order_test_records[0])
 		po.doc.is_subcontracted = None
 		po.doclist[1].item_code = "_Test Item"
-		po.doclist[1].import_rate = 50
+		po.doclist[1].rate = 50
 		po.insert()
 		po.submit()
 
@@ -583,7 +583,7 @@ class TestStockEntry(unittest.TestCase):
 		pi.doc.posting_date = pr.doc.posting_date
 		pi.doc.credit_to = "_Test Supplier - _TC"
 		for d in pi.doclist.get({"parentfield": "entries"}):
-			d.expense_head = "_Test Account Cost for Goods Sold - _TC"
+			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		for d in pi.doclist.get({"parentfield": "other_charges"}):
 			d.cost_center = "_Test Cost Center - _TC"

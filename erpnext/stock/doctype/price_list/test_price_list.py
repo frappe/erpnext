@@ -13,7 +13,8 @@ test_records = [
 			"price_list_name": "_Test Price List",
 			"enabled": 1,
 			"currency": "INR",
-			"selling": 1
+			"selling": 1,
+			"buying": 1
 		},
 		{
 			"doctype": "Applicable Territory",
@@ -27,12 +28,13 @@ test_records = [
 			"price_list_name": "_Test Price List 2",
 			"enabled": 1,
 			"currency": "INR",
-			"selling": 1
+			"selling": 1,
+			"buying": 1
 		},
 		{
 			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
-			"territory": "_Test Territory Rest of the World"
+			"territory": "_Test Territory Rest Of The World"
 		}
 	],
 	[
@@ -41,7 +43,8 @@ test_records = [
 			"price_list_name": "_Test Price List India",
 			"enabled": 1,
 			"currency": "INR",
-			"selling": 1
+			"selling": 1,
+			"buying": 1
 		},
 		{
 			"doctype": "Applicable Territory",
@@ -55,12 +58,13 @@ test_records = [
 			"price_list_name": "_Test Price List Rest of the World",
 			"enabled": 1,
 			"currency": "USD",
-			"selling": 1
+			"selling": 1,
+			"buying": 1
 		},
 		{
 			"doctype": "Applicable Territory",
 			"parentfield": "valid_for_territories",
-			"territory": "_Test Territory Rest of the World"
+			"territory": "_Test Territory Rest Of The World"
 		},
 		{
 			"doctype": "Applicable Territory",

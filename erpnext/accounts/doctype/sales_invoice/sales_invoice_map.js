@@ -8,7 +8,7 @@ wn.model.map_info["Sales Invoice"] = {
 		},
 		field_map: {
 			"Sales Invoice Item": {
-				"basic_rate": "rate",
+				"base_rate": "rate",
 				"time_log_batch": "name",
 				"qty": "total_hours",
 				"stock_uom": "=Hour",

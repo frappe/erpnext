@@ -46,7 +46,8 @@ test_records = [
 			"net_total": 5000.0, 
 			"grand_total": 5000.0,
 			"grand_total_import": 5000.0,
-			"naming_series": "_T-Supplier Quotation-"
+			"naming_series": "_T-Supplier Quotation-",
+			"buying_price_list": "_Test Price List"
 		}, 
 		{
 			"description": "_Test FG Item", 
@@ -55,8 +56,8 @@ test_records = [
 			"item_name": "_Test FG Item", 
 			"parentfield": "quotation_items", 
 			"qty": 10.0,
-			"import_rate": 500.0,
-			"amount": 5000.0,
+			"rate": 500.0,
+			"base_amount": 5000.0,
 			"warehouse": "_Test Warehouse - _TC", 
 			"uom": "_Test UOM",
 		}

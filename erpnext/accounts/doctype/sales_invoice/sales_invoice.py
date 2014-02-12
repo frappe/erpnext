@@ -29,12 +29,12 @@ class DocType(SellingController):
 		self.status_updater = [{
 			'source_dt': 'Sales Invoice Item',
 			'target_field': 'billed_amt',
-			'target_ref_field': 'export_amount',
+			'target_ref_field': 'amount',
 			'target_dt': 'Sales Order Item',
 			'join_field': 'so_detail',
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
-			'source_field': 'export_amount',
+			'source_field': 'amount',
 			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
@@ -73,7 +73,7 @@ class DocType(SellingController):
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_recurring_invoice()
-		self.validate_multiple_billing("Delivery Note", "dn_detail", "export_amount", 
+		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", 
 			"delivery_note_details")
 
 	def on_submit(self):
@@ -177,7 +177,7 @@ class DocType(SellingController):
 		if cint(self.doc.is_pos) != 1:
 			return
 		
-		from erpnext.selling.utils import get_pos_settings, apply_pos_settings	
+		from erpnext.stock.get_item_details import get_pos_settings_item_details, get_pos_settings	
 		pos = get_pos_settings(self.doc.company)
 			
 		if pos:
@@ -196,9 +196,9 @@ class DocType(SellingController):
 			# set pos values in items
 			for item in self.doclist.get({"parentfield": "entries"}):
 				if item.fields.get('item_code'):
-					for fieldname, val in apply_pos_settings(pos, item.fields).items():
-						if (not for_validate) or (for_validate and not item.fields.get(fieldname)):
-							item.fields[fieldname] = val
+					for fname, val in get_pos_settings_item_details(pos, item.fields, pos).items():
+						if (not for_validate) or (for_validate and not item.fields.get(fname)):
+							item.fields[fname] = val
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:
@@ -295,13 +295,13 @@ class DocType(SellingController):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
-					"compare_fields": [["export_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True
 				},
 				"Delivery Note Item": {
 					"ref_dn_field": "dn_detail",
-					"compare_fields": [["export_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True
 				}
 			})
@@ -522,12 +522,12 @@ class DocType(SellingController):
 	def make_item_gl_entries(self, gl_entries):			
 		# income account gl entries	
 		for item in self.doclist.get({"parentfield": "entries"}):
-			if flt(item.amount):
+			if flt(item.base_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
 						"against": self.doc.debit_to,
-						"credit": item.amount,
+						"credit": item.base_amount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
 					})
@@ -805,10 +805,10 @@ def make_delivery_note(source_name, target_doclist=None):
 		bean.run_method("onload_post_render")
 		
 	def update_item(source_doc, target_doc, source_parent):
+		target_doc.base_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
+			flt(source_doc.base_rate)
 		target_doc.amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.basic_rate)
-		target_doc.export_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \
-			flt(source_doc.export_rate)
+			flt(source_doc.rate)
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 	
 	doclist = get_mapped_doclist("Sales Invoice", source_name, 	{

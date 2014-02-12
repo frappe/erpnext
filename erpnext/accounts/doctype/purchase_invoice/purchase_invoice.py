@@ -27,8 +27,8 @@ class DocType(BuyingController):
 			'target_field': 'billed_amt',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_billed',
-			'target_ref_field': 'import_amount',
-			'source_field': 'import_amount',
+			'target_ref_field': 'amount',
+			'source_field': 'amount',
 			'percent_join_field': 'purchase_order',
 		}]
 		
@@ -54,7 +54,7 @@ class DocType(BuyingController):
 		self.validate_write_off_account()
 		self.update_raw_material_cost()
 		self.update_valuation_rate("entries")
-		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "import_amount", 
+		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", 
 			"purchase_receipt_details")
 	
 	def set_missing_values(self, for_validate=False):
@@ -169,13 +169,13 @@ class DocType(BuyingController):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
-					"compare_fields": [["import_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True,
 					"allow_duplicate_prev_row_id": True
 				},
 				"Purchase Receipt Item": {
 					"ref_dn_field": "pr_detail",
-					"compare_fields": [["import_rate", "="]],
+					"compare_fields": [["rate", "="]],
 					"is_child_table": True
 				}
 			})
@@ -201,19 +201,19 @@ class DocType(BuyingController):
 					and self.doc.is_opening == 'No':
 				# in case of auto inventory accounting, against expense account is always
 				# Stock Received But Not Billed for a stock item
-				item.expense_head = stock_not_billed_account
+				item.expense_account = stock_not_billed_account
 				item.cost_center = None
 				
 				if stock_not_billed_account not in against_accounts:
 					against_accounts.append(stock_not_billed_account)
 			
-			elif not item.expense_head:
+			elif not item.expense_account:
 				msgprint(_("Expense account is mandatory for item") + ": " + 
 					(item.item_code or item.item_name), raise_exception=1)
 			
-			elif item.expense_head not in against_accounts:
+			elif item.expense_account not in against_accounts:
 				# if no auto_accounting_for_stock or not a stock item
-				against_accounts.append(item.expense_head)
+				against_accounts.append(item.expense_account)
 				
 		self.doc.against_expense_account = ",".join(against_accounts)
 
@@ -342,25 +342,25 @@ class DocType(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 					
-					valuation_amt = flt(item.amount + item.item_tax_amount + item.rm_supp_cost, 
-						self.precision("amount", item))
+					valuation_amt = flt(item.base_amount + item.item_tax_amount + item.rm_supp_cost, 
+						self.precision("base_amount", item))
 					
 					gl_entries.append(
 						self.get_gl_dict({
-							"account": item.expense_head,
+							"account": item.expense_account,
 							"against": self.doc.credit_to,
 							"debit": valuation_amt,
 							"remarks": self.doc.remarks or "Accounting Entry for Stock"
 						})
 					)
 			
-			elif flt(item.amount):
+			elif flt(item.base_amount):
 				# if not a stock item or auto inventory accounting disabled, book the expense
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": item.expense_head,
+						"account": item.expense_account,
 						"against": self.doc.credit_to,
-						"debit": item.amount,
+						"debit": item.base_amount,
 						"remarks": self.doc.remarks,
 						"cost_center": item.cost_center
 					})

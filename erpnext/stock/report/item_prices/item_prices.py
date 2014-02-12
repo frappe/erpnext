@@ -58,7 +58,7 @@ def get_price_list():
 	rate = {}
 
 	price_list = webnotes.conn.sql("""select ip.item_code, ip.buying, ip.selling, 
-		concat(ip.price_list, " - ", ip.currency, " ", ip.ref_rate) as price 
+		concat(ip.price_list, " - ", ip.currency, " ", ip.price_list_rate) as price 
 		from `tabItem Price` ip, `tabPrice List` pl 
 		where ip.price_list=pl.name and pl.enabled=1""", as_dict=1)
 
@@ -80,15 +80,15 @@ def get_last_purchase_rate():
 
 	query = """select * from (select 
 					result.item_code,
-					result.purchase_rate
+					result.base_rate
 					from (
 						(select 
 							po_item.item_code,
 							po_item.item_name,
 							po.transaction_date as posting_date,
-							po_item.purchase_ref_rate, 
-							po_item.discount_rate, 
-							po_item.purchase_rate
+							po_item.base_price_list_rate, 
+							po_item.discount_percentage, 
+							po_item.base_rate
 						from `tabPurchase Order` po, `tabPurchase Order Item` po_item
 						where po.name = po_item.parent and po.docstatus = 1)
 						union
@@ -96,9 +96,9 @@ def get_last_purchase_rate():
 							pr_item.item_code,
 							pr_item.item_name,
 							pr.posting_date,
-							pr_item.purchase_ref_rate,
-							pr_item.discount_rate,
-							pr_item.purchase_rate
+							pr_item.base_price_list_rate,
+							pr_item.discount_percentage,
+							pr_item.base_rate
 						from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 						where pr.name = pr_item.parent and pr.docstatus = 1)
 				) result
@@ -106,7 +106,7 @@ def get_last_purchase_rate():
 				group by item_code"""
 
 	for d in webnotes.conn.sql(query, as_dict=1):
-		item_last_purchase_rate_map.setdefault(d.item_code, d.purchase_rate)
+		item_last_purchase_rate_map.setdefault(d.item_code, d.base_rate)
 
 	return item_last_purchase_rate_map
 
