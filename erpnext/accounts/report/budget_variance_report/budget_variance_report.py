@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import webnotes
-from webnotes import _, msgprint
+from webnotes import _, msgprint, throw
 from webnotes.utils import flt
 import time
 from erpnext.accounts.utils import get_fiscal_year
@@ -41,8 +41,7 @@ def get_columns(filters):
 	for fieldname in ["fiscal_year", "period", "company"]:
 		if not filters.get(fieldname):
 			label = (" ".join(fieldname.split("_"))).title()
-			msgprint(_("Please specify") + ": " + label,
-				raise_exception=True)
+			throw(_("Please specify") + ": " + label)
 
 	columns = ["Cost Center:Link/Cost Center:120", "Account:Link/Account:120"]
 

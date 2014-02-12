@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 09:04:18", 
   "docstatus": 0, 
-  "modified": "2014-02-03 18:06:03", 
+  "modified": "2014-02-11 18:52:41", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -219,14 +219,13 @@
   "search_index": 0
  }, 
  {
-  "description": "Applicable Holiday List", 
   "doctype": "DocField", 
-  "fieldname": "holiday_list", 
-  "fieldtype": "Link", 
-  "label": "Holiday List", 
+  "fieldname": "periodic_holiday_list", 
+  "fieldtype": "Table", 
+  "label": "Periodic Holiday List", 
   "oldfieldname": "holiday_list", 
   "oldfieldtype": "Link", 
-  "options": "Holiday List"
+  "options": "Periodic Holiday List"
  }, 
  {
   "doctype": "DocField", 

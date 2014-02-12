@@ -2,7 +2,7 @@
  {
   "creation": "2014-02-07 17:35:47", 
   "docstatus": 0, 
-  "modified": "2014-02-07 17:47:16", 
+  "modified": "2014-02-11 16:11:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -37,6 +37,7 @@
   "name": "Period"
  }, 
  {
+  "default": "1", 
   "doctype": "DocField", 
   "fieldname": "enabled", 
   "fieldtype": "Check", 
@@ -48,12 +49,6 @@
   "fieldtype": "Select", 
   "label": "Series", 
   "options": "LP/"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "period_name", 
-  "fieldtype": "Data", 
-  "label": "Period Name"
  }, 
  {
   "doctype": "DocField", 

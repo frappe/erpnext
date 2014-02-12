@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:13", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:26", 
+  "modified": "2014-02-11 18:30:43", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -62,6 +62,13 @@
   "oldfieldname": "branch", 
   "oldfieldtype": "Data", 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "periodic_holiday_list", 
+  "fieldtype": "Table", 
+  "label": "Periodic Holiday List", 
+  "options": "Periodic Holiday List"
  }, 
  {
   "doctype": "DocPerm", 

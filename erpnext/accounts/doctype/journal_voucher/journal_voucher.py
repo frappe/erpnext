@@ -7,7 +7,7 @@ import webnotes
 from webnotes.utils import cint, cstr, flt, fmt_money, formatdate, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint, _
+from webnotes import throw, msgprint, _
 from erpnext.setup.utils import get_company_currency
 
 from erpnext.controllers.accounts_controller import AccountsController
@@ -59,17 +59,18 @@ class DocType(AccountsController):
 	def validate_debit_credit(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.debit and d.credit:
-				msgprint("You cannot credit and debit same account at the same time.", 
-				 	raise_exception=1)
+				throw(_("You cannot credit and debit same account at the same time"))
 
 	def validate_cheque_info(self):
 		if self.doc.voucher_type in ['Bank Voucher']:
 			if not self.doc.cheque_no or not self.doc.cheque_date:
-				msgprint("Reference No & Reference Date is required for %s" %
-				self.doc.voucher_type, raise_exception=1)
+				throw("{msg} {voucher}".format(**{
+					"msg": _("Reference No & Reference Date is required for"),
+					"voucher": self.doc.voucher_type
+				}))
 				
 		if self.doc.cheque_date and not self.doc.cheque_no:
-			msgprint("Reference No is mandatory if you entered Reference Date", raise_exception=1)
+			throw(_("Reference No is mandatory if you entered Reference Date"))
 
 	def validate_entries_for_advance(self):
 		for d in getlist(self.doclist,'entries'):
@@ -85,12 +86,15 @@ class DocType(AccountsController):
 		for d in getlist(self.doclist, 'entries'):
 			if d.against_jv:
 				if d.against_jv == self.doc.name:
-					msgprint("You can not enter current voucher in 'Against JV' column",
-						raise_exception=1)
+					throw(_("You can not enter current voucher in 'Against JV' column"))
 				elif not webnotes.conn.sql("""select name from `tabJournal Voucher Detail` 
 						where account = '%s' and docstatus = 1 and parent = '%s'""" % 
 						(d.account, d.against_jv)):
-					msgprint("Against JV: %s is not valid." % d.against_jv, raise_exception=1)
+					throw("{msg}: {jv} {valid}".format(**{
+						"msg": _("Against JV"),
+						"jv": d.against_jv,
+						"valid": _("is not valid")
+					}))
 		
 	def set_against_account(self):
 		# Debit = Credit
@@ -106,8 +110,10 @@ class DocType(AccountsController):
 		self.doc.total_credit = credit
 
 		if abs(self.doc.total_debit-self.doc.total_credit) > 0.001:
-			msgprint("Debit must be equal to Credit. The difference is %s" % 
-			 	(self.doc.total_debit-self.doc.total_credit), raise_exception=1)
+			throw("{msg} {diff}".format(**{
+				"msg": _("Debit must be equal to Credit. The difference is"),
+				"diff": self.doc.total_debit - self.doc.total_credit
+			}))
 		
 		# update against account
 		for d in getlist(self.doclist, 'entries'):
@@ -121,7 +127,7 @@ class DocType(AccountsController):
 				r.append('Via Reference #%s dated %s' % 
 					(self.doc.cheque_no, formatdate(self.doc.cheque_date)))
 			else :
-				msgprint("Please enter Reference date", raise_exception=1)
+				throw(_("Please enter Reference date"))
 		
 		for d in getlist(self.doclist, 'entries'):
 			if d.against_invoice and d.credit:
@@ -144,7 +150,7 @@ class DocType(AccountsController):
 		if r:
 			self.doc.remark = ("\n").join(r)
 		else:
-			webnotes.msgprint("User Remarks is mandatory", raise_exception=1)
+			throw(_("User Remarks is mandatory"))
 
 	def set_aging_date(self):
 		if self.doc.is_opening != 'Yes':
@@ -160,7 +166,7 @@ class DocType(AccountsController):
 
 			# If customer/supplier account, aging date is mandatory
 			if exists and not self.doc.aging_date: 
-				msgprint("Aging Date is mandatory for opening entry", raise_exception=1)
+				throw(_("Aging Date is mandatory for opening entry"))
 			else:
 				self.doc.aging_date = self.doc.posting_date
 
@@ -197,8 +203,12 @@ class DocType(AccountsController):
 			credit_days = self.get_credit_days_for(d.account)
 			# Check credit days
 			if credit_days > 0 and not self.get_authorized_user() and cint(date_diff) > credit_days:
-				msgprint("Credit Not Allowed: Cannot allow a check that is dated \
-					more than %s days after the posting date" % credit_days, raise_exception=1)
+				throw("{credit}: {msg} {days} {posting}".format(**{
+					"credit": _("Credit Not Allowed"),
+					"msg": _("Cannot allow a check that is dated more than"),
+					"days": credit_days,
+					"posting": _("days after the posting date")
+				}))
 					
 	def get_credit_days_for(self, ac):
 		if not self.credit_days_for.has_key(ac):
@@ -231,12 +241,12 @@ class DocType(AccountsController):
 		for d in self.doclist.get({"parentfield": "entries"}):
 			if d.against_invoice and webnotes.conn.get_value("Sales Invoice", 
 					d.against_invoice, "debit_to") != d.account:
-				webnotes.throw(_("Row #") + cstr(d.idx) +  ": " +
+				throw(_("Row #") + cstr(d.idx) +  ": " +
 					_("Account is not matching with Debit To account of Sales Invoice"))
 			
 			if d.against_voucher and webnotes.conn.get_value("Purchase Invoice", 
 					d.against_voucher, "credit_to") != d.account:
-				webnotes.throw(_("Row #") + cstr(d.idx) + ": " +
+				throw(_("Row #") + cstr(d.idx) + ": " +
 					_("Account is not matching with Credit To account of Purchase Invoice"))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
