@@ -121,7 +121,7 @@ def get_basic_details(args, item_bean):
 	user_default_warehouse_list = get_user_default_as_list('warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
-	
+
 	out = webnotes._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
@@ -132,7 +132,7 @@ def get_basic_details(args, item_bean):
 		"expense_account": item.expense_account or args.expense_account \
 			or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
 		"cost_center": item.selling_cost_center \
-			if args.transaction_type == "selling" else args.buying_cost_center,
+			if args.transaction_type == "selling" else item.buying_cost_center,
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
 			item_bean.doclist.get({"parentfield": "item_tax"})))),
