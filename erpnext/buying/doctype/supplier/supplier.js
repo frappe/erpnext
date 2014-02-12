@@ -46,9 +46,9 @@ cur_frm.cscript.make_dashboard = function(doc) {
 			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
 				cur_frm.dashboard.set_headline(
 					wn._("Total Billing This Year: ") + "<b>" 
-					+ format_currency(r.message.total_billing, cur_frm.doc.default_currency)
+					+ format_currency(r.message.total_billing, erpnext.get_currency(cur_frm.doc.company))
 					+ '</b> / <span class="text-muted">' + wn._("Unpaid") + ": <b>" 
-					+ format_currency(r.message.total_unpaid, cur_frm.doc.default_currency) 
+					+ format_currency(r.message.total_unpaid, erpnext.get_currency(cur_frm.doc.company)) 
 					+ '</b></span>');
 			}
 			cur_frm.dashboard.set_badge_count(r.message);
