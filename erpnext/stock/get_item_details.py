@@ -35,6 +35,9 @@ def get_item_details(args):
 	
 	if not args.get("transaction_type"):
 		args.transaction_type = "selling" if args.get("customer") else "buying"
+		
+	if not args.get("price_list"):
+		args.price_list = args.get("selling_price_list") or args.get("buying_price_list")
 	
 	if args.barcode:
 		args.item_code = get_item_code(barcode=args.barcode)
@@ -54,31 +57,22 @@ def get_item_details(args):
 		out.update(get_available_qty(args.item_code, out.warehouse))
 		out.update(get_projected_qty(item.name, out.warehouse))
 	
-	if args.transaction_date and item.lead_time_days:
-		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
-			item.lead_time_days)
-	
 	get_price_list_rate(args, item_bean, out)
 	
-	# out.update(_get_item_discount(out.item_group, args.customer))
+	out.update(get_item_discount(out.item_group, args.customer))
 
 	if args.transaction_type == "selling" and cint(args.is_pos):
 		out.update(get_pos_settings_item_details(args.company, args))
 		
-	if args.doctype in ("Sales Invoice", "Delivery Note"):
+	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
 		if item_bean.doc.has_serial_no == "Yes" and not args.serial_no:
 			out.serial_no = get_serial_nos_by_fifo(args, item_bean)
+			
+	if args.transaction_date and item.lead_time_days:
+		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
+			item.lead_time_days)
 	
 	return out
-
-def get_serial_nos_by_fifo(args, item_bean):
-	return "\n".join(webnotes.conn.sql_list("""select name from `tabSerial No` 
-		where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available' 
-		order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
-			"item_code": args.item_code,
-			"warehouse": args.warehouse,
-			"qty": cint(args.qty)
-		}))
 
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
@@ -101,7 +95,7 @@ def validate_item_details(args, item):
 	
 	if args.transaction_type == "selling":
 		# validate if sales item or service item
-		if args.order_type == "Maintenance":
+		if args.get("order_type") == "Maintenance":
 			if item.is_service_item != "Yes":
 				throw(_("Item") + (" %s: " % item.name) + 
 					_("not a service item.") +
@@ -115,7 +109,7 @@ def validate_item_details(args, item):
 		if item.is_purchase_item != "Yes":
 			throw(_("Item") + (" %s: " % item.name) + _("not a purchase item"))
 	
-		if args.is_subcontracted == "Yes" and item.is_sub_contracted_item != "Yes":
+		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != "Yes":
 			throw(_("Item") + (" %s: " % item.name) + 
 				_("not a sub-contracted item.") +
 				_("Please select a sub-contracted item or do not sub-contract the transaction."))
@@ -129,31 +123,31 @@ def get_basic_details(args, item_bean):
 		if len(user_default_warehouse_list)==1 else ""
 	
 	out = webnotes._dict({
-			"item_code": item.name,
-			"item_name": item.item_name,
-			"description": item.description_html or item.description,
-			"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
-			"income_account": item.default_income_account or args.income_account \
-				or webnotes.conn.get_value("Company", args.company, "default_income_account"),
-			"expense_account": item.expense_account or args.expense_account \
-				or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
-			"cost_center": item.selling_cost_center \
-				if args.transaction_type == "selling" else args.buying_cost_center,
-			"batch_no": None,
-			"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
-				item_bean.doclist.get({"parentfield": "item_tax"})))),
-			"uom": item.stock_uom,
-			"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
-			"conversion_factor": 1.0,
-			"qty": 1.0,
-			"price_list_rate": 0.0,
-			"base_price_list_rate": 0.0,
-			"rate": 0.0,
-			"base_rate": 0.0,
-			"amount": 0.0,
-			"base_amount": 0.0,
-			"discount_percentage": 0.0
-		})
+		"item_code": item.name,
+		"item_name": item.item_name,
+		"description": item.description_html or item.description,
+		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
+		"income_account": item.default_income_account or args.income_account \
+			or webnotes.conn.get_value("Company", args.company, "default_income_account"),
+		"expense_account": item.expense_account or args.expense_account \
+			or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
+		"cost_center": item.selling_cost_center \
+			if args.transaction_type == "selling" else args.buying_cost_center,
+		"batch_no": None,
+		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
+			item_bean.doclist.get({"parentfield": "item_tax"})))),
+		"uom": item.stock_uom,
+		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
+		"conversion_factor": 1.0,
+		"qty": 1.0,
+		"price_list_rate": 0.0,
+		"base_price_list_rate": 0.0,
+		"rate": 0.0,
+		"base_rate": 0.0,
+		"amount": 0.0,
+		"base_amount": 0.0,
+		"discount_percentage": 0.0
+	})
 	
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
 		out[fieldname] = item.fields.get(fieldname)
@@ -211,22 +205,22 @@ def validate_conversion_rate(args, meta):
 			get_field_precision(meta.get_field("plc_conversion_rate"), 
 			webnotes._dict({"fields": args})))
 
-# def _get_item_discount(item_group, customer):
-# 	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name 
-# 		FROM `tabItem Group` AS node, `tabItem Group` AS parent 
-# 		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
-# 		GROUP BY parent.name 
-# 		ORDER BY parent.lft desc""", (item_group,))]
-# 		
-# 	discount = 0
-# 	for d in parent_item_groups:
-# 		res = webnotes.conn.sql("""select discount, name from `tabCustomer Discount` 
-# 			where parent = %s and item_group = %s""", (customer, d))
-# 		if res:
-# 			discount = flt(res[0][0])
-# 			break
-# 			
-# 	return {"discount_percentage": discount}
+def get_item_discount(item_group, customer):
+	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name 
+		FROM `tabItem Group` AS node, `tabItem Group` AS parent 
+		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
+		GROUP BY parent.name 
+		ORDER BY parent.lft desc""", (item_group,))]
+		
+	discount = 0
+	for d in parent_item_groups:
+		res = webnotes.conn.sql("""select discount, name from `tabCustomer Discount` 
+			where parent = %s and item_group = %s""", (customer, d))
+		if res:
+			discount = flt(res[0][0])
+			break
+			
+	return {"discount_percentage": discount}
 	
 def get_party_item_code(args, item_bean, out):
 	if args.transaction_type == "selling":
@@ -265,6 +259,15 @@ def get_pos_settings(company):
 			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
 			
 	return pos_settings and pos_settings[0] or None
+	
+def get_serial_nos_by_fifo(args, item_bean):
+	return "\n".join(webnotes.conn.sql_list("""select name from `tabSerial No` 
+		where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available' 
+		order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
+			"item_code": args.item_code,
+			"warehouse": args.warehouse,
+			"qty": cint(args.qty)
+		}))
 		
 @webnotes.whitelist()
 def get_conversion_factor(item_code, uom):

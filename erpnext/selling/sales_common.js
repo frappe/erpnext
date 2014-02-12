@@ -119,46 +119,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.item_code(doc, cdt, cdn);
 	},
 	
-	item_code: function(doc, cdt, cdn) {
-		var me = this;
-		var item = wn.model.get_doc(cdt, cdn);
-		if(item.item_code || item.barcode || item.serial_no) {
-			if(!this.validate_company_and_party("customer")) {
-				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
-			} else {
-				return this.frm.call({
-					method: "erpnext.stock.get_item_details.get_item_details",
-					child: item,
-					args: {
-						args: {
-							item_code: item.item_code,
-							barcode: item.barcode,
-							serial_no: item.serial_no,
-							warehouse: item.warehouse,
-							doctype: me.frm.doc.doctype,
-							parentfield: item.parentfield,
-							customer: me.frm.doc.customer,
-							currency: me.frm.doc.currency,
-							conversion_rate: me.frm.doc.conversion_rate,
-							price_list: me.frm.doc.selling_price_list,
-							price_list_currency: me.frm.doc.price_list_currency,
-							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
-							company: me.frm.doc.company,
-							order_type: me.frm.doc.order_type,
-							is_pos: cint(me.frm.doc.is_pos),
-							"transaction_type": "selling"
-						}
-					},
-					callback: function(r) {
-						if(!r.exc) {
-							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
-						}
-					}
-				});
-			}
-		}
-	},
-	
 	selling_price_list: function() {
 		this.get_price_list_currency("Selling");
 	},

@@ -416,7 +416,7 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				item.stock_uom,
 				item.default_warehouse,
 				item.expense_account as expense_account,
-				item.buying_cost_center
+				item.buying_cost_center as cost_center
 			from 
 				`tab%(table)s` bom_item, `tabItem` item 
 			where 

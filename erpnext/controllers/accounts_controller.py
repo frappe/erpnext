@@ -90,7 +90,6 @@ class AccountsController(TransactionBase):
 		for item in self.doclist.get({"parentfield": self.fname}):
 			if item.fields.get("item_code"):
 				args = item.fields.copy().update(self.doc.fields)
-				args.price_list = args.selling_price_list or args.buying_price_list
 				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield=self.fname) and \

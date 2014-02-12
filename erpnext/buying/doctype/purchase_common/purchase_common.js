@@ -73,43 +73,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.supplier_address();
 	},
 	
-	item_code: function(doc, cdt, cdn) {
-		var me = this;
-		var item = wn.model.get_doc(cdt, cdn);
-		if(item.item_code) {
-			if(!this.validate_company_and_party("supplier")) {
-				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
-			} else {
-				return this.frm.call({
-					method: "erpnext.stock.get_item_details.get_item_details",
-					child: item,
-					args: {
-						args: {
-							item_code: item.item_code,
-							warehouse: item.warehouse,
-							doctype: me.frm.doc.doctype,
-							docname: me.frm.doc.name,
-							supplier: me.frm.doc.supplier,
-							conversion_rate: me.frm.doc.conversion_rate,
-							buying_price_list: me.frm.doc.buying_price_list,
-							price_list_currency: me.frm.doc.price_list_currency,
-							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
-							is_subcontracted: me.frm.doc.is_subcontracted,
-							company: me.frm.doc.company,
-							currency: me.frm.doc.currency,
-							transaction_date: me.frm.doc.transaction_date
-						}
-					},
-					callback: function(r) {
-						if(!r.exc) {
-							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
-						}
-					}
-				});
-			}
-		}
-	},
-	
 	buying_price_list: function() {
 		this.get_price_list_currency("Buying");
 	},

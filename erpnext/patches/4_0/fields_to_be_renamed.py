@@ -108,16 +108,22 @@ def execute():
 			
 def reload_docs(docs):
 	for dn in docs:
-		module = webnotes.conn.get_value("DocType", dn, "module").lower().replace(" ", "_")
-		webnotes.reload_doc(module,	"doctype", dn.lower().replace(" ", "_"))
+		webnotes.reload_doc(get_module(dn),	"doctype", dn.lower().replace(" ", "_"))
 	
 	# reload all standard print formats
 	for pf in webnotes.conn.sql("""select name, module from `tabPrint Format` 
 			where ifnull(standard, 'No') = 'Yes'""", as_dict=1):
-		webnotes.reload_doc(pf.module, "Print Format", pf.name)
+		try:
+			webnotes.reload_doc(pf.module, "Print Format", pf.name)
+		except Exception, e:
+			print e
+			pass
 		
 	# reload all standard reports
-	for r in webnotes.conn.sql("""select name, module from `tabReport` 
+	for r in webnotes.conn.sql("""select name, ref_doctype from `tabReport` 
 		where ifnull(is_standard, 'No') = 'Yes'
 		and report_type in ('Report Builder', 'Query Report')""", as_dict=1):
-			webnotes.reload_doc(r.module, "Report", r.name)
+			webnotes.reload_doc(get_module(r.ref_doctype), "Report", r.name)
+			
+def get_module(dn):
+	return webnotes.conn.get_value("DocType", dn, "module").lower().replace(" ", "_")
