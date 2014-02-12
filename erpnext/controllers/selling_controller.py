@@ -372,10 +372,10 @@ def check_active_sales_items(obj):
 	for d in obj.doclist.get({"parentfield": obj.fname}):
 		if d.item_code:
 			item = webnotes.conn.sql("""select docstatus, is_sales_item, 
-				is_service_item, default_income_account from tabItem where name = %s""", 
+				is_service_item, income_account from tabItem where name = %s""", 
 				d.item_code, as_dict=True)[0]
 			if item.is_sales_item == 'No' and item.is_service_item == 'No':
 				webnotes.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
-			if d.income_account and not item.default_income_account:
-				webnotes.conn.set_value("Item", d.item_code, "default_income_account", 
+			if d.income_account and not item.income_account:
+				webnotes.conn.set_value("Item", d.item_code, "income_account", 
 					d.income_account)

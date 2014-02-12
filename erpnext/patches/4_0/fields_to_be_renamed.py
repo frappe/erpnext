@@ -93,7 +93,8 @@ def execute():
 		"Item": [
 			["purchase_account", "expense_account"],
 			["default_sales_cost_center", "selling_cost_center"],
-			["cost_center", "buying_cost_center"]
+			["cost_center", "buying_cost_center"],
+			["default_income_account", "income_account"],
 		],
 		"Item Price": [
 			["ref_rate", "price_list_rate"]

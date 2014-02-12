@@ -63,7 +63,7 @@ cur_frm.fields_dict['expense_account'].get_query = function(doc) {
 
 // Income Account
 // --------------------------------
-cur_frm.fields_dict['default_income_account'].get_query = function(doc) {
+cur_frm.fields_dict['income_account'].get_query = function(doc) {
 	return {
 		filters: {
 			'debit_or_credit': "Credit",
