@@ -12,10 +12,19 @@ class DocType:
 		self.doc, self.doclist = d, dl
 
 	def validate(self):
+		self.validate_item()
 		self.validate_price_list()
 		self.check_duplicate_item()
 		self.update_price_list_details()
 		self.update_item_details()
+		
+	def validate_item(self):
+		if not webnotes.conn.exists("Item", self.doc.item_code):
+			throw("{doctype}: {item} {not_found}".format(**{
+				"doctype": _("Item"), 
+				"item": self.doc.item_code, 
+				"not_found": _(" not found")
+			}))
 
 	def validate_price_list(self):
 		enabled = webnotes.conn.get_value("Price List", self.doc.price_list, "enabled")
@@ -38,8 +47,9 @@ class DocType:
 				}), ItemPriceDuplicateItem)
 
 	def update_price_list_details(self):
-		self.doc.buying, self.doc.selling, self.doc.currency = webnotes.conn.get_value("Price List", 
-			{"name": self.doc.price_list, "enabled": 1}, ["buying", "selling", "currency"])
+		self.doc.buying, self.doc.selling, self.doc.currency = \
+			webnotes.conn.get_value("Price List", {"name": self.doc.price_list, "enabled": 1}, 
+				["buying", "selling", "currency"])
 
 	def update_item_details(self):
 		self.doc.item_name, self.doc.item_description = webnotes.conn.get_value("Item", 

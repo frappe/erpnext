@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:42", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:37", 
+  "modified": "2014-02-13 11:29:35", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -27,29 +27,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "reference_name", 
-  "fieldtype": "Data", 
-  "hidden": 0, 
-  "in_filter": 0, 
-  "in_list_view": 1, 
-  "label": "Reference Name", 
-  "oldfieldname": "reference_name", 
-  "oldfieldtype": "Data", 
-  "read_only": 1, 
-  "search_index": 0
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "bom_detail_no", 
-  "fieldtype": "Data", 
-  "in_list_view": 1, 
-  "label": "BOM Detail No", 
-  "oldfieldname": "bom_detail_no", 
-  "oldfieldtype": "Data", 
-  "read_only": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "main_item_code", 
   "fieldtype": "Data", 
   "in_list_view": 1, 
@@ -65,12 +42,13 @@
   "in_list_view": 1, 
   "label": "Raw Material Item Code", 
   "oldfieldname": "rm_item_code", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "description", 
-  "fieldtype": "Data", 
+  "fieldtype": "Text", 
   "in_list_view": 1, 
   "label": "Description", 
   "oldfieldname": "description", 
@@ -78,6 +56,11 @@
   "print_width": "300px", 
   "read_only": 1, 
   "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
@@ -100,21 +83,22 @@
  }, 
  {
   "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "label": "Stock Uom", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "options": "UOM", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
   "fieldname": "rate", 
   "fieldtype": "Currency", 
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "conversion_factor", 
-  "fieldtype": "Float", 
-  "hidden": 1, 
-  "label": "Conversion Factor", 
-  "oldfieldname": "conversion_factor", 
-  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
   "read_only": 1
  }, 
  {
@@ -129,21 +113,46 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "stock_uom", 
-  "fieldtype": "Link", 
-  "label": "Stock Uom", 
-  "oldfieldname": "stock_uom", 
-  "oldfieldtype": "Data", 
-  "options": "UOM", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "hidden": 1, 
+  "label": "Conversion Factor", 
+  "oldfieldname": "conversion_factor", 
+  "oldfieldtype": "Currency", 
   "read_only": 1
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "current_stock", 
   "fieldtype": "Float", 
+  "hidden": 1, 
   "label": "Current Stock", 
   "oldfieldname": "current_stock", 
   "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reference_name", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Reference Name", 
+  "oldfieldname": "reference_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bom_detail_no", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 1, 
+  "label": "BOM Detail No", 
+  "oldfieldname": "bom_detail_no", 
+  "oldfieldtype": "Data", 
   "read_only": 1
  }
 ]
