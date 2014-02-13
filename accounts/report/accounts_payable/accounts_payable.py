@@ -51,10 +51,10 @@ def execute(filters=None):
 					ageing_based_on_date = gle.posting_date
 					
 				row += get_ageing_data(age_on, ageing_based_on_date, outstanding_amount) + \
-					[account_map.get(gle.account).get("supplier") or ""]
+					[account_map.get(gle.account, {}).get("supplier") or ""]
 
 				if supplier_naming_by == "Naming Series":
-					row += [account_map.get(gle.account).get("supplier_name") or ""]
+					row += [account_map.get(gle.account, {}).get("supplier_name") or ""]
 
 				row += [account_supplier_type_map.get(gle.account), gle.remarks]
 				data.append(row)
