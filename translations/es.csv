@@ -3,157 +3,157 @@
  against same operation,contra la misma operación
  already marked,ya marcada
  and year: ,y el año:
- as it is stock Item or packing item,ya que es la acción del artículo o elemento de embalaje
+ as it is stock Item or packing item,como está el artículo del inventario o el elemento de embalaje
  at warehouse: ,en el almacén:
- by Role ,por función
+ by Role ,por Rol
  can not be made.,no puede ser hecho.
- can not be marked as a ledger as it has existing child,"no puede ser marcado como un libro de contabilidad, ya que tiene menor existente"
+ can not be marked as a ledger as it has existing child,"no puede ser marcado como un libro de contabilidad, ya que tiene un hijo existente"
  cannot be 0,no puede ser 0
  cannot be deleted.,no se puede eliminar.
  does not belong to the company,no pertenece a la empresa
  has already been submitted.,ya se ha presentado.
- has been freezed. ,ha sido freezed.
- has been freezed. \				Only Accounts Manager can do transaction against this account,ha sido congelado. \ Sólo Administrador de cuentas puede hacer en contra de esta transacción cuenta
-" is less than equals to zero in the system, \						valuation rate is mandatory for this item","es menor que es igual a cero en el sistema, \ tasa de valoración es obligatoria para este artículo"
+ has been freezed. ,ha sido congelado.
+ has been freezed. \				Only Accounts Manager can do transaction against this account,ha sido congelado. \ Sólo Administradores de Cuentas pueden hacer una transacción contra esta cuenta
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item","es menor o iigual que cero en el sistema, \ tasa de valoración es obligatoria para este artículo"
  is mandatory,es obligatorio
- is mandatory for GL Entry,Es obligatorio para la entrada GL
+ is mandatory for GL Entry,Es obligatorio para la entrada del mayor general
  is not a ledger,no es un libro de contabilidad
  is not active,no está activa
  is not set,no se ha establecido
- is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,"Ahora es el Año Fiscal defecto. \ Por favor, actualiza tu navegador para que los cambios surtan efecto."
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,"Ahora es el Año Fiscal por defecto. \ Por favor, actualiza tu navegador para que los cambios surtan efecto."
  is present in one or many Active BOMs,está presente en una o varias listas de materiales activos
- not active or does not exists in the system,no activa o no se existe en el sistema
+ not active or does not exists in the system,no activa o no existe en el sistema
  not submitted,no presentado
- or the BOM is cancelled or inactive,o la lista de materiales se cancela o inactivo
- should be 'Yes'. As Item: ,debería ser &quot;sí&quot;. Como artículo:
+ or the BOM is cancelled or inactive,o la lista de materiales está cancelada o inactiva
+ should be 'Yes'. As Item: ,debería ser &quot;Sí&quot;. Como artículo:
  should be same as that in ,debe ser el mismo que el de
- was on leave on ,estaba en situación de excedencia
+ was on leave on ,estaba de licencia
  will be ,será
- will be over-billed against mentioned ,sobre-será facturado contra la mencionada
+ will be over-billed against mentioned ,será sobrefacturado contra la mencionada
  will become ,se convertirá
-"""Company History""",&quot;Historia de la empresa&quot;
-"""Team Members"" or ""Management""",&quot;Miembros del equipo&quot; o &quot;gestión&quot;
+"""Company History""",&quot;Historia de la Empresa&quot;
+"""Team Members"" or ""Management""",&quot;Miembros del Equipo&quot; o &quot;Gestión&quot;
 %  Delivered,Entregado%
-% Amount Billed,Importe% Anunciada
+% Amount Billed,Importe% Anunciado
 % Billed,Anunciado%
 % Completed,% Completado
 % Installed,Instalado%
 % Received,Recibido%
-% of materials billed against this Purchase Order.,% De los materiales facturados en contra de esta Orden de Compra.
-% of materials billed against this Sales Order,% De los materiales facturados en contra de esta orden de venta
-% of materials delivered against this Delivery Note,% De los materiales entregados en contra de esta nota de entrega
-% of materials delivered against this Sales Order,% De los materiales entregados en contra de esta orden de venta
-% of materials ordered against this Material Request,% De materiales ordenó en contra de esta solicitud de material
-% of materials received against this Purchase Order,% Del material recibido en contra de esta Orden de Compra
-"' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.","&#39;No puede gestionarse a través de la reconciliación de Valores. \ Puede añadir / eliminar Serial No directamente, \ para modificar existencias de este artículo."
-' in Company: ,&quot;En la empresa:
-'To Case No.' cannot be less than 'From Case No.',&#39;Para el caso núm&#39; no puede ser inferior a &#39;De Caso No.&#39;
-* Will be calculated in the transaction.,* Se calcula de la transacción.
-"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**","Distribución del presupuesto ** ** le ayuda a distribuir su presupuesto a través de meses, si usted tiene la estacionalidad en su business.To distribuir un presupuesto utilizando esta distribución, establezca esta distribución del presupuesto ** ** en el centro de coste ** **"
-**Currency** Master,Moneda ** ** Maestro
-**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,Año Fiscal ** ** representa un ejercicio. Los asientos contables y otras transacciones importantes se siguen contra ** Ejercicio **.
-. Outstanding cannot be less than zero. \				 	Please match exact outstanding.,. Pendiente no puede ser inferior a cero. \ Por favor coincidir exactamente excepcional.
-. Please set status of the employee as 'Left',". Por favor, establecer el estado del empleado como de &quot;izquierda&quot;"
-. You can not mark his attendance as 'Present',. No se puede marcar su asistencia como &quot;presente&quot;
-"000 is black, fff is white","000 es negro, es blanco fff"
-1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 Moneda = [?] FractionFor por ejemplo, 1 USD = 100 Cent"
-1. To maintain the customer wise item code and to make them searchable based on their code use this option,"1. Para mantener el código de artículo del cliente racional, y efectuar búsquedas en ellos sobre la base de su código de usar esta opción"
+% of materials billed against this Purchase Order.,% De los materiales facturados contra esta Orden de Compra.
+% of materials billed against this Sales Order,% De los materiales facturados contra esta Orden de Venta
+% of materials delivered against this Delivery Note,% De los materiales entregados contra esta Nota de Entrega
+% of materials delivered against this Sales Order,% De los materiales entregados contra esta Orden de Venta
+% of materials ordered against this Material Request,% De materiales ordenados contra esta Solicitud de Material
+% of materials received against this Purchase Order,% Del material recibido contra esta Orden de Compra
+"' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.","&#39;No puede gestionarse a través de la Reconciliación de Valores. \ Puede añadir/eliminar el Serial no directamente, \ para modificar existencias de este artículo."
+' in Company: ,&quot; en la Empresa:
+'To Case No.' cannot be less than 'From Case No.',&#39;Para el caso No.&#39; no puede ser inferior a &#39;De Caso No.&#39;
+* Will be calculated in the transaction.,* Se calcula en la transacción.
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**","Distribución del Presupuesto ** ** le ayuda a distribuir su presupuesto a través de meses, si usted tiene la estacionalidad en su business.Para distribuir un presupuesto utilizando esta distribución, establezca esta **Distribución del Presupuesto** en el **Centro de Costos**"
+**Currency** Master,**Moneda** Maestra
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,**Año Fiscal** representa un año de ejercicios financieros. Los asientos contables y otras transacciones importantes se siguen contra el **Año Fiscal**.
+. Outstanding cannot be less than zero. \				 	Please match exact outstanding.,. Pendiente no puede ser inferior a cero. \ Por favor coincidir el pendiente exacto.
+. Please set status of the employee as 'Left',". Por favor, establecer el estado del empleado como de &quot;Marchado&quot;"
+. You can not mark his attendance as 'Present',. No se puede marcar su asistencia como &quot;Presente&quot;
+"000 is black, fff is white","000 es negro, fff es blanco"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 Moneda = [?] FraccionPara por ejemplo, 1 USD = 100 Centavos"
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Para mantener el código de artículo inteligente del cliente y efectuar búsquedas sobre ellos basados en su código, usar esta opción
 12px,12px
 13px,13px
 14px,14px
 15px,15px
 16px,16px
 2 days ago,Hace 2 días
-: Duplicate row from same ,: Duplicar fila del mismo
-: It is linked to other active BOM(s),: Está vinculado a otro BOM activo (s)
-: Mandatory for a Recurring Invoice.,: Obligatorio para una factura recurrente.
-"<a href=""#!Sales Browser/Customer Group"">To manage Customer Groups, click here</a>","<a href=""#!Sales Browser/Customer Group"">Para administrar grupos de clientes, haga clic aquí</a>"
-"<a href=""#!Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#!Sales Browser/Item Group"">Gestionar grupos de artículos</a>"
-"<a href=""#!Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#!Sales Browser/Territory"">Para gestionar Territorio, haga clic aquí</a>"
-"<a href=""#Sales Browser/Customer Group"">Manage Customer Groups</a>","<a href=""#Sales Browser/Customer Group"">Gestionar grupos de clientes</a>"
-"<a href=""#Sales Browser/Customer Group"">To manage Territory, click here</a>","<a href=""#Sales Browser/Customer Group"">Para gestionar Territorio, haga clic aquí</a>"
-"<a href=""#Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#Sales Browser/Item Group"">Administrar los grupos de artículos</a>"
-"<a href=""#Sales Browser/Territory"">Territory</a>","<a href=""#Sales Browser/Territory"">Territorio</a>"
-"<a href=""#Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#Sales Browser/Territory"">Para gestionar Territorio, haga clic aquí</a>"
-"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Opciones de nombre</a>"
-<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>Cancel</b> le permite cambiar los documentos presentados por cancelarlos y enmendarlos.
-"<span class=""sys_manager"">To setup, please go to Setup > Naming Series</span>","<span class=""sys_manager"">Para configurar, por favor, vaya a Configuración&gt; Serie de nombres</span>"
-A Customer exists with same name,Un cliente que existe con el mismo nombre
-A Lead with this email id should exist,Un cable con este correo electrónico de identificación debe existir
-"A Product or a Service that is bought, sold or kept in stock.","Un producto o un servicio que se compra, se vende o se mantienen en stock."
+: Duplicate row from same ,: Duplicar fila de la misma
+: It is linked to other active BOM(s),: Está vinculado a otro BOM activo(s)
+: Mandatory for a Recurring Invoice.,: Obligatorio para una Factura Recurrente.
+"<a href=""#!Sales Browser/Customer Group"">To manage Customer Groups, click here</a>","<a href=""#!Buscados de Ventas/Grupo de Clientes"">Para administrar un Grupos de Clientes, haga clic aquí</a>"
+"<a href=""#!Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#!Buscador de Ventas/Grupo de Artículos"">Gestionar Grupos de Artículos</a>"
+"<a href=""#!Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#!Buscador de Ventas/Territorio"">Para gestionar un Territorio, haga clic aquí</a>"
+"<a href=""#Sales Browser/Customer Group"">Manage Customer Groups</a>","<a href=""#Buscador de Ventas/Grupo de Clientes"">Gestionar Grupos de Clientes</a>"
+"<a href=""#Sales Browser/Customer Group"">To manage Territory, click here</a>","<a href=""#Buscador de Ventas/Grupo de Clientes"">Para gestionar un Territorio, haga clic aquí</a>"
+"<a href=""#Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#Buscador de Ventas/Grupo de Artículos"">Administrar los Grupos de Artículos</a>"
+"<a href=""#Sales Browser/Territory"">Territory</a>","<a href=""#Buscador de Ventas/Territorio"">Territorio</a>"
+"<a href=""#Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#Buscador de Ventas/Territorio"">Para gestionar un Territorio, haga clic aquí</a>"
+"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - Por Campo\<li><b>naming_series:</b> - Por Nomenclatura (campo llamado naming_series debe estar presente\<li><b>eval:[expression]</b> - Evaluar la expresión en Python (self is doc)\<li><b>Entrada</b> - Entra un usuario para un nombre\<li><b>[series]</b> - Series por prefijo (separados por un punto); por ejemplo PRE.#####\</ol>')"">Opciones de Nombre</a>"
+<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>Cancelar</b> le permite cambiar los Documentos Presentados por cancelarlos y enmendarlos.
+"<span class=""sys_manager"">To setup, please go to Setup > Naming Series</span>","<span class=""sys_manager"">Para configurar, por favor vaya a Configuración > Nomenclatura</span>"
+A Customer exists with same name,Un Cliente existe con el mismo nombre
+A Lead with this email id should exist,Un Cliente Potencial con esta identificación de correo electrónico debe existir
+"A Product or a Service that is bought, sold or kept in stock.","Un Producto o un Servicio que se compra, vende o mantienen en inventario."
 A Supplier exists with same name,Un Proveedor existe con el mismo nombre
-A condition for a Shipping Rule,Una condición para una regla de envío
-A logical Warehouse against which stock entries are made.,Un almacen de depósito lógico en el que las entradas en existencias están hechos.
-A new popup will open that will ask you to select further conditions.,Una ventana se abrirá que le pedirá que seleccione otras condiciones.
-A symbol for this currency. For e.g. $,"Un símbolo de esta moneda. Por ejemplo, $"
-A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,Un distribuidor tercero / dealer / comisionista / filial / distribuidor que vende los productos de las empresas de una comisión.
-A user can have multiple values for a property.,Un usuario puede tener varios valores para una propiedad.
+A condition for a Shipping Rule,Una condición para una Regla de Envío
+A logical Warehouse against which stock entries are made.,Un depósito lógico donde las entradas del inventario son hechas.
+A new popup will open that will ask you to select further conditions.,Una nueva ventana emergente se abrirá y le pedirá que seleccione otras condiciones.
+A symbol for this currency. For e.g. $,Un símbolo de esta moneda. Por ejemplo, $
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,Un distribuidor tercero / comerciante / agente comercial / filial / revendedor que vende los productos de las empresas por una comisión.
+A user can have multiple values for a property.,Un usuario puede tener múltiples valores para una propiedad.
 A+,A +
 A-,A-
 AB+,AB +
 AB-,AB-
-AMC Expiry Date,AMC Fecha de Caducidad
+AMC Expiry Date,Fecha de Expiración AMC
 ATT,ATT
-Abbr,Abbr
-About,Sobre
-About Us Settings,La Empresa Ajustes
+Abbr,Abr
+About,Acerca de
+About Us Settings,Acerca de Nosotros Ajustes
 About Us Team Member,Acerca de Nosotros Miembro del Equipo
-Above Value,Por encima del valor
+Above Value,Por encima del Valor
 Absent,Ausente
 Acceptance Criteria,Criterios de Aceptación
 Accepted,Aceptado
-Accepted Quantity,Cantidad aceptada
+Accepted Quantity,Cantidad Aceptada
 Accepted Warehouse,Almacén Aceptado
 Account,Cuenta
-Account Balance,Saldo de la cuenta
-Account Details,Detalles de la cuenta
-Account Head,Cuenta Head
-Account Id,ID de la cuenta
-Account Name,Nombre de la cuenta
+Account Balance,Saldo de la Cuenta
+Account Details,Detalles de la Cuenta
+Account Head,Principal de la Cuenta
+Account Id,Identificación de la Cuenta
+Account Name,Nombre de la Cuenta
 Account Type,Tipo de Cuenta
 Account for this ,Cuenta para este
 Accounting,Contabilidad
-Accounting Year.,Ejercicio contable.
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Asiento contable congelado hasta la fecha, nadie puede hacer / modificar la entrada, excepto el papel se especifica a continuación."
+Accounting Year.,Año Fiscal.
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Asiento contable congelado hasta la fecha, nadie puede hacer / modificar la entrada, excepto el rol especificado a continuación."
 Accounting journal entries.,Contabilidad entradas del diario.
 Accounts,Cuentas
-Accounts Frozen Upto,Hasta que las cuentas congeladas
-Accounts Payable,Cuentas por pagar
-Accounts Receivable,Cuentas por cobrar
-Accounts Settings,Configuración de cuentas
+Accounts Frozen Upto,Cuentas Congeladas Hasta
+Accounts Payable,Cuentas por Pagar
+Accounts Receivable,Cuentas por Cobrar
+Accounts Settings,Configuración de Cuentas
 Action,Acción
 Active,Activo
-Active: Will extract emails from ,Activo: Will extraer correos electrónicos de
+Active: Will extract emails from ,Activo: Extraerá correos electrónicos de
 Activity,Actividad
-Activity Log,Registro de actividad
-Activity Type,Tipo de actividad
-Actual,Real
-Actual Budget,Presupuesto Real
-Actual Completion Date,Fecha de Terminación del Real
+Activity Log,Registro de Actividad
+Activity Type,Tipo de Actividad
+Actual,Actual
+Actual Budget,Presupuesto Actual
+Actual Completion Date,Fecha de Terminación Actual
 Actual Date,Fecha Actual
-Actual End Date,Fecha de finalización real
-Actual Invoice Date,Actual Fecha de la factura
-Actual Posting Date,Actual Fecha de Publicación
-Actual Qty,Cantidad real
-Actual Qty (at source/target),Cantidad real (en origen / destino)
-Actual Qty After Transaction,Cantidad real después de la transacción
-Actual Quantity,Cantidad real
-Actual Start Date,Fecha real de inicio
+Actual End Date,Fecha de Finalización Actual
+Actual Invoice Date,Fecha de la Factura Actual
+Actual Posting Date,Fecha de Publicación Actual
+Actual Qty,Cantidad Actual
+Actual Qty (at source/target),Cantidad Actual (en origen/destino)
+Actual Qty After Transaction,Cantidad Actual Después de la Transacción
+Actual Quantity,Cantidad Actual
+Actual Start Date,Fecha de Inicio Actual
 Add,Añadir
 Add / Edit Taxes and Charges,Agregar / Editar Impuestos y Cargos
-Add A New Rule,Agregar una nueva regla
-Add A Property,Agregue una propiedad
-Add Attachments,Adición de archivos adjuntos
+Add A New Rule,Añadir una Nueva Regla
+Add A Property,Añadir una Propiedad
+Add Attachments,Añadir Archivos Adjuntos
 Add Bookmark,Añadir a Favoritos
 Add CSS,Añadir CSS
 Add Column,Añadir columna
 Add Comment,Añadir comentario
-Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.,"Añadir Google Analytics ID: por ejemplo. UA-89XXX57-1. Por favor, ayudar a buscar en Google Analytics para obtener más información."
-Add Message,Agregar mensaje
-Add New Permission Rule,Añadir regla Nuevo permiso
-Add Reply,Añadir respuesta
-Add Terms and Conditions for the Material Request. You can also prepare a Terms and Conditions Master and use the Template,Añadir Términos y Condiciones para la solicitud de materiales. También puede preparar un documento de Términos y Condiciones dominar y utilizar la plantilla
-Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.,Añadir Términos y Condiciones para el recibo de compra. También se puede preparar a un Maestro Términos y Condiciones y el uso de la plantilla.
+Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.,"Añadir ID de Google Analytics: por ejemplo. UA-89XXX57-1. Por favor, buscar help en Google Analytics para obtener más información."
+Add Message,Agregar Mensaje
+Add New Permission Rule,Añadir Nueva Regla de Permiso
+Add Reply,Añadir Respuesta
+Add Terms and Conditions for the Material Request. You can also prepare a Terms and Conditions Master and use the Template,Añadir Términos y Condiciones para la Solicitud de Materiales. También puede preparar un documento maestro de Términos y Condiciones y utilizar la Plantilla
+Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.,Añadir Términos y Condiciones para el Recibo de Compra. También puede preparar un documento maestro de Términos y Condiciones y utilizar la plantilla.
 "Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template","Añadir Términos y Condiciones de la Oferta como condiciones de pago, la validez de una oferta, etc También se puede preparar a un Maestro Términos y Condiciones y el uso de la plantilla"
 Add Total Row,Añadir fila total
 Add a banner to the site. (small banners are usually good),Añadir un banner en el sitio. (Pequeños banners son generalmente buenos)
