@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, cint
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import cstr, cint
+from frappe import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -54,13 +54,13 @@ def get_columns(filters):
 	return columns
 	
 def get_attendance_list(conditions, filters):
-	attendance_list = webnotes.conn.sql("""select employee, day(att_date) as day_of_month, 
+	attendance_list = frappe.conn.sql("""select employee, day(att_date) as day_of_month, 
 		status from tabAttendance where docstatus = 1 %s order by employee, att_date""" % 
 		conditions, filters, as_dict=1)
 		
 	att_map = {}
 	for d in attendance_list:
-		att_map.setdefault(d.employee, webnotes._dict()).setdefault(d.day_of_month, "")
+		att_map.setdefault(d.employee, frappe._dict()).setdefault(d.day_of_month, "")
 		att_map[d.employee][d.day_of_month] = d.status
 
 	return att_map
@@ -84,7 +84,7 @@ def get_conditions(filters):
 	return conditions, filters
 	
 def get_employee_details():
-	employee = webnotes.conn.sql("""select name, employee_name, designation, department, 
+	employee = frappe.conn.sql("""select name, employee_name, designation, department, 
 		branch, company from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	
 	emp_map = {}

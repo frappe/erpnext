@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def _make_test_records(verbose):
-	from webnotes.test_runner import make_test_objects
+	from frappe.test_runner import make_test_objects
 		
 	accounts = [
 		# [account_name, parent_account, group_or_ledger]

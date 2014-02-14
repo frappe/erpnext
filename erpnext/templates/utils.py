@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-@webnotes.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)
 def send_message(subject="Website Query", message="", sender="", status="Open"):
-	from webnotes.templates.pages.contact import send_message as website_send_message
+	from frappe.templates.pages.contact import send_message as website_send_message
 	
 	if not website_send_message(subject, message, sender):
 		return

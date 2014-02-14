@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.refresh = function(doc) {
-	return wn.call({
+	return frappe.call({
 		method: "erpnext.utilities.doctype.rename_tool.rename_tool.get_doctypes",
 		callback: function(r) {
 			cur_frm.set_df_property("select_doctype", "options", r.message);
@@ -19,12 +19,12 @@ cur_frm.cscript.setup_upload = function() {
 	var me = this;
 	var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty()
 		.html("<hr><div class='alert alert-warning'>" +
-			wn._("Upload a .csv file with two columns: the old name and the new name. Max 500 rows.")
+			frappe._("Upload a .csv file with two columns: the old name and the new name. Max 500 rows.")
 			+ "</div>");
 	var $log = $(cur_frm.fields_dict.rename_log.wrapper).empty();
 
 	// upload
-	wn.upload.make({
+	frappe.upload.make({
 		parent: $wrapper,
 		args: {
 			method: 'utilities.doctype.rename_tool.rename_tool.upload',

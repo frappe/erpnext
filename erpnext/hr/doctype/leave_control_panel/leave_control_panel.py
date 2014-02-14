@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cint, cstr, flt, nowdate
-from webnotes.model.doc import Document
-from webnotes.model.code import get_obj
-from webnotes import msgprint
+from frappe.utils import cint, cstr, flt, nowdate
+from frappe.model.doc import Document
+from frappe.model.code import get_obj
+from frappe import msgprint
 
 	
 
@@ -33,7 +33,7 @@ class DocType:
     emp_query = "select name from `tabEmployee` "
     if flag == 1:
       emp_query += condition 
-    e = webnotes.conn.sql(emp_query)
+    e = frappe.conn.sql(emp_query)
     return e
 
   # ----------------
@@ -54,7 +54,7 @@ class DocType:
     for d in self.get_employees():
       la = Document('Leave Allocation')
       la.employee = cstr(d[0])
-      la.employee_name = webnotes.conn.get_value('Employee',cstr(d[0]),'employee_name')
+      la.employee_name = frappe.conn.get_value('Employee',cstr(d[0]),'employee_name')
       la.leave_type = self.doc.leave_type
       la.fiscal_year = self.doc.fiscal_year
       la.posting_date = nowdate()

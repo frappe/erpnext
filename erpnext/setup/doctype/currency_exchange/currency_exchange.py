@@ -4,9 +4,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
-from webnotes.model.controller import DocListController
+import frappe
+from frappe import _, msgprint
+from frappe.model.controller import DocListController
 
 class DocType(DocListController):
 	def __init__(self, d, dl):

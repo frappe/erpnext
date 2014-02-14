@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint, _
-from webnotes.utils import cstr, flt, now_datetime, cint
+import frappe
+from frappe import msgprint, _
+from frappe.utils import cstr, flt, now_datetime, cint
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -35,7 +35,7 @@ class TransactionBase(StatusUpdater):
 	def get_lead_defaults(self):
 		out = self.get_default_address_and_contact("lead")
 		
-		lead = webnotes.conn.get_value("Lead", self.doc.lead, 
+		lead = frappe.conn.get_value("Lead", self.doc.lead, 
 			["territory", "company_name", "lead_name"], as_dict=True) or {}
 
 		out["territory"] = lead.get("territory")
@@ -48,9 +48,9 @@ class TransactionBase(StatusUpdater):
 
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")
-		if int(webnotes.conn.get_value("Notification Control", None, dt) or 0):
+		if int(frappe.conn.get_value("Notification Control", None, dt) or 0):
 			self.doc.fields["__notification_message"] = \
-				webnotes.conn.get_value("Notification Control", None, dt + "_message")
+				frappe.conn.get_value("Notification Control", None, dt + "_message")
 							
 	def validate_posting_time(self):
 		if not self.doc.posting_time:
@@ -64,12 +64,12 @@ class TransactionBase(StatusUpdater):
 			self._add_calendar_event(opts)
 			
 	def delete_events(self):
-		webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+		frappe.delete_doc("Event", frappe.conn.sql_list("""select name from `tabEvent` 
 			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)), 
 			ignore_permissions=True)
 			
 	def _add_calendar_event(self, opts):
-		opts = webnotes._dict(opts)
+		opts = frappe._dict(opts)
 		
 		if self.doc.contact_date:
 			event_doclist = [{
@@ -83,14 +83,14 @@ class TransactionBase(StatusUpdater):
 				"ref_name": self.doc.name
 			}]
 			
-			if webnotes.conn.exists("Profile", self.doc.contact_by):
+			if frappe.conn.exists("Profile", self.doc.contact_by):
 				event_doclist.append({
 					"doctype": "Event User",
 					"parentfield": "event_individuals",
 					"person": self.doc.contact_by
 				})
 			
-			webnotes.bean(event_doclist).insert()
+			frappe.bean(event_doclist).insert()
 			
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self.doclist, uom_field, qty_fields)
@@ -108,7 +108,7 @@ class TransactionBase(StatusUpdater):
 						if ref_dn not in item_ref_dn:
 							item_ref_dn.append(ref_dn)
 						elif not val.get("allow_duplicate_prev_row_id"):
-							webnotes.msgprint(_("Row ") + cstr(d.idx + 1) + 
+							frappe.msgprint(_("Row ") + cstr(d.idx + 1) + 
 								_(": Duplicate row from same ") + key, raise_exception=1)
 					elif ref_dn:
 						ref_doc.setdefault(key, [])
@@ -120,7 +120,7 @@ class TransactionBase(StatusUpdater):
 	def compare_values(self, ref_doc, fields, doc=None):
 		for ref_doctype, ref_dn_list in ref_doc.items():
 			for ref_docname in ref_dn_list:
-				prevdoc_values = webnotes.conn.get_value(ref_doctype, ref_docname, 
+				prevdoc_values = frappe.conn.get_value(ref_doctype, ref_docname, 
 					[d[0] for d in fields], as_dict=1)
 
 				for field, condition in fields:
@@ -128,7 +128,7 @@ class TransactionBase(StatusUpdater):
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 def get_default_contact(party_field, party_name):
-	contact = webnotes.conn.sql("""select name from `tabContact` where `%s`=%s
+	contact = frappe.conn.sql("""select name from `tabContact` where `%s`=%s
 		order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
 		(party_name,))
 		
@@ -139,7 +139,7 @@ def map_lead_contact_details(party_name):
 	for fieldname in ["contact_display", "contact_email", "contact_mobile", "contact_phone"]:
 		out[fieldname] = None
 	
-	lead = webnotes.conn.sql("""select * from `tabLead` where name=%s""", party_name, as_dict=True)
+	lead = frappe.conn.sql("""select * from `tabLead` where name=%s""", party_name, as_dict=True)
 	if lead:
 		lead = lead[0]
 		out.update({
@@ -161,7 +161,7 @@ def map_party_contact_details(contact_name=None, party_field=None, party_name=No
 		contact_name = get_default_contact(party_field, party_name)
 	
 	if contact_name:
-		contact = webnotes.conn.sql("""select * from `tabContact` where name=%s""", 
+		contact = frappe.conn.sql("""select * from `tabContact` where name=%s""", 
 			contact_name, as_dict=True)
 
 		if contact:
@@ -184,23 +184,23 @@ def get_address_territory(address_doc):
 	for fieldname in ("city", "state", "country"):
 		value = address_doc.fields.get(fieldname)
 		if value:
-			territory = webnotes.conn.get_value("Territory", value.strip())
+			territory = frappe.conn.get_value("Territory", value.strip())
 			if territory:
 				break
 	
 	return territory
 	
 def delete_events(ref_type, ref_name):
-	webnotes.delete_doc("Event", webnotes.conn.sql_list("""select name from `tabEvent` 
+	frappe.delete_doc("Event", frappe.conn.sql_list("""select name from `tabEvent` 
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
-class UOMMustBeIntegerError(webnotes.ValidationError): pass
+class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 def validate_uom_is_integer(doclist, uom_field, qty_fields):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
 	
-	integer_uoms = filter(lambda uom: webnotes.conn.get_value("UOM", uom, 
+	integer_uoms = filter(lambda uom: frappe.conn.get_value("UOM", uom, 
 		"must_be_whole_number") or None, doclist.get_distinct_values(uom_field))
 		
 	if not integer_uoms:
@@ -211,7 +211,7 @@ def validate_uom_is_integer(doclist, uom_field, qty_fields):
 			for f in qty_fields:
 				if d.fields.get(f):
 					if cint(d.fields[f])!=d.fields[f]:
-						webnotes.msgprint(_("For UOM") + " '" + d.fields[uom_field] \
+						frappe.msgprint(_("For UOM") + " '" + d.fields[uom_field] \
 							+ "': " + _("Quantity cannot be a fraction.") \
 							+ " " + _("In Row") + ": " + str(d.idx),
 							raise_exception=UOMMustBeIntegerError)

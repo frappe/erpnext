@@ -1,29 +1,29 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Stock Projected Qty"] = {
+frappe.query_reports["Stock Projected Qty"] = {
 	"filters": [
 		{
 			"fieldname":"company",
-			"label": wn._("Company"),
+			"label": frappe._("Company"),
 			"fieldtype": "Link",
 			"options": "Company"
 		},
 		{
 			"fieldname":"warehouse",
-			"label": wn._("Warehouse"),
+			"label": frappe._("Warehouse"),
 			"fieldtype": "Link",
 			"options": "Warehouse"
 		},
 		{
 			"fieldname":"item_code",
-			"label": wn._("Item"),
+			"label": frappe._("Item"),
 			"fieldtype": "Link",
 			"options": "Item"
 		},
 		{
 			"fieldname":"brand",
-			"label": wn._("Brand"),
+			"label": frappe._("Brand"),
 			"fieldtype": "Link",
 			"options": "Brand"
 		}

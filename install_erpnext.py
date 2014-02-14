@@ -200,18 +200,18 @@ def setup_folders(install_path):
 	app = os.path.join(install_path, "app")
 	if not os.path.exists(app):
 		print "Cloning erpnext"
-		exec_in_shell("cd %s && git clone --branch master https://github.com/webnotes/erpnext.git app" % install_path)
+		exec_in_shell("cd %s && git clone --branch master https://github.com/frappe/erpnext.git app" % install_path)
 		exec_in_shell("cd app && git config core.filemode false")
 		if not os.path.exists(app):
 			raise Exception, "Couldn't clone erpnext repository"
 	
 	lib = os.path.join(install_path, "lib")
 	if not os.path.exists(lib):
-		print "Cloning wnframework"
-		exec_in_shell("cd %s && git clone --branch master https://github.com/webnotes/wnframework.git lib" % install_path)
+		print "Cloning frappe"
+		exec_in_shell("cd %s && git clone --branch master https://github.com/frappe/frappe.git lib" % install_path)
 		exec_in_shell("cd lib && git config core.filemode false")
 		if not os.path.exists(lib):
-			raise Exception, "Couldn't clone wnframework repository"
+			raise Exception, "Couldn't clone frappe repository"
 	
 	public = os.path.join(install_path, "public")
 	for p in [public, os.path.join(public, "files"), os.path.join(public, "backups"),

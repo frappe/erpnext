@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import add_days, add_years, cint, getdate
-from webnotes.model import db_exists
-from webnotes.model.doc import addchild, make_autoname
-from webnotes.model.bean import copy_doclist
-from webnotes import msgprint, throw, _
+from frappe.utils import add_days, add_years, cint, getdate
+from frappe.model import db_exists
+from frappe.model.doc import addchild, make_autoname
+from frappe.model.bean import copy_doclist
+from frappe import msgprint, throw, _
 import datetime
 
 class DocType:
@@ -41,11 +41,11 @@ class DocType:
 			throw(_("Please select weekly off day"))
 
 	def get_fy_start_end_dates(self):
-		return webnotes.conn.sql("""select year_start_date, year_end_date
+		return frappe.conn.sql("""select year_start_date, year_end_date
 			from `tabFiscal Year` where name=%s""", (self.doc.fiscal_year,))[0]
 
 	def get_weekly_off_date_list(self, year_start_date, year_end_date):
-		from webnotes.utils import getdate
+		from frappe.utils import getdate
 		year_start_date, year_end_date = getdate(year_start_date), getdate(year_end_date)
 		
 		from dateutil import relativedelta
@@ -66,5 +66,5 @@ class DocType:
 		self.doclist = self.doc.clear_table(self.doclist, 'holiday_list_details')
 
 	def update_default_holiday_list(self):
-		webnotes.conn.sql("""update `tabHoliday List` set is_default = 0 
+		frappe.conn.sql("""update `tabHoliday List` set is_default = 0 
 			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.doc.fiscal_year,))

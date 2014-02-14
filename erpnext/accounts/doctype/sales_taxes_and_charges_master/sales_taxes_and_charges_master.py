@@ -2,14 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint
-from webnotes.model.controller import DocListController
+import frappe
+from frappe.utils import cint
+from frappe.model.controller import DocListController
 
 class DocType(DocListController):		
 	def validate(self):
 		if self.doc.is_default == 1:
-			webnotes.conn.sql("""update `tabSales Taxes and Charges Master` set is_default = 0 
+			frappe.conn.sql("""update `tabSales Taxes and Charges Master` set is_default = 0 
 				where ifnull(is_default,0) = 1 and name != %s and company = %s""", 
 				(self.doc.name, self.doc.company))
 				

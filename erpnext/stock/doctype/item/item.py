@@ -2,14 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, flt, getdate, now_datetime, formatdate
-from webnotes.model.doc import addchild
-from webnotes.model.bean import getlist
-from webnotes import msgprint, _
+from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
+from frappe.model.doc import addchild
+from frappe.model.bean import getlist
+from frappe import msgprint, _
 
-from webnotes.model.controller import DocListController
+from frappe.model.controller import DocListController
 
 class WarehouseNotSet(Exception): pass
 
@@ -18,8 +18,8 @@ class DocType(DocListController):
 		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
 	
 	def autoname(self):
-		if webnotes.conn.get_default("item_naming_by")=="Naming Series":
-			from webnotes.model.doc import make_autoname
+		if frappe.conn.get_default("item_naming_by")=="Naming Series":
+			from frappe.model.doc import make_autoname
 			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
 		elif not self.doc.item_code:
 			msgprint(_("Item Code (item_code) is mandatory because Item naming is not sequential."), raise_exception=1)
@@ -43,7 +43,7 @@ class DocType(DocListController):
 		self.validate_item_type_for_reorder()
 
 		if self.doc.name:
-			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
+			self.old_page_name = frappe.conn.get_value('Item', self.doc.name, 'page_name')
 			
 	def on_update(self):
 		self.validate_name_with_item_group()
@@ -51,7 +51,7 @@ class DocType(DocListController):
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.doc.is_stock_item=="Yes" and not self.doc.default_warehouse:
-			webnotes.msgprint(_("Default Warehouse is mandatory for Stock Item."),
+			frappe.msgprint(_("Default Warehouse is mandatory for Stock Item."),
 				raise_exception=WarehouseNotSet)
 			
 	def add_default_uom_in_conversion_factor_table(self):
@@ -69,13 +69,13 @@ class DocType(DocListController):
 	def check_stock_uom_with_bin(self):
 		if not self.doc.fields.get("__islocal"):
 			matched=True
-			ref_uom = webnotes.conn.get_value("Stock Ledger Entry", 
+			ref_uom = frappe.conn.get_value("Stock Ledger Entry", 
 				{"item_code": self.doc.name}, "stock_uom")
 			if ref_uom:
 				if cstr(ref_uom) != cstr(self.doc.stock_uom):
 					matched = False
 			else:
-				bin_list = webnotes.conn.sql("select * from tabBin where item_code=%s", 
+				bin_list = frappe.conn.sql("select * from tabBin where item_code=%s", 
 					self.doc.item_code, as_dict=1)
 				for bin in bin_list:
 					if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
@@ -84,11 +84,11 @@ class DocType(DocListController):
 							break
 						
 				if matched and bin_list:
-					webnotes.conn.sql("""update tabBin set stock_uom=%s where item_code=%s""",
+					frappe.conn.sql("""update tabBin set stock_uom=%s where item_code=%s""",
 						(self.doc.stock_uom, self.doc.name))
 				
 			if not matched:
-				webnotes.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
+				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
 	
 	def validate_conversion_factor(self):
 		check_list = []
@@ -111,7 +111,7 @@ class DocType(DocListController):
 			self.doc.is_pro_applicable = "No"
 
 		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_stock_item == 'No':
-			webnotes.throw(_("As Production Order can be made for this item, \
+			frappe.throw(_("As Production Order can be made for this item, \
 				it must be a stock item."))
 
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
@@ -119,20 +119,20 @@ class DocType(DocListController):
 			
 	def check_for_active_boms(self):
 		if self.doc.is_purchase_item != "Yes":
-			bom_mat = webnotes.conn.sql("""select distinct t1.parent 
+			bom_mat = frappe.conn.sql("""select distinct t1.parent 
 				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
 				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
 				
 			if bom_mat and bom_mat[0][0]:
-				webnotes.throw(_("Item must be a purchase item, \
+				frappe.throw(_("Item must be a purchase item, \
 					as it is present in one or many Active BOMs"))
 					
 		if self.doc.is_manufactured_item != "Yes":
-			bom = webnotes.conn.sql("""select name from `tabBOM` where item = %s 
+			bom = frappe.conn.sql("""select name from `tabBOM` where item = %s 
 				and is_active = 1""", (self.doc.name,))
 			if bom and bom[0][0]:
-				webnotes.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many \
+				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many \
 					active BOMs present for this item"""))
 					
 	def fill_customer_code(self):
@@ -147,7 +147,7 @@ class DocType(DocListController):
 		check_list=[]
 		for d in getlist(self.doclist,'item_tax'):
 			if d.tax_type:
-				account_type = webnotes.conn.get_value("Account", d.tax_type, "account_type")
+				account_type = frappe.conn.get_value("Account", d.tax_type, "account_type")
 				
 				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
 					msgprint("'%s' is not Tax / Chargeable / Income / Expense Account" % d.tax_type, raise_exception=1)
@@ -159,7 +159,7 @@ class DocType(DocListController):
 						
 	def validate_barcode(self):
 		if self.doc.barcode:
-			duplicate = webnotes.conn.sql("""select name from tabItem where barcode = %s 
+			duplicate = frappe.conn.sql("""select name from tabItem where barcode = %s 
 				and name != %s""", (self.doc.barcode, self.doc.name))
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % 
@@ -167,36 +167,36 @@ class DocType(DocListController):
 
 	def cant_change(self):
 		if not self.doc.fields.get("__islocal"):
-			vals = webnotes.conn.get_value("Item", self.doc.name, 
+			vals = frappe.conn.get_value("Item", self.doc.name, 
 				["has_serial_no", "is_stock_item", "valuation_method"], as_dict=True)
 			
 			if vals and ((self.doc.is_stock_item == "No" and vals.is_stock_item == "Yes") or 
 				vals.has_serial_no != self.doc.has_serial_no or 
 				cstr(vals.valuation_method) != cstr(self.doc.valuation_method)):
 					if self.check_if_sle_exists() == "exists":
-						webnotes.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'"))
+						frappe.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'"))
 							
 	def validate_item_type_for_reorder(self):
 		if self.doc.re_order_level or len(self.doclist.get({"parentfield": "item_reorder", 
 				"material_request_type": "Purchase"})):
 			if not self.doc.is_purchase_item:
-				webnotes.msgprint(_("""To set reorder level, item must be Purchase Item"""), 
+				frappe.msgprint(_("""To set reorder level, item must be Purchase Item"""), 
 					raise_exception=1)
 	
 	def check_if_sle_exists(self):
-		sle = webnotes.conn.sql("""select name from `tabStock Ledger Entry` 
+		sle = frappe.conn.sql("""select name from `tabStock Ledger Entry` 
 			where item_code = %s""", self.doc.name)
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
 		# causes problem with tree build
-		if webnotes.conn.exists("Item Group", self.doc.name):
-			webnotes.msgprint("An item group exists with same name (%s), \
+		if frappe.conn.exists("Item Group", self.doc.name):
+			frappe.msgprint("An item group exists with same name (%s), \
 				please change the item name or rename the item group" % 
 				self.doc.name, raise_exception=1)
 
 	def update_item_price(self):
-		webnotes.conn.sql("""update `tabItem Price` set item_name=%s, 
+		frappe.conn.sql("""update `tabItem Price` set item_name=%s, 
 			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.doc.item_name, self.doc.description, self.doc.name))
 
@@ -209,10 +209,10 @@ class DocType(DocListController):
 		return page_name_from
 		
 	def get_tax_rate(self, tax_type):
-		return { "tax_rate": webnotes.conn.get_value("Account", tax_type, "tax_rate") }
+		return { "tax_rate": frappe.conn.get_value("Account", tax_type, "tax_rate") }
 
 	def get_file_details(self, arg = ''):
-		file = webnotes.conn.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
+		file = frappe.conn.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
 
 		ret = {
 			'file_group'	:	file and file[0]['file_group'] or '',
@@ -221,24 +221,24 @@ class DocType(DocListController):
 		return ret
 		
 	def on_trash(self):
-		webnotes.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		frappe.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
 			# Validate properties before merging
-			if not webnotes.conn.exists("Item", newdn):
-				webnotes.throw(_("Item ") + newdn +_(" does not exists"))
+			if not frappe.conn.exists("Item", newdn):
+				frappe.throw(_("Item ") + newdn +_(" does not exists"))
 			
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in webnotes.conn.get_value("Item", newdn, field_list)]
+			new_properties = [cstr(d) for d in frappe.conn.get_value("Item", newdn, field_list)]
 			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:
-				webnotes.throw(_("To merge, following properties must be same for both items")
+				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
-			webnotes.conn.sql("delete from `tabBin` where item_code=%s", olddn)
+			frappe.conn.sql("delete from `tabBin` where item_code=%s", olddn)
 
 	def after_rename(self, olddn, newdn, merge):
-		webnotes.conn.set_value("Item", newdn, "item_code", newdn)
+		frappe.conn.set_value("Item", newdn, "item_code", newdn)
 			
 		if merge:
 			self.set_last_purchase_rate(newdn)
@@ -246,23 +246,23 @@ class DocType(DocListController):
 			
 	def set_last_purchase_rate(self, newdn):
 		last_purchase_rate = get_last_purchase_details(newdn).get("base_rate", 0)
-		webnotes.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
+		frappe.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
 			
 	def recalculate_bin_qty(self, newdn):
 		from erpnext.utilities.repost_stock import repost_stock
-		webnotes.conn.auto_commit_on_many_writes = 1
-		webnotes.conn.set_default("allow_negative_stock", 1)
+		frappe.conn.auto_commit_on_many_writes = 1
+		frappe.conn.set_default("allow_negative_stock", 1)
 		
-		for warehouse in webnotes.conn.sql("select name from `tabWarehouse`"):
+		for warehouse in frappe.conn.sql("select name from `tabWarehouse`"):
 			repost_stock(newdn, warehouse[0])
 		
-		webnotes.conn.set_default("allow_negative_stock", 
-			webnotes.conn.get_value("Stock Settings", None, "allow_negative_stock"))
-		webnotes.conn.auto_commit_on_many_writes = 0
+		frappe.conn.set_default("allow_negative_stock", 
+			frappe.conn.get_value("Stock Settings", None, "allow_negative_stock"))
+		frappe.conn.auto_commit_on_many_writes = 0
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
-		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
+		end_of_life = frappe.conn.get_value("Item", item_code, "end_of_life")
 	
 	if end_of_life and getdate(end_of_life) <= now_datetime().date():
 		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
@@ -270,14 +270,14 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 			"in Item master") % {
 				"item_code": item_code,
 				"date": formatdate(end_of_life),
-				"end_of_life_label": webnotes.get_doctype("Item").get_label("end_of_life")
+				"end_of_life_label": frappe.get_doctype("Item").get_label("end_of_life")
 			}
 		
 		_msgprint(msg, verbose)
 		
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:
-		is_stock_item = webnotes.conn.get_value("Item", item_code, "is_stock_item")
+		is_stock_item = frappe.conn.get_value("Item", item_code, "is_stock_item")
 		
 	if is_stock_item != "Yes":
 		msg = (_("Item") + " %(item_code)s: " + _("is not a Stock Item")) % {
@@ -288,7 +288,7 @@ def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 		
 def validate_cancelled_item(item_code, docstatus=None, verbose=1):
 	if docstatus is None:
-		docstatus = webnotes.conn.get_value("Item", item_code, "docstatus")
+		docstatus = frappe.conn.get_value("Item", item_code, "docstatus")
 	
 	if docstatus == 2:
 		msg = (_("Item") + " %(item_code)s: " + _("is a cancelled Item")) % {
@@ -301,13 +301,13 @@ def _msgprint(msg, verbose):
 	if verbose:
 		msgprint(msg, raise_exception=True)
 	else:
-		raise webnotes.ValidationError, msg
+		raise frappe.ValidationError, msg
 		
 		
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
-	last_purchase_order = webnotes.conn.sql("""\
+	last_purchase_order = frappe.conn.sql("""\
 		select po.name, po.transaction_date, po.conversion_rate,
 			po_item.conversion_factor, po_item.base_price_list_rate, 
 			po_item.discount_percentage, po_item.base_rate
@@ -318,7 +318,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
 	# get last purchase receipt item details		
-	last_purchase_receipt = webnotes.conn.sql("""\
+	last_purchase_receipt = frappe.conn.sql("""\
 		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
 			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
 			pr_item.base_rate
@@ -346,10 +346,10 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		purchase_date = purchase_receipt_date
 		
 	else:
-		return webnotes._dict()
+		return frappe._dict()
 	
 	conversion_factor = flt(last_purchase.conversion_factor)
-	out = webnotes._dict({
+	out = frappe._dict({
 		"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
 		"base_rate": flt(last_purchase.base_rate) / conversion_factor,
 		"discount_percentage": flt(last_purchase.discount_percentage),

@@ -19,7 +19,7 @@
 # default settings that can be made for a profile.
 from __future__ import unicode_literals
 
-import webnotes
+import frappe
 
 product_name = "ERPNext"
 profile_defaults = {
@@ -32,9 +32,9 @@ mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><smal
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
 	
 def get_monthly_bulk_mail_limit():
-	import webnotes
+	import frappe
 	# if global settings, then 500 or unlimited
-	if webnotes.conn.get_value('Email Settings', None, 'outgoing_mail_server'):
+	if frappe.conn.get_value('Email Settings', None, 'outgoing_mail_server'):
 		return 999999
 	else:
 		return 500

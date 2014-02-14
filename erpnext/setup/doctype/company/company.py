@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
+import frappe
+from frappe import _, msgprint
 
-from webnotes.utils import cstr, cint
-import webnotes.defaults
+from frappe.utils import cstr, cint
+import frappe.defaults
 
 
 class DocType:
@@ -20,7 +20,7 @@ class DocType:
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
 			"Purchase Invoice", "Purchase Receipt", "Purchase Order", "Supplier Quotation"]:
-				if webnotes.conn.sql("""select name from `tab%s` where company=%s and docstatus=1
+				if frappe.conn.sql("""select name from `tab%s` where company=%s and docstatus=1
 					limit 1""" % (doctype, "%s"), self.doc.name):
 						exists = True
 						break
@@ -29,35 +29,35 @@ class DocType:
 		
 	def validate(self):
 		if self.doc.fields.get('__islocal') and len(self.doc.abbr) > 5:
-			webnotes.msgprint("Abbreviation cannot have more than 5 characters",
+			frappe.msgprint("Abbreviation cannot have more than 5 characters",
 				raise_exception=1)
 				
-		self.previous_default_currency = webnotes.conn.get_value("Company", self.doc.name, "default_currency")
+		self.previous_default_currency = frappe.conn.get_value("Company", self.doc.name, "default_currency")
 		if self.doc.default_currency and self.previous_default_currency and \
 			self.doc.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
 				msgprint(_("Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency."), raise_exception=True)
 
 	def on_update(self):
-		if not webnotes.conn.sql("""select name from tabAccount 
+		if not frappe.conn.sql("""select name from tabAccount 
 			where company=%s and docstatus<2 limit 1""", self.doc.name):
 			self.create_default_accounts()
 			self.create_default_warehouses()
 			self.create_default_web_page()
 		
-		if not webnotes.conn.get_value("Cost Center", {"group_or_ledger": "Ledger", 
+		if not frappe.conn.get_value("Cost Center", {"group_or_ledger": "Ledger", 
 				"company": self.doc.name}):
 			self.create_default_cost_center()
 			
 		self.set_default_accounts()
 
 		if self.doc.default_currency:
-			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
+			frappe.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
 
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
-			if not webnotes.conn.exists("Warehouse", whname + " - " + self.doc.abbr):
-				webnotes.bean({
+			if not frappe.conn.exists("Warehouse", whname + " - " + self.doc.abbr):
+				frappe.bean({
 					"doctype":"Warehouse",
 					"warehouse_name": whname,
 					"company": self.doc.name,
@@ -65,11 +65,11 @@ class DocType:
 				}).insert()
 			
 	def create_default_web_page(self):
-		if not webnotes.conn.get_value("Website Settings", None, "home_page") and \
-				not webnotes.conn.sql("select name from tabCompany where name!=%s", self.doc.name):
+		if not frappe.conn.get_value("Website Settings", None, "home_page") and \
+				not frappe.conn.sql("select name from tabCompany where name!=%s", self.doc.name):
 			import os
 			with open(os.path.join(os.path.dirname(__file__), "sample_home_page.html"), "r") as webfile:
-				webpage = webnotes.bean({
+				webpage = frappe.bean({
 					"doctype": "Web Page",
 					"title": self.doc.name + " Home",
 					"published": 1,
@@ -78,7 +78,7 @@ class DocType:
 				}).insert()
 			
 				# update in home page in settings
-				website_settings = webnotes.bean("Website Settings", "Website Settings")
+				website_settings = frappe.bean("Website Settings", "Website Settings")
 				website_settings.doc.home_page = webpage.doc.name
 				website_settings.doc.brand_html = self.doc.name
 				website_settings.doc.copyright = self.doc.name
@@ -95,7 +95,7 @@ class DocType:
 					"url": "blog"
 				})
 				website_settings.save()
-				style_settings = webnotes.bean("Style Settings", "Style Settings")
+				style_settings = frappe.bean("Style Settings", "Style Settings")
 				style_settings.doc.top_bar_background = "F2F2F2"
 				style_settings.doc.font_size = "15px"
 				style_settings.save()
@@ -217,7 +217,7 @@ class DocType:
 		for d in acc_list_common:
 			self.add_acc(d)
 
-		country = webnotes.conn.sql("select value from tabSingles where field = 'country' and doctype = 'Control Panel'")
+		country = frappe.conn.sql("select value from tabSingles where field = 'country' and doctype = 'Control Panel'")
 		country = country and cstr(country[0][0]) or ''
 
 		# load taxes (only for India)
@@ -226,7 +226,7 @@ class DocType:
 				self.add_acc(d)
 
 	def add_acc(self,lst):
-		account = webnotes.bean({
+		account = frappe.bean({
 			"doctype": "Account",
 			"freeze_account": "No",
 			"master_type": "",
@@ -240,8 +240,8 @@ class DocType:
 		def _set_default_accounts(accounts):
 			for a in accounts:
 				account_name = accounts[a] + " - " + self.doc.abbr
-				if not self.doc.fields.get(a) and webnotes.conn.exists("Account", account_name):
-					webnotes.conn.set(self.doc, a, account_name)
+				if not self.doc.fields.get(a) and frappe.conn.exists("Account", account_name):
+					frappe.conn.set(self.doc, a, account_name)
 			
 		_set_default_accounts({
 			"receivables_group": "Accounts Receivable",
@@ -249,7 +249,7 @@ class DocType:
 			"default_cash_account": "Cash"
 		})
 		
-		if cint(webnotes.conn.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+		if cint(frappe.conn.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
 			_set_default_accounts({
 				"stock_received_but_not_billed": "Stock Received But Not Billed",
 				"stock_adjustment_account": "Stock Adjustment",
@@ -273,67 +273,67 @@ class DocType:
 		]
 		for cc in cc_list:
 			cc.update({"doctype": "Cost Center"})
-			cc_bean = webnotes.bean(cc)
+			cc_bean = frappe.bean(cc)
 			cc_bean.ignore_permissions = True
 		
 			if cc.get("cost_center_name") == self.doc.name:
 				cc_bean.ignore_mandatory = True
 			cc_bean.insert()
 			
-		webnotes.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
+		frappe.conn.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
 
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
-		rec = webnotes.conn.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
+		rec = frappe.conn.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
 		if not rec:
 			#delete tabAccount
-			webnotes.conn.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
+			frappe.conn.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
 			
 			#delete cost center child table - budget detail
-			webnotes.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
+			frappe.conn.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
 			#delete cost center
-			webnotes.conn.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
+			frappe.conn.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
 			
-		if not webnotes.conn.get_value("Stock Ledger Entry", {"company": self.doc.name}):
-			webnotes.conn.sql("""delete from `tabWarehouse` where company=%s""", self.doc.name)
+		if not frappe.conn.get_value("Stock Ledger Entry", {"company": self.doc.name}):
+			frappe.conn.sql("""delete from `tabWarehouse` where company=%s""", self.doc.name)
 			
-		webnotes.defaults.clear_default("company", value=self.doc.name)
+		frappe.defaults.clear_default("company", value=self.doc.name)
 			
-		webnotes.conn.sql("""update `tabSingles` set value=""
+		frappe.conn.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company' 
 			and value=%s""", self.doc.name)
 			
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
-			webnotes.throw(_("Sorry, companies cannot be merged"))
+			frappe.throw(_("Sorry, companies cannot be merged"))
 	
 	def after_rename(self, olddn, newdn, merge=False):
-		webnotes.conn.set(self.doc, "company_name", newdn)
+		frappe.conn.set(self.doc, "company_name", newdn)
 
-		webnotes.conn.sql("""update `tabDefaultValue` set defvalue=%s 
+		frappe.conn.sql("""update `tabDefaultValue` set defvalue=%s 
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
-		webnotes.defaults.clear_cache()
+		frappe.defaults.clear_cache()
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def replace_abbr(company, old, new):
-	webnotes.conn.set_value("Company", company, "abbr", new)
+	frappe.conn.set_value("Company", company, "abbr", new)
 	
 	def _rename_record(dt):
-		for d in webnotes.conn.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
+		for d in frappe.conn.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
 			parts = d[0].split(" - ")
 			if parts[-1].lower() == old.lower():
 				name_without_abbr = " - ".join(parts[:-1])
-				webnotes.rename_doc(dt, d[0], name_without_abbr + " - " + new)
+				frappe.rename_doc(dt, d[0], name_without_abbr + " - " + new)
 		
 	for dt in ["Account", "Cost Center", "Warehouse"]:
 		_rename_record(dt)
-		webnotes.conn.commit()
+		frappe.conn.commit()
 
 def get_name_with_abbr(name, company):
-	company_abbr = webnotes.conn.get_value("Company", company, "abbr")		
+	company_abbr = frappe.conn.get_value("Company", company, "abbr")		
 	parts = name.split(" - ")
 
 	if parts[-1].lower() != company_abbr.lower():

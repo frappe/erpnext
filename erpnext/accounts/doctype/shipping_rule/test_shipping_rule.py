@@ -1,18 +1,18 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
+import frappe
 import unittest
 from erpnext.accounts.doctype.shipping_rule.shipping_rule import FromGreaterThanToError, ManyBlankToValuesError, OverlappingConditionError
 
 class TestShippingRule(unittest.TestCase):
 	def test_from_greater_than_to(self):
-		shipping_rule = webnotes.bean(copy=test_records[0])
+		shipping_rule = frappe.bean(copy=test_records[0])
 		shipping_rule.doclist[1].from_value = 101
 		self.assertRaises(FromGreaterThanToError, shipping_rule.insert)
 		
 	def test_many_zero_to_values(self):
-		shipping_rule = webnotes.bean(copy=test_records[0])
+		shipping_rule = frappe.bean(copy=test_records[0])
 		shipping_rule.doclist[1].to_value = 0
 		self.assertRaises(ManyBlankToValuesError, shipping_rule.insert)
 		
@@ -24,7 +24,7 @@ class TestShippingRule(unittest.TestCase):
 			((50, 150), (25, 175)),
 			((50, 150), (50, 150)),
 		]:
-			shipping_rule = webnotes.bean(copy=test_records[0])
+			shipping_rule = frappe.bean(copy=test_records[0])
 			shipping_rule.doclist[1].from_value = range_a[0]
 			shipping_rule.doclist[1].to_value = range_a[1]
 			shipping_rule.doclist[2].from_value = range_b[0]

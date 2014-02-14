@@ -4,16 +4,16 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-import webnotes.defaults
-from webnotes.utils import cint
+import frappe
+import frappe.defaults
+from frappe.utils import cint
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries, set_perpetual_inventory, test_records as pr_test_records
 
 def _insert_purchase_receipt(item_code=None):
 	if not item_code:
 		item_code = pr_test_records[0][1]["item_code"]
 	
-	pr = webnotes.bean(copy=pr_test_records[0])
+	pr = frappe.bean(copy=pr_test_records[0])
 	pr.doclist[1].item_code = item_code
 	pr.insert()
 	pr.submit()
@@ -25,12 +25,12 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		_insert_purchase_receipt()
-		dn = webnotes.bean(copy=test_records[0]).insert()
+		dn = frappe.bean(copy=test_records[0]).insert()
 		
-		self.assertRaises(webnotes.ValidationError, make_sales_invoice, 
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
 			dn.doc.name)
 
-		dn = webnotes.bean("Delivery Note", dn.doc.name)
+		dn = frappe.bean("Delivery Note", dn.doc.name)
 		dn.submit()
 		si = make_sales_invoice(dn.doc.name)
 		
@@ -38,21 +38,21 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		# modify amount
 		si[1].rate = 200
-		self.assertRaises(webnotes.ValidationError, webnotes.bean(si).insert)
+		self.assertRaises(frappe.ValidationError, frappe.bean(si).insert)
 		
 	
 	def test_delivery_note_no_gl_entry(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 0)
+		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 0)
 		
 		_insert_purchase_receipt()
 		
-		dn = webnotes.bean(copy=test_records[0])
+		dn = frappe.bean(copy=test_records[0])
 		dn.insert()
 		dn.submit()
 		
-		stock_value, stock_value_difference = webnotes.conn.get_value("Stock Ledger Entry", 
+		stock_value, stock_value_difference = frappe.conn.get_value("Stock Ledger Entry", 
 			{"voucher_type": "Delivery Note", "voucher_no": dn.doc.name, 
 				"item_code": "_Test Item"}, ["stock_value", "stock_value_difference"])
 		self.assertEqual(stock_value, 0)
@@ -63,16 +63,16 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_delivery_note_gl_entry(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
-		webnotes.conn.set_value("Item", "_Test Item", "valuation_method", "FIFO")
+		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
+		frappe.conn.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 		
 		_insert_purchase_receipt()
 		
-		dn = webnotes.bean(copy=test_records[0])
+		dn = frappe.bean(copy=test_records[0])
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
 		dn.doclist[1].cost_center = "Main - _TC"
 
-		stock_in_hand_account = webnotes.conn.get_value("Account", 
+		stock_in_hand_account = frappe.conn.get_value("Account", 
 			{"master_name": dn.doclist[1].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
@@ -95,7 +95,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(bal, prev_bal - 375.0)
 				
 		# back dated purchase receipt
-		pr = webnotes.bean(copy=pr_test_records[0])
+		pr = frappe.bean(copy=pr_test_records[0])
 		pr.doc.posting_date = "2013-01-01"
 		pr.doclist[1].rate = 100
 		pr.doclist[1].base_amount = 100
@@ -123,11 +123,11 @@ class TestDeliveryNote(unittest.TestCase):
 		_insert_purchase_receipt()
 		_insert_purchase_receipt("_Test Item Home Desktop 100")
 		
-		dn = webnotes.bean(copy=test_records[0])
+		dn = frappe.bean(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Sales BOM Item"
 		dn.doclist[1].qty = 1
 	
-		stock_in_hand_account = webnotes.conn.get_value("Account", 
+		stock_in_hand_account = frappe.conn.get_value("Account", 
 			{"master_name": dn.doclist[1].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
@@ -162,16 +162,16 @@ class TestDeliveryNote(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		dn = webnotes.bean(copy=test_records[0])
+		dn = frappe.bean(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Serialized Item With Series"
 		dn.doclist[1].qty = 1
 		dn.doclist[1].serial_no = serial_nos[0]
 		dn.insert()
 		dn.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
-		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"))
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
+		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"), dn.doc.name)
 			
 		return dn
@@ -183,9 +183,9 @@ class TestDeliveryNote(unittest.TestCase):
 
 		serial_nos = get_serial_nos(dn.doclist[1].serial_no)
 
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
-		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
@@ -195,11 +195,11 @@ class TestDeliveryNote(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		sr = webnotes.bean("Serial No", serial_nos[0])
+		sr = frappe.bean("Serial No", serial_nos[0])
 		sr.doc.status = "Not Available"
 		sr.save()
 		
-		dn = webnotes.bean(copy=test_records[0])
+		dn = frappe.bean(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Serialized Item With Series"
 		dn.doclist[1].qty = 1
 		dn.doclist[1].serial_no = serial_nos[0]
@@ -208,9 +208,9 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertRaises(SerialNoStatusError, dn.submit)
 		
 	def clear_stock_account_balance(self):
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("delete from `tabGL Entry`")
+		frappe.conn.sql("""delete from `tabBin`""")
+		frappe.conn.sql("delete from `tabStock Ledger Entry`")
+		frappe.conn.sql("delete from `tabGL Entry`")
 
 test_dependencies = ["Sales BOM"]
 

@@ -3,9 +3,9 @@
 
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import session, msgprint
-from webnotes.utils import today
+import frappe
+from frappe import session, msgprint
+from frappe.utils import today
 
 	
 
@@ -22,27 +22,27 @@ class DocType(TransactionBase):
 				raise_exception=True)
 				
 		if self.doc.status=="Closed" and \
-			webnotes.conn.get_value("Customer Issue", self.doc.name, "status")!="Closed":
+			frappe.conn.get_value("Customer Issue", self.doc.name, "status")!="Closed":
 			self.doc.resolution_date = today()
-			self.doc.resolved_by = webnotes.session.user
+			self.doc.resolved_by = frappe.session.user
 	
 	def on_cancel(self):
-		lst = webnotes.conn.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and	t1.docstatus!=2"%(self.doc.name))
+		lst = frappe.conn.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t2.prevdoc_docname = '%s' and	t1.docstatus!=2"%(self.doc.name))
 		if lst:
 			lst1 = ','.join([x[0] for x in lst])
 			msgprint("Maintenance Visit No. "+lst1+" already created against this customer issue. So can not be Cancelled")
 			raise Exception
 		else:
-			webnotes.conn.set(self.doc, 'status', 'Cancelled')
+			frappe.conn.set(self.doc, 'status', 'Cancelled')
 
 	def on_update(self):
 		pass
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_maintenance_visit(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
-	visit = webnotes.conn.sql("""select t1.name 
+	visit = frappe.conn.sql("""select t1.name 
 		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 
 		where t2.parent=t1.name and t2.prevdoc_docname=%s 
 		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)

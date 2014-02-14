@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.model.bean import getlist
-from webnotes import msgprint
+from frappe.model.bean import getlist
+from frappe import msgprint
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -18,7 +18,7 @@ class DocType:
 			
 	def on_submit(self):
 		if self.doc.approval_status=="Draft":
-			webnotes.msgprint("""Please set Approval Status to 'Approved' or \
+			frappe.msgprint("""Please set Approval Status to 'Approved' or \
 				'Rejected' before submitting""", raise_exception=1)
 	
 	def validate_fiscal_year(self):

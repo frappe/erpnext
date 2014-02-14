@@ -1,25 +1,25 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
+import frappe
 import unittest
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		webnotes.conn.sql("""delete from `tabLeave Application`""")
-		webnotes.conn.sql("""delete from `tabSalary Slip`""")
+		frappe.conn.sql("""delete from `tabLeave Application`""")
+		frappe.conn.sql("""delete from `tabSalary Slip`""")
 		from erpnext.hr.doctype.leave_application.test_leave_application import test_records as leave_applications
-		la = webnotes.bean(copy=leave_applications[4])
+		la = frappe.bean(copy=leave_applications[4])
 		la.insert()
 		la.doc.status = "Approved"
 		la.submit()
 		
 	def tearDown(self):
-		webnotes.conn.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
+		frappe.conn.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
 		
 	def test_salary_slip_with_holidays_included(self):
-		webnotes.conn.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
-		ss = webnotes.bean(copy=test_records[0])
+		frappe.conn.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
+		ss = frappe.bean(copy=test_records[0])
 		ss.insert()
 		self.assertEquals(ss.doc.total_days_in_month, 31)
 		self.assertEquals(ss.doc.payment_days, 30)
@@ -31,7 +31,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEquals(ss.doc.net_pay, 14867.74)
 		
 	def test_salary_slip_with_holidays_excluded(self):
-		ss = webnotes.bean(copy=test_records[0])
+		ss = frappe.bean(copy=test_records[0])
 		ss.insert()
 		self.assertEquals(ss.doc.total_days_in_month, 30)
 		self.assertEquals(ss.doc.payment_days, 29)

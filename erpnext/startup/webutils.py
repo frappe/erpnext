@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import webnotes
+import frappe
 
 def update_website_context(context):
 	if not context.get("favicon"):

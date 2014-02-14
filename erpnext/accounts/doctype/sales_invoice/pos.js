@@ -105,7 +105,7 @@ erpnext.POS = Class.extend({
 		});
 
 		this.wrapper.find('input.discount-amount').on("change", function() {
-			wn.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", this.value);
+			frappe.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", this.value);
 		});
 
 		this.call_function("remove-items", function() {me.remove_selected_items();});
@@ -115,10 +115,10 @@ erpnext.POS = Class.extend({
 		var me = this;
 
 		// Check whether the transaction is "Sales" or "Purchase"
-		if (wn.meta.has_field(cur_frm.doc.doctype, "customer")) {
+		if (frappe.meta.has_field(cur_frm.doc.doctype, "customer")) {
 			this.set_transaction_defaults("Customer", "export");
 		}
-		else if (wn.meta.has_field(cur_frm.doc.doctype, "supplier")) {
+		else if (frappe.meta.has_field(cur_frm.doc.doctype, "supplier")) {
 			this.set_transaction_defaults("Supplier", "import");
 		}
 	},
@@ -146,7 +146,7 @@ erpnext.POS = Class.extend({
 	},
 	make_party: function() {
 		var me = this;
-		this.party_field = wn.ui.form.make_control({
+		this.party_field = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Link",
 				"options": this.party,
@@ -160,13 +160,13 @@ erpnext.POS = Class.extend({
 		this.party_field.make_input();
 		this.party_field.$input.on("change", function() {
 			if(!me.party_field.autocomplete_open)
-				wn.model.set_value(me.frm.doctype, me.frm.docname, 
+				frappe.model.set_value(me.frm.doctype, me.frm.docname, 
 					me.party.toLowerCase(), this.value);
 		});
 	},
 	make_barcode: function() {
 		var me = this;
-		this.barcode = wn.ui.form.make_control({
+		this.barcode = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
 				"label": "Barcode",
@@ -185,7 +185,7 @@ erpnext.POS = Class.extend({
 	},
 	make_search: function() {
 		var me = this;
-		this.search = wn.ui.form.make_control({
+		this.search = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
 				"label": "Item",
@@ -205,7 +205,7 @@ erpnext.POS = Class.extend({
 	},
 	make_item_group: function() {
 		var me = this;
-		this.item_group = wn.ui.form.make_control({
+		this.item_group = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Link",
 				"options": "Item Group",
@@ -225,7 +225,7 @@ erpnext.POS = Class.extend({
 	make_item_list: function() {
 		var me = this;
 		me.item_timeout = null;
-		wn.call({
+		frappe.call({
 			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_items',
 			args: {
 				sales_or_purchase: this.sales_or_purchase,
@@ -284,14 +284,14 @@ erpnext.POS = Class.extend({
 		
 		// check whether the item is already added
 		if (no_of_items != 0) {
-			$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+			$.each(frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
 				if (d.item_code == item_code) {
 					caught = true;
 					if (serial_no)
-						wn.model.set_value(d.doctype, d.name, "serial_no", d.serial_no + '\n' + serial_no);
+						frappe.model.set_value(d.doctype, d.name, "serial_no", d.serial_no + '\n' + serial_no);
 					else
-						wn.model.set_value(d.doctype, d.name, "qty", d.qty + 1);
+						frappe.model.set_value(d.doctype, d.name, "qty", d.qty + 1);
 				}
 			});
 		}
@@ -306,7 +306,7 @@ erpnext.POS = Class.extend({
 	add_new_item_to_grid: function(item_code, serial_no) {
 		var me = this;
 
-		var child = wn.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
+		var child = frappe.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
 			this.frm.cscript.fname);
 		child.item_code = item_code;
 
@@ -326,14 +326,14 @@ erpnext.POS = Class.extend({
 	},
 	update_qty: function(item_code, qty) {
 		var me = this;
-		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+		$.each(frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 			if (d.item_code == item_code) {
 				if (qty == 0) {
-					wn.model.clear_doc(d.doctype, d.name);
+					frappe.model.clear_doc(d.doctype, d.name);
 					me.refresh_grid();
 				} else {
-					wn.model.set_value(d.doctype, d.name, "qty", qty);
+					frappe.model.set_value(d.doctype, d.name, "qty", qty);
 				}
 			}
 		});
@@ -378,7 +378,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		var $items = this.wrapper.find("#cart tbody").empty();
 
-		$.each(wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+		$.each(frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
@@ -413,7 +413,7 @@ erpnext.POS = Class.extend({
 	},
 	show_taxes: function() {
 		var me = this;
-		var taxes = wn.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
+		var taxes = frappe.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
 			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
 		$(this.wrapper).find(".tax-table")
 			.toggle((taxes && taxes.length) ? true : false)
@@ -510,7 +510,7 @@ erpnext.POS = Class.extend({
 	add_item_thru_barcode: function() {
 		var me = this;
 		me.barcode_timeout = null;
-		wn.call({
+		frappe.call({
 			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_item_code',
 			args: {barcode_serial_no: this.barcode.$input.val()},
 			callback: function(r) {
@@ -521,7 +521,7 @@ erpnext.POS = Class.extend({
 						me.add_to_cart(r.message[0][0].name);
 				}
 				else
-					msgprint(wn._("Invalid Barcode"));
+					msgprint(frappe._("Invalid Barcode"));
 
 				me.refresh();
 			}
@@ -538,13 +538,13 @@ erpnext.POS = Class.extend({
 			}
 		}
 
-		var child = wn.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
+		var child = frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
 			this.frm.cscript.fname, this.frm.doctype);
 
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {
 				if (d.item_code == selected_items[i]) {
-					wn.model.clear_doc(d.doctype, d.name);
+					frappe.model.clear_doc(d.doctype, d.name);
 				}
 			}
 		});
@@ -563,9 +563,9 @@ erpnext.POS = Class.extend({
 		var mode_of_payment = [];
 		
 		if (no_of_items == 0)
-			msgprint(wn._("Payment cannot be made for empty cart"));
+			msgprint(frappe._("Payment cannot be made for empty cart"));
 		else {
-			wn.call({
+			frappe.call({
 				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',
 				callback: function(r) {
 					for (x=0; x<=r.message.length - 1; x++) {
@@ -573,7 +573,7 @@ erpnext.POS = Class.extend({
 					}
 
 					// show payment wizard
-					var dialog = new wn.ui.Dialog({
+					var dialog = new frappe.ui.Dialog({
 						width: 400,
 						title: 'Payment', 
 						fields: [

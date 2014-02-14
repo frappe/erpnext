@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt, get_first_day, get_last_day, has_common
-import webnotes.defaults
+import frappe
+from frappe.utils import flt, get_first_day, get_last_day, has_common
+import frappe.defaults
 from erpnext.accounts.utils import get_balance_on
 
 class DocType:
@@ -33,7 +33,7 @@ class DocType:
 		ret['company'] = get_companies()
 
 		#--- to get fiscal year and start_date of that fiscal year -----
-		res = webnotes.conn.sql("select name, year_start_date from `tabFiscal Year`")
+		res = frappe.conn.sql("select name, year_start_date from `tabFiscal Year`")
 		ret['fiscal_year'] = [r[0] for r in res]
 		ret['start_dates'] = {}
 		for r in res:
@@ -41,7 +41,7 @@ class DocType:
 			
 		#--- from month and to month (for MIS - Comparison Report) -------
 		month_list = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-		fiscal_start_month = webnotes.conn.sql("select MONTH(year_start_date) from `tabFiscal Year` where name = %s",(webnotes.defaults.get_global_default("fiscal_year")))
+		fiscal_start_month = frappe.conn.sql("select MONTH(year_start_date) from `tabFiscal Year` where name = %s",(frappe.defaults.get_global_default("fiscal_year")))
 		fiscal_start_month = fiscal_start_month and fiscal_start_month[0][0] or 1
 		mon = ['']
 		for i in range(fiscal_start_month,13): mon.append(month_list[i-1])
@@ -49,7 +49,7 @@ class DocType:
 		ret['month'] = mon
 
 		# get MIS Type on basis of roles of session user
-		self.roles = webnotes.user.get_roles()
+		self.roles = frappe.user.get_roles()
 		if has_common(self.roles, ['Sales Manager']):
 			type.append('Sales')
 		if has_common(self.roles, ['Purchase Manager']):
@@ -76,7 +76,7 @@ class DocType:
 		return self.return_data
 
 	def get_children(self, parent_account, level, pl, company, fy):
-		cl = webnotes.conn.sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s and docstatus != 2 order by name asc", (parent_account, pl, company))
+		cl = frappe.conn.sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s and docstatus != 2 order by name asc", (parent_account, pl, company))
 		level0_diff = [0 for p in self.period_list]
 		if pl=='Yes' and level==0: # switch for income & expenses
 			cl = [c for c in cl]
@@ -123,7 +123,7 @@ class DocType:
 							self.return_data.append([4, 'Total '+c[0]] + totals)
 
 	def define_periods(self, year, period):	
-		ysd = webnotes.conn.sql("select year_start_date from `tabFiscal Year` where name=%s", year)
+		ysd = frappe.conn.sql("select year_start_date from `tabFiscal Year` where name=%s", year)
 		ysd = ysd and ysd[0][0] or ''
 
 		self.ysd = ysd

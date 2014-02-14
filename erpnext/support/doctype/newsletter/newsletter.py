@@ -3,10 +3,10 @@
 
 from __future__ import unicode_literals
 
-import webnotes
-import webnotes.utils
-from webnotes.utils import cstr
-from webnotes import msgprint, throw, _
+import frappe
+import frappe.utils
+from frappe.utils import cstr
+from frappe import msgprint, throw, _
 
 class DocType():
 	def __init__(self, d, dl):
@@ -14,7 +14,7 @@ class DocType():
 		
 	def onload(self):
 		if self.doc.email_sent:
-			self.doc.fields["__status_count"] = dict(webnotes.conn.sql("""select status, count(*)
+			self.doc.fields["__status_count"] = dict(frappe.conn.sql("""select status, count(*)
 				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
 				group by status""", (self.doc.doctype, self.doc.name))) or None
 
@@ -41,18 +41,18 @@ class DocType():
 			"doctype": self.send_to_doctype
 		}))
 
-		webnotes.conn.set(self.doc, "email_sent", 1)
+		frappe.conn.set(self.doc, "email_sent", 1)
 	
 	def get_recipients(self):
 		self.email_field = None
 		if self.doc.send_to_type=="Contact":
 			self.send_to_doctype = "Contact"
 			if self.doc.contact_type == "Customer":		
-				return webnotes.conn.sql_list("""select email_id from tabContact 
+				return frappe.conn.sql_list("""select email_id from tabContact 
 					where ifnull(email_id, '') != '' and ifnull(customer, '') != ''""")
 
 			elif self.doc.contact_type == "Supplier":		
-				return webnotes.conn.sql_list("""select email_id from tabContact 
+				return frappe.conn.sql_list("""select email_id from tabContact 
 					where ifnull(email_id, '') != '' and ifnull(supplier, '') != ''""")
 	
 		elif self.doc.send_to_type=="Lead":
@@ -66,14 +66,14 @@ class DocType():
 			if conditions:
 				conditions = "".join(conditions)
 				
-			return webnotes.conn.sql_list("""select email_id from tabLead 
+			return frappe.conn.sql_list("""select email_id from tabLead 
 				where ifnull(email_id, '') != '' %s""" % (conditions or ""))
 
 		elif self.doc.send_to_type=="Employee":
 			self.send_to_doctype = "Employee"
 			self.email_field = "company_email"
 
-			return webnotes.conn.sql_list("""select 
+			return frappe.conn.sql_list("""select 
 				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id 
 				from `tabEmployee` where status='Active'""")
 
@@ -88,56 +88,56 @@ class DocType():
 	def send_bulk(self):
 		self.validate_send()
 
-		sender = self.doc.send_from or webnotes.utils.get_formatted_email(self.doc.owner)
+		sender = self.doc.send_from or frappe.utils.get_formatted_email(self.doc.owner)
 		
-		from webnotes.utils.email_lib.bulk import send
+		from frappe.utils.email_lib.bulk import send
 		
-		if not webnotes.flags.in_test:
-			webnotes.conn.auto_commit_on_many_writes = True
+		if not frappe.flags.in_test:
+			frappe.conn.auto_commit_on_many_writes = True
 
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
 			doctype = self.send_to_doctype, email_field = self.email_field or "email_id",
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
-		if not webnotes.flags.in_test:
-			webnotes.conn.auto_commit_on_many_writes = False
+		if not frappe.flags.in_test:
+			frappe.conn.auto_commit_on_many_writes = False
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
 			throw(_("Please save the Newsletter before sending."))
 
-		from webnotes import conf
+		from frappe import conf
 		if (conf.get("status") or None) == "Trial":
 			throw(_("Sending newsletters is not allowed for Trial users, \
 				to prevent abuse of this feature."))
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_lead_options():
 	return {
 		"sources": ["All"] + filter(None, 
-			webnotes.conn.sql_list("""select distinct source from tabLead""")),
+			frappe.conn.sql_list("""select distinct source from tabLead""")),
 		"statuses": ["All"] + filter(None, 
-			webnotes.conn.sql_list("""select distinct status from tabLead"""))
+			frappe.conn.sql_list("""select distinct status from tabLead"""))
 	}
 
 
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
 	from email.utils import parseaddr
-	from webnotes.model.doc import get_default_naming_series
+	from frappe.model.doc import get_default_naming_series
 	real_name, email_id = parseaddr(email_id)
 	
-	if webnotes.conn.get_value("Lead", {"email_id": email_id}):
+	if frappe.conn.get_value("Lead", {"email_id": email_id}):
 		return
 	
-	lead = webnotes.bean({
+	lead = frappe.bean({
 		"doctype": "Lead",
 		"email_id": email_id,
 		"lead_name": real_name or email_id,
 		"status": "Contacted",
 		"naming_series": get_default_naming_series("Lead"),
-		"company": webnotes.conn.get_default("company"),
+		"company": frappe.conn.get_default("company"),
 		"source": "Email"
 	})
 	lead.insert()

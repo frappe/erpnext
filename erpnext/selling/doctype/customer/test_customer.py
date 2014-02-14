@@ -3,10 +3,10 @@
 
 from __future__ import unicode_literals
 
-import webnotes
+import frappe
 import unittest
 
-from webnotes.test_runner import make_test_records
+from frappe.test_runner import make_test_records
 
 
 class TestCustomer(unittest.TestCase):
@@ -39,12 +39,12 @@ class TestCustomer(unittest.TestCase):
 			self.assertEquals(value, details.get(key))
 		
 	def test_rename(self):
-		webnotes.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
+		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
-		self.assertTrue(webnotes.conn.exists("Customer", "_Test Customer 1 Renamed"))
-		self.assertFalse(webnotes.conn.exists("Customer", "_Test Customer 1"))
+		self.assertTrue(frappe.conn.exists("Customer", "_Test Customer 1 Renamed"))
+		self.assertFalse(frappe.conn.exists("Customer", "_Test Customer 1"))
 		
-		webnotes.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
+		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 		
 
 test_ignore = ["Price List"]

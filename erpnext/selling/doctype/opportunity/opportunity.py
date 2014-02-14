@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, cint
-from webnotes.model.bean import getlist
-from webnotes import msgprint, _
+from frappe.utils import cstr, cint
+from frappe.model.bean import getlist
+from frappe import msgprint, _
 
 	
 from erpnext.utilities.transaction_base import TransactionBase
@@ -18,15 +18,15 @@ class DocType(TransactionBase):
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
 		
-		self._prev = webnotes._dict({
-			"contact_date": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
+		self._prev = frappe._dict({
+			"contact_date": frappe.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": webnotes.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
+			"contact_by": frappe.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
 		})
 		
 	def get_item_details(self, item_code):
-		item = webnotes.conn.sql("""select item_name, stock_uom, description_html, description, item_group, brand
+		item = frappe.conn.sql("""select item_name, stock_uom, description_html, description, item_group, brand
 			from `tabItem` where name = %s""", item_code, as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 		return ret
 
 	def get_cust_address(self,name):
-		details = webnotes.conn.sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+		details = frappe.conn.sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if details:
 			ret = {
 				'customer_name':	details and details[0]['customer_name'] or '',
@@ -48,7 +48,7 @@ class DocType(TransactionBase):
 			}
 			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
 
-			contact_det = webnotes.conn.sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
+			contact_det = frappe.conn.sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
 			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
@@ -64,7 +64,7 @@ class DocType(TransactionBase):
 
 	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
-			opts = webnotes._dict()
+			opts = frappe._dict()
 		
 		opts.description = ""
 		
@@ -109,32 +109,32 @@ class DocType(TransactionBase):
 
 	def on_submit(self):
 		if self.doc.lead:
-			webnotes.bean("Lead", self.doc.lead).get_controller().set_status(update=True)
+			frappe.bean("Lead", self.doc.lead).get_controller().set_status(update=True)
 	
 	def on_cancel(self):
 		if self.has_quotation():
-			webnotes.throw(_("Cannot Cancel Opportunity as Quotation Exists"))
+			frappe.throw(_("Cannot Cancel Opportunity as Quotation Exists"))
 		self.set_status(update=True)
 		
 	def declare_enquiry_lost(self,arg):
 		if not self.has_quotation():
-			webnotes.conn.set(self.doc, 'status', 'Lost')
-			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
+			frappe.conn.set(self.doc, 'status', 'Lost')
+			frappe.conn.set(self.doc, 'order_lost_reason', arg)
 		else:
-			webnotes.throw(_("Cannot declare as lost, because Quotation has been made."))
+			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
 	def on_trash(self):
 		self.delete_events()
 		
 	def has_quotation(self):
-		return webnotes.conn.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.conn.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_quotation(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	def set_missing_values(source, target):
-		quotation = webnotes.bean(target)
+		quotation = frappe.bean(target)
 		quotation.run_method("onload_post_render")
 		quotation.run_method("calculate_taxes_and_totals")
 	

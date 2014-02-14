@@ -1,14 +1,14 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
+import frappe
 import unittest
 
 from erpnext.projects.doctype.time_log.time_log import OverlapError
 
 class TestTimeLog(unittest.TestCase):
 	def test_duplication(self):		
-		ts = webnotes.bean(webnotes.copy_doclist(test_records[0]))
+		ts = frappe.bean(frappe.copy_doclist(test_records[0]))
 		self.assertRaises(OverlapError, ts.insert)
 
 test_records = [[{

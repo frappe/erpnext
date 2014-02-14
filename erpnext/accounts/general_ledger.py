@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt, cstr
-from webnotes import _
+import frappe
+from frappe.utils import flt, cstr
+from frappe import _
 from erpnext.accounts.utils import validate_expense_against_budget
 
 
-class StockAccountInvalidTransaction(webnotes.ValidationError): pass
+class StockAccountInvalidTransaction(frappe.ValidationError): pass
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, 
 		update_outstanding='Yes'):
@@ -77,7 +77,7 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 	
 def make_entry(args, adv_adj, update_outstanding):
 	args.update({"doctype": "GL Entry"})
-	gle = webnotes.bean([args])
+	gle = frappe.bean([args])
 	gle.ignore_permissions = 1
 	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
@@ -85,17 +85,17 @@ def make_entry(args, adv_adj, update_outstanding):
 	
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
-		webnotes.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
+		frappe.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
 		 	cstr(total_debit - total_credit))
 			
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Voucher":
-		aii_accounts = [d[0] for d in webnotes.conn.sql("""select name from tabAccount 
+		aii_accounts = [d[0] for d in frappe.conn.sql("""select name from tabAccount 
 			where account_type = 'Warehouse' and ifnull(master_name, '')!=''""")]
 		
 		for entry in gl_map:
 			if entry.account in aii_accounts:
-				webnotes.throw(_("Account") + ": " + entry.account + 
+				frappe.throw(_("Account") + ": " + entry.account + 
 					_(" can only be debited/credited through Stock transactions"), 
 					StockAccountInvalidTransaction)
 	
@@ -107,12 +107,12 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 		
 	if not gl_entries:
-		gl_entries = webnotes.conn.sql("""select * from `tabGL Entry` 
+		gl_entries = frappe.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
 	if gl_entries:
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 	
-	webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
+	frappe.conn.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
 		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
 	
 	for entry in gl_entries:

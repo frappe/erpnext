@@ -8,10 +8,10 @@ $.extend(cur_frm.cscript, {
 
 	refresh: function() {
 		cur_frm.add_custom_button("Add / Edit Prices", function() {
-			wn.route_options = {
+			frappe.route_options = {
 				"price_list": cur_frm.doc.name
 			};
-			wn.set_route("Report", "Item Price");
+			frappe.set_route("Report", "Item Price");
 		}, "icon-money");
 	}
 });

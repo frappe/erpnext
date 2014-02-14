@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt, cstr
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import flt, cstr
+from frappe import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -42,11 +42,11 @@ def get_columns(salary_slips):
 		"Payment Days:Float:120"
 	]
 	
-	earning_types = webnotes.conn.sql_list("""select distinct e_type from `tabSalary Slip Earning`
+	earning_types = frappe.conn.sql_list("""select distinct e_type from `tabSalary Slip Earning`
 		where ifnull(e_modified_amount, 0) != 0 and parent in (%s)""" % 
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]))
 		
-	ded_types = webnotes.conn.sql_list("""select distinct d_type from `tabSalary Slip Deduction`
+	ded_types = frappe.conn.sql_list("""select distinct d_type from `tabSalary Slip Deduction`
 		where ifnull(d_modified_amount, 0) != 0 and parent in (%s)""" % 
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]))
 		
@@ -59,7 +59,7 @@ def get_columns(salary_slips):
 	
 def get_salary_slips(filters):
 	conditions, filters = get_conditions(filters)
-	salary_slips = webnotes.conn.sql("""select * from `tabSalary Slip` where docstatus = 1 %s
+	salary_slips = frappe.conn.sql("""select * from `tabSalary Slip` where docstatus = 1 %s
 		order by employee, month""" % conditions, filters, as_dict=1)
 	
 	if not salary_slips:
@@ -83,25 +83,25 @@ def get_conditions(filters):
 	return conditions, filters
 	
 def get_ss_earning_map(salary_slips):
-	ss_earnings = webnotes.conn.sql("""select parent, e_type, e_modified_amount 
+	ss_earnings = frappe.conn.sql("""select parent, e_type, e_modified_amount 
 		from `tabSalary Slip Earning` where parent in (%s)""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 	
 	ss_earning_map = {}
 	for d in ss_earnings:
-		ss_earning_map.setdefault(d.parent, webnotes._dict()).setdefault(d.e_type, [])
+		ss_earning_map.setdefault(d.parent, frappe._dict()).setdefault(d.e_type, [])
 		ss_earning_map[d.parent][d.e_type] = flt(d.e_modified_amount)
 	
 	return ss_earning_map
 
 def get_ss_ded_map(salary_slips):
-	ss_deductions = webnotes.conn.sql("""select parent, d_type, d_modified_amount 
+	ss_deductions = frappe.conn.sql("""select parent, d_type, d_modified_amount 
 		from `tabSalary Slip Deduction` where parent in (%s)""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 	
 	ss_ded_map = {}
 	for d in ss_deductions:
-		ss_ded_map.setdefault(d.parent, webnotes._dict()).setdefault(d.d_type, [])
+		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.d_type, [])
 		ss_ded_map[d.parent][d.d_type] = flt(d.d_modified_amount)
 	
 	return ss_ded_map

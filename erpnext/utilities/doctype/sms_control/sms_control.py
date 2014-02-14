@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes, json
+import frappe, json
 
-from webnotes.utils import nowdate, cstr
-from webnotes.model.code import get_obj
-from webnotes.model.doc import Document
-from webnotes import msgprint, throw, _
-from webnotes.model.bean import getlist
+from frappe.utils import nowdate, cstr
+from frappe.model.code import get_obj
+from frappe.model.doc import Document
+from frappe import msgprint, throw, _
+from frappe.model.bean import getlist
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -33,10 +33,10 @@ class DocType:
 
 	def get_sender_name(self):
 		"returns name as SMS sender"
-		sender_name = webnotes.conn.get_value('Global Defaults', None, 'sms_sender_name') or \
+		sender_name = frappe.conn.get_value('Global Defaults', None, 'sms_sender_name') or \
 			'ERPNXT'
 		if len(sender_name) > 6 and \
-				webnotes.conn.get_value("Control Panel", None, "country") == "India":
+				frappe.conn.get_value("Control Panel", None, "country") == "India":
 			throw(_("""
 				As per TRAI rule, sender name must be exactly 6 characters.
 				Kindly change sender name in Setup --> Global Defaults.
@@ -48,7 +48,7 @@ class DocType:
 	def get_contact_number(self, arg):
 		"returns mobile number of the contact"
 		args = json.loads(arg)
-		number = webnotes.conn.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
+		number = frappe.conn.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
 			('%s', args['key'], '%s'), (args['contact_name'], args['value']))
 		return number and (number[0][0] or number[0][1]) or ''
 	
@@ -66,7 +66,7 @@ class DocType:
 			'sender_name'	: sender_name or self.get_sender_name()
 		}
 
-		if webnotes.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
+		if frappe.conn.get_value('SMS Settings', None, 'sms_gateway_url'):
 			ret = self.send_via_gateway(arg)
 			msgprint(ret)
 

@@ -1,12 +1,12 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("assets/erpnext/js/stock_analytics.js");
+frappe.require("assets/erpnext/js/stock_analytics.js");
 
-wn.pages['stock-balance'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['stock-balance'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Stock Balance'),
+		title: frappe._('Stock Balance'),
 		single_column: true
 	});
 	
@@ -20,58 +20,58 @@ wn.pages['stock-balance'].onload = function(wrapper) {
 erpnext.StockBalance = erpnext.StockAnalytics.extend({
 	init: function(wrapper) {
 		this._super(wrapper, {
-			title: wn._("Stock Balance"),
+			title: frappe._("Stock Balance"),
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
 				"Stock Entry", "Project", "Serial No"],
 		});
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: wn._("Item"), field: "name", width: 300,
+			{id: "name", name: frappe._("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "item_name", name: wn._("Item Name"), field: "item_name", width: 100},
-			{id: "description", name: wn._("Description"), field: "description", width: 200, 
+			{id: "item_name", name: frappe._("Item Name"), field: "item_name", width: 100},
+			{id: "description", name: frappe._("Description"), field: "description", width: 200, 
 				formatter: this.text_formatter},
-			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
-			{id: "stock_uom", name: wn._("UOM"), field: "stock_uom", width: 100},
-			{id: "opening_qty", name: wn._("Opening Qty"), field: "opening_qty", width: 100, 
+			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: frappe._("UOM"), field: "stock_uom", width: 100},
+			{id: "opening_qty", name: frappe._("Opening Qty"), field: "opening_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow_qty", name: wn._("In Qty"), field: "inflow_qty", width: 100, 
+			{id: "inflow_qty", name: frappe._("In Qty"), field: "inflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow_qty", name: wn._("Out Qty"), field: "outflow_qty", width: 100, 
+			{id: "outflow_qty", name: frappe._("Out Qty"), field: "outflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing_qty", name: wn._("Closing Qty"), field: "closing_qty", width: 100, 
+			{id: "closing_qty", name: frappe._("Closing Qty"), field: "closing_qty", width: 100, 
 				formatter: this.currency_formatter},
 				
-			{id: "opening_value", name: wn._("Opening Value"), field: "opening_value", width: 100, 
+			{id: "opening_value", name: frappe._("Opening Value"), field: "opening_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow_value", name: wn._("In Value"), field: "inflow_value", width: 100, 
+			{id: "inflow_value", name: frappe._("In Value"), field: "inflow_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow_value", name: wn._("Out Value"), field: "outflow_value", width: 100, 
+			{id: "outflow_value", name: frappe._("Out Value"), field: "outflow_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing_value", name: wn._("Closing Value"), field: "closing_value", width: 100, 
+			{id: "closing_value", name: frappe._("Closing Value"), field: "closing_value", width: 100, 
 				formatter: this.currency_formatter},
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: wn._("Project"), link:"Project", 
+		{fieldtype:"Select", label: frappe._("Project"), link:"Project", 
 			default_value: "Select Project...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}, link_formatter: {filter_input: "project"}},
-		{fieldtype:"Date", label: wn._("From Date")},
-		{fieldtype:"Label", label: wn._("To")},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Date", label: frappe._("From Date")},
+		{fieldtype:"Label", label: frappe._("To")},
+		{fieldtype:"Date", label: frappe._("To Date")},
+		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: frappe._("Reset Filters")}
 	],
 	
 	setup_plot_check: function() {
@@ -79,7 +79,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 	},
 	
 	prepare_data: function() {
-		this.stock_entry_map = this.make_name_map(wn.report_dump.data["Stock Entry"], "name");
+		this.stock_entry_map = this.make_name_map(frappe.report_dump.data["Stock Entry"], "name");
 		this._super();
 	},
 	
@@ -87,7 +87,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		var me = this;
 		var from_date = dateutil.str_to_obj(this.from_date);
 		var to_date = dateutil.str_to_obj(this.to_date);
-		var data = wn.report_dump.data["Stock Ledger Entry"];
+		var data = frappe.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
 		this.serialized_buying_rates = this.get_serialized_buying_rates();

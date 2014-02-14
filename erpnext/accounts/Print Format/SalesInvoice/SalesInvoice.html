@@ -1,5 +1,5 @@
 {%- if doc.letter_head -%}
-	{{ webnotes.conn.get_value("Letter Head", doc.letter_head, "content") }}
+	{{ frappe.conn.get_value("Letter Head", doc.letter_head, "content") }}
 {%- endif -%}
 <!-- Page Layout Settings -->
 <div class='common page-header'>

@@ -23,23 +23,23 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 
 cur_frm.cscript.make_address = function() {
 	if(!cur_frm.address_list) {
-		cur_frm.address_list = new wn.ui.Listing({
+		cur_frm.address_list = new frappe.ui.Listing({
 			parent: cur_frm.fields_dict['address_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Address",
 			custom_new_doc: function(doctype) {
-				var address = wn.model.make_new_doc_and_get_name('Address');
+				var address = frappe.model.make_new_doc_and_get_name('Address');
 				address = locals['Address'][address];
 				address.sales_partner = cur_frm.doc.name;
 				address.address_title = cur_frm.doc.name;
 				address.address_type = "Office";
-				wn.set_route("Form", "Address", address.name);
+				frappe.set_route("Form", "Address", address.name);
 			},			
 			get_query: function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
-			no_results_message: wn._('No addresses created'),
+			no_results_message: frappe._('No addresses created'),
 			render_row: function(wrapper, data) {
 				$(wrapper).css('padding','5px 0px');
 				var link = $ln(wrapper,cstr(data.name), function() { loaddoc("Address", this.dn); }, {fontWeight:'bold'});
@@ -55,21 +55,21 @@ cur_frm.cscript.make_address = function() {
 
 cur_frm.cscript.make_contact = function() {
 	if(!cur_frm.contact_list) {
-		cur_frm.contact_list = new wn.ui.Listing({
+		cur_frm.contact_list = new frappe.ui.Listing({
 			parent: cur_frm.fields_dict['contact_html'].wrapper,
 			page_length: 2,
 			new_doctype: "Contact",
 			custom_new_doc: function(doctype) {
-				var contact = wn.model.make_new_doc_and_get_name('Contact');
+				var contact = frappe.model.make_new_doc_and_get_name('Contact');
 				contact = locals['Contact'][contact];
 				contact.sales_partner = cur_frm.doc.name;
-				wn.set_route("Form", "Contact", contact.name);
+				frappe.set_route("Form", "Contact", contact.name);
 			},
 			get_query: function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},
 			as_dict: 1,
-			no_results_message: wn._('No contacts created'),
+			no_results_message: frappe._('No contacts created'),
 			render_row: function(wrapper, data) {
 				$(wrapper).css('padding', '5px 0px');
 				var link = $ln(wrapper, cstr(data.name), function() { loaddoc("Contact", this.dn); }, {fontWeight:'bold'});

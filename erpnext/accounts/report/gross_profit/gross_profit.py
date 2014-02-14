@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 from erpnext.stock.utils import get_buying_amount, get_sales_bom_buying_amount
 
 def execute(filters=None):
@@ -22,7 +22,7 @@ def execute(filters=None):
 	for row in source:
 		selling_amount = flt(row.base_amount)
 		
-		item_sales_bom_map = item_sales_bom.get(row.parenttype, {}).get(row.name, webnotes._dict())
+		item_sales_bom_map = item_sales_bom.get(row.parenttype, {}).get(row.name, frappe._dict())
 		
 		if item_sales_bom_map.get(row.item_code):
 			buying_amount = get_sales_bom_buying_amount(row.item_code, row.warehouse, 
@@ -59,7 +59,7 @@ def get_stock_ledger_entries(filters):
 	
 	query += " order by item_code desc, warehouse desc, posting_date desc, posting_time desc, name desc"
 	
-	res = webnotes.conn.sql(query, filters, as_dict=True)
+	res = frappe.conn.sql(query, filters, as_dict=True)
 	
 	out = {}
 	for r in res:
@@ -73,11 +73,11 @@ def get_stock_ledger_entries(filters):
 def get_item_sales_bom():
 	item_sales_bom = {}
 	
-	for d in webnotes.conn.sql("""select parenttype, parent, parent_item,
+	for d in frappe.conn.sql("""select parenttype, parent, parent_item,
 		item_code, warehouse, -1*qty as total_qty, parent_detail_docname
 		from `tabPacked Item` where docstatus=1""", as_dict=True):
-		item_sales_bom.setdefault(d.parenttype, webnotes._dict()).setdefault(d.parent,
-			webnotes._dict()).setdefault(d.parent_item, []).append(d)
+		item_sales_bom.setdefault(d.parenttype, frappe._dict()).setdefault(d.parent,
+			frappe._dict()).setdefault(d.parent_item, []).append(d)
 
 	return item_sales_bom
 	
@@ -90,7 +90,7 @@ def get_source_data(filters):
 	if filters.get("to_date"):
 		conditions += " and posting_date<=%(to_date)s"
 	
-	delivery_note_items = webnotes.conn.sql("""select item.parenttype, dn.name, 
+	delivery_note_items = frappe.conn.sql("""select item.parenttype, dn.name, 
 		dn.posting_date, dn.posting_time, dn.project_name, 
 		item.item_code, item.item_name, item.description, item.warehouse,
 		item.qty, item.base_rate, item.base_amount, item.name as "item_row",
@@ -99,7 +99,7 @@ def get_source_data(filters):
 		where item.parent = dn.name and dn.docstatus = 1 %s
 		order by dn.posting_date desc, dn.posting_time desc""" % (conditions,), filters, as_dict=1)
 
-	sales_invoice_items = webnotes.conn.sql("""select item.parenttype, si.name, 
+	sales_invoice_items = frappe.conn.sql("""select item.parenttype, si.name, 
 		si.posting_date, si.posting_time, si.project_name,
 		item.item_code, item.item_name, item.description, item.warehouse,
 		item.qty, item.base_rate, item.base_amount, item.name as "item_row",

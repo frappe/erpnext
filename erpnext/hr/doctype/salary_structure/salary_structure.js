@@ -12,14 +12,14 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
   if((!doc.__islocal) && (doc.is_active == 'Yes')){
-    cur_frm.add_custom_button(wn._('Make Salary Slip'), cur_frm.cscript['Make Salary Slip']);  
+    cur_frm.add_custom_button(frappe._('Make Salary Slip'), cur_frm.cscript['Make Salary Slip']);  
   }
 
   cur_frm.toggle_enable('employee', doc.__islocal);
 }
 
 cur_frm.cscript['Make Salary Slip'] = function() {
-	wn.model.open_mapped_doc({
+	frappe.model.open_mapped_doc({
 		method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
 		source_name: cur_frm.doc.name
 	});

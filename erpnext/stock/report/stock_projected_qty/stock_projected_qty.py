@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def execute(filters=None):
 	columns = get_columns()
 		
-	data = webnotes.conn.sql("""select 
+	data = frappe.conn.sql("""select 
 			item.name, item.item_name, description, item_group, brand, warehouse, item.stock_uom, 
 			actual_qty, planned_qty, indented_qty, ordered_qty, reserved_qty, 
 			projected_qty, item.re_order_level, item.re_order_qty

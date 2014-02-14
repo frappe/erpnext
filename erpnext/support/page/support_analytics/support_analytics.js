@@ -1,10 +1,10 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.pages['support-analytics'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['support-analytics'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Support Analytics'),
+		title: frappe._('Support Analytics'),
 		single_column: true
 	});					
 
@@ -15,10 +15,10 @@ wn.pages['support-analytics'].onload = function(wrapper) {
 	
 }
 
-erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
+erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	init: function(wrapper) {
 		this._super({
-			title: wn._("Support Analtyics"),
+			title: frappe._("Support Analtyics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -27,22 +27,22 @@ erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype:"Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: wn._("From Date")},
-		{fieldtype:"Label", label: wn._("To")},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Select", label: wn._("Range"), 
+		{fieldtype:"Date", label: frappe._("From Date")},
+		{fieldtype:"Label", label: frappe._("To")},
+		{fieldtype:"Date", label: frappe._("To Date")},
+		{fieldtype:"Select", label: frappe._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: frappe._("Reset Filters")}
 	],
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: wn._("Plot"), field: "check", width: 30,
+			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "status", name: wn._("Status"), field: "status", width: 100},
+			{id: "status", name: frappe._("Status"), field: "status", width: 100},
 		];
 		this.make_date_range_columns();		
 		this.columns = std_columns.concat(this.columns);
@@ -64,7 +64,7 @@ erpnext.SupportAnalytics = wn.views.GridReportWithPlot.extend({
 		var total_responded = {};
 
 		
-		$.each(wn.report_dump.data["Support Ticket"], function(i, d) {
+		$.each(frappe.report_dump.data["Support Ticket"], function(i, d) {
 			var dateobj = dateutil.str_to_obj(d.creation);
 			var date = d.creation.split(" ")[0];
 			var col = me.column_map[date];

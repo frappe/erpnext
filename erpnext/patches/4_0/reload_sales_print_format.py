@@ -2,19 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def execute():
-	webnotes.reload_doc('accounts', 'Print Format', 'POS Invoice')
-	webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Classic')
-	webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Modern')
-	webnotes.reload_doc('accounts', 'Print Format', 'Sales Invoice Spartan')
-	webnotes.reload_doc('selling', 'Print Format', 'Quotation Classic')
-	webnotes.reload_doc('selling', 'Print Format', 'Quotation Modern')
-	webnotes.reload_doc('selling', 'Print Format', 'Quotation Spartan')
-	webnotes.reload_doc('selling', 'Print Format', 'Sales Order Classic')
-	webnotes.reload_doc('selling', 'Print Format', 'Sales Order Modern')
-	webnotes.reload_doc('selling', 'Print Format', 'Sales Order Spartan')
-	webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Classic')
-	webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Modern')
-	webnotes.reload_doc('stock', 'Print Format', 'Delivery Note Spartan')
+	frappe.reload_doc('accounts', 'Print Format', 'POS Invoice')
+	frappe.reload_doc('accounts', 'Print Format', 'Sales Invoice Classic')
+	frappe.reload_doc('accounts', 'Print Format', 'Sales Invoice Modern')
+	frappe.reload_doc('accounts', 'Print Format', 'Sales Invoice Spartan')
+	frappe.reload_doc('selling', 'Print Format', 'Quotation Classic')
+	frappe.reload_doc('selling', 'Print Format', 'Quotation Modern')
+	frappe.reload_doc('selling', 'Print Format', 'Quotation Spartan')
+	frappe.reload_doc('selling', 'Print Format', 'Sales Order Classic')
+	frappe.reload_doc('selling', 'Print Format', 'Sales Order Modern')
+	frappe.reload_doc('selling', 'Print Format', 'Sales Order Spartan')
+	frappe.reload_doc('stock', 'Print Format', 'Delivery Note Classic')
+	frappe.reload_doc('stock', 'Print Format', 'Delivery Note Modern')
+	frappe.reload_doc('stock', 'Print Format', 'Delivery Note Spartan')

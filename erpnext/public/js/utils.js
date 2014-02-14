@@ -1,19 +1,19 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-wn.provide("erpnext");
+frappe.provide("erpnext");
 
 $.extend(erpnext, {
 	get_currency: function(company) {
 		if(!company && cur_frm)
 			company = cur_frm.doc.company;
 		if(company)
-			return wn.model.get_doc(":Company", company).default_currency || wn.boot.sysdefaults.currency;
+			return frappe.model.get_doc(":Company", company).default_currency || frappe.boot.sysdefaults.currency;
 		else
-			return wn.boot.sysdefaults.currency;
+			return frappe.boot.sysdefaults.currency;
 	},
 	
 	hide_naming_series: function() {
-		if(cur_frm.fields_dict.naming_series && !wn.meta.get_docfield(cur_frm.doctype, "naming_series")) {
+		if(cur_frm.fields_dict.naming_series && !frappe.meta.get_docfield(cur_frm.doctype, "naming_series")) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
 		}
 	},
@@ -30,10 +30,10 @@ $.extend(erpnext, {
 	
 	add_applicable_territory: function() {
 		if(cur_frm.doc.__islocal && 
-			wn.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name).length === 1) {
-				var territory = wn.model.add_child(cur_frm.doc, "Applicable Territory", 
+			frappe.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name).length === 1) {
+				var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory", 
 					"valid_for_territories");
-				territory.territory = wn.defaults.get_default("territory");
+				territory.territory = frappe.defaults.get_default("territory");
 		}
 	},
 	
@@ -41,19 +41,19 @@ $.extend(erpnext, {
 		if(!grid_row.fields_dict.serial_no || 
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
 		
-		var $btn = $('<button class="btn btn-sm btn-default">'+wn._("Add Serial No")+'</button>')
+		var $btn = $('<button class="btn btn-sm btn-default">'+frappe._("Add Serial No")+'</button>')
 			.appendTo($("<div>")
 				.css({"margin-bottom": "10px", "margin-left": "15px"})
 				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
 				
 		$btn.on("click", function() {
-			var d = new wn.ui.Dialog({
-				title: wn._("Add Serial No"),
+			var d = new frappe.ui.Dialog({
+				title: frappe._("Add Serial No"),
 				fields: [
 					{
 						"fieldtype": "Link",
 						"options": "Serial No",
-						"label": wn._("Serial No"),
+						"label": frappe._("Serial No"),
 						"get_query": {
 							item_code: grid_row.doc.item_code,
 							warehouse: grid_row.doc.warehouse
@@ -61,7 +61,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
-						"label": wn._("Add")
+						"label": frappe._("Add")
 					}
 				]
 			});

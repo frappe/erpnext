@@ -1,23 +1,23 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 import unittest
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
-		webnotes.set_user("Administrator")
+		frappe.set_user("Administrator")
 		
 	def test_make_material_request(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
 		
-		so = webnotes.bean(copy=test_records[0]).insert()
+		so = frappe.bean(copy=test_records[0]).insert()
 		
-		self.assertRaises(webnotes.ValidationError, make_material_request, 
+		self.assertRaises(frappe.ValidationError, make_material_request, 
 			so.doc.name)
 
-		sales_order = webnotes.bean("Sales Order", so.doc.name)
+		sales_order = frappe.bean("Sales Order", so.doc.name)
 		sales_order.submit()
 		mr = make_material_request(so.doc.name)
 		
@@ -27,12 +27,12 @@ class TestSalesOrder(unittest.TestCase):
 	def test_make_delivery_note(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
-		so = webnotes.bean(copy=test_records[0]).insert()
+		so = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_delivery_note, 
+		self.assertRaises(frappe.ValidationError, make_delivery_note, 
 			so.doc.name)
 
-		sales_order = webnotes.bean("Sales Order", so.doc.name)
+		sales_order = frappe.bean("Sales Order", so.doc.name)
 		sales_order.submit()
 		dn = make_delivery_note(so.doc.name)
 		
@@ -42,12 +42,12 @@ class TestSalesOrder(unittest.TestCase):
 	def test_make_sales_invoice(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		so = webnotes.bean(copy=test_records[0]).insert()
+		so = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_sales_invoice, 
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
 			so.doc.name)
 
-		sales_order = webnotes.bean("Sales Order", so.doc.name)
+		sales_order = frappe.bean("Sales Order", so.doc.name)
 		sales_order.submit()
 		si = make_sales_invoice(so.doc.name)
 		
@@ -55,7 +55,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(si), len(sales_order.doclist))
 		self.assertEquals(len([d for d in si if d["doctype"]=="Sales Invoice Item"]), 1)
 		
-		si = webnotes.bean(si)
+		si = frappe.bean(si)
 		si.doc.posting_date = "2013-10-10"
 		si.insert()
 		si.submit()
@@ -68,7 +68,7 @@ class TestSalesOrder(unittest.TestCase):
 		if not so_doclist:
 			so_doclist = test_records[0]
 		
-		w = webnotes.bean(copy=so_doclist)
+		w = frappe.bean(copy=so_doclist)
 		w.insert()
 		w.submit()
 
@@ -80,7 +80,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		_insert_purchase_receipt(so.doclist[1].item_code)
 		
-		dn = webnotes.bean(webnotes.copy_doclist(dn_test_records[0]))
+		dn = frappe.bean(frappe.copy_doclist(dn_test_records[0]))
 		dn.doclist[1].item_code = so.doclist[1].item_code
 		dn.doclist[1].against_sales_order = so.doc.name
 		dn.doclist[1].prevdoc_detail_docname = so.doclist[1].name
@@ -91,14 +91,14 @@ class TestSalesOrder(unittest.TestCase):
 		return dn
 		
 	def get_bin_reserved_qty(self, item_code, warehouse):
-		return flt(webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
+		return flt(frappe.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
 			"reserved_qty"))
 	
 	def delete_bin(self, item_code, warehouse):
-		bin = webnotes.conn.exists({"doctype": "Bin", "item_code": item_code, 
+		bin = frappe.conn.exists({"doctype": "Bin", "item_code": item_code, 
 			"warehouse": warehouse})
 		if bin:
-			webnotes.delete_doc("Bin", bin[0][0])
+			frappe.delete_doc("Bin", bin[0][0])
 			
 	def check_reserved_qty(self, item_code, warehouse, qty):
 		bin_reserved_qty = self.get_bin_reserved_qty(item_code, warehouse)
@@ -125,7 +125,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so()
 		
 		# allow negative stock
-		webnotes.conn.set_default("allow_negative_stock", 1)
+		frappe.conn.set_default("allow_negative_stock", 1)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so)
@@ -154,10 +154,10 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so()
 		
 		# allow negative stock
-		webnotes.conn.set_default("allow_negative_stock", 1)
+		frappe.conn.set_default("allow_negative_stock", 1)
 		
 		# set over-delivery tolerance
-		webnotes.conn.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
+		frappe.conn.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)
@@ -199,7 +199,7 @@ class TestSalesOrder(unittest.TestCase):
 		
 		# change item in test so record
 		
-		test_record = webnotes.copy_doclist(test_records[0])
+		test_record = frappe.copy_doclist(test_records[0])
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 
 		# reset bin
@@ -210,7 +210,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so(test_record)
 		
 		# allow negative stock
-		webnotes.conn.set_default("allow_negative_stock", 1)
+		frappe.conn.set_default("allow_negative_stock", 1)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so)
@@ -248,7 +248,7 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
-		test_record = webnotes.copy_doclist(test_records[0])
+		test_record = frappe.copy_doclist(test_records[0])
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 
 		# reset bin
@@ -259,10 +259,10 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so(test_record)
 		
 		# allow negative stock
-		webnotes.conn.set_default("allow_negative_stock", 1)
+		frappe.conn.set_default("allow_negative_stock", 1)
 		
 		# set over-delivery tolerance
-		webnotes.conn.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
+		frappe.conn.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)
@@ -280,27 +280,27 @@ class TestSalesOrder(unittest.TestCase):
 			so.doclist[1].warehouse, 20.0)
 
 	def test_warehouse_user(self):
-		webnotes.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
-		webnotes.bean("Profile", "test@example.com").get_controller()\
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
+		frappe.bean("Profile", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 			
-		webnotes.bean("Profile", "test2@example.com").get_controller()\
+		frappe.bean("Profile", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 
-		from webnotes.model.bean import BeanPermissionError
-		so = webnotes.bean(copy = test_records[0])
+		from frappe.model.bean import BeanPermissionError
+		so = frappe.bean(copy = test_records[0])
 		so.doc.company = "_Test Company 1"
 		so.doc.conversion_rate = 0.02
 		so.doc.plc_conversion_rate = 0.02
 		so.doclist[1].warehouse = "_Test Warehouse 2 - _TC1"
 		self.assertRaises(BeanPermissionError, so.insert)
 
-		webnotes.set_user("test2@example.com")
+		frappe.set_user("test2@example.com")
 		so.insert()
 		
-		webnotes.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
 
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 	

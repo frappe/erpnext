@@ -1,12 +1,12 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("assets/erpnext/js/account_tree_grid.js");
+frappe.require("assets/erpnext/js/account_tree_grid.js");
 
-wn.pages['trial-balance'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['trial-balance'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Trial Balance'),
+		title: frappe._('Trial Balance'),
 		single_column: true
 	});
 	var TrialBalance = erpnext.AccountTreeGrid.extend({
@@ -18,7 +18,7 @@ wn.pages['trial-balance'].onload = function(wrapper) {
 			this.wrapper.bind("make", function() {
 				$('<div style="margin: 10px 0px; "\
 				 	class="with_period_closing_entry"><input type="checkbox" checked="checked">' + 
-						wn._("With period closing entry") + '</div>')
+						frappe._("With period closing entry") + '</div>')
 					.appendTo(me.wrapper)
 					.find("input").click(function() { me.refresh(); });
 			});

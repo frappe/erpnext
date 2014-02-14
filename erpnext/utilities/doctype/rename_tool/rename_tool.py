@@ -4,38 +4,38 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
+import frappe
+from frappe import _
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_doctypes():
-	return webnotes.conn.sql_list("""select name from tabDocType
+	return frappe.conn.sql_list("""select name from tabDocType
 		where ifnull(allow_rename,0)=1 and module!='Core' order by name""")
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def upload(select_doctype=None, rows=None):
-	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
-	from webnotes.modules import scrub
-	from webnotes.model.rename_doc import rename_doc
+	from frappe.utils.datautils import read_csv_content_from_uploaded_file
+	from frappe.modules import scrub
+	from frappe.model.rename_doc import rename_doc
 
 	if not select_doctype:
-		select_doctype = webnotes.form_dict.select_doctype
+		select_doctype = frappe.form_dict.select_doctype
 		
-	if not webnotes.has_permission(select_doctype, "write"):
-		raise webnotes.PermissionError
+	if not frappe.has_permission(select_doctype, "write"):
+		raise frappe.PermissionError
 
 	if not rows:
 		rows = read_csv_content_from_uploaded_file()
 	if not rows:
-		webnotes.msgprint(_("Please select a valid csv file with data."))
+		frappe.msgprint(_("Please select a valid csv file with data."))
 		raise Exception
 		
 	if len(rows) > 500:
-		webnotes.msgprint(_("Max 500 rows only."))
+		frappe.msgprint(_("Max 500 rows only."))
 		raise Exception
 	
 	rename_log = []
@@ -45,7 +45,7 @@ def upload(select_doctype=None, rows=None):
 			try:
 				if rename_doc(select_doctype, row[0], row[1]):
 					rename_log.append(_("Successful: ") + row[0] + " -> " + row[1])
-					webnotes.conn.commit()
+					frappe.conn.commit()
 				else:
 					rename_log.append(_("Ignored: ") + row[0] + " -> " + row[1])
 			except Exception, e:

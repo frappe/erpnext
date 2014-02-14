@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, getdate
-from webnotes.model.bean import getlist
-from webnotes import msgprint
+from frappe.utils import cstr, getdate
+from frappe.model.bean import getlist
+from frappe import msgprint
 from erpnext.stock.utils import get_valid_serial_nos	
 
 from erpnext.utilities.transaction_base import TransactionBase
@@ -44,7 +44,7 @@ class DocType(TransactionBase):
 		validate_fiscal_year(self.doc.inst_date, self.doc.fiscal_year, "Installation Date")
 	
 	def is_serial_no_added(self, item_code, serial_no):
-		ar_required = webnotes.conn.get_value("Item", item_code, "has_serial_no")
+		ar_required = frappe.conn.get_value("Item", item_code, "has_serial_no")
 		if ar_required == 'Yes' and not serial_no:
 			msgprint("Serial No is mandatory for item: " + item_code, raise_exception=1)
 		elif ar_required != 'Yes' and cstr(serial_no).strip():
@@ -53,12 +53,12 @@ class DocType(TransactionBase):
 	
 	def is_serial_no_exist(self, item_code, serial_no):
 		for x in serial_no:
-			if not webnotes.conn.exists("Serial No", x):
+			if not frappe.conn.exists("Serial No", x):
 				msgprint("Serial No " + x + " does not exist in the system", raise_exception=1)
 	
 	def is_serial_no_installed(self,cur_s_no,item_code):
 		for x in cur_s_no:
-			status = webnotes.conn.sql("select status from `tabSerial No` where name = %s", x)
+			status = frappe.conn.sql("select status from `tabSerial No` where name = %s", x)
 			status = status and status[0][0] or ''
 			
 			if status == 'Installed':
@@ -66,7 +66,7 @@ class DocType(TransactionBase):
 					raise_exception=1)
 	
 	def get_prevdoc_serial_no(self, prevdoc_detail_docname):
-		serial_nos = webnotes.conn.get_value("Delivery Note Item", 
+		serial_nos = frappe.conn.get_value("Delivery Note Item", 
 			prevdoc_detail_docname, "serial_no")
 		return get_valid_serial_nos(serial_nos)
 		
@@ -94,7 +94,7 @@ class DocType(TransactionBase):
 	def validate_installation_date(self):
 		for d in getlist(self.doclist, 'installed_item_details'):
 			if d.prevdoc_docname:
-				d_date = webnotes.conn.get_value("Delivery Note", d.prevdoc_docname, "posting_date")				
+				d_date = frappe.conn.get_value("Delivery Note", d.prevdoc_docname, "posting_date")				
 				if d_date > getdate(self.doc.inst_date):
 					msgprint("Installation Date can not be before Delivery Date " + cstr(d_date) + 
 						" for item "+d.item_code, raise_exception=1)
@@ -104,26 +104,26 @@ class DocType(TransactionBase):
 			msgprint("Please fetch items from Delivery Note selected", raise_exception=1)
 	
 	def on_update(self):
-		webnotes.conn.set(self.doc, 'status', 'Draft')
+		frappe.conn.set(self.doc, 'status', 'Draft')
 	
 	def on_submit(self):
 		valid_lst = []
 		valid_lst = self.validate_serial_no()
 		
 		for x in valid_lst:
-			if webnotes.conn.get_value("Serial No", x, "warranty_period"):
-				webnotes.conn.set_value("Serial No", x, "maintenance_status", "Under Warranty")
-			webnotes.conn.set_value("Serial No", x, "status", "Installed")
+			if frappe.conn.get_value("Serial No", x, "warranty_period"):
+				frappe.conn.set_value("Serial No", x, "maintenance_status", "Under Warranty")
+			frappe.conn.set_value("Serial No", x, "status", "Installed")
 
 		self.update_prevdoc_status()
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
+		frappe.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		for d in getlist(self.doclist, 'installed_item_details'):
 			if d.serial_no:
 				d.serial_no = d.serial_no.replace(",", "\n")
 				for sr_no in d.serial_no.split("\n"):
-					webnotes.conn.set_value("Serial No", sr_no, "status", "Delivered")
+					frappe.conn.set_value("Serial No", sr_no, "status", "Delivered")
 
 		self.update_prevdoc_status()
-		webnotes.conn.set(self.doc, 'status', 'Cancelled')
+		frappe.conn.set(self.doc, 'status', 'Cancelled')

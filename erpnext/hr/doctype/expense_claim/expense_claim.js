@@ -1,30 +1,30 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.hr");
+frappe.provide("erpnext.hr");
 
-erpnext.hr.ExpenseClaimController = wn.ui.form.Controller.extend({
+erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 	make_bank_voucher: function() {
 		var me = this;
-		return wn.call({
+		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
 				"company": cur_frm.doc.company,
 				"voucher_type": "Bank Voucher"
 			},
 			callback: function(r) {
-				var jv = wn.model.make_new_doc_and_get_name('Journal Voucher');
+				var jv = frappe.model.make_new_doc_and_get_name('Journal Voucher');
 				jv = locals['Journal Voucher'][jv];
 				jv.voucher_type = 'Bank Voucher';
 				jv.company = cur_frm.doc.company;
 				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
 				jv.fiscal_year = cur_frm.doc.fiscal_year;
 
-				var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
+				var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 				d1.debit = cur_frm.doc.total_sanctioned_amount;
 
 				// credit to bank
-				var d1 = wn.model.add_child(jv, 'Journal Voucher Detail', 'entries');
+				var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 				d1.credit = cur_frm.doc.total_sanctioned_amount;
 				if(r.message) {
 					d1.account = r.message.account;
@@ -92,27 +92,27 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();
 		
-		if(doc.docstatus==1 && wn.model.can_create("Journal Voucher"))
-			 cur_frm.add_custom_button(wn._("Make Bank Voucher"), cur_frm.cscript.make_bank_voucher);
+		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher"))
+			 cur_frm.add_custom_button(frappe._("Make Bank Voucher"), cur_frm.cscript.make_bank_voucher);
 	}
 }
 
 cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(user_roles, "HR User")) {
-		cur_frm.set_intro(wn._("Fill the form and save it"))
+		cur_frm.set_intro(frappe._("Fill the form and save it"))
 	} else {
 		if(doc.docstatus==0 && doc.approval_status=="Draft") {
 			if(user==doc.exp_approver) {
-				cur_frm.set_intro(wn._("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
+				cur_frm.set_intro(frappe._("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
 			} else {
-				cur_frm.set_intro(wn._("Expense Claim is pending approval. Only the Expense Approver can update status."));
+				cur_frm.set_intro(frappe._("Expense Claim is pending approval. Only the Expense Approver can update status."));
 			}
 		} else {
 			if(doc.approval_status=="Approved") {
-				cur_frm.set_intro(wn._("Expense Claim has been approved."));
+				cur_frm.set_intro(frappe._("Expense Claim has been approved."));
 			} else if(doc.approval_status=="Rejected") {
-				cur_frm.set_intro(wn._("Expense Claim has been rejected."));
+				cur_frm.set_intro(frappe._("Expense Claim has been rejected."));
 			}
 		}
 	}
@@ -125,7 +125,7 @@ cur_frm.cscript.validate = function(doc) {
 cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 	doc.total_claimed_amount = 0;
 	doc.total_sanctioned_amount = 0;
-	$.each(wn.model.get("Expense Claim Detail", {parent:doc.name}), function(i, d) {
+	$.each(frappe.model.get("Expense Claim Detail", {parent:doc.name}), function(i, d) {
 		doc.total_claimed_amount += d.claim_amount;
 		if(d.sanctioned_amount==null) {
 			d.sanctioned_amount = d.claim_amount;
@@ -152,7 +152,7 @@ cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings && wn.boot.notification_settings.expense_claim)) {
-		cur_frm.email_doc(wn.boot.notification_settings.expense_claim_message);
+	if(cint(frappe.boot.notification_settings && frappe.boot.notification_settings.expense_claim)) {
+		cur_frm.email_doc(frappe.boot.notification_settings.expense_claim_message);
 	}
 }

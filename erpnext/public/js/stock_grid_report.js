@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.StockGridReport = wn.views.TreeGridReport.extend({
+erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 	get_item_warehouse: function(warehouse, item) {
 		if(!this.item_warehouse[item]) this.item_warehouse[item] = {};
 		if(!this.item_warehouse[item][warehouse]) this.item_warehouse[item][warehouse] = {
@@ -110,8 +110,8 @@ erpnext.StockGridReport = wn.views.TreeGridReport.extend({
 	get_serialized_buying_rates: function() {
 		var serialized_buying_rates = {};
 		
-		if (wn.report_dump.data["Serial No"]) {
-			$.each(wn.report_dump.data["Serial No"], function(i, sn) {
+		if (frappe.report_dump.data["Serial No"]) {
+			$.each(frappe.report_dump.data["Serial No"], function(i, sn) {
 				serialized_buying_rates[sn.name.toLowerCase()] = flt(sn.incoming_rate);
 			});
 		}

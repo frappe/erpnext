@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes import msgprint, throw, _
-from webnotes.utils import cstr, cint
+from frappe import msgprint, throw, _
+from frappe.utils import cstr, cint
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -34,7 +34,7 @@ class DocType:
 		elif self.doc.is_shipping_address != 1:
 			for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
 				if self.doc.fields.get(fieldname):
-					if not webnotes.conn.sql("""select name from `tabAddress` where is_primary_address=1
+					if not frappe.conn.sql("""select name from `tabAddress` where is_primary_address=1
 						and `%s`=%s and name!=%s""" % (fieldname, "%s", "%s"), 
 						(self.doc.fields[fieldname], self.doc.name)):
 							self.doc.is_primary_address = 1
@@ -48,16 +48,16 @@ class DocType:
 	def _unset_other(self, is_address_type):
 		for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
 			if self.doc.fields.get(fieldname):
-				webnotes.conn.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
+				frappe.conn.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
 					(is_address_type, fieldname, "%s", "%s"), (self.doc.fields[fieldname], self.doc.name))
 				break
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_address_display(address_dict):
 	if not isinstance(address_dict, dict):
-		address_dict = webnotes.conn.get_value("Address", address_dict, "*", as_dict=True) or {}
+		address_dict = frappe.conn.get_value("Address", address_dict, "*", as_dict=True) or {}
 	
-	meta = webnotes.get_doctype("Address")
+	meta = frappe.get_doctype("Address")
 	sequence = (("", "address_line1"), 
 		("\n", "address_line2"), 
 		("\n", "city"),

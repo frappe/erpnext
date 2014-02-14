@@ -4,7 +4,7 @@
 
 Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on Python / MySQL.
 
-ERPNext is built on [wnframework](https://github.com/webnotes/wnframework)
+ERPNext is built on [frappe](https://github.com/frappe/frappe)
 
 - [User Guide](http://erpnext.org/user-guide.html)
 - [Getting Help](http://erpnext.org/getting-help.html)
@@ -24,10 +24,10 @@ ERPNext is built on [wnframework](https://github.com/webnotes/wnframework)
 1. Switch to root user using `sudo su`
 1. create a folder where you want to install erpnext
 1. go to the new folder
-1. `wget https://raw.github.com/webnotes/erpnext/master/install_erpnext.py`
+1. `wget https://raw.github.com/frappe/erpnext/master/install_erpnext.py`
 1. `python install_erpnext.py`
     
-[See installation notes](https://github.com/webnotes/erpnext/wiki/How-to-Install-ERPNext)
+[See installation notes](https://github.com/frappe/erpnext/wiki/How-to-Install-ERPNext)
 
 ##### Patch and update
 

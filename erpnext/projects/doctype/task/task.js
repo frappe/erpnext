@@ -1,11 +1,11 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.projects");
+frappe.provide("erpnext.projects");
 
 cur_frm.add_fetch("project", "company", "company");
 
-erpnext.projects.Task = wn.ui.form.Controller.extend({
+erpnext.projects.Task = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.project.get_query = function() {
 			return {
@@ -22,7 +22,7 @@ erpnext.projects.Task = wn.ui.form.Controller.extend({
 	},
 
 	validate: function() {
-		this.frm.doc.project && wn.model.remove_from_locals("Project",
+		this.frm.doc.project && frappe.model.remove_from_locals("Project",
 			this.frm.doc.project);
 	},
 });

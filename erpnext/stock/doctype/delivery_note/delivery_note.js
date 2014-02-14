@@ -12,7 +12,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 {% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
-wn.provide("erpnext.stock");
+frappe.provide("erpnext.stock");
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
@@ -26,20 +26,20 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				});
 			
 			if(!from_sales_invoice)
-				cur_frm.add_custom_button(wn._('Make Invoice'), this.make_sales_invoice);
+				cur_frm.add_custom_button(frappe._('Make Invoice'), this.make_sales_invoice);
 		}
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
-			cur_frm.add_custom_button(wn._('Make Installation Note'), this.make_installation_note);
+			cur_frm.add_custom_button(frappe._('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.appframe.add_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button(wn._('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(frappe._('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
 	
 		set_print_hide(doc, dt, dn);
@@ -49,9 +49,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Sales Order'), 
+			cur_frm.add_custom_button(frappe._('From Sales Order'), 
 				function() {
-					wn.model.map_current_doc({
+					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 						source_doctype: "Sales Order",
 						get_query_filters: {
@@ -69,14 +69,14 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	}, 
 	
 	make_sales_invoice: function() {
-		wn.model.open_mapped_doc({
+		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			source_name: cur_frm.doc.name
 		})
 	}, 
 	
 	make_installation_note: function() {
-		wn.model.open_mapped_doc({
+		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 			source_name: cur_frm.doc.name
 		});
@@ -96,7 +96,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 $.extend(cur_frm.cscript, new erpnext.stock.DeliveryNoteController({frm: cur_frm}));
 
 cur_frm.cscript.new_contact = function(){
-	tn = wn.model.make_new_doc_and_get_name('Contact');
+	tn = frappe.model.make_new_doc_and_get_name('Contact');
 	locals['Contact'][tn].is_customer = 1;
 	if(doc.customer) locals['Contact'][tn].customer = doc.customer;
 	loaddoc('Contact', tn);
@@ -120,15 +120,15 @@ cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 }
 
 cur_frm.cscript['Make Packing Slip'] = function() {
-	n = wn.model.make_new_doc_and_get_name('Packing Slip');
+	n = frappe.model.make_new_doc_and_get_name('Packing Slip');
 	ps = locals["Packing Slip"][n];
 	ps.delivery_note = cur_frm.doc.name;
 	loaddoc('Packing Slip', n);
 }
 
 var set_print_hide= function(doc, cdt, cdn){
-	var dn_fields = wn.meta.docfield_map['Delivery Note'];
-	var dn_item_fields = wn.meta.docfield_map['Delivery Note Item'];
+	var dn_fields = frappe.meta.docfield_map['Delivery Note'];
+	var dn_item_fields = frappe.meta.docfield_map['Delivery Note Item'];
 	var dn_fields_copy = dn_fields;
 	var dn_item_fields_copy = dn_item_fields;
 
@@ -195,8 +195,8 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.delivery_note)) {
-		cur_frm.email_doc(wn.boot.notification_settings.delivery_note_message);
+	if(cint(frappe.boot.notification_settings.delivery_note)) {
+		cur_frm.email_doc(frappe.boot.notification_settings.delivery_note_message);
 	}
 }
 

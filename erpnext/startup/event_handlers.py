@@ -3,19 +3,19 @@
 
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def on_session_creation(login_manager):
 	"""
 		called after login
 		update login_from and delete parallel sessions
 	"""
-	if webnotes.session['user'] not in ('Guest'):
+	if frappe.session['user'] not in ('Guest'):
 		# create feed
-		from webnotes.utils import nowtime
-		from webnotes.profile import get_user_fullname
-		webnotes.conn.begin()
+		from frappe.utils import nowtime
+		from frappe.profile import get_user_fullname
+		frappe.conn.begin()
 		make_feed('Login', 'Profile', login_manager.user, login_manager.user,
 			'%s logged in at %s' % (get_user_fullname(login_manager.user), nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')
-		webnotes.conn.commit()
+		frappe.conn.commit()

@@ -4,8 +4,8 @@
 {% include 'setup/doctype/contact_control/contact_control.js' %};
 {% include 'utilities/doctype/sms_control/sms_control.js' %}
 
-wn.provide("erpnext");
-erpnext.LeadController = wn.ui.form.Controller.extend({
+frappe.provide("erpnext");
+erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
 				return { query: "erpnext.controllers.queries.customer_query" } }
@@ -14,17 +14,17 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	onload: function() {
 		if(cur_frm.fields_dict.lead_owner.df.options.match(/^Profile/)) {
 			cur_frm.fields_dict.lead_owner.get_query = function(doc, cdt, cdn) {
-				return { query:"webnotes.core.doctype.profile.profile.profile_query" } }
+				return { query:"frappe.core.doctype.profile.profile.profile_query" } }
 		}
 
 		if(cur_frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
 			cur_frm.fields_dict.contact_by.get_query = function(doc, cdt, cdn) {
-				return { query:"webnotes.core.doctype.profile.profile.profile_query" } }
+				return { query:"frappe.core.doctype.profile.profile.profile_query" } }
 		}
 
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+wn._('Sales Email Settings')+'</a><br>\
-				<span class="help">'+wn._('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+frappe._('Sales Email Settings')+'</a><br>\
+				<span class="help">'+frappe._('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
 		}
 	},
 	
@@ -35,13 +35,13 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
 		if(!this.frm.doc.__islocal && !this.frm.doc.__is_customer) {
-			this.frm.add_custom_button(wn._("Create Customer"), this.create_customer);
-			this.frm.add_custom_button(wn._("Create Opportunity"), this.create_opportunity);
-			this.frm.appframe.add_button(wn._("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
+			this.frm.add_custom_button(frappe._("Create Customer"), this.create_customer);
+			this.frm.add_custom_button(frappe._("Create Opportunity"), this.create_opportunity);
+			this.frm.appframe.add_button(frappe._("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
 		}
 		
-		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
+		cur_frm.communication_view = new frappe.views.CommunicationList({
+			list: frappe.model.get("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
 			parent: this.frm.fields_dict.communication_html.wrapper,
 			doc: this.frm.doc,
 			recipients: this.frm.doc.email_id
@@ -55,7 +55,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	make_address_list: function() {
 		var me = this;
 		if(!this.frm.address_list) {
-			this.frm.address_list = new wn.ui.Listing({
+			this.frm.address_list = new frappe.ui.Listing({
 				parent: this.frm.fields_dict['address_html'].wrapper,
 				page_length: 5,
 				new_doctype: "Address",
@@ -67,7 +67,7 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 					order by is_primary_address, is_shipping_address desc'
 				},
 				as_dict: 1,
-				no_results_message: wn._('No addresses created'),
+				no_results_message: frappe._('No addresses created'),
 				render_row: this.render_address_row,
 			});
 			// note: render_address_row is defined in contact_control.js
@@ -76,14 +76,14 @@ erpnext.LeadController = wn.ui.form.Controller.extend({
 	}, 
 	
 	create_customer: function() {
-		wn.model.open_mapped_doc({
+		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.lead.lead.make_customer",
 			source_name: cur_frm.doc.name
 		})
 	}, 
 	
 	create_opportunity: function() {
-		wn.model.open_mapped_doc({
+		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.lead.lead.make_opportunity",
 			source_name: cur_frm.doc.name
 		})

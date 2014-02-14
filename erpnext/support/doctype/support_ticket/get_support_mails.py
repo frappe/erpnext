@@ -2,16 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, cint, decode_dict, today
-from webnotes.utils.email_lib import sendmail		
-from webnotes.utils.email_lib.receive import POP3Mailbox
-from webnotes.core.doctype.communication.communication import _make
+import frappe
+from frappe.utils import cstr, cint, decode_dict, today
+from frappe.utils.email_lib import sendmail		
+from frappe.utils.email_lib.receive import POP3Mailbox
+from frappe.core.doctype.communication.communication import _make
 
 class SupportMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.email_settings = webnotes.doc("Email Settings", "Email Settings")
-		self.settings = args or webnotes._dict({
+		self.email_settings = frappe.doc("Email Settings", "Email Settings")
+		self.settings = args or frappe._dict({
 			"use_ssl": self.email_settings.support_use_ssl,
 			"host": self.email_settings.support_host,
 			"username": self.email_settings.support_username,
@@ -24,7 +24,7 @@ class SupportMailbox(POP3Mailbox):
 		thread_id = mail.get_thread_id()
 		new_ticket = False
 
-		if not (thread_id and webnotes.conn.exists("Support Ticket", thread_id)):
+		if not (thread_id and frappe.conn.exists("Support Ticket", thread_id)):
 			new_ticket = True
 		
 		ticket = add_support_communication(mail.subject, mail.content, mail.from_email,
@@ -53,17 +53,17 @@ Original Query:
 			msg = cstr(response))
 		
 def get_support_mails():
-	if cint(webnotes.conn.get_value('Email Settings', None, 'sync_support_mails')):
+	if cint(frappe.conn.get_value('Email Settings', None, 'sync_support_mails')):
 		SupportMailbox()
 		
 def add_support_communication(subject, content, sender, docname=None, mail=None):
 	if docname:
-		ticket = webnotes.bean("Support Ticket", docname)
+		ticket = frappe.bean("Support Ticket", docname)
 		ticket.doc.status = 'Open'
 		ticket.ignore_permissions = True
 		ticket.doc.save()
 	else:
-		ticket = webnotes.bean([decode_dict({
+		ticket = frappe.bean([decode_dict({
 			"doctype":"Support Ticket",
 			"description": content,
 			"subject": subject,

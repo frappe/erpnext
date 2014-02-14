@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint, cstr, flt, now, nowdate
-from webnotes.model.doc import addchild
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import cint, cstr, flt, now, nowdate
+from frappe.model.doc import addchild
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 
 
 
@@ -17,7 +17,7 @@ class DocType:
 		self.doclist = doclist
 
 	def autoname(self):
-		last_name = webnotes.conn.sql("""select max(name) from `tabBOM` 
+		last_name = frappe.conn.sql("""select max(name) from `tabBOM` 
 			where name like "BOM/%s/%%" """ % cstr(self.doc.item).replace('"', '\\"'))
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
@@ -47,8 +47,8 @@ class DocType:
 		self.manage_default_bom()
 
 	def on_cancel(self):
-		webnotes.conn.set(self.doc, "is_active", 0)
-		webnotes.conn.set(self.doc, "is_default", 0)
+		frappe.conn.set(self.doc, "is_active", 0)
+		frappe.conn.set(self.doc, "is_default", 0)
 
 		# check if used in any other bom
 		self.validate_bom_links()
@@ -59,7 +59,7 @@ class DocType:
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = webnotes.conn.sql("""select name, is_asset_item, is_purchase_item, 
+		item = frappe.conn.sql("""select name, is_asset_item, is_purchase_item, 
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom, 
 			last_purchase_rate, standard_rate, is_manufactured_item 
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
@@ -86,7 +86,7 @@ class DocType:
 	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
 		if not args:
-			args = webnotes.form_dict.get('args')
+			args = frappe.form_dict.get('args')
 		
 		if isinstance(args, basestring):
 			import json
@@ -119,8 +119,8 @@ class DocType:
 				rate = arg['last_purchase_rate']
 			elif self.doc.rm_cost_as_per == "Price List":
 				if not self.doc.buying_price_list:
-					webnotes.throw(_("Please select Price List"))
-				rate = webnotes.conn.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
+					frappe.throw(_("Please select Price List"))
+				rate = frappe.conn.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
 			elif self.doc.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
@@ -136,14 +136,14 @@ class DocType:
 			})["rate"]
 		
 		if self.doc.docstatus == 0:
-			webnotes.bean(self.doclist).save()
+			frappe.bean(self.doclist).save()
 		elif self.doc.docstatus == 1:
 			self.calculate_cost()
 			self.update_exploded_items()
-			webnotes.bean(self.doclist).update_after_submit()
+			frappe.bean(self.doclist).update_after_submit()
 
 	def get_bom_unitcost(self, bom_no):
-		bom = webnotes.conn.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
+		bom = frappe.conn.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
 			where is_active = 1 and name = %s""", bom_no, as_dict=1)
 		return bom and bom[0]['unit_cost'] or 0
 
@@ -155,7 +155,7 @@ class DocType:
 		from erpnext.stock.utils import get_incoming_rate
 		dt = self.doc.costing_date or nowdate()
 		time = self.doc.costing_date == nowdate() and now().split()[1] or '23:59'
-		warehouse = webnotes.conn.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
+		warehouse = frappe.conn.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
 		rate = []
 		for wh in warehouse:
 			r = get_incoming_rate({
@@ -175,15 +175,15 @@ class DocType:
 			update default bom in item master
 		"""
 		if self.doc.is_default and self.doc.is_active:
-			from webnotes.model.utils import set_default
+			from frappe.model.utils import set_default
 			set_default(self.doc, "item")
-			webnotes.conn.set_value("Item", self.doc.item, "default_bom", self.doc.name)
+			frappe.conn.set_value("Item", self.doc.item, "default_bom", self.doc.name)
 		
 		else:
 			if not self.doc.is_active:
-				webnotes.conn.set(self.doc, "is_default", 0)
+				frappe.conn.set(self.doc, "is_default", 0)
 			
-			webnotes.conn.sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
+			frappe.conn.sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
 				 (self.doc.item, self.doc.name))
 
 	def clear_operations(self):
@@ -203,7 +203,7 @@ class DocType:
 			msgprint("""As Item: %s is not a manufactured / sub-contracted item, \
 				you can not make BOM for it""" % self.doc.item, raise_exception = 1)
 		else:
-			ret = webnotes.conn.get_value("Item", self.doc.item, ["description", "stock_uom"])
+			ret = frappe.conn.get_value("Item", self.doc.item, ["description", "stock_uom"])
 			self.doc.description = ret[0]
 			self.doc.uom = ret[1]
 
@@ -249,7 +249,7 @@ class DocType:
 
 	def validate_bom_no(self, item, bom_no, idx):
 		"""Validate BOM No of sub-contracted items"""
-		bom = webnotes.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
+		bom = frappe.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
 			and is_active=1 and docstatus=1""", 
 			(bom_no, item), as_dict =1)
 		if not bom:
@@ -271,7 +271,7 @@ class DocType:
 		for d in check_list:
 			bom_list, count = [self.doc.name], 0
 			while (len(bom_list) > count ):
-				boms = webnotes.conn.sql(" select %s from `tabBOM Item` where %s = '%s' " % 
+				boms = frappe.conn.sql(" select %s from `tabBOM Item` where %s = '%s' " % 
 					(d[0], d[1], cstr(bom_list[count])))
 				count = count + 1
 				for b in boms:
@@ -291,7 +291,7 @@ class DocType:
 			
 	def traverse_tree(self, bom_list=[]):
 		def _get_children(bom_no):
-			return [cstr(d[0]) for d in webnotes.conn.sql("""select bom_no from `tabBOM Item` 
+			return [cstr(d[0]) for d in frappe.conn.sql("""select bom_no from `tabBOM Item` 
 				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
 				
 		count = 0
@@ -317,7 +317,7 @@ class DocType:
 		total_op_cost = 0
 		for d in getlist(self.doclist, 'bom_operations'):
 			if d.workstation and not d.hour_rate:
-				d.hour_rate = webnotes.conn.get_value("Workstation", d.workstation, "hour_rate")
+				d.hour_rate = frappe.conn.get_value("Workstation", d.workstation, "hour_rate")
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
 			total_op_cost += flt(d.operating_cost)
@@ -347,7 +347,7 @@ class DocType:
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
-				self.add_to_cur_exploded_items(webnotes._dict({
+				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'				: d.item_code, 
 					'description'			: d.description, 
 					'stock_uom'				: d.stock_uom, 
@@ -364,12 +364,12 @@ class DocType:
 	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		
-		child_fb_items = webnotes.conn.sql("""select item_code, description, stock_uom, qty, rate, 
+		child_fb_items = frappe.conn.sql("""select item_code, description, stock_uom, qty, rate, 
 			qty_consumed_per_unit from `tabBOM Explosion Item` 
 			where parent = %s and docstatus = 1""", bom_no, as_dict = 1)
 			
 		for d in child_fb_items:
-			self.add_to_cur_exploded_items(webnotes._dict({
+			self.add_to_cur_exploded_items(frappe._dict({
 				'item_code'				: d['item_code'], 
 				'description'			: d['description'], 
 				'stock_uom'				: d['stock_uom'], 
@@ -390,12 +390,12 @@ class DocType:
 			ch.save(1)
 
 	def get_parent_bom_list(self, bom_no):
-		p_bom = webnotes.conn.sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
+		p_bom = frappe.conn.sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
 		return p_bom and [i[0] for i in p_bom] or []
 
 	def validate_bom_links(self):
 		if not self.doc.is_active:
-			act_pbom = webnotes.conn.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
+			act_pbom = frappe.conn.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
 				where bom_item.bom_no = %s and bom_item.docstatus = 1
 				and exists (select * from `tabBOM` where name = bom_item.parent
 					and docstatus = 1 and is_active = 1)""", self.doc.name)
@@ -427,7 +427,7 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				group by item_code, stock_uom"""
 	
 	if fetch_exploded:
-		items = webnotes.conn.sql(query % {
+		items = frappe.conn.sql(query % {
 			"qty": qty,
 			"table": "BOM Explosion Item",
 			"bom": bom,
@@ -435,7 +435,7 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 					and ifnull(item.is_sub_contracted_item, 'No') = 'No' """
 		}, as_dict=True)
 	else:
-		items = webnotes.conn.sql(query % {
+		items = frappe.conn.sql(query % {
 			"qty": qty,
 			"table": "BOM Item",
 			"bom": bom,
@@ -451,7 +451,7 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 		
 	return item_dict
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_bom_items(bom, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, qty, fetch_exploded).values()
 	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)

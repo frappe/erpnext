@@ -4,9 +4,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cint
+from frappe.utils import cint
 
 class DocType:
 	def __init__(self, d, dl):
@@ -20,16 +20,16 @@ class DocType:
 			self.doc.get("emp_created_by")=="Naming Series", hide_name_field=True)
 			
 	def update_birthday_reminders(self):
-		original_stop_birthday_reminders = cint(webnotes.conn.get_value("HR Settings", 
+		original_stop_birthday_reminders = cint(frappe.conn.get_value("HR Settings", 
 			None, "stop_birthday_reminders"))
 
 		# reset birthday reminders
 		if cint(self.doc.stop_birthday_reminders) != original_stop_birthday_reminders:
-			webnotes.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and ref_type='Employee'""")
+			frappe.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and ref_type='Employee'""")
 		
 			if not self.doc.stop_birthday_reminders:
-				for employee in webnotes.conn.sql_list("""select name from `tabEmployee` where status='Active' and 
+				for employee in frappe.conn.sql_list("""select name from `tabEmployee` where status='Active' and 
 					ifnull(date_of_birth, '')!=''"""):
-					webnotes.get_obj("Employee", employee).update_dob_event()
+					frappe.get_obj("Employee", employee).update_dob_event()
 					
-			webnotes.msgprint(webnotes._("Updated Birthday Reminders"))
+			frappe.msgprint(frappe._("Updated Birthday Reminders"))

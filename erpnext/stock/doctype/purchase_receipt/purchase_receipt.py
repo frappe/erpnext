@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, flt, cint
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
-import webnotes.defaults
+from frappe.utils import cstr, flt, cint
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
+import frappe.defaults
 from erpnext.stock.utils import update_bin
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -32,7 +32,7 @@ class DocType(BuyingController):
 		}]
 		
 	def onload(self):
-		billed_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
+		billed_qty = frappe.conn.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
 			where purchase_receipt=%s""", self.doc.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "purchase_receipt_details"})))
@@ -72,7 +72,7 @@ class DocType(BuyingController):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
 				d.rejected_warehouse = self.doc.rejected_warehouse
 				if not d.rejected_warehouse:
-					webnotes.throw(_("Rejected Warehouse is mandatory against regected item"))		
+					frappe.throw(_("Rejected Warehouse is mandatory against regected item"))		
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
@@ -96,12 +96,12 @@ class DocType(BuyingController):
 	def validate_challan_no(self):
 		"Validate if same challan no exists for same supplier in a submitted purchase receipt"
 		if self.doc.challan_no:
-			exists = webnotes.conn.sql("""
+			exists = frappe.conn.sql("""
 			SELECT name FROM `tabPurchase Receipt`
 			WHERE name!=%s AND supplier=%s AND challan_no=%s
 		AND docstatus=1""", (self.doc.name, self.doc.supplier, self.doc.challan_no))
 			if exists:
-				webnotes.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
+				frappe.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
 			Please enter a valid Challan No.", raise_exception=1)
 			
 	def validate_with_previous_doc(self):
@@ -117,7 +117,7 @@ class DocType(BuyingController):
 			}
 		})
 		
-		if cint(webnotes.defaults.get_global_default('maintain_same_rate')):
+		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "prevdoc_detail_docname",
@@ -128,7 +128,7 @@ class DocType(BuyingController):
 			
 
 	def po_required(self):
-		if webnotes.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
+		if frappe.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'purchase_receipt_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
@@ -171,7 +171,7 @@ class DocType(BuyingController):
 				po_qty, ordered_warehouse = self.get_po_qty_and_warehouse(d.prevdoc_detail_docname)
 				
 				if not ordered_warehouse:
-					webnotes.throw(_("Warehouse is missing in Purchase Order"))
+					frappe.throw(_("Warehouse is missing in Purchase Order"))
 				
 				if already_received_qty + d.qty > po_qty:
 					ordered_qty = - (po_qty - already_received_qty) * flt(d.conversion_factor)
@@ -186,14 +186,14 @@ class DocType(BuyingController):
 				})
 
 	def get_already_received_qty(self, po, po_detail):
-		qty = webnotes.conn.sql("""select sum(qty) from `tabPurchase Receipt Item` 
+		qty = frappe.conn.sql("""select sum(qty) from `tabPurchase Receipt Item` 
 			where prevdoc_detail_docname = %s and docstatus = 1 
 			and prevdoc_doctype='Purchase Order' and prevdoc_docname=%s 
 			and parent != %s""", (po_detail, po, self.doc.name))
 		return qty and flt(qty[0][0]) or 0.0
 		
 	def get_po_qty_and_warehouse(self, po_detail):
-		po_qty, po_warehouse = webnotes.conn.get_value("Purchase Order Item", po_detail, 
+		po_qty, po_warehouse = frappe.conn.get_value("Purchase Order Item", po_detail, 
 			["qty", "warehouse"])
 		return po_qty, po_warehouse
 	
@@ -210,7 +210,7 @@ class DocType(BuyingController):
 
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = webnotes.conn.sql("select inspection_required from `tabItem` where name = %s",
+			ins_reqd = frappe.conn.sql("select inspection_required from `tabItem` where name = %s",
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
@@ -226,13 +226,13 @@ class DocType(BuyingController):
 
 	# on submit
 	def on_submit(self):
-		purchase_controller = webnotes.get_obj("Purchase Common")
+		purchase_controller = frappe.get_obj("Purchase Common")
 
 		# Check for Approving Authority
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 
 		# Set status as Submitted
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
+		frappe.conn.set(self.doc, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
 		
@@ -248,7 +248,7 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 
 	def check_next_docstatus(self):
-		submit_rv = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = frappe.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -261,13 +261,13 @@ class DocType(BuyingController):
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		# pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
 
-		submitted = webnotes.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = frappe.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
 
 		
-		webnotes.conn.set(self.doc,'status','Cancelled')
+		frappe.conn.set(self.doc,'status','Cancelled')
 
 		self.update_ordered_qty()
 		
@@ -281,7 +281,7 @@ class DocType(BuyingController):
 	def get_current_stock(self):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
 			if self.doc.supplier_warehouse:
-				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
+				bin = frappe.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 	def get_rate(self,arg):
@@ -294,12 +294,12 @@ class DocType(BuyingController):
 		return gl_entries
 		
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_purchase_invoice(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	def set_missing_values(source, target):
-		bean = webnotes.bean(target)
+		bean = frappe.bean(target)
 		bean.run_method("set_missing_values")
 
 	doclist = get_mapped_doclist("Purchase Receipt", source_name,	{

@@ -2,38 +2,38 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_children():
-	ctype = webnotes.local.form_dict.get('ctype')
-	webnotes.local.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
-	if not webnotes.form_dict.get('parent'):
-		webnotes.local.form_dict['parent'] = ''
+	ctype = frappe.local.form_dict.get('ctype')
+	frappe.local.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
+	if not frappe.form_dict.get('parent'):
+		frappe.local.form_dict['parent'] = ''
 		
-	return webnotes.conn.sql("""select name as value, 
+	return frappe.conn.sql("""select name as value, 
 		if(is_group='Yes', 1, 0) as expandable
 		from `tab%(ctype)s`
 		where docstatus < 2
 		and ifnull(%(parent_field)s,'') = "%(parent)s"
-		order by name""" % webnotes.local.form_dict, as_dict=1)
+		order by name""" % frappe.local.form_dict, as_dict=1)
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def add_node():
-	# from webnotes.model.doc import Document
-	ctype = webnotes.form_dict.get('ctype')
+	# from frappe.model.doc import Document
+	ctype = frappe.form_dict.get('ctype')
 	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
 	name_field = ctype.lower().replace(' ', '_') + '_name'
 	
 	doclist = [{
 		"doctype": ctype,
 		"__islocal": 1,
-		name_field: webnotes.form_dict['name_field'],
-		parent_field: webnotes.form_dict['parent'],
-		"is_group": webnotes.form_dict['is_group']
+		name_field: frappe.form_dict['name_field'],
+		parent_field: frappe.form_dict['parent'],
+		"is_group": frappe.form_dict['is_group']
 	}]
 	if ctype == "Sales Person":
-		doclist[0]["employee"] = webnotes.form_dict.get('employee')
+		doclist[0]["employee"] = frappe.form_dict.get('employee')
 		
-	webnotes.bean(doclist).save()
+	frappe.bean(doclist).save()

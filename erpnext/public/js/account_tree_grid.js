@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
-erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
+erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	init: function(wrapper, title) {
 		this._super({
 			title: title,
@@ -27,7 +27,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 				parent_field: "parent_account", 
 				formatter: function(item) {
 					return repl("<a \
-						onclick='wn.cur_grid_report.show_general_ledger(\"%(value)s\")'>\
+						onclick='frappe.cur_grid_report.show_general_ledger(\"%(value)s\")'>\
 						%(value)s</a>", {
 							value: item.name,
 						});
@@ -37,39 +37,39 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: wn._("Account"), field: "name", width: 300, cssClass: "cell-title", 
+			{id: "name", name: frappe._("Account"), field: "name", width: 300, cssClass: "cell-title", 
 				formatter: this.tree_formatter},
-			{id: "opening_debit", name: wn._("Opening (Dr)"), field: "opening_debit", width: 100,
+			{id: "opening_debit", name: frappe._("Opening (Dr)"), field: "opening_debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "opening_credit", name: wn._("Opening (Cr)"), field: "opening_credit", width: 100,
+			{id: "opening_credit", name: frappe._("Opening (Cr)"), field: "opening_credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "debit", name: wn._("Debit"), field: "debit", width: 100,
+			{id: "debit", name: frappe._("Debit"), field: "debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "credit", name: wn._("Credit"), field: "credit", width: 100,
+			{id: "credit", name: frappe._("Credit"), field: "credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_debit", name: wn._("Closing (Dr)"), field: "closing_debit", width: 100,
+			{id: "closing_debit", name: frappe._("Closing (Dr)"), field: "closing_debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_credit", name: wn._("Closing (Cr)"), field: "closing_credit", width: 100,
+			{id: "closing_credit", name: frappe._("Closing (Cr)"), field: "closing_credit", width: 100,
 				formatter: this.currency_formatter}
 		];
 
 	},
 	filters: [
-		{fieldtype: "Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", label: frappe._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype: "Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype: "Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype: "Date", label: wn._("From Date")},
-		{fieldtype: "Label", label: wn._("To")},
-		{fieldtype: "Date", label: wn._("To Date")},
-		{fieldtype: "Button", label: wn._("Refresh"), icon:"icon-refresh icon-white",
+		{fieldtype: "Date", label: frappe._("From Date")},
+		{fieldtype: "Label", label: frappe._("To")},
+		{fieldtype: "Date", label: frappe._("To Date")},
+		{fieldtype: "Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white",
 		 	cssClass:"btn-info"},
-		{fieldtype: "Button", label: wn._("Reset Filters")},
+		{fieldtype: "Button", label: frappe._("Reset Filters")},
 	],
 	setup_filters: function() {
 		this._super();
@@ -77,7 +77,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 		// default filters
 		this.filter_inputs.fiscal_year.change(function() {
 			var fy = $(this).val();
-			$.each(wn.report_dump.data["Fiscal Year"], function(i, v) {
+			$.each(frappe.report_dump.data["Fiscal Year"], function(i, v) {
 				if (v.name==fy) {
 					me.filter_inputs.from_date.val(dateutil.str_to_user(v.year_start_date));
 					me.filter_inputs.to_date.val(dateutil.str_to_user(v.year_end_date));
@@ -96,7 +96,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 			me.parent_map = {};
 			me.item_by_name = {};
 
-			$.each(wn.report_dump.data["Account"], function(i, v) {
+			$.each(frappe.report_dump.data["Account"], function(i, v) {
 				var d = copy_dict(v);
 
 				me.data.push(d);
@@ -123,7 +123,7 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 	},
 
 	prepare_balances: function() {
-		var gl = wn.report_dump.data['GL Entry'];
+		var gl = frappe.report_dump.data['GL Entry'];
 		var me = this;
 
 		this.opening_date = dateutil.user_to_obj(this.filter_inputs.from_date.val());
@@ -194,13 +194,13 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 
 	set_fiscal_year: function() {
 		if (this.opening_date > this.closing_date) {
-			msgprint(wn._("Opening Date should be before Closing Date"));
+			msgprint(frappe._("Opening Date should be before Closing Date"));
 			return;
 		}
 
 		this.fiscal_year = null;
 		var me = this;
-		$.each(wn.report_dump.data["Fiscal Year"], function(i, v) {
+		$.each(frappe.report_dump.data["Fiscal Year"], function(i, v) {
 			if (me.opening_date >= dateutil.str_to_obj(v.year_start_date) && 
 				me.closing_date <= dateutil.str_to_obj(v.year_end_date)) {
 					me.fiscal_year = v;
@@ -208,18 +208,18 @@ erpnext.AccountTreeGrid = wn.views.TreeGridReport.extend({
 		});
 
 		if (!this.fiscal_year) {
-			msgprint(wn._("Opening Date and Closing Date should be within same Fiscal Year"));
+			msgprint(frappe._("Opening Date and Closing Date should be within same Fiscal Year"));
 			return;
 		}
 	},
 	
 	show_general_ledger: function(account) {
-		wn.route_options = {
+		frappe.route_options = {
 			account: account,
 			company: this.company,
 			from_date: this.from_date,
 			to_date: this.to_date
 		};
-		wn.set_route("query-report", "General Ledger");
+		frappe.set_route("query-report", "General Ledger");
 	}
 });

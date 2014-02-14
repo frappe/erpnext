@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.model import rename_field
+import frappe
+from frappe.model import rename_field
 
 
 def execute():
@@ -109,22 +109,22 @@ def execute():
 			
 def reload_docs(docs):
 	for dn in docs:
-		webnotes.reload_doc(get_module(dn),	"doctype", dn.lower().replace(" ", "_"))
+		frappe.reload_doc(get_module(dn),	"doctype", dn.lower().replace(" ", "_"))
 	
 	# reload all standard print formats
-	for pf in webnotes.conn.sql("""select name, module from `tabPrint Format` 
+	for pf in frappe.conn.sql("""select name, module from `tabPrint Format` 
 			where ifnull(standard, 'No') = 'Yes'""", as_dict=1):
 		try:
-			webnotes.reload_doc(pf.module, "Print Format", pf.name)
+			frappe.reload_doc(pf.module, "Print Format", pf.name)
 		except Exception, e:
 			print e
 			pass
 		
 	# reload all standard reports
-	for r in webnotes.conn.sql("""select name, ref_doctype from `tabReport` 
+	for r in frappe.conn.sql("""select name, ref_doctype from `tabReport` 
 		where ifnull(is_standard, 'No') = 'Yes'
 		and report_type in ('Report Builder', 'Query Report')""", as_dict=1):
-			webnotes.reload_doc(get_module(r.ref_doctype), "Report", r.name)
+			frappe.reload_doc(get_module(r.ref_doctype), "Report", r.name)
 			
 def get_module(dn):
-	return webnotes.conn.get_value("DocType", dn, "module").lower().replace(" ", "_")
+	return frappe.conn.get_value("DocType", dn, "module").lower().replace(" ", "_")

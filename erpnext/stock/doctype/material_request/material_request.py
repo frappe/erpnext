@@ -5,12 +5,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, flt
-from webnotes.model.utils import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from frappe.utils import cstr, flt
+from frappe.model.utils import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 
 from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -37,25 +37,25 @@ class DocType(BuyingController):
 		
 		for so_no in so_items.keys():
 			for item in so_items[so_no].keys():
-				already_indented = webnotes.conn.sql("""select sum(ifnull(qty, 0)) 
+				already_indented = frappe.conn.sql("""select sum(ifnull(qty, 0)) 
 					from `tabMaterial Request Item` 
 					where item_code = %s and sales_order_no = %s and 
 					docstatus = 1 and parent != %s""", (item, so_no, self.doc.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 				
-				actual_so_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Order Item` 
+				actual_so_qty = frappe.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Order Item` 
 					where parent = %s and item_code = %s and docstatus = 1""", (so_no, item))
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 				
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
-					webnotes.throw("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
+					frappe.throw("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
 						\n Anyway, you can add more qty in new row for the same item."
 						% (actual_so_qty - already_indented, item, so_no))
 				
 	def validate_schedule_date(self):
 		for d in getlist(self.doclist, 'indent_details'):
 			if d.schedule_date < self.doc.transaction_date:
-				webnotes.throw(_("Expected Date cannot be before Material Request Date"))
+				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 				
 	# Validate
 	# ---------------------
@@ -85,9 +85,9 @@ class DocType(BuyingController):
 		
 		from erpnext.stock.utils import update_bin
 		for d in getlist(self.doclist, 'indent_details'):
-			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
+			if frappe.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
-					webnotes.throw("Please Enter Warehouse for Item %s as it is stock item" 
+					frappe.throw("Please Enter Warehouse for Item %s as it is stock item" 
 						% cstr(d.item_code))
 					
 				qty =flt(d.qty)
@@ -103,17 +103,17 @@ class DocType(BuyingController):
 				update_bin(args)		
 		
 	def on_submit(self):
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
+		frappe.conn.set(self.doc, 'status', 'Submitted')
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	
 	def check_modified_date(self):
-		mod_db = webnotes.conn.sql("""select modified from `tabMaterial Request` where name = %s""", 
+		mod_db = frappe.conn.sql("""select modified from `tabMaterial Request` where name = %s""", 
 			self.doc.name)
-		date_diff = webnotes.conn.sql("""select TIMEDIFF('%s', '%s')"""
+		date_diff = frappe.conn.sql("""select TIMEDIFF('%s', '%s')"""
 			% (mod_db[0][0], cstr(self.doc.modified)))
 		
 		if date_diff and date_diff[0][0]:
-			webnotes.throw(cstr(self.doc.doctype) + " => " + cstr(self.doc.name) + " has been modified. Please Refresh.")
+			frappe.throw(cstr(self.doc.doctype) + " => " + cstr(self.doc.name) + " has been modified. Please Refresh.")
 
 	def update_status(self, status):
 		self.check_modified_date()
@@ -121,7 +121,7 @@ class DocType(BuyingController):
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
 
 		# Step 2:=> Set status 
-		webnotes.conn.set(self.doc, 'status', cstr(status))
+		frappe.conn.set(self.doc, 'status', cstr(status))
 		
 		# Step 3:=> Acknowledge User
 		msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
@@ -140,7 +140,7 @@ class DocType(BuyingController):
 		self.update_bin(is_submit = 0, is_stopped = (cstr(self.doc.status) == 'Stopped') and 1 or 0)
 		
 		# Step 5:=> Set Status
-		webnotes.conn.set(self.doc,'status','Cancelled')
+		frappe.conn.set(self.doc,'status','Cancelled')
 		
 	def update_completed_qty(self, mr_items=None):
 		if self.doc.material_request_type != "Transfer":
@@ -154,11 +154,11 @@ class DocType(BuyingController):
 		per_ordered = 0.0
 		for d in item_doclist:
 			if d.name in mr_items:
-				d.ordered_qty =  flt(webnotes.conn.sql("""select sum(transfer_qty) 
+				d.ordered_qty =  flt(frappe.conn.sql("""select sum(transfer_qty) 
 					from `tabStock Entry Detail` where material_request = %s 
 					and material_request_item = %s and docstatus = 1""", 
 					(self.doc.name, d.name))[0][0])
-				webnotes.conn.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
+				frappe.conn.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 				
 			# note: if qty is 0, its row is still counted in len(item_doclist)
 			# hence adding 1 to per_ordered
@@ -168,7 +168,7 @@ class DocType(BuyingController):
 				per_ordered += flt(d.ordered_qty / flt(d.qty))
 		
 		self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
-		webnotes.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
+		frappe.conn.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
 		
 def update_completed_qty(bean, method):
 	if bean.doc.doctype == "Stock Entry":
@@ -179,13 +179,13 @@ def update_completed_qty(bean, method):
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 			
 		for mr_name, mr_items in material_request_map.items():
-			mr_obj = webnotes.get_obj("Material Request", mr_name, with_children=1)
-			mr_doctype = webnotes.get_doctype("Material Request")
+			mr_obj = frappe.get_obj("Material Request", mr_name, with_children=1)
+			mr_doctype = frappe.get_doctype("Material Request")
 			
 			if mr_obj.doc.status in ["Stopped", "Cancelled"]:
-				webnotes.throw(_("Material Request") + ": %s, " % mr_obj.doc.name 
+				frappe.throw(_("Material Request") + ": %s, " % mr_obj.doc.name 
 					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.doc.status)
-					+ _("Cannot continue."), exc=webnotes.InvalidStatusError)
+					+ _("Cannot continue."), exc=frappe.InvalidStatusError)
 				
 			_update_requested_qty(bean, mr_obj, mr_items)
 			
@@ -221,16 +221,16 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 		})
 
 def set_missing_values(source, target_doclist):
-	po = webnotes.bean(target_doclist)
+	po = frappe.bean(target_doclist)
 	po.run_method("set_missing_values")
 	
 def update_item(obj, target, source_parent):
 	target.conversion_factor = 1
 	target.qty = flt(obj.qty) - flt(obj.ordered_qty)
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_purchase_order(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 
 	doclist = get_mapped_doclist("Material Request", source_name, 	{
 		"Material Request": {
@@ -255,13 +255,13 @@ def make_purchase_order(source_name, target_doclist=None):
 
 	return [d.fields for d in doclist]
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	if target_doclist:
 		if isinstance(target_doclist, basestring):
 			import json
-			target_doclist = webnotes.doclist(json.loads(target_doclist))
+			target_doclist = frappe.doclist(json.loads(target_doclist))
 		target_doclist = target_doclist.get({"parentfield": ["!=", "po_details"]})
 		
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
@@ -298,9 +298,9 @@ def make_purchase_order_based_on_supplier(source_name, target_doclist=None):
 	return [d.fields for d in target_doclist]
 	
 def get_material_requests_based_on_supplier(supplier):
-	supplier_items = [d[0] for d in webnotes.conn.get_values("Item", 
+	supplier_items = [d[0] for d in frappe.conn.get_values("Item", 
 		{"default_supplier": supplier})]
-	material_requests = webnotes.conn.sql_list("""select distinct mr.name 
+	material_requests = frappe.conn.sql_list("""select distinct mr.name 
 		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 		where mr.name = mr_item.parent
 		and mr_item.item_code in (%s)
@@ -311,9 +311,9 @@ def get_material_requests_based_on_supplier(supplier):
 		tuple(supplier_items))
 	return material_requests, supplier_items
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_supplier_quotation(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 
 	doclist = get_mapped_doclist("Material Request", source_name, {
 		"Material Request": {
@@ -335,9 +335,9 @@ def make_supplier_quotation(source_name, target_doclist=None):
 
 	return [d.fields for d in doclist]
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_stock_entry(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
@@ -346,7 +346,7 @@ def make_stock_entry(source_name, target_doclist=None):
 	
 	def set_missing_values(source, target):
 		target[0].purpose = "Material Transfer"
-		se = webnotes.bean(target)
+		se = frappe.bean(target)
 		se.run_method("get_stock_and_rate")
 
 	doclist = get_mapped_doclist("Material Request", source_name, {

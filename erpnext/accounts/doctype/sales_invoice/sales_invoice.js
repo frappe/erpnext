@@ -14,7 +14,7 @@ cur_frm.pformat.print_heading = 'Invoice';
 {% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
-wn.provide("erpnext.accounts");
+frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	onload: function() {
 		this._super();
@@ -25,11 +25,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		
 		// toggle to pos view if is_pos is 1 in user_defaults
-		if ((cint(wn.defaults.get_user_defaults("is_pos"))===1 || this.frm.doc.is_pos)) {
+		if ((cint(frappe.defaults.get_user_defaults("is_pos"))===1 || this.frm.doc.is_pos)) {
 			if(this.frm.doc.__islocal && !this.frm.doc.amended_from && !this.frm.doc.customer) {
 				this.frm.set_value("is_pos", 1);
 				this.is_pos(function() {
-					if (cint(wn.defaults.get_user_defaults("fs_pos_view"))===1)
+					if (cint(frappe.defaults.get_user_defaults("fs_pos_view"))===1)
 						cur_frm.cscript.toggle_pos(true);
 				});
 			}
@@ -50,20 +50,20 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		if(doc.docstatus==1) {
 			cur_frm.appframe.add_button('View Ledger', function() {
-				wn.route_options = {
+				frappe.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
 					"company": doc.company,
 					group_by_voucher: 0
 				};
-				wn.set_route("query-report", "General Ledger");
+				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 			
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
 			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
+			cur_frm.appframe.add_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
@@ -74,11 +74,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 				
 				if(!from_delivery_note)
-					cur_frm.appframe.add_primary_action(wn._('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
+					cur_frm.appframe.add_primary_action(frappe._('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
 			}
 
 			if(doc.outstanding_amount!=0)
-				cur_frm.appframe.add_primary_action(wn._('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
+				cur_frm.appframe.add_primary_action(frappe._('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
 		}
 
 		// Show buttons only when pos view is active
@@ -89,9 +89,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.appframe.add_primary_action(wn._('From Sales Order'), 
+		this.$sales_order_btn = cur_frm.appframe.add_primary_action(frappe._('From Sales Order'), 
 			function() {
-				wn.model.map_current_doc({
+				frappe.model.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
 					source_doctype: "Sales Order",
 					get_query_filters: {
@@ -106,9 +106,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(wn._('From Delivery Note'), 
+		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(frappe._('From Delivery Note'), 
 			function() {
-				wn.model.map_current_doc({
+				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 					source_doctype: "Delivery Note",
 					get_query: function() {
@@ -134,7 +134,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
-				msgprint(wn._("Please specify Company to proceed"));
+				msgprint(frappe._("Please specify Company to proceed"));
 			} else {
 				var me = this;
 				return this.frm.call({
@@ -179,7 +179,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	
 	write_off_outstanding_amount_automatically: function() {
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
-			wn.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
+			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount", 
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), precision("write_off_amount"));
@@ -198,7 +198,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	entries_add: function(doc, cdt, cdn) {
-		var row = wn.model.get_doc(cdt, cdn);
+		var row = frappe.model.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
 	},
 	
@@ -233,7 +233,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 	} else {
 		hide_field('payments_section');
 		for (i in par_flds) {
-			var docfield = wn.meta.docfield_map[doc.doctype][par_flds[i]];
+			var docfield = frappe.meta.docfield_map[doc.doctype][par_flds[i]];
 			if(!docfield.hidden) unhide_field(par_flds[i]);
 		}
 		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
@@ -244,7 +244,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 		(cint(doc.update_stock)==1 ? true : false));
 	
 	// India related fields
-	var cp = wn.control_panel;
+	var cp = frappe.control_panel;
 	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
 	
@@ -269,21 +269,21 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 }
 
 cur_frm.cscript['Make Delivery Note'] = function() {
-	wn.model.open_mapped_doc({
+	frappe.model.open_mapped_doc({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
 		source_name: cur_frm.doc.name
 	})
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
-	return wn.call({
+	return frappe.call({
 		method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_sales_invoice",
 		args: {
 			"sales_invoice": cur_frm.doc.name
 		},
 		callback: function(r) {
-			var doclist = wn.model.sync(r.message);
-			wn.set_route("Form", doclist[0].doctype, doclist[0].name);
+			var doclist = frappe.model.sync(r.message);
+			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}
 	});
 }
@@ -400,8 +400,8 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.sales_invoice)) {
-		cur_frm.email_doc(wn.boot.notification_settings.sales_invoice_message);
+	if(cint(frappe.boot.notification_settings.sales_invoice)) {
+		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
 	}
 }
 
@@ -409,12 +409,12 @@ cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
 	// set default values for recurring invoices
 	if(doc.convert_into_recurring_invoice) {
 		var owner_email = doc.owner=="Administrator"
-			? wn.user_info("Administrator").email
+			? frappe.user_info("Administrator").email
 			: doc.owner;
 		
 		doc.notification_email_address = $.map([cstr(owner_email),
 			cstr(doc.contact_email)], function(v) { return v || null; }).join(", ");
-		doc.repeat_on_day_of_month = wn.datetime.str_to_obj(doc.posting_date).getDate();
+		doc.repeat_on_day_of_month = frappe.datetime.str_to_obj(doc.posting_date).getDate();
 	}
 		
 	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
@@ -428,9 +428,9 @@ cur_frm.cscript.invoice_period_from_date = function(doc, dt, dn) {
 
 		var months = recurring_type_map[doc.recurring_type];
 		if(months) {
-			var to_date = wn.datetime.add_months(doc.invoice_period_from_date,
+			var to_date = frappe.datetime.add_months(doc.invoice_period_from_date,
 				months);
-			doc.invoice_period_to_date = wn.datetime.add_days(to_date, -1);
+			doc.invoice_period_to_date = frappe.datetime.add_days(to_date, -1);
 			refresh_field('invoice_period_to_date');
 		}
 	}

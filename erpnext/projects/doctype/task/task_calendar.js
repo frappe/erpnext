@@ -1,12 +1,12 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.views.calendar["Task"] = {
+frappe.views.calendar["Task"] = {
 	field_map: {
 		"start": "exp_start_date",
 		"end": "exp_end_date",
 		"id": "name",
-		"title": wn._("subject"),
+		"title": frappe._("subject"),
 		"allDay": "allDay"
 	},
 	gantt: true,
@@ -15,7 +15,7 @@ wn.views.calendar["Task"] = {
 			"fieldtype": "Link", 
 			"fieldname": "project", 
 			"options": "Project", 
-			"label": wn._("Project")
+			"label": frappe._("Project")
 		}
 	],
 	get_events_method: "erpnext.projects.doctype.task.task.get_events"

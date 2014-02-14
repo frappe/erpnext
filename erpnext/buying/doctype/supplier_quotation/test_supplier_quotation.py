@@ -4,19 +4,19 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-import webnotes.defaults
+import frappe
+import frappe.defaults
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
-		sq = webnotes.bean(copy=test_records[0]).insert()
+		sq = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_purchase_order, 
+		self.assertRaises(frappe.ValidationError, make_purchase_order, 
 			sq.doc.name)
 
-		sq = webnotes.bean("Supplier Quotation", sq.doc.name)
+		sq = frappe.bean("Supplier Quotation", sq.doc.name)
 		sq.submit()
 		po = make_purchase_order(sq.doc.name)
 		
@@ -29,7 +29,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			if doc.get("item_code"):
 				doc["schedule_date"] = "2013-04-12"
 
-		webnotes.bean(po).insert()
+		frappe.bean(po).insert()
 		
 test_records = [
 	[

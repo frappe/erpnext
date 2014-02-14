@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import flt
+from frappe import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -72,12 +72,12 @@ def get_columns(invoice_list):
 	income_accounts = tax_accounts = income_columns = tax_columns = []
 	
 	if invoice_list:
-		income_accounts = webnotes.conn.sql_list("""select distinct income_account 
+		income_accounts = frappe.conn.sql_list("""select distinct income_account 
 			from `tabSales Invoice Item` where docstatus = 1 and parent in (%s) 
 			order by income_account""" % 
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 	
-		tax_accounts = 	webnotes.conn.sql_list("""select distinct account_head 
+		tax_accounts = 	frappe.conn.sql_list("""select distinct account_head 
 			from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
 			and docstatus = 1 and ifnull(tax_amount_after_discount_amount, 0) != 0 
 			and parent in (%s) order by account_head""" % 
@@ -107,26 +107,26 @@ def get_conditions(filters):
 	
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
+	return frappe.conn.sql("""select name, posting_date, debit_to, project_name, customer, 
 		customer_name, remarks, net_total, grand_total, rounded_total, outstanding_amount 
 		from `tabSales Invoice` 
 		where docstatus = 1 %s order by posting_date desc, name desc""" % 
 		conditions, filters, as_dict=1)
 	
 def get_invoice_income_map(invoice_list):
-	income_details = webnotes.conn.sql("""select parent, income_account, sum(base_amount) as amount
+	income_details = frappe.conn.sql("""select parent, income_account, sum(base_amount) as amount
 		from `tabSales Invoice Item` where parent in (%s) group by parent, income_account""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 	
 	invoice_income_map = {}
 	for d in income_details:
-		invoice_income_map.setdefault(d.parent, webnotes._dict()).setdefault(d.income_account, [])
+		invoice_income_map.setdefault(d.parent, frappe._dict()).setdefault(d.income_account, [])
 		invoice_income_map[d.parent][d.income_account] = flt(d.amount)
 	
 	return invoice_income_map
 	
 def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
-	tax_details = webnotes.conn.sql("""select parent, account_head, 
+	tax_details = frappe.conn.sql("""select parent, account_head, 
 		sum(tax_amount_after_discount_amount) as tax_amount 
 		from `tabSales Taxes and Charges` where parent in (%s) group by parent, account_head""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
@@ -139,13 +139,13 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 			else:
 				invoice_income_map[d.parent][d.account_head] = flt(d.tax_amount)
 		else:
-			invoice_tax_map.setdefault(d.parent, webnotes._dict()).setdefault(d.account_head, [])
+			invoice_tax_map.setdefault(d.parent, frappe._dict()).setdefault(d.account_head, [])
 			invoice_tax_map[d.parent][d.account_head] = flt(d.tax_amount)
 	
 	return invoice_income_map, invoice_tax_map
 	
 def get_invoice_so_dn_map(invoice_list):
-	si_items = webnotes.conn.sql("""select parent, sales_order, delivery_note
+	si_items = frappe.conn.sql("""select parent, sales_order, delivery_note
 		from `tabSales Invoice Item` where parent in (%s) 
 		and (ifnull(sales_order, '') != '' or ifnull(delivery_note, '') != '')""" % 
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
@@ -153,10 +153,10 @@ def get_invoice_so_dn_map(invoice_list):
 	invoice_so_dn_map = {}
 	for d in si_items:
 		if d.sales_order:
-			invoice_so_dn_map.setdefault(d.parent, webnotes._dict()).setdefault(
+			invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault(
 				"sales_order", []).append(d.sales_order)
 		if d.delivery_note:
-			invoice_so_dn_map.setdefault(d.parent, webnotes._dict()).setdefault(
+			invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault(
 				"delivery_note", []).append(d.delivery_note)
 				
 	return invoice_so_dn_map
@@ -164,7 +164,7 @@ def get_invoice_so_dn_map(invoice_list):
 def get_customer_deatils(invoice_list):
 	customer_map = {}
 	customers = list(set([inv.customer for inv in invoice_list]))
-	for cust in webnotes.conn.sql("""select name, territory from `tabCustomer` 
+	for cust in frappe.conn.sql("""select name, territory from `tabCustomer` 
 		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
 			customer_map[cust.name] = cust.territory
 	
@@ -173,7 +173,7 @@ def get_customer_deatils(invoice_list):
 def get_account_details(invoice_list):
 	account_map = {}
 	accounts = list(set([inv.debit_to for inv in invoice_list]))
-	for acc in webnotes.conn.sql("""select name, parent_account from tabAccount 
+	for acc in frappe.conn.sql("""select name, parent_account from tabAccount 
 		where name in (%s)""" % ", ".join(["%s"]*len(accounts)), tuple(accounts), as_dict=1):
 			account_map[acc.name] = acc.parent_account
 						

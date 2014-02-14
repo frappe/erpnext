@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -55,7 +55,7 @@ def get_conditions(filters):
 		
 def get_items(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name, 
+	return frappe.conn.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name, 
 		si.customer, si.remarks, si.territory, si.company, si_item.item_code, si_item.item_name, 
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account, 
 		si_item.qty, si_item.base_rate, si_item.base_amount, si.customer_name
@@ -68,7 +68,7 @@ def get_tax_accounts(item_list, columns):
 	item_tax = {}
 	tax_accounts = []
 	
-	tax_details = webnotes.conn.sql("""select parent, account_head, item_wise_tax_detail
+	tax_details = frappe.conn.sql("""select parent, account_head, item_wise_tax_detail
 		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
 		and docstatus = 1 and ifnull(account_head, '') != ''
 		and parent in (%s)""" % ', '.join(['%s']*len(item_list)), 

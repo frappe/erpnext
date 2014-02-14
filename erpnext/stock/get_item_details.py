@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, throw
-from webnotes.utils import flt, cint, add_days
+import frappe
+from frappe import _, throw
+from frappe.utils import flt, cint, add_days
 import json
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_item_details(args):
 	"""
 		args = {
@@ -31,7 +31,7 @@ def get_item_details(args):
 
 	if isinstance(args, basestring):
 		args = json.loads(args)
-	args = webnotes._dict(args)
+	args = frappe._dict(args)
 	
 	if not args.get("transaction_type"):
 		args.transaction_type = "selling" if args.get("customer") else "buying"
@@ -44,7 +44,7 @@ def get_item_details(args):
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
 	
-	item_bean = webnotes.bean("Item", args.item_code)
+	item_bean = frappe.bean("Item", args.item_code)
 	item = item_bean.doc
 
 	validate_item_details(args, item)
@@ -76,9 +76,9 @@ def get_item_details(args):
 
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
-		item_code = webnotes.conn.get_value("Item", {"barcode": barcode})
+		item_code = frappe.conn.get_value("Item", {"barcode": barcode})
 	elif serial_no:
-		item_code = webnotes.conn.get_value("Serial No", serial_no, "item_code")
+		item_code = frappe.conn.get_value("Serial No", serial_no, "item_code")
 
 	if not item_code:
 		throw(_("No Item found with ") + _("Barcode") if barcode else _("Serial No") + 
@@ -117,20 +117,20 @@ def validate_item_details(args, item):
 def get_basic_details(args, item_bean):
 	item = item_bean.doc
 	
-	from webnotes.defaults import get_user_default_as_list
+	from frappe.defaults import get_user_default_as_list
 	user_default_warehouse_list = get_user_default_as_list('warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
 
-	out = webnotes._dict({
+	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
 		"description": item.description_html or item.description,
 		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
 		"income_account": item.income_account or args.income_account \
-			or webnotes.conn.get_value("Company", args.company, "default_income_account"),
+			or frappe.conn.get_value("Company", args.company, "default_income_account"),
 		"expense_account": item.expense_account or args.expense_account \
-			or webnotes.conn.get_value("Company", args.company, "default_expense_account"),
+			or frappe.conn.get_value("Company", args.company, "default_expense_account"),
 		"cost_center": item.selling_cost_center \
 			if args.transaction_type == "selling" else item.buying_cost_center,
 		"batch_no": None,
@@ -155,13 +155,13 @@ def get_basic_details(args, item_bean):
 	return out
 	
 def get_price_list_rate(args, item_bean, out):
-	meta = webnotes.get_doctype(args.doctype)
+	meta = frappe.get_doctype(args.doctype)
 
 	if meta.get_field("currency"):
 		validate_price_list(args)
 		validate_conversion_rate(args, meta)
 
-		price_list_rate = webnotes.conn.get_value("Item Price", 
+		price_list_rate = frappe.conn.get_value("Item Price", 
 			{"price_list": args.price_list, "item_code": args.item_code}, "price_list_rate")
 			
 		if not price_list_rate: return {}
@@ -176,7 +176,7 @@ def get_price_list_rate(args, item_bean, out):
 			
 def validate_price_list(args):
 	if args.get("price_list"):
-		if not webnotes.conn.get_value("Price List", 
+		if not frappe.conn.get_value("Price List", 
 			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
 				throw(_("Price List is either disabled or for not ") + _(args.transaction_type))
 	else:
@@ -184,7 +184,7 @@ def validate_price_list(args):
 		
 def validate_conversion_rate(args, meta):
 	from erpnext.setup.doctype.currency.currency import validate_conversion_rate
-	from webnotes.model.meta import get_field_precision
+	from frappe.model.meta import get_field_precision
 	
 	# validate currency conversion rate
 	validate_conversion_rate(args.currency, args.conversion_rate, 
@@ -192,7 +192,7 @@ def validate_conversion_rate(args, meta):
 	
 	args.conversion_rate = flt(args.conversion_rate, 
 		get_field_precision(meta.get_field("conversion_rate"), 
-			webnotes._dict({"fields": args})))
+			frappe._dict({"fields": args})))
 	
 	# validate price list currency conversion rate
 	if not args.get("price_list_currency"):
@@ -203,10 +203,10 @@ def validate_conversion_rate(args, meta):
 		
 		args.plc_conversion_rate = flt(args.plc_conversion_rate, 
 			get_field_precision(meta.get_field("plc_conversion_rate"), 
-			webnotes._dict({"fields": args})))
+			frappe._dict({"fields": args})))
 
 def get_item_discount(item_group, customer):
-	parent_item_groups = [x[0] for x in webnotes.conn.sql("""SELECT parent.name 
+	parent_item_groups = [x[0] for x in frappe.conn.sql("""SELECT parent.name 
 		FROM `tabItem Group` AS node, `tabItem Group` AS parent 
 		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
 		GROUP BY parent.name 
@@ -214,7 +214,7 @@ def get_item_discount(item_group, customer):
 		
 	discount = 0
 	for d in parent_item_groups:
-		res = webnotes.conn.sql("""select discount, name from `tabCustomer Discount` 
+		res = frappe.conn.sql("""select discount, name from `tabCustomer Discount` 
 			where parent = %s and item_group = %s""", (customer, d))
 		if res:
 			discount = flt(res[0][0])
@@ -234,7 +234,7 @@ def get_party_item_code(args, item_bean, out):
 		
 
 def get_pos_settings_item_details(company, args, pos_settings=None):
-	res = webnotes._dict()
+	res = frappe._dict()
 	
 	if not pos_settings:
 		pos_settings = get_pos_settings(company)
@@ -251,17 +251,17 @@ def get_pos_settings_item_details(company, args, pos_settings=None):
 	return res
 
 def get_pos_settings(company):
-	pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` where user = %s 
-		and company = %s""", (webnotes.session['user'], company), as_dict=1)
+	pos_settings = frappe.conn.sql("""select * from `tabPOS Setting` where user = %s 
+		and company = %s""", (frappe.session['user'], company), as_dict=1)
 	
 	if not pos_settings:
-		pos_settings = webnotes.conn.sql("""select * from `tabPOS Setting` 
+		pos_settings = frappe.conn.sql("""select * from `tabPOS Setting` 
 			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
 			
 	return pos_settings and pos_settings[0] or None
 	
 def get_serial_nos_by_fifo(args, item_bean):
-	return "\n".join(webnotes.conn.sql_list("""select name from `tabSerial No` 
+	return "\n".join(frappe.conn.sql_list("""select name from `tabSerial No` 
 		where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available' 
 		order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
 			"item_code": args.item_code,
@@ -269,17 +269,17 @@ def get_serial_nos_by_fifo(args, item_bean):
 			"qty": cint(args.qty)
 		}))
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_conversion_factor(item_code, uom):
-	return {"conversion_factor": webnotes.conn.get_value("UOM Conversion Detail",
+	return {"conversion_factor": frappe.conn.get_value("UOM Conversion Detail",
 		{"parent": item_code, "uom": uom}, "conversion_factor")}
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_projected_qty(item_code, warehouse):
-	return {"projected_qty": webnotes.conn.get_value("Bin", 
+	return {"projected_qty": frappe.conn.get_value("Bin", 
 		{"item_code": item_code, "warehouse": warehouse}, "projected_qty")}
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_available_qty(item_code, warehouse):
-	return webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
+	return frappe.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
 		["projected_qty", "actual_qty"], as_dict=True) or {}

@@ -7,12 +7,12 @@ $.extend(cur_frm.cscript, {
 		
 		if(!(cint(cur_frm.doc.dropbox_access_allowed) || 
 			cint(cur_frm.doc.gdrive_access_allowed))) {
-				cur_frm.set_intro(wn._("You can start by selecting backup frequency and \
+				cur_frm.set_intro(frappe._("You can start by selecting backup frequency and \
 					granting access for sync"));
 		} else {
 			var services = {
-				"dropbox": wn._("Dropbox"),
-				"gdrive": wn._("Google Drive")
+				"dropbox": frappe._("Dropbox"),
+				"gdrive": frappe._("Google Drive")
 			}
 			var active_services = [];
 			
@@ -25,8 +25,8 @@ $.extend(cur_frm.cscript, {
 			});
 			
 			if(active_services.length > 0) {
-				cur_frm.set_intro(wn._("Backups will be uploaded to") + ": " + 
-					wn.utils.comma_and(active_services));
+				cur_frm.set_intro(frappe._("Backups will be uploaded to") + ": " + 
+					frappe.utils.comma_and(active_services));
 			} else {
 				cur_frm.set_intro("");
 			}
@@ -36,8 +36,8 @@ $.extend(cur_frm.cscript, {
 	
 	validate_send_notifications_to: function() {
 		if(!cur_frm.doc.send_notifications_to) {
-			msgprint(wn._("Please specify") + ": " + 
-				wn._(wn.meta.get_label(cur_frm.doctype, "send_notifications_to")));
+			msgprint(frappe._("Please specify") + ": " + 
+				frappe._(frappe.meta.get_label(cur_frm.doctype, "send_notifications_to")));
 			return false;
 		}
 		
@@ -46,7 +46,7 @@ $.extend(cur_frm.cscript, {
 	
 	allow_dropbox_access: function() {
 		if(cur_frm.cscript.validate_send_notifications_to()) {
-			return wn.call({
+			return frappe.call({
 				method: "erpnext.setup.doctype.backup_manager.backup_dropbox.get_dropbox_authorize_url",
 				callback: function(r) {
 					if(!r.exc) {
@@ -63,7 +63,7 @@ $.extend(cur_frm.cscript, {
 	
 	allow_gdrive_access: function() {
 		if(cur_frm.cscript.validate_send_notifications_to()) {
-			return wn.call({
+			return frappe.call({
 				method: "erpnext.setup.doctype.backup_manager.backup_googledrive.get_gdrive_authorize_url",
 				callback: function(r) {
 					if(!r.exc) {
@@ -75,7 +75,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	validate_gdrive: function() {
-		return wn.call({
+		return frappe.call({
 			method: "erpnext.setup.doctype.backup_manager.backup_googledrive.gdrive_callback",
 			args: {
 				verification_code: cur_frm.doc.verification_code

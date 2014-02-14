@@ -8,7 +8,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
     }
     
     return $c('runserverobj',args={'method' : 'get_months', 'docs' : 
-		wn.model.compress(make_doclist(doc.doctype, doc.name))},callback1);
+		frappe.model.compress(make_doclist(doc.doctype, doc.name))},callback1);
   }
 }
 

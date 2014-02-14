@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import flt
+import frappe
+from frappe import _, msgprint
+from frappe.utils import flt
 import time
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -62,7 +62,7 @@ def get_columns(filters):
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):
-	return webnotes.conn.sql("""select cc.name, cc.distribution_id, 
+	return frappe.conn.sql("""select cc.name, cc.distribution_id, 
 		cc.parent_cost_center, bd.account, bd.budget_allocated 
 		from `tabCost Center` cc, `tabBudget Detail` bd 
 		where bd.parent=cc.name and bd.fiscal_year=%s and 
@@ -73,7 +73,7 @@ def get_costcenter_target_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation  
+	for d in frappe.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation  
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
@@ -82,7 +82,7 @@ def get_target_distribution_details(filters):
 
 #Get actual details from gl entry
 def get_actual_details(filters):
-	ac_details = webnotes.conn.sql("""select gl.account, gl.debit, gl.credit, 
+	ac_details = frappe.conn.sql("""select gl.account, gl.debit, gl.credit, 
 		gl.cost_center, MONTHNAME(gl.posting_date) as month_name 
 		from `tabGL Entry` gl, `tabBudget Detail` bd 
 		where gl.fiscal_year=%s and company=%s
@@ -108,7 +108,7 @@ def get_costcenter_account_month_map(filters):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
 			
 			cam_map.setdefault(ccd.name, {}).setdefault(ccd.account, {})\
-				.setdefault(month, webnotes._dict({
+				.setdefault(month, frappe._dict({
 					"target": 0.0, "actual": 0.0
 				}))
 

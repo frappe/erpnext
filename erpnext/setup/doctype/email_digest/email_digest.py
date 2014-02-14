@@ -2,14 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
-from webnotes.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
+import frappe
+from frappe import _
+from frappe.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
 	get_url_to_form, get_fullname
-from webnotes.utils.dateutils import datetime_in_user_format
+from frappe.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from webnotes.utils.email_lib import sendmail
+from frappe.utils.email_lib import sendmail
 
 content_sequence = [
 	["Income / Expenses", ["income_year_to_date", "bank_balance",
@@ -43,18 +43,18 @@ row_template = """<p style="%(style)s">
 	<span style="color: grey">%(currency)s</span>%(value)s
 </span></p>"""
 
-from webnotes.model.controller import DocListController
+from frappe.model.controller import DocListController
 class DocType(DocListController):
 	def __init__(self, doc, doclist=[]):
 		self.doc, self.doclist = doc, doclist
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.future_from_date, self.future_to_date = self.get_future_from_to_date()
-		self.currency = webnotes.conn.get_value("Company", self.doc.company,
+		self.currency = frappe.conn.get_value("Company", self.doc.company,
 			"default_currency")
 
 	def get_profiles(self):
 		"""get list of profiles"""
-		profile_list = webnotes.conn.sql("""
+		profile_list = frappe.conn.sql("""
 			select name, enabled from tabProfile
 			where docstatus=0 and name not in ('Administrator', 'Guest')
 			and user_type = "System User"
@@ -67,11 +67,11 @@ class DocType(DocListController):
 		for p in profile_list:
 			p["checked"] = p["name"] in recipient_list and 1 or 0
 
-		webnotes.response['profile_list'] = profile_list
+		frappe.response['profile_list'] = profile_list
 	
 	def send(self):
 		# send email only to enabled users
-		valid_users = [p[0] for p in webnotes.conn.sql("""select name from `tabProfile`
+		valid_users = [p[0] for p in frappe.conn.sql("""select name from `tabProfile`
 			where enabled=1""")]
 		recipients = filter(lambda r: r in valid_users,
 			self.doc.recipient_list.split("\n"))
@@ -88,7 +88,7 @@ class DocType(DocListController):
 						msg=msg_for_this_receipient)
 			
 	def get_digest_msg(self):
-		return self.get_msg_html(self.get_user_specific_content(webnotes.session.user) + \
+		return self.get_msg_html(self.get_user_specific_content(frappe.session.user) + \
 			self.get_common_content(), send_only_if_updates=False)
 	
 	def get_common_content(self):
@@ -106,17 +106,17 @@ class DocType(DocListController):
 		return out
 		
 	def get_user_specific_content(self, user_id):
-		original_session_user = webnotes.session.user
+		original_session_user = frappe.session.user
 		
 		# setting session user for role base event fetching
-		webnotes.session.user = user_id
+		frappe.session.user = user_id
 		
 		out = []
 		for ctype in user_specific_content:
 			if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
 				out.append(getattr(self, "get_"+ctype)(user_id))
 				
-		webnotes.session.user = original_session_user
+		frappe.session.user = original_session_user
 		
 		return out
 				
@@ -153,7 +153,7 @@ class DocType(DocListController):
 		return msg
 	
 	def get_income_year_to_date(self):
-		return self.get_income(webnotes.conn.get_defaults("year_start_date"), 
+		return self.get_income(frappe.conn.get_defaults("year_start_date"), 
 			self.meta.get_label("income_year_to_date"))
 			
 	def get_bank_balance(self):
@@ -293,7 +293,7 @@ class DocType(DocListController):
 			filter_by_company=False)
 		
 	def get_calendar_events(self, user_id):
-		from webnotes.core.doctype.event.event import get_events
+		from frappe.core.doctype.event.event import get_events
 		events = get_events(self.future_from_date.strftime("%Y-%m-%d"), self.future_to_date.strftime("%Y-%m-%d"))
 		
 		html = ""
@@ -314,7 +314,7 @@ class DocType(DocListController):
 			return 0, "<p>Calendar Events</p>"
 	
 	def get_todo_list(self, user_id):
-		from webnotes.core.page.todo.todo import get
+		from frappe.core.page.todo.todo import get
 		todo_list = get()
 		
 		html = ""
@@ -339,7 +339,7 @@ class DocType(DocListController):
 			company = """and company="%s" """ % self.doc.company
 		else:
 			company = ""
-		count = webnotes.conn.sql("""select count(*) from `tab%s`
+		count = frappe.conn.sql("""select count(*) from `tab%s`
 			where docstatus=%s %s and
 			date(creation)>=%s and date(creation)<=%s""" % 
 			(doctype, docstatus, company, "%s", "%s"), (self.from_date, self.to_date))
@@ -348,7 +348,7 @@ class DocType(DocListController):
 		return count, self.get_html(label, None, count)
 		
 	def get_new_sum(self, doctype, label, sum_field):
-		count_sum = webnotes.conn.sql("""select count(*), sum(ifnull(`%s`, 0))
+		count_sum = frappe.conn.sql("""select count(*), sum(ifnull(`%s`, 0))
 			from `tab%s` where docstatus=1 and company = %s and
 			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
 			"%s", "%s"), (self.doc.company, self.from_date, self.to_date))
@@ -372,7 +372,7 @@ class DocType(DocListController):
 				hasattr(self, "gl_entries"):
 			return self.gl_entries
 		
-		gl_entries = webnotes.conn.sql("""select `account`, 
+		gl_entries = frappe.conn.sql("""select `account`, 
 			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
 			from `tabGL Entry`
 			where company=%s 
@@ -388,7 +388,7 @@ class DocType(DocListController):
 		
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
-			self.accounts = webnotes.conn.sql("""select name, is_pl_account,
+			self.accounts = frappe.conn.sql("""select name, is_pl_account,
 				debit_or_credit, account_type, account_name, master_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
@@ -451,7 +451,7 @@ class DocType(DocListController):
 		return send_date
 	
 	def get_open_tickets(self):
-		open_tickets = webnotes.conn.sql("""select name, subject, modified, raised_by
+		open_tickets = frappe.conn.sql("""select name, subject, modified, raised_by
 			from `tabSupport Ticket` where status='Open'
 			order by modified desc limit 10""", as_dict=True)
 			
@@ -463,23 +463,23 @@ class DocType(DocListController):
 			return 0, "No Open Tickets!"
 			
 	def get_scheduler_errors(self):
-		import webnotes.utils.scheduler
-		return webnotes.utils.scheduler.get_error_report(self.from_date, self.to_date)
+		import frappe.utils.scheduler
+		return frappe.utils.scheduler.get_error_report(self.from_date, self.to_date)
 	
 	def onload(self):
 		self.get_next_sending()
 	
 def send():
-	from webnotes.model.code import get_obj
-	from webnotes.utils import getdate
+	from frappe.model.code import get_obj
+	from frappe.utils import getdate
 	now_date = now_datetime().date()
 	
-	from webnotes import conf
+	from frappe import conf
 	if "expires_on" in conf and now_date > getdate(conf.expires_on):
 		# do not send email digests to expired accounts
 		return
 	
-	for ed in webnotes.conn.sql("""select name from `tabEmail Digest`
+	for ed in frappe.conn.sql("""select name from `tabEmail Digest`
 			where enabled=1 and docstatus<2""", as_list=1):
 		ed_obj = get_obj('Email Digest', ed[0])
 		if (now_date == ed_obj.get_next_sending()):

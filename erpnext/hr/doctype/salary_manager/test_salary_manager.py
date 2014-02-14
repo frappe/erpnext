@@ -3,32 +3,32 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
+import frappe
 
 test_records = []
 
-# from webnotes.model.doc import Document
-# from webnotes.model.code import get_obj
-# webnotes.conn.sql = webnotes.conn.sql
+# from frappe.model.doc import Document
+# from frappe.model.code import get_obj
+# frappe.conn.sql = frappe.conn.sql
 # 
 # class TestSalaryManager(unittest.TestCase):
 # 	def setUp(self):
-# 		webnotes.conn.begin()
+# 		frappe.conn.begin()
 # 		for rec in [des1, dep1, branch1, grade1, comp1, emp1, emp2]:
 # 			rec.save(1)
 # 					
 # 		ss1[0].employee = emp1.name
 # 		for s in ss1: s.save(1)
 # 		for s in ss1[1:]:
-# 			webnotes.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
-# 			webnotes.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
+# 			frappe.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
+# 			frappe.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
 # 			
 # 		
 # 		ss2[0].employee = emp2.name
 # 		for s in ss2: s.save(1)		
 # 		for s in ss2[1:]:
-# 			webnotes.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
-# 			webnotes.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
+# 			frappe.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
+# 			frappe.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
 # 			
 # 		sman.save()
 # 		self.sm = get_obj('Salary Manager')	
@@ -36,7 +36,7 @@ test_records = []
 # 		self.sm.create_sal_slip()
 # 		
 # 	def test_creation(self):
-# 		ssid = webnotes.conn.sql("""
+# 		ssid = frappe.conn.sql("""
 # 			select name, department 
 # 			from `tabSalary Slip` 
 # 			where month = '08' and fiscal_year='2011-2012'""")
@@ -46,7 +46,7 @@ test_records = []
 # 		
 # 		
 # 	def test_lwp_calc(self):
-# 		ss = webnotes.conn.sql("""
+# 		ss = frappe.conn.sql("""
 # 			select payment_days
 # 			from `tabSalary Slip` 
 # 			where month = '08' and fiscal_year='2011-2012' and employee = '%s'
@@ -55,7 +55,7 @@ test_records = []
 # 		self.assertTrue(ss[0][0]==27)
 # 		
 # 	def test_net_pay(self):
-# 		ss = webnotes.conn.sql("""
+# 		ss = frappe.conn.sql("""
 # 			select rounded_total 
 # 			from `tabSalary Slip` 
 # 			where month = '08'
@@ -64,7 +64,7 @@ test_records = []
 # 
 # 	def test_submit(self):
 # 		self.sm.submit_salary_slip()
-# 		ss = webnotes.conn.sql("""
+# 		ss = frappe.conn.sql("""
 # 			select docstatus 
 # 			from `tabSalary Slip` 
 # 			where month = '08'
@@ -72,7 +72,7 @@ test_records = []
 # 		self.assertTrue(ss[0][0]==1)
 # 		
 # 	def tearDown(self):
-# 		webnotes.conn.rollback()
+# 		frappe.conn.rollback()
 # 		
 # #--------------------------------------------
 # # test data

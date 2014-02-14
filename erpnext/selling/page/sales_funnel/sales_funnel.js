@@ -1,8 +1,8 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.pages['sales-funnel'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['sales-funnel'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Sales Funnel',
 		single_column: true
@@ -11,7 +11,7 @@ wn.pages['sales-funnel'].onload = function(wrapper) {
 	wrapper.sales_funnel = new erpnext.SalesFunnel(wrapper);
 	
 	wrapper.appframe.add_module_icon("Selling", "sales-funnel", function() {
-		wn.set_route("selling-home");
+		frappe.set_route("selling-home");
 	});
 }
 
@@ -44,15 +44,15 @@ erpnext.SalesFunnel = Class.extend({
 			.appendTo(this.elements.layout);
 		
 		this.options = {
-			from_date: wn.datetime.add_months(wn.datetime.get_today(), -1),
-			to_date: wn.datetime.get_today()
+			from_date: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			to_date: frappe.datetime.get_today()
 		};
 		
 		// set defaults and bind on change
 		$.each(this.options, function(k, v) { 
-			me.elements[k].val(wn.datetime.str_to_user(v)); 
+			me.elements[k].val(frappe.datetime.str_to_user(v)); 
 			me.elements[k].on("change", function() {
-				me.options[k] = wn.datetime.user_to_str($(this).val());
+				me.options[k] = frappe.datetime.user_to_str($(this).val());
 				me.get_data();
 			});
 		});
@@ -70,7 +70,7 @@ erpnext.SalesFunnel = Class.extend({
 	
 	get_data: function(btn) {
 		var me = this;
-		wn.call({
+		frappe.call({
 			method: "erpnext.selling.page.sales_funnel.sales_funnel.get_funnel_data",
 			args: {
 				from_date: this.options.from_date,

@@ -3,9 +3,9 @@
 
 from __future__ import unicode_literals
 """Global Defaults"""
-import webnotes
-import webnotes.defaults
-from webnotes.utils import cint
+import frappe
+import frappe.defaults
+from frappe.utils import cint
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
@@ -32,35 +32,35 @@ class DocType:
 		self.update_control_panel()
 		
 		for key in keydict:
-			webnotes.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
+			frappe.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
 			
 		# update year start date and year end date from fiscal_year
-		year_start_end_date = webnotes.conn.sql("""select year_start_date, year_end_date 
+		year_start_end_date = frappe.conn.sql("""select year_start_date, year_end_date 
 			from `tabFiscal Year` where name=%s""", self.doc.current_fiscal_year)
 
 		ysd = year_start_end_date[0][0] or ''
 		yed = year_start_end_date[0][1] or ''
 
 		if ysd and yed:
-			webnotes.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
-			webnotes.conn.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
+			frappe.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
+			frappe.conn.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
 		
 		# enable default currency
 		if self.doc.default_currency:
-			webnotes.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
+			frappe.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
 		
 		# clear cache
-		webnotes.clear_cache()
+		frappe.clear_cache()
 	
 	def validate_session_expiry(self):
 		if self.doc.session_expiry:
 			parts = self.doc.session_expiry.split(":")
 			if len(parts)!=2 or not (cint(parts[0]) or cint(parts[1])):
-				webnotes.msgprint("""Session Expiry must be in format hh:mm""",
+				frappe.msgprint("""Session Expiry must be in format hh:mm""",
 					raise_exception=1)
 
 	def update_control_panel(self):
-		cp_bean = webnotes.bean("Control Panel")
+		cp_bean = frappe.bean("Control Panel")
 		if self.doc.country:
 			cp_bean.doc.country = self.doc.country
 		if self.doc.time_zone:
@@ -69,4 +69,4 @@ class DocType:
 		cp_bean.save()
 
 	def get_defaults(self):
-		return webnotes.defaults.get_defaults()
+		return frappe.defaults.get_defaults()

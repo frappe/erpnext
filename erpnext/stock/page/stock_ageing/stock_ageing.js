@@ -2,10 +2,10 @@
 // License: GNU General Public License v3. See license.txt
 
 
-wn.pages['stock-ageing'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['stock-ageing'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Stock Ageing'),
+		title: frappe._('Stock Ageing'),
 		single_column: true
 	});
 
@@ -16,12 +16,12 @@ wn.pages['stock-ageing'].onload = function(wrapper) {
 	
 }
 
-wn.require("assets/erpnext/js/stock_grid_report.js");
+frappe.require("assets/erpnext/js/stock_grid_report.js");
 
 erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: wn._("Stock Ageing"),
+			title: frappe._("Stock Ageing"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -30,37 +30,37 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: wn._("Item"), field: "name", width: 300,
+			{id: "name", name: frappe._("Item"), field: "name", width: 300,
 				link_formatter: {
 					open_btn: true,
 					doctype: '"Item"'
 				}},
-			{id: "item_name", name: wn._("Item Name"), field: "item_name", 
+			{id: "item_name", name: frappe._("Item Name"), field: "item_name", 
 				width: 100, formatter: this.text_formatter},
-			{id: "description", name: wn._("Description"), field: "description", 
+			{id: "description", name: frappe._("Description"), field: "description", 
 				width: 200, formatter: this.text_formatter},
-			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
-			{id: "average_age", name: wn._("Average Age"), field: "average_age",
+			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
+			{id: "average_age", name: frappe._("Average Age"), field: "average_age",
 				formatter: this.currency_formatter},
-			{id: "earliest", name: wn._("Earliest"), field: "earliest",
+			{id: "earliest", name: frappe._("Earliest"), field: "earliest",
 				formatter: this.currency_formatter},
-			{id: "latest", name: wn._("Latest"), field: "latest",
+			{id: "latest", name: frappe._("Latest"), field: "latest",
 				formatter: this.currency_formatter},
 			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 		];
 	},
 	filters: [
-		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: wn._("Plot By"), 
+		{fieldtype:"Select", label: frappe._("Plot By"), 
 			options: ["Average Age", "Earliest", "Latest"]},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Date", label: frappe._("To Date")},
+		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: frappe._("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;
@@ -76,7 +76,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 		var me = this;
 				
 		if(!this.data) {
-			me._data = wn.report_dump.data["Item"];
+			me._data = frappe.report_dump.data["Item"];
 			me.item_by_name = me.make_name_map(me._data);
 		}
 		
@@ -103,7 +103,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	prepare_balances: function() {
 		var me = this;
 		var to_date = dateutil.str_to_obj(this.to_date);
-		var data = wn.report_dump.data["Stock Ledger Entry"];
+		var data = frappe.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
 

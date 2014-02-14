@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import add_days, cstr, flt, nowdate, cint, now
-from webnotes.model.doc import Document
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import session, msgprint
+from frappe.utils import add_days, cstr, flt, nowdate, cint, now
+from frappe.model.doc import Document
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import session, msgprint
 from erpnext.stock.utils import get_valid_serial_nos
 
 
@@ -25,10 +25,10 @@ class DocType:
 			if v.get('is_cancelled') == 'Yes':
 				v['actual_qty'] = -flt(v['actual_qty'])
 				# cancel matching entry
-				webnotes.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
+				frappe.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
 					modified=%s, modified_by=%s
 					where voucher_no=%s and voucher_type=%s""", 
-					(now(), webnotes.session.user, v['voucher_no'], v['voucher_type']))
+					(now(), frappe.session.user, v['voucher_no'], v['voucher_type']))
 
 			if v.get("actual_qty"):
 				sle_id = self.make_entry(v)
@@ -44,7 +44,7 @@ class DocType:
 
 	def make_entry(self, args):
 		args.update({"doctype": "Stock Ledger Entry"})
-		sle = webnotes.bean([args])
+		sle = frappe.bean([args])
 		sle.ignore_permissions = 1
 		sle.insert()
 		return sle.doc.name
@@ -53,5 +53,5 @@ class DocType:
 		"""
 		Repost everything!
 		"""
-		for wh in webnotes.conn.sql("select name from tabWarehouse"):
+		for wh in frappe.conn.sql("select name from tabWarehouse"):
 			get_obj('Warehouse', wh[0]).repost_stock()

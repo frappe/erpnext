@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.widgets.reportview import execute as runreport
+import frappe
+from frappe.widgets.reportview import execute as runreport
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -12,19 +12,19 @@ def execute(filters=None):
 		[["Employee", "company", "=", filters.get("company")]] or None
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
 		filters=employee_filters)
-	leave_types = webnotes.conn.sql_list("select name from `tabLeave Type`")
+	leave_types = frappe.conn.sql_list("select name from `tabLeave Type`")
 	
 	if filters.get("fiscal_year"):
 		fiscal_years = [filters["fiscal_year"]]
 	else:
-		fiscal_years = webnotes.conn.sql_list("select name from `tabFiscal Year` order by name desc")
+		fiscal_years = frappe.conn.sql_list("select name from `tabFiscal Year` order by name desc")
 		
 	employee_in = '", "'.join([e.name for e in employees])
 	
-	allocations = webnotes.conn.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
+	allocations = frappe.conn.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
 	 	from `tabLeave Allocation` 
 		where docstatus=1 and employee in ("%s")""" % employee_in, as_dict=True)
-	applications = webnotes.conn.sql("""select employee, fiscal_year, leave_type, SUM(total_leave_days) as leaves
+	applications = frappe.conn.sql("""select employee, fiscal_year, leave_type, SUM(total_leave_days) as leaves
 			from `tabLeave Application` 
 			where status="Approved" and docstatus = 1 and employee in ("%s")
 			group by employee, fiscal_year, leave_type""" % employee_in, as_dict=True)
@@ -41,11 +41,11 @@ def execute(filters=None):
 	data = {}
 	for d in allocations:
 		data.setdefault((d.fiscal_year, d.employee, 
-			d.leave_type), webnotes._dict()).allocation = d.total_leaves_allocated
+			d.leave_type), frappe._dict()).allocation = d.total_leaves_allocated
 
 	for d in applications:
 		data.setdefault((d.fiscal_year, d.employee, 
-			d.leave_type), webnotes._dict()).leaves = d.leaves
+			d.leave_type), frappe._dict()).leaves = d.leaves
 	
 	result = []
 	for fiscal_year in fiscal_years:
@@ -53,7 +53,7 @@ def execute(filters=None):
 			row = [fiscal_year, employee.name, employee.employee_name, employee.department]
 			result.append(row)
 			for leave_type in leave_types:
-				tmp = data.get((fiscal_year, employee.name, leave_type), webnotes._dict())
+				tmp = data.get((fiscal_year, employee.name, leave_type), frappe._dict())
 				row.append(tmp.allocation or 0)
 				row.append(tmp.leaves or 0)
 				row.append((tmp.allocation or 0) - (tmp.leaves or 0))

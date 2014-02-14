@@ -4,8 +4,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
+import frappe
+from frappe import _
 
 class DocType:
 	def __init__(self, d, dl):
@@ -15,7 +15,7 @@ class DocType:
 		self.set_status()
 		self.doc.total_hours = 0.0
 		for d in self.doclist.get({"doctype":"Time Log Batch Detail"}):
-			tl = webnotes.doc("Time Log", d.time_log)
+			tl = frappe.doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)
 			self.validate_time_log_is_submitted(tl)
 			self.doc.total_hours += float(tl.hours or 0.0)
@@ -29,7 +29,7 @@ class DocType:
 
 	def validate_time_log_is_submitted(self, tl):
 		if tl.status != "Submitted" and self.doc.docstatus == 0:
-			webnotes.msgprint(_("Time Log must have status 'Submitted'") + \
+			frappe.msgprint(_("Time Log must have status 'Submitted'") + \
 				" :" + tl.name + " (" + _(tl.status) + ")", raise_exception=True)
 	
 	def set_status(self):
@@ -54,7 +54,7 @@ class DocType:
 	def update_status(self, time_log_batch):
 		self.set_status()
 		for d in self.doclist.get({"doctype":"Time Log Batch Detail"}):
-			tl = webnotes.bean("Time Log", d.time_log)
+			tl = frappe.bean("Time Log", d.time_log)
 			tl.doc.time_log_batch = time_log_batch
 			tl.doc.sales_invoice = self.doc.sales_invoice
 			tl.update_after_submit()

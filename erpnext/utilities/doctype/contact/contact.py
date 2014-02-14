@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, extract_email_id
+import frappe
+from frappe.utils import cstr, extract_email_id
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -30,29 +30,29 @@ class DocType(StatusUpdater):
 	def validate_primary_contact(self):
 		if self.doc.is_primary_contact == 1:
 			if self.doc.customer:
-				webnotes.conn.sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
+				frappe.conn.sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
 			elif self.doc.supplier:
-				webnotes.conn.sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
+				frappe.conn.sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
 			elif self.doc.sales_partner:
-				webnotes.conn.sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
+				frappe.conn.sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
 		else:
 			if self.doc.customer:
-				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
+				if not frappe.conn.sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.supplier:
-				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
+				if not frappe.conn.sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.sales_partner:
-				if not webnotes.conn.sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
+				if not frappe.conn.sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
 					self.doc.is_primary_contact = 1
 
 	def on_trash(self):
-		webnotes.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
+		frappe.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
 			self.doc.name)
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_contact_details(contact):
-	contact = webnotes.doc("Contact", contact)
+	contact = frappe.doc("Contact", contact)
 	out = {
 		"contact_person": contact.get("name"),
 		"contact_display": " ".join(filter(None, 

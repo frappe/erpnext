@@ -2,15 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import add_days, cint, cstr, flt, formatdate
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from frappe.utils import add_days, cint, cstr, flt, formatdate
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 
-import webnotes.defaults
+import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
@@ -73,7 +73,7 @@ class DocType(BuyingController):
 	def check_active_purchase_items(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
-				valid_item = webnotes.conn.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
+				valid_item = frappe.conn.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
 				if valid_item[0][0] == 2:
 					msgprint("Item : '%s' is Inactive, you can restore it from Trash" %(d.item_code))
 					raise Exception
@@ -93,7 +93,7 @@ class DocType(BuyingController):
 	def validate_bill_no(self):
 		if self.doc.bill_no and self.doc.bill_no.lower().strip() \
 				not in ['na', 'not applicable', 'none']:
-			b_no = webnotes.conn.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
+			b_no = frappe.conn.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
 				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
@@ -109,7 +109,7 @@ class DocType(BuyingController):
 			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
+		acc = frappe.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
 			self.doc.credit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.credit_to + "does not exist")
@@ -125,7 +125,7 @@ class DocType(BuyingController):
 	# ------------------------------------------------------------
 	def check_for_acc_head_of_supplier(self): 
 		if self.doc.supplier and self.doc.credit_to:
-			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
+			acc_head = frappe.conn.sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.company_abbr)):
 				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
@@ -137,7 +137,7 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purhcase_order)
-				stopped = webnotes.conn.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
+				stopped = frappe.conn.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
 				if stopped:
 					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
 					raise Exception
@@ -165,7 +165,7 @@ class DocType(BuyingController):
 			}
 		})
 		
-		if cint(webnotes.defaults.get_global_default('maintain_same_rate')):
+		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
@@ -189,7 +189,7 @@ class DocType(BuyingController):
 			raise Exception
 			
 	def set_against_expense_account(self):
-		auto_accounting_for_stock = cint(webnotes.defaults.get_global_default("auto_accounting_for_stock"))
+		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 		if auto_accounting_for_stock:
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
@@ -218,14 +218,14 @@ class DocType(BuyingController):
 		self.doc.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
-		if webnotes.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
+		if frappe.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_order:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
 	def pr_required(self):
-		if webnotes.conn.get_value("Buying Settings", None, "pr_required") == 'Yes':
+		if frappe.conn.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			 for d in getlist(self.doclist,'entries'):
 				 if not d.purchase_receipt:
 					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
@@ -238,13 +238,13 @@ class DocType(BuyingController):
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order:
-				submitted = webnotes.conn.sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
+				submitted = frappe.conn.sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
 				if not submitted:
-					webnotes.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
+					frappe.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
 			if d.purchase_receipt:
-				submitted = webnotes.conn.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
+				submitted = frappe.conn.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
 				if not submitted:
-					webnotes.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
+					frappe.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
 					
 					
 	def update_against_document_in_jv(self):
@@ -289,7 +289,7 @@ class DocType(BuyingController):
 
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
-			cint(webnotes.defaults.get_global_default("auto_accounting_for_stock"))
+			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 		
 		gl_entries = []
 		
@@ -324,7 +324,7 @@ class DocType(BuyingController):
 			# accumulate valuation tax
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
 				if auto_accounting_for_stock and not tax.cost_center:
-					webnotes.throw(_("Row %(row)s: Cost Center is mandatory \
+					frappe.throw(_("Row %(row)s: Cost Center is mandatory \
 						if tax/charges category is Valuation or Valuation and Total" % 
 						{"row": tax.idx}))
 				valuation_tax.setdefault(tax.cost_center, 0)
@@ -414,25 +414,25 @@ class DocType(BuyingController):
 	def update_raw_material_cost(self):
 		if self.sub_contracted_items:
 			for d in self.doclist.get({"parentfield": "entries"}):
-				rm_cost = webnotes.conn.sql("""select raw_material_cost / quantity 
+				rm_cost = frappe.conn.sql("""select raw_material_cost / quantity 
 					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1 
 					and is_active = 1 """, (d.item_code,))
 				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0
 				
-				d.conversion_factor = d.conversion_factor or flt(webnotes.conn.get_value(
+				d.conversion_factor = d.conversion_factor or flt(frappe.conn.get_value(
 					"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom}, 
 					"conversion_factor")) or 1
 		
 				d.rm_supp_cost = rm_cost * flt(d.qty) * flt(d.conversion_factor)
 				
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 	
 	# expense account can be any Debit account, 
 	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
 	# Hence the first condition is an "OR"
-	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
+	return frappe.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Debit" 
 					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger" 

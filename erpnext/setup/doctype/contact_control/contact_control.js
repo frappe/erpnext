@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.get_states=function(doc, dt, dn) {
-	return $c('runserverobj', args={'method': 'check_state', 'docs':wn.model.compress(make_doclist(doc.doctype, doc.name))},
+	return $c('runserverobj', args={'method': 'check_state', 'docs':frappe.model.compress(make_doclist(doc.doctype, doc.name))},
 		function(r, rt) {
 			if(r.message)
 				set_field_options('state', r.message);
@@ -121,7 +121,7 @@ cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 
 	// show delete
 	var $delete_doc = $wrapper.find('a.delete');
-	if (wn.model.can_delete(doctype))
+	if (frappe.model.can_delete(doctype))
 		$delete_doc.toggle(true);
 	else
 		$delete_doc.toggle(false);
@@ -142,8 +142,8 @@ cur_frm.cscript.delete_doc = function(doctype, name) {
 	}));
 	if (!go_ahead) return;
 
-	return wn.call({
-		method: 'webnotes.model.delete_doc',
+	return frappe.call({
+		method: 'frappe.model.delete_doc',
 		args: {
 			dt: doctype,
 			dn: name
@@ -161,11 +161,11 @@ cur_frm.cscript.delete_doc = function(doctype, name) {
 
 // Render List
 cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new_doc) {
-	wn.model.with_doctype(doctype, function(r) {
-		if((r && r['403']) || wn.boot.profile.all_read.indexOf(doctype)===-1) {
+	frappe.model.with_doctype(doctype, function(r) {
+		if((r && r['403']) || frappe.boot.profile.all_read.indexOf(doctype)===-1) {
 			return;
 		}
-		var RecordListView = wn.views.RecordListView.extend({
+		var RecordListView = frappe.views.RecordListView.extend({
 			default_docstatus: ['0', '1', '2'],
 			default_filters: [
 				[doctype, doc.doctype.toLowerCase().replace(" ", "_"), '=', doc.name],

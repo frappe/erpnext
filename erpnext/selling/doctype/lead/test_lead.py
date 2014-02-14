@@ -14,7 +14,7 @@ test_records = [
 		"email_id":"test_lead3@example.com"}],
 ]
 
-import webnotes
+import frappe
 import unittest
 
 class TestLead(unittest.TestCase):
@@ -26,5 +26,5 @@ class TestLead(unittest.TestCase):
 		self.assertEquals(customer[0]["lead_name"], "_T-Lead-00001")
 		
 		customer[0].customer_group = "_Test Customer Group"
-		webnotes.bean(customer).insert()
+		frappe.bean(customer).insert()
 		

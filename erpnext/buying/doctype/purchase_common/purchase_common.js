@@ -6,8 +6,8 @@
 // cur_frm.cscript.tname - Details table name
 // cur_frm.cscript.fname - Details fieldname
 
-wn.provide("erpnext.buying");
-wn.require("assets/erpnext/js/transaction.js");
+frappe.provide("erpnext.buying");
+frappe.require("assets/erpnext/js/transaction.js");
 {% include "public/js/controllers/accounts.js" %}
 
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
@@ -78,8 +78,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	price_list_rate: function(doc, cdt, cdn) {
-		var item = wn.model.get_doc(cdt, cdn);
-		wn.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
+		var item = frappe.model.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
 		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
 			precision("rate", item));
@@ -92,8 +92,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	rate: function(doc, cdt, cdn) {
-		var item = wn.model.get_doc(cdt, cdn);
-		wn.model.round_floats_in(item, ["rate", "discount_percentage"]);
+		var item = frappe.model.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["rate", "discount_percentage"]);
 		
 		if(item.price_list_rate) {
 			item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
@@ -107,7 +107,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	
 	uom: function(doc, cdt, cdn) {
 		var me = this;
-		var item = wn.model.get_doc(cdt, cdn);
+		var item = frappe.model.get_doc(cdt, cdn);
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.buying.utils.get_conversion_factor",
@@ -131,16 +131,16 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	conversion_factor: function(doc, cdt, cdn) {
-		if(wn.meta.get_docfield(cdt, "stock_qty", cdn)) {
-			var item = wn.model.get_doc(cdt, cdn);
-			wn.model.round_floats_in(item, ["qty", "conversion_factor"]);
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+			var item = frappe.model.get_doc(cdt, cdn);
+			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
 		}
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = wn.model.get_doc(cdt, cdn);
+		var item = frappe.model.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.buying.utils.get_projected_qty",
@@ -154,9 +154,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	project_name: function(doc, cdt, cdn) {
-		var item = wn.model.get_doc(cdt, cdn);
+		var item = frappe.model.get_doc(cdt, cdn);
 		if(item.project_name) {
-			$.each(wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: this.fname}),
+			$.each(frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: this.fname}),
 				function(i, other_item) { 
 					if(!other_item.project_name) {
 						other_item.project_name = item.project_name;
@@ -183,7 +183,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		
 		$.each(this.frm.item_doclist, function(i, item) {
-			wn.model.round_floats_in(item);
+			frappe.model.round_floats_in(item);
 			item.amount = flt(item.rate * item.qty, precision("amount", item));
 			item.item_tax_amount = 0.0;
 			
@@ -203,7 +203,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			me.frm.doc.net_total_import += item.amount;
 		});
 		
-		wn.model.round_floats_in(this.frm.doc, ["net_total", "net_total_import"]);
+		frappe.model.round_floats_in(this.frm.doc, ["net_total", "net_total_import"]);
 	},
 	
 	calculate_totals: function() {
@@ -218,11 +218,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			precision("total_tax"));
 		
 		// rounded totals
-		if(wn.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
 			this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
 		}
 		
-		if(wn.meta.get_docfield(this.frm.doc.doctype, "rounded_total_import", this.frm.doc.name)) {
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total_import", this.frm.doc.name)) {
 			this.frm.doc.rounded_total_import = Math.round(this.frm.doc.grand_total_import);
 		}
 		
@@ -230,17 +230,17 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.frm.doc.other_charges_added = 0.0
 		this.frm.doc.other_charges_deducted = 0.0
 		if(tax_count) {
-			this.frm.doc.other_charges_added = wn.utils.sum($.map(this.frm.tax_doclist, 
+			this.frm.doc.other_charges_added = frappe.utils.sum($.map(this.frm.tax_doclist, 
 				function(tax) { return (tax.add_deduct_tax == "Add" 
 					&& in_list(["Valuation and Total", "Total"], tax.category)) ? 
 					tax.tax_amount : 0.0; }));
 		
-			this.frm.doc.other_charges_deducted = wn.utils.sum($.map(this.frm.tax_doclist, 
+			this.frm.doc.other_charges_deducted = frappe.utils.sum($.map(this.frm.tax_doclist, 
 				function(tax) { return (tax.add_deduct_tax == "Deduct" 
 					&& in_list(["Valuation and Total", "Total"], tax.category)) ? 
 					tax.tax_amount : 0.0; }));
 			
-			wn.model.round_floats_in(this.frm.doc,
+			frappe.model.round_floats_in(this.frm.doc,
 				["other_charges_added", "other_charges_deducted"]);
 		}
 		this.frm.doc.other_charges_added_import = flt(this.frm.doc.other_charges_added /
@@ -254,7 +254,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.frm.doc.in_words = this.frm.doc.in_words_import = "";
 		
 		if(this.frm.item_doclist.length) {
-			if(!wn.meta.get_docfield(this.frm.item_doclist[0].doctype, "item_tax_amount", this.frm.doctype)) {
+			if(!frappe.meta.get_docfield(this.frm.item_doclist[0].doctype, "item_tax_amount", this.frm.doctype)) {
 				$.each(this.frm.item_doclist, function(i, item) {
 					delete item["item_tax_amount"];
 				});
@@ -262,7 +262,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		if(this.frm.tax_doclist.length) {
-			if(!wn.meta.get_docfield(this.frm.tax_doclist[0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
+			if(!frappe.meta.get_docfield(this.frm.tax_doclist[0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
 				$.each(this.frm.tax_doclist, function(i, tax) {
 					delete tax["tax_amount_after_discount_amount"];
 				});
@@ -272,7 +272,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	
 	calculate_outstanding_amount: function() {
 		if(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.docstatus < 2) {
-			wn.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
+			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
 			this.frm.doc.total_amount_to_pay = flt(this.frm.doc.grand_total - this.frm.doc.write_off_amount,
 				precision("total_amount_to_pay"));
 			this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
@@ -286,7 +286,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		// 
 		// TODO: rename item_tax_amount to valuation_tax_amount
 		if(["Valuation", "Valuation and Total"].indexOf(tax.category) != -1 &&
-			wn.meta.get_docfield(item.doctype, "item_tax_amount", item.parent || item.name)) {
+			frappe.meta.get_docfield(item.doctype, "item_tax_amount", item.parent || item.name)) {
 				// accumulate only if tax is for Valuation / Valuation and Total
 				item.item_tax_amount += flt(current_tax_amount, precision("item_tax_amount", item));
 		}
@@ -298,9 +298,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		
 		var setup_field_label_map = function(fields_list, currency) {
 			$.each(fields_list, function(i, fname) {
-				var docfield = wn.meta.docfield_map[me.frm.doc.doctype][fname];
+				var docfield = frappe.meta.docfield_map[me.frm.doc.doctype][fname];
 				if(docfield) {
-					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					var label = frappe._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
 				}
 			});
@@ -345,9 +345,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var setup_field_label_map = function(fields_list, currency, parentfield) {
 			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
 			$.each(fields_list, function(i, fname) {
-				var docfield = wn.meta.docfield_map[grid_doctype][fname];
+				var docfield = frappe.meta.docfield_map[grid_doctype][fname];
 				if(docfield) {
-					var label = wn._(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					var label = frappe._(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] = 
 						label.trim() + " (" + currency + ")";
 				}
@@ -372,7 +372,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
 		var fieldnames = $.map(["base_rate", "base_price_list_rate", "base_amount", "base_rate"], function(fname) {
-			return wn.meta.get_docfield(item_grid.doctype, fname, me.frm.docname) ? fname : null;
+			return frappe.meta.get_docfield(item_grid.doctype, fname, me.frm.docname) ? fname : null;
 		});
 		
 		item_grid.set_column_disp(fieldnames, this.frm.doc.currency != company_currency);

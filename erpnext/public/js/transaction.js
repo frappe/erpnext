@@ -1,15 +1,15 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext");
-wn.require("assets/erpnext/js/controllers/stock_controller.js");
+frappe.provide("erpnext");
+frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 
 erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {
 		var me = this;
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
-				currency = wn.defaults.get_default("currency");
+				currency = frappe.defaults.get_default("currency");
 			
 			$.each({
 				posting_date: today,
@@ -18,8 +18,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				currency: currency,
 				price_list_currency: currency,
 				status: "Draft",
-				company: wn.defaults.get_default("company"),
-				fiscal_year: wn.defaults.get_default("fiscal_year"),
+				company: frappe.defaults.get_default("company"),
+				fiscal_year: frappe.defaults.get_default("fiscal_year"),
 				is_subcontracted: "No",
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
@@ -71,10 +71,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	make_pos_btn: function() {
 		if(!this.pos_active) {
-			var btn_label = wn._("POS View"),
+			var btn_label = frappe._("POS View"),
 				icon = "icon-desktop";
 		} else {
-			var btn_label = wn._(this.frm.doctype) + wn._(" View"),
+			var btn_label = frappe._(this.frm.doctype) + frappe._(" View"),
 				icon = "icon-file-text";
 		}
 		var me = this;
@@ -86,11 +86,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	toggle_pos: function(show) {
 		// Check whether it is Selling or Buying cycle
-		var price_list = wn.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
+		var price_list = frappe.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
 		
 		if (!price_list)
-			msgprint(wn._("Please select Price List"))
+			msgprint(frappe._("Please select Price List"))
 		else {
 			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
 
@@ -114,7 +114,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
-		var item = wn.model.get_doc(cdt, cdn);
+		var item = frappe.model.get_doc(cdt, cdn);
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
@@ -157,7 +157,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
-		var item = wn.model.get_doc(cdt, cdn);
+		var item = frappe.model.get_doc(cdt, cdn);
 
 		if (item.serial_no) {
 			if (!item.item_code) {
@@ -184,7 +184,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					item.serial_no += sr_no[x] + '\n';
 
 				refresh_field("serial_no", item.name, item.parentfield);
-				wn.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+				frappe.model.set_value(item.doctype, item.name, "qty", sr_no.length);
 			}
 		}
 	},
@@ -194,8 +194,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	set_default_values: function() {
-		$.each(wn.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
-			var updated = wn.model.set_default_values(doc);
+		$.each(frappe.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
+			var updated = frappe.model.set_default_values(doc);
 			if(doc.parentfield) {
 				refresh_field(doc.parentfield);
 			} else {
@@ -273,8 +273,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	get_exchange_rate: function(from_currency, to_currency, callback) {
 		var exchange_name = from_currency + "-" + to_currency;
-		wn.model.with_doc("Currency Exchange", exchange_name, function(name) {
-			var exchange_doc = wn.model.get_doc("Currency Exchange", exchange_name);
+		frappe.model.with_doc("Currency Exchange", exchange_name, function(name) {
+			var exchange_doc = frappe.model.get_doc("Currency Exchange", exchange_name);
 			callback(exchange_doc ? flt(exchange_doc.exchange_rate) : 0);
 		});
 	},
@@ -316,7 +316,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	row_id: function(doc, cdt, cdn) {
-		var tax = wn.model.get_doc(cdt, cdn);
+		var tax = frappe.model.get_doc(cdt, cdn);
 		try {
 			this.validate_on_previous_row(tax);
 			this.calculate_taxes_and_totals();
@@ -351,7 +351,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	included_in_print_rate: function(doc, cdt, cdn) {
-		var tax = wn.model.get_doc(cdt, cdn);
+		var tax = frappe.model.get_doc(cdt, cdn);
 		try {
 			this.validate_on_previous_row(tax);
 			this.validate_inclusive_tax(tax);
@@ -366,15 +366,15 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	validate_on_previous_row: function(tax) {
 		// validate if a valid row id is mentioned in case of
 		// On Previous Row Amount and On Previous Row Total
-		if(([wn._("On Previous Row Amount"), wn._("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
+		if(([frappe._("On Previous Row Amount"), frappe._("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
 			(!tax.row_id || cint(tax.row_id) >= tax.idx)) {
-				var msg = repl(wn._("Row") + " # %(idx)s [%(doctype)s]: " +
-					wn._("Please specify a valid") + " %(row_id_label)s", {
+				var msg = repl(frappe._("Row") + " # %(idx)s [%(doctype)s]: " +
+					frappe._("Please specify a valid") + " %(row_id_label)s", {
 						idx: tax.idx,
 						doctype: tax.doctype,
-						row_id_label: wn.meta.get_label(tax.doctype, "row_id", tax.name)
+						row_id_label: frappe.meta.get_label(tax.doctype, "row_id", tax.name)
 					});
-				wn.throw(msg);
+				frappe.throw(msg);
 			}
 	},
 	
@@ -382,30 +382,30 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(!this.frm.tax_doclist) this.frm.tax_doclist = this.get_tax_doclist();
 		
 		var actual_type_error = function() {
-			var msg = repl(wn._("For row") + " # %(idx)s [%(doctype)s]: " + 
+			var msg = repl(frappe._("For row") + " # %(idx)s [%(doctype)s]: " + 
 				"%(charge_type_label)s = \"%(charge_type)s\" " +
-				wn._("cannot be included in Item's rate"), {
+				frappe._("cannot be included in Item's rate"), {
 					idx: tax.idx,
 					doctype: tax.doctype,
-					charge_type_label: wn.meta.get_label(tax.doctype, "charge_type", tax.name),
+					charge_type_label: frappe.meta.get_label(tax.doctype, "charge_type", tax.name),
 					charge_type: tax.charge_type
 				});
-			wn.throw(msg);
+			frappe.throw(msg);
 		};
 		
 		var on_previous_row_error = function(row_range) {
-			var msg = repl(wn._("For row") + " # %(idx)s [%(doctype)s]: " + 
-				wn._("to be included in Item's rate, it is required that: ") + 
-				" [" + wn._("Row") + " # %(row_range)s] " + wn._("also be included in Item's rate"), {
+			var msg = repl(frappe._("For row") + " # %(idx)s [%(doctype)s]: " + 
+				frappe._("to be included in Item's rate, it is required that: ") + 
+				" [" + frappe._("Row") + " # %(row_range)s] " + frappe._("also be included in Item's rate"), {
 					idx: tax.idx,
 					doctype: tax.doctype,
-					charge_type_label: wn.meta.get_label(tax.doctype, "charge_type", tax.name),
+					charge_type_label: frappe.meta.get_label(tax.doctype, "charge_type", tax.name),
 					charge_type: tax.charge_type,
-					inclusive_label: wn.meta.get_label(tax.doctype, "included_in_print_rate", tax.name),
+					inclusive_label: frappe.meta.get_label(tax.doctype, "included_in_print_rate", tax.name),
 					row_range: row_range,
 				});
 			
-			wn.throw(msg);
+			frappe.throw(msg);
 		};
 		
 		if(cint(tax.included_in_print_rate)) {
@@ -466,7 +466,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			tax_accounts.push([tax.name, tax.account_head]);
 		});
 		
-		var headings = $.map([wn._("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
+		var headings = $.map([frappe._("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
 			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
 			
 		var distinct_item_names = [];
@@ -504,11 +504,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var valid = true;
 		
 		$.each(["company", "customer", "supplier"], function(i, fieldname) {
-			if(wn.meta.has_field(me.frm.doc.doctype, fieldname)) {
+			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname)) {
 				if (!me.frm.doc[fieldname]) {
-					msgprint(wn._("Please specify") + ": " + 
-						wn.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
-						". " + wn._("It is needed to fetch Item Details."));
+					msgprint(frappe._("Please specify") + ": " + 
+						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+						". " + frappe._("It is needed to fetch Item Details."));
 						valid = false;
 				}
 			}
@@ -517,25 +517,25 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	get_item_doclist: function() {
-		return wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
+		return frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
 			{parentfield: this.fname});
 	},
 	
 	get_tax_doclist: function() {
-		return wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
+		return frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
 			{parentfield: this.other_fname});
 	},
 	
 	validate_conversion_rate: function() {
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
-		var conversion_rate_label = wn.meta.get_label(this.frm.doc.doctype, "conversion_rate", 
+		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate", 
 			this.frm.doc.name);
 		var company_currency = this.get_company_currency();
 		
 		if(!this.frm.doc.conversion_rate) {
-			wn.throw(repl('%(conversion_rate_label)s' + 
-				wn._(' is mandatory. Maybe Currency Exchange record is not created for ') + 
-				'%(from_currency)s' + wn._(" to ") + '%(to_currency)s', 
+			frappe.throw(repl('%(conversion_rate_label)s' + 
+				frappe._(' is mandatory. Maybe Currency Exchange record is not created for ') + 
+				'%(from_currency)s' + frappe._(" to ") + '%(to_currency)s', 
 				{
 					"conversion_rate_label": conversion_rate_label,
 					"from_currency": this.frm.doc.currency,
@@ -547,7 +547,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	calculate_taxes_and_totals: function() {
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
-		if (wn.meta.get_docfield(this.frm.doc.doctype, "discount_amount"))
+		if (frappe.meta.get_docfield(this.frm.doc.doctype, "discount_amount"))
 			this.apply_discount_amount();
 	},
 
@@ -583,7 +583,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			
 			me.validate_on_previous_row(tax);
 			me.validate_inclusive_tax(tax);
-			wn.model.round_floats_in(tax);
+			frappe.model.round_floats_in(tax);
 		});
 	},
 	
@@ -716,9 +716,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	calculate_total_advance: function(parenttype, advance_parentfield) {
 		if(this.frm.doc.doctype == parenttype && this.frm.doc.docstatus < 2) {
-			var advance_doclist = wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
+			var advance_doclist = frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
 				{parentfield: advance_parentfield});
-			this.frm.doc.total_advance = flt(wn.utils.sum(
+			this.frm.doc.total_advance = flt(frappe.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));
 			
@@ -736,7 +736,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var me = this;
 		if(this.frm.doc.tc_name) {
 			return this.frm.call({
-				method: "webnotes.client.get_value",
+				method: "frappe.client.get_value",
 				args: {
 					doctype: "Terms and Conditions",
 					fieldname: "terms",

@@ -4,9 +4,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
-from webnotes.utils import cint
+import frappe
+from frappe import _
+from frappe.utils import cint
 
 class DocType:
 	def __init__(self, d, dl):
@@ -16,5 +16,5 @@ class DocType:
 		if cint(self.doc.extract_emails) and not (self.doc.email_id and self.doc.host and \
 			self.doc.username and self.doc.password):
 			
-			webnotes.msgprint(_("""Host, Email and Password required if emails are to be pulled"""),
+			frappe.msgprint(_("""Host, Email and Password required if emails are to be pulled"""),
 				raise_exception=True)

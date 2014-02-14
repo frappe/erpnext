@@ -1,39 +1,39 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
+import frappe
 import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
 
 class TestLeaveApplication(unittest.TestCase):
 	def tearDown(self):
-		webnotes.set_user("Administrator")
+		frappe.set_user("Administrator")
 		
 		# so that this test doesn't affect other tests
-		webnotes.conn.sql("""delete from `tabEmployee Leave Approver`""")
+		frappe.conn.sql("""delete from `tabEmployee Leave Approver`""")
 		
 	def _clear_roles(self):
-		webnotes.conn.sql("""delete from `tabUserRole` where parent in 
+		frappe.conn.sql("""delete from `tabUserRole` where parent in 
 			("test@example.com", "test1@example.com", "test2@example.com")""")
 			
 	def _clear_applications(self):
-		webnotes.conn.sql("""delete from `tabLeave Application`""")
+		frappe.conn.sql("""delete from `tabLeave Application`""")
 		
 	def _add_employee_leave_approver(self, employee, leave_approver):
-		temp_session_user = webnotes.session.user
-		webnotes.set_user("Administrator")
-		employee = webnotes.bean("Employee", employee)
+		temp_session_user = frappe.session.user
+		frappe.set_user("Administrator")
+		employee = frappe.bean("Employee", employee)
 		employee.doclist.append({
 			"doctype": "Employee Leave Approver",
 			"parentfield": "employee_leave_approvers",
 			"leave_approver": leave_approver
 		})
 		employee.save()
-		webnotes.set_user(temp_session_user)
+		frappe.set_user(temp_session_user)
 	
 	def get_application(self, doclist):
-		application = webnotes.bean(copy=doclist)
+		application = frappe.bean(copy=doclist)
 		application.doc.from_date = "2013-01-01"
 		application.doc.to_date = "2013-01-05"
 		return application
@@ -41,10 +41,10 @@ class TestLeaveApplication(unittest.TestCase):
 	def test_block_list(self):
 		self._clear_roles()
 		
-		from webnotes.profile import add_role
+		from frappe.profile import add_role
 		add_role("test1@example.com", "HR User")
 			
-		webnotes.conn.set_value("Department", "_Test Department", 
+		frappe.conn.set_value("Department", "_Test Department", 
 			"leave_block_list", "_Test Leave Block List")
 		
 		application = self.get_application(test_records[1])
@@ -52,10 +52,10 @@ class TestLeaveApplication(unittest.TestCase):
 		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
-		webnotes.set_user("test1@example.com")
+		frappe.set_user("test1@example.com")
 
 		# clear other applications
-		webnotes.conn.sql("delete from `tabLeave Application`")
+		frappe.conn.sql("delete from `tabLeave Application`")
 		
 		application = self.get_application(test_records[1])
 		self.assertTrue(application.insert())
@@ -64,11 +64,11 @@ class TestLeaveApplication(unittest.TestCase):
 		self._clear_roles()
 		self._clear_applications()
 		
-		from webnotes.profile import add_role
+		from frappe.profile import add_role
 		add_role("test@example.com", "Employee")
 		add_role("test2@example.com", "Leave Approver")
 		
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
@@ -80,32 +80,32 @@ class TestLeaveApplication(unittest.TestCase):
 	def test_global_block_list(self):
 		self._clear_roles()
 
-		from webnotes.profile import add_role
+		from frappe.profile import add_role
 		add_role("test1@example.com", "Employee")
 		add_role("test@example.com", "Leave Approver")
 				
 		application = self.get_application(test_records[3])
 		application.doc.leave_approver = "test@example.com"
 		
-		webnotes.conn.set_value("Leave Block List", "_Test Leave Block List", 
+		frappe.conn.set_value("Leave Block List", "_Test Leave Block List", 
 			"applies_to_all_departments", 1)
-		webnotes.conn.set_value("Employee", "_T-Employee-0002", "department", 
+		frappe.conn.set_value("Employee", "_T-Employee-0002", "department", 
 			"_Test Department")
 		
-		webnotes.set_user("test1@example.com")
+		frappe.set_user("test1@example.com")
 		application.insert()
 		
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 		application.doc.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
-		webnotes.conn.set_value("Leave Block List", "_Test Leave Block List", 
+		frappe.conn.set_value("Leave Block List", "_Test Leave Block List", 
 			"applies_to_all_departments", 0)
 		
 	def test_leave_approval(self):
 		self._clear_roles()
 		
-		from webnotes.profile import add_role
+		from frappe.profile import add_role
 		add_role("test@example.com", "Employee")
 		add_role("test1@example.com", "Leave Approver")
 		add_role("test2@example.com", "Leave Approver")
@@ -119,16 +119,16 @@ class TestLeaveApplication(unittest.TestCase):
 		self._clear_applications()
 		
 		# create leave application as Employee
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test1@example.com"
 		application.insert()
 		
 		# submit leave application by Leave Approver
-		webnotes.set_user("test1@example.com")
+		frappe.set_user("test1@example.com")
 		application.doc.status = "Approved"
 		application.submit()
-		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,
+		self.assertEqual(frappe.conn.get_value("Leave Application", application.doc.name,
 			"docstatus"), 1)
 		
 	def _test_leave_approval_invalid_leave_approver_insert(self):
@@ -142,12 +142,12 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		# TODO - add test2@example.com leave approver in employee's leave approvers list
 		application = self.get_application(test_records[1])
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 		
 		application.doc.leave_approver = "test1@example.com"
 		self.assertRaises(InvalidLeaveApproverError, application.insert)
 		
-		webnotes.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
+		frappe.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
 			"_T-Employee-0001")
 		
 	def _test_leave_approval_invalid_leave_approver_submit(self):
@@ -156,42 +156,42 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		# create leave application as employee
 		# but submit as invalid leave approver - should raise exception
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
-		webnotes.set_user("test1@example.com")
+		frappe.set_user("test1@example.com")
 		application.doc.status = "Approved"
 		
 		from erpnext.hr.doctype.leave_application.leave_application import LeaveApproverIdentityError
 		self.assertRaises(LeaveApproverIdentityError, application.submit)
 
-		webnotes.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
+		frappe.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
 			"_T-Employee-0001")
 			
 	def _test_leave_approval_valid_leave_approver_insert(self):
 		self._clear_applications()
 		self._add_employee_leave_approver("_T-Employee-0001", "test2@example.com")
 		
-		original_department = webnotes.conn.get_value("Employee", "_T-Employee-0001", "department")
-		webnotes.conn.set_value("Employee", "_T-Employee-0001", "department", None)
+		original_department = frappe.conn.get_value("Employee", "_T-Employee-0001", "department")
+		frappe.conn.set_value("Employee", "_T-Employee-0001", "department", None)
 		
-		webnotes.set_user("test@example.com")
+		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
 		application.doc.leave_approver = "test2@example.com"
 		application.insert()
 
 		# change to valid leave approver and try to submit leave application
-		webnotes.set_user("test2@example.com")
+		frappe.set_user("test2@example.com")
 		application.doc.status = "Approved"
 		application.submit()
-		self.assertEqual(webnotes.conn.get_value("Leave Application", application.doc.name,
+		self.assertEqual(frappe.conn.get_value("Leave Application", application.doc.name,
 			"docstatus"), 1)
 			
-		webnotes.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
+		frappe.conn.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
 			"_T-Employee-0001")
 		
-		webnotes.conn.set_value("Employee", "_T-Employee-0001", "department", original_department)
+		frappe.conn.set_value("Employee", "_T-Employee-0001", "department", original_department)
 		
 test_dependencies = ["Leave Block List"]		
 

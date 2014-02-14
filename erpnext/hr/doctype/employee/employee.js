@@ -1,11 +1,11 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.hr");
-erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
+frappe.provide("erpnext.hr");
+erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.user_id.get_query = function(doc, cdt, cdn) {
-			return { query:"webnotes.core.doctype.profile.profile.profile_query"} }
+			return { query:"frappe.core.doctype.profile.profile.profile_query"} }
 		this.frm.fields_dict.reports_to.get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.employee_query"} }
 	},
@@ -13,7 +13,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 	onload: function() {
 		this.setup_leave_approver_select();
 		this.frm.toggle_display(["esic_card_no", "gratuity_lic_id", "pan_number", "pf_number"],
-			wn.control_panel.country==="India");
+			frappe.control_panel.country==="India");
 		if(this.frm.doc.__islocal) this.frm.set_value("employee_name", "");
 	},
 	
@@ -21,7 +21,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		var me = this;
 		erpnext.hide_naming_series();
 		if(!this.frm.doc.__islocal) {			
-			cur_frm.add_custom_button(wn._('Make Salary Structure'), function() {
+			cur_frm.add_custom_button(frappe._('Make Salary Structure'), function() {
 				me.make_salary_structure(this); });
 		}
 	},
@@ -31,10 +31,10 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		return this.frm.call({
 			method: "erpnext.hr.utils.get_leave_approver_list",
 			callback: function(r) {
-				var df = wn.meta.get_docfield("Employee Leave Approver", "leave_approver",
+				var df = frappe.meta.get_docfield("Employee Leave Approver", "leave_approver",
 					me.frm.doc.name);
 				df.options = $.map(r.message, function(profile) { 
-					return {value: profile, label: wn.user_info(profile).fullname}; 
+					return {value: profile, label: frappe.user_info(profile).fullname}; 
 				});
 				me.frm.fields_dict.employee_leave_approvers.refresh();
 			}
@@ -61,14 +61,14 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		var me = this;
 		this.validate_salary_structure(btn, function(r) {
 			if(r.message) {
-				msgprint(wn._("Employee") + ' "' + me.frm.doc.name + '": ' 
-					+ wn._("An active Salary Structure already exists. \
+				msgprint(frappe._("Employee") + ' "' + me.frm.doc.name + '": ' 
+					+ frappe._("An active Salary Structure already exists. \
 						If you want to create new one, please ensure that no active \
 						Salary Structure exists for this Employee. \
 						Go to the active Salary Structure and set \"Is Active\" = \"No\""));
 			} else if(!r.exc) {
-				wn.model.map({
-					source: wn.model.get_doclist(me.frm.doc.doctype, me.frm.doc.name),
+				frappe.model.map({
+					source: frappe.model.get_doclist(me.frm.doc.doctype, me.frm.doc.name),
 					target: "Salary Structure"
 				});
 			}
@@ -79,7 +79,7 @@ erpnext.hr.EmployeeController = wn.ui.form.Controller.extend({
 		var me = this;
 		return this.frm.call({
 			btn: btn,
-			method: "webnotes.client.get_value",
+			method: "frappe.client.get_value",
 			args: {
 				doctype: "Salary Structure",
 				fieldname: "name",

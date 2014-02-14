@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint, flt, comma_or, _round, cstr
+import frappe
+from frappe.utils import cint, flt, comma_or, _round, cstr
 from erpnext.setup.utils import get_company_currency
-from webnotes import msgprint, _
+from frappe import msgprint, _
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -20,7 +20,7 @@ class SellingController(StockController):
 		check_active_sales_items(self)
 	
 	def get_sender(self, comm):
-		return webnotes.conn.get_value('Sales Email Settings', None, 'email_id')
+		return frappe.conn.get_value('Sales Email Settings', None, 'email_id')
 	
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
@@ -45,7 +45,7 @@ class SellingController(StockController):
 										
 	def apply_shipping_rule(self):
 		if self.doc.shipping_rule:
-			shipping_rule = webnotes.bean("Shipping Rule", self.doc.shipping_rule)
+			shipping_rule = frappe.bean("Shipping Rule", self.doc.shipping_rule)
 			value = self.doc.net_total
 			
 			# TODO
@@ -68,10 +68,10 @@ class SellingController(StockController):
 			})
 		
 	def set_total_in_words(self):
-		from webnotes.utils import money_in_words
+		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.doc.company)
 		
-		disable_rounded_total = cint(webnotes.conn.get_value("Global Defaults", None, 
+		disable_rounded_total = cint(frappe.conn.get_value("Global Defaults", None, 
 			"disable_rounded_total"))
 			
 		if self.meta.get_field("in_words"):
@@ -264,24 +264,24 @@ class SellingController(StockController):
 				_("must be one of") + ": " + comma_or(valid_types), raise_exception=True)
 				
 	def check_credit(self, grand_total):
-		customer_account = webnotes.conn.get_value("Account", {"company": self.doc.company, 
+		customer_account = frappe.conn.get_value("Account", {"company": self.doc.company, 
 			"master_name": self.doc.customer}, "name")
 		if customer_account:
-			total_outstanding = webnotes.conn.sql("""select 
+			total_outstanding = frappe.conn.sql("""select 
 				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 				from `tabGL Entry` where account = %s""", customer_account)
 			total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 			
 			outstanding_including_current = flt(total_outstanding) + flt(grand_total)
-			webnotes.bean('Account', customer_account).run_method("check_credit_limit", 
+			frappe.bean('Account', customer_account).run_method("check_credit_limit", 
 				outstanding_including_current)
 				
 	def validate_max_discount(self):
 		for d in self.doclist.get({"parentfield": self.fname}):
-			discount = flt(webnotes.conn.get_value("Item", d.item_code, "max_discount"))
+			discount = flt(frappe.conn.get_value("Item", d.item_code, "max_discount"))
 			
 			if discount and flt(d.discount_percentage) > discount:
-				webnotes.throw(_("You cannot give more than ") + cstr(discount) + "% " + 
+				frappe.throw(_("You cannot give more than ") + cstr(discount) + "% " + 
 					_("discount on Item Code") + ": " + cstr(d.item_code))
 					
 	def get_item_list(self):
@@ -291,9 +291,9 @@ class SellingController(StockController):
 			reserved_qty_for_main_item = 0
 			
 			if self.doc.doctype == "Sales Order":
-				if (webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
+				if (frappe.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
-						webnotes.throw(_("Please enter Reserved Warehouse for item ") + 
+						frappe.throw(_("Please enter Reserved Warehouse for item ") + 
 							d.item_code + _(" as it is stock Item or packing item"))
 				reserved_warehouse = d.warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
@@ -316,7 +316,7 @@ class SellingController(StockController):
 				for p in self.doclist.get({"parentfield": "packing_details"}):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
-						il.append(webnotes._dict({
+						il.append(frappe._dict({
 							'warehouse': p.warehouse,
 							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
@@ -328,7 +328,7 @@ class SellingController(StockController):
 							'name': d.name
 						}))
 			else:
-				il.append(webnotes._dict({
+				il.append(frappe._dict({
 					'warehouse': d.warehouse,
 					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
@@ -342,18 +342,18 @@ class SellingController(StockController):
 		return il
 		
 	def has_sales_bom(self, item_code):
-		return webnotes.conn.sql("""select name from `tabSales BOM` 
+		return frappe.conn.sql("""select name from `tabSales BOM` 
 			where new_item_code=%s and docstatus != 2""", item_code)
 			
 	def get_already_delivered_qty(self, dn, so, so_detail):
-		qty = webnotes.conn.sql("""select sum(qty) from `tabDelivery Note Item` 
+		qty = frappe.conn.sql("""select sum(qty) from `tabDelivery Note Item` 
 			where prevdoc_detail_docname = %s and docstatus = 1 
 			and against_sales_order = %s 
 			and parent != %s""", (so_detail, so, dn))
 		return qty and flt(qty[0][0]) or 0.0
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = webnotes.conn.sql("""select qty, warehouse from `tabSales Order Item`
+		so_item = frappe.conn.sql("""select qty, warehouse from `tabSales Order Item`
 			where name = %s and docstatus = 1""", so_detail, as_dict=1)
 		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
@@ -362,20 +362,20 @@ class SellingController(StockController):
 	def check_stop_sales_order(self, ref_fieldname):
 		for d in self.doclist.get({"parentfield": self.fname}):
 			if d.fields.get(ref_fieldname):
-				status = webnotes.conn.get_value("Sales Order", d.fields[ref_fieldname], "status")
+				status = frappe.conn.get_value("Sales Order", d.fields[ref_fieldname], "status")
 				if status == "Stopped":
-					webnotes.throw(self.doc.doctype + 
+					frappe.throw(self.doc.doctype + 
 						_(" can not be created/modified against stopped Sales Order ") + 
 						d.fields[ref_fieldname])
 		
 def check_active_sales_items(obj):
 	for d in obj.doclist.get({"parentfield": obj.fname}):
 		if d.item_code:
-			item = webnotes.conn.sql("""select docstatus, is_sales_item, 
+			item = frappe.conn.sql("""select docstatus, is_sales_item, 
 				is_service_item, income_account from tabItem where name = %s""", 
 				d.item_code, as_dict=True)[0]
 			if item.is_sales_item == 'No' and item.is_service_item == 'No':
-				webnotes.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
+				frappe.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
 			if d.income_account and not item.income_account:
-				webnotes.conn.set_value("Item", d.item_code, "income_account", 
+				frappe.conn.set_value("Item", d.item_code, "income_account", 
 					d.income_account)

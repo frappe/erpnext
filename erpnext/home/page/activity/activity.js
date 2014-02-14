@@ -1,15 +1,15 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.pages['activity'].onload = function(wrapper) {
-	wn.ui.make_app_page({
+frappe.pages['activity'].onload = function(wrapper) {
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._("Activity"),
+		title: frappe._("Activity"),
 		single_column: true
 	})
 	wrapper.appframe.add_module_icon("Activity");
 	
-	var list = new wn.ui.Listing({
+	var list = new frappe.ui.Listing({
 		hide_refresh: true,
 		appframe: wrapper.appframe,
 		method: 'erpnext.home.page.activity.activity.get_feed',
@@ -23,9 +23,9 @@ wn.pages['activity'].onload = function(wrapper) {
 	wrapper.appframe.set_title_right("Refresh", function() { list.run(); });
 	
 	// Build Report Button
-	if(wn.boot.profile.can_get_report.indexOf("Feed")!=-1) {
-		wrapper.appframe.add_primary_action(wn._('Build Report'), function() {
-			wn.set_route('Report', "Feed");
+	if(frappe.boot.profile.can_get_report.indexOf("Feed")!=-1) {
+		wrapper.appframe.add_primary_action(frappe._('Build Report'), function() {
+			frappe.set_route('Report', "Feed");
 		}, 'icon-th')
 	}
 }
@@ -42,12 +42,12 @@ erpnext.ActivityFeed = Class.extend({
 			%(link)s %(subject)s <span class="user-info">%(by)s</span></div>', data));
 	},
 	scrub_data: function(data) {
-		data.by = wn.user_info(data.owner).fullname;
-		data.imgsrc = wn.utils.get_file_link(wn.user_info(data.owner).image);
+		data.by = frappe.user_info(data.owner).fullname;
+		data.imgsrc = frappe.utils.get_file_link(frappe.user_info(data.owner).image);
 		
 		// feedtype
 		if(!data.feed_type) {
-			data.feed_type = wn._(data.doc_type);
+			data.feed_type = frappe._(data.doc_type);
 			data.add_class = "label-info";
 			data.onclick = repl('onclick="window.location.href=\'#!List/%(feed_type)s\';"', data)
 		}
@@ -63,7 +63,7 @@ erpnext.ActivityFeed = Class.extend({
 		
 		// link
 		if(data.doc_name && data.feed_type!='Login') {
-			data.link = wn.format(data.doc_name, {"fieldtype":"Link", "options":data.doc_type})
+			data.link = frappe.format(data.doc_name, {"fieldtype":"Link", "options":data.doc_type})
 		} else {
 			data.link = "";
 		}

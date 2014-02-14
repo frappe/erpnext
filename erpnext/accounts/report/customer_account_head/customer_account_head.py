@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def execute(filters=None):
 	account_map = get_account_map()
 	columns = get_columns(account_map)
 	data = []
-	customers = webnotes.conn.sql("select name from tabCustomer where docstatus < 2")
+	customers = frappe.conn.sql("select name from tabCustomer where docstatus < 2")
 	for cust in customers:
 		row = [cust[0]]
 		for company in sorted(account_map):
@@ -18,7 +18,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_account_map():
-	accounts = webnotes.conn.sql("""select name, company, master_name 
+	accounts = frappe.conn.sql("""select name, company, master_name 
 		from `tabAccount` where master_type = 'Customer' 
 		and ifnull(master_name, '') != '' and docstatus < 2""", as_dict=1)
 

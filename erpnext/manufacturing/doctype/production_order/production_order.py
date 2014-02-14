@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, flt, nowdate
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from frappe.utils import cstr, flt, nowdate
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 
-class OverProductionError(webnotes.ValidationError): pass
+class OverProductionError(frappe.ValidationError): pass
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -32,21 +32,21 @@ class DocType:
 		
 	def validate_bom_no(self):
 		if self.doc.bom_no:
-			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
+			bom = frappe.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
-				webnotes.throw("""Incorrect BOM: %s entered. 
+				frappe.throw("""Incorrect BOM: %s entered. 
 					May be BOM not exists or inactive or not submitted 
 					or for some other item.""" % cstr(self.doc.bom_no))
 					
 	def validate_sales_order(self):
 		if self.doc.sales_order:
-			so = webnotes.conn.sql("""select name, delivery_date from `tabSales Order` 
+			so = frappe.conn.sql("""select name, delivery_date from `tabSales Order` 
 				where name=%s and docstatus = 1""", self.doc.sales_order, as_dict=1)[0]
 
 			if not so.name:
-				webnotes.throw("Sales Order: %s is not valid" % self.doc.sales_order)
+				frappe.throw("Sales Order: %s is not valid" % self.doc.sales_order)
 
 			if not self.doc.expected_delivery_date:
 				self.doc.expected_delivery_date = so.delivery_date
@@ -61,25 +61,25 @@ class DocType:
 	
 	def validate_production_order_against_so(self):
 		# already ordered qty
-		ordered_qty_against_so = webnotes.conn.sql("""select sum(qty) from `tabProduction Order`
+		ordered_qty_against_so = frappe.conn.sql("""select sum(qty) from `tabProduction Order`
 			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""", 
 			(self.doc.production_item, self.doc.sales_order, self.doc.name))[0][0]
 
 		total_qty = flt(ordered_qty_against_so) + flt(self.doc.qty)
 		
 		# get qty from Sales Order Item table
-		so_item_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
+		so_item_qty = frappe.conn.sql("""select sum(qty) from `tabSales Order Item` 
 			where parent = %s and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# get qty from Packing Item table
-		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabPacked Item` 
+		dnpi_qty = frappe.conn.sql("""select sum(qty) from `tabPacked Item` 
 			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 				
 		if total_qty > so_qty:
-			webnotes.throw(_("Total production order qty for item") + ": " + 
+			frappe.throw(_("Total production order qty for item") + ": " + 
 				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
 				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
 				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
@@ -95,32 +95,32 @@ class DocType:
 
 	def update_status(self, status):
 		if status == 'Stopped':
-			webnotes.conn.set(self.doc, 'status', cstr(status))
+			frappe.conn.set(self.doc, 'status', cstr(status))
 		else:
 			if flt(self.doc.qty) == flt(self.doc.produced_qty):
-				webnotes.conn.set(self.doc, 'status', 'Completed')
+				frappe.conn.set(self.doc, 'status', 'Completed')
 			if flt(self.doc.qty) > flt(self.doc.produced_qty):
-				webnotes.conn.set(self.doc, 'status', 'In Process')
+				frappe.conn.set(self.doc, 'status', 'In Process')
 			if flt(self.doc.produced_qty) == 0:
-				webnotes.conn.set(self.doc, 'status', 'Submitted')
+				frappe.conn.set(self.doc, 'status', 'Submitted')
 
 
 	def on_submit(self):
 		if not self.doc.wip_warehouse:
-			webnotes.throw(_("WIP Warehouse required before Submit"))
-		webnotes.conn.set(self.doc,'status', 'Submitted')
+			frappe.throw(_("WIP Warehouse required before Submit"))
+		frappe.conn.set(self.doc,'status', 'Submitted')
 		self.update_planned_qty(self.doc.qty)
 		
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry` 
+		stock_entry = frappe.conn.sql("""select name from `tabStock Entry` 
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
-			webnotes.throw("""Submitted Stock Entry %s exists against this production order. 
+			frappe.throw("""Submitted Stock Entry %s exists against this production order. 
 				Hence can not be cancelled.""" % stock_entry[0][0])
 
-		webnotes.conn.set(self.doc,'status', 'Cancelled')
+		frappe.conn.set(self.doc,'status', 'Cancelled')
 		self.update_planned_qty(-self.doc.qty)
 
 	def update_planned_qty(self, qty):
@@ -134,9 +134,9 @@ class DocType:
 		from erpnext.stock.utils import update_bin
 		update_bin(args)
 
-@webnotes.whitelist()	
+@frappe.whitelist()	
 def get_item_details(item):
-	res = webnotes.conn.sql("""select stock_uom, description
+	res = frappe.conn.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
 	
@@ -144,18 +144,18 @@ def get_item_details(item):
 		return {}
 		
 	res = res[0]
-	bom = webnotes.conn.sql("""select name from `tabBOM` where item=%s 
+	bom = frappe.conn.sql("""select name from `tabBOM` where item=%s 
 		and ifnull(is_default, 0)=1""", item)
 	if bom:
 		res.bom_no = bom[0][0]
 		
 	return res
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_stock_entry(production_order_id, purpose):
-	production_order = webnotes.bean("Production Order", production_order_id)
+	production_order = frappe.bean("Production Order", production_order_id)
 		
-	stock_entry = webnotes.new_bean("Stock Entry")
+	stock_entry = frappe.new_bean("Stock Entry")
 	stock_entry.doc.purpose = purpose
 	stock_entry.doc.production_order = production_order_id
 	stock_entry.doc.company = production_order.doc.company

@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cint, cstr, flt, has_common
-from webnotes.model import db_exists
-from webnotes.model.bean import copy_doclist
-from webnotes import msgprint
+from frappe.utils import cint, cstr, flt, has_common
+from frappe.model import db_exists
+from frappe.model.bean import copy_doclist
+from frappe import msgprint
 
 	
 
@@ -18,7 +18,7 @@ class DocType:
 
 
 	def check_duplicate_entry(self):
-		exists = webnotes.conn.sql("""select name, docstatus from `tabAuthorization Rule` 
+		exists = frappe.conn.sql("""select name, docstatus from `tabAuthorization Rule` 
 			where transaction = %s and based_on = %s and system_user = %s 
 			and system_role = %s and approving_user = %s and approving_role = %s 
 			and to_emp =%s and to_designation=%s and name != %s""", 
@@ -38,12 +38,12 @@ class DocType:
 
 	def validate_master_name(self):
 		if self.doc.based_on == 'Customerwise Discount' and \
-				not webnotes.conn.sql("select name from tabCustomer where name = '%s' and docstatus != 2" % \
+				not frappe.conn.sql("select name from tabCustomer where name = '%s' and docstatus != 2" % \
 				 	(self.doc.master_name)):
 			msgprint("Please select valid Customer Name for Customerwise Discount", 
 			 	raise_exception=1)
 		elif self.doc.based_on == 'Itemwise Discount' and \
-				not webnotes.conn.sql("select name from tabItem where name = '%s' and docstatus != 2" % \
+				not frappe.conn.sql("select name from tabItem where name = '%s' and docstatus != 2" % \
 				 	(self.doc.master_name)):
 			msgprint("Please select valid Item Name for Itemwise Discount", raise_exception=1)
 		elif (self.doc.based_on == 'Grand Total' or \
@@ -64,7 +64,7 @@ class DocType:
 					Applicable To (Role).", raise_exception=1)
 			elif self.doc.system_user and self.doc.approving_role and \
 			 		has_common([self.doc.approving_role], [x[0] for x in \
-					webnotes.conn.sql("select role from `tabUserRole` where parent = '%s'" % \
+					frappe.conn.sql("select role from `tabUserRole` where parent = '%s'" % \
 					 	(self.doc.system_user))]):
 				msgprint("System User : %s is assigned role : %s. So rule does not make sense" % 
 				 	(self.doc.system_user,self.doc.approving_role), raise_exception=1)

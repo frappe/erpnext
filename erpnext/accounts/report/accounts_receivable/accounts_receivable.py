@@ -2,20 +2,20 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
-from webnotes.utils import getdate, nowdate, flt
+import frappe
+from frappe import _
+from frappe.utils import getdate, nowdate, flt
 
 class AccountsReceivableReport(object):
 	def __init__(self, filters=None):
-		self.filters = webnotes._dict(filters or {})
+		self.filters = frappe._dict(filters or {})
 		self.filters.report_date = getdate(self.filters.report_date or nowdate())
 		self.age_as_on = getdate(nowdate()) \
 			if self.filters.report_date > getdate(nowdate()) \
 			else self.filters.report_date
 			
 	def run(self):
-		customer_naming_by = webnotes.conn.get_value("Selling Settings", None, "cust_master_name")
+		customer_naming_by = frappe.conn.get_value("Selling Settings", None, "cust_master_name")
 		return self.get_columns(customer_naming_by), self.get_data(customer_naming_by)
 		
 	def get_columns(self, customer_naming_by):
@@ -111,7 +111,7 @@ class AccountsReceivableReport(object):
 		
 	def get_account_map(self):
 		if not hasattr(self, "account_map"):
-			self.account_map = dict(((r.name, r) for r in webnotes.conn.sql("""select 
+			self.account_map = dict(((r.name, r) for r in frappe.conn.sql("""select 
 				acc.name, cust.name as customer, cust.customer_name, cust.territory
 				from `tabAccount` acc left join `tabCustomer` cust 
 				on cust.name=acc.master_name where acc.master_type="Customer" """, as_dict=True)))
@@ -121,7 +121,7 @@ class AccountsReceivableReport(object):
 	def get_due_date(self, gle):
 		if not hasattr(self, "invoice_due_date_map"):
 			# TODO can be restricted to posting date
-			self.invoice_due_date_map = dict(webnotes.conn.sql("""select name, due_date
+			self.invoice_due_date_map = dict(frappe.conn.sql("""select name, due_date
 				from `tabSales Invoice` where docstatus=1"""))
 				
 		return gle.voucher_type == "Sales Invoice" \
@@ -130,7 +130,7 @@ class AccountsReceivableReport(object):
 	def get_gl_entries(self):
 		if not hasattr(self, "gl_entries"):
 			conditions, values = self.prepare_conditions()
-			self.gl_entries = webnotes.conn.sql("""select * from `tabGL Entry`
+			self.gl_entries = frappe.conn.sql("""select * from `tabGL Entry`
 				where docstatus < 2 {0} order by posting_date, account""".format(conditions),
 				values, as_dict=True)
 		return self.gl_entries
@@ -149,7 +149,7 @@ class AccountsReceivableReport(object):
 		else:
 			account_map = self.get_account_map()
 			if not account_map:
-				webnotes.throw(_("No Customer Accounts found."))
+				frappe.throw(_("No Customer Accounts found."))
 			else:
 				accounts_list = ['"{0}"'.format(ac) for ac in account_map]
 				conditions.append("account in ({0})".format(", ".join(accounts_list)))

@@ -4,26 +4,26 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, add_days, date_diff
-from webnotes import msgprint, _
-from webnotes.utils.datautils import UnicodeWriter
+import frappe
+from frappe.utils import cstr, add_days, date_diff
+from frappe import msgprint, _
+from frappe.utils.datautils import UnicodeWriter
 
 # doclist = None
-doclist = webnotes.local('uploadattendance_doclist')
+doclist = frappe.local('uploadattendance_doclist')
 
 class DocType():
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_template():
-	if not webnotes.has_permission("Attendance", "create"):
-		raise webnotes.PermissionError
+	if not frappe.has_permission("Attendance", "create"):
+		raise frappe.PermissionError
 	
-	args = webnotes.local.form_dict
-	webnotes.local.uploadattendance_doclist = webnotes.model.doctype.get("Attendance")
+	args = frappe.local.form_dict
+	frappe.local.uploadattendance_doclist = frappe.model.doctype.get("Attendance")
 
 	w = UnicodeWriter()
 	w = add_header(w)
@@ -31,9 +31,9 @@ def get_template():
 	w = add_data(w, args)
 
 	# write out response as a type csv
-	webnotes.response['result'] = cstr(w.getvalue())
-	webnotes.response['type'] = 'csv'
-	webnotes.response['doctype'] = "Attendance"
+	frappe.response['result'] = cstr(w.getvalue())
+	frappe.response['type'] = 'csv'
+	frappe.response['doctype'] = "Attendance"
 	
 def getdocfield(fieldname):
 	"""get docfield from doclist of doctype"""
@@ -79,12 +79,12 @@ def get_dates(args):
 	return dates
 	
 def get_active_employees():
-	employees = webnotes.conn.sql("""select name, employee_name, company 
+	employees = frappe.conn.sql("""select name, employee_name, company 
 		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	return employees
 	
 def get_existing_attendance_records(args):
-	attendance = webnotes.conn.sql("""select name, att_date, employee, status, naming_series 
+	attendance = frappe.conn.sql("""select name, att_date, employee, status, naming_series 
 		from `tabAttendance` where att_date between %s and %s and docstatus < 2""", 
 		(args["from_date"], args["to_date"]), as_dict=1)
 		
@@ -102,13 +102,13 @@ def get_naming_series():
 	return series[0]
 
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def upload():
-	if not webnotes.has_permission("Attendance", "create"):
-		raise webnotes.PermissionError
+	if not frappe.has_permission("Attendance", "create"):
+		raise frappe.PermissionError
 	
-	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
-	from webnotes.modules import scrub
+	from frappe.utils.datautils import read_csv_content_from_uploaded_file
+	from frappe.modules import scrub
 	
 	rows = read_csv_content_from_uploaded_file()
 	if not rows:
@@ -120,16 +120,16 @@ def upload():
 	ret = []
 	error = False
 	
-	from webnotes.utils.datautils import check_record, import_doc
-	doctype_dl = webnotes.get_doctype("Attendance")
+	from frappe.utils.datautils import check_record, import_doc
+	doctype_dl = frappe.get_doctype("Attendance")
 	
 	for i, row in enumerate(rows[5:]):
 		if not row: continue
 		row_idx = i + 5
-		d = webnotes._dict(zip(columns, row))
+		d = frappe._dict(zip(columns, row))
 		d["doctype"] = "Attendance"
 		if d.name:
-			d["docstatus"] = webnotes.conn.get_value("Attendance", d.name, "docstatus")
+			d["docstatus"] = frappe.conn.get_value("Attendance", d.name, "docstatus")
 			
 		try:
 			check_record(d, doctype_dl=doctype_dl)
@@ -138,10 +138,10 @@ def upload():
 			error = True
 			ret.append('Error for row (#%d) %s : %s' % (row_idx, 
 				len(row)>1 and row[1] or "", cstr(e)))
-			webnotes.errprint(webnotes.get_traceback())
+			frappe.errprint(frappe.get_traceback())
 
 	if error:
-		webnotes.conn.rollback()		
+		frappe.conn.rollback()		
 	else:
-		webnotes.conn.commit()
+		frappe.conn.commit()
 	return {"messages": ret, "error": error}

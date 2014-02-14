@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import date_diff
+import frappe
+from frappe.utils import date_diff
 
 def execute(filters=None):
 	
@@ -63,7 +63,7 @@ def get_fifo_queue(filters):
 	return item_details
 	
 def get_stock_ledger_entries(filters):
-	return webnotes.conn.sql("""select 
+	return frappe.conn.sql("""select 
 			item.name, item.item_name, item_group, brand, description, item.stock_uom, 
 			actual_qty, posting_date
 		from `tabStock Ledger Entry` sle,
