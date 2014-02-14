@@ -6,12 +6,14 @@ from __future__ import unicode_literals
 test_records = [
 	[{
 		"doctype": "Period", 
+		"name": "_Test Period", 
 		"enabled": 1, 
-		"from_date": "2013-01-01",
+		"from_date": "2013-01-01", 
 		"to_date": "2013-12-31"
 	}],
 	[{
 		"doctype": "Period", 
+		"name": "_Test Period 1", 
 		"enabled": 1, 
 		"from_date": "2014-01-01",
 		"to_date": "2014-01-31"

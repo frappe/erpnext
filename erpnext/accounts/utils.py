@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-
 import webnotes
 from webnotes.utils import nowdate, cstr, flt, now, getdate, add_months
 from webnotes.model.doc import addchild
@@ -10,14 +9,12 @@ from webnotes import msgprint, throw, _
 from webnotes.utils import formatdate
 from erpnext.utilities import build_filter_conditions
 
-
 class FiscalYearError(webnotes.ValidationError): pass
 class BudgetError(webnotes.ValidationError): pass
 
-
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
 	return get_fiscal_years(date, fiscal_year, label, verbose)[0]
-	
+
 def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = ""
@@ -28,39 +25,40 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 			(date, date)
 	fy = webnotes.conn.sql("""select name, year_start_date, year_end_date
 		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
-	
+
 	if not fy:
-		error_msg = """%s %s not in any Fiscal Year""" % (label, formatdate(date))
-		error_msg = """{msg}: {date}""".format(msg=_("Fiscal Year does not exist for date"), 
+		error_msg = "{label} {date} {msg}".format(label=label, date=formatdate(date), 
+			msg=_("not in any Fiscal Year"))
+		error_msg = "{msg}: {date}".format(msg=_("Fiscal Year does not exist for date"), 
 			date=formatdate(date))
-		if verbose: webnotes.msgprint(error_msg)
-		raise FiscalYearError, error_msg
-	
+		if verbose: msgprint(error_msg)
+		throw(error_msg, exc=FiscalYearError)
+
 	return fy
-	
+
 def validate_fiscal_year(date, fiscal_year, label="Date"):
 	years = [f[0] for f in get_fiscal_years(date, label=label)]
 	if fiscal_year not in years:
-		throw(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
-			": '%(fiscal_year)s'") % {
+		throw("{label} '{posting_date}': {not}: '{fiscal_year}'".format(**{
 				"label": label,
 				"posting_date": formatdate(date),
+				"not": _("not within Fiscal Year")
 				"fiscal_year": fiscal_year
-			})
+			}))
 
 @webnotes.whitelist()
 def get_balance_on(account=None, date=None):
 	if not account and webnotes.form_dict.get("account"):
 		account = webnotes.form_dict.get("account")
 		date = webnotes.form_dict.get("date")
-	
+
 	cond = []
 	if date:
 		cond.append("posting_date <= '%s'" % date)
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
-		
+
 	try:
 		year_start_date = get_fiscal_year(date, verbose=0)[1]
 	except FiscalYearError, e:
@@ -72,15 +70,15 @@ def get_balance_on(account=None, date=None):
 			# this indicates that it is a date older than any existing fiscal year.
 			# hence, assuming balance as 0.0
 			return 0.0
-		
+
 	acc = webnotes.conn.get_value('Account', account, \
 		['lft', 'rgt', 'debit_or_credit', 'is_pl_account', 'group_or_ledger'], as_dict=1)
-	
+
 	# for pl accounts, get balance within a fiscal year
 	if acc.is_pl_account == 'Yes':
 		cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
 			% year_start_date)
-	
+
 	# different filter for group and ledger - improved performance
 	if acc.group_or_ledger=="Group":
 		cond.append("""exists (
@@ -89,7 +87,7 @@ def get_balance_on(account=None, date=None):
 		)""" % (acc.lft, acc.rgt))
 	else:
 		cond.append("""gle.account = "%s" """ % (account, ))
-	
+
 	bal = webnotes.conn.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		FROM `tabGL Entry` gle
@@ -120,7 +118,7 @@ def add_cc(args=None):
 	if not args:
 		args = webnotes.local.form_dict
 		args.pop("cmd")
-		
+
 	cc = webnotes.bean(args)
 	cc.doc.doctype = "Cost Center"
 	cc.doc.old_parent = ""
@@ -153,7 +151,6 @@ def reconcile_against_document(args):
 		jv_obj = webnotes.get_obj('Journal Voucher', d['voucher_no'], with_children =1)
 		jv_obj.make_gl_entries(cancel = 0, adv_adj =1)
 
-
 def check_if_jv_modified(args):
 	"""
 		check if there is already a voucher reference
@@ -167,21 +164,19 @@ def check_if_jv_modified(args):
 		and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
 		and t1.name = '%(voucher_no)s' and t2.name = '%(voucher_detail_no)s'
 		and t1.docstatus=1 and t2.%(dr_or_cr)s = %(unadjusted_amt)s""" % args)
-	
+
 	if not ret:
 		throw(_("""Payment Entry has been modified after you pulled it. Please pull it again."""))
 
 def update_against_doc(d, jv_obj):
-	"""
-		Updates against document, if partial amount splits into rows
-	"""
+	""" Updates against document, if partial amount splits into rows """
 
 	webnotes.conn.sql("""
 		update `tabJournal Voucher Detail` t1, `tabJournal Voucher` t2	
 		set t1.%(dr_or_cr)s = '%(allocated_amt)s', 
 		t1.%(against_fld)s = '%(against_voucher)s', t2.modified = now() 
 		where t1.name = '%(voucher_detail_no)s' and t1.parent = t2.name""" % d)
-	
+
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = webnotes.conn.sql("""select cost_center, balance, against_account, is_advance 
 			from `tabJournal Voucher Detail` where name = %s""", d['voucher_detail_no'])
@@ -196,50 +191,49 @@ def update_against_doc(d, jv_obj):
 		ch.is_advance = cstr(jvd[0][3])
 		ch.docstatus = 1
 		ch.save(1)
-		
+
 def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("group_or_ledger"):
 		filters["group_or_ledger"] = "Ledger"
 
 	conditions, filter_values = build_filter_conditions(filters)
-		
+
 	return webnotes.conn.sql("""select name, parent_account from `tabAccount` 
 		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" % 
 		(conditions, searchfield, "%s", "%s", "%s"), 
 		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
-		
+
 def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("group_or_ledger"):
 		filters["group_or_ledger"] = "Ledger"
 
 	conditions, filter_values = build_filter_conditions(filters)
-	
+
 	return webnotes.conn.sql("""select name, parent_cost_center from `tabCost Center` 
 		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" % 
 		(conditions, searchfield, "%s", "%s", "%s"), 
 		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
-		
+
 def remove_against_link_from_jv(ref_type, ref_no, against_field):
 	linked_jv = webnotes.conn.sql_list("""select parent from `tabJournal Voucher Detail` 
 		where `%s`=%s and docstatus < 2""" % (against_field, "%s"), (ref_no))
-		
+
 	if linked_jv:	
 		webnotes.conn.sql("""update `tabJournal Voucher Detail` set `%s`=null,
 			modified=%s, modified_by=%s
 			where `%s`=%s and docstatus < 2""" % (against_field, "%s", "%s", against_field, "%s"), 
 			(now(), webnotes.session.user, ref_no))
-	
+
 		webnotes.conn.sql("""update `tabGL Entry`
 			set against_voucher_type=null, against_voucher=null,
 			modified=%s, modified_by=%s
 			where against_voucher_type=%s and against_voucher=%s
 			and voucher_no != ifnull(against_voucher, '')""",
 			(now(), webnotes.session.user, ref_type, ref_no))
-			
+
 		webnotes.msgprint("{msg} {linked_jv}".format(msg = _("""Following linked Journal Vouchers \
 			made against this transaction has been unlinked. You can link them again with other \
 			transactions via Payment Reconciliation Tool."""), linked_jv="\n".join(linked_jv)))
-		
 
 @webnotes.whitelist()
 def get_company_default(company, fieldname):
@@ -249,7 +243,7 @@ def get_company_default(company, fieldname):
 		throw(_("Please mention default value for '") + 
 			_(webnotes.get_doctype("company").get_label(fieldname) + 
 			_("' in Company: ") + company))
-			
+
 	return value
 
 def fix_total_debit_credit():
@@ -258,27 +252,27 @@ def fix_total_debit_credit():
 		from `tabGL Entry` 
 		group by voucher_type, voucher_no
 		having sum(ifnull(debit, 0)) != sum(ifnull(credit, 0))""", as_dict=1)
-		
+
 	for d in vouchers:
 		if abs(d.diff) > 0:
 			dr_or_cr = d.voucher_type == "Sales Invoice" and "credit" or "debit"
-			
+
 			webnotes.conn.sql("""update `tabGL Entry` set %s = %s + %s
 				where voucher_type = %s and voucher_no = %s and %s > 0 limit 1""" %
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr), 
 				(d.diff, d.voucher_type, d.voucher_no))
-	
+
 def get_stock_and_account_difference(account_list=None, posting_date=None):
 	from erpnext.stock.utils import get_stock_balance_on
-	
+
 	if not posting_date: posting_date = nowdate()
-	
+
 	difference = {}
-	
+
 	account_warehouse = dict(webnotes.conn.sql("""select name, master_name from tabAccount 
 		where account_type = 'Warehouse' and ifnull(master_name, '') != '' 
 		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
-			
+
 	for account, warehouse in account_warehouse.items():
 		account_balance = get_balance_on(account, posting_date)
 		stock_value = get_stock_balance_on(warehouse, posting_date)
@@ -296,7 +290,7 @@ def validate_expense_against_budget(args):
 				from `tabCost Center` cc, `tabBudget Detail` bd
 				where cc.name=bd.parent and cc.name=%s and account=%s and bd.fiscal_year=%s
 			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
-			
+
 			if budget and budget[0].budget_allocated:
 				yearly_action, monthly_action = webnotes.conn.get_value("Company", args.company, 
 					["yearly_bgt_flag", "monthly_bgt_flag"])
@@ -322,7 +316,7 @@ def validate_expense_against_budget(args):
 							args.cost_center + _(" will exceed by ") + 
 							cstr(actual_expense - budget_amount) + _(" after this transaction.")
 							, exc=BudgetError if action=="Stop" else False)
-					
+
 def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
 	if distribution_id:
 		distribution = {}
@@ -333,7 +327,7 @@ def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budg
 
 	dt = webnotes.conn.get_value("Fiscal Year", fiscal_year, "year_start_date")
 	budget_percentage = 0.0
-	
+
 	while(dt <= getdate(posting_date)):
 		if distribution_id:
 			budget_percentage += distribution.get(getdate(dt).strftime("%B"), 0)
@@ -341,7 +335,7 @@ def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budg
 			budget_percentage += 100.0/12
 			
 		dt = add_months(dt, 1)
-		
+
 	return yearly_budget * budget_percentage / 100
 				
 def get_actual_expense(args):
@@ -354,7 +348,7 @@ def get_actual_expense(args):
 		where account='%(account)s' and cost_center='%(cost_center)s' 
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
 	""" % (args))[0][0]
-	
+
 def rename_account_for(dt, olddn, newdn, merge, company):
 	old_account = get_account_for(dt, olddn)
 	if old_account:
@@ -368,25 +362,25 @@ def rename_account_for(dt, olddn, newdn, merge, company):
 				existing_new_account or newdn, merge=True if existing_new_account else False)
 
 		webnotes.conn.set_value("Account", new_account or old_account, "master_name", newdn)
-		
+
 def add_abbr_if_missing(dn, company):
 	from erpnext.setup.doctype.company.company import get_name_with_abbr
 	return get_name_with_abbr(dn, company)
-			
+
 def get_account_for(account_for_doctype, account_for):
 	if account_for_doctype in ["Customer", "Supplier"]:
 		account_for_field = "master_type"
 	elif account_for_doctype == "Warehouse":
 		account_for_field = "account_type"
-		
+
 	return webnotes.conn.get_value("Account", {account_for_field: account_for_doctype, 
 		"master_name": account_for})
-		
+
 def get_currency_precision(currency=None):
 	if not currency:
 		currency = webnotes.conn.get_value("Company", 
 			webnotes.conn.get_default("company"), "default_currency")
 	currency_format = webnotes.conn.get_value("Currency", currency, "number_format")
-	
+
 	from webnotes.utils import get_number_format_info
 	return get_number_format_info(currency_format)[2]
