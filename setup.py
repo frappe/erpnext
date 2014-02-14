@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '4.0.0-wip'
+version = '4.0.0-beta'
 
 setup(
     name='erpnext',
