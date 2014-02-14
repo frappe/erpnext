@@ -1,0 +1,3029 @@
+ (Half Day),(அரை நாள்)
+ .You can not assign / modify / remove Master Name,
+ Quantity should be greater than 0.,
+ after this transaction.,
+ against cost center ,
+ against sales order,விற்பனை எதிராக
+ against same operation,அதே நடவடிக்கை எதிராக
+ already marked,ஏற்கனவே குறிக்கப்பட்ட
+ and fiscal year : ,
+ and year: ,ஆண்டு:
+ as it is stock Item or packing item,அதை பங்கு பொருள் அல்லது பேக்கிங் உருப்படியை உள்ளது
+ at warehouse: ,கிடங்கு மணிக்கு:
+ budget ,
+ can not be created/modified against stopped Sales Order ,
+ can not be deleted,
+ can not be made.,முடியாது.
+ can not be received twice,
+ can only be debited/credited through Stock transactions,
+ created,
+ does not belong to ,
+ does not belong to Warehouse,
+ does not belong to the company,நிறுவனத்திற்கு சொந்தமானது இல்லை
+ does not exists,
+ for account ,
+ has been freezed. ,freezed.
+ is a frozen account. Either make the account active or assign role in Accounts Settings who can create / modify entries against this account,
+" is a frozen account. To create / edit transactions against this account, you need role",
+" is less than equals to zero in the system, valuation rate is mandatory for this item",
+ is mandatory,அவசியமானதாகும்
+ is mandatory for GL Entry,ஜீ நுழைவு அத்தியாவசியமானதாகும்
+ is not a ledger,ஒரு பேரேட்டில் அல்ல
+ is not active,செயலில் இல்லை
+ is not submitted document,
+" is now the default Fiscal Year. \
+			Please refresh your browser for the change to take effect.",
+ not active or does not exists in the system,செயலில் இல்லை அல்லது அமைப்பு உள்ளது இல்லை
+ or the BOM is cancelled or inactive,அல்லது BOM ரத்து அல்லது செயலற்று
+ should be same as that in ,அந்த அதே இருக்க வேண்டும்
+ was on leave on ,அவர் மீது விடுப்பில்
+ will be ,இருக்கும்
+ will be created,
+ will be over-billed against mentioned ,குறிப்பிட்ட எதிரான ஒரு தடவை கட்டணம்
+ will become ,மாறும்
+ will exceed by ,
+""" does not exists",""" உள்ளது இல்லை"
+# ###.##,
+"#,###",
+"#,###.##",
+"#,###.###",
+"#,##,###.##",
+#.###,
+"#.###,##",
+%  Delivered,அனுப்பப்பட்டது%
+% Amount Billed,கணக்கில்% தொகை
+% Billed,% வசூலிக்கப்படும்
+% Completed,% முடிந்தது
+% Delivered,% வழங்க
+% Installed,% நிறுவப்பட்ட
+% Received,% பெறப்பட்டது
+% of materials billed against this Purchase Order.,பொருட்களை% இந்த கொள்முதல் ஆணை எதிராக வசூலிக்கப்படும்.
+% of materials billed against this Sales Order,பொருட்களை% இந்த விற்பனை அமைப்புக்கு எதிராக வசூலிக்கப்படும்
+% of materials delivered against this Delivery Note,இந்த டெலிவரி குறிப்பு எதிராக அளிக்கப்பட்ட பொருட்களை%
+% of materials delivered against this Sales Order,இந்த விற்பனை அமைப்புக்கு எதிராக அளிக்கப்பட்ட பொருட்களை%
+% of materials ordered against this Material Request,பொருட்கள்% இந்த பொருள் வேண்டுகோள் எதிராக உத்தரவிட்டது
+% of materials received against this Purchase Order,பொருட்களை% இந்த கொள்முதல் ஆணை எதிராக பெற்றார்
+%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s,% ( conversion_rate_label ) கள் கட்டாயமாகும். ஒருவேளை செலாவணி சாதனை % உருவாக்கப்பட்டது அல்ல ( from_currency ) % s க்கு ( to_currency ) கள்
+' in Company: ,&#39;கம்பெனி:
+'To Case No.' cannot be less than 'From Case No.',&#39;வழக்கு எண் வேண்டும்&#39; &#39;வழக்கு எண் வரம்பு&#39; விட குறைவாக இருக்க முடியாது
+"(Paid amount + Write Off Amount) can not be \
+				greater than Grand Total",
+(Total) Net Weight value. Make sure that Net Weight of each item is,( மொத்த ) நிகர எடை மதிப்பு . ஒவ்வொரு பொருளின் நிகர எடை இருக்கும் என்று உறுதி
+* Will be calculated in the transaction.,* பரிமாற்றத்தில் கணக்கிடப்படுகிறது.
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.
+
+To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",
+**Currency** Master,** நாணயத்தின் ** மாஸ்டர்
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,** நிதியாண்டு ** ஒரு நிதி ஆண்டு பிரதிபலிக்கிறது. அனைத்து கணக்கியல் உள்ளீடுகள் மற்றும் பிற முக்கிய நடவடிக்கைகள் ** நிதியாண்டு ** எதிராக கண்காணிக்கப்படும்.
+". Outstanding cannot be less than zero. \
+			 	Please match exact outstanding.",
+. Please set status of the employee as 'Left',. &#39;இடது&#39; என ஊழியர் நிலையை அமைக்கவும்
+. You can not mark his attendance as 'Present',. நீங்கள் &#39;தற்போது&#39; என அவரது வருகை குறிக்க முடியாது
+01,01
+02,02
+03,03
+04,04
+05,05
+06,06
+07,07
+08,08
+09,09
+"1 Currency = [?] Fraction
+For e.g. 1 USD = 100 Cent",
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. வாடிக்கையாளர் வாரியாக உருப்படியை குறியீடு பராமரிக்க மற்றும் அவற்றின் குறியீடு அடிப்படையில் அவர்களை தேடும் செய்ய இந்த விருப்பத்தை பயன்படுத்த
+10,10
+11,11
+12,12
+2,2
+3,3
+4,4
+5,5
+6,6
+: Duplicate row from same ,: அதே இருந்து வரிசையில் நகல்
+: It is linked to other active BOM(s),: இது மற்ற செயலில் BOM (கள்) இணைக்கப்பட்டது
+: Mandatory for a Recurring Invoice.,: ஒரு தொடர் விலைப்பட்டியல் கட்டாயமாக.
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","மிக href=""#Sales Browser/Customer Group""> சேர் / திருத்து </ a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","மிக href=""#Sales Browser/Item Group""> சேர் / திருத்து </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","மிக href=""#Sales Browser/Territory""> சேர் / திருத்து </ a>"
+"<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank"">[?]</a>","மிக href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank""> [?] </ a>"
+A Customer exists with same name,ஒரு வாடிக்கையாளர் அதே பெயரில் உள்ளது
+A Lead with this email id should exist,இந்த மின்னஞ்சல் ஐடியை கொண்ட ஒரு முன்னணி இருக்க வேண்டும்
+"A Product or a Service that is bought, sold or kept in stock.","ஒரு தயாரிப்பு அல்லது, வாங்கி விற்பனை அல்லது பங்கு இருக்கிறது என்று ஒரு சேவை."
+A Supplier exists with same name,ஒரு சப்ளையர் அதே பெயரில் உள்ளது
+A condition for a Shipping Rule,ஒரு கப்பல் விதி ஒரு நிலை
+A logical Warehouse against which stock entries are made.,பங்கு எழுதியுள்ளார் இவை எதிராக ஒரு தருக்க கிடங்கு.
+A symbol for this currency. For e.g. $,இந்த நாணயம் ஒரு குறியீடு. உதாரணமாக $ க்கு
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,மூன்றாவது கட்சி விநியோகஸ்தர் / டீலர் / கமிஷன் முகவர் / இணை / மறுவிற்பனையாளரை ஒரு கமிஷன் நிறுவனங்கள் பொருட்களை விற்கும்.
+A+,A +
+A-,ஒரு-
+AB+,AB +
+AB-,ஏபி-
+AMC Expiry Date,AMC காலாவதியாகும் தேதி
+AMC expiry date and maintenance status mismatched,AMC காலாவதியாகும் தேதி மற்றும் பராமரிப்பு நிலையை பொருந்தாத
+ATT,ATT
+Abbr,Abbr
+About ERPNext,ERPNext பற்றி
+Above Value,மதிப்பு மேலே
+Absent,வராதிரு
+Acceptance Criteria,ஏற்று வரையறைகள்
+Accepted,ஏற்று
+Accepted Quantity,ஏற்று அளவு
+Accepted Warehouse,ஏற்று கிடங்கு
+Account,கணக்கு
+Account ,
+Account Balance,கணக்கு இருப்பு
+Account Details,கணக்கு விவரம்
+Account Head,கணக்கு ஒதுக்கும் தலைப்பு - பிரிவு
+Account Name,கணக்கு பெயர்
+Account Type,கணக்கு வகை
+Account expires on,கணக்கு அன்று காலாவதியாகிறது
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,கிடங்கு ( நிரந்தர இருப்பு ) கணக்கு இந்த கணக்கு கீழ் உருவாக்கப்பட்டது.
+Account for this ,இந்த கணக்கு
+Accounting,கணக்கு வைப்பு
+Accounting Entries are not allowed against groups.,கணக்கியல் உள்ளீடுகள் குழுக்களுக்கு எதிராக அனுமதி இல்லை.
+"Accounting Entries can be made against leaf nodes, called","கணக்கியல் உள்ளீடுகள் என்று , இலை முனைகள் எதிராக"
+Accounting Year.,பைனான்ஸ் ஆண்டு.
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","இந்த தேதி வரை உறைநிலையில் பைனான்ஸ் நுழைவு, யாரும் / கீழே குறிப்பிட்ட பங்கை தவிர நுழைவு மாற்ற முடியும்."
+Accounting journal entries.,பைனான்ஸ் ஜர்னல் பதிவுகள்.
+Accounts,கணக்குகள்
+Accounts Frozen Upto,கணக்குகள் வரை உறை
+Accounts Payable,கணக்குகள் செலுத்த வேண்டிய
+Accounts Receivable,கணக்குகள்
+Accounts Settings,கணக்குகள் அமைப்புகள்
+Action,செயல்
+Active,செயலில்
+Active: Will extract emails from ,செயலில்: மின்னஞ்சல்களை பிரித்தெடுக்கும்
+Activity,நடவடிக்கை
+Activity Log,நடவடிக்கை புகுபதிகை
+Activity Log:,செயல்பாடு : புகுபதிகை
+Activity Type,நடவடிக்கை வகை
+Actual,உண்மையான
+Actual Budget,உண்மையான பட்ஜெட்
+Actual Completion Date,உண்மையான நிறைவு நாள்
+Actual Date,உண்மையான தேதி
+Actual End Date,உண்மையான முடிவு தேதி
+Actual Invoice Date,உண்மையான விலைப்பட்டியல் தேதி
+Actual Posting Date,உண்மையான பதிவுசெய்ய தேதி
+Actual Qty,உண்மையான அளவு
+Actual Qty (at source/target),உண்மையான அளவு (ஆதாரம் / இலக்கு)
+Actual Qty After Transaction,பரிவர்த்தனை பிறகு உண்மையான அளவு
+Actual Qty: Quantity available in the warehouse.,உண்மையான அளவு: கிடங்கில் கிடைக்கும் அளவு.
+Actual Quantity,உண்மையான அளவு
+Actual Start Date,உண்மையான தொடக்க தேதி
+Add,சேர்
+Add / Edit Taxes and Charges,வரிகள் மற்றும் கட்டணங்கள் சேர்க்க / திருத்தவும்
+Add Child,குழந்தை சேர்
+Add Serial No,சீரியல் இல்லை சேர்
+Add Taxes,வரிகளை சேர்க்க
+Add Taxes and Charges,வரிகள் மற்றும் கட்டணங்கள் சேர்
+Add or Deduct,சேர்க்க அல்லது கழித்து
+Add rows to set annual budgets on Accounts.,கணக்கு ஆண்டு வரவு செலவு திட்டம் அமைக்க வரிசைகளை சேர்க்க.
+Add to calendar on this date,இந்த தேதி நாள்காட்டியில் சேர்க்கவும்
+Add/Remove Recipients,சேர்க்க / பெற்றவர்கள் அகற்று
+Additional Info,கூடுதல் தகவல்
+Address,முகவரி
+Address & Contact,முகவரி மற்றும் தொடர்பு கொள்ள
+Address & Contacts,முகவரி மற்றும் தொடர்புகள்
+Address Desc,DESC முகவரி
+Address Details,முகவரி விவரம்
+Address HTML,HTML முகவரி
+Address Line 1,முகவரி வரி 1
+Address Line 2,முகவரி வரி 2
+Address Title,முகவரி தலைப்பு
+Address Type,முகவரி வகை
+Advance Amount,முன்கூட்டியே தொகை
+Advance amount,முன்கூட்டியே அளவு
+Advances,முன்னேற்றங்கள்
+Advertisement,விளம்பரம்
+After Sale Installations,விற்பனை நிறுவல்கள் பிறகு
+Against,எதிராக
+Against Account,கணக்கு எதிராக
+Against Docname,Docname எதிராக
+Against Doctype,Doctype எதிராக
+Against Document Detail No,ஆவண விரிவாக இல்லை எதிராக
+Against Document No,ஆவண எதிராக இல்லை
+Against Expense Account,செலவு கணக்கு எதிராக
+Against Income Account,வருமான கணக்கு எதிராக
+Against Journal Voucher,ஜர்னல் வவுச்சர் எதிராக
+Against Purchase Invoice,கொள்முதல் விலை விவரம் எதிராக
+Against Sales Invoice,விற்பனை விலைப்பட்டியல் எதிராக
+Against Sales Order,விற்னையாளர் எதிராக
+Against Voucher,வவுச்சர் எதிராக
+Against Voucher Type,வவுச்சர் வகை எதிராக
+Ageing Based On,அன்று Based
+Agent,முகவர்
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+
+The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
+
+For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.
+
+Note: BOM = Bill of Materials",
+Aging Date,தேதி வயதான
+All Addresses.,அனைத்து முகவரிகள்.
+All Contact,அனைத்து தொடர்பு
+All Contacts.,அனைத்து தொடர்புகள்.
+All Customer Contact,அனைத்து வாடிக்கையாளர் தொடர்பு
+All Day,அனைத்து தினம்
+All Employee (Active),அனைத்து பணியாளர் (செயலில்)
+All Lead (Open),அனைத்து முன்னணி (திறந்த)
+All Products or Services.,அனைத்து தயாரிப்புகள் அல்லது சேவைகள்.
+All Sales Partner Contact,அனைத்து விற்பனை வரன்வாழ்க்கை துணை தொடர்பு
+All Sales Person,அனைத்து விற்பனை நபர்
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,அனைத்து விற்பனை நடவடிக்கைகள் நீங்கள் இலக்குகளை மற்றும் கண்காணிக்க முடியும் ** அதனால் பல ** விற்பனை நபர்கள் எதிரான குறித்துள்ளார்.
+All Supplier Contact,அனைத்து சப்ளையர் தொடர்பு
+All Supplier Types,அனைத்து வழங்குபவர் வகைகள்
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>
+Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>
+Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.",
+Allocate,நிர்ணயி
+Allocate leaves for the year.,ஆண்டு இலைகள் ஒதுக்க.
+Allocated Amount,ஒதுக்கப்பட்ட தொகை
+Allocated Budget,ஒதுக்கப்பட்ட பட்ஜெட்
+Allocated amount,ஒதுக்கப்பட்ட தொகை
+Allow Bill of Materials,பொருட்களை பில் அனுமதி
+Allow Dropbox Access,டிராப்பாக்ஸ் அணுகல் அனுமதி
+Allow For Users,பயனர்கள் அனுமதி
+Allow Google Drive Access,Google Drive ஐ அனுமதி
+Allow Negative Balance,எதிர்மறை இருப்பு அனுமதி
+Allow Negative Stock,எதிர்மறை பங்கு அனுமதிக்கும்
+Allow Production Order,உற்பத்தி ஆர்டர் அனுமதி
+Allow User,பயனர் அனுமதி
+Allow Users,பயனர்கள் அனுமதி
+Allow the following users to approve Leave Applications for block days.,பின்வரும் பயனர்கள் தொகுதி நாட்கள் விடுப்பு விண்ணப்பங்கள் ஏற்று கொள்ள அனுமதிக்கும்.
+Allow user to edit Price List Rate in transactions,பயனர் நடவடிக்கைகளில் விலை பட்டியல் விகிதம் திருத்த அனுமதி
+Allowance Percent,கொடுப்பனவு விகிதம்
+Allowed Role to Edit Entries Before Frozen Date,உறைந்த தேதி முன் திருத்து பதிவுகள் அனுமதி ரோல்
+Always use above Login Id as sender,எப்போதும் அனுப்புநர் என உள்நுழைவு ஐடி மேலே பயன்படுத்த
+Amended From,முதல் திருத்தப்பட்ட
+Amount,அளவு
+Amount (Company Currency),அளவு (நிறுவனத்தின் கரன்சி)
+Amount <=,அளவு &lt;=
+Amount >=,அளவு&gt; =
+Amount to Bill,பில் தொகை
+Analytics,பகுப்பாய்வு
+Another Period Closing Entry,மற்றொரு காலம் நிறைவு நுழைவு
+Another Salary Structure '%s' is active for employee '%s'. Please make its status 'Inactive' to proceed.,மற்றொரு சம்பள கட்டமைப்பு '% s' ஊழியர் '% s' செயல்பாட்டில் உள்ளது . தொடர அதன் நிலை 'செயலற்ற ' செய்து கொள்ளவும்.
+"Any other comments, noteworthy effort that should go in the records.","மற்ற கருத்துக்கள், பதிவுகள் செல்ல வேண்டும் என்று குறிப்பிடத்தக்கது முயற்சி."
+Applicable Holiday List,பொருந்தும் விடுமுறை பட்டியல்
+Applicable Territory,பொருந்தாது மண்டலம்
+Applicable To (Designation),பொருந்தும் (பதவி)
+Applicable To (Employee),பொருந்தும் (பணியாளர்)
+Applicable To (Role),பொருந்தும் (பாத்திரம்)
+Applicable To (User),பொருந்தும் (பயனர்)
+Applicant Name,விண்ணப்பதாரர் பெயர்
+Applicant for a Job,ஒரு வேலை இந்த விண்ணப்பதாரர்
+Applicant for a Job.,ஒரு வேலை விண்ணப்பதாரர்.
+Applications for leave.,விடுமுறை விண்ணப்பங்கள்.
+Applies to Company,நிறுவனத்தின் பொருந்தும்
+Apply / Approve Leaves,இலைகள் ஒப்புதல் / விண்ணப்பிக்கலாம்
+Appraisal,மதிப்பிடுதல்
+Appraisal Goal,மதிப்பீட்டு கோல்
+Appraisal Goals,மதிப்பீட்டு இலக்குகள்
+Appraisal Template,மதிப்பீட்டு வார்ப்புரு
+Appraisal Template Goal,மதிப்பீட்டு வார்ப்புரு கோல்
+Appraisal Template Title,மதிப்பீட்டு வார்ப்புரு தலைப்பு
+Approval Status,ஒப்புதல் நிலைமை
+Approved,ஏற்பளிக்கப்பட்ட
+Approver,சர்க்கார் தரப்பில் சாட்சி சொல்லும் குற்றவாளி
+Approving Role,பங்கு ஒப்புதல்
+Approving User,பயனர் ஒப்புதல்
+Are you sure you want to STOP ,
+Are you sure you want to UNSTOP ,
+Arrear Amount,நிலுவை தொகை
+"As Production Order can be made for this item, \
+				it must be a stock item.",
+As existing qty for item: ,: உருப்படியை இருப்பவை அளவு போன்ற
+As per Stock UOM,பங்கு மொறட்டுவ பல்கலைகழகம் படி
+"As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","இந்த உருப்படி இருக்கும் பங்கு பரிவர்த்தனைகள் உள்ளன , நீங்கள் ' சீரியல் இல்லை உள்ளது ' மதிப்புகள் மாற்ற முடியாது , மற்றும் ' மதிப்பீட்டு முறை ' பங்கு உருப்படாது '"
+Atleast one warehouse is mandatory,குறைந்தது ஒரு கிடங்கில் அவசியமானதாகும்
+Attendance,கவனம்
+Attendance Date,வருகை தேதி
+Attendance Details,வருகை விவரங்கள்
+Attendance From Date,வரம்பு தேதி வருகை
+Attendance From Date and Attendance To Date is mandatory,தேதி தேதி மற்றும் வருகை வருகை கட்டாய ஆகிறது
+Attendance To Date,தேதி வருகை
+Attendance can not be marked for future dates,வருகை எதிர்கால நாட்களுக்கு குறித்தது முடியாது
+Attendance for the employee: ,பணியாளர் வருகை:
+Attendance record.,வருகை பதிவு.
+Authorization Control,அங்கீகாரம் கட்டுப்பாடு
+Authorization Rule,அங்கீகார விதி
+Auto Accounting For Stock Settings,பங்கு அமைப்புகள் ஆட்டோ பைனான்ஸ்
+Auto Email Id,கார் மின்னஞ்சல் விலாசம்
+Auto Material Request,கார் பொருள் கோரிக்கை
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,அளவு ஒரு கிடங்கில் மறு ஒழுங்கு நிலை கீழே சென்றால் பொருள் கோரிக்கை ஆட்டோ உயர்த்த
+Automatically extract Job Applicants from a mail box ,
+Automatically extract Leads from a mail box e.g.,"தானாக ஒரு மின்னஞ்சல் பெட்டியில் இருந்து செல்கிறது பெறுவதற்கு , எ.கா."
+Automatically updated via Stock Entry of type Manufacture/Repack,தானாக வகை உற்பத்தி / Repack பங்கு நுழைவு வழியாக மேம்படுத்தப்பட்டது
+Autoreply when a new mail is received,ஒரு புதிய மின்னஞ்சல் பெற்றார் Autoreply போது
+Available,கிடைக்கக்கூடிய
+Available Qty at Warehouse,சேமிப்பு கிடங்கு கிடைக்கும் அளவு
+Available Stock for Packing Items,பொருட்கள் பொதி கிடைக்கும் பங்கு
+"Available in 
+BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet",
+Average Age,சராசரி வயது
+Average Commission Rate,சராசரி கமிஷன் விகிதம்
+Average Discount,சராசரி தள்ளுபடி
+B+,B +
+B-,பி
+BILL,பில்
+BILLJ,BILLJ
+BOM,BOM
+BOM Detail No,BOM விரிவாக இல்லை
+BOM Explosion Item,BOM வெடிப்பு பொருள்
+BOM Item,BOM பொருள்
+BOM No,BOM இல்லை
+BOM No. for a Finished Good Item,ஒரு முடிந்தது நல்ல தகவல்கள் கிடைக்கும் BOM இல்லை
+BOM Operation,BOM ஆபரேஷன்
+BOM Operations,BOM நடவடிக்கை
+BOM Replace Tool,BOM பதிலாக கருவி
+BOM replaced,BOM பதிலாக
+Backup Manager,காப்பு மேலாளர்
+Backup Right Now,வலது இப்போது காப்பு
+Backups will be uploaded to,காப்பு பதிவேற்றிய
+Balance Qty,இருப்பு அளவு
+Balance Value,இருப்பு மதிப்பு
+"Balances of Accounts of type ""Bank or Cash""",வகை &quot;வங்கி அல்லது பண&quot; என்ற கணக்கு நிலுவைகளை
+Bank,வங்கி
+Bank A/C No.,வங்கி A / C இல்லை
+Bank Account,வங்கி கணக்கு
+Bank Account No.,வங்கி கணக்கு எண்
+Bank Accounts,வங்கி கணக்குகள்
+Bank Clearance Summary,வங்கி இசைவு சுருக்கம்
+Bank Name,வங்கி பெயர்
+Bank Reconciliation,வங்கி நல்லிணக்க
+Bank Reconciliation Detail,வங்கி நல்லிணக்க விரிவாக
+Bank Reconciliation Statement,வங்கி நல்லிணக்க அறிக்கை
+Bank Voucher,வங்கி வவுச்சர்
+Bank or Cash,வங்கி அல்லது பண
+Bank/Cash Balance,வங்கி / ரொக்க இருப்பு
+Barcode,பார்கோடு
+Based On,அடிப்படையில்
+Basic Info,அடிப்படை தகவல்
+Basic Information,அடிப்படை தகவல்
+Basic Rate,அடிப்படை விகிதம்
+Basic Rate (Company Currency),அடிப்படை விகிதம் (நிறுவனத்தின் கரன்சி)
+Batch,கூட்டம்
+Batch (lot) of an Item.,ஒரு பொருள் ஒரு தொகுதி (நிறைய).
+Batch Finished Date,தொகுதி தேதி முடிந்தது
+Batch ID,தொகுதி அடையாள
+Batch No,தொகுதி இல்லை
+Batch Started Date,தொகுதி தேதி துவக்கம்
+Batch Time Logs for Billing.,தொகுதி நேரம் பில்லிங் பதிகைகளை.
+Batch Time Logs for billing.,தொகுதி நேரம் பில்லிங் பதிவுகள்.
+Batch-Wise Balance History,தொகுதி-வைஸ் இருப்பு வரலாறு
+Batched for Billing,பில்லிங் Batched
+"Before proceeding, please create Customer from Lead","தொடர்வதற்கு முன், முன்னணி இருந்து வாடிக்கையாளர் உருவாக்க தயவு செய்து"
+Better Prospects,நல்ல வாய்ப்புகள்
+Bill Date,பில் தேதி
+Bill No,பில் இல்லை
+Bill of Material to be considered for manufacturing,உற்பத்தி கருதப்பட பொருள் பில்
+Bill of Materials,பொருட்களை பில்
+Bill of Materials (BOM),பொருட்களை பில் (BOM)
+Billable,பில்
+Billed,கட்டணம்
+Billed Amount,கூறப்படுவது தொகை
+Billed Amt,கணக்கில் AMT
+Billing,பட்டியலிடல்
+Billing Address,பில்லிங் முகவரி
+Billing Address Name,பில்லிங் முகவரி பெயர்
+Billing Status,பில்லிங் நிலைமை
+Bills raised by Suppliers.,பில்கள் விநியோகஸ்தர்கள் எழுப்பும்.
+Bills raised to Customers.,பில்கள் வாடிக்கையாளர்கள் உயர்த்தப்பட்டுள்ளது.
+Bin,தொட்டி
+Bio,உயிரி
+Birthday,பிறந்த நாள்
+Block Date,தேதி தடை
+Block Days,தொகுதி நாட்கள்
+Block Holidays on important days.,முக்கியமான நாட்களில் விடுமுறை தடுக்கும்.
+Block leave applications by department.,துறை மூலம் பயன்பாடுகள் விட்டு தடுக்கும்.
+Blog Post,வலைப்பதிவு இடுகை
+Blog Subscriber,வலைப்பதிவு சந்தாதாரர்
+Blood Group,குருதி பகுப்பினம்
+Both Income and Expense balances are zero. No Need to make Period Closing Entry.,இருவரும் வருமானம் மற்றும் செலவு நிலுவைகளை பூஜ்ஜியமாக இருக்கும் . காலம் நிறைவு நுழைவு செய்ய வேண்டிய அவசியம் இல்லை .
+Both Warehouse must belong to same Company,இரண்டு கிடங்கு அதே நிறுவனத்திற்கு சொந்தமானது வேண்டும்
+Branch,கிளை
+Brand,பிராண்ட்
+Brand Name,குறியீட்டு பெயர்
+Brand master.,பிராண்ட் மாஸ்டர்.
+Brands,பிராண்ட்கள்
+Breakdown,முறிவு
+Budget,வரவு செலவு திட்டம்
+Budget Allocated,பட்ஜெட் ஒதுக்கப்பட்ட
+Budget Detail,வரவு செலவு திட்ட விரிவாக
+Budget Details,வரவு செலவு விவரம்
+Budget Distribution,பட்ஜெட் விநியோகம்
+Budget Distribution Detail,பட்ஜெட் விநியோகம் விரிவாக
+Budget Distribution Details,பட்ஜெட் விநியோகம் விவரம்
+Budget Variance Report,வரவு செலவு வேறுபாடு அறிக்கை
+Build Report,அறிக்கை கட்ட
+Bulk Rename,மொத்த விதமாக
+Bummer! There are more holidays than working days this month.,Bum நா r! வேலை நாட்கள் இந்த மாதம் விட விடுமுறை உள்ளன.
+Bundle items at time of sale.,விற்பனை நேரத்தில் பொருட்களை மூட்டை.
+Buyer of Goods and Services.,பொருட்கள் மற்றும் சேவைகள் வாங்குபவர்.
+Buying,வாங்குதல்
+Buying Amount,தொகை வாங்கும்
+Buying Settings,அமைப்புகள் வாங்கும்
+By,மூலம்
+C-FORM/,/ சி படிவம்
+C-Form,சி படிவம்
+C-Form Applicable,பொருந்தாது சி படிவம்
+C-Form Invoice Detail,சி படிவம் விலைப்பட்டியல் விரிவாக
+C-Form No,இல்லை சி படிவம்
+C-Form records,சி படிவம் பதிவுகள்
+CI/2010-2011/,CI/2010-2011 /
+COMM-,Comm-
+CUST,CUST
+CUSTMUM,CUSTMUM
+Calculate Based On,ஆனால் அடிப்படையில் கணக்கிட
+Calculate Total Score,மொத்த மதிப்பெண் கணக்கிட
+Calendar Events,அட்டவணை நிகழ்வுகள்
+Call,அழைப்பு
+Campaign,பிரச்சாரம்
+Campaign Name,பிரச்சாரம் பெயர்
+"Can not filter based on Account, if grouped by Account","கணக்கு மூலம் தொகுக்கப்பட்டுள்ளது என்றால் , கணக்கு அடிப்படையில் வடிகட்ட முடியாது"
+"Can not filter based on Voucher No, if grouped by Voucher","வவுச்சர் அடிப்படையில் வடிகட்ட முடியாது இல்லை , ரசீது மூலம் தொகுக்கப்பட்டுள்ளது என்றால்"
+Cancelled,ரத்து
+Cancelling this Stock Reconciliation will nullify its effect.,இந்த பங்கு நல்லிணக்க ரத்தாகிறது அதன் விளைவு ஆக்கிவிடும் .
+Cannot ,முடியாது
+Cannot Cancel Opportunity as Quotation Exists,மேற்கோள் உள்ளது என வாய்ப்பு ரத்து செய்ய முடியாது
+Cannot approve leave as you are not authorized to approve leaves on Block Dates.,நீங்கள் பிளாக் தேதிகளில் இலைகள் ஒப்புதல் அதிகாரம் இல்லை என விட்டு ஒப்புதல் முடியாது.
+Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,ஆண்டு தொடக்க தேதி மற்றும் நிதியாண்டு சேமிக்கப்படும் முறை ஆண்டு முடிவு தேதி மாற்ற முடியாது.
+Cannot continue.,தொடர முடியாது.
+"Cannot declare as lost, because Quotation has been made.","இழந்தது மேற்கோள் செய்யப்பட்டது ஏனெனில் , அறிவிக்க முடியாது ."
+"Cannot delete Serial No in warehouse. \
+				First remove from warehouse, then delete.",
+Cannot set as Lost as Sales Order is made.,விற்பனை ஆணை உள்ளது என இழந்தது அமைக்க முடியாது.
+Capacity,கொள்ளளவு
+Capacity Units,கொள்ளளவு அலகுகள்
+Carry Forward,முன்னெடுத்து செல்
+Carry Forwarded Leaves,முன்னனுப்பியது இலைகள் எடுத்து
+Case No. cannot be 0,வழக்கு எண் 0 இருக்க முடியாது
+Cash,பணம்
+Cash Voucher,பண வவுச்சர்
+Cash/Bank Account,பண / வங்கி கணக்கு
+Category,வகை
+Cell Number,செல் எண்
+Change UOM for an Item.,ஒரு பொருள் ஒரு மொறட்டுவ பல்கலைகழகம் மாற்ற.
+Change the starting / current sequence number of an existing series.,ஏற்கனவே தொடரில் தற்போதைய / தொடக்க வரிசை எண் மாற்ற.
+Channel Partner,சேனல் வரன்வாழ்க்கை துணை
+Charge,கட்டணம்
+Chargeable,குற்றம் சாட்டப்பட தக்க
+Chart of Accounts,கணக்கு விளக்கப்படம்
+Chart of Cost Centers,செலவு மையங்கள் விளக்கப்படம்
+Chat,அரட்டை
+Check all the items below that you want to send in this digest.,இந்த தொகுப்பு இல் அனுப்ப வேண்டும் என்று கீழே அனைத்து பொருட்களும் சோதனை.
+Check for Duplicates,நகல்களை பாருங்கள்
+Check how the newsletter looks in an email by sending it to your email.,செய்திமடல் உங்கள் மின்னஞ்சல் அனுப்பும் ஒரு மின்னஞ்சல் எப்படி சரி.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","மீண்டும் விலைப்பட்டியல் என்றால் மீண்டும் நிறுத்த அல்லது சரியான முடிவு தேதி வைத்து தேர்வை நீக்குக, சோதனை"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","தானாக வரும் பொருள் தேவை என்பதை அறியவும். எந்த விற்பனை விலைப்பட்டியல் சமர்ப்பித்த பிறகு, தொடர் பகுதியில் காண முடியும்."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,நீங்கள் ஒவ்வொரு ஊழியர் அஞ்சல் சம்பளம் சீட்டு அனுப்ப விரும்பினால் சம்பளம் சீட்டு சமர்ப்பிக்கும் போது சோதனை
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,நீங்கள் பயனர் சேமிப்பு முன்பு ஒரு தொடர் தேர்ந்தெடுக்க கட்டாயப்படுத்தும் விரும்பினால் இந்த சோதனை. இந்த சோதனை என்றால் இல்லை இயல்பாக இருக்கும்.
+Check this if you want to send emails as this id only (in case of restriction by your email provider).,"நீங்கள் மட்டுமே இந்த அடையாள (உங்கள் மின்னஞ்சல் வழங்குநர் மூலம் கட்டுப்பாடு விஷயத்தில்) போன்ற மின்னஞ்சல்களை அனுப்ப விரும்பினால், இந்த சோதனை."
+Check this if you want to show in website,நீங்கள் இணையதளத்தில் காட்ட வேண்டும் என்றால் இந்த சோதனை
+Check this to disallow fractions. (for Nos),அனுமதிப்பதில்லை உராய்வுகள் இந்த சரிபார்க்கவும். (இலக்கங்கள் ஐந்து)
+Check this to pull emails from your mailbox,உங்கள் அஞ்சல்பெட்டியில் உள்ள மின்னஞ்சல்களின் இழுக்க இந்த சோதனை
+Check to activate,செயல்படுத்த சோதனை
+Check to make Shipping Address,ஷிப்பிங் முகவரி சரிபார்க்கவும்
+Check to make primary address,முதன்மை முகவரியை சரிபார்க்கவும்
+Cheque,காசோலை
+Cheque Date,காசோலை தேதி
+Cheque Number,காசோலை எண்
+City,நகரம்
+City/Town,நகரம் / டவுன்
+Claim Amount,உரிமை தொகை
+Claims for company expense.,நிறுவனத்தின் செலவினம் கூற்றுக்கள்.
+Class / Percentage,வர்க்கம் / சதவீதம்
+Classic,தரமான
+Classification of Customers by region,இப்பகுதியில் மூலம் வாடிக்கையாளர்கள் வகைப்பாடு
+Clear Table,தெளிவான அட்டவணை
+Clearance Date,அனுமதி தேதி
+Click here to buy subscription.,சந்தா வாங்க இங்கே கிளிக் செய்யவும் .
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ஒரு புதிய விற்பனை விலைப்பட்டியல் உருவாக்க பொத்தானை &#39;விற்பனை விலைப்பட்டியல் கொள்ளுங்கள்&#39; கிளிக்.
+Click on a link to get options to expand get options ,
+Client,கிளையன்
+Close Balance Sheet and book Profit or Loss.,Close இருப்புநிலை மற்றும் புத்தகம் லாபம் அல்லது நஷ்டம் .
+Closed,மூடிய
+Closing Account Head,கணக்கு தலைமை மூடுவதற்கு
+Closing Date,தேதி மூடுவது
+Closing Fiscal Year,நிதியாண்டு மூடுவதற்கு
+Closing Qty,நிறைவு அளவு
+Closing Value,மூடுவதால்
+CoA Help,CoA உதவி
+Cold Calling,குளிர் காலிங்
+Color,நிறம்
+Comma separated list of email addresses,மின்னஞ்சல் முகவரிகளை கமாவால் பிரிக்கப்பட்ட பட்டியல்
+Comments,கருத்துரைகள்
+Commission Rate,கமிஷன் விகிதம்
+Commission Rate (%),கமிஷன் விகிதம் (%)
+Commission partners and targets,கமிஷன் பங்குதாரர்கள் மற்றும் இலக்குகள்
+Commit Log,இங்கு செயல்படுங்கள்
+Communication,தகவல்
+Communication HTML,தொடர்பு HTML
+Communication History,தொடர்பு வரலாறு
+Communication Medium,தொடர்பு மொழி
+Communication log.,தகவல் பதிவு.
+Communications,தகவல்
+Company,நிறுவனம்
+Company Abbreviation,நிறுவனத்தின் சுருக்கமான
+Company Details,நிறுவனத்தின் விவரம்
+Company Email,நிறுவனத்தின் மின்னஞ்சல்
+Company Info,நிறுவன தகவல்
+Company Master.,நிறுவனத்தின் முதன்மை.
+Company Name,நிறுவனத்தின் பெயர்
+Company Settings,நிறுவனத்தின் அமைப்புகள்
+Company branches.,நிறுவனத்தின் கிளைகள்.
+Company departments.,நிறுவனம் துறைகள்.
+Company is missing in following warehouses,நிறுவனத்தின் கிடங்குகள் பின்வரும் காணவில்லை
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,உங்கள் குறிப்பு நிறுவனத்தில் பதிவு எண்கள். எடுத்துக்காட்டாக: VAT பதிவு எண்கள் போன்ற
+Company registration numbers for your reference. Tax numbers etc.,உங்கள் குறிப்பு நிறுவனத்தில் பதிவு எண்கள். வரி எண்கள் போன்ற
+"Company, Month and Fiscal Year is mandatory","நிறுவனத்தின் , மாதம் மற்றும் நிதியாண்டு கட்டாயமாகும்"
+Complaint,புகார்
+Complete,முழு
+Completed,நிறைவு
+Completed Production Orders,இதன் தயாரிப்பு நிறைவடைந்தது ஆணைகள்
+Completed Qty,நிறைவு அளவு
+Completion Date,நிறைவு நாள்
+Completion Status,நிறைவு நிலைமை
+Confirmation Date,உறுதிப்படுத்தல் தேதி
+Confirmed orders from Customers.,வாடிக்கையாளர்கள் இருந்து உத்தரவுகளை உறுதி.
+Consider Tax or Charge for,வரி அல்லது பொறுப்பு கருத்தில்
+Considered as Opening Balance,இருப்பு திறந்து கருதப்படுகிறது
+Considered as an Opening Balance,ஒரு ஆரம்ப இருப்பு கருதப்படுகிறது
+Consultant,பிறர் அறிவுரை வேண்டுபவர்
+Consumable Cost,நுகர்வோர் விலை
+Consumable cost per hour,ஒரு மணி நேரத்திற்கு நுகர்வோர் விலை
+Consumed Qty,நுகரப்படும் அளவு
+Contact,தொடர்பு
+Contact Control,கட்டுப்பாடு தொடர்பு
+Contact Desc,தொடர்பு DESC
+Contact Details,விபரங்கள்
+Contact Email,மின்னஞ்சல் தொடர்பு
+Contact HTML,தொடர்பு HTML
+Contact Info,தகவல் தொடர்பு
+Contact Mobile No,இல்லை மொபைல் தொடர்பு
+Contact Name,பெயர் தொடர்பு
+Contact No.,இல்லை தொடர்பு
+Contact Person,நபர் தொடர்பு
+Contact Type,வகை தொடர்பு
+Content,உள்ளடக்கம்
+Content Type,உள்ளடக்க வகை
+Contra Voucher,எதிர் வவுச்சர்
+Contract End Date,ஒப்பந்தம் முடிவு தேதி
+Contribution (%),பங்களிப்பு (%)
+Contribution to Net Total,நிகர மொத்த பங்களிப்பு
+Conversion Factor,மாற்ற காரணி
+Conversion Factor of UOM: %s should be equal to 1. As UOM: %s is Stock UOM of Item: %s.,மொறட்டுவ பல்கலைகழகம் மாற்றம் காரணி % s 1 சமமாக இருக்க வேண்டும் . மொறட்டுவ பல்கலைகழகம் போல்: % s பொருள் பங்கு மொறட்டுவ பல்கலைகழகம் ஆகிறது : % s .
+Convert into Recurring Invoice,தொடர் விலைப்பட்டியல் மாற்றம்
+Convert to Group,குழு மாற்ற
+Convert to Ledger,லெட்ஜர் மாற்ற
+Converted,மாற்றப்படுகிறது
+Copy From Item Group,பொருள் குழு நகல்
+Cost Center,செலவு மையம்
+Cost Center Details,மையம் விவரம் செலவு
+Cost Center Name,மையம் பெயர் செலவு
+Cost Center must be specified for PL Account: ,செலவு மையம் பிஎல் கணக்கில் குறிப்பிடப்படவில்லை:
+Costing,செலவு
+Country,நாடு
+Country Name,நாட்டின் பெயர்
+"Country, Timezone and Currency","நாடு , நேர மண்டலம் மற்றும் நாணய"
+Create,உருவாக்கு
+Create Bank Voucher for the total salary paid for the above selected criteria,மேலே தேர்ந்தெடுக்கப்பட்ட அடிப்படை ஊதியம் மொத்த சம்பளம் வங்கி வவுச்சர் உருவாக்க
+Create Customer,உருவாக்கு
+Create Material Requests,பொருள் கோரிக்கைகள் உருவாக்க
+Create New,புதிய உருவாக்கவும்
+Create Opportunity,வாய்ப்பை உருவாக்க
+Create Production Orders,உற்பத்தி ஆணைகள் உருவாக்க
+Create Quotation,மேற்கோள் உருவாக்கவும்
+Create Receiver List,பெறுநர் பட்டியல் உருவாக்க
+Create Salary Slip,சம்பளம் ஸ்லிப் உருவாக்க
+Create Stock Ledger Entries when you submit a Sales Invoice,நீங்கள் ஒரு விற்பனை விலைப்பட்டியல் சமர்ப்பிக்க போது பங்கு லெட்ஜர் பதிவுகள் உருவாக்க
+Create and Send Newsletters,செய்தி உருவாக்கி அனுப்பவும்
+Created Account Head: ,உருவாக்கப்பட்ட கணக்கு தலைமை:
+Created By,மூலம் உருவாக்கப்பட்டது
+Created Customer Issue,உருவாக்கிய வாடிக்கையாளர் வெளியீடு
+Created Group ,உருவாக்கப்பட்ட குழு
+Created Opportunity,வாய்ப்பு உருவாக்கப்பட்டது
+Created Support Ticket,உருவாக்கிய ஆதரவு டிக்கெட்
+Creates salary slip for above mentioned criteria.,மேலே குறிப்பிட்டுள்ள அடிப்படை சம்பளம் சீட்டு உருவாக்குகிறது.
+Creation Date,உருவாக்கிய தேதி
+Creation Document No,உருவாக்கம் ஆவண இல்லை
+Creation Document Type,உருவாக்கம் ஆவண வகை
+Creation Time,உருவாக்கம் நேரம்
+Credentials,அறிமுக ஆவணம்
+Credit,கடன்
+Credit Amt,கடன் AMT
+Credit Card Voucher,கடன் அட்டை வவுச்சர்
+Credit Controller,கடன் கட்டுப்பாட்டாளர்
+Credit Days,கடன் நாட்கள்
+Credit Limit,கடன் எல்லை
+Credit Note,வரவுக்குறிப்பு
+Credit To,கடன்
+Credited account (Customer) is not matching with Sales Invoice,வரவு கணக்கு ( வாடிக்கையாளர் ) கவிஞருக்கு உடன் பொருந்தும் இல்லை
+Cross Listing of Item in multiple groups,பல குழுக்களாக உருப்படி பட்டியல் கடக்க
+Currency,நாணய
+Currency Exchange,நாணய பரிவர்த்தனை
+Currency Name,நாணயத்தின் பெயர்
+Currency Settings,நாணய அமைப்புகள்
+Currency and Price List,நாணயம் மற்றும் விலை பட்டியல்
+Currency is missing for Price List,நாணய விலை பட்டியல் காணவில்லை
+Current Address,தற்போதைய முகவரி
+Current Address Is,தற்போதைய முகவரி
+Current BOM,தற்போதைய BOM
+Current Fiscal Year,தற்போதைய நிதியாண்டு
+Current Stock,தற்போதைய பங்கு
+Current Stock UOM,தற்போதைய பங்கு மொறட்டுவ பல்கலைகழகம்
+Current Value,தற்போதைய மதிப்பு
+Custom,வழக்கம்
+Custom Autoreply Message,தனிபயன் Autoreply செய்தி
+Custom Message,தனிப்பயன் செய்தி
+Customer,வாடிக்கையாளர்
+Customer (Receivable) Account,வாடிக்கையாளர் (வரவேண்டிய) கணக்கு
+Customer / Item Name,வாடிக்கையாளர் / உருப்படி பெயர்
+Customer / Lead Address,வாடிக்கையாளர் / முன்னணி முகவரி
+Customer Account Head,வாடிக்கையாளர் கணக்கு தலைமை
+Customer Acquisition and Loyalty,வாடிக்கையாளர் கையகப்படுத்துதல் மற்றும் லாயல்டி
+Customer Address,வாடிக்கையாளர் முகவரி
+Customer Addresses And Contacts,வாடிக்கையாளர் முகவரிகள் மற்றும் தொடர்புகள்
+Customer Code,வாடிக்கையாளர் கோட்
+Customer Codes,வாடிக்கையாளர் குறியீடுகள்
+Customer Details,வாடிக்கையாளர் விவரம்
+Customer Discount,வாடிக்கையாளர் தள்ளுபடி
+Customer Discounts,வாடிக்கையாளர் தள்ளுபடி
+Customer Feedback,வாடிக்கையாளர் கருத்து
+Customer Group,வாடிக்கையாளர் பிரிவு
+Customer Group / Customer,வாடிக்கையாளர் குழு / வாடிக்கையாளர்
+Customer Group Name,வாடிக்கையாளர் குழு பெயர்
+Customer Intro,வாடிக்கையாளர் அறிமுகம்
+Customer Issue,வாடிக்கையாளர் வெளியீடு
+Customer Issue against Serial No.,சீரியல் எண் எதிரான வாடிக்கையாளர் வெளியீடு
+Customer Name,வாடிக்கையாளர் பெயர்
+Customer Naming By,மூலம் பெயரிடுதல் வாடிக்கையாளர்
+Customer classification tree.,வாடிக்கையாளர் வகைப்பாடு மரம்.
+Customer database.,வாடிக்கையாளர் தகவல்.
+Customer's Item Code,வாடிக்கையாளர் பொருள் குறியீடு
+Customer's Purchase Order Date,வாடிக்கையாளர் கொள்முதல் ஆர்டர் தேதி
+Customer's Purchase Order No,வாடிக்கையாளர் கொள்முதல் ஆர்டர் இல்லை
+Customer's Purchase Order Number,வாடிக்கையாளர் கொள்முதல் ஆணை எண்
+Customer's Vendor,வாடிக்கையாளர் விற்பனையாளர்
+Customers Not Buying Since Long Time,வாடிக்கையாளர்கள் நீண்ட நாட்களாக வாங்குதல்
+Customerwise Discount,Customerwise தள்ளுபடி
+Customization,தன்விருப்ப
+Customize the Notification,அறிவிப்பு தனிப்பயனாக்கு
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,அந்த மின்னஞ்சல் ஒரு பகுதியாக சென்று அந்த அறிமுக உரை தனிப்பயனாக்கலாம். ஒவ்வொரு நடவடிக்கைக்கும் ஒரு தனி அறிமுக உரை உள்ளது.
+DN,DN
+DN Detail,DN விரிவாக
+Daily,தினசரி
+Daily Time Log Summary,தினமும் நேரம் புகுபதிகை சுருக்கம்
+Data Import,தரவு இறக்குமதி
+Database Folder ID,தகவல் அடைவு ஐடி
+Database of potential customers.,வாடிக்கையாளர்கள் பற்றிய தகவல்.
+Date,தேதி
+Date Format,தேதி வடிவமைப்பு
+Date Of Retirement,ஓய்வு தேதி
+Date and Number Settings,தேதி மற்றும் எண் அமைப்புகள்
+Date is repeated,தேதி மீண்டும்
+Date of Birth,பிறந்த நாள்
+Date of Issue,இந்த தேதி
+Date of Joining,சேர்வது தேதி
+Date on which lorry started from supplier warehouse,எந்த தேதி லாரி சப்ளையர் கிடங்கில் இருந்து தொடங்கியது
+Date on which lorry started from your warehouse,எந்த தேதி லாரி உங்கள் கிடங்கில் இருந்து தொடங்கியது
+Dates,தேதிகள்
+Days Since Last Order,கடந்த சில நாட்களாக கடைசி ஆர்டர்
+Days for which Holidays are blocked for this department.,இது விடுமுறை நாட்கள் இந்த துறை தடுக்கப்பட்டது.
+Dealer,வாணிகம் செய்பவர்
+Debit,பற்று
+Debit Amt,பற்று AMT
+Debit Note,பற்றுக்குறிப்பு
+Debit To,செய்ய பற்று
+Debit and Credit not equal for this voucher: Diff (Debit) is ,
+Debit or Credit,பற்று அல்லது கடன்
+Debited account (Supplier) is not matching with Purchase Invoice,பற்று கணக்கு ( வழங்குபவர் ) கொள்முதல் விலைப்பட்டியல் பொருந்தும் இல்லை
+Deduct,தள்ளு
+Deduction,கழித்தல்
+Deduction Type,துப்பறியும் வகை
+Deduction1,Deduction1
+Deductions,கழிவுகளுக்கு
+Default,தவறுதல்
+Default Account,முன்னிருப்பு கணக்கு
+Default BOM,முன்னிருப்பு BOM
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,இந்த முறையில் தேர்ந்தெடுக்கும் போது முன்னிருப்பு வங்கி / பண கணக்கு தானாக பிஓஎஸ் விலைப்பட்டியல் உள்ள புதுப்பிக்கப்படும்.
+Default Bank Account,முன்னிருப்பு வங்கி கணக்கு
+Default Buying Price List,இயல்புநிலை கொள்முதல் விலை பட்டியல்
+Default Cash Account,இயல்புநிலை பண கணக்கு
+Default Company,முன்னிருப்பு நிறுவனத்தின்
+Default Cost Center,முன்னிருப்பு செலவு மையம்
+Default Cost Center for tracking expense for this item.,இந்த உருப்படிக்கு செலவில் கண்காணிப்பு முன்னிருப்பு செலவு மையம்.
+Default Currency,முன்னிருப்பு நாணயத்தின்
+Default Customer Group,முன்னிருப்பு வாடிக்கையாளர் பிரிவு
+Default Expense Account,முன்னிருப்பு செலவு கணக்கு
+Default Income Account,முன்னிருப்பு வருமானம் கணக்கு
+Default Item Group,முன்னிருப்பு உருப்படி குழு
+Default Price List,முன்னிருப்பு விலை பட்டியல்
+Default Purchase Account in which cost of the item will be debited.,முன்னிருப்பு கொள்முதல் கணக்கு இதில் உருப்படியை செலவு debited.
+Default Settings,இயல்புநிலை அமைப்புகள்
+Default Source Warehouse,முன்னிருப்பு மூல கிடங்கு
+Default Stock UOM,முன்னிருப்பு பங்கு மொறட்டுவ பல்கலைகழகம்
+Default Supplier,இயல்புநிலை சப்ளையர்
+Default Supplier Type,முன்னிருப்பு சப்ளையர் வகை
+Default Target Warehouse,முன்னிருப்பு அடைவு கிடங்கு
+Default Territory,முன்னிருப்பு மண்டலம்
+Default UOM updated in item ,
+Default Unit of Measure,மெஷர் முன்னிருப்பு அலகு
+"Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.","நீங்கள் ஏற்கனவே மற்றொரு மொறட்டுவ பல்கலைகழகம் சில பரிவர்த்தனை (கள்) ஏனென்றால் நடவடிக்கை முன்னிருப்பு பிரிவாகும் நேரடியாக மாற்ற முடியாது . இயல்புநிலை மொறட்டுவ பல்கலைகழகம் மாற்ற, பங்கு தொகுதி கீழ் ' மொறட்டுவ பல்கலைகழகம் பயன்பாட்டு மாற்றவும் ' கருவியை பயன்படுத்த ."
+Default Valuation Method,முன்னிருப்பு மதிப்பீட்டு முறை
+Default Warehouse,இயல்புநிலை சேமிப்பு கிடங்கு
+Default Warehouse is mandatory for Stock Item.,இயல்புநிலை சேமிப்பு பங்கு பொருள் அத்தியாவசியமானதாகும்.
+Default settings for Shopping Cart,வணிக வண்டியில் இயல்புநிலை அமைப்புகளை
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","இந்த செலவு மையம் பட்ஜெட் வரையறை. வரவு செலவு திட்ட நடவடிக்கை அமைக்க, பார்க்க <a href=""#!List/Company"">நிறுவனத்தின் முதன்மை</a>"
+Delete,நீக்கு
+Delivered,வழங்கினார்
+Delivered Items To Be Billed,கட்டணம் வழங்கப்படும் பொருட்கள்
+Delivered Qty,வழங்கப்படும் அளவு
+Delivered Serial No ,
+Delivery Date,டெலிவரி தேதி
+Delivery Details,விநியோக விவரம்
+Delivery Document No,டெலிவரி ஆவண இல்லை
+Delivery Document Type,டெலிவரி ஆவண வகை
+Delivery Note,டெலிவரி குறிப்பு
+Delivery Note Item,டெலிவரி குறிப்பு பொருள்
+Delivery Note Items,டெலிவரி குறிப்பு உருப்படிகள்
+Delivery Note Message,டெலிவரி குறிப்பு செய்தி
+Delivery Note No,டெலிவரி குறிப்பு இல்லை
+Delivery Note Required,டெலிவரி குறிப்பு தேவை
+Delivery Note Trends,பந்து குறிப்பு போக்குகள்
+Delivery Status,விநியோக நிலைமை
+Delivery Time,விநியோக நேரம்
+Delivery To,வழங்கும்
+Department,இலாகா
+Depends on LWP,LWP பொறுத்தது
+Description,விளக்கம்
+Description HTML,விளக்கம் HTML
+Description of a Job Opening,வேலை தொடக்க விளக்கம்
+Designation,பதவி
+Detailed Breakup of the totals,மொத்த எண்ணிக்கையில் விரிவான முறிவுக்கு
+Details,விவரம்
+Difference,வேற்றுமை
+Difference Account,வித்தியாசம் கணக்கு
+Different UOM for items will lead to incorrect,பொருட்களை பல்வேறு மொறட்டுவ பல்கலைகழகம் தவறான வழிவகுக்கும்
+Disable Rounded Total,வட்டமான மொத்த முடக்கு
+Discount  %,தள்ளுபடி%
+Discount %,தள்ளுபடி%
+Discount (%),தள்ளுபடி (%)
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","தள்ளுபடி புலங்கள் கொள்முதல் ஆணை, கொள்முதல் ரசீது, கொள்முதல் விலை விவரம் கிடைக்கும்"
+Discount(%),தள்ளுபடி (%)
+Display all the individual items delivered with the main items,முக்கிய பொருட்கள் விநியோகிக்கப்படும் அனைத்து தனிப்பட்ட உருப்படிகள்
+Distinct unit of an Item,ஒரு பொருள் பற்றிய தெளிவான அலகு
+Distribute transport overhead across items.,பொருட்கள் முழுவதும் போக்குவரத்து செலவுகள் விநியோகிக்க.
+Distribution,பகிர்ந்தளித்தல்
+Distribution Id,விநியோக அடையாளம்
+Distribution Name,விநியோக பெயர்
+Distributor,பகிர்கருவி
+Divorced,விவாகரத்து
+Do Not Contact,தொடர்பு இல்லை
+Do not show any symbol like $ etc next to currencies.,நாணயங்கள் அடுத்த $ ஹிப்ரு போன்றவை எந்த சின்னம் காட்டாதே.
+Do you really want to STOP ,
+Do you really want to STOP this Material Request?,நீங்கள் உண்மையில் இந்த பொருள் கோரிக்கை நிறுத்த விரும்புகிறீர்களா ?
+Do you really want to Submit all Salary Slip for month : ,
+Do you really want to UNSTOP ,
+Do you really want to UNSTOP this Material Request?,நீங்கள் உண்மையில் இந்த பொருள் கோரிக்கை தடை இல்லாத விரும்புகிறீர்களா?
+Doc Name,Doc பெயர்
+Doc Type,Doc வகை
+Document Description,ஆவண விவரம்
+Document Type,ஆவண வகை
+Documentation,ஆவணமாக்கம்
+Documents,ஆவணங்கள்
+Domain,டொமைன்
+Don't send Employee Birthday Reminders,பணியாளர் நினைவூட்டல்கள் அனுப்ப வேண்டாம்
+Download Materials Required,தேவையான பொருட்கள் பதிவிறக்க
+Download Reconcilation Data,நல்லிணக்கத்தையும் தரவு பதிவிறக்க
+Download Template,வார்ப்புரு பதிவிறக்க
+Download a report containing all raw materials with their latest inventory status,அவர்களின் சமீபத்திய சரக்கு நிலை அனைத்து மூலப்பொருட்கள் கொண்ட ஒரு அறிக்கையை பதிவிறக்கு
+"Download the Template, fill appropriate data and attach the modified file.","டெம்ப்ளேட் பதிவிறக்க , அதற்கான தரவு நிரப்ப மாற்றம் கோப்பினை இணைக்கவும் ."
+"Download the Template, fill appropriate data and attach the modified file.
+All dates and employee combination in the selected period will come in the template, with existing attendance records",
+Draft,காற்று வீச்சு
+Dropbox,டிராப்பாக்ஸ்
+Dropbox Access Allowed,டிரா பாக்ஸ் அனுமதி
+Dropbox Access Key,டிரா பாக்ஸ் அணுகல் விசை
+Dropbox Access Secret,டிரா பாக்ஸ் அணுகல் ரகசியம்
+Due Date,காரணம் தேதி
+Duplicate Item,உருப்படி போலி
+EMP/,EMP /
+ERPNext Setup,ERPNext அமைப்பு
+ERPNext Setup Guide,ERPNext அமைவு வழிகாட்டி
+"ERPNext is an open-source web based ERP made by Web Notes Technologies Pvt Ltd. to provide an integrated tool to manage most processes in a small organization. For more information about Web Notes, or to buy hosting servies, go to ",
+ESIC CARD No,ESIC CARD இல்லை
+ESIC No.,ESIC இல்லை
+Earliest,மிகமுந்திய
+Earning,சம்பாதித்து
+Earning & Deduction,சம்பளம் மற்றும் பொருத்தியறிதல்
+Earning Type,வகை சம்பாதித்து
+Earning1,Earning1
+Edit,திருத்த
+Educational Qualification,கல்வி தகுதி
+Educational Qualification Details,கல்வி தகுதி விவரம்
+Eg. smsgateway.com/api/send_sms.cgi,உதாரணம். smsgateway.com / API / send_sms.cgi
+Electricity Cost,மின்சார செலவு
+Electricity cost per hour,ஒரு மணி நேரத்திற்கு மின்சாரம் செலவு
+Email,மின்னஞ்சல்
+Email Digest,மின்னஞ்சல் டைஜஸ்ட்
+Email Digest Settings,மின்னஞ்சல் டைஜஸ்ட் அமைப்புகள்
+Email Digest: ,
+Email Id,மின்னஞ்சல் விலாசம்
+"Email Id must be unique, already exists for: ","மின்னஞ்சல் தனிப்பட்ட இருக்க வேண்டும், ஏற்கனவே உள்ளது:"
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",ஒரு வேலை விண்ணப்பதாரர் எ.கா. &quot;jobs@example.com&quot; மின்னஞ்சல் எங்கு மின்னஞ்சல் விலாசம்
+Email Sent?,அனுப்பிய மின்னஞ்சல்?
+Email Settings,மின்னஞ்சல் அமைப்புகள்
+Email Settings for Outgoing and Incoming Emails.,வெளிச்செல்லும் மற்றும் உள்வரும் மின்னஞ்சல்கள் மின்னஞ்சல் அமைப்புகள்.
+Email ids separated by commas.,மின்னஞ்சல் ஐடிகள் பிரிக்கப்பட்ட.
+"Email settings for jobs email id ""jobs@example.com""",வேலைகள் மின்னஞ்சல் ஐடி &quot;jobs@example.com&quot; மின்னஞ்சல் அமைப்புகள்
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",மின்னஞ்சல் அமைப்புகளை விற்பனை மின்னஞ்சல் ஐடி எ.கா. &quot;sales@example.com&quot; செல்கின்றது பெறுவதற்கு
+Emergency Contact,அவசர தொடர்பு
+Emergency Contact Details,அவசர தொடர்பு விவரம்
+Emergency Phone,அவசர தொலைபேசி
+Employee,ஊழியர்
+Employee Birthday,பணியாளர் பிறந்தநாள்
+Employee Designation.,ஊழியர் பதவி.
+Employee Details,பணியாளர் விவரங்கள்
+Employee Education,ஊழியர் கல்வி
+Employee External Work History,ஊழியர் புற வேலை வரலாறு
+Employee Information,பணியாளர் தகவல்
+Employee Internal Work History,ஊழியர் உள்நாட்டு வேலை வரலாறு
+Employee Internal Work Historys,ஊழியர் உள்நாட்டு வேலை Historys
+Employee Leave Approver,பணியாளர் விடுப்பு சர்க்கார் தரப்பில் சாட்சி
+Employee Leave Balance,பணியாளர் விடுப்பு இருப்பு
+Employee Name,பணியாளர் பெயர்
+Employee Number,பணியாளர் எண்
+Employee Records to be created by,பணியாளர் ரெக்கார்ட்ஸ் விவரங்களை வேண்டும்
+Employee Settings,பணியாளர் அமைப்புகள்
+Employee Setup,பணியாளர் அமைப்பு
+Employee Type,பணியாளர் அமைப்பு
+Employee grades,ஊழியர் தரங்களாக
+Employee record is created using selected field. ,பணியாளர் பதிவு தேர்ந்தெடுக்கப்பட்ட துறையில் பயன்படுத்தி உருவாக்கப்பட்டது.
+Employee records.,ஊழியர் பதிவுகள்.
+Employee: ,ஊழியர்:
+Employees Email Id,ஊழியர்கள் மின்னஞ்சல் விலாசம்
+Employment Details,வேலை விவரம்
+Employment Type,வேலை வகை
+Enable / Disable Email Notifications,/ முடக்கு மின்னஞ்சல் அறிவிப்புகளை இயக்கு
+Enable Shopping Cart,வணிக வண்டியில் செயல்படுத்த
+Enabled,இயலுமைப்படுத்த
+Encashment Date,பணமாக்கல் தேதி
+End Date,இறுதி நாள்
+End date of current invoice's period,தற்போதைய விலைப்பட்டியல் நேரத்தில் முடிவு தேதி
+End of Life,வாழ்க்கை முடிவுக்கு
+Enter Row,வரிசை உள்ளிடவும்
+Enter Verification Code,அதிகாரமளித்தல் குறியீடு உள்ளிடவும்
+Enter campaign name if the source of lead is campaign.,முன்னணி மூலம் பிரச்சாரம் என்று பிரச்சாரம் பெயரை உள்ளிடவும்.
+Enter department to which this Contact belongs,இந்த தொடர்பு சார்ந்த துறை உள்ளிடவும்
+Enter designation of this Contact,இந்த தொடர்பு பதவி உள்ளிடவும்
+"Enter email id separated by commas, invoice will be mailed automatically on particular date","பிரிக்கப்பட்ட மின்னஞ்சல் ஐடியை உள்ளிடுக, விலைப்பட்டியல் குறிப்பிட்ட தேதியில் தானாக அஞ்சலிடப்படும்"
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,நீங்கள் உற்பத்தி ஆர்டர்கள் உயர்த்த அல்லது ஆய்வில் மூலப்பொருட்கள் பதிவிறக்க வேண்டிய உருப்படிகளை மற்றும் திட்டமிட்ட அளவு உள்ளிடவும்.
+Enter name of campaign if source of enquiry is campaign,விசாரணை மூலம் பிரச்சாரம் என்று பிரச்சாரம் பெயரை உள்ளிடவும்
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","இங்கே நிலையான URL அளவுருக்கள் (எ.கா. அனுப்புநர் = ERPNext, பயனர்பெயர் = ERPNext, கடவுச்சொல்லை = 1234 முதலியன) உள்ளிடவும்"
+Enter the company name under which Account Head will be created for this Supplier,கணக்கு தலைமை இந்த சப்ளையர் உருவாக்கப்படும் கீழ் நிறுவனத்தின் பெயரை
+Enter url parameter for message,செய்தி இணைய அளவுரு உள்ளிடவும்
+Enter url parameter for receiver nos,ரிசீவர் இலக்கங்கள் URL ஐ அளவுரு உள்ளிடவும்
+Entries,பதிவுகள்
+Entries against,பதிவுகள் எதிராக
+Entries are not allowed against this Fiscal Year if the year is closed.,ஆண்டு மூடப்பட்டு என்றால் உள்ளீடுகளை இந்த நிதியாண்டு எதிராக அனுமதி இல்லை.
+Error,பிழை
+Error for,பிழை
+Estimated Material Cost,கிட்டத்தட்ட பொருள் செலவு
+Everyone can read,அனைவரும் படிக்க முடியும்
+"Example: ABCD.#####
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
+Exchange Rate,அயல்நாட்டு நாணய பரிமாற்ற விகிதம் வீதம்
+Excise Page Number,கலால் பக்கம் எண்
+Excise Voucher,கலால் வவுச்சர்
+Exemption Limit,விலக்கு வரம்பு
+Exhibition,கண்காட்சி
+Existing Customer,ஏற்கனவே வாடிக்கையாளர்
+Exit,மரணம்
+Exit Interview Details,பேட்டி விவரம் வெளியேற
+Expected,எதிர்பார்க்கப்படுகிறது
+Expected Date cannot be before Material Request Date,எதிர்பார்க்கப்படுகிறது தேதி பொருள் கோரிக்கை தேதி முன் இருக்க முடியாது
+Expected Delivery Date,எதிர்பார்க்கப்படுகிறது டெலிவரி தேதி
+Expected End Date,எதிர்பார்க்கப்படுகிறது முடிவு தேதி
+Expected Start Date,எதிர்பார்க்கப்படுகிறது தொடக்க தேதி
+Expense Account,செலவு கணக்கு
+Expense Account is mandatory,செலவு கணக்கு அத்தியாவசியமானதாகும்
+Expense Claim,இழப்பில் கோரிக்கை
+Expense Claim Approved,இழப்பில் கோரிக்கை ஏற்கப்பட்டது
+Expense Claim Approved Message,இழப்பில் கோரிக்கை செய்தி அங்கீகரிக்கப்பட்ட
+Expense Claim Detail,இழப்பில் உரிமைகோரல் விவரம்
+Expense Claim Details,இழப்பில் உரிமைகோரல் விவரங்கள்
+Expense Claim Rejected,இழப்பில் கோரிக்கை நிராகரிக்கப்பட்டது
+Expense Claim Rejected Message,இழப்பில் கோரிக்கை செய்தி நிராகரிக்கப்பட்டது
+Expense Claim Type,இழப்பில் உரிமைகோரல் வகை
+Expense Claim has been approved.,செலவு கோரும் ஏற்கப்பட்டுள்ளது .
+Expense Claim has been rejected.,செலவு கோரிக்கை நிராகரிக்கப்பட்டுவிட்டது.
+Expense Claim is pending approval. Only the Expense Approver can update status.,செலவு கோரும் அனுமதிக்காக நிலுவையில் உள்ளது . மட்டுமே செலவு அப்ரூவரான நிலையை மேம்படுத்த முடியும் .
+Expense Date,இழப்பில் தேதி
+Expense Details,செலவு விவரம்
+Expense Head,இழப்பில் தலைமை
+Expense account is mandatory for item,செலவு கணக்கு உருப்படியை கட்டாய
+Expense/Difference account is mandatory for item: ,
+Expenses Booked,செலவுகள் பதிவு
+Expenses Included In Valuation,செலவுகள் மதிப்பீட்டு சேர்க்கப்பட்டுள்ளது
+Expenses booked for the digest period,தொகுப்பு காலம் பதிவு செலவுகள்
+Expiry Date,காலாவதியாகும் தேதி
+Exports,ஏற்றுமதி
+External,வெளி
+Extract Emails,மின்னஞ்சல்கள் பிரித்தெடுக்க
+FCFS Rate,FCFS விகிதம்
+FIFO,FIFO
+Failed: ,தோல்வி:
+Family Background,குடும்ப பின்னணி
+Fax,தொலைநகல்
+Features Setup,அம்சங்கள் அமைப்பு
+Feed,உணவு
+Feed Type,வகை உணவு
+Feedback,கருத்து
+Female,பெண்
+Fetch exploded BOM (including sub-assemblies),( துணை கூட்டங்கள் உட்பட ) வெடித்தது BOM எடு
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","டெலிவரி குறிப்பு, மேற்கோள், விற்பனை விலைப்பட்டியல், விற்பனை ஆர்டர் கிடைக்கும் புலம்"
+Files Folder ID,கோப்புகளை அடைவு ஐடி
+Fill the form and save it,"படிவத்தை பூர்த்தி செய்து, அதை காப்பாற்ற"
+Filter By Amount,மொத்த தொகை மூலம் வடிகட்ட
+Filter By Date,தேதி வாக்கில் வடிகட்ட
+Filter based on customer,வாடிக்கையாளர் அடிப்படையில் வடிகட்ட
+Filter based on item,உருப்படியை அடிப்படையில் வடிகட்ட
+Financial Analytics,நிதி பகுப்பாய்வு
+Financial Statements,நிதி அறிக்கைகள்
+Finished Goods,முடிக்கப்பட்ட பொருட்கள்
+First Name,முதல் பெயர்
+First Responded On,முதல் தேதி இணையம்
+Fiscal Year,நிதியாண்டு
+Fixed Asset Account,நிலையான சொத்து கணக்கு
+Float Precision,துல்லிய மிதப்பதற்கு
+Follow via Email,மின்னஞ்சல் வழியாக பின்பற்றவும்
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",ஒப்பந்த - உருப்படிகளை துணை இருந்தால் அட்டவணை தொடர்ந்து மதிப்புகள் காண்பிக்கும். ஒப்பந்த பொருட்கள் - இந்த மதிப்புகள் துணை பற்றிய &quot;பொருட்களை பில்&quot; தலைவனா இருந்து எடுக்கப்படவில்லை.
+For Company,நிறுவனத்தின்
+For Employee,பணியாளர் தேவை
+For Employee Name,பணியாளர் பெயர்
+For Production,உற்பத்திக்கான
+For Reference Only.,குறிப்பு மட்டுமே.
+For Sales Invoice,விற்பனை விலைப்பட்டியல் ஐந்து
+For Server Side Print Formats,சர்வர் பக்க அச்சு வடிவமைப்புகளையும்
+For Supplier,சப்ளையர்
+For UOM,மொறட்டுவ பல்கலைகழகம் க்கான
+For Warehouse,சேமிப்பு
+"For e.g. 2012, 2012-13","உதாரணமாக 2012, 2012-13 க்கான"
+For opening balance entry account can not be a PL account,சமநிலை நுழைவு கணக்கு ஒரு பிஎல் கணக்கு முடியாது
+For reference,குறிப்பிற்கு
+For reference only.,குறிப்பு மட்டுமே.
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","வாடிக்கையாளர்களின் வசதிக்காக, இந்த குறியீடுகள் பற்றுச்சீட்டுகள் மற்றும் டெலிவரி குறிப்புகள் போன்ற அச்சு வடிவங்கள் பயன்படுத்த முடியும்"
+Forum,கருத்துக்களம்
+Fraction,பின்னம்
+Fraction Units,பின்னம் அலகுகள்
+Freeze Stock Entries,பங்கு பதிவுகள் நிறுத்தப்படலாம்
+Friday,வெள்ளி
+From,இருந்து
+From Bill of Materials,பொருள்களின் பில் இருந்து
+From Company,நிறுவனத்தின் இருந்து
+From Currency,நாணய இருந்து
+From Currency and To Currency cannot be same,நாணய மற்றும் நாணயத்தை அதே இருக்க முடியாது
+From Customer,வாடிக்கையாளர் இருந்து
+From Customer Issue,வாடிக்கையாளர் பிரச்சினை இருந்து
+From Date,தேதி
+From Delivery Note,டெலிவரி குறிப்பு இருந்து
+From Employee,பணியாளர் இருந்து
+From Lead,முன்னணி இருந்து
+From Maintenance Schedule,பராமரிப்பு அட்டவணை இருந்து
+From Material Request,பொருள் கோரிக்கையை இருந்து
+From Opportunity,வாய்ப்பை இருந்து
+From Package No.,தொகுப்பு எண் இருந்து
+From Purchase Order,கொள்முதல் ஆணை இருந்து
+From Purchase Receipt,கொள்முதல் ரசீது இருந்து
+From Quotation,கூறியவை
+From Sales Order,விற்பனை ஆர்டர் இருந்து
+From Supplier Quotation,வழங்குபவர் கூறியவை
+From Time,நேரம் இருந்து
+From Value,மதிப்பு இருந்து
+From Value should be less than To Value,மதிப்பு இருந்து மதிப்பு குறைவாக இருக்க வேண்டும்
+Frozen,நிலையாக்கப்பட்டன
+Frozen Accounts Modifier,உறைந்த கணக்குகள் மாற்றி
+Fulfilled,பூர்த்தி
+Full Name,முழு பெயர்
+Fully Completed,முழுமையாக பூர்த்தி
+"Further accounts can be made under Groups,","மேலும் கணக்குகள் குழுக்கள் கீழ்,"
+Further nodes can be only created under 'Group' type nodes,மேலும் முனைகளில் ஒரே 'குரூப்' வகை முனைகளில் கீழ் உருவாக்கப்பட்ட
+GL Entry,ஜீ நுழைவு
+GL Entry: Debit or Credit amount is mandatory for ,ஜீ நுழைவு: பற்று அல்லது கடன் தொகை அத்தியாவசியமானதாகும்
+GRN,GRN
+Gantt Chart,காண்ட் விளக்கப்படம்
+Gantt chart of all tasks.,அனைத்து பணிகளை கன்ட் விளக்கப்படம்.
+Gender,பாலினம்
+General,பொதுவான
+General Ledger,பொது லெட்ஜர்
+Generate Description HTML,"விளக்கம் HTML ஐ உருவாக்க,"
+Generate Material Requests (MRP) and Production Orders.,பொருள் கோரிக்கைகள் (எம்ஆர்பி) மற்றும் உற்பத்தி ஆணைகள் உருவாக்க.
+Generate Salary Slips,சம்பளம் தவறிவிடும் உருவாக்க
+Generate Schedule,அட்டவணை உருவாக்க
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","விநியோகிப்பதற்காக தொகுப்புகள் பின்னடைவு பொதி உருவாக்க. தொகுப்பு எண், தொகுப்பு உள்ளடக்கங்கள் மற்றும் அதன் எடை தெரிவிக்க பயன்படுத்தப்படுகிறது."
+Generates HTML to include selected image in the description,விளக்கத்தில் தேர்ந்தெடுக்கப்பட்ட படத்தை சேர்க்க HTML உருவாக்குகிறது
+Get Advances Paid,கட்டண முன்னேற்றங்கள் கிடைக்கும்
+Get Advances Received,முன்னேற்றம் பெற்ற கிடைக்கும்
+Get Current Stock,தற்போதைய பங்கு கிடைக்கும்
+Get Items,பொருட்கள் கிடைக்கும்
+Get Items From Sales Orders,விற்பனை ஆணைகள் உருப்படிகளை கிடைக்கும்
+Get Items from BOM,BOM இருந்து பொருட்களை பெற
+Get Last Purchase Rate,கடைசியாக கொள்முதல் விலை கிடைக்கும்
+Get Non Reconciled Entries,அசைவம் ஒருமைப்படுத்திய பதிவுகள் பெற
+Get Outstanding Invoices,சிறந்த பற்றுச்சீட்டுகள் கிடைக்கும்
+Get Sales Orders,விற்பனை ஆணைகள் கிடைக்கும்
+Get Specification Details,குறிப்பு விவரம் கிடைக்கும்
+Get Stock and Rate,பங்கு மற்றும் விகிதம் கிடைக்கும்
+Get Template,வார்ப்புரு கிடைக்கும்
+Get Terms and Conditions,நிபந்தனைகள் கிடைக்கும்
+Get Weekly Off Dates,வாராந்திர இனிய தினங்கள் கிடைக்கும்
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","அன்று மூல / இலக்கு ஹவுஸில் மதிப்பீடு விகிதம் மற்றும் கிடைக்கும் பங்கு பெற தேதி, நேரம் தகவல்களுக்கு குறிப்பிட்டுள்ளார். உருப்படியை தொடர் என்றால், தொடர் இலக்கங்கள் நுழைந்து பின்னர் இந்த பொத்தானை கிளிக் செய்யவும்."
+GitHub Issues,மகிழ்ச்சியா சிக்கல்கள்
+Global Defaults,உலக இயல்புநிலைகளுக்கு
+Global Settings / Default Values,உலகளாவிய அமைப்புகள் / default கலாச்சாரம்
+Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts),அதற்கான குழு ( நிதி > தற்போதைய சொத்து பொதுவாக விண்ணப்ப > வங்கி கணக்குகள் ) சென்று
+Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties),அதற்கான குழு ( நிதி பொதுவாக மூல > நடப்பு பொறுப்புகள் > வரி மற்றும் கடமைகள் ) சென்று
+Goal,இலக்கு
+Goals,இலக்குகளை
+Goods received from Suppliers.,பொருட்கள் விநியோகஸ்தர்கள் இருந்து பெற்றார்.
+Google Drive,Google இயக்ககம்
+Google Drive Access Allowed,Google Drive ஐ அனுமதி
+Grade,கிரமம்
+Graduate,பல்கலை கழக பட்டம் பெற்றவர்
+Grand Total,ஆக மொத்தம்
+Grand Total (Company Currency),கிராண்ட் மொத்த (நிறுவனத்தின் கரன்சி)
+Gratuity LIC ID,பணிக்கொடை எல்.ஐ. சி ஐடி
+"Grid ""","கிரிட் """
+Gross Margin %,மொத்த அளவு%
+Gross Margin Value,மொத்த அளவு மதிப்பு
+Gross Pay,ஒட்டு மொத்த ஊதியம் / சம்பளம்
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,மொத்த சம்பளம் + நிலுவை தொகை + பணமாக்கல் தொகை - மொத்தம் பொருத்தியறிதல்
+Gross Profit,மொத்த இலாபம்
+Gross Profit (%),மொத்த லாபம் (%)
+Gross Weight,மொத்த எடை
+Gross Weight UOM,மொத்த எடை மொறட்டுவ பல்கலைகழகம்
+Group,தொகுதி
+Group or Ledger,குழு அல்லது லெட்ஜர்
+Groups,குழுக்கள்
+HR,அலுவலக
+HR Settings,அலுவலக அமைப்புகள்
+HTML / Banner that will show on the top of product list.,தயாரிப்பு பட்டியலில் காண்பிக்கும் என்று HTML / பதாகை.
+Half Day,அரை நாள்
+Half Yearly,அரையாண்டு
+Half-yearly,அரை ஆண்டு
+Happy Birthday!,பிறந்தநாள் வாழ்த்துக்கள்!
+Has Batch No,கூறு எண் உள்ளது
+Has Child Node,குழந்தை கணு உள்ளது
+Has Serial No,இல்லை வரிசை உள்ளது
+Header,தலை கீழாக நீரில் மூழ்குதல்
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,பைனான்ஸ் பதிவுகள் செய்யப்படுகின்றன மற்றும் சமநிலைகள் பராமரிக்கப்படுகிறது எதிராக தலைகள் (அல்லது குழுக்கள்).
+Health Concerns,சுகாதார கவலைகள்
+Health Details,சுகாதார விவரம்
+Held On,இல் நடைபெற்றது
+Help,உதவி
+Help HTML,HTML உதவி
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","உதவி:. அமைப்பு மற்றொரு சாதனை இணைக்க, &quot;# படிவம் / குறிப்பு / [குறிப்பு பெயர்]&quot; இணைப்பு URL பயன்படுத்த (&quot;Http://&quot; பயன்படுத்த வேண்டாம்)"
+"Here you can maintain family details like name and occupation of parent, spouse and children","இங்கே நீங்கள் பெற்றோர், மனைவி மற்றும் குழந்தைகள் பெயர் மற்றும் ஆக்கிரமிப்பு போன்ற குடும்ப விவரங்கள் பராமரிக்க முடியும்"
+"Here you can maintain height, weight, allergies, medical concerns etc","இங்கே நீங்கள் உயரம், எடை, ஒவ்வாமை, மருத்துவ கவலைகள் ஹிப்ரு பராமரிக்க முடியும்"
+Hey! All these items have already been invoiced.,ஏய்! இந்த பொருட்களை ஏற்கனவே விலை விவரம்.
+Hide Currency Symbol,நாணய சின்னம் மறைக்க
+High,உயர்
+History In Company,நிறுவனத்தின் ஆண்டு வரலாறு
+Hold,பிடி
+Holiday,விடுமுறை
+Holiday List,விடுமுறை பட்டியல்
+Holiday List Name,விடுமுறை பட்டியல் பெயர்
+Holidays,விடுமுறை
+Home,முகப்பு
+Host,புரவலன்
+"Host, Email and Password required if emails are to be pulled","மின்னஞ்சல்கள் இழுத்து வேண்டும் என்றால் தேவையான புரவலன், மின்னஞ்சல் மற்றும் கடவுச்சொல்"
+Hour Rate,மணி விகிதம்
+Hour Rate Labour,மணி விகிதம் தொழிலாளர்
+Hours,மணி
+How frequently?,எப்படி அடிக்கடி?
+"How should this currency be formatted? If not set, will use system defaults","எப்படி இந்த நாணய வடிவமைக்க வேண்டும்? அமைக்கவில்லை எனில், கணினி இயல்புநிலைகளை பயன்படுத்தும்"
+Human Resource,மனிதவளம்
+I,நான்
+IDT,IDT
+II,இரண்டாம்
+III,III
+IN,IN
+INV,INV
+INV/10-11/,INV/10-11 /
+ITEM,ITEM
+IV,IV
+Identification of the package for the delivery (for print),பிரசவத்திற்கு தொகுப்பின் அடையாள (அச்சுக்கு)
+If Income or Expense,என்றால் வருமானம் அல்லது செலவு
+If Monthly Budget Exceeded,மாதாந்திர பட்ஜெட் மீறப்பட்ட என்றால்
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.
+Available in Delivery Note and Sales Order",
+"If Supplier Part Number exists for given Item, it gets stored here","வழங்குபவர் பாகம் எண் கொடுக்கப்பட்ட பொருள் உள்ளது என்றால், அது இங்கே சேமிக்கப்பட்டிருக்கும்"
+If Yearly Budget Exceeded,ஆண்டு பட்ஜெட் மீறப்பட்ட என்றால்
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","தேர்வுசெய்யப்பட்டால், துணை சட்டசபை பொருட்கள் BOM மூலப்பொருட்கள் பெற கருதப்படுகிறது. மற்றபடி, அனைத்து துணை சட்டசபை பொருட்களை மூலப்பொருளாக கருதப்படுகிறது."
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","சரி என்றால், மொத்த இல்லை. வேலை நாட்கள் விடுமுறை அடங்கும், இந்த நாள் ஒன்றுக்கு சம்பளம் மதிப்பு குறையும்"
+"If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.","சரி என்றால், ஒரு இணைக்கப்பட்ட HTML வடிவம் ஒரு மின்னஞ்சல் மின்னஞ்சல் உடல் அத்துடன் இணைப்பு பகுதியாக சேர்க்கப்பட்டது. ஒரே இணைப்பாக அனுப்ப, இந்த தேர்வை நீக்குக."
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","தேர்ந்தெடுக்கப்பட்டால், ஏற்கனவே அச்சிடுக விகிதம் / அச்சிடுக தொகை சேர்க்கப்பட்டுள்ளது என, வரி தொகை"
+"If disable, 'Rounded Total' field will not be visible in any transaction","முடக்கவும், &#39;வட்டமான மொத்த&#39; என்றால் துறையில் எந்த பரிமாற்றத்தில் பார்க்க முடியாது"
+"If enabled, the system will post accounting entries for inventory automatically.","இயலுமைப்படுத்த என்றால், கணினி தானாக சரக்கு கணக்கியல் உள்ளீடுகள் பதிவு."
+If more than one package of the same type (for print),அதே வகை மேற்பட்ட தொகுப்பு (அச்சுக்கு)
+"If no change in either Quantity or Valuation Rate, leave the cell blank.","அளவு அல்லது மதிப்பீட்டு விகிதம் அல்லது எந்த மாற்றமும் இல்லை , செல் வெற்று விட்டு ."
+If non standard port (e.g. 587),நீங்கள் அல்லாத நிலையான துறை (எ.கா. 587)
+If not applicable please enter: NA,பொருந்தாது என்றால் உள்ளிடவும்: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.","சரி இல்லை என்றால், பட்டியலில் அதை பயன்படுத்த வேண்டும் ஒவ்வொரு துறை சேர்க்க வேண்டும்."
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.","தொகுப்பு என்றால், தரவு உள்ளீடு மட்டுமே குறிப்பிட்ட பயனர்கள் அனுமதிக்கப்படுகிறது. வேறு, நுழைவு தேவையான அனுமதிகளை அனைத்து பயனர்களும் அனுமதிக்கப்படுகிறது."
+"If specified, send the newsletter using this email address","குறிப்பிட்ட என்றால், இந்த மின்னஞ்சல் முகவரியை பயன்படுத்தி அனுப்புக"
+"If the account is frozen, entries are allowed to restricted users.","கணக்கு முடக்கப்படும் என்றால், உள்ளீடுகளை தடை செய்த அனுமதிக்கப்படுகிறது ."
+"If this Account represents a Customer, Supplier or Employee, set it here.","இந்த கணக்கு ஒரு வாடிக்கையாளர், சப்ளையர் அல்லது பணியாளர் குறிக்கிறது என்றால், இங்கே அமைக்கவும்."
+"If you follow Quality Inspection<br>
+Enables item QA Required and QA No in Purchase Receipt",
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,நீங்கள் விற்பனை குழு மற்றும் விற்பனை பங்குதாரர்கள் (சேனல் பங்குதாரர்கள்) அவர்கள் குறித்துள்ளார் முடியும் மற்றும் விற்பனை நடவடிக்கைகளில் தங்களது பங்களிப்பை பராமரிக்க வேண்டும்
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","நீங்கள் கொள்முதல் வரி மற்றும் கட்டணங்கள் மாஸ்டர் ஒரு நிலையான டெம்ப்ளேட் உருவாக்கியது என்றால், ஒரு தேர்ந்தெடுத்து கீழே உள்ள பொத்தானை கிளிக் செய்யவும்."
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","நீங்கள் விற்பனை வரி மற்றும் கட்டணங்கள் மாஸ்டர் ஒரு நிலையான டெம்ப்ளேட் உருவாக்கியது என்றால், ஒரு தேர்ந்தெடுத்து கீழே உள்ள பொத்தானை கிளிக் செய்யவும்."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","நீங்கள் நீண்ட வடிவங்கள் அச்சிட வேண்டும் என்றால், இந்த அம்சம் பக்கம் ஒவ்வொரு பக்கத்தில் அனைத்து தலைப்புகள் மற்றும் அடிக்குறிப்புகளும் பல பக்கங்களில் அச்சிடப்பட்ட வேண்டும் பிரித்து பயன்படுத்தலாம்"
+"If you involve in manufacturing activity<br>
+Enables item <b>Is Manufactured</b>",
+Ignore,புறக்கணி
+Ignored: ,அலட்சியம்:
+Image,படம்
+Image View,பட காட்சி
+Implementation Partner,செயல்படுத்தல் வரன்வாழ்க்கை துணை
+Import,இறக்குமதி பொருள்கள்
+Import Attendance,இறக்குமதி பங்கேற்கும்
+Import Failed!,இறக்குமதி தோல்வி!
+Import Log,புகுபதிகை இறக்குமதி
+Import Successful!,வெற்றிகரமான இறக்குமதி!
+Imports,இறக்குமதி
+In Hours,மணி
+In Process,செயல்முறை உள்ள
+In Qty,அளவு உள்ள
+In Row,வரிசையில்
+In Value,மதிப்பு
+In Words,வேர்ட்ஸ்
+In Words (Company Currency),வேர்ட்ஸ் (நிறுவனத்தின் கரன்சி)
+In Words (Export) will be visible once you save the Delivery Note.,நீங்கள் டெலிவரி குறிப்பு சேமிக்க முறை வேர்ட்ஸ் (ஏற்றுமதி) காண முடியும்.
+In Words will be visible once you save the Delivery Note.,நீங்கள் டெலிவரி குறிப்பு சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+In Words will be visible once you save the Purchase Invoice.,நீங்கள் கொள்முதல் விலைப்பட்டியல் சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+In Words will be visible once you save the Purchase Order.,நீங்கள் கொள்முதல் ஆணை சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+In Words will be visible once you save the Purchase Receipt.,நீங்கள் கொள்முதல் ரசீது சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+In Words will be visible once you save the Quotation.,நீங்கள் மேற்கோள் சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+In Words will be visible once you save the Sales Invoice.,நீங்கள் விற்பனை விலைப்பட்டியல் சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+In Words will be visible once you save the Sales Order.,நீங்கள் விற்பனை ஆணை சேமிக்க முறை சொற்கள் காணக்கூடியதாக இருக்கும்.
+Incentives,செயல் தூண்டுதல்
+Incharge,பொறுப்பிலுள்ள
+Incharge Name,பெயர் பொறுப்பிலுள்ள
+Include holidays in Total no. of Working Days,மொத்த எந்த விடுமுறை அடங்கும். வேலை நாட்கள்
+Income / Expense,வருமான / செலவின
+Income Account,வருமான கணக்கு
+Income Booked,வருமான பதிவு
+Income Year to Date,தேதி வருமான வருடம்
+Income booked for the digest period,வருமான தொகுப்பு காலம் பதிவு
+Incoming,அடுத்து வருகிற
+Incoming / Support Mail Setting,உள்வரும் / ஆதரவு மெயில் அமைக்கிறது
+Incoming Rate,உள்வரும் விகிதம்
+Incoming quality inspection.,உள்வரும் தரத்தை ஆய்வு.
+Indicates that the package is a part of this delivery,தொகுப்பு இந்த விநியோக ஒரு பகுதியாக என்று குறிக்கிறது
+Individual,தனிப்பட்ட
+Industry,தொழில்
+Industry Type,தொழில் அமைப்பு
+Inspected By,மூலம் ஆய்வு
+Inspection Criteria,ஆய்வு வரையறைகள்
+Inspection Required,ஆய்வு தேவை
+Inspection Type,ஆய்வு அமைப்பு
+Installation Date,நிறுவல் தேதி
+Installation Note,நிறுவல் குறிப்பு
+Installation Note Item,நிறுவல் குறிப்பு பொருள்
+Installation Status,நிறுவல் நிலைமை
+Installation Time,நிறுவல் நேரம்
+Installation record for a Serial No.,ஒரு சீரியல் எண் நிறுவல் பதிவு
+Installed Qty,நிறுவப்பட்ட அளவு
+Instructions,அறிவுறுத்தல்கள்
+Integrate incoming support emails to Support Ticket,டிக்கெட் ஆதரவு உள்வரும் ஆதரவு மின்னஞ்சல்கள் ஒருங்கிணை
+Interested,அக்கறை உள்ள
+Internal,உள்ளக
+Introduction,அறிமுகப்படுத்துதல்
+Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again.,செல்லாத டெலிவரி குறிப்பு . டெலிவரி குறிப்பு இருக்க வேண்டும் மற்றும் வரைவு மாநில இருக்க வேண்டும் . சரிசெய்து மீண்டும் முயற்சிக்கவும்.
+Invalid Email Address,செல்லாத மின்னஞ்சல் முகவரி
+Invalid Leave Approver,தவறான சர்க்கார் தரப்பில் சாட்சி விடவும்
+Invalid Master Name,செல்லாத மாஸ்டர் பெயர்
+Invalid quantity specified for item ,
+Inventory,சரக்கு
+Invoice Date,விலைப்பட்டியல் தேதி
+Invoice Details,விலைப்பட்டியல் விவரம்
+Invoice No,இல்லை விலைப்பட்டியல்
+Invoice Period From Date,வரம்பு தேதி விலைப்பட்டியல் காலம்
+Invoice Period To Date,தேதி விலைப்பட்டியல் காலம்
+Invoiced Amount (Exculsive Tax),விலை விவரம் தொகை ( ஒதுக்கி தள்ளும் பண்புடைய வரி )
+Is Active,செயலில் உள்ளது
+Is Advance,முன்பணம்
+Is Asset Item,சொத்து உருப்படி உள்ளது
+Is Cancelled,ரத்து
+Is Carry Forward,அடுத்த Carry
+Is Default,இது இயல்பு
+Is Encash,ரொக்கமான மாற்று இல்லை
+Is LWP,LWP உள்ளது
+Is Opening,திறக்கிறது
+Is Opening Entry,நுழைவு திறக்கிறது
+Is PL Account,பிஎல் கணக்கு
+Is POS,பிஓஎஸ் உள்ளது
+Is Primary Contact,முதன்மை தொடர்பு இல்லை
+Is Purchase Item,கொள்முதல் உருப்படி உள்ளது
+Is Sales Item,விற்பனை பொருள் ஆகும்
+Is Service Item,சேவை பொருள் ஆகும்
+Is Stock Item,பங்கு உருப்படி உள்ளது
+Is Sub Contracted Item,துணை ஒப்பந்தம் உருப்படி உள்ளது
+Is Subcontracted,உள்குத்தகை
+Is this Tax included in Basic Rate?,இந்த வரி அடிப்படை விகிதம் சேர்க்கப்பட்டுள்ளது?
+Issue,சிக்கல்
+Issue Date,பிரச்சினை தேதி
+Issue Details,சிக்கல் விவரம்
+Issued Items Against Production Order,உற்பத்தி ஆர்டர் எதிராக வழங்கப்படும் பொருட்கள்
+It can also be used to create opening stock entries and to fix stock value.,இது திறந்து பங்கு உள்ளீடுகளை உருவாக்க மற்றும் பங்கு மதிப்பு சரி செய்ய முடியும் .
+Item,உருப்படி
+Item ,
+Item Advanced,உருப்படியை மேம்பட்ட
+Item Barcode,உருப்படியை பார்கோடு
+Item Batch Nos,உருப்படியை தொகுப்பு இலக்கங்கள்
+Item Classification,உருப்படியை வகைப்பாடு
+Item Code,உருப்படியை கோட்
+Item Code (item_code) is mandatory because Item naming is not sequential.,"பொருள் பெயரிடும் தொடர் அல்ல, ஏனெனில் உருப்படியை கோட் (item_code) அத்தியாவசியமானதாகும்."
+Item Code and Warehouse should already exist.,பொருள் கோட் மற்றும் கிடங்கு ஏற்கனவே வேண்டும்.
+Item Code cannot be changed for Serial No.,பொருள் கோட் சீரியல் எண் மாற்றப்பட கூடாது
+Item Customer Detail,உருப்படியை வாடிக்கையாளர் விரிவாக
+Item Description,உருப்படி விளக்கம்
+Item Desription,உருப்படியை Desription
+Item Details,உருப்படியை விவரம்
+Item Group,உருப்படியை குழு
+Item Group Name,உருப்படியை குழு பெயர்
+Item Group Tree,பொருள் குழு மரம்
+Item Groups in Details,விவரங்கள் உருப்படியை குழுக்கள்
+Item Image (if not slideshow),உருப்படி படம் (இருந்தால் ஸ்லைடுஷோ)
+Item Name,உருப்படி பெயர்
+Item Naming By,மூலம் பெயரிடுதல் உருப்படியை
+Item Price,உருப்படியை விலை
+Item Prices,உருப்படியை விலைகள்
+Item Quality Inspection Parameter,உருப்படியை தர ஆய்வு அளவுரு
+Item Reorder,உருப்படியை மறுவரிசைப்படுத்துக
+Item Serial No,உருப்படி இல்லை தொடர்
+Item Serial Nos,உருப்படியை தொடர் இலக்கங்கள்
+Item Shortage Report,பொருள் பற்றாக்குறை அறிக்கை
+Item Supplier,உருப்படியை சப்ளையர்
+Item Supplier Details,உருப்படியை சப்ளையர் விவரம்
+Item Tax,உருப்படியை வரி
+Item Tax Amount,உருப்படியை வரி தொகை
+Item Tax Rate,உருப்படியை வரி விகிதம்
+Item Tax1,உருப்படியை Tax1
+Item To Manufacture,உற்பத்தி பொருள்
+Item UOM,உருப்படியை மொறட்டுவ பல்கலைகழகம்
+Item Website Specification,உருப்படியை வலைத்தளம் குறிப்புகள்
+Item Website Specifications,உருப்படியை வலைத்தளம் விருப்பம்
+Item Wise Tax Detail ,உருப்படியை வைஸ் வரி விரிவாக
+Item classification.,உருப்படியை வகைப்பாடு.
+Item is neither Sales nor Service Item,பொருள் விற்பனை அல்லது சேவை பொருள் அல்ல
+"Item must be a purchase item, \
+					as it is present in one or many Active BOMs",
+Item must have 'Has Serial No' as 'Yes',பொருள் வேண்டும் ' ஆமாம் ' என ' சீரியல் இல்லை Has வேண்டும்'
+Item table can not be blank,பொருள் அட்டவணை காலியாக இருக்க முடியாது
+Item to be manufactured or repacked,உருப்படியை உற்பத்தி அல்லது repacked வேண்டும்
+Item will be saved by this name in the data base.,உருப்படியை தரவு தளத்தை இந்த பெயரை காப்பாற்ற முடியாது.
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","உருப்படி, உத்தரவாதம், AMC (ஆண்டு பராமரிப்பு ஒப்பந்த) விவரங்கள் வரிசை எண் தேர்ந்தெடுக்கும் போது தானாக எடுக்கப்படவில்லை இருக்கும்."
+Item-wise Last Purchase Rate,உருப்படியை வாரியான கடைசியாக கொள்முதல் விலை
+Item-wise Price List Rate,பொருள் வாரியான விலை பட்டியல் விகிதம்
+Item-wise Purchase History,உருப்படியை வாரியான கொள்முதல் வரலாறு
+Item-wise Purchase Register,உருப்படியை வாரியான வாங்குதல் பதிவு
+Item-wise Sales History,உருப்படியை வாரியான விற்பனை வரலாறு
+Item-wise Sales Register,உருப்படியை வாரியான விற்பனை பதிவு
+Items,உருப்படிகள்
+Items To Be Requested,கோரிய பொருட்களை
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty",&quot;அவுட் பங்கு பற்றிய&quot; எந்த கோரிய வேண்டும் பொருட்களை உத்தேச அளவு மற்றும் குறைந்த ஆர்டர் அளவு அடிப்படையில் அனைத்து கிடங்குகள் பரிசீலித்து
+Items which do not exist in Item master can also be entered on customer's request,பொருள் மாஸ்டர் உள்ள இல்லை எந்த உருப்படிகளும் வாடிக்கையாளர் கோரிக்கை நுழைந்த
+Itemwise Discount,இனவாரியாக தள்ளுபடி
+Itemwise Recommended Reorder Level,இனவாரியாக நிலை மறுவரிசைப்படுத்துக பரிந்துரைக்கப்பட்ட
+JV,கூட்டு தொழில்
+Job Applicant,வேலை விண்ணப்பதாரர்
+Job Opening,வேலை திறக்கிறது
+Job Profile,வேலை செய்தது
+Job Title,வேலை தலைப்பு
+"Job profile, qualifications required etc.","வேலை சுயவிவரத்தை, தகுதிகள் போன்ற தேவை"
+Jobs Email Settings,வேலைகள் மின்னஞ்சல் அமைப்புகள்
+Journal Entries,ஜர்னல் பதிவுகள்
+Journal Entry,பத்திரிகை நுழைவு
+Journal Voucher,பத்திரிகை வவுச்சர்
+Journal Voucher Detail,பத்திரிகை வவுச்சர் விரிவாக
+Journal Voucher Detail No,பத்திரிகை வவுச்சர் விரிவாக இல்லை
+KRA,KRA
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ","விற்பனை பிரச்சாரங்கள் கண்காணியுங்கள். முதலீட்டு மீதான திரும்ப அளவிடுவதற்கு பிரச்சாரங்கள் இருந்து செல்கிறது, மேற்கோள்கள், விற்பனை ஆணை போன்றவை கண்காணியுங்கள்."
+Keep a track of communication related to this enquiry which will help for future reference.,எதிர்கால உதவும் இந்த விசாரணை தொடர்பான தகவல் ஒரு கண்காணிக்க.
+Key Performance Area,முக்கிய செயல்திறன் பகுதி
+Key Responsibility Area,முக்கிய பொறுப்பு பகுதி
+LEAD,LEAD
+LEAD/10-11/,LEAD/10-11 /
+LEAD/MUMBAI/,LEAD / மும்பை /
+LR Date,LR தேதி
+LR No,LR இல்லை
+Label,சிட்டை
+Landed Cost Item,இறங்கினார் செலவு உருப்படி
+Landed Cost Items,இறங்கினார் செலவு உருப்படிகள்
+Landed Cost Purchase Receipt,இறங்கினார் செலவு கொள்முதல் ரசீது
+Landed Cost Purchase Receipts,இறங்கினார் செலவு கொள்முதல் ரசீதுகள்
+Landed Cost Wizard,இறங்கினார் செலவு செய்யும் விசார்ட்
+Last Name,கடந்த பெயர்
+Last Purchase Rate,கடந்த கொள்முதல் விலை
+Latest,சமீபத்திய
+Latest Updates,சமீபத்திய மேம்படுத்தல்கள்
+Lead,தலைமை
+Lead Details,விவரம் இட்டு
+Lead Id,முன்னணி ஐடி
+Lead Name,பெயர் இட்டு
+Lead Owner,உரிமையாளர் இட்டு
+Lead Source,மூல இட்டு
+Lead Status,நிலைமை ஏற்படும்
+Lead Time Date,நேரம் தேதி இட்டு
+Lead Time Days,நேரம் நாட்கள் இட்டு
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,இந்த உருப்படி உங்கள் கிடங்கில் எதிர்பார்க்கப்படுகிறது இதன் மூலம் நாட்கள் எண்ணிக்கை நேரம் நாட்களுக்கு இட்டு உள்ளது. இந்த உருப்படியை தேர்வு போது இந்த நாட்களில் பொருள் கோரிக்கையில் தந்தது.
+Lead Type,வகை இட்டு
+Leave Allocation,ஒதுக்கீடு விட்டு
+Leave Allocation Tool,ஒதுக்கீடு கருவி விட்டு
+Leave Application,விண்ணப்ப விட்டு
+Leave Approver,சர்க்கார் தரப்பில் சாட்சி விட்டு
+Leave Approver can be one of,சர்க்கார் தரப்பில் சாட்சி ஒருவர் இருக்க முடியும் விட்டு
+Leave Approvers,குற்றம் விட்டு
+Leave Balance Before Application,விண்ணப்ப முன் இருப்பு விட்டு
+Leave Block List,பிளாக் பட்டியல் விட்டு
+Leave Block List Allow,பிளாக் பட்டியல் அனுமதி விட்டு
+Leave Block List Allowed,அனுமதிக்கப்பட்ட பிளாக் பட்டியல் விட்டு
+Leave Block List Date,பிளாக் பட்டியல் தேதி விட்டு
+Leave Block List Dates,பிளாக் பட்டியல் தினங்கள் விட்டு
+Leave Block List Name,பிளாக் பட்டியல் பெயர் விட்டு
+Leave Blocked,தடுக்கப்பட்ட விட்டு
+Leave Control Panel,கண்ட்ரோல் பேனல் விட்டு
+Leave Encashed?,காசாக்கப்பட்டால் விட்டு?
+Leave Encashment Amount,பணமாக்கல் தொகை விட்டு
+Leave Setup,அமைவு விட்டு
+Leave Type,வகை விட்டு
+Leave Type Name,வகை பெயர் விட்டு
+Leave Without Pay,சம்பளமில்லா விடுப்பு
+Leave allocations.,ஒதுக்கீடுகள் விட்டு.
+Leave application has been approved.,விண்ணப்ப ஒப்புதல் வழங்கியுள்ளது.
+Leave application has been rejected.,விடுப்பு விண்ணப்பம் நிராகரிக்கப்பட்டது.
+Leave blank if considered for all branches,அனைத்து கிளைகளையும் கருத்தில் இருந்தால் வெறுமையாக
+Leave blank if considered for all departments,அனைத்து துறைகளில் கருதப்படுகிறது என்றால் வெறுமையாக
+Leave blank if considered for all designations,அனைத்து வடிவ கருத்தில் இருந்தால் வெறுமையாக
+Leave blank if considered for all employee types,அனைத்து பணியாளர் வகையான கருதப்படுகிறது என்றால் வெறுமையாக
+Leave blank if considered for all grades,அனைத்து தரங்களாக கருத்தில் இருந்தால் வெறுமையாக
+"Leave can be approved by users with Role, ""Leave Approver""","விட்டு பாத்திரம் பயனர்கள் ஒப்புதல் முடியும், &quot;சர்க்கார் தரப்பில் சாட்சி விடு&quot;"
+Ledger,பேரேடு
+Ledgers,பேரேடுகளால்
+Left,விட்டு
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,அமைப்பு சார்ந்த கணக்கு ஒரு தனி பட்டியலில் சேர்த்து சட்ட நிறுவனத்தின் / துணைநிறுவனத்திற்கு.
+Letter Head,முகவரியடங்கல்
+Level,நிலை
+Lft,Lft
+List a few of your customers. They could be organizations or individuals.,உங்கள் வாடிக்கையாளர்களுக்கு ஒரு சில பட்டியல் . அவர்கள் நிறுவனங்கள் அல்லது தனிநபர்கள் இருக்க முடியும் .
+List a few of your suppliers. They could be organizations or individuals.,உங்கள் சப்ளையர்கள் ஒரு சில பட்டியல் . அவர்கள் நிறுவனங்கள் அல்லது தனிநபர்கள் இருக்க முடியும் .
+"List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them.","உங்கள் சப்ளையர்கள் அல்லது விற்பனையாளர்கள் இருந்து வாங்க ஒரு சில பொருட்கள் அல்லது சேவைகள் பட்டியலில் . இந்த உங்கள் தயாரிப்புகள் அதே இருந்தால், அவற்றை சேர்க்க வேண்டாம் ."
+List items that form the package.,தொகுப்பு அமைக்க என்று பட்டியல் உருப்படிகள்.
+List of holidays.,விடுமுறை பட்டியல்.
+List of users who can edit a particular Note,ஒரு குறிப்பிட்ட குறிப்பு திருத்த முடியும் பயனர் பட்டியல்
+List this Item in multiple groups on the website.,வலைத்தளத்தில் பல குழுக்கள் இந்த உருப்படி பட்டியல்.
+"List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start.","நீங்கள் உங்கள் வாடிக்கையாளர்களுக்கு விற்க என்று உங்கள் தயாரிப்புகள் அல்லது சேவைகளை பட்டியல் . நீங்கள் தொடங்கும் போது பொருள் குழு , அளவிட மற்றும் பிற பண்புகள் அலகு பார்க்க உறுதி ."
+"List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later.","உங்கள் வரி தலைகள் ( 3 வரை) (எ.கா. பெறுமதிசேர் வரி, உற்பத்தி ) மற்றும் அவற்றின் தரத்தை விகிதங்கள் பட்டியல் . இந்த ஒரு நிலையான டெம்ப்ளேட் உருவாக்க வேண்டும் , நீங்கள் திருத்த இன்னும் பின்னர் சேர்க்க முடியும் ."
+Live Chat,அரட்டை வாழ
+Loading...,ஏற்றுகிறது ...
+"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","கண்காணிப்பு முறை, பில்லிங் பயன்படுத்தலாம் என்று பணிகள் எதிராக செய்த நிகழ்த்த செயல்பாடுகள் பதிவு."
+Login Id,அடையாளம் செய்
+Login with your new User ID,உங்கள் புதிய பயனர் ஐடி காண்க
+Logo,லோகோ
+Logo and Letter Heads,லோகோ மற்றும் லெடர்ஹெட்ஸ்
+Lost,லாஸ்ட்
+Lost Reason,இழந்த காரணம்
+Low,குறைந்த
+Lower Income,குறைந்த வருமானம்
+MIS Control,MIS கட்டுப்பாடு
+MREQ-,MREQ-
+MTN Details,MTN விவரம்
+Mail Password,மின்னஞ்சல் கடவுச்சொல்
+Mail Port,அஞ்சல் துறை
+Main Reports,முக்கிய செய்திகள்
+Maintain Same Rate Throughout Sales Cycle,விற்பனை சைக்கிள் முழுவதும் அதே விகிதத்தில் பராமரிக்க
+Maintain same rate throughout purchase cycle,கொள்முதல் சுழற்சி முழுவதும் ஒரே விகிதத்தை பராமரிக்க
+Maintenance,பராமரிப்பு
+Maintenance Date,பராமரிப்பு தேதி
+Maintenance Details,பராமரிப்பு விவரம்
+Maintenance Schedule,பராமரிப்பு அட்டவணை
+Maintenance Schedule Detail,பராமரிப்பு அட்டவணை விரிவாக
+Maintenance Schedule Item,பராமரிப்பு அட்டவணை உருப்படி
+Maintenance Schedules,பராமரிப்பு அட்டவணை
+Maintenance Status,பராமரிப்பு நிலைமை
+Maintenance Time,பராமரிப்பு நேரம்
+Maintenance Type,பராமரிப்பு அமைப்பு
+Maintenance Visit,பராமரிப்பு வருகை
+Maintenance Visit Purpose,பராமரிப்பு சென்று நோக்கம்
+Major/Optional Subjects,முக்கிய / விருப்ப பாடங்கள்
+Make ,
+Make Accounting Entry For Every Stock Movement,"ஒவ்வொரு பங்கு இயக்கம் , பைனான்ஸ் உள்ளீடு செய்ய"
+Make Bank Voucher,வங்கி வவுச்சர் செய்ய
+Make Credit Note,கடன் நினைவில் கொள்ளுங்கள்
+Make Debit Note,பற்று நினைவில் கொள்ளுங்கள்
+Make Delivery,விநியோகம் செய்ய
+Make Difference Entry,வித்தியாசம் நுழைவு செய்ய
+Make Excise Invoice,கலால் விலைப்பட்டியல் செய்ய
+Make Installation Note,நிறுவல் குறிப்பு கொள்ளுங்கள்
+Make Invoice,விலைப்பட்டியல் செய்ய
+Make Maint. Schedule,Maint கொள்ளுங்கள். அட்டவணை
+Make Maint. Visit,Maint கொள்ளுங்கள். வருகை
+Make Maintenance Visit,பராமரிப்பு விஜயம் செய்ய
+Make Packing Slip,ஸ்லிப் பொதி செய்ய
+Make Payment Entry,கொடுப்பனவு உள்ளீடு செய்ய
+Make Purchase Invoice,கொள்முதல் விலைப்பட்டியல் செய்ய
+Make Purchase Order,செய்ய கொள்முதல் ஆணை
+Make Purchase Receipt,கொள்முதல் ரசீது செய்ய
+Make Salary Slip,சம்பள செய்ய
+Make Salary Structure,சம்பள கட்டமைப்பு செய்ய
+Make Sales Invoice,கவிஞருக்கு செய்ய
+Make Sales Order,செய்ய விற்பனை ஆணை
+Make Supplier Quotation,வழங்குபவர் மேற்கோள் செய்ய
+Male,ஆண்
+Manage 3rd Party Backups,3 வது கட்சி மறுபிரதிகளை நிர்வகி
+Manage cost of operations,நடவடிக்கைகள் செலவு மேலாண்மை
+Manage exchange rates for currency conversion,நாணய மாற்ற மாற்று விகிதங்கள் நிர்வகி
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",கட்டாய என்றால் பங்கு பொருள் &quot;ஆமாம்&quot; என்று. மேலும் ஒதுக்கப்பட்ட அளவு விற்பனை ஆர்டர் இருந்து அமைக்க அமைந்துள்ள இயல்புநிலை கிடங்கு.
+Manufacture against Sales Order,விற்பனை அமைப்புக்கு எதிராக உற்பத்தி
+Manufacture/Repack,உற்பத்தி / Repack
+Manufactured Qty,உற்பத்தி அளவு
+Manufactured quantity will be updated in this warehouse,உற்பத்தி அளவு இந்த கிடங்கில் புதுப்பிக்கப்படும்
+Manufacturer,உற்பத்தியாளர்
+Manufacturer Part Number,தயாரிப்பாளர் பாகம் எண்
+Manufacturing,உருவாக்கம்
+Manufacturing Quantity,உற்பத்தி அளவு
+Manufacturing Quantity is mandatory,உற்பத்தி அளவு கட்டாய ஆகிறது
+Margin,விளிம்பு
+Marital Status,திருமண தகுதி
+Market Segment,சந்தை பிரிவு
+Married,திருமணம்
+Mass Mailing,வெகுஜன அஞ்சல்
+Master Data,முதன்மை தரவு
+Master Name,மாஸ்டர் பெயர்
+Master Name is mandatory if account type is Warehouse,கணக்கு வகை கிடங்கு என்றால் மாஸ்டர் பெயர் கட்டாய ஆகிறது
+Master Type,முதன்மை வகை
+Masters,முதுநிலை
+Match non-linked Invoices and Payments.,அல்லாத தொடர்புடைய பற்றுச்சீட்டுகள் மற்றும் கட்டணங்கள் போட்டி.
+Material Issue,பொருள் வழங்கல்
+Material Receipt,பொருள் ரசீது
+Material Request,பொருள் கோரிக்கை
+Material Request Detail No,பொருள் கோரிக்கை விரிவாக இல்லை
+Material Request For Warehouse,கிடங்கு பொருள் கோரிக்கை
+Material Request Item,பொருள் கோரிக்கை பொருள்
+Material Request Items,பொருள் கோரிக்கை பொருட்கள்
+Material Request No,பொருள் வேண்டுகோள் இல்லை
+Material Request Type,பொருள் கோரிக்கை வகை
+Material Request used to make this Stock Entry,இந்த பங்கு நுழைவு செய்ய பயன்படுத்தப்படும் பொருள் கோரிக்கை
+Material Requests for which Supplier Quotations are not created,வழங்குபவர் மேற்கோள்கள் உருவாக்கப்பட்ட எந்த பொருள் கோரிக்கைகள்
+Material Requirement,பொருள் தேவை
+Material Transfer,பொருள் மாற்றம்
+Materials,மூலப்பொருள்கள்
+Materials Required (Exploded),பொருட்கள் தேவை (விரிவான)
+Max 500 rows only.,மட்டுமே அதிகபட்சம் 500 வரிசைகள்.
+Max Days Leave Allowed,மேக்ஸ் நாட்கள் அனுமதிக்கப்பட்ட விடவும்
+Max Discount (%),மேக்ஸ் தள்ளுபடி (%)
+Max Returnable Qty,மேக்ஸ் திருப்பி அளவு
+Medium,ஊடகம்
+"Merging is only possible if following \
+					properties are same in both records.
+					Group or Ledger, Debit or Credit, Is PL Account",
+Message,செய்தி
+Message Parameter,செய்தி அளவுரு
+Message Sent,செய்தி அனுப்பப்பட்டது
+Messages,செய்திகள்
+Messages greater than 160 characters will be split into multiple messages,160 தன்மையை விட செய்தியை பல mesage கொண்டு split
+Middle Income,நடுத்தர வருமானம்
+Milestone,மைல் கல்
+Milestone Date,மைல்கல் தேதி
+Milestones,மைல்கற்கள்
+Milestones will be added as Events in the Calendar,மைல்கற்கள் அட்டவணை நிகழ்வுகள் சேர்த்துள்ளார்
+Min Order Qty,Min ஆர்டர் அளவு
+Minimum Order Qty,குறைந்தபட்ச ஆணை அளவு
+Misc Details,மற்றவை விவரம்
+Miscellaneous,நானாவிதமான
+Miscelleneous,Miscelleneous
+Mobile No,இல்லை மொபைல்
+Mobile No.,மொபைல் எண்
+Mode of Payment,கட்டணம் செலுத்தும் முறை
+Modern,நவீன
+Modified Amount,மாற்றப்பட்ட தொகை
+Monday,திங்கட்கிழமை
+Month,மாதம்
+Monthly,மாதாந்தர
+Monthly Attendance Sheet,மாதாந்திர பங்கேற்கும் தாள்
+Monthly Earning & Deduction,மாத வருமானம் &amp; பொருத்தியறிதல்
+Monthly Salary Register,மாத சம்பளம் பதிவு
+Monthly salary statement.,மாத சம்பளம் அறிக்கை.
+Monthly salary template.,மாத சம்பளம் வார்ப்புரு.
+More Details,மேலும் விபரங்கள்
+More Info,மேலும் தகவல்
+Moving Average,சராசரி நகரும்
+Moving Average Rate,சராசரி விகிதம் நகரும்
+Mr,திரு
+Ms,Ms
+Multiple Item prices.,பல பொருள் விலை .
+Multiple Price list.,பல விலை பட்டியல்.
+Must be Whole Number,முழு எண் இருக்க வேண்டும்
+My Settings,என் அமைப்புகள்
+NL-,NL-
+Name,பெயர்
+Name and Description,பெயர் மற்றும் விவரம்
+Name and Employee ID,பெயர் மற்றும் பணியாளர் ஐடி
+Name is required,பெயர் தேவை
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers,","புதிய கணக்கு பெயர். குறிப்பு: வாடிக்கையாளர்கள் மற்றும் வழங்குநர்கள் கணக்குகள் உருவாக்க வேண்டாம் ,"
+Name of person or organization that this address belongs to.,நபர் அல்லது இந்த முகவரியை சொந்தமானது என்று நிறுவனத்தின் பெயர்.
+Name of the Budget Distribution,பட்ஜெட் விநியோகம் பெயர்
+Naming Series,தொடர் பெயரிடும்
+Negative balance is not allowed for account ,எதிர்மறை இருப்பு கணக்கை அனுமதி இல்லை
+Net Pay,நிகர சம்பளம்
+Net Pay (in words) will be visible once you save the Salary Slip.,நீங்கள் சம்பளம் ஸ்லிப் சேமிக்க முறை நிகர வருவாய் (வார்த்தைகளில்) காண முடியும்.
+Net Total,நிகர மொத்தம்
+Net Total (Company Currency),நிகர மொத்தம் (நிறுவனத்தின் கரன்சி)
+Net Weight,நிகர எடை
+Net Weight UOM,நிகர எடை மொறட்டுவ பல்கலைகழகம்
+Net Weight of each Item,ஒவ்வொரு பொருள் நிகர எடை
+Net pay can not be negative,"நிகர ஊதியம், எதிர்மறையாக இருக்க முடியாது"
+Never,இல்லை
+New,புதிய
+New ,
+New Account,புதிய கணக்கு
+New Account Name,புதிய கணக்கு பெயர்
+New BOM,புதிய BOM
+New Communications,புதிய தகவல்
+New Company,புதிய நிறுவனம்
+New Cost Center,புதிய செலவு மையம்
+New Cost Center Name,புதிய செலவு மையம் பெயர்
+New Delivery Notes,புதிய டெலிவரி குறிப்புகள்
+New Enquiries,புதிய விவரம் கேள்
+New Leads,புதிய அறிதல்
+New Leave Application,புதிய விடுப்பு விண்ணப்பம்
+New Leaves Allocated,புதிய ஒதுக்கப்பட்ட இலைகள்
+New Leaves Allocated (In Days),புதிய இலைகள் (டேஸ்) ஒதுக்கப்பட்ட
+New Material Requests,புதிய பொருள் கோரிக்கைகள்
+New Projects,புதிய திட்டங்கள்
+New Purchase Orders,புதிய கொள்முதல் ஆணை
+New Purchase Receipts,புதிய கொள்முதல் ரசீதுகள்
+New Quotations,புதிய மேற்கோள்கள்
+New Sales Orders,புதிய விற்பனை ஆணைகள்
+"New Serial No cannot have Warehouse. Warehouse must be \
+				set by Stock Entry or Purchase Receipt",
+New Stock Entries,புதிய பங்கு பதிவுகள்
+New Stock UOM,புதிய பங்கு மொறட்டுவ பல்கலைகழகம்
+New Supplier Quotations,புதிய சப்ளையர் மேற்கோள்கள்
+New Support Tickets,புதிய ஆதரவு டிக்கெட்
+New Workplace,புதிய பணியிடத்தை
+Newsletter,செய்தி மடல்
+Newsletter Content,செய்திமடல் உள்ளடக்கம்
+Newsletter Status,செய்திமடல் நிலைமை
+"Newsletters to contacts, leads.","தொடர்புகள் செய்திமடல்கள், வழிவகுக்கிறது."
+Next Communcation On,அடுத்த Communcation இல்
+Next Contact By,அடுத்த தொடர்பு
+Next Contact Date,அடுத்த தொடர்பு தேதி
+Next Date,அடுத்த நாள்
+Next email will be sent on:,அடுத்த மின்னஞ்சலில் அனுப்பி வைக்கப்படும்:
+No,இல்லை
+No Action,இல்லை அதிரடி
+No Customer Accounts found.,இல்லை வாடிக்கையாளர் கணக்குகள் எதுவும் இல்லை.
+"No Customer or Supplier Accounts found. Accounts are identified based on \
+			'Master Type' value in account record.",
+No Item found with ,
+No Items to Pack,வை எந்த உருப்படிகள்
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.,குற்றம் விடவும். ஒதுக்க ஒரு பயனர் செல்லுங்கள் என்று பாத்திரம் &#39;சர்க்கார் தரப்பில் சாட்சி விட்டு&#39; தயவு செய்து.
+No Permission,இல்லை அனுமதி
+No Production Order created.,எந்த உற்பத்தி ஆர்டர் உருவாக்கப்பட்டது.
+No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,இல்லை வழங்குபவர் கணக்குகள் எதுவும் இல்லை. வழங்குபவர் கணக்கு கணக்கு பதிவு ' மாஸ்டர் வகை ' மதிப்பு அடிப்படையில் அடையாளம்.
+No accounting entries for following warehouses,கிடங்குகள் தொடர்ந்து இல்லை கணக்கியல் உள்ளீடுகள்
+No addresses created,உருவாக்கப்பட்ட முகவரிகள்
+No contacts created,உருவாக்கப்பட்ட எந்த தொடர்பும் இல்லை
+No default BOM exists for item: ,இயல்பான BOM உருப்படியை உள்ளது:
+No of Requested SMS,கோரப்பட்ட எஸ்எம்எஸ் இல்லை
+No of Sent SMS,அனுப்பிய எஸ்எம்எஸ் இல்லை
+No of Visits,வருகைகள் எண்ணிக்கை
+No record found,எந்த பதிவும் இல்லை
+No salary slip found for month: ,மாதம் இல்லை சம்பளம் சீட்டு:
+Not,இல்லை
+Not Active,செயலில் இல்லை
+Not Applicable,பொருந்தாது
+Not Available,இல்லை
+Not Billed,கட்டணம்
+Not Delivered,அனுப்பப்பட்டது
+Not Set,அமை
+Not allowed entry in Warehouse,கிடங்கு அனுமதி இல்லை நுழைவு
+Note,குறிப்பு
+Note User,குறிப்பு பயனர்
+Note is a free page where users can share documents / notes,குறிப்பு செய்த ஆவணங்களை / குறிப்புகள் பகிர்ந்து கொள்ள ஒரு இலவச பக்கம் உள்ளது
+Note:,குறிப்பு:
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.","குறிப்பு: காப்புப்படிகள் மற்றும் கோப்புகளை டிராப்பாக்ஸ் இருந்து நீக்க முடியாது, நீங்கள் கைமுறையாக அவற்றை நீக்க வேண்டும்."
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.","குறிப்பு: காப்புப்படிகள் மற்றும் கோப்புகள் Google இயக்ககத்தில் இருந்து நீக்க முடியாது, நீங்கள் கைமுறையாக அவற்றை நீக்க வேண்டும்."
+Note: Email will not be sent to disabled users,குறிப்பு: மின்னஞ்சல் ஊனமுற்ற செய்த அனுப்ப முடியாது
+Notes,குறிப்புகள்
+Notes:,குறிப்புகள்:
+Nothing to request,கேட்டு எதுவும்
+Notice (days),அறிவிப்பு ( நாட்கள்)
+Notification Control,அறிவிப்பு கட்டுப்பாடு
+Notification Email Address,அறிவிப்பு மின்னஞ்சல் முகவரி
+Notify by Email on creation of automatic Material Request,தானியங்கி பொருள் கோரிக்கை உருவாக்கம் மின்னஞ்சல் மூலம் தெரிவிக்க
+Number Format,எண் வடிவமைப்பு
+O+,O +
+O-,O-
+OPPT,OPPT
+Offer Date,ஆஃபர் தேதி
+Office,அலுவலகம்
+Old Parent,பழைய பெற்றோர்
+On,மீது
+On Net Total,நிகர மொத்தம் உள்ள
+On Previous Row Amount,முந்தைய வரிசை தொகை
+On Previous Row Total,முந்தைய வரிசை மொத்த மீது
+"Only Serial Nos with status ""Available"" can be delivered.","நிலை மட்டும் சீரியல் இலக்கங்கள் "" கிடைக்கும் "" வழங்க முடியும் ."
+Only Stock Items are allowed for Stock Entry,மட்டுமே பங்கு விடயங்கள் பங்கு நுழைவு அனுமதி
+Only leaf nodes are allowed in transaction,ஒரே இலை முனைகள் பரிமாற்றத்தில் அனுமதிக்கப்படுகிறது
+Open,திறந்த
+Open Production Orders,திறந்த உற்பத்தி ஆணைகள்
+Open Tickets,திறந்த டிக்கெட்
+Opening,தொடக்க
+Opening Accounting Entries,கணக்கியல் உள்ளீடுகள் திறந்து
+Opening Accounts and Stock,திறந்து கணக்குகள் மற்றும் பங்கு
+Opening Date,தேதி திறப்பு
+Opening Entry,நுழைவு திறந்து
+Opening Qty,திறந்து அளவு
+Opening Time,நேரம் திறந்து
+Opening Value,திறந்து மதிப்பு
+Opening for a Job.,ஒரு வேலை திறப்பு.
+Operating Cost,இயக்க செலவு
+Operation Description,அறுவை சிகிச்சை விளக்கம்
+Operation No,அறுவை சிகிச்சை இல்லை
+Operation Time (mins),அறுவை நேரம் (நிமிடங்கள்)
+Operations,நடவடிக்கைகள்
+Opportunity,சந்தர்ப்பம்
+Opportunity Date,வாய்ப்பு தேதி
+Opportunity From,வாய்ப்பு வரம்பு
+Opportunity Item,வாய்ப்பு தகவல்கள்
+Opportunity Items,வாய்ப்பு உருப்படிகள்
+Opportunity Lost,வாய்ப்பை இழந்த
+Opportunity Type,வாய்ப்பு வகை
+Optional. This setting will be used to filter in various transactions.,விருப்ப . இந்த அமைப்பு பல்வேறு நடவடிக்கைகளில் வடிகட்ட பயன்படும்.
+Order Type,வரிசை வகை
+Ordered,ஆணையிட்டார்
+Ordered Items To Be Billed,கணக்கில் வேண்டும் உத்தரவிட்டது உருப்படிகள்
+Ordered Items To Be Delivered,விநியோகிப்பதற்காக உத்தரவிட்டார் உருப்படிகள்
+Ordered Qty,அளவு உத்தரவிட்டார்
+"Ordered Qty: Quantity ordered for purchase, but not received.","அளவு உத்தரவிட்டார்: அளவு வாங்குவதற்கு உத்தரவிட்டார் , ஆனால் பெறவில்லை ."
+Ordered Quantity,உத்தரவிட்டார் அளவு
+Orders released for production.,ஆணைகள் உற்பத்தி வெளியிடப்பட்டது.
+Organization,அமைப்பு
+Organization Name,நிறுவன பெயர்
+Organization Profile,அமைப்பு விவரம்
+Other,வேறு
+Other Details,மற்ற விவரங்கள்
+Out Qty,அளவு அவுட்
+Out Value,மதிப்பு அவுட்
+Out of AMC,AMC வெளியே
+Out of Warranty,உத்தரவாதத்தை வெளியே
+Outgoing,வெளிச்செல்லும்
+Outgoing Email Settings,வெளிச்செல்லும் மின்னஞ்சல் அமைப்புகள்
+Outgoing Mail Server,வெளிச்செல்லும் அஞ்சல் சேவையகம்
+Outgoing Mails,வெளிச்செல்லும் அஞ்சல்
+Outstanding Amount,சிறந்த தொகை
+Outstanding for Voucher ,வவுச்சர் மிகச்சிறந்த
+Overhead,அவசியமான
+Overheads,செலவுகள்
+Overlapping Conditions found between,ஒன்றுடன் ஒன்று நிபந்தனைகளும் இடையே காணப்படும்
+Overview,கண்ணோட்டம்
+Owned,சொந்தமானது
+Owner,சொந்தக்காரர்
+PAN Number,நிரந்தர கணக்கு எண் எண்
+PF No.,PF இல்லை
+PF Number,PF எண்
+PI/2011/,PI/2011 /
+PIN,PIN
+PL or BS,PL அல்லது BS
+PO,அஞ்சல்
+PO Date,அஞ்சல் தேதி
+PO No,அஞ்சல் இல்லை
+POP3 Mail Server,POP3 அஞ்சல் சேவையகம்
+POP3 Mail Settings,POP3 அஞ்சல் அமைப்புகள்
+POP3 mail server (e.g. pop.gmail.com),POP3 அஞ்சல் சேவையகம் (எ.கா. pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),POP3 சேவையகத்திலிருந்து எ.கா. (pop.gmail.com)
+POS Setting,பிஓஎஸ் அமைக்கிறது
+POS View,பிஓஎஸ் பார்வையிடு
+PR Detail,PR விரிவாக
+PR Posting Date,பொது தகவல்களுக்கு தேதி
+PRO,PRO
+PS,சோசலிஸ்ட் கட்சி
+Package Item Details,தொகுப்பு பொருள் விவரம்
+Package Items,தொகுப்பு உருப்படிகள்
+Package Weight Details,தொகுப்பு எடை விவரம்
+Packed Item,டெலிவரி குறிப்பு தடைக்காப்பு பொருள்
+Packing Details,விவரம் பொதி
+Packing Detials,பொதி Detials
+Packing List,பட்டியல் பொதி
+Packing Slip,ஸ்லிப் பொதி
+Packing Slip Item,ஸ்லிப் பொருள் பொதி
+Packing Slip Items,ஸ்லிப் பொருட்களை பொதி
+Packing Slip(s) Cancelled,பொதி ஸ்லிப் (கள்) ரத்து
+Page Break,பக்கம் பிரேக்
+Page Name,பக்கம் பெயர்
+Paid,பணம்
+Paid Amount,பணம் தொகை
+Parameter,அளவுரு
+Parent Account,பெற்றோர் கணக்கு
+Parent Cost Center,பெற்றோர் செலவு மையம்
+Parent Customer Group,பெற்றோர் வாடிக்கையாளர் பிரிவு
+Parent Detail docname,பெற்றோர் விரிவாக docname
+Parent Item,பெற்றோர் பொருள்
+Parent Item Group,பெற்றோர் பொருள் பிரிவு
+Parent Sales Person,பெற்றோர் விற்பனை நபர்
+Parent Territory,பெற்றோர் மண்டலம்
+Parenttype,Parenttype
+Partially Billed,பகுதி கூறப்படுவது
+Partially Completed,ஓரளவிற்கு பூர்த்தி
+Partially Delivered,பகுதியளவு வழங்கப்படுகிறது
+Partly Billed,இதற்கு கட்டணம்
+Partly Delivered,இதற்கு அனுப்பப்பட்டது
+Partner Target Detail,வரன்வாழ்க்கை துணை இலக்கு விரிவாக
+Partner Type,வரன்வாழ்க்கை துணை வகை
+Partner's Website,கூட்டாளியின் இணையத்தளம்
+Passive,மந்தமான
+Passport Number,பாஸ்போர்ட் எண்
+Password,கடவுச்சொல்
+Pay To / Recd From,வரம்பு / Recd செய்ய பணம்
+Payables,Payables
+Payables Group,Payables குழு
+Payment Days,கட்டணம் நாட்கள்
+Payment Due Date,கொடுப்பனவு காரணமாக தேதி
+Payment Entries,பணம் பதிவுகள்
+"Payment Entry has been modified after you pulled it. 
+			Please pull it again.",
+Payment Period Based On Invoice Date,விலைப்பட்டியல் தேதியின் அடிப்படையில் கொடுப்பனவு காலம்
+Payment Reconciliation,பணம் நல்லிணக்க
+Payment Type,கொடுப்பனவு வகை
+Payment of salary for the month: ,
+Payment to Invoice Matching Tool,விலைப்பட்டியல் பொருந்தும் கருவி பணம்
+Payment to Invoice Matching Tool Detail,விலைப்பட்டியல் பொருந்தும் கருவி விரிவாக பணம்
+Payments,பணம்
+Payments Made,பணம் மேட்
+Payments Received,பணம் பெற்ற
+Payments made during the digest period,தொகுப்பு காலத்தில் செலுத்தப்பட்ட கட்டணம்
+Payments received during the digest period,பணம் தொகுப்பு காலத்தில் பெற்றார்
+Payroll Settings,சம்பளப்பட்டியல் அமைப்புகள்
+Payroll Setup,ஊதிய அமைப்பு
+Pending,முடிவுபெறாத
+Pending Amount,நிலுவையில் தொகை
+Pending Review,விமர்சனம் நிலுவையில்
+Pending SO Items For Purchase Request,கொள்முதல் கோரிக்கை நிலுவையில் எனவே விடயங்கள்
+Percent Complete,முழுமையான சதவீதம்
+Percentage Allocation,சதவீத ஒதுக்கீடு
+Percentage Allocation should be equal to ,சதவீத ஒதுக்கீடு சமமாக இருக்க வேண்டும்
+Percentage variation in quantity to be allowed while receiving or delivering this item.,இந்த உருப்படியை பெறும் அல்லது வழங்கும் போது அளவு சதவீதம் மாறுபாடு அனுமதிக்கப்படுகிறது வேண்டும்.
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,நீங்கள் அளவு எதிராக இன்னும் பெற அல்லது வழங்க அனுமதிக்கப்படுகிறது சதவீதம் உத்தரவிட்டது. எடுத்துக்காட்டாக: நீங்கள் 100 அலகுகள் உத்தரவிட்டார் என்றால். உங்கள் அலவன்ஸ் 10% நீங்கள் 110 அலகுகள் பெற அனுமதிக்கப்படும்.
+Performance appraisal.,செயல்திறன் மதிப்பிடுதல்.
+Period,காலம்
+Period Closing Voucher,காலம் முடிவுறும் வவுச்சர்
+Periodicity,வட்டம்
+Permanent Address,நிரந்தர முகவரி
+Permanent Address Is,நிரந்தர முகவரி
+Permission,உத்தரவு
+Permission Manager,அனுமதி மேலாளர்
+Personal,தனிப்பட்ட
+Personal Details,தனிப்பட்ட விவரங்கள்
+Personal Email,தனிப்பட்ட மின்னஞ்சல்
+Phone,தொலைபேசி
+Phone No,இல்லை போன்
+Phone No.,தொலைபேசி எண்
+Pincode,ப ன்ேகா
+Place of Issue,இந்த இடத்தில்
+Plan for maintenance visits.,பராமரிப்பு வருகைகள் திட்டம்.
+Planned Qty,திட்டமிட்ட அளவு
+"Planned Qty: Quantity, for which, Production Order has been raised,","திட்டமிட்ட அளவு: அளவு , எந்த , உற்பத்தி ஆர்டர் எழுப்பினார் ,"
+Planned Quantity,திட்டமிட்ட அளவு
+Plant,தாவரம்
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,இது அனைத்து கணக்கு தலைவர்கள் என்று பின்னொட்டு என சேர்க்கப்படும் என ஒழுங்காக சுருக்கமான அல்லது குறுகிய பெயர் உள்ளிடுக.
+Please Select Company under which you want to create account head,நீங்கள் கணக்கு தலையில் உருவாக்க வேண்டும் கீழ் நிறுவனத்தின் தேர்வு செய்க
+Please check,சரிபார்க்கவும்
+Please create new account from Chart of Accounts.,கணக்கு பட்டியலில் இருந்து புதிய கணக்கை உருவாக்கு .
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,வாடிக்கையாளர்கள் மற்றும் சப்ளையர்கள் கணக்கு ( துறைகளை ) உருவாக்க வேண்டாம். அவர்கள் வாடிக்கையாளர் / வழங்குபவர் முதுநிலை நேரடியாக உருவாக்கப்படுகின்றன .
+Please enter Company,நிறுவனத்தின் உள்ளிடவும்
+Please enter Cost Center,செலவு மையம் உள்ளிடவும்
+Please enter Default Unit of Measure,அளவுகளின் இயல்புநிலை பிரிவு உள்ளிடவும்
+Please enter Delivery Note No or Sales Invoice No to proceed,இல்லை அல்லது விற்பனை விலைப்பட்டியல் இல்லை தொடர டெலிவரி குறிப்பு உள்ளிடவும்
+Please enter Employee Id of this sales parson,இந்த விற்பனை பார்சன் என்ற பணியாளர் Id உள்ளிடவும்
+Please enter Expense Account,செலவு கணக்கு உள்ளிடவும்
+Please enter Item Code to get batch no,எந்த தொகுதி கிடைக்கும் பொருள் கோட் உள்ளிடவும்
+Please enter Item Code.,பொருள் கோட் உள்ளிடவும்.
+Please enter Item first,முதல் பொருள் உள்ளிடவும்
+Please enter Master Name once the account is created.,கணக்கு உருவாக்கப்பட்டதும் மாஸ்டர் பெயர் உள்ளிடவும்.
+Please enter Production Item first,முதல் உற்பத்தி பொருள் உள்ளிடவும்
+Please enter Purchase Receipt No to proceed,தொடர இல்லை கொள்முதல் ரசீது உள்ளிடவும்
+Please enter Reserved Warehouse for item ,உருப்படியை முன்பதிவு கிடங்கு உள்ளிடவும்
+Please enter Start Date and End Date,தொடக்க தேதி மற்றும் தேதி உள்ளிடவும்
+Please enter Warehouse for which Material Request will be raised,பொருள் கோரிக்கை எழுப்பப்படும் எந்த கிடங்கு உள்ளிடவும்
+"Please enter account group under which account \
+					for warehouse ",
+Please enter company first,முதல் நிறுவனம் உள்ளிடவும்
+Please enter company name first,முதல் நிறுவனத்தின் பெயரை உள்ளிடுக
+Please enter sales order in the above table,மேலே உள்ள அட்டவணையில் விற்பனை பொருட்டு உள்ளிடவும்
+Please install dropbox python module,டிரா பாக்ஸ் பைதான் தொகுதி நிறுவவும்
+Please mention default value for ',இயல்புநிலை மதிப்பு குறிப்பிட தயவு செய்து &#39;
+Please reduce qty.,அளவு குறைக்க வேண்டும்.
+Please save the Newsletter before sending.,அனுப்புவதற்கு முன் செய்தி காப்பாற்றுங்கள்.
+Please save the document before generating maintenance schedule,"பராமரிப்பு அட்டவணை உருவாக்கும் முன் ஆவணத்தை சேமிக்க , தயவு செய்து"
+Please select Account first,முதல் கணக்கு தேர்வு செய்க
+Please select Bank Account,வங்கி கணக்கு தேர்ந்தெடுக்கவும்
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,நீங்கள் முந்தைய நிதி ஆண்டின் இருப்புநிலை இந்த நிதி ஆண்டு விட்டு சேர்க்க விரும்பினால் முன் எடுத்து கொள்ளவும்
+Please select Category first,முதல் வகையை தேர்ந்தெடுக்கவும்
+Please select Charge Type first,பொறுப்பு வகை முதல் தேர்வு செய்க
+Please select Date on which you want to run the report,நீங்கள் அறிக்கை ரன் தெரிய வேண்டிய தேதி தேர்ந்தெடுக்கவும்
+Please select Price List,விலை பட்டியல் தேர்ந்தெடுக்கவும்
+Please select a,தேர்ந்தெடுக்கவும் ஒரு
+Please select a csv file,ஒரு கோப்பை தேர்ந்தெடுக்கவும்
+Please select a service item or change the order type to Sales.,ஒரு சேவை உருப்படியை தேர்ந்தெடுக்கவும் அல்லது விற்பனை செய்ய வகை மாற்றம் செய்யுங்கள்.
+Please select a sub-contracted item or do not sub-contract the transaction.,ஒரு துணை ஒப்பந்த உருப்படியை தேர்ந்தெடுக்கவும் அல்லது துணை ஒப்பந்தம் பரிவர்த்தனை வேண்டாம்.
+Please select a valid csv file with data.,தரவு சரியான கோப்பை தேர்ந்தெடுக்கவும்.
+"Please select an ""Image"" first","முதல் ஒரு ""படம்"" தேர்வு செய்க"
+Please select month and year,மாதம் மற்றும் ஆண்டு தேர்ந்தெடுக்கவும்
+Please select options and click on Create,"விருப்பங்களை தேர்ந்தெடுத்து உருவாக்கு கிளிக் செய்து,"
+Please select the document type first,முதல் ஆவணம் வகையை தேர்ந்தெடுக்கவும்
+Please select: ,தேர்ந்தெடுக்கவும்:
+Please set Dropbox access keys in,ல் டிராப்பாக்ஸ் அணுகல் விசைகள் அமைக்கவும்
+Please set Google Drive access keys in,Google Drive ஐ அணுகல் விசைகள் அமைக்க தயவு செய்து
+Please setup Employee Naming System in Human Resource > HR Settings,மனித வள உள்ள அமைப்பு பணியாளர் பெயரிடுதல் கணினி தயவு செய்து&gt; அலுவலக அமைப்புகள்
+Please setup your chart of accounts before you start Accounting Entries,நீங்கள் கணக்கியல் உள்ளீடுகள் தொடங்கும் முன் அமைப்பு உங்கள் மீது கணக்குகளின் அட்டவணை ப்ளீஸ்
+Please specify,குறிப்பிடவும்
+Please specify Company,நிறுவனத்தின் குறிப்பிடவும்
+Please specify Company to proceed,நிறுவனத்தின் தொடர குறிப்பிடவும்
+"Please specify Default Currency in Company Master \
+			and Global Defaults",
+Please specify a,குறிப்பிடவும் ஒரு
+Please specify a Price List which is valid for Territory,மண்டலம் செல்லுபடியாகும் ஒரு விலை பட்டியல் குறிப்பிடவும்
+Please specify a valid,சரியான குறிப்பிடவும்
+Please specify a valid 'From Case No.',&#39;வழக்கு எண் வரம்பு&#39; சரியான குறிப்பிடவும்
+Please specify currency in Company,நிறுவனத்தின் நாணய குறிப்பிடவும்
+Please submit to update Leave Balance.,விடுப்பு இருப்பு மேம்படுத்த சமர்ப்பிக்கவும்.
+Please write something,ஏதாவது எழுத கொள்ளவும்
+Please write something in subject and message!,பொருள் மற்றும் செய்தி ஏதாவது எழுத கொள்ளவும் !
+Plot,சதி
+Plot By,கதை
+Point of Sale,விற்பனை செய்யுமிடம்
+Point-of-Sale Setting,புள்ளி விற்பனை அமைக்கிறது
+Post Graduate,பட்டதாரி பதிவு
+Postal,தபால் அலுவலகம் சார்ந்த
+Posting Date,தேதி தகவல்களுக்கு
+Posting Date Time cannot be before,தகவல்களுக்கு தேதி நேரம் முன் இருக்க முடியாது
+Posting Time,நேரம் தகவல்களுக்கு
+Potential Sales Deal,சாத்தியமான விற்பனை ஒப்பந்தம்
+Potential opportunities for selling.,விற்பனை திறன் வாய்ப்புகள்.
+"Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3","ஃப்ளோட் துறைகள் ஐந்து துல்லிய (அளவு, தள்ளுபடிகள், சதவீதங்கள் போன்றவை). மிதவைகள் குறிப்பிட்ட தசமங்கள் வரை வட்டமானது. Default = 3"
+Preferred Billing Address,விருப்பமான பில்லிங் முகவரி
+Preferred Shipping Address,விருப்பமான கப்பல் முகவரி
+Prefix,முற்சேர்க்கை
+Present,தற்போது
+Prevdoc DocType,Prevdoc டாக்டைப்பின்
+Prevdoc Doctype,Prevdoc Doctype
+Previous Work Experience,முந்தைய பணி அனுபவம்
+Price List,விலை பட்டியல்
+Price List Currency,விலை பட்டியல் நாணயத்தின்
+Price List Exchange Rate,விலை பட்டியல் செலாவணி விகிதம்
+Price List Master,விலை பட்டியல் மாஸ்டர்
+Price List Name,விலை பட்டியல் பெயர்
+Price List Rate,விலை பட்டியல் விகிதம்
+Price List Rate (Company Currency),விலை பட்டியல் விகிதம் (நிறுவனத்தின் கரன்சி)
+Print,அச்சடி
+Print Format Style,அச்சு வடிவம் உடை
+Print Heading,தலைப்பு அச்சிட
+Print Without Amount,மொத்த தொகை இல்லாமல் அச்சிட
+Printing,அச்சடித்தல்
+Priority,முதன்மை
+Process Payroll,செயல்முறை சம்பளப்பட்டியல்
+Produced,உற்பத்தி
+Produced Quantity,உற்பத்தி அளவு
+Product Enquiry,தயாரிப்பு விசாரணை
+Production Order,உற்பத்தி ஆணை
+Production Order must be submitted,உத்தரவு சமர்ப்பிக்க வேண்டும்
+Production Order(s) created:\n\n,உத்தரவு (கள்) உருவாக்கப்பட்டது : \ n \ n
+Production Orders,தயாரிப்பு ஆணைகள்
+Production Orders in Progress,முன்னேற்றம் உற்பத்தி ஆணைகள்
+Production Plan Item,உற்பத்தி திட்டம் பொருள்
+Production Plan Items,உற்பத்தி திட்டம் உருப்படிகள்
+Production Plan Sales Order,உற்பத்தி திட்டம் விற்பனை ஆணை
+Production Plan Sales Orders,உற்பத்தி திட்டம் விற்பனை ஆணைகள்
+Production Planning (MRP),உற்பத்தி திட்டமிடல் (MRP)
+Production Planning Tool,உற்பத்தி திட்டமிடல் கருவி
+Products or Services You Buy,தயாரிப்புகள் அல்லது நீங்கள் வாங்க சேவைகள்
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","பொருட்கள் முன்னிருப்பு தேடல்கள் எடை வயது வாரியாக. மேலும் எடை வயதில், அதிக தயாரிப்பு பட்டியலில் தோன்றும்."
+Project,திட்டம்
+Project Costing,செயற் கைக்கோள் நிலாவிலிருந்து திட்டம்
+Project Details,திட்டம் விவரம்
+Project Milestone,திட்டம் மைல்கல்
+Project Milestones,திட்டம் மைல்கற்கள்
+Project Name,திட்டம் பெயர்
+Project Start Date,திட்ட தொடக்க தேதி
+Project Type,திட்ட வகை
+Project Value,திட்ட மதிப்பு
+Project activity / task.,திட்ட செயல்பாடு / பணி.
+Project master.,திட்டம் மாஸ்டர்.
+Project will get saved and will be searchable with project name given,திட்டம் சேமிக்க மற்றும் கொடுக்கப்பட்ட திட்டத்தின் பெயர் தேட முடியும்
+Project wise Stock Tracking,திட்டத்தின் வாரியாக ஸ்டாக் தடமறிதல்
+Projected,திட்டமிடப்பட்ட
+Projected Qty,திட்டமிட்டிருந்தது அளவு
+Projects,திட்டங்கள்
+Prompt for Email on Submission of,இந்த சமர்ப்பிக்கும் மீது மின்னஞ்சல் கேட்டு
+Provide email id registered in company,நிறுவனத்தின் பதிவு மின்னஞ்சல் ஐடி வழங்கும்
+Public,பொது
+Pull Payment Entries,பண பதிவுகள் இழுக்க
+Pull sales orders (pending to deliver) based on the above criteria,மேலே அடிப்படை அடிப்படையில் விற்பனை ஆணைகள் (வழங்க நிலுவையில்) இழுக்க
+Purchase,கொள்முதல்
+Purchase / Manufacture Details,கொள்முதல் / உற்பத்தி விவரம்
+Purchase Analytics,கொள்முதல் ஆய்வு
+Purchase Common,பொதுவான வாங்க
+Purchase Details,கொள்முதல் விவரம்
+Purchase Discounts,கொள்முதல் தள்ளுபடி
+Purchase In Transit,வரையிலான ட்ரான்ஸிட் அங்குலம் வாங்குவதற்கு
+Purchase Invoice,விலைப்பட்டியல் கொள்வனவு
+Purchase Invoice Advance,விலைப்பட்டியல் அட்வான்ஸ் வாங்குவதற்கு
+Purchase Invoice Advances,விலைப்பட்டியல் முன்னேற்றங்கள் வாங்க
+Purchase Invoice Item,விலைப்பட்டியல் பொருள் வாங்க
+Purchase Invoice Trends,விலைப்பட்டியல் போக்குகள் வாங்குவதற்கு
+Purchase Order,ஆர்டர் வாங்க
+Purchase Order Date,ஆர்டர் தேதி வாங்க
+Purchase Order Item,ஆர்டர் பொருள் வாங்க
+Purchase Order Item No,ஆர்டர் பொருள் இல்லை வாங்க
+Purchase Order Item Supplied,கொள்முதல் ஆணை பொருள் வழங்கியது
+Purchase Order Items,ஆணை பொருட்கள் வாங்க
+Purchase Order Items Supplied,கொள்முதல் ஆணை பொருட்களை வழங்கியது
+Purchase Order Items To Be Billed,"பில்லிங் செய்யப்படும் விதமே இருக்கவும் செய்ய வாங்குதல், ஆர்டர் உருப்படிகள்"
+Purchase Order Items To Be Received,"பெறப்பட்டுள்ள இருக்கவும் செய்ய வாங்குதல், ஆர்டர் உருப்படிகள்"
+Purchase Order Message,ஆர்டர் செய்தி வாங்க
+Purchase Order Required,தேவையான கொள்முதல் ஆணை
+Purchase Order Trends,ஆர்டர் போக்குகள் வாங்குவதற்கு
+Purchase Orders given to Suppliers.,விநியோகஸ்தர்கள் கொடுக்கப்பட்ட ஆணைகள் வாங்க.
+Purchase Receipt,ரசீது வாங்க
+Purchase Receipt Item,ரசீது பொருள் வாங்க
+Purchase Receipt Item Supplied,கொள்முதல் ரசீது பொருள் வழங்கியது
+Purchase Receipt Item Supplieds,ரசீது பொருள் Supplieds வாங்க
+Purchase Receipt Items,ரசீது பொருட்கள் வாங்க
+Purchase Receipt Message,ரசீது செய்தி வாங்க
+Purchase Receipt No,இல்லை சீட்டு வாங்க
+Purchase Receipt Required,கொள்முதல் ரசீது தேவை
+Purchase Receipt Trends,ரிசிப்ட் போக்குகள் வாங்குவதற்கு
+Purchase Register,பதிவு வாங்குவதற்கு
+Purchase Return,திரும்ப வாங்க
+Purchase Returned,வாங்க மீண்டும்
+Purchase Taxes and Charges,கொள்முதல் வரி மற்றும் கட்டணங்கள்
+Purchase Taxes and Charges Master,கொள்முதல் வரி மற்றும் கட்டணங்கள் மாஸ்டர்
+Purpose,நோக்கம்
+Purpose must be one of ,நோக்கம் ஒன்றாக இருக்க வேண்டும்
+QA Inspection,QA ஆய்வு
+QAI/11-12/,QAI/11-12 /
+QTN,QTN
+Qty,அளவு
+Qty Consumed Per Unit,அளவு அலகு ஒவ்வொரு உட்கொள்ளப்படுகிறது
+Qty To Manufacture,உற்பத்தி அளவு
+Qty as per Stock UOM,பங்கு மொறட்டுவ பல்கலைகழகம் படி அளவு
+Qty to Deliver,அடித்தளத்திருந்து அளவு
+Qty to Order,அளவு ஒழுங்கிற்கு
+Qty to Receive,மதுரையில் அளவு
+Qty to Transfer,இடமாற்றம் அளவு
+Qualification,தகுதி
+Quality,பண்பு
+Quality Inspection,தரமான ஆய்வு
+Quality Inspection Parameters,தரமான ஆய்வு அளவுருக்களை
+Quality Inspection Reading,தரமான ஆய்வு படித்தல்
+Quality Inspection Readings,தரமான ஆய்வு அளவீடுகளும்
+Quantity,அளவு
+Quantity Requested for Purchase,அளவு கொள்முதல் செய்ய கோரப்பட்ட
+Quantity and Rate,அளவு மற்றும் விகிதம்
+Quantity and Warehouse,அளவு மற்றும் சேமிப்பு கிடங்கு
+Quantity cannot be a fraction.,அளவு ஒரு பகுதியை இருக்க முடியாது.
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,உருப்படி அளவு மூலப்பொருட்களை கொடுக்கப்பட்ட அளவு இருந்து உற்பத்தி / repacking பின்னர் பெறப்படும்
+"Quantity should be equal to Manufacturing Quantity. To fetch items again, click on 'Get Items' button or update the Quantity manually.","அளவு உற்பத்தி அளவு சமமாக இருக்க வேண்டும் . மீண்டும் பொருட்களை பெற , 'கிடைக்கும் பொருட்கள் ' பொத்தானை கிளிக் செய்யவும் அல்லது கைமுறையாக அளவு மேம்படுத்த ."
+Quarter,காலாண்டு
+Quarterly,கால் ஆண்டுக்கு ஒரு முறை நிகழ்கிற
+Quick Help,விரைவு உதவி
+Quotation,மேற்கோள்
+Quotation Date,விலைப்பட்டியல் தேதி
+Quotation Item,மேற்கோள் பொருள்
+Quotation Items,மேற்கோள் உருப்படிகள்
+Quotation Lost Reason,மேற்கோள் காரணம் லாஸ்ட்
+Quotation Message,மேற்கோள் செய்தி
+Quotation Series,மேற்கோள் தொடர்
+Quotation To,என்று மேற்கோள்
+Quotation Trend,விலைக்குறியீட்டு டிரெண்டின்
+Quotation is cancelled.,மேற்கோள் ரத்து செய்யப்பட்டது.
+Quotations received from Suppliers.,மேற்கோள்கள் சப்ளையர்கள் இருந்து பெற்றார்.
+Quotes to Leads or Customers.,தாங்கியவர்கள் விளைவாக அல்லது வாடிக்கையாளர்களுக்கு மேற்கோள்.
+Raise Material Request when stock reaches re-order level,பங்கு மறு ஒழுங்கு நிலை அடையும் போது பொருள் கோரிக்கை எழுப்ப
+Raised By,எழுப்பப்பட்ட
+Raised By (Email),(மின்னஞ்சல்) மூலம் எழுப்பப்பட்ட
+Random,குறிப்பான நோக்கம் ஏதுமற்ற
+Range,எல்லை
+Rate,விலை
+Rate ,விலை
+Rate (Company Currency),விகிதம் (நிறுவனத்தின் கரன்சி)
+Rate Of Materials Based On,ஆனால் அடிப்படையில் பொருட்களின் விகிதம்
+Rate and Amount,விகிதம் மற்றும் தொகை
+Rate at which Customer Currency is converted to customer's base currency,விகிதம் இது வாடிக்கையாளர் நாணயத்தின் வாடிக்கையாளர் அடிப்படை நாணய மாற்றப்படும்
+Rate at which Price list currency is converted to company's base currency,விலை பட்டியல் நாணய நிறுவனத்தின் அடிப்படை நாணய மாற்றப்படும் விகிதத்தை
+Rate at which Price list currency is converted to customer's base currency,விலை பட்டியல் நாணய வாடிக்கையாளர் அடிப்படை நாணய மாற்றப்படும் விகிதத்தை
+Rate at which customer's currency is converted to company's base currency,விகிதம் இது வாடிக்கையாளர் நாணய நிறுவனத்தின் அடிப்படை நாணய மாற்றப்படும்
+Rate at which supplier's currency is converted to company's base currency,அளிப்பாளரின் நாணய நிறுவனத்தின் அடிப்படை நாணய மாற்றப்படும் விகிதத்தை
+Rate at which this tax is applied,இந்த வரி செலுத்தப்படுகிறது விகிதத்தில்
+Raw Material Item Code,மூலப்பொருட்களின் பொருள் குறியீடு
+Raw Materials Supplied,மூலப்பொருட்கள் வழங்கியது
+Raw Materials Supplied Cost,மூலப்பொருட்கள் விலை வழங்கியது
+Re-Order Level,மறு ஒழுங்கு நிலை
+Re-Order Qty,மறு ஆர்டர் அளவு
+Re-order,மறு உத்தரவு
+Re-order Level,மறு ஒழுங்கு நிலை
+Re-order Qty,மறு ஒழுங்கு அளவு
+Read,வாசிக்க
+Reading 1,1 படித்தல்
+Reading 10,10 படித்தல்
+Reading 2,2 படித்தல்
+Reading 3,3 படித்தல்
+Reading 4,4 படித்தல்
+Reading 5,5 படித்தல்
+Reading 6,6 படித்தல்
+Reading 7,7 படித்தல்
+Reading 8,8 படித்தல்
+Reading 9,9 படித்தல்
+Reason,காரணம்
+Reason for Leaving,விட்டு காரணம்
+Reason for Resignation,ராஜினாமாவுக்கான காரணம்
+Reason for losing,இழந்து காரணம்
+Recd Quantity,Recd அளவு
+Receivable / Payable account will be identified based on the field Master Type,செலுத்த வேண்டிய / பெறத்தக்க கணக்கு துறையில் மாஸ்டர் வகை அடிப்படையில் அடையாளம்
+Receivables,வரவுகள்
+Receivables / Payables,வரவுகள் / Payables
+Receivables Group,பெறத்தக்கவைகளின் குழு
+Received,பெற்றார்
+Received Date,பெற்ற தேதி
+Received Items To Be Billed,கட்டணம் பெறப்படும் பொருட்கள்
+Received Qty,பெற்றார் அளவு
+Received and Accepted,பெற்று ஏற்கப்பட்டது
+Receiver List,ரிசீவர் பட்டியல்
+Receiver Parameter,ரிசீவர் அளவுரு
+Recipients,பெறுநர்கள்
+Reconciliation Data,சமரசம் தகவல்கள்
+Reconciliation HTML,சமரசம் HTML
+Reconciliation JSON,சமரசம் JSON
+Record item movement.,உருப்படியை இயக்கம் பதிவு.
+Recurring Id,மீண்டும் அடையாளம்
+Recurring Invoice,மீண்டும் விலைப்பட்டியல்
+Recurring Type,மீண்டும் வகை
+Reduce Deduction for Leave Without Pay (LWP),சம்பளமில்லா விடுப்பு க்கான பொருத்தியறிதல் குறைக்க (LWP)
+Reduce Earning for Leave Without Pay (LWP),சம்பளம் (LWP) இல்லாமல் விடுமுறை ஆதாயம் குறைக்க
+Ref Code,Ref கோட்
+Ref SQ,Ref SQ
+Reference,குறிப்பு
+Reference Date,குறிப்பு தேதி
+Reference Name,குறிப்பு பெயர்
+Reference Number,குறிப்பு எண்
+Refresh,இளைப்பா (ற்) று
+Refreshing....,புத்துணர்ச்சி ....
+Registration Details,பதிவு விவரங்கள்
+Registration Info,பதிவு தகவல்
+Rejected,நிராகரிக்கப்பட்டது
+Rejected Quantity,நிராகரிக்கப்பட்டது அளவு
+Rejected Serial No,நிராகரிக்கப்பட்டது சீரியல் இல்லை
+Rejected Warehouse,நிராகரிக்கப்பட்டது கிடங்கு
+Rejected Warehouse is mandatory against regected item,நிராகரிக்கப்பட்டது கிடங்கு regected உருப்படியை எதிராக கட்டாய ஆகிறது
+Relation,உறவு
+Relieving Date,தேதி நிவாரணத்தில்
+Relieving Date of employee is ,ஊழியர் நிவாரணத்தில் தேதி
+Remark,குறிப்பு
+Remarks,கருத்துக்கள்
+Rename,மறுபெயரிடு
+Rename Log,பதிவு மறுபெயர்
+Rename Tool,கருவி மறுபெயரிடு
+Rent Cost,வாடகை செலவு
+Rent per hour,ஒரு மணி நேரத்திற்கு வாடகைக்கு
+Rented,வாடகைக்கு
+Repeat on Day of Month,மாதம் ஒரு நாள் மீண்டும்
+Replace,பதிலாக
+Replace Item / BOM in all BOMs,அனைத்து BOM கள் உள்ள பொருள் / BOM பதிலாக
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM","இது பயன்படுத்தப்படுகிறது அமைந்துள்ள அனைத்து மற்ற BOM கள் ஒரு குறிப்பிட்ட BOM பதிலாக. இது, பழைய BOM இணைப்பு பதிலாக செலவு புதுப்பிக்க புதிய BOM படி &quot;BOM வெடிப்பு பொருள்&quot; அட்டவணை மறுஉற்பத்தி"
+Replied,பதில்
+Report Date,தேதி அறிக்கை
+Report issues at,அறிக்கை பிரச்சினைகள்
+Reports,அறிக்கைகள்
+Reports to,அறிக்கைகள்
+Reqd By Date,தேதி வாக்கில் Reqd
+Request Type,கோரிக்கை வகை
+Request for Information,தகவல் கோரிக்கை
+Request for purchase.,வாங்குவதற்கு கோரிக்கை.
+Requested,கோரப்பட்ட
+Requested For,கோரப்பட்ட
+Requested Items To Be Ordered,கேட்டு கேட்டு விடயங்கள்
+Requested Items To Be Transferred,மாற்றப்படுவதற்கு கோரப்பட்ட விடயங்கள்
+Requested Qty,கோரப்பட்ட அளவு
+"Requested Qty: Quantity requested for purchase, but not ordered.","கோரப்பட்ட அளவு: அளவு உத்தரவிட்டார் வாங்குவதற்கு கோரியது, ஆனால் இல்லை."
+Requests for items.,பொருட்கள் கோரிக்கைகள்.
+Required By,By தேவை
+Required Date,தேவையான தேதி
+Required Qty,தேவையான அளவு
+Required only for sample item.,ஒரே மாதிரி உருப்படியை தேவைப்படுகிறது.
+Required raw materials issued to the supplier for producing a sub - contracted item.,துணை உற்பத்தி சப்ளையர் வழங்கப்படும் தேவையான மூலப்பொருட்கள் - ஒப்பந்த உருப்படியை.
+Reseller,மறுவிற்பனையாளர்
+Reserved,முன்பதிவு
+Reserved Qty,பாதுகாக்கப்பட்டவை அளவு
+"Reserved Qty: Quantity ordered for sale, but not delivered.","பாதுகாக்கப்பட்டவை அளவு: அளவு விற்பனை உத்தரவிட்டார் , ஆனால் கொடுத்தது இல்லை ."
+Reserved Quantity,ஒதுக்கப்பட்ட அளவு
+Reserved Warehouse,ஒதுக்கப்பட்ட கிடங்கு
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,விற்பனை ஆணை / இறுதிப்பொருட்களாக்கும் கிடங்கில் ஒதுக்கப்பட்ட கிடங்கு
+Reserved Warehouse is missing in Sales Order,ஒதுக்கப்பட்ட கிடங்கு விற்பனை ஆர்டர் காணவில்லை
+Reset Filters,வடிகட்டிகள் மீட்டமை
+Resignation Letter Date,ராஜினாமா கடிதம் தேதி
+Resolution,தீர்மானம்
+Resolution Date,தீர்மானம் தேதி
+Resolution Details,தீர்மானம் விவரம்
+Resolved By,மூலம் தீர்க்கப்பட
+Retail,சில்லறை
+Retailer,சில்லறை
+Review Date,தேதி
+Rgt,Rgt
+Role Allowed to edit frozen stock,உறைந்த பங்கு திருத்த அனுமதி பங்கு
+Role that is allowed to submit transactions that exceed credit limits set.,அமைக்க கடன் எல்லை மீறிய நடவடிக்கைகளை சமர்ப்பிக்க அனுமதி என்று பாத்திரம்.
+Root cannot have a parent cost center,ரூட் ஒரு பெற்றோர் செலவு சென்டர் முடியாது
+Rounded Total,வட்டமான மொத்த
+Rounded Total (Company Currency),வட்டமான மொத்த (நிறுவனத்தின் கரன்சி)
+Row,வரிசை
+Row ,வரிசை
+Row #,# வரிசையை
+Row # ,# வரிசையை
+Rules to calculate shipping amount for a sale,ஒரு விற்பனை கப்பல் அளவு கணக்கிட விதிகள்
+S.O. No.,S.O. இல்லை
+SMS,எஸ்எம்எஸ்
+SMS Center,எஸ்எம்எஸ் மையம்
+SMS Control,எஸ்எம்எஸ் கட்டுப்பாடு
+SMS Gateway URL,எஸ்எம்எஸ் வாயில் URL
+SMS Log,எஸ்எம்எஸ் புகுபதிகை
+SMS Parameter,எஸ்எம்எஸ் அளவுரு
+SMS Sender Name,எஸ்எம்எஸ் அனுப்பியவர் பெயர்
+SMS Settings,SMS அமைப்புகள்
+SMTP Server (e.g. smtp.gmail.com),SMTP சேவையகம் (எ.கா. smtp.gmail.com)
+SO,என்
+SO Date,எனவே தேதி
+SO Pending Qty,எனவே அளவு நிலுவையில்
+SO Qty,எனவே அளவு
+SO/10-11/,SO/10-11 /
+SO1112,SO1112
+SQTN,SQTN
+STE,டிவிட்டு
+SUP,சிறிது சிறிதாக
+SUPP,சப்
+SUPP/10-11/,SUPP/10-11 /
+Salary,சம்பளம்
+Salary Information,சம்பளம் தகவல்
+Salary Manager,சம்பளம் மேலாளர்
+Salary Mode,சம்பளம் முறை
+Salary Slip,சம்பளம் ஸ்லிப்
+Salary Slip Deduction,சம்பளம் ஸ்லிப் பொருத்தியறிதல்
+Salary Slip Earning,சம்பளம் ஸ்லிப் ஆதாயம்
+Salary Structure,சம்பளம் அமைப்பு
+Salary Structure Deduction,சம்பளம் அமைப்பு பொருத்தியறிதல்
+Salary Structure Earning,சம்பளம் அமைப்பு ஆதாயம்
+Salary Structure Earnings,சம்பளம் அமைப்பு வருவாய்
+Salary breakup based on Earning and Deduction.,சம்பளம் கலைத்தல் வருமானம் மற்றும் துப்பறியும் அடிப்படையாக கொண்டது.
+Salary components.,சம்பளம் கூறுகள்.
+Sales,விற்பனை
+Sales Analytics,விற்பனை அனலிட்டிக்ஸ்
+Sales BOM,விற்பனை BOM
+Sales BOM Help,விற்பனை BOM உதவி
+Sales BOM Item,விற்பனை BOM பொருள்
+Sales BOM Items,விற்பனை BOM உருப்படிகள்
+Sales Details,விற்பனை விவரம்
+Sales Discounts,விற்பனை தள்ளுபடி
+Sales Email Settings,விற்பனை மின்னஞ்சல் அமைப்புகள்
+Sales Extras,விற்பனை உபரி
+Sales Funnel,விற்பனை நீக்க
+Sales Invoice,விற்பனை விலை விவரம்
+Sales Invoice Advance,விற்பனை விலைப்பட்டியல் முன்பணம்
+Sales Invoice Item,விற்பனை விலைப்பட்டியல் பொருள்
+Sales Invoice Items,விற்பனை விலைப்பட்டியல் விடயங்கள்
+Sales Invoice Message,விற்பனை விலைப்பட்டியல் செய்தி
+Sales Invoice No,விற்பனை விலைப்பட்டியல் இல்லை
+Sales Invoice Trends,விற்பனை விலைப்பட்டியல் போக்குகள்
+Sales Order,விற்பனை ஆணை
+Sales Order Date,விற்பனை ஆர்டர் தேதி
+Sales Order Item,விற்பனை ஆணை உருப்படி
+Sales Order Items,விற்பனை ஆணை உருப்படிகள்
+Sales Order Message,விற்பனை ஆர்டர் செய்தி
+Sales Order No,விற்பனை ஆணை இல்லை
+Sales Order Required,விற்பனை ஆர்டர் தேவை
+Sales Order Trend,விற்பனை ஆணை போக்கு
+Sales Partner,விற்பனை வரன்வாழ்க்கை துணை
+Sales Partner Name,விற்பனை வரன்வாழ்க்கை துணை பெயர்
+Sales Partner Target,விற்பனை வரன்வாழ்க்கை துணை இலக்கு
+Sales Partners Commission,விற்பனை பங்குதாரர்கள் ஆணையம்
+Sales Person,விற்பனை நபர்
+Sales Person Incharge,விற்பனை நபர் பொறுப்பிலுள்ள
+Sales Person Name,விற்பனை நபர் பெயர்
+Sales Person Target Variance (Item Group-Wise),விற்பனை நபர் இலக்கு வேறுபாடு (பொருள் குழு வாரியாக)
+Sales Person Targets,விற்பனை நபர் இலக்குகள்
+Sales Person-wise Transaction Summary,விற்பனை நபர் வாரியான பரிவர்த்தனை சுருக்கம்
+Sales Register,விற்பனை பதிவு
+Sales Return,விற்பனை Return
+Sales Returned,விற்னையாளர் திரும்பினார்
+Sales Taxes and Charges,விற்பனை வரி மற்றும் கட்டணங்கள்
+Sales Taxes and Charges Master,விற்பனை வரி மற்றும் கட்டணங்கள் மாஸ்டர்
+Sales Team,விற்பனை குழு
+Sales Team Details,விற்பனை குழு விவரம்
+Sales Team1,விற்பனை Team1
+Sales and Purchase,விற்பனை மற்றும் கொள்முதல்
+Sales campaigns,விற்பனை பிரச்சாரங்களில்
+Sales persons and targets,விற்பனை நபர்கள் மற்றும் இலக்குகள்
+Sales taxes template.,விற்பனை வரி வார்ப்புரு.
+Sales territories.,விற்பனை பிரதேசங்களில்.
+Salutation,வணக்கம் தெரிவித்தல்
+Same Serial No,அதே சீரியல் இல்லை
+Sample Size,மாதிரி அளவு
+Sanctioned Amount,ஒப்புதல் தொகை
+Saturday,சனிக்கிழமை
+Save ,
+Schedule,அனுபந்தம்
+Schedule Date,அட்டவணை தேதி
+Schedule Details,அட்டவணை விவரம்
+Scheduled,திட்டமிடப்பட்ட
+Scheduled Date,திட்டமிடப்பட்ட தேதி
+School/University,பள்ளி / பல்கலைக்கழகம்
+Score (0-5),ஸ்கோர் (0-5)
+Score Earned,ஜூலை ஈட்டிய
+Score must be less than or equal to 5,ஸ்கோர் குறைவாக அல்லது 5 சமமாக இருக்க வேண்டும்
+Scrap %,% கைவிட்டால்
+Seasonality for setting budgets.,வரவு செலவு திட்டம் அமைக்க பருவகாலம்.
+"See ""Rate Of Materials Based On"" in Costing Section",பகுதி செயற் கைக்கோள் நிலாவிலிருந்து உள்ள &quot;அடிப்படையில் பொருட்களின் விகிதம்&quot; பார்க்க
+"Select ""Yes"" for sub - contracting items",துணை க்கான &quot;ஆம்&quot; என்பதை தேர்ந்தெடுக்கவும் - ஒப்பந்த உருப்படிகளை
+"Select ""Yes"" if this item is used for some internal purpose in your company.",இந்த உருப்படி உங்கள் நிறுவனம் சில உள் நோக்கம் பயன்படுத்தப்படுகிறது என்றால் &quot;ஆம்&quot; என்பதை தேர்ந்தெடுக்கவும்.
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","இந்த உருப்படியை பயிற்சி போன்ற சில வேலை, பல ஆலோசனை, வடிவமைத்தல் குறிக்கிறது என்றால் &quot;ஆம்&quot; என்பதை தேர்ந்தெடுக்கவும்"
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.","உங்கள் இருப்பு, இந்த உருப்படி பங்கு பராமரிக்க என்றால் &quot;ஆம்&quot; என்பதை தேர்ந்தெடுக்கவும்."
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",நீங்கள் இந்த உருப்படியை உற்பத்தி உங்கள் சப்ளையர் மூல பொருட்களை சப்ளை என்றால் &quot;ஆம்&quot; என்பதை தேர்ந்தெடுக்கவும்.
+Select Budget Distribution to unevenly distribute targets across months.,ஒரே சீராக பரவி மாதங்கள் முழுவதும் இலக்குகளை விநியோகிக்க பட்ஜெட் விநியோகம் தேர்ந்தெடுக்கவும்.
+"Select Budget Distribution, if you want to track based on seasonality.","நீங்கள் பருவகாலம் அடிப்படையில் கண்காணிக்க வேண்டும் என்றால், பட்ஜெட் விநியோகம் தேர்ந்தெடுக்கவும்."
+Select Digest Content,டைஜஸ்ட் உள்ளடக்கம் தேர்வு
+Select DocType,DOCTYPE தேர்வு
+"Select Item where ""Is Stock Item"" is ""No""",""" பங்கு பொருள் "" அங்கு தேர்ந்தெடு பொருள் ""இல்லை"""
+Select Items,தேர்ந்தெடு
+Select Purchase Receipts,கொள்முதல் ரசீதுகள் தேர்வு
+Select Sales Orders,விற்பனை ஆணைகள் தேர்வு
+Select Sales Orders from which you want to create Production Orders.,நீங்கள் உற்பத்தி ஆணைகள் உருவாக்க வேண்டிய இருந்து விற்பனை ஆணைகள் தேர்ந்தெடுக்கவும்.
+Select Time Logs and Submit to create a new Sales Invoice.,நேரம் பதிவுகள் தேர்ந்தெடுத்து ஒரு புதிய விற்பனை விலைப்பட்டியல் உருவாக்க சமர்ப்பிக்கவும்.
+Select Transaction,பரிவர்த்தனை தேர்வு
+Select account head of the bank where cheque was deposited.,காசோலை டெபாசிட் அங்கு வங்கி கணக்கு தலைவர் தேர்வு.
+Select company name first.,முதல் நிறுவனத்தின் பெயரை தேர்ந்தெடுக்கவும்.
+Select template from which you want to get the Goals,நீங்கள் இலக்குகள் பெற விரும்பும் டெம்ப்ளேட்டை தேர்வு
+Select the Employee for whom you are creating the Appraisal.,நீங்கள் மதிப்பீடு உருவாக்கும் யாருக்காக பணியாளர் தேர்வு.
+Select the Invoice against which you want to allocate payments.,"நீங்கள் பணம் ஒதுக்க வேண்டும் என்றும், அதற்கு எதிராக விலைப்பட்டியல் தேர்ந்தெடுக்கவும்."
+Select the period when the invoice will be generated automatically,விலைப்பட்டியல் தானாக உருவாக்கப்படும் போது காலம் தேர்வு
+Select the relevant company name if you have multiple companies,நீங்கள் பல நிறுவனங்கள் இருந்தால் சம்பந்தப்பட்ட நிறுவனத்தின் பெயர் தேர்வு
+Select the relevant company name if you have multiple companies.,நீங்கள் பல நிறுவனங்கள் இருந்தால் சம்பந்தப்பட்ட நிறுவனத்தின் பெயர் தேர்ந்தெடுக்கவும்.
+Select who you want to send this newsletter to,நீங்கள் இந்த மடலை அனுப்ப விரும்பும் தேர்வு
+Select your home country and check the timezone and currency.,உங்கள் வீட்டில் நாட்டின் தேர்ந்தெடுத்து நேர மண்டலத்தை மற்றும் நாணய சரிபார்க்க .
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","&quot;ஆமாம்&quot; தேர்வு இந்த உருப்படியை கொள்முதல் ஆணை, கொள்முதல் ரசீது தோன்றும் அனுமதிக்கும்."
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","தேர்வு &quot;ஆம்&quot; இந்த உருப்படி, விற்பனை ஆணை வழங்கல் குறிப்பு விளங்கும்படியான அனுமதிக்கும்"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",&quot;ஆமாம்&quot; தேர்வு நீ மூலப்பொருள் மற்றும் இந்த உருப்படியை உற்பத்தி ஏற்படும் செயல்பாட்டு செலவுகள் காட்டும் பொருள் பில் உருவாக்க அனுமதிக்கும்.
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",&quot;ஆமாம்&quot; தேர்வு இந்த உருப்படி ஒரு உற்பத்தி ஆர்டர் செய்ய அனுமதிக்கும்.
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",&quot;ஆமாம்&quot; தேர்வு தொடர் மாஸ்டர் இல்லை காணலாம் இந்த உருப்படியை ஒவ்வொரு நிறுவனம் ஒரு தனிப்பட்ட அடையாள கொடுக்கும்.
+Selling,விற்பனை
+Selling Settings,அமைப்புகள் விற்பனை
+Send,அனுப்பு
+Send Autoreply,Autoreply அனுப்ப
+Send Bulk SMS to Leads / Contacts,லீட்ஸ் / தொடர்புகள் மொத்தமாக எஸ்எம்எஸ் அனுப்பவும்
+Send Email,மின்னஞ்சல் அனுப்ப
+Send From,வரம்பு அனுப்ப
+Send Notifications To,அறிவிப்புகளை அனுப்பவும்
+Send Now,இப்போது அனுப்பவும்
+Send Print in Body and Attachment,உடல் மற்றும் இணைப்பு உள்ள அச்சு அனுப்பவும்
+Send SMS,எஸ்எம்எஸ் அனுப்ப
+Send To,அனுப்பு
+Send To Type,வகை அனுப்பவும்
+Send automatic emails to Contacts on Submitting transactions.,பரிவர்த்தனைகள் சமர்ப்பிக்கும் மீது தொடர்புகள் தானியங்கி மின்னஞ்சல்களை அனுப்புவது.
+Send mass SMS to your contacts,உங்கள் தொடர்புகள் வெகுஜன எஸ்எம்எஸ் அனுப்ப
+Send regular summary reports via Email.,மின்னஞ்சல் வழியாக வழக்கமான சுருக்கம் அறிக்கைகள் அனுப்ப.
+Send to this list,இந்த பட்டியலில் அனுப்ப
+Sender,அனுப்புபவர்
+Sender Name,அனுப்புநர் பெயர்
+Sent,அனுப்பப்பட்டது
+Sent Mail,அனுப்பிய அஞ்சல்
+Sent On,அன்று அனுப்பப்பட்டது
+Sent Quotation,அனுப்பி விலைப்பட்டியல்
+Sent or Received,அனுப்பப்படும் அல்லது பெறப்படும்
+Separate production order will be created for each finished good item.,தனி உற்பத்தி வரிசையில் ஒவ்வொரு முடிக்கப்பட்ட நல்ல உருப்படியை செய்தது.
+Serial No,இல்லை தொடர்
+Serial No / Batch,சீரியல் இல்லை / தொகுப்பு
+Serial No Details,தொடர் எண் விவரம்
+Serial No Service Contract Expiry,தொடர் எண் சேவை ஒப்பந்தம் காலாவதியாகும்
+Serial No Status,தொடர் இல்லை நிலைமை
+Serial No Warranty Expiry,தொடர் இல்லை உத்தரவாதத்தை காலாவதியாகும்
+Serial No created,உருவாக்கப்பட்ட சீரியல் இல்லை
+Serial No does not belong to Item,சீரியல் இல்லை பொருள் அல்ல
+Serial No must exist to transfer out.,தொடர் இல வெளியே மாற்ற இருக்க வேண்டும் .
+Serial No qty cannot be a fraction,தொடர் இல அளவு ஒரு பகுதியை இருக்க முடியாது
+Serial No status must be 'Available' to Deliver,தொடர் இல நிலையை வழங்க ' கிடைக்கும் ' இருக்க வேண்டும்
+Serial Nos do not match with qty,சீரியல் இலக்கங்கள் அளவு கொண்ட பொருந்தவில்லை
+Serial Number Series,வரிசை எண் தொடர்
+Serialized Item: ',தொடர் பொருள்: &#39;
+Series,தொடர்
+Series List for this Transaction,இந்த பரிவர்த்தனை தொடர் பட்டியல்
+Service Address,சேவை முகவரி
+Services,சேவைகள்
+Session Expiry,அமர்வு காலாவதியாகும்
+Session Expiry in Hours e.g. 06:00,ஹவர்ஸ் அமர்வு காலாவதியாகும் 06:00 எ.கா.
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,இந்த மண்டலம் உருப்படி பிரிவு வாரியான வரவு செலவு திட்டம் அமைக்க. நீங்கள் விநியோகம் அமைக்க பருவகாலம் சேர்க்க முடியும்.
+Set Login and Password if authentication is required.,அங்கீகாரம் தேவை என்றால் தேதி மற்றும் கடவுச்சொல் அமைக்க.
+Set allocated amount against each Payment Entry and click 'Allocate'.,அமை ஒவ்வொரு கொடுப்பனவு நுழைவு எதிராக அளவு ஒதுக்கீடு மற்றும் ' ஒதுக்கி ' கிளிக் செய்யவும்.
+Set as Default,இயல்புநிலை அமை
+Set as Lost,லாஸ்ட் அமை
+Set prefix for numbering series on your transactions,உங்கள் நடவடிக்கைகள் மீது தொடர் எண்ணுவதற்கான முன்னொட்டு அமைக்க
+Set targets Item Group-wise for this Sales Person.,தொகுப்பு இந்த விற்பனை நபர் குழு வாரியான பொருள் குறிவைக்கிறது.
+"Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.","இங்கே உங்கள் வெளிச்செல்லும் அஞ்சல் SMTP அமைப்புகளை அமைக்கவும். கணினி அறிவிப்புகளை உருவாக்கப்பட்ட, மின்னஞ்சல்கள் இந்த அஞ்சல் சேவையகத்திலிருந்து போம். நிச்சயமாக இல்லை என்றால், ERPNext சேவையகங்கள் (மின்னஞ்சல்கள் இன்னும் உங்கள் மின்னஞ்சல் ஐடி இருந்து அனுப்பப்படும்) பயன்படுத்த அல்லது உங்கள் மின்னஞ்சல் வழங்குநரை தொடர்புகொண்டு இந்த வெறுமையாக."
+Setting Account Type helps in selecting this Account in transactions.,அமைத்தல் கணக்கு வகை பரிமாற்றங்கள் இந்த கணக்கு தேர்வு உதவுகிறது.
+Setting up...,அமைக்கிறது ...
+Settings,அமைப்புகள்
+Settings for Accounts,கணக்கு அமைப்புகளை
+Settings for Buying Module,தொகுதி வாங்குதல் அமைப்புகளை
+Settings for Selling Module,தொகுதி விற்பனை அமைப்புகளை
+Settings for Stock Module,பங்கு தொகுதி அமைப்புகள்
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",ஒரு அஞ்சல் பெட்டி எ.கா. &quot;jobs@example.com&quot; இருந்து வேலை விண்ணப்பதாரர்கள் பெறுவதற்கு அமைப்புகள்
+Setup,அமைப்பு முறை
+Setup Already Complete!!,அமைப்பு ஏற்கனவே முடிந்து !
+Setup Complete!,அமைப்பு முழு !
+Setup Completed,அமைப்பு நிறைவு
+Setup Series,அமைப்பு தொடர்
+Setup of Shopping Cart.,வணிக வண்டியில் ஒரு அமைப்பு.
+Setup to pull emails from support email account,ஆதரவு மின்னஞ்சல் கணக்கு மின்னஞ்சல்களை இழுக்க அமைக்கப்பட்டுள்ளது
+Share,பங்கு
+Share With,பகிர்ந்து
+Shipments to customers.,வாடிக்கையாளர்களுக்கு ஏற்றுமதி.
+Shipping,கப்பல் வாணிபம்
+Shipping Account,கப்பல் கணக்கு
+Shipping Address,கப்பல் முகவரி
+Shipping Amount,கப்பல் தொகை
+Shipping Rule,கப்பல் விதி
+Shipping Rule Condition,கப்பல் விதி நிபந்தனை
+Shipping Rule Conditions,கப்பல் விதி நிபந்தனைகள்
+Shipping Rule Label,கப்பல் விதி லேபிள்
+Shipping Rules,கப்பல் விதிகள்
+Shop,ஷாப்பிங்
+Shopping Cart,வணிக வண்டி
+Shopping Cart Price List,வணிக வண்டியில் விலை பட்டியல்
+Shopping Cart Price Lists,வணிக வண்டியில் விலை பட்டியல்கள்
+Shopping Cart Settings,வணிக வண்டியில் அமைப்புகள்
+Shopping Cart Shipping Rule,வணிக வண்டியில் கப்பல் போக்குவரத்து விதி
+Shopping Cart Shipping Rules,வணிக வண்டியில் கப்பல் போக்குவரத்து விதிகள்
+Shopping Cart Taxes and Charges Master,வணிக வண்டியில் வரிகள் மற்றும் கட்டணங்கள் மாஸ்டர்
+Shopping Cart Taxes and Charges Masters,வணிக வண்டியில் வரிகள் மற்றும் கட்டணங்கள் முதுநிலை
+Short biography for website and other publications.,இணையதளம் மற்றும் பிற வெளியீடுகள் குறுகிய வாழ்க்கை.
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",இந்த கிடங்கில் கிடைக்கும் பங்கு அடிப்படையில் &quot;ஸ்டாக் இல்லை&quot; &quot;இருப்பு&quot; காட்டு அல்லது.
+Show / Hide Features,காட்டு / மறை அம்சங்கள்
+Show / Hide Modules,காட்டு / மறை தொகுதிகள்
+Show In Website,இணையத்தளம் காண்பி
+Show a slideshow at the top of the page,பக்கம் மேலே ஒரு ஸ்லைடு ஷோ
+Show in Website,வெப்சைட் காண்பி
+Show this slideshow at the top of the page,பக்கத்தின் மேல் இந்த காட்சியை காட்ட
+Signature,கையொப்பம்
+Signature to be appended at the end of every email,ஒவ்வொரு மின்னஞ்சல் இறுதியில் தொடுக்க வேண்டும் கையெழுத்து
+Single,ஒற்றை
+Single unit of an Item.,ஒரு பொருள் ஒரே யூனிட்.
+Sit tight while your system is being setup. This may take a few moments.,உங்கள் கணினி அமைப்பு என்றாலும் அமர்ந்து . இந்த ஒரு சில நிமிடங்கள் ஆகலாம்.
+Slideshow,ஸ்லைடுஷோ
+"Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency.","மன்னிக்கவும்! அதற்கு எதிராக இருக்கும் பரிவர்த்தனைகள் இருப்பதால் நீங்கள், நிறுவனத்தின் இயல்புநிலை நாணய மாற்ற முடியாது. நீங்கள் இயல்புநிலை நாணய மாற்ற விரும்பினால் நீங்கள் அந்த நடவடிக்கைகளை ரத்து செய்ய வேண்டும்."
+"Sorry, Serial Nos cannot be merged","மன்னிக்கவும், சீரியல் இலக்கங்கள் ஒன்றாக்க முடியாது"
+"Sorry, companies cannot be merged","மன்னிக்கவும், நிறுவனங்கள் ஒன்றாக்க முடியாது"
+Source,மூல
+Source Warehouse,மூல கிடங்கு
+Source and Target Warehouse cannot be same,மூல மற்றும் அடைவு கிடங்கு அதே இருக்க முடியாது
+Spartan,எளிய வாழ்க்கை வாழ்பவர்
+Special Characters,சிறப்பு எழுத்துக்கள்
+Special Characters ,
+Specification Details,விவரக்குறிப்பு விவரம்
+Specify Exchange Rate to convert one currency into another,மற்றொரு வகையில் ஒரு நாணயத்தை மாற்ற பரிவர்த்தனை விகிதம் குறிப்பிடவும்
+"Specify a list of Territories, for which, this Price List is valid","பிரதேசங்களின் பட்டியலை குறிப்பிட, இது, இந்த விலை பட்டியல் செல்லுபடியாகும்"
+"Specify a list of Territories, for which, this Shipping Rule is valid","பிரதேசங்களின் பட்டியலை குறிப்பிட, இதில், இந்த கப்பல் போக்குவரத்து விதி செல்லுபடியாகும்"
+"Specify a list of Territories, for which, this Taxes Master is valid","பிரதேசங்களின் பட்டியலை குறிப்பிட, இது, இந்த வரி மாஸ்டர் செல்லுபடியாகும்"
+Specify conditions to calculate shipping amount,கப்பல் அளவு கணக்கிட நிலைமைகள் குறிப்பிடவும்
+"Specify the operations, operating cost and give a unique Operation no to your operations.","நடவடிக்கைகள் , இயக்க செலவு குறிப்பிட உங்கள் நடவடிக்கைகள் ஒரு தனிப்பட்ட நடவடிக்கை இல்லை கொடுக்க ."
+Split Delivery Note into packages.,தொகுப்புகளை கொண்டு டெலிவரி குறிப்பு பிரிந்தது.
+Standard,நிலையான
+Standard Rate,நிலையான விகிதம்
+"Standard Terms and Conditions that can be added to Sales and Purchases.
+
+Examples:
+
+1. Validity of the offer.
+1. Payment Terms (In Advance, On Credit, part advance etc).
+1. What is extra (or payable by the Customer).
+1. Safety / usage warning.
+1. Warranty if any.
+1. Returns Policy.
+1. Terms of shipping, if applicable.
+1. Ways of addressing disputes, indemnity, liability, etc.
+1. Address and Contact of your Company.",
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
+10. Add or Deduct: Whether you want to add or deduct the tax.",
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",
+Start,தொடக்கம்
+Start Date,தொடக்க தேதி
+Start date of current invoice's period,தற்போதைய விலைப்பட்டியல் நேரத்தில் தேதி தொடங்கும்
+Starting up...,தொடங்கும் ...
+State,நிலை
+Static Parameters,நிலையான அளவுருக்களை
+Status,அந்தஸ்து
+Status must be one of ,தகுதி ஒன்றாக இருக்க வேண்டும்
+Status should be Submitted,நிலைமை சமர்ப்பிக்க வேண்டும்
+Statutory info and other general information about your Supplier,சட்டப்பூர்வ தகவல் மற்றும் உங்கள் சப்ளையர் பற்றி மற்ற பொது தகவல்
+Stock,பங்கு
+Stock Adjustment Account,பங்கு சரிசெய்தல் கணக்கு
+Stock Ageing,பங்கு மூப்படைதலுக்கான
+Stock Analytics,பங்கு அனலிட்டிக்ஸ்
+Stock Balance,பங்கு இருப்பு
+Stock Entries already created for Production Order ,
+Stock Entry,பங்கு நுழைவு
+Stock Entry Detail,பங்கு நுழைவு விரிவாக
+Stock Frozen Upto,பங்கு வரை உறை
+Stock Ledger,பங்கு லெட்ஜர்
+Stock Ledger Entry,பங்கு லெட்ஜர் நுழைவு
+Stock Level,பங்கு நிலை
+Stock Projected Qty,பங்கு அளவு திட்டமிடப்பட்ட
+Stock Qty,பங்கு அளவு
+Stock Queue (FIFO),பங்கு வரிசையில் (FIFO)
+Stock Received But Not Billed,"பங்கு பெற்றார், ஆனால் கணக்கில் இல்லை"
+Stock Reconcilation Data,பங்கு நல்லிணக்கத்தையும் தகவல்கள்
+Stock Reconcilation Template,பங்கு நல்லிணக்கத்தையும் டெம்ப்ளேட்
+Stock Reconciliation,பங்கு நல்லிணக்க
+"Stock Reconciliation can be used to update the stock on a particular date, ",
+Stock Settings,பங்கு அமைப்புகள்
+Stock UOM,பங்கு மொறட்டுவ பல்கலைகழகம்
+Stock UOM Replace Utility,பங்கு மொறட்டுவ பல்கலைகழகம் பதிலாக பயன்பாட்டு
+Stock Uom,பங்கு மொறட்டுவ பல்கலைகழகம்
+Stock Value,பங்கு மதிப்பு
+Stock Value Difference,பங்கு மதிப்பு வேறுபாடு
+Stock transactions exist against warehouse ,
+Stop,நில்
+Stop Birthday Reminders,நிறுத்து நினைவூட்டல்கள்
+Stop Material Request,நிறுத்து பொருள் கோரிக்கை
+Stop users from making Leave Applications on following days.,பின்வரும் நாட்களில் விடுப்பு விண்ணப்பங்கள் செய்து பயனர்களை நிறுத்த.
+Stop!,நிறுத்து!
+Stopped,நிறுத்தி
+Structure cost centers for budgeting.,பட்ஜெட் கட்டமைப்பு செலவு மையங்கள்.
+Structure of books of accounts.,கணக்கு புத்தகங்கள் கட்டமைப்பு.
+"Sub-currency. For e.g. ""Cent""",துணை நாணய. உதாரணமாக &quot;செண்ட்&quot; க்கான
+Subcontract,உள் ஒப்பந்தம்
+Subject,பொருள்
+Submit Salary Slip,சம்பளம் ஸ்லிப் &#39;to
+Submit all salary slips for the above selected criteria,மேலே தேர்ந்தெடுக்கப்பட்ட அடிப்படை அனைத்து சம்பளம் பின்னடைவு &#39;to
+Submit this Production Order for further processing.,மேலும் செயலாக்க இந்த உற்பத்தி ஆர்டர் .
+Submitted,சமர்ப்பிக்கப்பட்டது
+Subsidiary,உப
+Successful: ,வெற்றி:
+Suggestion,யோசனை
+Suggestions,பரிந்துரைகள்
+Sunday,ஞாயிற்றுக்கிழமை
+Supplier,கொடுப்பவர்
+Supplier (Payable) Account,வழங்குபவர் (செலுத்த வேண்டிய) கணக்கு
+Supplier (vendor) name as entered in supplier master,வழங்குபவர் (விற்பனையாளர்) பெயர் என சப்ளையர் மாஸ்டர் உள்ளிட்ட
+Supplier Account,வழங்குபவர் கணக்கு
+Supplier Account Head,வழங்குபவர் கணக்கு தலைமை
+Supplier Address,வழங்குபவர் முகவரி
+Supplier Addresses And Contacts,வழங்குபவர் முகவரிகள் மற்றும் தொடர்புகள்
+Supplier Addresses and Contacts,வழங்குபவர் முகவரிகள் மற்றும் தொடர்புகள்
+Supplier Details,வழங்குபவர் விவரம்
+Supplier Intro,வழங்குபவர் அறிமுகம்
+Supplier Invoice Date,வழங்குபவர் விலைப்பட்டியல் தேதி
+Supplier Invoice No,வழங்குபவர் விலைப்பட்டியல் இல்லை
+Supplier Name,வழங்குபவர் பெயர்
+Supplier Naming By,மூலம் பெயரிடுதல் சப்ளையர்
+Supplier Part Number,வழங்குபவர் பாகம் எண்
+Supplier Quotation,வழங்குபவர் விலைப்பட்டியல்
+Supplier Quotation Item,வழங்குபவர் மேற்கோள் பொருள்
+Supplier Reference,வழங்குபவர் குறிப்பு
+Supplier Shipment Date,வழங்குபவர் கப்பல் ஏற்றுமதி தேதி
+Supplier Shipment No,வழங்குபவர் கப்பல் ஏற்றுமதி இல்லை
+Supplier Type,வழங்குபவர் வகை
+Supplier Type / Supplier,வழங்குபவர் வகை / வழங்குபவர்
+Supplier Warehouse,வழங்குபவர் கிடங்கு
+Supplier Warehouse mandatory subcontracted purchase receipt,வழங்குபவர் கிடங்கு கட்டாய உள்குத்தகை கொள்முதல் ரசீது
+Supplier classification.,வழங்குபவர் வகைப்பாடு.
+Supplier database.,வழங்குபவர் தரவுத்தள.
+Supplier of Goods or Services.,சரக்கு அல்லது சேவைகள் சப்ளையர்.
+Supplier warehouse where you have issued raw materials for sub - contracting,நீங்கள் துணை கச்சா பொருட்கள் வழங்கப்படும் அங்கு சப்ளையர் கிடங்கில் - ஒப்பந்த
+Supplier-Wise Sales Analytics,வழங்குபவர் - தம்பதியினர் அனலிட்டிக்ஸ்
+Support,ஆதரவு
+Support Analtyics,ஆதரவு Analtyics
+Support Analytics,ஆதரவு ஆய்வு
+Support Email,மின்னஞ்சல் ஆதரவு
+Support Email Settings,ஆதரவு மின்னஞ்சல் அமைப்புகள்
+Support Password,ஆதரவு கடவுச்சொல்
+Support Ticket,ஆதரவு டிக்கெட்
+Support queries from customers.,வாடிக்கையாளர்கள் கேள்விகளுக்கு ஆதரவு.
+Symbol,அடையாளம்
+Sync Support Mails,ஆதரவு அஞ்சல் ஒத்திசை
+Sync with Dropbox,டிராப்பாக்ஸ் உடன் ஒத்திசைக்க
+Sync with Google Drive,Google Drive ஐ ஒத்திசைந்து
+System Administration,கணினி மேலாண்மை
+System Scheduler Errors,கணினி திட்டமிடுதல் பிழைகள்
+System Settings,கணினி அமைப்புகள்
+"System User (login) ID. If set, it will become default for all HR forms.","கணினி பயனர் (உள்நுழைய) ஐடி. அமைத்தால், அது அனைத்து அலுவலக வடிவங்கள் முன்னிருப்பு போம்."
+System for managing Backups,காப்புப்படிகள் மேலாண்மை அமைப்பு
+System generated mails will be sent from this email id.,கணினி உருவாக்கப்பட்ட அஞ்சல் இந்த மின்னஞ்சல் ஐடி இருந்து அனுப்பப்படும்.
+TL-,டிஎல்-
+TLB-,TLB-
+Table for Item that will be shown in Web Site,வலைத்தள காண்பிக்கப்படும் என்று பொருள் அட்டவணை
+Target  Amount,இலக்கு தொகை
+Target Detail,இலக்கு விரிவாக
+Target Details,இலக்கு விவரம்
+Target Details1,இலக்கு Details1
+Target Distribution,இலக்கு விநியோகம்
+Target On,இலக்கு
+Target Qty,இலக்கு அளவு
+Target Warehouse,இலக்கு கிடங்கு
+Task,பணி
+Task Details,பணி விவரம்
+Tasks,பணிகள்
+Tax,வரி
+Tax Accounts,வரி கணக்கு
+Tax Calculation,வரி கணக்கீடு
+Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,வரி பகுப்பு ' மதிப்பீட்டு ' அல்லது ' மதிப்பீடு மற்றும் மொத்த ' அனைத்து பொருட்களை அல்லாத பங்கு பொருட்களை இருக்க முடியாது
+Tax Master,வரி மாஸ்டர்
+Tax Rate,வரி விகிதம்
+Tax Template for Purchase,கொள்முதல் வரி வார்ப்புரு
+Tax Template for Sales,விற்பனை வரி வார்ப்புரு
+Tax and other salary deductions.,வரி மற்றும் பிற சம்பளம் கழிவுகள்.
+"Tax detail table fetched from item master as a string and stored in this field.
+Used for Taxes and Charges",
+Taxable,வரி
+Taxes,வரி
+Taxes and Charges,வரிகள் மற்றும் கட்டணங்கள்
+Taxes and Charges Added,வரிகள் மற்றும் கட்டணங்கள் சேர்க்கப்பட்டது
+Taxes and Charges Added (Company Currency),வரிகள் மற்றும் கட்டணங்கள் சேர்க்கப்பட்டது (நிறுவனத்தின் கரன்சி)
+Taxes and Charges Calculation,வரிகள் மற்றும் கட்டணங்கள் கணக்கிடுதல்
+Taxes and Charges Deducted,கழிக்கப்படும் வரி மற்றும் கட்டணங்கள்
+Taxes and Charges Deducted (Company Currency),வரிகள் மற்றும் கட்டணங்கள் கழிக்கப்படும் (நிறுவனத்தின் கரன்சி)
+Taxes and Charges Total,வரிகள் மற்றும் கட்டணங்கள் மொத்தம்
+Taxes and Charges Total (Company Currency),வரிகள் மற்றும் கட்டணங்கள் மொத்த (நிறுவனத்தின் கரன்சி)
+Template for employee performance appraisals.,பணியாளர் செயல்திறனை மதிப்பீடு டெம்ப்ளேட்டையும்.
+Template of terms or contract.,சொற்கள் அல்லது ஒப்பந்த வார்ப்புரு.
+Term Details,கால விவரம்
+Terms,விதிமுறைகள்
+Terms and Conditions,நிபந்தனைகள்
+Terms and Conditions Content,நிபந்தனைகள் உள்ளடக்கம்
+Terms and Conditions Details,நிபந்தனைகள் விவரம்
+Terms and Conditions Template,நிபந்தனைகள் வார்ப்புரு
+Terms and Conditions1,விதிமுறைகள் மற்றும் Conditions1
+Terretory,Terretory
+Territory,மண்டலம்
+Territory / Customer,மண்டலம் / வாடிக்கையாளர்
+Territory Manager,மண்டலம் மேலாளர்
+Territory Name,மண்டலம் பெயர்
+Territory Target Variance (Item Group-Wise),மண்டலம் இலக்கு வேறுபாடு (பொருள் குழு வாரியாக)
+Territory Targets,மண்டலம் இலக்குகள்
+Test,சோதனை
+Test Email Id,டெஸ்ட் மின்னஞ்சல் விலாசம்
+Test the Newsletter,இ சோதனை
+The BOM which will be replaced,பதிலீடு செய்யப்படும் BOM
+The First User: You,முதல் பயனர் : நீங்கள்
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",தொகுப்பு பிரதிபலிக்கிறது என்று பொருள். இந்த பொருள் &quot;இல்லை&quot; என &quot;பங்கு உருப்படி இல்லை&quot; மற்றும் &quot;ஆம்&quot; என &quot;விற்பனை பொருள் இல்லை&quot;
+The Organization,அமைப்பு
+"The account head under Liability, in which Profit/Loss will be booked","லாபம் / நஷ்டம் பதிவு வேண்டிய பொறுப்பு கீழ் கணக்கு தலைவர் ,"
+"The date on which next invoice will be generated. It is generated on submit.
+",
+The date on which recurring invoice will be stop,மீண்டும் விலைப்பட்டியல் நிறுத்த வேண்டும் எந்த தேதி
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","கார் விலைப்பட்டியல் எ.கா. 05, 28 ஹிப்ரு உருவாக்கப்படும் எந்த மாதம் நாள்"
+The day(s) on which you are applying for leave coincide with holiday(s). You need not apply for leave.,நீங்கள் விடுப்பு விண்ணப்பிக்கும் எந்த நாள் (கள்) விடுமுறை (கள் ) இணைந்து . நீங்கள் விடுப்பு விண்ணப்பிக்க தேவையில்லை .
+The first Leave Approver in the list will be set as the default Leave Approver,பட்டியலில் முதல் விடுப்பு சர்க்கார் தரப்பில் சாட்சி இயல்புநிலை விடுப்பு சர்க்கார் தரப்பில் சாட்சி என அமைக்க வேண்டும்
+The first user will become the System Manager (you can change that later).,முதல் பயனர் ( நீங்கள் பின்னர் மாற்ற முடியும் ) கணினி மேலாளர் மாறும் .
+The gross weight of the package. Usually net weight + packaging material weight. (for print),தொகுப்பின் மொத்த எடை. பொதுவாக நிகர எடை + பேக்கேஜிங் பொருட்கள் எடை. (அச்சுக்கு)
+The name of your company for which you are setting up this system.,நீங்கள் இந்த அமைப்பை அமைக்க இது உங்கள் நிறுவனத்தின் பெயர் .
+The net weight of this package. (calculated automatically as sum of net weight of items),இந்த தொகுப்பு நிகர எடை. (பொருட்களை நிகர எடை கூடுதல் போன்ற தானாக கணக்கிடப்படுகிறது)
+The new BOM after replacement,மாற்று பின்னர் புதிய BOM
+The rate at which Bill Currency is converted into company's base currency,பில் நாணய நிறுவனத்தின் அடிப்படை நாணய மாற்றப்படும் விகிதத்தை
+The unique id for tracking all recurring invoices. It is generated on submit.,அனைத்து மீண்டும் பொருள் தேடும் தனிப்பட்ட ஐடி. அதை சமர்ப்பிக்க இல் உருவாக்கப்பட்டது.
+There is nothing to edit.,திருத்த எதுவும் இல்லை .
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,ஒரு பிழை ஏற்பட்டது . ஒரு சாத்தியமான காரணம் நீங்கள் வடிவம் காப்பாற்ற முடியாது என்று இருக்க முடியும் . சிக்கல் தொடர்ந்தால் support@erpnext.com தொடர்பு கொள்ளவும்.
+There were errors.,பிழைகள் இருந்தன .
+This Cost Center is a,இந்த விலை மையம் ஒரு ஆகிறது
+This Currency is disabled. Enable to use in transactions,இந்த நாணய முடக்கப்பட்டுள்ளது. நடவடிக்கைகளில் பயன்படுத்த உதவும்
+This ERPNext subscription,இந்த ERPNext சந்தா
+This Leave Application is pending approval. Only the Leave Apporver can update status.,இந்த விடுமுறை விண்ணப்பம் அனுமதிக்காக நிலுவையில் உள்ளது . மட்டும் விட்டு Apporver நிலையை மேம்படுத்த முடியும் .
+This Time Log Batch has been billed.,இந்த நேரம் புகுபதிகை தொகுதி படியாக.
+This Time Log Batch has been cancelled.,இந்த நேரம் புகுபதிகை தொகுப்பு ரத்து செய்யப்பட்டது.
+This Time Log conflicts with,இந்த நேரம் புகுபதிகை மோதல்கள்
+This is a root account and cannot be edited.,இந்த ரூட் கணக்கு மற்றும் திருத்த முடியாது .
+This is a root customer group and cannot be edited.,இந்த ஒரு ரூட் வாடிக்கையாளர் குழு மற்றும் திருத்த முடியாது .
+This is a root item group and cannot be edited.,இந்த ஒரு ரூட் உருப்படியை குழு மற்றும் திருத்த முடியாது .
+This is a root sales person and cannot be edited.,இந்த ஒரு ரூட் விற்பனை நபர் மற்றும் திருத்த முடியாது .
+This is a root territory and cannot be edited.,இந்த வேர் பகுதியில் மற்றும் திருத்த முடியாது .
+This is the number of the last created transaction with this prefix,இந்த முன்னொட்டு கடந்த உருவாக்கப்பட்ட பரிவர்த்தனை எண்ணிக்கை
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,இந்த கருவியை நீங்கள் கணினியில் அளவு மற்றும் பங்கு மதிப்பு மேம்படுத்த அல்லது சரிசெய்ய உதவும். அது பொதுவாக கணினி மதிப்புகள் ஒருங்கிணைக்க பயன்படுகிறது என்ன உண்மையில் உங்கள் கிடங்குகள் உள்ளது.
+This will be used for setting rule in HR module,இந்த அலுவலக தொகுதி உள்ள அமைப்பு விதி பயன்படுத்தப்படும்
+Thread HTML,Thread HTML
+Thursday,வியாழக்கிழமை
+Time Log,நேரம் புகுபதிகை
+Time Log Batch,நேரம் புகுபதிகை தொகுப்பு
+Time Log Batch Detail,நேரம் புகுபதிகை தொகுப்பு விரிவாக
+Time Log Batch Details,நேரம் புகுபதிகை தொகுப்பு விவரம்
+Time Log Batch status must be 'Submitted',நேரம் புகுபதிகை தொகுப்பு நிலையை &#39;சமர்ப்பிக்கப்பட்டது&#39;
+Time Log for tasks.,பணிகளை நேரம் புகுபதிகை.
+Time Log must have status 'Submitted',நேரம் புகுபதிகை நிலையை &#39;Submitted&#39; இருக்க வேண்டும்
+Time Zone,நேரம் மண்டல
+Time Zones,நேரம் மண்டலங்கள்
+Time and Budget,நேரம் மற்றும் பட்ஜெட்
+Time at which items were delivered from warehouse,நேரம் பொருட்களை கிடங்கில் இருந்து அனுப்பப்படும்
+Time at which materials were received,பொருட்கள் பெற்றனர் எந்த நேரத்தில்
+Title,தலைப்பு
+To,வேண்டும்
+To Currency,நாணய செய்ய
+To Date,தேதி
+To Date should be same as From Date for Half Day leave,தேதி அரை நாள் விடுப்பு வரம்பு தேதி அதே இருக்க வேண்டும்
+To Discuss,ஆலோசிக்க வேண்டும்
+To Do List,பட்டியல் செய்ய வேண்டும்
+To Package No.,இல்லை தொகுப்பு வேண்டும்
+To Pay,பணம்
+To Produce,தயாரிப்பாளர்கள்
+To Time,டைம்
+To Value,மதிப்பு
+To Warehouse,சேமிப்பு கிடங்கு வேண்டும்
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.","குழந்தை முனைகள் சேர்க்க, மரம் ஆராய நீங்கள் மேலும் முனைகளில் சேர்க்க வேண்டும் கீழ் முனை மீது கிளிக் செய்யவும்."
+"To assign this issue, use the ""Assign"" button in the sidebar.","இந்த சிக்கலை ஒதுக்க, பக்கப்பட்டியில் &quot;ஒதுக்க&quot; பொத்தானை பயன்படுத்தவும்."
+"To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.","தானாகவே உள்வரும் மின்னஞ்சல் இருந்து ஆதரவு டிக்கெட் உருவாக்க, இங்கே உங்கள் POP3 அமைப்புகளை அமைக்க. அனைத்து மின்னஞ்சல்கள் என்று அஞ்சல் அடையாள இருந்து முறையில் ஒத்திசைக்கப்பட்டுள்ளது என்று நீங்கள் வெறுமனே ஈஆர்பி ஒரு தனி மின்னஞ்சல் ஐடி உருவாக்க வேண்டும். நிச்சயமாக இல்லை என்றால், உங்கள் மின்னஞ்சல் வழங்குநர் தொடர்பு கொள்ளவும்."
+To create a Bank Account:,ஒரு வங்கி கணக்கு உருவாக்க:
+To create a Tax Account:,ஒரு வரி கணக்கு உருவாக்க:
+"To create an Account Head under a different company, select the company and save customer.","வேறு நிறுவனத்தின் கீழ் ஒரு கணக்கு தலைமை உருவாக்க, நிறுவனம் தேர்வு மற்றும் வாடிக்கையாளர் சேமிக்க."
+To date cannot be before from date,தேதி தேதி முதல் முன் இருக்க முடியாது
+To enable <b>Point of Sale</b> features,<b>விற்பனை அம்சங்களை புள்ளி</b> செயல்படுத்த
+To enable <b>Point of Sale</b> view,விற்பனை </ b> பார்வையில் <b> புள்ளி செயல்படுத்த
+To get Item Group in details table,விவரங்கள் அட்டவணையில் உருப்படி குழு பெற
+"To merge, following properties must be same for both items","ஒன்றாக்க , பின்வரும் பண்புகளை இரு பொருட்களை சமமாக இருக்க வேண்டும்"
+"To report an issue, go to ",
+"To set this Fiscal Year as Default, click on 'Set as Default'","இயல்புநிலை என இந்த நிதியாண்டில் அமைக்க, ' இயல்புநிலை அமை ' கிளிக்"
+To track any installation or commissioning related work after sales,விற்பனை பிறகு எந்த நிறுவல் அல்லது அதிகாரம்பெற்ற தொடர்பான வேலை தடமறிய
+"To track brand name in the following documents<br>
+Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,அவர்களின் தொடர் இலக்கங்கள் அடிப்படையில் விற்பனை மற்றும் கொள்முதல் ஆவணங்களில் உருப்படியை தடமறிய. இந்த உற்பத்தியில் உத்தரவாதத்தை விவரங்களை கண்டறிய பயன்படுகிறது.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,தொகுதி இலக்கங்கள் கொண்ட விற்பனை மற்றும் கொள்முதல் ஆவணங்களில் பொருட்களை தடமறிய <br> <b>விருப்பமான தொழில்: கெமிக்கல்ஸ் ஹிப்ரு</b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,பார்கோடு பயன்படுத்தி பொருட்களை கண்காணிக்க வேண்டும். நீங்கள் உருப்படியின் பார்கோடு ஸ்கேனிங் மூலம் வினியோகம் குறிப்பு மற்றும் விற்பனை விலைப்பட்டியல் உள்ள பொருட்களை நுழைய முடியும்.
+Tools,கருவிகள்
+Top,மேல்
+Total,மொத்தம்
+Total (sum of) points distribution for all goals should be 100.,மொத்தம் இலக்குகளை புள்ளிகள் விநியோகம் (தொகை) 100 இருக்க வேண்டும்.
+Total Advance,மொத்த முன்பணம்
+Total Amount,மொத்த தொகை
+Total Amount To Pay,செலுத்த மொத்த தொகை
+Total Amount in Words,சொற்கள் மொத்த தொகை
+Total Billing This Year: ,மொத்த பில்லிங் இந்த ஆண்டு:
+Total Claimed Amount,மொத்த கோரப்பட்ட தொகை
+Total Commission,மொத்த ஆணையம்
+Total Cost,மொத்த செலவு
+Total Credit,மொத்த கடன்
+Total Debit,மொத்த பற்று
+Total Deduction,மொத்த பொருத்தியறிதல்
+Total Earning,மொத்த வருமானம்
+Total Experience,மொத்த அனுபவம்
+Total Hours,மொத்த நேரம்
+Total Hours (Expected),மொத்த நேரம் (எதிர்பார்க்கப்பட்டது)
+Total Invoiced Amount,மொத்த விலை விவரம் தொகை
+Total Leave Days,மொத்த விடுப்பு நாட்கள்
+Total Leaves Allocated,மொத்த இலைகள் ஒதுக்கப்பட்ட
+Total Manufactured Qty can not be greater than Planned qty to manufacture,மொத்த உற்பத்தி அளவு திட்டமிட்ட அளவு உற்பத்தி அதிகமாக இருக்க முடியாது
+Total Operating Cost,மொத்த இயக்க செலவு
+Total Points,மொத்த புள்ளிகள்
+Total Raw Material Cost,மொத்த மூலப்பொருட்களின் விலை
+Total Sanctioned Amount,மொத்த ஒப்புதல் தொகை
+Total Score (Out of 5),மொத்த மதிப்பெண் (5 அவுட்)
+Total Tax (Company Currency),மொத்த வரி (நிறுவனத்தின் கரன்சி)
+Total Taxes and Charges,மொத்த வரி மற்றும் கட்டணங்கள்
+Total Taxes and Charges (Company Currency),மொத்த வரி மற்றும் கட்டணங்கள் (நிறுவனத்தின் கரன்சி)
+Total Working Days In The Month,மாதம் மொத்த வேலை நாட்கள்
+Total amount of invoices received from suppliers during the digest period,பொருள் மொத்த அளவு தொகுப்பாக காலத்தில் சப்ளையர்கள் பெறப்படும்
+Total amount of invoices sent to the customer during the digest period,பொருள் மொத்த அளவு தொகுப்பாக காலத்தில் வாடிக்கையாளர் அனுப்பப்படும்
+Total in words,வார்த்தைகளில் மொத்த
+Total production order qty for item,உருப்படியை மொத்த உற்பத்தி ஆர்டர் அளவு
+Totals,மொத்த
+Track separate Income and Expense for product verticals or divisions.,தயாரிப்பு மேம்பாடுகளையும் அல்லது பிரிவுகள் தனி வருமானம் மற்றும் செலவு கண்காணிக்க.
+Track this Delivery Note against any Project,எந்த திட்டம் எதிரான இந்த டெலிவரி குறிப்பு கண்காணிக்க
+Track this Sales Order against any Project,எந்த திட்டம் எதிரான இந்த விற்பனை ஆணை கண்காணிக்க
+Transaction,பரிவர்த்தனை
+Transaction Date,பரிவர்த்தனை தேதி
+Transaction not allowed against stopped Production Order,பரிவர்த்தனை நிறுத்தி உத்தரவு எதிரான அனுமதி இல்லை
+Transfer,பரிமாற்றம்
+Transfer Material,மாற்றம் பொருள்
+Transfer Raw Materials,மூலப்பொருட்கள் பரிமாற்றம்
+Transferred Qty,அளவு மாற்றம்
+Transporter Info,போக்குவரத்து தகவல்
+Transporter Name,இடமாற்றி பெயர்
+Transporter lorry number,இடமாற்றி லாரி எண்
+Trash Reason,குப்பை காரணம்
+Tree Type,மரம் வகை
+Tree of item classification,உருப்படியை வகைப்பாடு மரம்
+Trial Balance,விசாரணை இருப்பு
+Tuesday,செவ்வாய்க்கிழமை
+Type,மாதிரி
+Type of document to rename.,மறுபெயர் ஆவணம் வகை.
+Type of employment master.,வேலை மாஸ்டர் வகை.
+"Type of leaves like casual, sick etc.","சாதாரண, உடம்பு போன்ற இலைகள் வகை"
+Types of Expense Claim.,செலவின உரிமைகோரல் வகைகள்.
+Types of activities for Time Sheets,நேரம் தாள்கள் செயல்பாடுகளை வகைகள்
+UOM,மொறட்டுவ பல்கலைகழகம்
+UOM Conversion Detail,மொறட்டுவ பல்கலைகழகம் மாற்றம் விரிவாக
+UOM Conversion Details,மொறட்டுவ பல்கலைகழகம் மாற்றம் விவரம்
+UOM Conversion Factor,மொறட்டுவ பல்கலைகழகம் மாற்ற காரணி
+UOM Conversion Factor is mandatory,மொறட்டுவ பல்கலைகழகம் மாற்ற காரணி அத்தியாவசியமானதாகும்
+UOM Name,மொறட்டுவ பல்கலைகழகம் பெயர்
+UOM Replace Utility,மொறட்டுவ பல்கலைகழகம் பதிலாக பயன்பாட்டு
+Under AMC,AMC கீழ்
+Under Graduate,பட்டதாரி கீழ்
+Under Warranty,உத்தரவாதத்தின் கீழ்
+Unit of Measure,அளவிடத்தக்க அலகு
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","இந்த உருப்படியின் அளவீட்டு அலகு (எ.கா. கிலோ, அலகு, இல்லை, சோடி)."
+Units/Hour,அலகுகள் / ஹவர்
+Units/Shifts,அலகுகள் / மாற்றம் நேரும்
+Unmatched Amount,பொருந்தா தொகை
+Unpaid,செலுத்தப்படாத
+Unscheduled,திட்டமிடப்படாத
+Unstop,தடை இல்லாத
+Unstop Material Request,தடை இல்லாத பொருள் கோரிக்கை
+Unstop Purchase Order,தடை இல்லாத கொள்முதல் ஆணை
+Unsubscribed,குழுவிலகப்பட்டது
+Update,புதுப்பிக்க
+Update Clearance Date,இசைவு தேதி புதுப்பிக்க
+Update Cost,மேம்படுத்தல்
+Update Finished Goods,புதுப்பி முடிந்தது பொருட்கள்
+Update Landed Cost,மேம்படுத்தல் Landed
+Update Numbering Series,புதுப்பி எண் தொடர்
+Update Series,மேம்படுத்தல் தொடர்
+Update Series Number,மேம்படுத்தல் தொடர் எண்
+Update Stock,பங்கு புதுப்பிக்க
+Update Stock should be checked.,மேம்படுத்தல் பங்கு சரிபார்க்கப்பட வேண்டும்.
+"Update allocated amount in the above table and then click ""Allocate"" button",மேலே அட்டவணையில் ஒதுக்கப்பட்ட தொகை மேம்படுத்த பின்னர் &quot;ஒதுக்கி&quot; பொத்தானை கிளிக் செய்யவும்
+Update bank payment dates with journals.,மேம்படுத்தல் வங்கி பணம் பத்திரிகைகள் மூலம் செல்கிறது.
+Update clearance date of Journal Entries marked as 'Bank Vouchers',ஜர்னல் பதிவுகள் புதுப்பிக்கவும் அனுமதி தேதி ' வங்கி உறுதி சீட்டு ' என குறிக்கப்பட்ட
+Updated,புதுப்பிக்கப்பட்ட
+Updated Birthday Reminders,இற்றை நினைவூட்டல்கள்
+Upload Attendance,பங்கேற்கும் பதிவேற்ற
+Upload Backups to Dropbox,டிரா காப்புப்படிகள் பதிவேற்ற
+Upload Backups to Google Drive,Google இயக்ககத்தில் காப்புப்படிகள் பதிவேற்ற
+Upload HTML,HTML பதிவேற்று
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,பழைய பெயர் புதிய பெயர்:. இரண்டு பத்திகள் ஒரு கோப்பை பதிவேற்ற. அதிகபட்சம் 500 வரிசைகள்.
+Upload attendance from a .csv file,ஒரு. Csv கோப்பு இருந்து வருகை பதிவேற்று
+Upload stock balance via csv.,Csv வழியாக பங்கு சமநிலை பதிவேற்றலாம்.
+Upload your letter head and logo - you can edit them later.,உங்கள் கடிதம் தலை மற்றும் லோகோ பதிவேற்ற - நீங்கள் பின்னர் அவர்களை திருத்த முடியாது .
+Uploaded File Attachments,பதிவேற்றிய கோப்பு இணைப்புகள்
+Upper Income,உயர் வருமானம்
+Urgent,அவசரமான
+Use Multi-Level BOM,மல்டி லெவல் BOM பயன்படுத்த
+Use SSL,SSL பயன்படுத்த
+Use TLS,TLS பயன்படுத்தவும்
+User,பயனர்
+User ID,பயனர் ஐடி
+User Name,பயனர் பெயர்
+User Properties,பயனர் பண்புகள்
+User Remark,பயனர் குறிப்பு
+User Remark will be added to Auto Remark,பயனர் குறிப்பு ஆட்டோ குறிப்பு சேர்க்கப்படும்
+User Tags,பயனர் குறிச்சொற்கள்
+User must always select,பயனர் எப்போதும் தேர்ந்தெடுக்க வேண்டும்
+User settings for Point-of-sale (POS),புள்ளி விற்பனை (POS) பயனர் அமைப்புகள்
+Username,பயனர்பெயர்
+Users and Permissions,பயனர்கள் மற்றும் அனுமதிகள்
+Users who can approve a specific employee's leave applications,ஒரு குறிப்பிட்ட ஊழியர் விடுப்பு விண்ணப்பங்கள் பெறலாம் பயனர்கள்
+Users with this role are allowed to create / modify accounting entry before frozen date,"இந்த பங்களிப்பை செய்த உறைந்த தேதி முன் , பைனான்ஸ் நுழைவு மாற்ற / உருவாக்க அனுமதி"
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,இந்த பங்களிப்பை செய்த உறைந்த கணக்குகள் எதிராக கணக்கியல் உள்ளீடுகள் மாற்ற / உறைந்த கணக்குகள் அமைக்க உருவாக்க அனுமதி
+Utilities,பயன்பாடுகள்
+Utility,உபயோகம்
+Valid For Territories,நிலப்பகுதிகள் செல்லுபடியாகும்
+Valid Upto,வரை செல்லுபடியாகும்
+Valid for Buying or Selling?,வாங்குதல் அல்லது விற்றல் செல்லுபடியாகும்?
+Valid for Territories,நிலப்பகுதிகள் செல்லுபடியாகும்
+Validate,உறுதி செய்
+Valuation,மதிப்பு மிக்க
+Valuation Method,மதிப்பீட்டு முறை
+Valuation Rate,மதிப்பீட்டு விகிதம்
+Valuation and Total,மதிப்பீடு மற்றும் மொத்த
+Value,மதிப்பு
+Value or Qty,மதிப்பு அல்லது அளவு
+Vehicle Dispatch Date,வாகன அனுப்புகை தேதி
+Vehicle No,வாகனம் இல்லை
+Verified By,மூலம் சரிபார்க்கப்பட்ட
+View,கருத்து
+View Ledger,காட்சி லெட்ஜர்
+View Now,இப்போது காண்க
+Visit,வருகை
+Visit report for maintenance call.,பராமரிப்பு அழைப்பு அறிக்கையை பார்க்க.
+Voucher #,வவுச்சர் #
+Voucher Detail No,ரசீது விரிவாக இல்லை
+Voucher ID,ரசீது அடையாள
+Voucher No,ரசீது இல்லை
+Voucher Type,ரசீது வகை
+Voucher Type and Date,ரசீது வகை மற்றும் தேதி
+WIP Warehouse required before Submit,WIP கிடங்கு சமர்ப்பி முன் தேவை
+Walk In,ல் நடக்க
+Warehouse,கிடங்கு
+Warehouse ,
+Warehouse Contact Info,சேமிப்பு கிடங்கு தொடர்பு தகவல்
+Warehouse Detail,சேமிப்பு கிடங்கு விரிவாக
+Warehouse Name,சேமிப்பு கிடங்கு பெயர்
+Warehouse User,கிடங்கு பயனர்
+Warehouse Users,கிடங்கு பயனர்கள்
+Warehouse and Reference,கிடங்கு மற்றும் குறிப்பு
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,கிடங்கு மட்டுமே பங்கு நுழைவு / டெலிவரி குறிப்பு / கொள்முதல் ரசீது மூலம் மாற்ற முடியும்
+Warehouse cannot be changed for Serial No.,கிடங்கு சீரியல் எண் மாற்றப்பட கூடாது
+Warehouse does not belong to company.,கிடங்கு நிறுவனம் அல்ல.
+Warehouse is missing in Purchase Order,கிடங்கு கொள்முதல் ஆணை காணவில்லை
+Warehouse where you are maintaining stock of rejected items,நீங்கள் நிராகரித்து பொருட்களை பங்கு வைத்து எங்கே கிடங்கு
+Warehouse-Wise Stock Balance,கிடங்கு-வைஸ் பங்கு இருப்பு
+Warehouse-wise Item Reorder,கிடங்கு வாரியான பொருள் மறுவரிசைப்படுத்துக
+Warehouses,கிடங்குகள்
+Warn,எச்சரிக்கை
+Warning: Leave application contains following block dates,எச்சரிக்கை: விடுப்பு பயன்பாடு பின்வரும் தொகுதி தேதிகள் உள்ளன
+Warning: Material Requested Qty is less than Minimum Order Qty,எச்சரிக்கை : அளவு கோரப்பட்ட பொருள் குறைந்தபட்ச ஆணை அளவு குறைவாக உள்ளது
+Warranty / AMC Details,உத்தரவாதத்தை / AMC விவரம்
+Warranty / AMC Status,உத்தரவாதத்தை / AMC நிலைமை
+Warranty Expiry Date,உத்தரவாதத்தை காலாவதியாகும் தேதி
+Warranty Period (Days),உத்தரவாதத்தை காலம் (நாட்கள்)
+Warranty Period (in days),உத்தரவாதத்தை காலம் (நாட்கள்)
+Warranty expiry date and maintenance status mismatched,உத்தரவாதத்தை காலாவதியாகும் தேதி மற்றும் பராமரிப்பு நிலையை பொருந்தாத
+Website,இணையதளம்
+Website Description,இணையதளத்தில் விளக்கம்
+Website Item Group,இணைய தகவல்கள் குழு
+Website Item Groups,இணைய தகவல்கள் குழுக்கள்
+Website Settings,இணைய அமைப்புகள்
+Website Warehouse,இணைய கிடங்கு
+Wednesday,புதன்கிழமை
+Weekly,வாரந்தோறும்
+Weekly Off,இனிய வாராந்திர
+Weight UOM,எடை மொறட்டுவ பல்கலைகழகம்
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","எடை குறிப்பிடப்பட்டுள்ளது , \ n ""மிக எடை மொறட்டுவ பல்கலைகழகம் "" குறிப்பிட"
+Weightage,Weightage
+Weightage (%),Weightage (%)
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,ERPNext வரவேற்கிறோம் . அடுத்த சில நிமிடங்களில் முடிந்து நீங்கள் அமைப்பு உங்கள் ERPNext கணக்கு உதவும். முயற்சி மற்றும் நீங்கள் அதை ஒரு பிட் இனி எடுக்கும் கூட அதிகம் என தகவல் நிரப்ப . பின்னர் நீங்கள் நிறைய நேரம் சேமிக்கும். குட் லக்!
+What does it do?,அது என்ன?
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","சரி நடவடிக்கைகள் எந்த &quot;Submitted&quot; போது, ஒரு மின்னஞ்சல் பாப் அப் தானாகவே ஒரு இணைப்பாக பரிவர்த்தனை மூலம், அந்த பரிமாற்றத்தில் தொடர்புடைய &quot;தொடர்பு&quot; ஒரு மின்னஞ்சல் அனுப்ப திறக்கப்பட்டது. பயனர் அல்லது மின்னஞ்சல் அனுப்ப முடியாது."
+"When submitted, the system creates difference entries ",
+Where items are stored.,அங்கு பொருட்களை சேமிக்கப்படும்.
+Where manufacturing operations are carried out.,உற்பத்தி நடவடிக்கைகள் மேற்கொள்ளப்பட்டு வருகின்றன.
+Widowed,விதவை
+Will be calculated automatically when you enter the details,நீங்கள் விவரங்களை உள்ளிடவும் போது தானாக கணக்கிடப்படுகிறது
+Will be updated after Sales Invoice is Submitted.,விற்பனை விலைப்பட்டியல் சமர்பிக்கப்பட்டதும் புதுப்பிக்கப்படும்.
+Will be updated when batched.,Batched போது புதுப்பிக்கப்படும்.
+Will be updated when billed.,கணக்கில் போது புதுப்பிக்கப்படும்.
+With Operations,செயல்பாடுகள் மூலம்
+With period closing entry,காலம் நிறைவு நுழைவு
+Work Details,வேலை விவரம்
+Work Done,வேலை
+Work In Progress,முன்னேற்றம் வேலை
+Work-in-Progress Warehouse,"வேலை, செயலில் கிடங்கு"
+Working,உழைக்கும்
+Workstation,பணிநிலையம்
+Workstation Name,பணிநிலைய பெயர்
+Write Off Account,கணக்கு இனிய எழுத
+Write Off Amount,மொத்த தொகை இனிய எழுத
+Write Off Amount <=,மொத்த தொகை இனிய எழுத &lt;=
+Write Off Based On,ஆனால் அடிப்படையில் இனிய எழுத
+Write Off Cost Center,செலவு மையம் இனிய எழுத
+Write Off Outstanding Amount,சிறந்த தொகை இனிய எழுத
+Write Off Voucher,வவுச்சர் இனிய எழுத
+Wrong Template: Unable to find head row.,தவறான வார்ப்புரு: தலை வரிசையில் கண்டுபிடிக்க முடியவில்லை.
+Year,ஆண்டு
+Year Closed,ஆண்டு மூடப்பட்ட
+Year End Date,ஆண்டு முடிவு தேதி
+Year Name,ஆண்டு பெயர்
+Year Start Date,ஆண்டு தொடக்க தேதி
+Year Start Date and Year End Date are already set in Fiscal Year: ,
+Year Start Date and Year End Date are not within Fiscal Year.,ஆண்டு தொடக்க தேதி மற்றும் வருடம் முடிவு தேதி நிதியாண்டு நிலையில் இல்லை.
+Year Start Date should not be greater than Year End Date,ஆண்டு தொடக்கம் தேதி ஆண்டு முடிவு தேதி விட அதிகமாக இருக்க கூடாது
+Year of Passing,தேர்ச்சி பெறுவதற்கான ஆண்டு
+Yearly,வருடாந்திர
+Yes,ஆம்
+You are not allowed to reply to this ticket.,இந்த டிக்கெட் பதில் அனுமதி இல்லை .
+You are not authorized to do/modify back dated entries before ,நீங்கள் / முன் தேதியிட்ட உள்ளீடுகளை திரும்ப மாற்ற செய்ய அதிகாரம் இல்லை
+You are not authorized to set Frozen value,நீங்கள் உறைந்த மதிப்பை அமைக்க அதிகாரம் இல்லை
+You are the Expense Approver for this record. Please Update the 'Status' and Save,இந்த பதிவு செலவு அப்ரூவரான இருக்கிறீர்கள் . 'தகுதி' புதுப்பி இரட்சியும்
+You are the Leave Approver for this record. Please Update the 'Status' and Save,"நீங்கள் இந்த சாதனையை விட்டு வீடு, இருக்கிறீர்கள் . 'தகுதி' புதுப்பி இரட்சியும்"
+You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total',உங்கள் பொறுப்பு வகை அல்லது ' முந்தைய வரிசை மொத்த ' முந்தைய வரிசை அளவு ' மட்டுமே நீங்கள் வரிசையில் நுழைய முடியும்
+You can enter any date manually,நீங்கள் கைமுறையாக எந்த தேதி நுழைய முடியும்
+You can enter the minimum quantity of this item to be ordered.,நீங்கள் கட்டளையிட்ட வேண்டும் இந்த உருப்படியை குறைந்தபட்ச அளவு நுழைய முடியாது.
+You can not change rate if BOM mentioned agianst any item,BOM எந்த பொருளை agianst குறிப்பிட்டுள்ள நீங்கள் வீதம் மாற்ற முடியாது
+You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,நீங்கள் எந்த இரு விநியோக குறிப்பு நுழைய முடியாது மற்றும் விற்பனை விலைப்பட்டியல் இல்லை எந்த ஒரு உள்ளிடவும்.
+"You can start by selecting backup frequency and \
+					granting access for sync",
+You can submit this Stock Reconciliation.,இந்த பங்கு நல்லிணக்க சமர்ப்பிக்க முடியும் .
+You can update either Quantity or Valuation Rate or both.,நீங்கள் அளவு அல்லது மதிப்பீட்டு விகிதம் அல்லது இரண்டு அல்லது மேம்படுத்த முடியும் .
+You cannot Enter Row no. greater than or equal to current row no. for this Charge type,நீங்கள் எந்த வரிசை நுழைய முடியாது. அதிகமாக அல்லது தற்போதைய வரிசையில் சமமாக இல்லை . இந்த குற்றச்சாட்டை வகை
+You cannot deduct when category is for 'Valuation' or 'Valuation and Total',"வகை ' மதிப்பீட்டு ' அல்லது ' மதிப்பீடு மற்றும் மொத்த ' என்கிற போது, நீங்கள் கழித்து முடியாது"
+You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate,நீங்கள் நேரடியாக தொகை உள்ளிட்டு உங்கள் பொறுப்பு வகை உண்மையான இருந்தால் விகிதம் உங்கள் அளவு நுழைய முடியாது
+You cannot give more than ,
+You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row,நீங்கள் முதல் வரிசையில் ' முந்தைய வரிசை மொத்த ' முந்தைய வரிசையில் தொகை 'அல்லது பொறுப்பு வகை தேர்ந்தெடுக்க முடியாது
+You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total,நீங்கள் மதிப்பீட்டிற்கு ' முந்தைய வரிசை மொத்த ' முந்தைய வரிசையில் தொகை 'அல்லது குற்றச்சாட்டுக்கள் வகை தேர்ந்தெடுக்க முடியாது . நீங்கள் முந்தைய வரிசையில் அளவு அல்லது முந்தைய வரிசையில் மொத்த மட்டுமே ' மொத்த ' விருப்பத்தை தேர்ந்தெடுக்க முடியும்
+You have entered duplicate items. Please rectify and try again.,நீங்கள் போலி பொருட்களை நுழைந்தது. சரிசெய்து மீண்டும் முயற்சிக்கவும்.
+You may need to update: ,நீங்கள் மேம்படுத்த வேண்டும்:
+You must ,
+Your Customer's TAX registration numbers (if applicable) or any general information,உங்கள் வாடிக்கையாளர் வரி பதிவு எண்கள் (பொருந்தினால்) அல்லது எந்த பொது தகவல்
+Your Customers,உங்கள் வாடிக்கையாளர்கள்
+Your ERPNext subscription will,உங்கள் ERPNext சந்தா சாப்பிடுவேன்
+Your Products or Services,உங்கள் தயாரிப்புகள் அல்லது சேவைகள்
+Your Suppliers,உங்கள் சப்ளையர்கள்
+Your sales person who will contact the customer in future,எதிர்காலத்தில் வாடிக்கையாளர் தொடர்பு யார் உங்கள் விற்பனை நபர்
+Your sales person will get a reminder on this date to contact the customer,உங்கள் விற்பனை நபர் வாடிக்கையாளர் தொடர்பு கொள்ள இந்த தேதியில் ஒரு நினைவூட்டல் வரும்
+Your setup is complete. Refreshing...,உங்கள் அமைப்பு முழு ஆகிறது . புதுப்பிக்கிறது ...
+Your support email id - must be a valid email - this is where your emails will come!,"உங்கள் ஆதரவு மின்னஞ்சல் ஐடி - ஒரு சரியான மின்னஞ்சல் இருக்க வேண்டும் - உங்கள் மின்னஞ்சல்கள் வரும், அங்கு இது!"
+already available in Price List,விலை பட்டியல் ஏற்கனவே கிடைக்க
+already returned though some other documents,வேறு சில ஆவணங்களை கூட ஏற்கனவே திரும்பினார்
+also be included in Item's rate,மேலும் பொருள் வீதம் சேர்க்கப்பட
+and,மற்றும்
+"and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","மற்றும் "" விற்பனை பொருள் உள்ளது"" ""ஆம்"" வேறு எந்த விற்னையாளர் BOM உள்ளது"
+"and create a new Account Ledger (by clicking on Add Child) of type ""Bank or Cash""","மற்றும் வகை "" வங்கி அல்லது பண "" ஒரு புதிய கணக்கு லெட்ஜர் ( கிளிக் செய்வதன் மூலம் குழந்தை சேர் ) உருவாக்க"
+"and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.","மற்றும் வகை "" வரி "" ஒரு புதிய கணக்கு லெட்ஜர் ( கிளிக் செய்வதன் மூலம் குழந்தை சேர் ) உருவாக்க மற்றும் வரி விகிதம் பற்றி தெரியாது."
+and fiscal year: ,
+are not allowed for,அனுமதி இல்லை
+are not allowed for ,
+are not allowed.,அனுமதி இல்லை.
+assigned by,ஒதுக்கப்படுகின்றன
+but entries can be made against Ledger,ஆனால் உள்ளீடுகளை லெட்ஜர் எதிராக
+but is pending to be manufactured.,ஆனால் உற்பத்தி நிலுவையில் இருக்கிறது .
+cancel,ரத்து
+cannot be greater than 100,100 க்கும் அதிகமாக இருக்க முடியாது
+dd-mm-yyyy,dd-mm-yyyy
+dd/mm/yyyy,dd / mm / yyyy
+deactivate,செயலிழக்க
+discount on Item Code,பொருள் கோட் தள்ளுபடி
+does not belong to BOM: ,BOM அல்ல:
+does not have role 'Leave Approver',பங்கு &#39;விடுப்பு சர்க்கார் தரப்பில் சாட்சி&#39; இல்லை
+does not match,பொருந்தவில்லை
+"e.g. Bank, Cash, Credit Card","உதாரணமாக வங்கி, பண, கடன் அட்டை"
+"e.g. Kg, Unit, Nos, m","உதாரணமாக கிலோ, அலகு, இலக்கங்கள், மீ"
+eg. Cheque Number,உதாரணம். காசோலை எண்
+example: Next Day Shipping,உதாரணமாக: அடுத்த நாள் கப்பல்
+has already been submitted.,ஏற்கனவே சமர்ப்பிக்கப்பட்டுள்ளது.
+has been entered atleast twice,இரண்டு முறை குறைந்தது உள்ளிட்ட
+has been made after posting date,தேதி தகவல்களுக்கு பிறகு செய்யப்பட்டது
+has expired,காலாவதியாகிவிட்டது
+have a common territory,ஒரு பொதுவான பகுதியில் உள்ளது
+in the same UOM.,அதே மொறட்டுவ பல்கலைகழகம் உள்ள .
+is a cancelled Item,ஒரு ரத்து உருப்படி உள்ளது
+is not a Stock Item,ஒரு பங்கு பொருள் அல்ல
+lft,lft
+mm-dd-yyyy,mm-dd-yyyy
+mm/dd/yyyy,dd / mm / yyyy
+must be a Liability account,ஒரு பொறுப்பு கணக்கில் இருக்க வேண்டும்
+must be one of,ஒன்றாக இருக்க வேண்டும்
+not a purchase item,ஒரு கொள்முதல் உருப்படியை
+not a sales item,ஒரு விற்பனை பொருள் அல்ல
+not a service item.,ஒரு சேவை உருப்படியை.
+not a sub-contracted item.,ஒரு துணை ஒப்பந்த உருப்படியை.
+not submitted,சமர்ப்பிக்கவில்லை
+not within Fiscal Year,இல்லை நிதியாண்டு உள்ள
+of,உள்ள
+old_parent,old_parent
+reached its end of life on,வாழ்க்கை அதன் இறுதியில் அடைந்தது
+rgt,rgt
+should be 100%,100% இருக்க வேண்டும்
+the form before proceeding,அதற்கு முன் வடிவம்
+they are created automatically from the Customer and Supplier master,அவர்கள் வாடிக்கையாளர் மற்றும் சப்ளையர் மாஸ்டர் இருந்து தானாக உருவாக்கப்பட்டது
+"to be included in Item's rate, it is required that: ","பொருள் வீதம் சேர்க்கப்பட்டுள்ளது வேண்டும், அது வேண்டும்:"
+to set the given stock and valuation on this date.,இந்த தேதியில் கொடுக்கப்பட்ட பங்கு மற்றும் மதிப்பீட்டு அமைக்க .
+usually as per physical inventory.,பொதுவாக உடல் சரக்கு படி .
+website page link,இணைய பக்கம் இணைப்பு
+which is greater than sales order qty ,இது விற்பனை பொருட்டு அளவு அதிகமாக இருக்கும்
+yyyy-mm-dd,yyyy-mm-dd
