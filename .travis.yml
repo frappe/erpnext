@@ -7,7 +7,7 @@ services:
   - mysql
 
 install:
-  - CFLAGS=-O0 pip install git+https://github.com/frappe/wnframework.git@4.0.0-wip &&
+  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop &&
   - pip install --editable .
 
 script: 
