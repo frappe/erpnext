@@ -42,7 +42,7 @@ def validate_fiscal_year(date, fiscal_year, label="Date"):
 		throw("{label} '{posting_date}': {not}: '{fiscal_year}'".format(**{
 				"label": label,
 				"posting_date": formatdate(date),
-				"not": _("not within Fiscal Year")
+				"not": _("not within Fiscal Year"),
 				"fiscal_year": fiscal_year
 			}))
 
