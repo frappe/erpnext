@@ -39,17 +39,13 @@ class TestCustomer(unittest.TestCase):
 			self.assertEquals(value, details.get(key))
 		
 	def test_rename(self):
-		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1"), 
-			(("_Test Customer 1",),))
-			
 		webnotes.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
-		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1 Renamed"), 
-			(("_Test Customer 1 Renamed",),))
-		self.assertEqual(webnotes.conn.exists("Customer", "_Test Customer 1"), ())
+		self.assertTrue(webnotes.conn.exists("Customer", "_Test Customer 1 Renamed"))
+		self.assertFalse(webnotes.conn.exists("Customer", "_Test Customer 1"))
 		
 		webnotes.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
-				
+		
 
 test_ignore = ["Price List"]
 			
