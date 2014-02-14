@@ -101,13 +101,13 @@ class AccountsReceivableReport(object):
 		return flt(gle.debit) - flt(gle.credit) - payment_received
 		
 	def get_customer(self, account):
-		return self.get_account_map().get(account).get("customer") or ""
+		return self.get_account_map().get(account, {}).get("customer") or ""
 
 	def get_customer_name(self, account):
-		return self.get_account_map().get(account).get("customer_name") or ""
+		return self.get_account_map().get(account, {}).get("customer_name") or ""
 
 	def get_territory(self, account):
-		return self.get_account_map().get(account).get("territory") or ""
+		return self.get_account_map().get(account, {}).get("territory") or ""
 		
 	def get_account_map(self):
 		if not hasattr(self, "account_map"):
