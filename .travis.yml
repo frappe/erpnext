@@ -7,22 +7,14 @@ services:
   - mysql
 
 install:
-  - pip install git+https://github.com/webnotes/wnframework.git@4.0.0-wip &&
+  - CFLAGS=-O0 pip install git+https://github.com/frappe/wnframework.git@4.0.0-wip &&
   - pip install --editable .
 
 script: 
     cd ./test_sites/ &&
-    webnotes --reinstall -v test_site &&
-    webnotes --install_app erpnext -v test_site &&
-    webnotes --run_tests -v test_site --app erpnext
-
-branches:
-  except:
-    - develop
-    - master
-    - 3.x.x
-    - slow
-    - webshop_refactor
+    frappe --reinstall -v test_site &&
+    frappe --install_app erpnext -v test_site &&
+    frappe --run_tests -v test_site --app erpnext
 
 before_script:
   - mysql -e 'create database travis' &&
