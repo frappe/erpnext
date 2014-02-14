@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-11-22 17:15:27", 
+  "modified": "2014-02-11 12:01:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -738,6 +738,15 @@
   "fieldname": "column_break_63", 
   "fieldtype": "Column Break", 
   "read_only": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
  }, 
  {
   "doctype": "DocField", 
