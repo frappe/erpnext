@@ -13,28 +13,73 @@ ERPNext is built on [frappe](https://github.com/frappe/frappe)
 
 ---
 
+### Development install
+
+#### Pre-requisites
+
+1. MySQL
+1. Python-2.7
+1. Python Setuptools (Python Package Manager)
+1. Memcache
+1. libxslt
+
+#### Steps
+
+1. Start MySQL and memcache
+1. Setup Python Virtualenv (optional - only if you are running multiple python projects requiring different versions of libraries)
+1. Install pip: `sudo easy_install pip`
+1. Create a `bench` directory
+1. Clone `frappe` in the `bench` : `git clone https://github.com/frappe/frappe`
+1. Install python libraries `sudo pip install webnotes/requirements.txt`
+1. Clone `erpnext` in the `bench`: `git clone https://github.com/frappe/erpnext.git`
+1. Clone `shopping-cart` in the `bench`: `git clone https://github.com/frappe/shopping-cart.git`
+1. Install the packages: `pip install -e frappe/ erpnext/ shopping-cart/`
+1. Create `sites` directory
+1. Create `apps.txt`: `echo erpnext\nshopping_cart >> sites/apps.txt`
+1. Change to `sites` directory
+1. Setup a site: `frappe erpnext.local --install erpnext`
+1. Install erpnext app: `frappe erpnext.local --install_app erpnext`
+1. Start serving: `frappe erpnext.local --serve`
+1. Start a browser and go to `http://localhost:8000`
+
+Putting it all together:
+
+```
+sudo easy_install pip
+mkdir bench
+cd bench
+git clone https://github.com/frappe/frappe.git
+git clone https://github.com/frappe/erpnext.git
+git clone https://github.com/frappe/shopping-cart.git
+sudo pip install -e frappe/ erpnext/ shopping-cart/
+mkdir sites
+echo erpnext\nshopping_cart >> sites/apps.txt
+cd sites
+frappe erpnext.local --install erpnext
+frappe erpnext.local --install_app erpnext
+frappe erpnext.local --install_app shopping-cart
+frappe erpnext.local --serve
+```
+
+#### Pulling Latest Updates
+
+1. Update your git repositories
+1. Go to `bench/sites` directory
+1. Run `frappe erpnext.local --latest`
+1. Run `frappe erpnext.local --build`
+1. Run `frappe erpnext.local --flush`
+
+#### Admin Login
+
+1. go to "/login"
+1. Administrator user name: "Administrator"
+1. Administrator passowrd "admin"
+
 ### Download and Install
 
 ##### Virtual Image:
 
 - [ERPNext Download](http://erpnext.com/erpnext-download)
-
-##### On Linux:
-
-1. Switch to root user using `sudo su`
-1. create a folder where you want to install erpnext
-1. go to the new folder
-1. `wget https://raw.github.com/frappe/erpnext/master/install_erpnext.py`
-1. `python install_erpnext.py`
-    
-[See installation notes](https://github.com/frappe/erpnext/wiki/How-to-Install-ERPNext)
-
-##### Patch and update
-
-To patch and update from the latest git repository the erpnext folder and run.
-You will have to set your origin in git remote
-
-    $ lib/wnf.py --update origin master
 
 ---
 
