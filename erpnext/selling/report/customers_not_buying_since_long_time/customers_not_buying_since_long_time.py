@@ -2,15 +2,15 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import getdate, cint
+import frappe
+from frappe.utils import getdate, cint
 
 def execute(filters=None):
 	if not filters: filters ={}
 
 	days_since_last_order = filters.get("days_since_last_order")
 	if cint(days_since_last_order) <= 0:
-		webnotes.msgprint("Please mention positive value in 'Days Since Last Order' field",raise_exception=1)
+		frappe.msgprint("Please mention positive value in 'Days Since Last Order' field",raise_exception=1)
 
 	columns = get_columns() 
 	customers = get_so_details()
@@ -23,7 +23,7 @@ def execute(filters=None):
 	return columns, data 
 
 def get_so_details():
-	return webnotes.conn.sql("""select 
+	return frappe.conn.sql("""select 
 			cust.name, 
 			cust.customer_name, 
 			cust.territory, 
@@ -41,7 +41,7 @@ def get_so_details():
 		order by 'days_since_last_order' desc """,as_list=1)
 
 def get_last_so_amt(customer):
-	res =  webnotes.conn.sql("""select net_total from `tabSales Order`
+	res =  frappe.conn.sql("""select net_total from `tabSales Order`
 		where customer ='%(customer)s' and docstatus = 1 order by transaction_date desc 
 		limit 1""" % {'customer':customer})
 

@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint, flt
-from webnotes import msgprint, throw, _
+import frappe
+from frappe.utils import cint, flt
+from frappe import msgprint, throw, _
 
 class DocType:
 	def __init__(self, doc, doclist):
@@ -45,9 +45,10 @@ class DocType:
 
 	def check_existing_leave_allocation(self):
 		"""check whether leave for same type is already allocated or not"""
-		leave_allocation = webnotes.conn.sql("""select name from `tabLeave Allocation`
+		leave_allocation = frappe.conn.sql("""select name from `tabLeave Allocation`
 			where employee=%s and leave_type=%s and period=%s and docstatus=1""",
 			(self.doc.employee, self.doc.leave_type, self.doc.period))
+
 		if leave_allocation:
 			throw("""%s is already allocated to Employee: %s for Period: %s.
 				Please refere Leave Allocation: \
@@ -71,14 +72,14 @@ class DocType:
 		return self.get_leaves_allocated(prev_fyear) - self.get_leaves_applied(prev_fyear)
 
 	def get_leaves_applied(self, period):
-		leaves_applied = webnotes.conn.sql("""select SUM(ifnull(total_leave_days, 0))
+		leaves_applied = frappe.conn.sql("""select SUM(ifnull(total_leave_days, 0))
 			from `tabLeave Application` where employee=%s and leave_type=%s
 			and period=%s and docstatus=1""", 
 			(self.doc.employee, self.doc.leave_type, period))
 		return leaves_applied and flt(leaves_applied[0][0]) or 0
 
 	def get_leaves_allocated(self, period):
-		leaves_allocated = webnotes.conn.sql("""select SUM(ifnull(total_leaves_allocated, 0))
+		leaves_allocated = frappe.conn.sql("""select SUM(ifnull(total_leaves_allocated, 0))
 			from `tabLeave Allocation` where employee=%s and leave_type=%s
 			and period=%s and docstatus=1 and name!=%s""",
 			(self.doc.employee, self.doc.leave_type, period, self.doc.name))
@@ -86,12 +87,12 @@ class DocType:
 
 	def allow_carry_forward(self):
 		"""check whether carry forward is allowed or not for this leave type"""
-		cf = webnotes.conn.sql("""select is_carry_forward from `tabLeave Type` where name = %s""",
+		cf = frappe.conn.sql("""select is_carry_forward from `tabLeave Type` where name = %s""",
 			self.doc.leave_type)
 		cf = cf and cint(cf[0][0]) or 0
 
 		if not cf:
-			webnotes.conn.set(self.doc, 'carry_forward', 0)
+			frappe.conn.set(self.doc, 'carry_forward', 0)
 			throw("{msg}: {leave_type}".format(**{
 				"msg": _("Sorry! You cannot carry forward"),
 				"leave_type": self.doc.leave_type
@@ -100,7 +101,7 @@ class DocType:
 	def get_carry_forwarded_leaves(self):
 		if self.doc.carry_forward:
 			self.allow_carry_forward()
-		prev_period = webnotes.conn.sql("""select name from `tabPeriod` 
+		prev_period = frappe.conn.sql("""select name from `tabPeriod` 
 			where from_date = (select date_add(from_date, interval -1 year) 
 				from `tabPeriod` where name=%s) 
 			order by name desc limit 1""", self.doc.period)
@@ -116,13 +117,14 @@ class DocType:
 
 	def get_total_allocated_leaves(self):
 		leave_det = self.get_carry_forwarded_leaves()
-		webnotes.conn.set(self.doc, 'carry_forwarded_leaves', flt(leave_det['carry_forwarded_leaves']))
-		webnotes.conn.set(self.doc, 'total_leaves_allocated', flt(leave_det['total_leaves_allocated']))
+		frappe.conn.set(self.doc, 'carry_forwarded_leaves', flt(leave_det['carry_forwarded_leaves']))
+		frappe.conn.set(self.doc, 'total_leaves_allocated', flt(leave_det['total_leaves_allocated']))
 
 	def check_for_leave_application(self):
-		exists = webnotes.conn.sql("""select name from `tabLeave Application`
+		exists = frappe.conn.sql("""select name from `tabLeave Application`
 			where employee=%s and leave_type=%s and period=%s and docstatus=1""",
 			(self.doc.employee, self.doc.leave_type, self.doc.period))
+
 		if exists:
 			throw("""Cannot cancel this Leave Allocation as \
 				Employee : %s has already applied for %s. 

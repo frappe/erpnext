@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt, cint
-from webnotes import msgprint, _
-from webnotes.model.doc import addchild
+import frappe
+from frappe.utils import flt, cint
+from frappe import msgprint, _
+from frappe.model.doc import addchild
 
 class DocType:
 	def __init__(self, d, dl):
@@ -32,28 +32,28 @@ class DocType:
 		"""
 			Validates if delivery note has status as draft
 		"""
-		if cint(webnotes.conn.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
+		if cint(frappe.conn.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
 			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again."""), raise_exception=1)
 	
 	def validate_items_mandatory(self):
 		rows = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
 		if not rows:
-			webnotes.msgprint(_("No Items to Pack"), raise_exception=1)
+			frappe.msgprint(_("No Items to Pack"), raise_exception=1)
 
 	def validate_case_nos(self):
 		"""
 			Validate if case nos overlap. If they do, recommend next case no.
 		"""
 		if not cint(self.doc.from_case_no):
-			webnotes.msgprint(_("Please specify a valid 'From Case No.'"), raise_exception=1)
+			frappe.msgprint(_("Please specify a valid 'From Case No.'"), raise_exception=1)
 		elif not self.doc.to_case_no:
 			self.doc.to_case_no = self.doc.from_case_no
 		elif self.doc.from_case_no > self.doc.to_case_no:
-			webnotes.msgprint(_("'To Case No.' cannot be less than 'From Case No.'"),
+			frappe.msgprint(_("'To Case No.' cannot be less than 'From Case No.'"),
 				raise_exception=1)
 		
 		
-		res = webnotes.conn.sql("""SELECT name FROM `tabPacking Slip`
+		res = frappe.conn.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
 			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
@@ -61,7 +61,7 @@ class DocType:
 			""", self.doc.fields)
 
 		if res:
-			webnotes.msgprint(_("""Case No(s) already in use. Please rectify and try again.
+			frappe.msgprint(_("""Case No(s) already in use. Please rectify and try again.
 				Recommended <b>From Case No. = %s</b>""") % self.get_recommended_case_no(),
 				raise_exception=1)
 
@@ -94,7 +94,7 @@ class DocType:
 			condition = " and item_code in (%s)" % (", ".join(["%s"]*len(rows)))
 		
 		# gets item code, qty per item code, latest packed qty per item code and stock uom
-		res = webnotes.conn.sql("""select item_code, ifnull(sum(qty), 0) as qty,
+		res = frappe.conn.sql("""select item_code, ifnull(sum(qty), 0) as qty,
 			(select sum(ifnull(psi.qty, 0) * (abs(ps.to_case_no - ps.from_case_no) + 1))
 				from `tabPacking Slip` ps, `tabPacking Slip Item` psi
 				where ps.name = psi.parent and ps.docstatus = 1
@@ -119,7 +119,7 @@ class DocType:
 		item['specified_qty'] = flt(ps_item_qty[item['item_code']])
 		if not item['packed_qty']: item['packed_qty'] = 0
 		
-		webnotes.msgprint("""
+		frappe.msgprint("""
 			Invalid Quantity specified (%(specified_qty)s %(stock_uom)s).
 			%(packed_qty)s out of %(qty)s %(stock_uom)s already packed for %(item_code)s.
 			<b>Recommended quantity for %(item_code)s = %(recommended_qty)s 
@@ -133,7 +133,7 @@ class DocType:
 			self.doc.from_case_no = self.get_recommended_case_no()
 
 		for d in self.doclist.get({"parentfield": "item_details"}):
-			res = webnotes.conn.get_value("Item", d.item_code, 
+			res = frappe.conn.get_value("Item", d.item_code, 
 				["net_weight", "weight_uom"], as_dict=True)
 			
 			if res and len(res)>0:
@@ -145,7 +145,7 @@ class DocType:
 			Returns the next case no. for a new packing slip for a delivery
 			note
 		"""
-		recommended_case_no = webnotes.conn.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
+		recommended_case_no = frappe.conn.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
 		
 		return cint(recommended_case_no[0][0]) + 1
@@ -165,7 +165,7 @@ class DocType:
 
 def item_details(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	return webnotes.conn.sql("""select name, item_name, description from `tabItem` 
+	return frappe.conn.sql("""select name, item_name, description from `tabItem` 
 				where name in ( select item_code FROM `tabDelivery Note Item` 
 	 						where parent= %s 
 	 							and ifnull(qty, 0) > ifnull(packed_qty, 0)) 

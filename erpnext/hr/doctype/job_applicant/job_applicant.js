@@ -6,16 +6,16 @@
 cur_frm.cscript = {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Jobs Email Settings">'+wn._("Jobs Email Settings")+'</a><br>\
-				<span class="help">'+wn._('Automatically extract Job Applicants from a mail box ')+'e.g. "jobs@example.com"</span></p>';
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Jobs Email Settings">'+frappe._("Jobs Email Settings")+'</a><br>\
+				<span class="help">'+frappe._('Automatically extract Job Applicants from a mail box ')+'e.g. "jobs@example.com"</span></p>';
 		}
 	},
 	refresh: function(doc) {
 		cur_frm.cscript.make_listing(doc);
 	},
 	make_listing: function(doc) {
-		cur_frm.communication_view = new wn.views.CommunicationList({
-			list: wn.model.get("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
+		cur_frm.communication_view = new frappe.views.CommunicationList({
+			list: frappe.model.get("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
 			parent: cur_frm.fields_dict['thread_html'].wrapper,
 			doc: doc,
 			recipients: doc.email_id

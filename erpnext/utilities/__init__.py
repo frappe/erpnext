@@ -15,9 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import cint, comma_or
+import frappe
+from frappe import _, msgprint
+from frappe.utils import cint, comma_or
 
 def validate_status(status, options):
 	if status not in options:

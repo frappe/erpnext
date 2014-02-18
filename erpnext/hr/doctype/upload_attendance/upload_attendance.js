@@ -1,10 +1,10 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("assets/erpnext/js/utils.js");
-wn.provide("erpnext.hr");
+frappe.require("assets/erpnext/js/utils.js");
+frappe.provide("erpnext.hr");
 
-erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
+erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 	onload: function() {
 		this.frm.set_value("att_fr_date", get_today());
 		this.frm.set_value("att_to_date", get_today());
@@ -16,10 +16,10 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 
 	get_template:function() {
 		if(!this.frm.doc.att_fr_date || !this.frm.doc.att_to_date) {
-			msgprint(wn._("Attendance From Date and Attendance To Date is mandatory"));
+			msgprint(frappe._("Attendance From Date and Attendance To Date is mandatory"));
 			return;
 		}
-		window.location.href = repl(wn.request.url + 
+		window.location.href = repl(frappe.request.url + 
 			'?cmd=%(cmd)s&from_date=%(from_date)s&to_date=%(to_date)s', {
 				cmd: "erpnext.hr.doctype.upload_attendance.upload_attendance.get_template",
 				from_date: this.frm.doc.att_fr_date,
@@ -32,7 +32,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
 
 		// upload
-		wn.upload.make({
+		frappe.upload.make({
 			parent: $wrapper,
 			args: {
 				method: 'erpnext.hr.doctype.upload_attendance.upload_attendance.upload'
@@ -55,11 +55,11 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 						return v;
 					});
 
-					r.messages = ["<h4 style='color:red'>"+wn._("Import Failed!")+"</h4>"]
-						.concat(r.messages);
+					r.messages = ["<h4 style='color:red'>" + frappe._("Import Failed!") + "</h4>"]
+						.concat(r.messages)
 				} else {
-					r.messages = ["<h4 style='color:green'>"+wn._("Import Successful!")+"</h4>"].
-						concat(r.message.messages);
+					r.messages = ["<h4 style='color:green'>" + frappe._("Import Successful!") + "</h4>"].
+						concat(r.message.messages)
 				}
 
 				$.each(r.messages, function(i, v) {
@@ -71,7 +71,7 @@ erpnext.hr.AttendanceControlPanel = wn.ui.form.Controller.extend({
 					else if(v.substr(0,7) == 'Updated')
 						$p.css('color', 'green');
 					else if(v.substr(0,5) == 'Valid')
-						$p.css('color', '#777');	
+						$p.css('color', '#777');
 				});
 			}
 		});

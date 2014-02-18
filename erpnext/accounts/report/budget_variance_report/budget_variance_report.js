@@ -1,28 +1,28 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Budget Variance Report"] = {
+frappe.query_reports["Budget Variance Report"] = {
 	"filters": [
 		{
 			fieldname: "fiscal_year",
-			label: wn._("Fiscal Year"),
+			label: frappe._("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
 			default: sys_defaults.fiscal_year
 		},
 		{
 			fieldname: "period",
-			label: wn._("Period"),
+			label: frappe._("Period"),
 			fieldtype: "Select",
 			options: "Monthly\nQuarterly\nHalf-Yearly\nYearly",
 			default: "Monthly"
 		},
 		{
 			fieldname: "company",
-			label: wn._("Company"),
+			label: frappe._("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: wn.defaults.get_default("company")
+			default: frappe.defaults.get_default("company")
 		},
 	]
 }

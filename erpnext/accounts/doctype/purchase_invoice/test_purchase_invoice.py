@@ -4,11 +4,11 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-import webnotes.model
+import frappe
+import frappe.model
 import json	
-from webnotes.utils import cint
-import webnotes.defaults
+from frappe.utils import cint
+import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 test_dependencies = ["Item", "Cost Center"]
@@ -17,9 +17,9 @@ test_ignore = ["Serial No"]
 class TestPurchaseInvoice(unittest.TestCase):
 	def test_gl_entries_without_auto_accounting_for_stock(self):
 		set_perpetual_inventory(0)
-		self.assertTrue(not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")))
+		self.assertTrue(not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")))
 		
-		wrapper = webnotes.bean(copy=test_records[0])
+		wrapper = frappe.bean(copy=test_records[0])
 		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.submit()
@@ -37,21 +37,21 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"_Test Account VAT - _TC": [156.25, 0],
 			"_Test Account Discount - _TC": [0, 168.03],
 		}
-		gl_entries = webnotes.conn.sql("""select account, debit, credit from `tabGL Entry`
+		gl_entries = frappe.conn.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type = 'Purchase Invoice' and voucher_no = %s""", dl[0].name, as_dict=1)
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
 	def test_gl_entries_with_auto_accounting_for_stock(self):
 		set_perpetual_inventory(1)
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
+		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pi = webnotes.bean(copy=test_records[1])
+		pi = frappe.bean(copy=test_records[1])
 		pi.run_method("calculate_taxes_and_totals")
 		pi.insert()
 		pi.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
 			order by account asc""", pi.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -73,9 +73,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_gl_entries_with_aia_for_non_stock_items(self):
 		set_perpetual_inventory()
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
+		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pi = webnotes.bean(copy=test_records[1])
+		pi = frappe.bean(copy=test_records[1])
 		pi.doclist[1].item_code = "_Test Non Stock Item"
 		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
@@ -84,7 +84,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.insert()
 		pi.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
 			order by account asc""", pi.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -102,7 +102,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 			
 	def test_purchase_invoice_calculation(self):
-		wrapper = webnotes.bean(copy=test_records[0])
+		wrapper = frappe.bean(copy=test_records[0])
 		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.load_from_db()
@@ -136,7 +136,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 			
 	def test_purchase_invoice_with_subcontracted_item(self):
-		wrapper = webnotes.bean(copy=test_records[0])
+		wrapper = frappe.bean(copy=test_records[0])
 		wrapper.doclist[1].item_code = "_Test FG Item"
 		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
@@ -174,11 +174,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = webnotes.bean(copy=jv_test_records[1])
+		jv = frappe.bean(copy=jv_test_records[1])
 		jv.insert()
 		jv.submit()
 		
-		pi = webnotes.bean(copy=test_records[0])
+		pi = frappe.bean(copy=test_records[0])
 		pi.doclist.append({
 			"doctype": "Purchase Invoice Advance",
 			"parentfield": "advance_allocation_details",
@@ -193,17 +193,17 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.submit()
 		pi.load_from_db()
 		
-		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_voucher=%s""", pi.doc.name))
 		
-		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_voucher=%s and debit=300""", pi.doc.name))
 			
 		self.assertEqual(pi.doc.outstanding_amount, 1212.30)
 		
 		pi.cancel()
 		
-		self.assertTrue(not webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_voucher=%s""", pi.doc.name))
 	
 test_records = [

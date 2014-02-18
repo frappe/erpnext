@@ -5,18 +5,18 @@ cur_frm.cscript.tname = "Installation Note Item";
 cur_frm.cscript.fname = "installed_item_details";
 
 
-wn.ui.form.on_change("Installation Note", "customer", 
+frappe.ui.form.on_change("Installation Note", "customer", 
 	function(frm) { erpnext.utils.get_party_details(frm); });
 
-wn.ui.form.on_change("Installation Note", "customer_address", 
+frappe.ui.form.on_change("Installation Note", "customer_address", 
 	function(frm) { erpnext.utils.get_address_display(frm); });
 
-wn.ui.form.on_change("Installation Note", "contact_person", 
+frappe.ui.form.on_change("Installation Note", "contact_person", 
 	function(frm) { erpnext.utils.get_contact_details(frm); });
 
-wn.provide("erpnext.selling");
+frappe.provide("erpnext.selling");
 // TODO commonify this code
-erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
+erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 	onload: function() {
 		if(!this.frm.doc.status) set_multiple(dt,dn,{ status:'Draft'});
 		if(this.frm.doc.__islocal) set_multiple(this.frm.doc.doctype, this.frm.doc.name, 
@@ -49,9 +49,9 @@ erpnext.selling.InstallationNote = wn.ui.form.Controller.extend({
 	
 	refresh: function() {
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Delivery Note'), 
+			cur_frm.add_custom_button(frappe._('From Delivery Note'), 
 				function() {
-					wn.model.map_current_doc({
+					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 						source_doctype: "Delivery Note",
 						get_query_filters: {

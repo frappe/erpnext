@@ -35,19 +35,19 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 		
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(wn._('Make Sales Order'), 
+			cur_frm.add_custom_button(frappe._('Make Sales Order'), 
 				cur_frm.cscript['Make Sales Order']);
 			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button(wn._('Set as Lost'), 
+				cur_frm.add_custom_button(frappe._('Set as Lost'), 
 					cur_frm.cscript['Declare Order Lost'], "icon-exclamation");
 			}
-			cur_frm.appframe.add_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.appframe.add_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 		}
 		
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Opportunity'), 
+			cur_frm.add_custom_button(frappe._('From Opportunity'), 
 				function() {
-					wn.model.map_current_doc({
+					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {
@@ -63,8 +63,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		}
 
 		if (!doc.__islocal) {
-			cur_frm.communication_view = new wn.views.CommunicationList({
-				list: wn.model.get("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
+			cur_frm.communication_view = new frappe.views.CommunicationList({
+				list: frappe.model.get("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
 				parent: cur_frm.fields_dict.communication_html.wrapper,
 				doc: doc,
 				recipients: doc.contact_email
@@ -91,8 +91,8 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	
 	validate_company_and_party: function(party_field) {
 		if(!this.frm.doc.quotation_to) {
-			msgprint(wn._("Please select a value for" + " " + 
-				wn.meta.get_label(this.frm.doc.doctype, "quotation_to", this.frm.doc.name)));
+			msgprint(frappe._("Please select a value for" + " " + 
+				frappe.meta.get_label(this.frm.doc.doctype, "quotation_to", this.frm.doc.name)));
 			return false;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			return true;
@@ -127,7 +127,7 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 // Make Sales Order
 // =====================================================================================
 cur_frm.cscript['Make Sales Order'] = function() {
-	wn.model.open_mapped_doc({
+	frappe.model.open_mapped_doc({
 		method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 		source_name: cur_frm.doc.name
 	})
@@ -136,12 +136,12 @@ cur_frm.cscript['Make Sales Order'] = function() {
 // declare order lost
 //-------------------------
 cur_frm.cscript['Declare Order Lost'] = function(){
-	var dialog = new wn.ui.Dialog({
+	var dialog = new frappe.ui.Dialog({
 		title: "Set as Lost",
 		fields: [
-			{"fieldtype": "Text", "label": wn._("Reason for losing"), "fieldname": "reason",
+			{"fieldtype": "Text", "label": frappe._("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": wn._("Update"), "fieldname": "update"},
+			{"fieldtype": "Button", "label": frappe._("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -154,7 +154,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(wn._("There were errors."));
+					msgprint(frappe._("There were errors."));
 					return;
 				}
 				dialog.hide();
@@ -168,6 +168,6 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(wn.boot.notification_settings.quotation))
-		cur_frm.email_doc(wn.boot.notification_settings.quotation_message);
+	if(cint(frappe.boot.notification_settings.quotation))
+		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }

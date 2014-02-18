@@ -4,8 +4,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
+import frappe
+from frappe import _
 
 class DocType:
 	def __init__(self, d, dl):
@@ -18,13 +18,13 @@ def take_backups_weekly():
 	take_backups_if("Weekly")
 
 def take_backups_if(freq):
-	if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
+	if frappe.conn.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
 		take_backups_dropbox()
 		
-	# if webnotes.conn.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
+	# if frappe.conn.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
 	# 	take_backups_gdrive()
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def take_backups_dropbox():
 	did_not_upload, error_log = [], []
 	try:
@@ -35,12 +35,12 @@ def take_backups_dropbox():
 		send_email(True, "Dropbox")
 	except Exception:
 		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
-		error_message = ("\n".join(file_and_error) + "\n" + webnotes.get_traceback())
-		webnotes.errprint(error_message)
+		error_message = ("\n".join(file_and_error) + "\n" + frappe.get_traceback())
+		frappe.errprint(error_message)
 		send_email(False, "Dropbox", error_message)
 
 #backup to gdrive 
-@webnotes.whitelist()
+@frappe.whitelist()
 def take_backups_gdrive():
 	did_not_upload, error_log = [], []
 	try:
@@ -51,12 +51,12 @@ def take_backups_gdrive():
 		send_email(True, "Google Drive")
 	except Exception:
 		file_and_error = [" - ".join(f) for f in zip(did_not_upload, error_log)]
-		error_message = ("\n".join(file_and_error) + "\n" + webnotes.get_traceback())
-		webnotes.errprint(error_message)
+		error_message = ("\n".join(file_and_error) + "\n" + frappe.get_traceback())
+		frappe.errprint(error_message)
 		send_email(False, "Google Drive", error_message)
 
 def send_email(success, service_name, error_status=None):
-	from webnotes.utils.email_lib import sendmail
+	from frappe.utils.email_lib import sendmail
 	if success:
 		subject = "Backup Upload Successful"
 		message ="""<h3>Backup Uploaded Successfully</h3><p>Hi there, this is just to inform you 
@@ -71,8 +71,8 @@ def send_email(success, service_name, error_status=None):
 		<p>Please contact your system manager for more information.</p>
 		""" % (service_name, error_status)
 	
-	if not webnotes.conn:
-		webnotes.connect()
+	if not frappe.conn:
+		frappe.connect()
 	
-	recipients = webnotes.conn.get_value("Backup Manager", None, "send_notifications_to").split(",")
+	recipients = frappe.conn.get_value("Backup Manager", None, "send_notifications_to").split(",")
 	sendmail(recipients, subject=subject, msg=message)

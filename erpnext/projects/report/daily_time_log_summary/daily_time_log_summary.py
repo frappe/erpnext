@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters:
@@ -19,7 +19,7 @@ def execute(filters=None):
 	task_map = get_task_map()
 		
 	conditions = build_conditions(filters)
-	time_logs = webnotes.conn.sql("""select * from `tabTime Log` 
+	time_logs = frappe.conn.sql("""select * from `tabTime Log` 
 		where docstatus < 2 %s order by owner asc""" % (conditions, ), filters, as_dict=1)
 
 	if time_logs:
@@ -49,7 +49,7 @@ def execute(filters=None):
 	return columns, data
 	
 def get_profile_map():
-	profiles = webnotes.conn.sql("""select name, 
+	profiles = frappe.conn.sql("""select name, 
 		concat(first_name, if(last_name, (' ' + last_name), '')) as fullname 
 		from tabProfile""", as_dict=1)
 	profile_map = {}
@@ -59,7 +59,7 @@ def get_profile_map():
 	return profile_map
 	
 def get_task_map():
-	tasks = webnotes.conn.sql("""select name, subject from tabTask""", as_dict=1)
+	tasks = frappe.conn.sql("""select name, subject from tabTask""", as_dict=1)
 	task_map = {}
 	for t in tasks:
 		task_map.setdefault(t.name, []).append(t.subject)
@@ -73,7 +73,7 @@ def build_conditions(filters):
 	if filters.get("to_date"):
 		conditions += " and to_time <= %(to_date)s"
 	
-	from webnotes.widgets.reportview import build_match_conditions
+	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Time Log")
 	if match_conditions:
 		conditions += " and %s" % match_conditions

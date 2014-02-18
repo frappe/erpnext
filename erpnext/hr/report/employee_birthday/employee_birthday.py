@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -22,7 +22,7 @@ def get_columns():
 	
 def get_employees(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select name, date_of_birth, branch, department, designation, 
+	return frappe.conn.sql("""select name, date_of_birth, branch, department, designation, 
 	gender, company from tabEmployee where status = 'Active' %s""" % conditions, as_list=1)
 	
 def get_conditions(filters):

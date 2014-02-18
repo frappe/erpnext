@@ -3,13 +3,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint
-from webnotes.utils import flt, getdate, add_days
-from webnotes.model.controller import DocListController
+import frappe
+from frappe import msgprint
+from frappe.utils import flt, getdate, add_days
+from frappe.model.controller import DocListController
 from datetime import date
 
-class StockFreezeError(webnotes.ValidationError): pass
+class StockFreezeError(frappe.ValidationError): pass
 
 class DocType(DocListController):
 	def __init__(self, doc, doclist=[]):
@@ -37,7 +37,7 @@ class DocType(DocListController):
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.doc.batch_no:
-			batch_bal_after_transaction = flt(webnotes.conn.sql("""select sum(actual_qty)
+			batch_bal_after_transaction = flt(frappe.conn.sql("""select sum(actual_qty)
 				from `tabStock Ledger Entry`
 				where warehouse=%s and item_code=%s and batch_no=%s""",
 				(self.doc.warehouse, self.doc.item_code, self.doc.batch_no))[0][0])
@@ -47,7 +47,7 @@ class DocType(DocListController):
 					'batch_bal': batch_bal_after_transaction - self.doc.actual_qty
 				})
 
-				webnotes.throw("""Not enough quantity (requested: %(actual_qty)s, \
+				frappe.throw("""Not enough quantity (requested: %(actual_qty)s, \
 					current: %(batch_bal)s in Batch <b>%(batch_no)s</b> for Item \
 					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
 					as on %(posting_date)s %(posting_time)s""" % self.doc.fields)
@@ -60,43 +60,43 @@ class DocType(DocListController):
 			if not self.doc.fields.get(k):
 				msgprint("Stock Ledger Entry: '%s' is mandatory" % k, raise_exception = 1)
 			elif k == 'warehouse':
-				if not webnotes.conn.sql("select name from tabWarehouse where name = '%s'" % self.doc.fields.get(k)):
+				if not frappe.conn.sql("select name from tabWarehouse where name = '%s'" % self.doc.fields.get(k)):
 					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
 
 	def validate_item(self):
-		item_det = webnotes.conn.sql("""select name, has_batch_no, docstatus,
+		item_det = frappe.conn.sql("""select name, has_batch_no, docstatus,
 			is_stock_item, has_serial_no, serial_no_series
 			from tabItem where name=%s""",
 			self.doc.item_code, as_dict=True)[0]
 
 		if item_det.is_stock_item != 'Yes':
-			webnotes.throw("""Item: "%s" is not a Stock Item.""" % self.doc.item_code)
+			frappe.throw("""Item: "%s" is not a Stock Item.""" % self.doc.item_code)
 
 		# check if batch number is required
 		if item_det.has_batch_no =='Yes' and self.doc.voucher_type != 'Stock Reconciliation':
 			if not self.doc.batch_no:
-				webnotes.throw("Batch number is mandatory for Item '%s'" % self.doc.item_code)
+				frappe.throw("Batch number is mandatory for Item '%s'" % self.doc.item_code)
 
 			# check if batch belongs to item
-			if not webnotes.conn.sql("""select name from `tabBatch`
+			if not frappe.conn.sql("""select name from `tabBatch`
 				where item='%s' and name ='%s' and docstatus != 2""" % (self.doc.item_code, self.doc.batch_no)):
-				webnotes.throw("'%s' is not a valid Batch Number for Item '%s'" % (self.doc.batch_no, self.doc.item_code))
+				frappe.throw("'%s' is not a valid Batch Number for Item '%s'" % (self.doc.batch_no, self.doc.item_code))
 
 		if not self.doc.stock_uom:
 			self.doc.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
-		stock_frozen_upto = webnotes.conn.get_value('Stock Settings', None, 'stock_frozen_upto') or ''
+		stock_frozen_upto = frappe.conn.get_value('Stock Settings', None, 'stock_frozen_upto') or ''
 		if stock_frozen_upto:
-			stock_auth_role = webnotes.conn.get_value('Stock Settings', None,'stock_auth_role')
-			if getdate(self.doc.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in webnotes.user.get_roles():
+			stock_auth_role = frappe.conn.get_value('Stock Settings', None,'stock_auth_role')
+			if getdate(self.doc.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in frappe.user.get_roles():
 				msgprint("You are not authorized to do / modify back dated stock entries before %s" % getdate(stock_frozen_upto).strftime('%d-%m-%Y'), raise_exception=StockFreezeError)
 
-		stock_frozen_upto_days = int(webnotes.conn.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
+		stock_frozen_upto_days = int(frappe.conn.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
 		if stock_frozen_upto_days:
-			stock_auth_role = webnotes.conn.get_value('Stock Settings', None,'stock_auth_role')
+			stock_auth_role = frappe.conn.get_value('Stock Settings', None,'stock_auth_role')
 			older_than_x_days_ago = (add_days(getdate(self.doc.posting_date), stock_frozen_upto_days) <= date.today())
-			if older_than_x_days_ago and not stock_auth_role in webnotes.user.get_roles():
+			if older_than_x_days_ago and not stock_auth_role in frappe.user.get_roles():
 				msgprint("You are not authorized to do / modify back dated stock entries older than %d days ago" %stock_frozen_upto_days, raise_exception=StockFreezeError)
 
 
@@ -105,8 +105,8 @@ class DocType(DocListController):
 			self.doc.posting_time = '00:00'
 
 def on_doctype_update():
-	if not webnotes.conn.sql("""show index from `tabStock Ledger Entry`
+	if not frappe.conn.sql("""show index from `tabStock Ledger Entry`
 		where Key_name="posting_sort_index" """):
-		webnotes.conn.commit()
-		webnotes.conn.sql("""alter table `tabStock Ledger Entry`
+		frappe.conn.commit()
+		frappe.conn.sql("""alter table `tabStock Ledger Entry`
 			add index posting_sort_index(posting_date, posting_time, name)""")

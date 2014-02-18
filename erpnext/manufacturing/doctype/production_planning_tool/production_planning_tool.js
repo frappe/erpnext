@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
-	cur_frm.set_value("company", wn.defaults.get_default("company"))
+	cur_frm.set_value("company", frappe.defaults.get_default("company"))
 	cur_frm.set_value("use_multi_level_bom", 1)
 }
 
@@ -44,7 +44,7 @@ cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(
 			query: "erpnext.controllers.queries.bom",
 			filters:{'item': cstr(d.item_code)}
 		}
-	} else msgprint(wn._("Please enter Item first"));
+	} else msgprint(frappe._("Please enter Item first"));
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {

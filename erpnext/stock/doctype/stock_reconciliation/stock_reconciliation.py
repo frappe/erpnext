@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-import webnotes.defaults
+import frappe
+import frappe.defaults
 import json
-from webnotes import msgprint, _
-from webnotes.utils import cstr, flt, cint
+from frappe import msgprint, _
+from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.utils import update_bin
@@ -87,7 +87,7 @@ class DocType(StockController):
 			for msg in self.validation_messages:
 				msgprint(msg)
 			
-			raise webnotes.ValidationError
+			raise frappe.ValidationError
 						
 	def validate_item(self, item_code, row_num):
 		from erpnext.stock.doctype.item.item import validate_end_of_life, \
@@ -96,7 +96,7 @@ class DocType(StockController):
 		# using try except to catch all validation msgs and display together
 		
 		try:
-			item = webnotes.doc("Item", item_code)
+			item = frappe.doc("Item", item_code)
 			
 			# end of life and stock item
 			validate_end_of_life(item_code, item.end_of_life, verbose=0)
@@ -104,7 +104,7 @@ class DocType(StockController):
 		
 			# item should not be serialized
 			if item.has_serial_no == "Yes":
-				raise webnotes.ValidationError, (_("Serialized Item: '") + item_code +
+				raise frappe.ValidationError, (_("Serialized Item: '") + item_code +
 					_("""' can not be managed using Stock Reconciliation.\
 					You can add/delete Serial No directly, \
 					to modify stock of this item."""))
@@ -128,7 +128,7 @@ class DocType(StockController):
 		
 		data = json.loads(self.doc.reconciliation_json)
 		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
-			row = webnotes._dict(zip(row_template, row))
+			row = frappe._dict(zip(row_template, row))
 			row["row_num"] = row_num
 			previous_sle = get_previous_sle({
 				"item_code": row.item_code,
@@ -140,7 +140,7 @@ class DocType(StockController):
 			# check valuation rate mandatory
 			if row.qty != "" and not row.valuation_rate and \
 					flt(previous_sle.get("qty_after_transaction")) <= 0:
-				webnotes.throw(_("As existing qty for item: ") + row.item_code + 
+				frappe.throw(_("As existing qty for item: ") + row.item_code + 
 					_(" at warehouse: ") + row.warehouse +
 					_(" is less than equals to zero in the system, valuation rate is mandatory for this item"))
 			
@@ -233,7 +233,7 @@ class DocType(StockController):
 					
 	def insert_entries(self, opts, row):
 		"""Insert Stock Ledger Entries"""		
-		args = webnotes._dict({
+		args = frappe._dict({
 			"doctype": "Stock Ledger Entry",
 			"item_code": row.item_code,
 			"warehouse": row.warehouse,
@@ -242,7 +242,7 @@ class DocType(StockController):
 			"voucher_type": self.doc.doctype,
 			"voucher_no": self.doc.name,
 			"company": self.doc.company,
-			"stock_uom": webnotes.conn.get_value("Item", row.item_code, "stock_uom"),
+			"stock_uom": frappe.conn.get_value("Item", row.item_code, "stock_uom"),
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.doc.fiscal_year,
 			"is_cancelled": "No"
@@ -257,12 +257,12 @@ class DocType(StockController):
 		"""	Delete Stock Ledger Entries related to this voucher
 			and repost future Stock Ledger Entries"""
 				
-		existing_entries = webnotes.conn.sql("""select distinct item_code, warehouse 
+		existing_entries = frappe.conn.sql("""select distinct item_code, warehouse 
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
 			(self.doc.doctype, self.doc.name), as_dict=1)
 				
 		# delete entries
-		webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+		frappe.conn.sql("""delete from `tabStock Ledger Entry` 
 			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
 		
 		# repost future entries for selected item_code, warehouse
@@ -283,20 +283,20 @@ class DocType(StockController):
 		
 			
 	def validate_expense_account(self):
-		if not cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return
 			
 		if not self.doc.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
-		elif not webnotes.conn.sql("""select * from `tabStock Ledger Entry`"""):
-			if webnotes.conn.get_value("Account", self.doc.expense_account, 
+		elif not frappe.conn.sql("""select * from `tabStock Ledger Entry`"""):
+			if frappe.conn.get_value("Account", self.doc.expense_account, 
 					"is_pl_account") == "Yes":
 				msgprint(_("""Expense Account can not be a PL Account, as this stock \
 					reconciliation is an opening entry. \
 					Please select 'Temporary Account (Liabilities)' or relevant account"""), 
 					raise_exception=1)
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def upload():
-	from webnotes.utils.datautils import read_csv_content_from_uploaded_file
+	from frappe.utils.datautils import read_csv_content_from_uploaded_file
 	return read_csv_content_from_uploaded_file()

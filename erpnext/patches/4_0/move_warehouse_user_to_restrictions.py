@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def execute():
-	from webnotes.core.page.user_properties import user_properties
-	for warehouse, profile in webnotes.conn.sql("""select parent, user from `tabWarehouse User`"""):
+	from frappe.core.page.user_properties import user_properties
+	for warehouse, profile in frappe.conn.sql("""select parent, user from `tabWarehouse User`"""):
 		user_properties.add(profile, "Warehouse", warehouse)
 	
-	webnotes.delete_doc("DocType", "Warehouse User")
-	webnotes.reload_doc("stock", "doctype", "warehouse")
+	frappe.delete_doc("DocType", "Warehouse User")
+	frappe.reload_doc("stock", "doctype", "warehouse")

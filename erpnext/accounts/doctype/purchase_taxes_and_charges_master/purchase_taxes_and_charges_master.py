@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.model import db_exists
-from webnotes.model.bean import copy_doclist
-from webnotes.model.code import get_obj
+from frappe.model import db_exists
+from frappe.model.bean import copy_doclist
+from frappe.model.code import get_obj
 
 	
 

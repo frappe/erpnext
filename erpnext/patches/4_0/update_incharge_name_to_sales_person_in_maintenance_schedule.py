@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def execute():
-	webnotes.reload_doc("support", "doctype", "maintenance_schedule_detail")
-	webnotes.reload_doc("support", "doctype", "maintenance_schedule_item")
+	frappe.reload_doc("support", "doctype", "maintenance_schedule_detail")
+	frappe.reload_doc("support", "doctype", "maintenance_schedule_item")
 	
-	webnotes.conn.sql("""update `tabMaintenance Schedule Detail` set sales_person=incharge_name""")
-	webnotes.conn.sql("""update `tabMaintenance Schedule Item` set sales_person=incharge_name""")
+	frappe.conn.sql("""update `tabMaintenance Schedule Detail` set sales_person=incharge_name""")
+	frappe.conn.sql("""update `tabMaintenance Schedule Item` set sales_person=incharge_name""")

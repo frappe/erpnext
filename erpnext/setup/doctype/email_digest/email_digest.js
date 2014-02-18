@@ -3,10 +3,10 @@
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	doc = locals[dt][dn];
-	var save_msg = wn._("You must ")+ "<b>"+wn._("Save ")+"</b>"+wn._("the form before proceeding");
-	var err_msg = wn._("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
+	var save_msg = frappe._("You must ")+ "<b>"+frappe._("Save ")+"</b>"+frappe._("the form before proceeding");
+	var err_msg = frappe._("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
 	
-	cur_frm.add_custom_button(wn._('View Now'), function() {
+	cur_frm.add_custom_button(frappe._('View Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			return $c_obj(make_doclist(dt, dn), 'get_digest_msg', '', function(r, rt) {
@@ -15,8 +15,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 					console.log(r.exc);
 				} else {
 					//console.log(arguments);
-					var d = new wn.ui.Dialog({
-						title: wn._('Email Digest: ') + dn,
+					var d = new frappe.ui.Dialog({
+						title: frappe._('Email Digest: ') + dn,
 						width: 800
 					});
 
@@ -29,7 +29,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			msgprint(save_msg);
 		}	
 	}, 1);
-	cur_frm.add_custom_button(wn._('Send Now'), function() {
+	cur_frm.add_custom_button(frappe._('Send Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			return $c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
@@ -38,7 +38,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 					console.log(r.exc);
 				} else {
 					//console.log(arguments);
-					msgprint(wn._('Message Sent'));
+					msgprint(frappe._('Message Sent'));
 				}
 			});
 		} else {
@@ -55,8 +55,8 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 		} else {
 			// Open a dialog and display checkboxes against email addresses
 			doc = locals[dt][dn];
-			var d = new wn.ui.Dialog({
-				title: wn._('Add/Remove Recipients'),
+			var d = new frappe.ui.Dialog({
+				title: frappe._('Add/Remove Recipients'),
 				width: 400
 			});
 			var dialog_div = $a(d.body, 'div', 'dialog-div', '', '');
@@ -70,7 +70,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 					check.checked = 1;
 					add_or_update = 'Update';
 				}
-				var fullname = wn.user.full_name(v.name);
+				var fullname = frappe.user.full_name(v.name);
 				if(fullname !== v.name) v.name = fullname + " &lt;" + v.name + "&gt;";
 				if(v.enabled==0) {
 					v.name = repl("<span style='color: red'> %(name)s (disabled user)</span>", {name: v.name});

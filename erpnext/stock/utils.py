@@ -1,19 +1,19 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
-from webnotes import msgprint, _
+import frappe
+from frappe import msgprint, _
 import json
-from webnotes.utils import flt, cstr, nowdate, add_days, cint
-from webnotes.defaults import get_global_default
-from webnotes.utils.email_lib import sendmail
+from frappe.utils import flt, cstr, nowdate, add_days, cint
+from frappe.defaults import get_global_default
+from frappe.utils.email_lib import sendmail
 
-class InvalidWarehouseCompany(webnotes.ValidationError): pass
+class InvalidWarehouseCompany(frappe.ValidationError): pass
 	
 def get_stock_balance_on(warehouse, posting_date=None):
 	if not posting_date: posting_date = nowdate()
 	
-	stock_ledger_entries = webnotes.conn.sql("""
+	stock_ledger_entries = frappe.conn.sql("""
 		SELECT 
 			item_code, stock_value
 		FROM 
@@ -31,16 +31,16 @@ def get_stock_balance_on(warehouse, posting_date=None):
 	
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in webnotes.conn.sql("""SELECT item_code, warehouse, stock_value as stock_value 
+	for d in frappe.conn.sql("""SELECT item_code, warehouse, stock_value as stock_value 
 		FROM tabBin""", as_dict=1):
 			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 			
 	return bin_map
 	
 def get_bin(item_code, warehouse):
-	bin = webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
+	bin = frappe.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
-		bin_wrapper = webnotes.bean([{
+		bin_wrapper = frappe.bean([{
 			"doctype": "Bin",
 			"item_code": item_code,
 			"warehouse": warehouse,
@@ -49,12 +49,12 @@ def get_bin(item_code, warehouse):
 		bin_wrapper.insert()
 		bin_obj = bin_wrapper.make_controller()
 	else:
-		from webnotes.model.code import get_obj
+		from frappe.model.code import get_obj
 		bin_obj = get_obj('Bin', bin)
 	return bin_obj
 
 def update_bin(args):
-	is_stock_item = webnotes.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
+	is_stock_item = frappe.conn.get_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item == 'Yes':
 		bin = get_bin(args.get("item_code"), args.get("warehouse"))
 		bin.update_stock(args)
@@ -71,7 +71,7 @@ def get_incoming_rate(args):
 	if args.get("serial_no"):
 		in_rate = get_avg_purchase_rate(args.get("serial_no"))
 	elif args.get("bom_no"):
-		result = webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
+		result = frappe.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
 			from `tabBOM` where name = %s and docstatus=1 and is_active=1""", args.get("bom_no"))
 		in_rate = result and flt(result[0][0]) or 0
 	else:
@@ -91,13 +91,13 @@ def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
 	
 	serial_nos = get_valid_serial_nos(serial_nos)
-	return flt(webnotes.conn.sql("""select avg(ifnull(purchase_rate, 0)) from `tabSerial No` 
+	return flt(frappe.conn.sql("""select avg(ifnull(purchase_rate, 0)) from `tabSerial No` 
 		where name in (%s)""" % ", ".join(["%s"] * len(serial_nos)),
 		tuple(serial_nos))[0][0])
 
 def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
-	val_method = webnotes.conn.get_value('Item', item_code, 'valuation_method')
+	val_method = frappe.conn.get_value('Item', item_code, 'valuation_method')
 	if not val_method:
 		val_method = get_global_default('valuation_method') or "FIFO"
 	return val_method
@@ -148,9 +148,9 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	return valid_serial_nos
 
 def validate_warehouse_company(warehouse, company):
-	warehouse_company = webnotes.conn.get_value("Warehouse", warehouse, "company")
+	warehouse_company = frappe.conn.get_value("Warehouse", warehouse, "company")
 	if warehouse_company and warehouse_company != company:
-		webnotes.msgprint(_("Warehouse does not belong to company.") + " (" + \
+		frappe.msgprint(_("Warehouse does not belong to company.") + " (" + \
 			warehouse + ", " + company +")", raise_exception=InvalidWarehouseCompany)
 
 def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, voucher_detail_no, 
@@ -181,12 +181,12 @@ def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
-	if getattr(webnotes.local, "auto_indent", None) is None:
-		webnotes.local.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
+	if getattr(frappe.local, "auto_indent", None) is None:
+		frappe.local.auto_indent = cint(frappe.conn.get_value('Stock Settings', None, 'auto_indent'))
 	
-	if webnotes.local.auto_indent:
+	if frappe.local.auto_indent:
 		material_requests = {}
-		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
+		bin_list = frappe.conn.sql("""select item_code, warehouse, projected_qty
 			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
 			and exists (select name from `tabItem` 
 				where `tabItem`.name = `tabBin`.item_code and 
@@ -194,14 +194,14 @@ def reorder_item():
 				(ifnull(end_of_life, '')='' or end_of_life > now()))""", as_dict=True)
 		for bin in bin_list:
 			#check if re-order is required
-			item_reorder = webnotes.conn.get("Item Reorder", 
+			item_reorder = frappe.conn.get("Item Reorder", 
 				{"parent": bin.item_code, "warehouse": bin.warehouse})
 			if item_reorder:
 				reorder_level = item_reorder.warehouse_reorder_level
 				reorder_qty = item_reorder.warehouse_reorder_qty
 				material_request_type = item_reorder.material_request_type or "Purchase"
 			else:
-				reorder_level, reorder_qty = webnotes.conn.get_value("Item", bin.item_code,
+				reorder_level, reorder_qty = frappe.conn.get_value("Item", bin.item_code,
 					["re_order_level", "re_order_qty"])
 				material_request_type = "Purchase"
 		
@@ -209,12 +209,12 @@ def reorder_item():
 				if flt(reorder_level) - flt(bin.projected_qty) > flt(reorder_qty):
 					reorder_qty = flt(reorder_level) - flt(bin.projected_qty)
 					
-				company = webnotes.conn.get_value("Warehouse", bin.warehouse, "company") or \
-					webnotes.defaults.get_defaults()["company"] or \
-					webnotes.conn.sql("""select name from tabCompany limit 1""")[0][0]
+				company = frappe.conn.get_value("Warehouse", bin.warehouse, "company") or \
+					frappe.defaults.get_defaults()["company"] or \
+					frappe.conn.sql("""select name from tabCompany limit 1""")[0][0]
 					
-				material_requests.setdefault(material_request_type, webnotes._dict()).setdefault(
-					company, []).append(webnotes._dict({
+				material_requests.setdefault(material_request_type, frappe._dict()).setdefault(
+					company, []).append(frappe._dict({
 						"item_code": bin.item_code,
 						"warehouse": bin.warehouse,
 						"reorder_qty": reorder_qty
@@ -226,7 +226,7 @@ def reorder_item():
 def create_material_request(material_requests):
 	"""	Create indent on reaching reorder level	"""
 	mr_list = []
-	defaults = webnotes.defaults.get_defaults()
+	defaults = frappe.defaults.get_defaults()
 	exceptions_list = []
 	from erpnext.accounts.utils import get_fiscal_year
 	current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
@@ -246,7 +246,7 @@ def create_material_request(material_requests):
 				}]
 			
 				for d in items:
-					item = webnotes.doc("Item", d.item_code)
+					item = frappe.doc("Item", d.item_code)
 					mr.append({
 						"doctype": "Material Request Item",
 						"parenttype": "Material Request",
@@ -262,24 +262,24 @@ def create_material_request(material_requests):
 						"brand": item.brand,
 					})
 			
-				mr_bean = webnotes.bean(mr)
+				mr_bean = frappe.bean(mr)
 				mr_bean.insert()
 				mr_bean.submit()
 				mr_list.append(mr_bean)
 
 			except:
-				if webnotes.local.message_log:
-					exceptions_list.append([] + webnotes.local.message_log)
-					webnotes.local.message_log = []
+				if frappe.local.message_log:
+					exceptions_list.append([] + frappe.local.message_log)
+					frappe.local.message_log = []
 				else:
-					exceptions_list.append(webnotes.get_traceback())
+					exceptions_list.append(frappe.get_traceback())
 
 	if mr_list:
-		if getattr(webnotes.local, "reorder_email_notify", None) is None:
-			webnotes.local.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
+		if getattr(frappe.local, "reorder_email_notify", None) is None:
+			frappe.local.reorder_email_notify = cint(frappe.conn.get_value('Stock Settings', None, 
 				'reorder_email_notify'))
 			
-		if(webnotes.local.reorder_email_notify):
+		if(frappe.local.reorder_email_notify):
 			send_email_notification(mr_list)
 
 	if exceptions_list:
@@ -288,7 +288,7 @@ def create_material_request(material_requests):
 def send_email_notification(mr_list):
 	""" Notify user about auto creation of indent"""
 	
-	email_list = webnotes.conn.sql_list("""select distinct r.parent 
+	email_list = frappe.conn.sql_list("""select distinct r.parent 
 		from tabUserRole r, tabProfile p
 		where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
 		and r.role in ('Purchase Manager','Material Manager') 
@@ -320,5 +320,5 @@ def notify_errors(exceptions_list):
 		Regards,
 		Administrator""" % ("\n\n".join(["\n".join(msg) for msg in exceptions_list]),)
 
-	from webnotes.profile import get_system_managers
+	from frappe.profile import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)

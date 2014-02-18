@@ -1,4 +1,4 @@
-from webnotes import _
+from frappe import _
 
 data = {
 	"Accounts": {
@@ -52,12 +52,6 @@ data = {
 		"icon": "icon-tag", 
 		"link": "selling-home", 
 		"type": "module"
-	}, 
-	"Setup": {
-		"color": "#bdc3c7", 
-		"icon": "icon-wrench", 
-		"link": "Setup", 
-		"type": "setup"
 	}, 
 	"Stock": {
 		"color": "#f39c12", 

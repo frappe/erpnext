@@ -17,10 +17,10 @@ from __future__ import unicode_literals
 import httplib2
 import os
 import mimetypes
-import webnotes
+import frappe
 import oauth2client.client
-from webnotes.utils import cstr
-from webnotes import _, msgprint
+from frappe.utils import cstr
+from frappe import _, msgprint
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
 
@@ -29,7 +29,7 @@ from apiclient.http import MediaFileUpload
 import logging
 logging.basicConfig()
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_gdrive_authorize_url():
 	flow = get_gdrive_flow()
 	authorize_url = flow.step1_get_authorize_url()
@@ -38,8 +38,8 @@ def get_gdrive_authorize_url():
 	}
 
 def upload_files(name, mimetype, service, folder_id):
-	if not webnotes.conn:
-		webnotes.connect()
+	if not frappe.conn:
+		frappe.connect()
 	file_name = os.path.basename(name)
 	media_body = MediaFileUpload(name, mimetype=mimetype, resumable=True)
 	body = {
@@ -57,11 +57,11 @@ def upload_files(name, mimetype, service, folder_id):
 		status, response = request.next_chunk()
 
 def backup_to_gdrive():
-	from webnotes.utils.backups import new_backup
-	if not webnotes.conn:
-		webnotes.connect()
+	from frappe.utils.backups import new_backup
+	if not frappe.conn:
+		frappe.connect()
 	get_gdrive_flow()
-	credentials_json = webnotes.conn.get_value("Backup Manager", None, "gdrive_credentials")
+	credentials_json = frappe.conn.get_value("Backup Manager", None, "gdrive_credentials")
 	credentials = oauth2client.client.Credentials.new_from_json(credentials_json)
 	http = httplib2.Http()
 	http = credentials.authorize(http)
@@ -69,21 +69,21 @@ def backup_to_gdrive():
 
 	# upload database
 	backup = new_backup()
-	path = os.path.join(webnotes.local.site_path, "public", "backups")
+	path = os.path.join(frappe.local.site_path, "public", "backups")
 	filename = os.path.join(path, os.path.basename(backup.backup_path_db))
 	
 	# upload files to database folder
 	upload_files(filename, 'application/x-gzip', drive_service, 
-		webnotes.conn.get_value("Backup Manager", None, "database_folder_id"))
+		frappe.conn.get_value("Backup Manager", None, "database_folder_id"))
 	
 	# upload files to files folder
 	did_not_upload = []
 	error_log = []
 	
-	files_folder_id = webnotes.conn.get_value("Backup Manager", None, "files_folder_id")
+	files_folder_id = frappe.conn.get_value("Backup Manager", None, "files_folder_id")
 	
-	webnotes.conn.close()
-	path = os.path.join(webnotes.local.site_path, "public", "files")
+	frappe.conn.close()
+	path = os.path.join(frappe.local.site_path, "public", "files")
 	for filename in os.listdir(path):
 		filename = cstr(filename)
 		found = False
@@ -109,22 +109,22 @@ def backup_to_gdrive():
 				did_not_upload.append(filename)
 				error_log.append(cstr(e))
 	
-	webnotes.connect()
+	frappe.connect()
 	return did_not_upload, list(set(error_log))
 
 def get_gdrive_flow():
 	from oauth2client.client import OAuth2WebServerFlow
-	from webnotes import conf
+	from frappe import conf
 	
 	if not "gdrive_client_id" in conf:
-		webnotes.msgprint(_("Please set Google Drive access keys in") + " conf.py", 
+		frappe.msgprint(_("Please set Google Drive access keys in") + " conf.py", 
 		raise_exception=True)
 
 	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret, 
 		"https://www.googleapis.com/auth/drive", 'urn:ietf:wg:oauth:2.0:oob')
 	return flow
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def gdrive_callback(verification_code = None):
 	flow = get_gdrive_flow()
 	if verification_code:
@@ -139,17 +139,17 @@ def gdrive_callback(verification_code = None):
 	database_folder_id = create_folder('database', drive_service, erpnext_folder_id)
 	files_folder_id = create_folder('files', drive_service, erpnext_folder_id)
 
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "gdrive_access_allowed", allowed)
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "database_folder_id", database_folder_id)
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "files_folder_id", files_folder_id)
+	frappe.conn.set_value("Backup Manager", "Backup Manager", "gdrive_access_allowed", allowed)
+	frappe.conn.set_value("Backup Manager", "Backup Manager", "database_folder_id", database_folder_id)
+	frappe.conn.set_value("Backup Manager", "Backup Manager", "files_folder_id", files_folder_id)
 	final_credentials = credentials.to_json()
-	webnotes.conn.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
+	frappe.conn.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
 
-	webnotes.msgprint("Updated")
+	frappe.msgprint("Updated")
 
 def create_erpnext_folder(service):
-	if not webnotes.conn:
-		webnotes.connect()
+	if not frappe.conn:
+		frappe.connect()
 	erpnext = {
 		'title': 'erpnext',
 		'mimeType': 'application/vnd.google-apps.folder'

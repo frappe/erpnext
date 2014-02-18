@@ -2,19 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, cint
-from webnotes.utils.email_lib.receive import POP3Mailbox
-from webnotes.core.doctype.communication.communication import _make
+import frappe
+from frappe.utils import cstr, cint
+from frappe.utils.email_lib.receive import POP3Mailbox
+from frappe.core.doctype.communication.communication import _make
 
 def add_sales_communication(subject, content, sender, real_name, mail=None, 
 	status="Open", date=None):
-	lead_name = webnotes.conn.get_value("Lead", {"email_id": sender})
-	contact_name = webnotes.conn.get_value("Contact", {"email_id": sender})
+	lead_name = frappe.conn.get_value("Lead", {"email_id": sender})
+	contact_name = frappe.conn.get_value("Contact", {"email_id": sender})
 
 	if not (lead_name or contact_name):
 		# none, create a new Lead
-		lead = webnotes.bean({
+		lead = frappe.bean({
 			"doctype":"Lead",
 			"lead_name": real_name or sender,
 			"email_id": sender,
@@ -33,12 +33,12 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 	
 	if mail:
 		# save attachments to parent if from mail
-		bean = webnotes.bean(parent_doctype, parent_name)
+		bean = frappe.bean(parent_doctype, parent_name)
 		mail.save_attachments_in_doc(bean.doc)
 
 class SalesMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.settings = args or webnotes.doc("Sales Email Settings", "Sales Email Settings")
+		self.settings = args or frappe.doc("Sales Email Settings", "Sales Email Settings")
 		
 	def process_message(self, mail):
 		if mail.from_email == self.settings.email_id:
@@ -48,5 +48,5 @@ class SalesMailbox(POP3Mailbox):
 			mail.from_real_name, mail=mail, date=mail.date)
 
 def get_leads():
-	if cint(webnotes.conn.get_value('Sales Email Settings', None, 'extract_emails')):
+	if cint(frappe.conn.get_value('Sales Email Settings', None, 'extract_emails')):
 		SalesMailbox()

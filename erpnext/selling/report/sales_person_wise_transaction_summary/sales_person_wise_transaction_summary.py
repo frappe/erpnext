@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint, _
+import frappe
+from frappe import msgprint, _
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -26,7 +26,7 @@ def get_columns(filters):
 def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
 	conditions, items = get_conditions(filters, date_field)
-	entries = webnotes.conn.sql("""select dt.name, dt.customer, dt.territory, dt.%s, 
+	entries = frappe.conn.sql("""select dt.name, dt.customer, dt.territory, dt.%s, 
 		dt_item.item_code, dt_item.qty, dt_item.base_amount, st.sales_person, 
 		st.allocated_percentage, dt_item.base_amount*st.allocated_percentage/100
 		from `tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st 
@@ -63,7 +63,7 @@ def get_items(filters):
 
 	items = []
 	if key:
-		items = webnotes.conn.sql_list("""select name from tabItem where %s = %s""" % 
+		items = frappe.conn.sql_list("""select name from tabItem where %s = %s""" % 
 			(key, '%s'), (filters[key]))
 			
 	return items

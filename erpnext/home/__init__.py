@@ -15,8 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint
+import frappe
+from frappe import msgprint
 
 feed_dict = {
 	# Project
@@ -59,16 +59,16 @@ feed_dict = {
 def make_feed(feedtype, doctype, name, owner, subject, color):
 	"makes a new Feed record"
 	#msgprint(subject)
-	from webnotes.model.doc import Document
-	from webnotes.utils import get_fullname
+	from frappe.model.doc import Document
+	from frappe.utils import get_fullname
 
 	if feedtype in ('Login', 'Comment', 'Assignment'):
 		# delete old login, comment feed
-		webnotes.conn.sql("""delete from tabFeed where 
+		frappe.conn.sql("""delete from tabFeed where 
 			datediff(curdate(), creation) > 7 and doc_type in ('Comment', 'Login', 'Assignment')""")
 	else:
 		# one feed per item
-		webnotes.conn.sql("""delete from tabFeed
+		frappe.conn.sql("""delete from tabFeed
 			where doc_type=%s and doc_name=%s 
 			and ifnull(feed_type,'') != 'Comment'""", (doctype, name))
 

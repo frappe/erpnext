@@ -1,10 +1,10 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.pages['sales-analytics'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['sales-analytics'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Sales Analytics'),
+		title: frappe._('Sales Analytics'),
 		single_column: true
 	});
 	new erpnext.SalesAnalytics(wrapper);
@@ -14,10 +14,10 @@ wn.pages['sales-analytics'].onload = function(wrapper) {
 	
 }
 
-erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
+erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: wn._("Sales Analytics"),
+			title: frappe._("Sales Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -30,14 +30,14 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		
 		this.tree_grids = {
 			"Customer Group": {
-				label: wn._("Customer Group / Customer"),
+				label: frappe._("Customer Group / Customer"),
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_customer_group", 
 				formatter: function(item) { return item.name; }
 			},
 			"Customer": {
-				label: wn._("Customer"),
+				label: frappe._("Customer"),
 				show: false, 
 				item_key: "customer",
 				formatter: function(item) {
@@ -45,7 +45,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				}
 			},	
 			"Item Group": {
-				label: wn._("Item"),
+				label: frappe._("Item"),
 				show: true, 
 				parent_field: "parent_item_group", 
 				item_key: "item_code",
@@ -54,7 +54,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				}
 			},	
 			"Item": {
-				label: wn._("Item"),
+				label: frappe._("Item"),
 				show: false, 
 				item_key: "item_code",
 				formatter: function(item) {
@@ -62,7 +62,7 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 				}
 			},	
 			"Territory": {
-				label: wn._("Territory / Customer"),
+				label: frappe._("Territory / Customer"),
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_territory", 
@@ -88,23 +88,23 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", fieldname: "tree_type", label: wn._("Tree Type"), options:["Customer Group", "Customer", 
+		{fieldtype:"Select", fieldname: "tree_type", label: frappe._("Tree Type"), options:["Customer Group", "Customer", 
 			"Item Group", "Item", "Territory"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", fieldname: "based_on", label: wn._("Based On"), options:["Sales Invoice", 
+		{fieldtype:"Select", fieldname: "based_on", label: frappe._("Based On"), options:["Sales Invoice", 
 			"Sales Order", "Delivery Note"]},
-		{fieldtype:"Select", fieldname: "value_or_qty", label:  wn._("Value or Qty"), options:["Value", "Quantity"]},
-		{fieldtype:"Select", fieldname: "company", label: wn._("Company"), link:"Company", 
+		{fieldtype:"Select", fieldname: "value_or_qty", label:  frappe._("Value or Qty"), options:["Value", "Quantity"]},
+		{fieldtype:"Select", fieldname: "company", label: frappe._("Company"), link:"Company", 
 			default_value: "Select Company..."},
-		{fieldtype:"Date", fieldname: "from_date", label: wn._("From Date")},
-		{fieldtype:"Label", fieldname: "to", label: wn._("To")},
-		{fieldtype:"Date", fieldname: "to_date", label: wn._("To Date")},
-		{fieldtype:"Select", fieldname: "range", label: wn._("Range"), 
+		{fieldtype:"Date", fieldname: "from_date", label: frappe._("From Date")},
+		{fieldtype:"Label", fieldname: "to", label: frappe._("To")},
+		{fieldtype:"Date", fieldname: "to_date", label: frappe._("To Date")},
+		{fieldtype:"Select", fieldname: "range", label: frappe._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", fieldname: "refresh", label: wn._("Refresh"), icon:"icon-refresh"},
-		{fieldtype:"Button", fieldname: "reset_filters", label: wn._("Reset Filters"), icon:"icon-filter"}
+		{fieldtype:"Button", fieldname: "refresh", label: frappe._("Refresh"), icon:"icon-refresh"},
+		{fieldtype:"Button", fieldname: "reset_filters", label: frappe._("Reset Filters"), icon:"icon-filter"}
 	],
 	setup_filters: function() {
 		var me = this;
@@ -124,14 +124,14 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		if (!this.tl) {
 			// add 'Not Set' Customer & Item
 			// (Customer / Item are not mandatory!!)
-			wn.report_dump.data["Customer"].push({
+			frappe.report_dump.data["Customer"].push({
 				name: "Not Set", 
 				parent_customer_group: "All Customer Groups",
 				parent_territory: "All Territories",
 				id: "Not Set",
 			});
 
-			wn.report_dump.data["Item"].push({
+			frappe.report_dump.data["Item"].push({
 				name: "Not Set", 
 				parent_item_group: "All Item Groups",
 				id: "Not Set",
@@ -144,13 +144,13 @@ erpnext.SalesAnalytics = wn.views.TreeGridReport.extend({
 		
 		if(!this.data || me.item_type != me.tree_type) {
 			if(me.tree_type=='Customer') {
-				var items = wn.report_dump.data["Customer"];
+				var items = frappe.report_dump.data["Customer"];
 			} if(me.tree_type=='Customer Group') {
 				var items = this.prepare_tree("Customer", "Customer Group");
 			} else if(me.tree_type=="Item Group") {
 				var items = this.prepare_tree("Item", "Item Group");
 			} else if(me.tree_type=="Item") {
-				var items = wn.report_dump.data["Item"];
+				var items = frappe.report_dump.data["Item"];
 			} else if(me.tree_type=="Territory") {
 				var items = this.prepare_tree("Customer", "Territory");
 			}

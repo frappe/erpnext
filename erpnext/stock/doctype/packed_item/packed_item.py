@@ -4,26 +4,26 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, flt
-from webnotes.model.doc import addchild
-from webnotes.model.bean import getlist
+import frappe
+from frappe.utils import cstr, flt
+from frappe.model.doc import addchild
+from frappe.model.bean import getlist
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
 def get_sales_bom_items(item_code):
-	return webnotes.conn.sql("""select t1.item_code, t1.qty, t1.uom 
+	return frappe.conn.sql("""select t1.item_code, t1.qty, t1.uom 
 		from `tabSales BOM Item` t1, `tabSales BOM` t2 
 		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
 def get_packing_item_details(item):
-	return webnotes.conn.sql("""select item_name, description, stock_uom from `tabItem` 
+	return frappe.conn.sql("""select item_name, description, stock_uom from `tabItem` 
 		where name = %s""", item, as_dict = 1)[0]
 
 def get_bin_qty(item, warehouse):
-	det = webnotes.conn.sql("""select actual_qty, projected_qty from `tabBin` 
+	det = frappe.conn.sql("""select actual_qty, projected_qty from `tabBin` 
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or ''
 
@@ -66,7 +66,7 @@ def make_packing_list(obj, item_table_fieldname):
 	for d in obj.doclist.get({"parentfield": item_table_fieldname}):
 		warehouse = (item_table_fieldname == "sales_order_details") \
 			and d.warehouse or d.warehouse
-		if webnotes.conn.get_value("Sales BOM", {"new_item_code": d.item_code}):
+		if frappe.conn.get_value("Sales BOM", {"new_item_code": d.item_code}):
 			for i in get_sales_bom_items(d.item_code):
 				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), 
 					warehouse, d, packing_list_idx)
@@ -90,7 +90,7 @@ def cleanup_packing_list(obj, parent_items):
 		return obj.doclist
 	
 	# delete from doclist
-	obj.doclist = webnotes.doclist(filter(lambda d: [d.parent_item, d.parent_detail_docname] 
+	obj.doclist = frappe.doclist(filter(lambda d: [d.parent_item, d.parent_detail_docname] 
 		not in delete_list, obj.doclist))
 		
 	return obj.doclist

@@ -4,9 +4,9 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-import webnotes.defaults
-from webnotes.utils import cint
+import frappe
+import frappe.defaults
+from frappe.utils import cint
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
@@ -14,12 +14,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
-		pr = webnotes.bean(copy=test_records[0]).insert()
+		pr = frappe.bean(copy=test_records[0]).insert()
 		
-		self.assertRaises(webnotes.ValidationError, make_purchase_invoice, 
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
 			pr.doc.name)
 
-		pr = webnotes.bean("Purchase Receipt", pr.doc.name)
+		pr = frappe.bean("Purchase Receipt", pr.doc.name)
 		pr.submit()
 		pi = make_purchase_invoice(pr.doc.name)
 		
@@ -28,23 +28,23 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		# modify rate
 		pi[1].rate = 200
-		self.assertRaises(webnotes.ValidationError, webnotes.bean(pi).submit)
+		self.assertRaises(frappe.ValidationError, frappe.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
 		self._clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		pr = webnotes.bean(copy=test_records[0])
+		pr = frappe.bean(copy=test_records[0])
 		pr.insert()
 		pr.submit()
 		
-		stock_value, stock_value_difference = webnotes.conn.get_value("Stock Ledger Entry", 
+		stock_value, stock_value_difference = frappe.conn.get_value("Stock Ledger Entry", 
 			{"voucher_type": "Purchase Receipt", "voucher_no": pr.doc.name, 
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
 			["stock_value", "stock_value_difference"])
 		self.assertEqual(stock_value, 375)
 		self.assertEqual(stock_value_difference, 375)
 		
-		bin_stock_value = webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+		bin_stock_value = frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
 		self.assertEqual(bin_stock_value, 375)
 		
@@ -54,9 +54,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self._clear_stock_account_balance()
 		
 		set_perpetual_inventory()
-		self.assertEqual(cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")), 1)
+		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pr = webnotes.bean(copy=test_records[0])
+		pr = frappe.bean(copy=test_records[0])
 		pr.insert()
 		pr.submit()
 		
@@ -64,9 +64,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		self.assertTrue(gl_entries)
 		
-		stock_in_hand_account = webnotes.conn.get_value("Account", 
+		stock_in_hand_account = frappe.conn.get_value("Account", 
 			{"master_name": pr.doclist[1].warehouse})		
-		fixed_asset_account = webnotes.conn.get_value("Account", 
+		fixed_asset_account = frappe.conn.get_value("Account", 
 			{"master_name": pr.doclist[2].warehouse})
 		
 		expected_values = {
@@ -85,12 +85,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		
 	def _clear_stock_account_balance(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("""delete from `tabGL Entry`""")
+		frappe.conn.sql("delete from `tabStock Ledger Entry`")
+		frappe.conn.sql("""delete from `tabBin`""")
+		frappe.conn.sql("""delete from `tabGL Entry`""")
 		
 	def test_subcontracting(self):
-		pr = webnotes.bean(copy=test_records[1])
+		pr = frappe.bean(copy=test_records[1])
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		
@@ -98,14 +98,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(len(pr.doclist.get({"parentfield": "pr_raw_material_details"})), 2)
 		
 	def test_serial_no_supplier(self):
-		pr = webnotes.bean(copy=test_records[0])
+		pr = frappe.bean(copy=test_records[0])
 		pr.doclist[1].item_code = "_Test Serialized Item With Series"
 		pr.doclist[1].qty = 1
 		pr.doclist[1].received_qty = 1
 		pr.insert()
 		pr.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+		self.assertEquals(frappe.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"supplier"), pr.doc.supplier)
 			
 		return pr
@@ -114,16 +114,16 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = self.test_serial_no_supplier()
 		pr.cancel()
 		
-		self.assertFalse(webnotes.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+		self.assertFalse(frappe.conn.get_value("Serial No", pr.doclist[1].serial_no, 
 			"warehouse"))
 			
 def get_gl_entries(voucher_type, voucher_no):
-	return webnotes.conn.sql("""select account, debit, credit
+	return frappe.conn.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 		
 def set_perpetual_inventory(enable=1):
-	accounts_settings = webnotes.bean("Accounts Settings")
+	accounts_settings = frappe.bean("Accounts Settings")
 	accounts_settings.doc.auto_accounting_for_stock = enable
 	accounts_settings.save()
 	

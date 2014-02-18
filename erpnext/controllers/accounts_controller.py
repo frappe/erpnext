@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, throw
-from webnotes.utils import flt, cint, today, cstr
-from webnotes.model.code import get_obj
+import frappe
+from frappe import _, throw
+from frappe.utils import flt, cint, today, cstr
+from frappe.model.code import get_obj
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
@@ -44,7 +44,7 @@ class AccountsController(TransactionBase):
 	def validate_for_freezed_account(self):
 		for fieldname in ["customer", "supplier"]:
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				accounts = webnotes.conn.get_values("Account", 
+				accounts = frappe.conn.get_values("Account", 
 					{"master_type": fieldname.title(), "master_name": self.doc.fields[fieldname], 
 					"company": self.doc.company}, "name")
 				if accounts:
@@ -60,7 +60,7 @@ class AccountsController(TransactionBase):
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
 				else "buying_price_list"
 			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				self.doc.price_list_currency = webnotes.conn.get_value("Price List",
+				self.doc.price_list_currency = frappe.conn.get_value("Price List",
 					self.doc.fields.get(fieldname), "currency")
 				
 				if self.doc.price_list_currency == company_currency:
@@ -82,7 +82,7 @@ class AccountsController(TransactionBase):
 
 	def get_exchange_rate(self, from_currency, to_currency):
 		exchange = "%s-%s" % (from_currency, to_currency)
-		return flt(webnotes.conn.get_value("Currency Exchange", exchange, "exchange_rate"))
+		return flt(frappe.conn.get_value("Currency Exchange", exchange, "exchange_rate"))
 
 	def set_missing_item_details(self):
 		"""set missing item values"""
@@ -106,7 +106,7 @@ class AccountsController(TransactionBase):
 			if not self.doc.fields.get(tax_master_field):
 				# get the default tax master
 				self.doc.fields[tax_master_field] = \
-					webnotes.conn.get_value(tax_master_doctype, {"is_default": 1})
+					frappe.conn.get_value(tax_master_doctype, {"is_default": 1})
 					
 			self.append_taxes_from_master(tax_parentfield, tax_master_field, tax_master_doctype)
 				
@@ -117,8 +117,8 @@ class AccountsController(TransactionBase):
 			
 			tax_doctype = self.meta.get_field(tax_parentfield).options
 			
-			from webnotes.model import default_fields
-			tax_master = webnotes.bean(tax_master_doctype, self.doc.fields.get(tax_master_field))
+			from frappe.model import default_fields
+			tax_master = frappe.bean(tax_master_doctype, self.doc.fields.get(tax_master_field))
 			
 			for i, tax in enumerate(tax_master.doclist.get({"parentfield": tax_parentfield})):
 				for fieldname in default_fields:
@@ -375,7 +375,7 @@ class AccountsController(TransactionBase):
 
 	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""
-		gl_dict = webnotes._dict({
+		gl_dict = frappe._dict({
 			'company': self.doc.company, 
 			'posting_date': self.doc.posting_date,
 			'voucher_type': self.doc.doctype,
@@ -393,11 +393,11 @@ class AccountsController(TransactionBase):
 	def clear_unallocated_advances(self, childtype, parentfield):
 		self.doclist.remove_items({"parentfield": parentfield, "allocated_amount": ["in", [0, None, ""]]})
 			
-		webnotes.conn.sql("""delete from `tab%s` where parentfield=%s and parent = %s 
+		frappe.conn.sql("""delete from `tab%s` where parentfield=%s and parent = %s 
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.doc.name))
 		
 	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr):
-		res = webnotes.conn.sql("""select t1.name as jv_no, t1.remark, 
+		res = frappe.conn.sql("""select t1.name as jv_no, t1.remark, 
 			t2.%s as amount, t2.name as jv_detail_no
 			from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2 
 			where t1.name = t2.parent and t2.account = %s and t2.is_advance = 'Yes' 
@@ -426,13 +426,13 @@ class AccountsController(TransactionBase):
 		
 		for item in self.doclist.get({"parentfield": "entries"}):
 			if item.fields.get(item_ref_dn):
-				ref_amt = flt(webnotes.conn.get_value(ref_dt + " Item", 
+				ref_amt = flt(frappe.conn.get_value(ref_dt + " Item", 
 					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
 				if not ref_amt:
-					webnotes.msgprint(_("As amount for item") + ": " + item.item_code + _(" in ") + 
+					frappe.msgprint(_("As amount for item") + ": " + item.item_code + _(" in ") + 
 						ref_dt + _(" is zero, system will not check for over-billed"))
 				else:
-					already_billed = webnotes.conn.sql("""select sum(%s) from `tab%s` 
+					already_billed = frappe.conn.sql("""select sum(%s) from `tab%s` 
 						where %s=%s and docstatus=1 and parent != %s""" % 
 						(based_on, self.tname, item_ref_dn, '%s', '%s'), 
 						(item.fields[item_ref_dn], self.doc.name))[0][0]
@@ -448,7 +448,7 @@ class AccountsController(TransactionBase):
 					if total_billed_amt - max_allowed_amt > 0.01:
 						reduce_by = total_billed_amt - max_allowed_amt
 					
-						webnotes.throw(_("Row #") + cstr(item.idx) + ": " + 
+						frappe.throw(_("Row #") + cstr(item.idx) + ": " + 
 							_(" Max amount allowed for Item ") + cstr(item.item_code) + 
 							_(" against ") + ref_dt + " " + 
 							cstr(item.fields[ref_dt.lower().replace(" ", "_")]) + _(" is ") + 
@@ -468,7 +468,7 @@ class AccountsController(TransactionBase):
 		item_codes = list(set(item.item_code for item in 
 			self.doclist.get({"parentfield": self.fname})))
 		if item_codes:
-			stock_items = [r[0] for r in webnotes.conn.sql("""select name
+			stock_items = [r[0] for r in frappe.conn.sql("""select name
 				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 				
@@ -477,12 +477,12 @@ class AccountsController(TransactionBase):
 	@property
 	def company_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = webnotes.conn.get_value("Company", self.doc.company, "abbr")
+			self._abbr = frappe.conn.get_value("Company", self.doc.company, "abbr")
 			
 		return self._abbr
 
 	def check_credit_limit(self, account):
-		total_outstanding = webnotes.conn.sql("""
+		total_outstanding = frappe.conn.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 			from `tabGL Entry` where account = %s""", account)
 		
@@ -491,6 +491,6 @@ class AccountsController(TransactionBase):
 			get_obj('Account', account).check_credit_limit(total_outstanding)
 
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_tax_rate(account_head):
-	return webnotes.conn.get_value("Account", account_head, "tax_rate")
+	return frappe.conn.get_value("Account", account_head, "tax_rate")

@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.model.map_info["Sales Invoice"] = {
+frappe.model.map_info["Sales Invoice"] = {
 	"Time Log Batch": {
 		table_map: {
 			"Sales Invoice Item": "Time Log Batch",

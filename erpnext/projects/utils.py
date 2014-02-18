@@ -4,22 +4,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_time_log_list(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.get_values("Time Log", filters, ["name", "activity_type", "owner"])
+	return frappe.conn.get_values("Time Log", filters, ["name", "activity_type", "owner"])
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def query_task(doctype, txt, searchfield, start, page_len, filters):
-	from webnotes.widgets.reportview import build_match_conditions
+	from frappe.widgets.reportview import build_match_conditions
 	
 	search_string = "%%%s%%" % txt
 	order_by_string = "%s%%" % txt
 	match_conditions = build_match_conditions("Task")
 	match_conditions = ("and" + match_conditions) if match_conditions else ""
 	
-	return webnotes.conn.sql("""select name, subject from `tabTask`
+	return frappe.conn.sql("""select name, subject from `tabTask`
 		where (`%s` like %s or `subject` like %s) %s
 		order by
 			case when `subject` like %s then 0 else 1 end,

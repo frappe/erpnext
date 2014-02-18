@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes, json
+import frappe, json
 
-from webnotes.utils import getdate, today
-from webnotes.model import db_exists
-from webnotes.model.bean import copy_doclist
-from webnotes import msgprint
+from frappe.utils import getdate, today
+from frappe.model import db_exists
+from frappe.model.bean import copy_doclist
+from frappe import msgprint
 
 
 class DocType:
@@ -21,7 +21,7 @@ class DocType:
 		}
 		
 	def get_customer_details(self):
-		cust = webnotes.conn.sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
+		cust = frappe.conn.sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
 		if cust:
 			ret = {'customer_name': cust and cust[0][0] or ''}
 			return ret
@@ -38,7 +38,7 @@ class DocType:
 		self.update_status()
 
 	def update_status(self):
-		status = webnotes.conn.get_value("Task", self.doc.name, "status")
+		status = frappe.conn.get_value("Task", self.doc.name, "status")
 		if self.doc.status=="Working" and status !="Working" and not self.doc.act_start_date:
 			self.doc.act_start_date = today()
 			
@@ -48,14 +48,14 @@ class DocType:
 	def on_update(self):
 		"""update percent complete in project"""
 		if self.doc.project:
-			project = webnotes.bean("Project", self.doc.project)
+			project = frappe.bean("Project", self.doc.project)
 			project.run_method("update_percent_complete")
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_events(start, end, filters=None):
-	from webnotes.widgets.reportview import build_match_conditions
-	if not webnotes.has_permission("Task"):
-		webnotes.msgprint(_("No Permission"), raise_exception=1)
+	from frappe.widgets.reportview import build_match_conditions
+	if not frappe.has_permission("Task"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	conditions = build_match_conditions("Task")
 	conditions and (" and " + conditions) or ""
@@ -66,7 +66,7 @@ def get_events(start, end, filters=None):
 			if filters[key]:
 				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
 	
-	data = webnotes.conn.sql("""select name, exp_start_date, exp_end_date, 
+	data = frappe.conn.sql("""select name, exp_start_date, exp_end_date, 
 		subject, status, project from `tabTask`
 		where ((exp_start_date between '%(start)s' and '%(end)s') \
 			or (exp_end_date between '%(start)s' and '%(end)s'))
@@ -80,7 +80,7 @@ def get_events(start, end, filters=None):
 
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	return webnotes.conn.sql(""" select name from `tabProject`
+	return frappe.conn.sql(""" select name from `tabProject`
 			where %(key)s like "%(txt)s"
 				%(mcond)s
 			order by name 

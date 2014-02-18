@@ -2,10 +2,10 @@
 // License: GNU General Public License v3. See license.txt
 
 
-wn.pages['stock-analytics'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['stock-analytics'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Stock Analytics'),
+		title: frappe._('Stock Analytics'),
 		single_column: true
 	});
 
@@ -16,4 +16,4 @@ wn.pages['stock-analytics'].onload = function(wrapper) {
 	
 }
 
-wn.require("assets/erpnext/js/stock_analytics.js");
+frappe.require("assets/erpnext/js/stock_analytics.js");

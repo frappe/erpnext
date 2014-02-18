@@ -1,7 +1,7 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes 
+import frappe 
 
 def execute(filters=None):
 	columns = get_columns()
@@ -28,11 +28,11 @@ def get_columns():
 		"Project Start Date:Date:120", "Completion Date:Date:120"]
 
 def get_project_details():
-	return webnotes.conn.sql(""" select name, project_name, status, company, customer, project_value,
+	return frappe.conn.sql(""" select name, project_name, status, company, customer, project_value,
 		project_start_date, completion_date from tabProject where docstatus < 2""", as_dict=1)
 
 def get_purchased_items_cost():
-	pr_items = webnotes.conn.sql("""select project_name, sum(base_amount) as amount
+	pr_items = frappe.conn.sql("""select project_name, sum(base_amount) as amount
 		from `tabPurchase Receipt Item` where ifnull(project_name, '') != '' 
 		and docstatus = 1 group by project_name""", as_dict=1)
 
@@ -43,7 +43,7 @@ def get_purchased_items_cost():
 	return pr_item_map
 
 def get_issued_items_cost():
-	se_items = webnotes.conn.sql("""select se.project_name, sum(se_item.amount) as amount
+	se_items = frappe.conn.sql("""select se.project_name, sum(se_item.amount) as amount
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
 		where se.name = se_item.parent and se.docstatus = 1 and ifnull(se_item.t_warehouse, '') = '' 
 		and ifnull(se.project_name, '') != '' group by se.project_name""", as_dict=1)
@@ -55,12 +55,12 @@ def get_issued_items_cost():
 	return se_item_map
 
 def get_delivered_items_cost():
-	dn_items = webnotes.conn.sql("""select dn.project_name, sum(dn_item.base_amount) as amount
+	dn_items = frappe.conn.sql("""select dn.project_name, sum(dn_item.base_amount) as amount
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where dn.name = dn_item.parent and dn.docstatus = 1 and ifnull(dn.project_name, '') != ''
 		group by dn.project_name""", as_dict=1)
 
-	si_items = webnotes.conn.sql("""select si.project_name, sum(si_item.base_amount) as amount
+	si_items = frappe.conn.sql("""select si.project_name, sum(si_item.base_amount) as amount
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 and ifnull(si.update_stock, 0) = 1 
 		and ifnull(si.is_pos, 0) = 1 and ifnull(si.project_name, '') != ''

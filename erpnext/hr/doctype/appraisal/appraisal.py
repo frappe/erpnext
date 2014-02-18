@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint, cstr, flt, getdate
-from webnotes.model.bean import getlist
-from webnotes import msgprint, throw, _
+import frappe
+from frappe.utils import cstr, flt, getdate
+from frappe.model.bean import getlist
+from frappe import msgprint, throw, _
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -21,7 +21,7 @@ class DocType:
 		self.calculate_total()
 
 	def get_employee_name(self):
-		emp_nm = webnotes.conn.sql("""select employee_name from `tabEmployee` where 
+		emp_nm = frappe.conn.sql("""select employee_name from `tabEmployee` where 
 			name=%s""", self.doc.employee)
 		emp_nm = emp_nm and emp_nm[0][0] or ''
 		self.doc.employee_name = emp_nm
@@ -32,7 +32,7 @@ class DocType:
 			throw(_("End Date can not be less than Start Date"))
 
 	def validate_existing_appraisal(self):
-		chk = webnotes.conn.sql("""select name from `tabAppraisal` where employee=%s 
+		chk = frappe.conn.sql("""select name from `tabAppraisal` where employee=%s 
 			and (status='Submitted' or status='Completed') 
 			and ((start_date>=%s and start_date<=%s) 
 			or (end_date>=%s and end_date<=%s))""",
@@ -60,21 +60,21 @@ class DocType:
 				"total": cstr(total_w)
 			}))
 
-		if webnotes.conn.get_value("Employee", self.doc.employee, "user_id") != \
-				webnotes.session.user and total == 0:
+		if frappe.conn.get_value("Employee", self.doc.employee, "user_id") != \
+				frappe.session.user and total == 0:
 			throw(_("Total can't be zero. You must atleast give some points!"))
 
 		self.doc.total_score = total
 
 	def on_submit(self):
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
+		frappe.conn.set(self.doc, 'status', 'Submitted')
 
 	def on_cancel(self): 
-		webnotes.conn.set(self.doc, 'status', 'Cancelled')
+		frappe.conn.set(self.doc, 'status', 'Cancelled')
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def fetch_appraisal_template(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 
 	doclist = get_mapped_doclist("Appraisal Template", source_name, {
 		"Appraisal Template": {

@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, flt
-from webnotes.model.doc import addchild, make_autoname
-from webnotes import msgprint, _
+from frappe.utils import cstr, flt
+from frappe.model.doc import addchild, make_autoname
+from frappe import msgprint, _
 
 
 class DocType:
@@ -19,7 +19,7 @@ class DocType:
 
 	def get_employee_details(self):
 		ret = {}
-		det = webnotes.conn.sql("""select employee_name, branch, designation, department, grade 
+		det = frappe.conn.sql("""select employee_name, branch, designation, department, grade 
 			from `tabEmployee` where name = %s""", self.doc.employee)
 		if det:
 			ret = {
@@ -33,7 +33,7 @@ class DocType:
 		return ret
 
 	def get_ss_values(self,employee):
-		basic_info = webnotes.conn.sql("""select bank_name, bank_ac_no, esic_card_no, pf_number 
+		basic_info = frappe.conn.sql("""select bank_name, bank_ac_no, esic_card_no, pf_number 
 			from `tabEmployee` where name =%s""", employee)
 		ret = {'bank_name': basic_info and basic_info[0][0] or '',
 			'bank_ac_no': basic_info and basic_info[0][1] or '',
@@ -42,7 +42,7 @@ class DocType:
 		return ret
 
 	def make_table(self, doct_name, tab_fname, tab_name):
-		list1 = webnotes.conn.sql("select name from `tab%s` where docstatus != 2" % doct_name)
+		list1 = frappe.conn.sql("select name from `tab%s` where docstatus != 2" % doct_name)
 		for li in list1:
 			child = addchild(self.doc, tab_fname, tab_name, self.doclist)
 			if(tab_fname == 'earning_details'):
@@ -57,7 +57,7 @@ class DocType:
 		self.make_table('Deduction Type','deduction_details', 'Salary Structure Deduction')
 
 	def check_existing(self):
-		ret = webnotes.conn.sql("""select name from `tabSalary Structure` where is_active = 'Yes' 
+		ret = frappe.conn.sql("""select name from `tabSalary Structure` where is_active = 'Yes' 
 			and employee = %s and name!=%s""", (self.doc.employee,self.doc.name))
 		if ret and self.doc.is_active=='Yes':
 			msgprint(_("""Another Salary Structure '%s' is active for employee '%s'. Please make its status 'Inactive' to proceed.""") % 
@@ -71,15 +71,15 @@ class DocType:
 		self.check_existing()
 		self.validate_amount()
 		
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_salary_slip(source_name, target_doclist=None):
 	return [d.fields for d in get_mapped_doclist(source_name, target_doclist)]
 	
 def get_mapped_doclist(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	def postprocess(source, target):
-		sal_slip = webnotes.bean(target)
+		sal_slip = frappe.bean(target)
 		sal_slip.run_method("pull_emp_details")
 		sal_slip.run_method("get_leave_details")
 		sal_slip.run_method("calculate_net_pay")

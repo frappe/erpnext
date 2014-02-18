@@ -5,7 +5,7 @@ cur_frm.cscript.tname = "Purchase Invoice Item";
 cur_frm.cscript.fname = "entries";
 cur_frm.cscript.other_fname = "other_charges";
 
-wn.provide("erpnext.accounts");
+frappe.provide("erpnext.accounts");
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
@@ -27,25 +27,25 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			this.frm.add_custom_button(wn._('Make Payment Entry'), this.make_bank_voucher);
+			this.frm.add_custom_button(frappe._('Make Payment Entry'), this.make_bank_voucher);
 
 		if(doc.docstatus==1) { 
-			cur_frm.appframe.add_button(wn._('View Ledger'), function() {
-				wn.route_options = {
+			cur_frm.appframe.add_button(frappe._('View Ledger'), function() {
+				frappe.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
 					"to_date": doc.posting_date,
 					"company": doc.company,
 					group_by_voucher: 0
 				};
-				wn.set_route("query-report", "General Ledger");
+				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 		}
 
 		if(doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Purchase Order'), 
+			cur_frm.add_custom_button(frappe._('From Purchase Order'), 
 				function() {
-					wn.model.map_current_doc({
+					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 						source_doctype: "Purchase Order",
 						get_query_filters: {
@@ -58,9 +58,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					})
 				});
 
-			cur_frm.add_custom_button(wn._('From Purchase Receipt'), 
+			cur_frm.add_custom_button(frappe._('From Purchase Receipt'), 
 				function() {
-					wn.model.map_current_doc({
+					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 						source_doctype: "Purchase Receipt",
 						get_query_filters: {
@@ -108,7 +108,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 	
 	entries_add: function(doc, cdt, cdn) {
-		var row = wn.model.get_doc(cdt, cdn);
+		var row = frappe.model.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_account", "cost_center"]);
 	}
 });
@@ -121,14 +121,14 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.make_bank_voucher = function() {
-	return wn.call({
+	return frappe.call({
 		method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_purchase_invoice",
 		args: {
 			"purchase_invoice": cur_frm.doc.name,
 		},
 		callback: function(r) {
-			var doclist = wn.model.sync(r.message);
-			wn.set_route("Form", doclist[0].doctype, doclist[0].name);
+			var doclist = frappe.model.sync(r.message);
+			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}
 	});
 }
@@ -229,5 +229,5 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = wn._("Purchase Invoice");
+		cur_frm.pformat.print_heading = frappe._("Purchase Invoice");
 }

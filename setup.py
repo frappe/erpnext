@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '4.0.0-wip'
+version = '4.0.0-beta'
 
 setup(
     name='erpnext',
@@ -12,5 +12,5 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=("webnotes",),
+    install_requires=("frappe",),
 )

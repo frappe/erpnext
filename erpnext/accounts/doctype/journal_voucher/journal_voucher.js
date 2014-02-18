@@ -1,9 +1,9 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.accounts");
+frappe.provide("erpnext.accounts");
 
-erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
+erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	onload: function() {
 		this.load_defaults();
 		this.setup_queries();
@@ -11,10 +11,10 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
-			wn.model.set_default_values(this.frm.doc);
-			$.each(wn.model.get_doclist(this.frm.doc.doctype, 
+			frappe.model.set_default_values(this.frm.doc);
+			$.each(frappe.model.get_doclist(this.frm.doc.doctype, 
 				this.frm.doc.name, {parentfield: "entries"}), function(i, jvd) {
-					wn.model.set_default_values(jvd);
+					frappe.model.set_default_values(jvd);
 				}
 			);
 			
@@ -27,7 +27,7 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 		
 		$.each(["account", "cost_center"], function(i, fieldname) {
 			me.frm.set_query(fieldname, "entries", function() {
-				wn.model.validate_missing(me.frm.doc, "company");
+				frappe.model.validate_missing(me.frm.doc, "company");
 				return {
 					filters: {
 						company: me.frm.doc.company,
@@ -40,8 +40,8 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 		$.each([["against_voucher", "Purchase Invoice", "credit_to"], 
 			["against_invoice", "Sales Invoice", "debit_to"]], function(i, opts) {
 				me.frm.set_query(opts[0], "entries", function(doc, cdt, cdn) {
-					var jvd = wn.model.get_doc(cdt, cdn);
-					wn.model.validate_missing(jvd, "account");
+					var jvd = frappe.model.get_doc(cdt, cdn);
+					frappe.model.validate_missing(jvd, "account");
 					return {
 						filters: [
 							[opts[1], opts[2], "=", jvd.account],
@@ -53,8 +53,8 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 		});
 		
 		this.frm.set_query("against_jv", "entries", function(doc, cdt, cdn) {
-			var jvd = wn.model.get_doc(cdt, cdn);
-			wn.model.validate_missing(jvd, "account");
+			var jvd = frappe.model.get_doc(cdt, cdn);
+			frappe.model.validate_missing(jvd, "account");
 			
 			return {
 				query: "accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
@@ -64,7 +64,7 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	},
 	
 	against_voucher: function(doc, cdt, cdn) {
-		var d = wn.model.get_doc(cdt, cdn);
+		var d = frappe.model.get_doc(cdt, cdn);
 		if (d.against_voucher && !flt(d.debit)) {
 			this.get_outstanding({
 				'doctype': 'Purchase Invoice', 
@@ -74,7 +74,7 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	},
 	
 	against_invoice: function(doc, cdt, cdn) {
-		var d = wn.model.get_doc(cdt, cdn);
+		var d = frappe.model.get_doc(cdt, cdn);
 		if (d.against_invoice && !flt(d.credit)) {
 			this.get_outstanding({
 				'doctype': 'Sales Invoice', 
@@ -84,7 +84,7 @@ erpnext.accounts.JournalVoucher = wn.ui.form.Controller.extend({
 	},
 	
 	against_jv: function(doc, cdt, cdn) {
-		var d = wn.model.get_doc(cdt, cdn);
+		var d = frappe.model.get_doc(cdt, cdn);
 		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
 			this.get_outstanding({
 				'doctype': 'Journal Voucher', 
@@ -115,15 +115,15 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) { 
-		cur_frm.appframe.add_button(wn._('View Ledger'), function() {
-			wn.route_options = {
+		cur_frm.appframe.add_button(frappe._('View Ledger'), function() {
+			frappe.route_options = {
 				"voucher_no": doc.name,
 				"from_date": doc.posting_date,
 				"to_date": doc.posting_date,
 				"company": doc.company,
 				group_by_voucher: 0
 			};
-			wn.set_route("query-report", "General Ledger");
+			frappe.set_route("query-report", "General Ledger");
 		}, "icon-table");
 	}
 }
@@ -166,7 +166,7 @@ cur_frm.cscript.get_balance = function(doc,dt,dn) {
 cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
 	if(d.account) {
-		return wn.call({
+		return frappe.call({
 			method: "erpnext.accounts.utils.get_balance_on",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
@@ -187,20 +187,20 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = wn._("Journal Voucher");
+		cur_frm.pformat.print_heading = frappe._("Journal Voucher");
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
 	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Voucher");
 
-	if(wn.model.get("Journal Voucher Detail", {"parent":doc.name}).length!==0 // too late
+	if(frappe.model.get("Journal Voucher Detail", {"parent":doc.name}).length!==0 // too late
 		|| !doc.company) // too early
 		return;
 	
 	var update_jv_details = function(doc, r) {
 		$.each(r.message, function(i, d) {
-			var jvdetail = wn.model.add_child(doc, "Journal Voucher Detail", "entries");
+			var jvdetail = frappe.model.add_child(doc, "Journal Voucher Detail", "entries");
 			jvdetail.account = d.account;
 			jvdetail.balance = d.balance;
 		});
@@ -208,7 +208,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	}
 	
 	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
-		return wn.call({
+		return frappe.call({
 			type: "GET",
 			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
 			args: {
@@ -222,14 +222,14 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 			}
 		})
 	} else if(doc.voucher_type=="Opening Entry") {
-		return wn.call({
+		return frappe.call({
 			type:"GET",
 			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
 			args: {
 				"company": doc.company
 			},
 			callback: function(r) {
-				wn.model.clear_table("Journal Voucher Detail", "Journal Voucher", 
+				frappe.model.clear_table("Journal Voucher Detail", "Journal Voucher", 
 					doc.name, "entries");
 				if(r.message) {
 					update_jv_details(doc, r);

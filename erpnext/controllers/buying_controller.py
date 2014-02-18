@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import flt, _round
+import frappe
+from frappe import _, msgprint
+from frappe.utils import flt, _round
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 
@@ -18,7 +18,7 @@ class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
 		if self.doc.supplier and not self.doc.supplier_name:
-			self.doc.supplier_name = webnotes.conn.get_value("Supplier", 
+			self.doc.supplier_name = frappe.conn.get_value("Supplier", 
 				self.doc.supplier, "supplier_name")
 		self.is_item_table_empty()
 		self.validate_stock_or_nonstock_items()
@@ -41,7 +41,7 @@ class BuyingController(StockController):
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.doc.supplier:
 			for d in self.doclist.get({"doctype": self.tname}):
-				supplier = webnotes.conn.get_value("Item", d.item_code, "default_supplier")
+				supplier = frappe.conn.get_value("Item", d.item_code, "default_supplier")
 				if supplier:
 					self.doc.supplier = supplier
 					break
@@ -61,10 +61,10 @@ class BuyingController(StockController):
 				self.doclist.get({"parentfield": "other_charges"}) 
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
-				webnotes.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"""), raise_exception=1)
+				frappe.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"""), raise_exception=1)
 			
 	def set_total_in_words(self):
-		from webnotes.utils import money_in_words
+		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.doc.company)
 		if self.meta.get_field("in_words"):
 			self.doc.in_words = money_in_words(self.doc.grand_total, company_currency)
@@ -198,7 +198,7 @@ class BuyingController(StockController):
 
 				self.round_floats_in(item)
 				
-				item.conversion_factor = item.conversion_factor or flt(webnotes.conn.get_value(
+				item.conversion_factor = item.conversion_factor or flt(frappe.conn.get_value(
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
@@ -209,12 +209,12 @@ class BuyingController(StockController):
 				
 	def validate_for_subcontracting(self):
 		if not self.doc.is_subcontracted and self.sub_contracted_items:
-			webnotes.msgprint(_("""Please enter whether %s is made for subcontracting or purchasing,
+			frappe.msgprint(_("""Please enter whether %s is made for subcontracting or purchasing,
 			 	in 'Is Subcontracted' field""" % self.doc.doctype), raise_exception=1)
 			
 		if self.doc.doctype == "Purchase Receipt" and self.doc.is_subcontracted=="Yes" \
 			and not self.doc.supplier_warehouse:
-				webnotes.msgprint(_("Supplier Warehouse mandatory subcontracted purchase receipt"), 
+				frappe.msgprint(_("Supplier Warehouse mandatory subcontracted purchase receipt"), 
 					raise_exception=1)
 										
 	def update_raw_materials_supplied(self, raw_material_table):
@@ -256,7 +256,7 @@ class BuyingController(StockController):
 			d.rm_supp_cost = raw_materials_cost
 
 	def get_items_from_default_bom(self, item_code):
-		bom_items = webnotes.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
+		bom_items = frappe.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
 			t2.rate, t2.stock_uom, t2.name, t2.description 
 			from `tabBOM` t1, `tabBOM Item` t2 
 			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1 
@@ -273,7 +273,7 @@ class BuyingController(StockController):
 			item_codes = list(set(item.item_code for item in 
 				self.doclist.get({"parentfield": self.fname})))
 			if item_codes:
-				self._sub_contracted_items = [r[0] for r in webnotes.conn.sql("""select name
+				self._sub_contracted_items = [r[0] for r in frappe.conn.sql("""select name
 					from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
@@ -286,7 +286,7 @@ class BuyingController(StockController):
 			item_codes = list(set(item.item_code for item in 
 				self.doclist.get({"parentfield": self.fname})))
 			if item_codes:
-				self._purchase_items = [r[0] for r in webnotes.conn.sql("""select name
+				self._purchase_items = [r[0] for r in frappe.conn.sql("""select name
 					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
@@ -295,4 +295,4 @@ class BuyingController(StockController):
 
 	def is_item_table_empty(self):
 		if not len(self.doclist.get({"parentfield": self.fname})):
-			webnotes.throw(_("Item table can not be blank"))
+			frappe.throw(_("Item table can not be blank"))

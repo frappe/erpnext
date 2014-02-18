@@ -3,23 +3,23 @@
 
 from __future__ import unicode_literals
 
-import webnotes
-from webnotes import _
-from webnotes.defaults import get_restrictions
+import frappe
+from frappe import _
+from frappe.defaults import get_restrictions
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None, 
 	posting_date=None, price_list=None, currency=None):
-	out = webnotes._dict(set_account_and_due_date(party, account, party_type, company, posting_date))
+	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date))
 	
 	party = out[party_type.lower()]
 
-	if not webnotes.has_permission(party_type, "read", party):
-		webnotes.throw("Not Permitted", webnotes.PermissionError)
+	if not frappe.has_permission(party_type, "read", party):
+		frappe.throw("Not Permitted", frappe.PermissionError)
 
-	party_bean = webnotes.bean(party_type, party)
+	party_bean = frappe.bean(party_type, party)
 	party = party_bean.doc
 
 	set_address_and_contact(out, party, party_type)
@@ -40,9 +40,9 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 
 def set_address_and_contact(out, party, party_type):
 	out.update({
-		party_type.lower() + "_address": webnotes.conn.get_value("Address", 
+		party_type.lower() + "_address": frappe.conn.get_value("Address", 
 			{party_type.lower(): party.name, "is_primary_address":1}, "name"),
-		"contact_person": webnotes.conn.get_value("Contact", 
+		"contact_person": frappe.conn.get_value("Contact", 
 			{party_type.lower(): party.name, "is_primary_contact":1}, "name")
 	})
 	
@@ -78,14 +78,14 @@ def set_price_list(out, party, given_price_list):
 		price_list = party.default_price_list
 		
 	if not price_list and party.party_type=="Customer":
-		price_list =  webnotes.conn.get_value("Customer Group", 
+		price_list =  frappe.conn.get_value("Customer Group", 
 			party.customer_group, "default_price_list")
 
 	if not price_list:
 		price_list = given_price_list
 
 	if price_list:
-		out.price_list_currency = webnotes.conn.get_value("Price List", price_list, "currency")
+		out.price_list_currency = frappe.conn.get_value("Price List", price_list, "currency")
 		
 	out["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
 	
@@ -100,7 +100,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date):
 	if party:
 		account = get_party_account(company, party, party_type)
 	elif account:
-		party = webnotes.conn.get_value('Account', account, 'master_name')
+		party = frappe.conn.get_value('Account', account, 'master_name')
 
 	account_fieldname = "debit_to" if party_type=="Customer" else "credit_to" 
 
@@ -113,10 +113,10 @@ def set_account_and_due_date(party, account, party_type, company, posting_date):
 
 def get_party_account(company, party, party_type):
 	if not company:
-		webnotes.throw(_("Please select company first."))
+		frappe.throw(_("Please select company first."))
 
 	if party:
-		acc_head = webnotes.conn.get_value("Account", {"master_name":party,
+		acc_head = frappe.conn.get_value("Account", {"master_name":party,
 			"master_type": party_type, "company": company})
 
 		if not acc_head:
@@ -130,11 +130,11 @@ def get_due_date(posting_date, party, party_type, account, company):
 	if posting_date:
 		credit_days = 0
 		if account:
-			credit_days = webnotes.conn.get_value("Account", account, "credit_days")
+			credit_days = frappe.conn.get_value("Account", account, "credit_days")
 		if party and not credit_days:
-			credit_days = webnotes.conn.get_value(party_type, party, "credit_days")
+			credit_days = frappe.conn.get_value(party_type, party, "credit_days")
 		if company and not credit_days:
-			credit_days = webnotes.conn.get_value("Company", company, "credit_days")
+			credit_days = frappe.conn.get_value("Company", company, "credit_days")
 			
 		due_date = add_days(posting_date, credit_days) if credit_days else posting_date
 
@@ -142,16 +142,16 @@ def get_due_date(posting_date, party, party_type, account, company):
 
 def create_party_account(party, party_type, company):
 	if not company:
-		webnotes.throw(_("Company is required"))
+		frappe.throw(_("Company is required"))
 		
-	company_details = webnotes.conn.get_value("Company", company, 
+	company_details = frappe.conn.get_value("Company", company, 
 		["abbr", "receivables_group", "payables_group"], as_dict=True)
-	if not webnotes.conn.exists("Account", (party + " - " + company_details.abbr)):
+	if not frappe.conn.exists("Account", (party + " - " + company_details.abbr)):
 		parent_account = company_details.receivables_group \
 			if party_type=="Customer" else company_details.payables_group
 
 		# create
-		account = webnotes.bean({
+		account = frappe.bean({
 			"doctype": "Account",
 			'account_name': party,
 			'parent_account': parent_account, 
@@ -162,4 +162,4 @@ def create_party_account(party, party_type, company):
 			"freeze_account": "No"
 		}).insert(ignore_permissions=True)
 		
-		webnotes.msgprint(_("Account Created") + ": " + account.doc.name)
+		frappe.msgprint(_("Account Created") + ": " + account.doc.name)

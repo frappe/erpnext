@@ -2,17 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-import webnotes.defaults
+import frappe
+import frappe.defaults
 
-from webnotes.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
+from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
 	get_first_day, get_last_day
 
-from webnotes.utils import comma_and, get_url
-from webnotes.model.doc import make_autoname
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import _, msgprint
+from frappe.utils import comma_and, get_url
+from frappe.model.doc import make_autoname
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import _, msgprint
 
 from erpnext.accounts.party import get_party_account, get_due_date
 
@@ -160,16 +160,16 @@ class DocType(SellingController):
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
-				tlb = webnotes.bean("Time Log Batch", d.time_log_batch)
+				tlb = frappe.bean("Time Log Batch", d.time_log_batch)
 				tlb.doc.sales_invoice = sales_invoice
 				tlb.update_after_submit()
 
 	def validate_time_logs_are_submitted(self):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
-				status = webnotes.conn.get_value("Time Log Batch", d.time_log_batch, "status")
+				status = frappe.conn.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
-					webnotes.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
+					frappe.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
 						raise_exception=True)
 
 	def set_pos_fields(self, for_validate=False):
@@ -202,7 +202,7 @@ class DocType(SellingController):
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:
-				self.doc.terms = webnotes.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
+				self.doc.terms = frappe.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
@@ -213,7 +213,7 @@ class DocType(SellingController):
 			"Sales Invoice Advance", "advance_adjustment_details", "credit")
 		
 	def get_company_abbr(self):
-		return webnotes.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
+		return frappe.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 
 	def update_against_document_in_jv(self):
 		"""
@@ -246,7 +246,7 @@ class DocType(SellingController):
 	def validate_customer_account(self):
 		"""Validates Debit To Account and Customer Matches"""
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
-			acc_head = webnotes.conn.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
+			acc_head = frappe.conn.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.customer)) or \
 				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
@@ -255,7 +255,7 @@ class DocType(SellingController):
 
 
 	def validate_debit_acc(self):
-		acc = webnotes.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
+		acc = frappe.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.debit_to + " does not exist")
 			raise Exception
@@ -270,8 +270,8 @@ class DocType(SellingController):
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset Account and whether Income Account Entered Exists"""
 		for d in getlist(self.doclist,'entries'):
-			item = webnotes.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
-			acc =	webnotes.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
+			item = frappe.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
+			acc =	frappe.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
 			if not acc:
 				msgprint("Account: "+d.income_account+" does not exist in the system", raise_exception=True)
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
@@ -291,7 +291,7 @@ class DocType(SellingController):
 			},
 		})
 		
-		if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+		if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
 			super(DocType, self).validate_with_previous_doc(self.tname, {
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
@@ -332,9 +332,9 @@ class DocType(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:
-			if webnotes.conn.get_value('Selling Settings', None, dic[i]) == 'Yes':
+			if frappe.conn.get_value('Selling Settings', None, dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
-					if webnotes.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
+					if frappe.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
 						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
 
@@ -342,7 +342,7 @@ class DocType(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
-			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = frappe.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project."%(self.doc.customer,self.doc.project_name))
 				raise Exception
@@ -353,7 +353,7 @@ class DocType(SellingController):
 			raise Exception
 		if flt(self.doc.paid_amount) + flt(self.doc.write_off_amount) \
 				- flt(self.doc.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
-			webnotes.throw(_("""(Paid amount + Write Off Amount) can not be \
+			frappe.throw(_("""(Paid amount + Write Off Amount) can not be \
 				greater than Grand Total"""))
 
 
@@ -377,28 +377,28 @@ class DocType(SellingController):
 	def validate_c_form(self):
 		""" Blank C-form no if C-form applicable marked as 'No'"""
 		if self.doc.amended_from and self.doc.c_form_applicable == 'No' and self.doc.c_form_no:
-			webnotes.conn.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
+			frappe.conn.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
 					and parent = %s""", (self.doc.amended_from,	self.doc.c_form_no))
 
-			webnotes.conn.set(self.doc, 'c_form_no', '')
+			frappe.conn.set(self.doc, 'c_form_no', '')
 			
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code and d.warehouse:
-				bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+				bin = frappe.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 		for d in getlist(self.doclist, 'packing_details'):
-			bin = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = frappe.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 	 
 	
 	def get_warehouse(self):
-		w = webnotes.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (webnotes.session['user'], self.doc.company))
+		w = frappe.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (frappe.session['user'], self.doc.company))
 		w = w and w[0][0] or ''
 		if not w:
-			ps = webnotes.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
+			ps = frappe.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
 				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
 			elif not ps[0][1]:
@@ -425,25 +425,25 @@ class DocType(SellingController):
 		if cint(self.doc.is_pos) == 1:
 			if flt(self.doc.paid_amount) == 0:
 				if self.doc.cash_bank_account: 
-					webnotes.conn.set(self.doc, 'paid_amount', 
+					frappe.conn.set(self.doc, 'paid_amount', 
 						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
 				else:
 					# show message that the amount is not paid
-					webnotes.conn.set(self.doc,'paid_amount',0)
-					webnotes.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+					frappe.conn.set(self.doc,'paid_amount',0)
+					frappe.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
 		else:
-			webnotes.conn.set(self.doc,'paid_amount',0)
+			frappe.conn.set(self.doc,'paid_amount',0)
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.sales_order:
-				submitted = webnotes.conn.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
+				submitted = frappe.conn.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
 				if not submitted:
 					msgprint("Sales Order : "+ cstr(d.sales_order) +" is not submitted")
 					raise Exception , "Validation Error."
 
 			if d.delivery_note:
-				submitted = webnotes.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
+				submitted = frappe.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
 				if not submitted:
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
 					raise Exception , "Validation Error."
@@ -451,11 +451,11 @@ class DocType(SellingController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+			if frappe.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d.qty),
-					"stock_uom": webnotes.conn.get_value("Item", d.item_code, "stock_uom")
+					"stock_uom": frappe.conn.get_value("Item", d.item_code, "stock_uom")
 				}))
 		
 		self.make_sl_entries(sl_entries)
@@ -472,7 +472,7 @@ class DocType(SellingController):
 				update_outstanding=update_outstanding, merge_entries=False)
 			
 			if update_gl_entries_after and cint(self.doc.update_stock) \
-				and cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
+				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 					self.update_gl_entries_after()
 				
 	def get_gl_entries(self, warehouse_account=None):
@@ -534,7 +534,7 @@ class DocType(SellingController):
 				)
 				
 		# expense account gl entries
-		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
+		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.doc.update_stock):
 			gl_entries += super(DocType, self).get_gl_entries()
 				
@@ -584,7 +584,7 @@ class DocType(SellingController):
 	def update_c_form(self):
 		"""Update amended id in C-form"""
 		if self.doc.c_form_no and self.doc.amended_from:
-			webnotes.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
+			frappe.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
 				invoice_date = %s, territory = %s, net_total = %s,
 				grand_total = %s where invoice_no = %s and parent = %s""", 
 				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
@@ -592,7 +592,7 @@ class DocType(SellingController):
 	@property
 	def meta(self):
 		if not hasattr(self, "_meta"):
-			self._meta = webnotes.get_doctype(self.doc.doctype)
+			self._meta = frappe.get_doctype(self.doc.doctype)
 		return self._meta
 	
 	def validate_recurring_invoice(self):
@@ -613,13 +613,13 @@ class DocType(SellingController):
 	def convert_to_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
 			if not self.doc.recurring_id:
-				webnotes.conn.set(self.doc, "recurring_id",
+				frappe.conn.set(self.doc, "recurring_id",
 					make_autoname("RECINV/.#####"))
 			
 			self.set_next_date()
 
 		elif self.doc.recurring_id:
-			webnotes.conn.sql("""update `tabSales Invoice`
+			frappe.conn.sql("""update `tabSales Invoice`
 				set convert_into_recurring_invoice = 0
 				where recurring_id = %s""", (self.doc.recurring_id,))
 			
@@ -628,7 +628,7 @@ class DocType(SellingController):
 			email_list = filter(None, [cstr(email).strip() for email in
 				self.doc.notification_email_address.replace("\n", "").split(",")])
 			
-			from webnotes.utils import validate_email_add
+			from frappe.utils import validate_email_add
 			for email in email_list:
 				if not validate_email_add(email):
 					msgprint(self.meta.get_label("notification_email_address") \
@@ -649,7 +649,7 @@ class DocType(SellingController):
 		next_date = get_next_date(self.doc.posting_date,
 			month_map[self.doc.recurring_type], cint(self.doc.repeat_on_day_of_month))
 		
-		webnotes.conn.set(self.doc, 'next_date', next_date)
+		frappe.conn.set(self.doc, 'next_date', next_date)
 	
 def get_next_date(dt, mcount, day=None):
 	dt = getdate(dt)
@@ -665,43 +665,43 @@ def manage_recurring_invoices(next_date=None, commit=True):
 		and notify the concerned people
 	"""
 	next_date = next_date or nowdate()
-	recurring_invoices = webnotes.conn.sql("""select name, recurring_id
+	recurring_invoices = frappe.conn.sql("""select name, recurring_id
 		from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0)=1
 		and docstatus=1 and next_date=%s
 		and next_date <= ifnull(end_date, '2199-12-31')""", next_date)
 	
 	exception_list = []
 	for ref_invoice, recurring_id in recurring_invoices:
-		if not webnotes.conn.sql("""select name from `tabSales Invoice`
+		if not frappe.conn.sql("""select name from `tabSales Invoice`
 				where posting_date=%s and recurring_id=%s and docstatus=1""",
 				(next_date, recurring_id)):
 			try:
-				ref_wrapper = webnotes.bean('Sales Invoice', ref_invoice)
+				ref_wrapper = frappe.bean('Sales Invoice', ref_invoice)
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
 				if commit:
-					webnotes.conn.commit()
+					frappe.conn.commit()
 			except:
 				if commit:
-					webnotes.conn.rollback()
+					frappe.conn.rollback()
 
-					webnotes.conn.begin()
-					webnotes.conn.sql("update `tabSales Invoice` set \
+					frappe.conn.begin()
+					frappe.conn.sql("update `tabSales Invoice` set \
 						convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
 					notify_errors(ref_invoice, ref_wrapper.doc.customer, ref_wrapper.doc.owner)
-					webnotes.conn.commit()
+					frappe.conn.commit()
 
-				exception_list.append(webnotes.get_traceback())
+				exception_list.append(frappe.get_traceback())
 			finally:
 				if commit:
-					webnotes.conn.begin()
+					frappe.conn.begin()
 			
 	if exception_list:
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
 		raise Exception, exception_message
 
 def make_new_invoice(ref_wrapper, posting_date):
-	from webnotes.model.bean import clone
+	from frappe.model.bean import clone
 	from erpnext.accounts.utils import get_fiscal_year
 	new_invoice = clone(ref_wrapper)
 	
@@ -738,17 +738,17 @@ def make_new_invoice(ref_wrapper, posting_date):
 def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
 	
-	from webnotes.core.doctype.print_format.print_format import get_html
-	webnotes.sendmail(new_rv.doc.notification_email_address, 
+	from frappe.core.doctype.print_format.print_format import get_html
+	frappe.sendmail(new_rv.doc.notification_email_address, 
 		subject="New Invoice : " + new_rv.doc.name, 
 		message = get_html(new_rv.doc, new_rv.doclist, "SalesInvoice"))
 		
 def notify_errors(inv, customer, owner):
-	from webnotes.profile import get_system_managers
+	from frappe.profile import get_system_managers
 	
-	webnotes.sendmail(recipients=get_system_managers() + [webnotes.conn.get_value("Profile", owner, "email")],
+	frappe.sendmail(recipients=get_system_managers() + [frappe.conn.get_value("Profile", owner, "email")],
 		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
-		message = webnotes.get_template("template/emails/recurring_invoice_failed.html").render({
+		message = frappe.get_template("template/emails/recurring_invoice_failed.html").render({
 			"name": inv,
 			"customer": customer
 		}))
@@ -757,7 +757,7 @@ def notify_errors(inv, customer, owner):
 
 def assign_task_to_owner(inv, msg, users):
 	for d in users:
-		from webnotes.widgets.form import assign_to
+		from frappe.widgets.form import assign_to
 		args = {
 			'assign_to' 	:	d,
 			'doctype'		:	'Sales Invoice',
@@ -767,23 +767,23 @@ def assign_task_to_owner(inv, msg, users):
 		}
 		assign_to.add(args)
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_bank_cash_account(mode_of_payment):
-	val = webnotes.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
+	val = frappe.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
 	if not val:
-		webnotes.msgprint("Default Bank / Cash Account not set in Mode of Payment: %s. Please add a Default Account in Mode of Payment master." % mode_of_payment)
+		frappe.msgprint("Default Bank / Cash Account not set in Mode of Payment: %s. Please add a Default Account in Mode of Payment master." % mode_of_payment)
 	return {
 		"cash_bank_account": val
 	}
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 
 	# income account can be any Credit account, 
 	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
 	# Hence the first condition is an "OR"
-	return webnotes.conn.sql("""select tabAccount.name from `tabAccount` 
+	return frappe.conn.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Credit" 
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 
@@ -796,12 +796,12 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})
 
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_delivery_note(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	def set_missing_values(source, target):
-		bean = webnotes.bean(target)
+		bean = frappe.bean(target)
 		bean.run_method("onload_post_render")
 		
 	def update_item(source_doc, target_doc, source_parent):

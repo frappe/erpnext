@@ -4,30 +4,30 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
+import frappe
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
 		# clear GL Entries
-		webnotes.conn.sql("""delete from `tabGL Entry`""")
+		frappe.conn.sql("""delete from `tabGL Entry`""")
 		
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher import test_records as jv_records
-		jv = webnotes.bean(copy=jv_records[2])
+		jv = frappe.bean(copy=jv_records[2])
 		jv.insert()
 		jv.submit()
 		
-		jv1 = webnotes.bean(copy=jv_records[0])
+		jv1 = frappe.bean(copy=jv_records[0])
 		jv1.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv1.doclist[2].debit = 600.0
 		jv1.doclist[1].credit = 600.0
 		jv1.insert()
 		jv1.submit()
 		
-		pcv = webnotes.bean(copy=test_record)
+		pcv = frappe.bean(copy=test_record)
 		pcv.insert()
 		pcv.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Period Closing Voucher' and voucher_no=%s
 			order by account asc, debit asc""", pcv.doc.name, as_dict=1)
 

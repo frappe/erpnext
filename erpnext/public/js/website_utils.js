@@ -5,8 +5,8 @@ if(!window.erpnext) window.erpnext = {};
 
 // Add / update a new Lead / Communication
 // subject, sender, description
-wn.send_message = function(opts, btn) {
-	return wn.call({
+frappe.send_message = function(opts, btn) {
+	return frappe.call({
 		type: "POST",
 		method: "erpnext.templates.utils.send_message",
 		btn: btn,
@@ -16,4 +16,4 @@ wn.send_message = function(opts, btn) {
 };
 
 // for backward compatibility
-erpnext.send_message = wn.send_message;
+erpnext.send_message = frappe.send_message;

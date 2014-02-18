@@ -9,7 +9,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root territory
 	if(!doc.parent_territory) {
 		cur_frm.set_read_only();
-		cur_frm.set_intro(wn._("This is a root territory and cannot be edited."));
+		cur_frm.set_intro(frappe._("This is a root territory and cannot be edited."));
 	} else {
 		cur_frm.set_intro(null);
 	}

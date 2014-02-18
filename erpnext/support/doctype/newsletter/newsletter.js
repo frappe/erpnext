@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc) {
-	return wn.call({
+	return frappe.call({
 		method: "erpnext.support.doctype.newsletter.newsletter.get_lead_options",
 		type: "GET",
 		callback: function(r) {
@@ -15,8 +15,8 @@ cur_frm.cscript.onload = function(doc) {
 cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	if(!doc.__islocal && !cint(doc.email_sent) && !doc.__unsaved
-			&& inList(wn.boot.profile.can_write, doc.doctype)) {
-		cur_frm.add_custom_button(wn._('Send'), function() {
+			&& inList(frappe.boot.profile.can_write, doc.doctype)) {
+		cur_frm.add_custom_button(frappe._('Send'), function() {
 			return $c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
 				cur_frm.refresh();
 			});
@@ -27,7 +27,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 	if(doc.__islocal && !doc.send_from) {
 		cur_frm.set_value("send_from", 
-			repl("%(fullname)s <%(email)s>", wn.user_info(doc.owner)));
+			repl("%(fullname)s <%(email)s>", frappe.user_info(doc.owner)));
 	}
 }
 
@@ -35,7 +35,7 @@ cur_frm.cscript.setup_dashboard = function() {
 	cur_frm.dashboard.reset();
 	if(!cur_frm.doc.__islocal && cint(cur_frm.doc.email_sent) && cur_frm.doc.__status_count) {
 		var stat = cur_frm.doc.__status_count;
-		var total = wn.utils.sum($.map(stat, function(v) { return v; }));
+		var total = frappe.utils.sum($.map(stat, function(v) { return v; }));
 		if(total) {
 			$.each(stat, function(k, v) {
 				stat[k] = flt(v * 100 / total, 2);

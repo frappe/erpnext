@@ -5,7 +5,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes, unittest
+import frappe, unittest
 
 test_dependencies = ["Item"]
 test_records = []
@@ -14,7 +14,7 @@ from erpnext.stock.doctype.serial_no.serial_no import *
 
 class TestSerialNo(unittest.TestCase):
 	def test_cannot_create_direct(self):
-		sr = webnotes.new_bean("Serial No")
+		sr = frappe.new_bean("Serial No")
 		sr.doc.item_code = "_Test Serialized Item"
 		sr.doc.warehouse = "_Test Warehouse - _TC"
 		sr.doc.serial_no = "_TCSER0001"

@@ -5,15 +5,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes, unittest
-from webnotes.utils import flt
+import frappe, unittest
+from frappe.utils import flt
 import json
 from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference, get_balance_on
 
 
 class TestStockReconciliation(unittest.TestCase):
 	def test_reco_for_fifo(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
@@ -37,27 +37,27 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 		
 			# check stock value
-			res = webnotes.conn.sql("""select stock_value from `tabStock Ledger Entry`
+			res = frappe.conn.sql("""select stock_value from `tabStock Ledger Entry`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
 			self.assertEqual(res and flt(res[0][0]) or 0, d[4])
 			
 			# check bin qty and stock value
-			bin = webnotes.conn.sql("""select actual_qty, stock_value from `tabBin`
+			bin = frappe.conn.sql("""select actual_qty, stock_value from `tabBin`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
 			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1])] or [], [d[5], d[6]])
 			
 			# no gl entries
-			gl_entries = webnotes.conn.sql("""select name from `tabGL Entry` 
+			gl_entries = frappe.conn.sql("""select name from `tabGL Entry` 
 				where voucher_type = 'Stock Reconciliation' and voucher_no = %s""",
 				 stock_reco.doc.name)
 			self.assertFalse(gl_entries)
 			
 		
 	def test_reco_for_moving_average(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
@@ -82,7 +82,7 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 			
 			# check stock value in sle
-			res = webnotes.conn.sql("""select stock_value from `tabStock Ledger Entry`
+			res = frappe.conn.sql("""select stock_value from `tabStock Ledger Entry`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
@@ -90,20 +90,20 @@ class TestStockReconciliation(unittest.TestCase):
 			self.assertEqual(res and flt(res[0][0], 4) or 0, d[4])
 			
 			# bin qty and stock value
-			bin = webnotes.conn.sql("""select actual_qty, stock_value from `tabBin`
+			bin = frappe.conn.sql("""select actual_qty, stock_value from `tabBin`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
 			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1], 4)] or [], 
 				[flt(d[5]), flt(d[6])])
 				
 			# no gl entries
-			gl_entries = webnotes.conn.sql("""select name from `tabGL Entry` 
+			gl_entries = frappe.conn.sql("""select name from `tabGL Entry` 
 				where voucher_type = 'Stock Reconciliation' and voucher_no = %s""", 
 				stock_reco.doc.name)
 			self.assertFalse(gl_entries)
 			
 	def test_reco_fifo_gl_entries(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		# [[qty, valuation_rate, posting_date, posting_time, stock_in_hand_debit]]
 		input_data = [
@@ -133,10 +133,10 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco.cancel()
 			self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
 		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
 			
 	def test_reco_moving_average_gl_entries(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 1)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 1)
 		
 		# [[qty, valuation_rate, posting_date, 
 		#		posting_time, stock_in_hand_debit]]
@@ -166,16 +166,16 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco.cancel()
 			self.assertFalse(get_stock_and_account_difference(["_Test Warehouse - _TC"]))
 		
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
 
 
 	def cleanup_data(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("delete from tabBin")
-		webnotes.conn.sql("delete from `tabGL Entry`")
+		frappe.conn.sql("delete from `tabStock Ledger Entry`")
+		frappe.conn.sql("delete from tabBin")
+		frappe.conn.sql("delete from `tabGL Entry`")
 						
 	def submit_stock_reconciliation(self, qty, rate, posting_date, posting_time):
-		stock_reco = webnotes.bean([{
+		stock_reco = frappe.bean([{
 			"doctype": "Stock Reconciliation",
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -193,8 +193,8 @@ class TestStockReconciliation(unittest.TestCase):
 		return stock_reco
 		
 	def insert_existing_sle(self, valuation_method):
-		webnotes.conn.set_value("Item", "_Test Item", "valuation_method", valuation_method)
-		webnotes.conn.set_default("allow_negative_stock", 1)
+		frappe.conn.set_value("Item", "_Test Item", "valuation_method", valuation_method)
+		frappe.conn.set_default("allow_negative_stock", 1)
 		
 		stock_entry = [
 			{
@@ -221,11 +221,11 @@ class TestStockReconciliation(unittest.TestCase):
 			}, 
 		]
 			
-		pr = webnotes.bean(copy=stock_entry)
+		pr = frappe.bean(copy=stock_entry)
 		pr.insert()
 		pr.submit()
 		
-		pr1 = webnotes.bean(copy=stock_entry)
+		pr1 = frappe.bean(copy=stock_entry)
 		pr1.doc.posting_date = "2012-12-15"
 		pr1.doc.posting_time = "02:00"
 		pr1.doclist[1].qty = 10
@@ -234,7 +234,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr1.insert()
 		pr1.submit()
 		
-		pr2 = webnotes.bean(copy=stock_entry)
+		pr2 = frappe.bean(copy=stock_entry)
 		pr2.doc.posting_date = "2012-12-25"
 		pr2.doc.posting_time = "03:00"
 		pr2.doc.purpose = "Material Issue"
@@ -246,7 +246,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr2.insert()
 		pr2.submit()
 		
-		pr3 = webnotes.bean(copy=stock_entry)
+		pr3 = frappe.bean(copy=stock_entry)
 		pr3.doc.posting_date = "2012-12-31"
 		pr3.doc.posting_time = "08:00"
 		pr3.doc.purpose = "Material Issue"
@@ -259,7 +259,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr3.submit()
 		
 		
-		pr4 = webnotes.bean(copy=stock_entry)
+		pr4 = frappe.bean(copy=stock_entry)
 		pr4.doc.posting_date = "2013-01-05"
 		pr4.doc.fiscal_year = "_Test Fiscal Year 2013"
 		pr4.doc.posting_time = "07:00"

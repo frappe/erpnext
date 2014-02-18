@@ -29,7 +29,7 @@ cur_frm.cscript.make_dashboard = function() {
 
 cur_frm.cscript.edit_prices_button = function() {
 	cur_frm.add_custom_button("Add / Edit Prices", function() {
-		wn.set_route("Report", "Item Price", {"item_code": cur_frm.doc.name});
+		frappe.set_route("Report", "Item Price", {"item_code": cur_frm.doc.name});
 	}, "icon-money");
 }
 
@@ -117,14 +117,14 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 
 cur_frm.cscript.add_image = function(doc, dt, dn) {
 	if(!doc.image) {
-		msgprint(wn._('Please select an "Image" first'));
+		msgprint(frappe._('Please select an "Image" first'));
 		return;
 	}
 
 	doc.description_html = repl('<table style="width: 100%; table-layout: fixed;">' +
 		'<tr><td style="width:110px"><img src="%(imgurl)s" width="100px"></td>' +
 		'<td>%(desc)s</td></tr>' +
-		'</table>', {imgurl: wn.utils.get_file_link(doc.image), desc:doc.description});
+		'</table>', {imgurl: frappe.utils.get_file_link(doc.image), desc:doc.description});
 
 	refresh_field('description_html');
 }
@@ -132,7 +132,7 @@ cur_frm.cscript.add_image = function(doc, dt, dn) {
 // Quotation to validation - either customer or lead mandatory
 cur_frm.cscript.weight_to_validate = function(doc, cdt, cdn){
 	if((doc.nett_weight || doc.gross_weight) && !doc.weight_uom) {
-		msgprint(wn._('Weight is mentioned,\nPlease mention "Weight UOM" too'));
+		msgprint(frappe._('Weight is mentioned,\nPlease mention "Weight UOM" too'));
 		validated = 0;
 	}
 }
@@ -150,10 +150,10 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 }
 
 cur_frm.cscript.copy_from_item_group = function(doc) {
-	wn.model.with_doc("Item Group", doc.item_group, function() {
-		$.each(wn.model.get("Item Website Specification", {parent:doc.item_group}), 
+	frappe.model.with_doc("Item Group", doc.item_group, function() {
+		$.each(frappe.model.get("Item Website Specification", {parent:doc.item_group}), 
 			function(i, d) {
-				var n = wn.model.add_child(doc, "Item Website Specification", 
+				var n = frappe.model.add_child(doc, "Item Website Specification", 
 					"item_website_specifications");
 				n.label = d.label;
 				n.description = d.description;
@@ -169,7 +169,7 @@ cur_frm.cscript.image = function() {
 	if(!cur_frm.doc.description_html)
 		cur_frm.cscript.add_image(cur_frm.doc);
 	else {
-		msgprint(wn._("You may need to update: ") + 
-			wn.meta.get_docfield(cur_frm.doc.doctype, "description_html").label);
+		msgprint(frappe._("You may need to update: ") + 
+			frappe.meta.get_docfield(cur_frm.doc.doctype, "description_html").label);
 	}
 }

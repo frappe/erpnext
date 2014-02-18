@@ -1,20 +1,20 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.stock");
+frappe.provide("erpnext.stock");
 
-erpnext.stock.StockController = wn.ui.form.Controller.extend({
+erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 	show_stock_ledger: function() {
 		var me = this;
 		if(this.frm.doc.docstatus===1) {
-			this.frm.appframe.add_button(wn._("Stock Ledger"), function() {
-				wn.route_options = {
+			this.frm.appframe.add_button(frappe._("Stock Ledger"), function() {
+				frappe.route_options = {
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
 					company: me.frm.doc.company
 				};
-				wn.set_route("query-report", "Stock Ledger");
+				frappe.set_route("query-report", "Stock Ledger");
 			}, "icon-bar-chart");
 		}
 		
@@ -22,16 +22,16 @@ erpnext.stock.StockController = wn.ui.form.Controller.extend({
 
 	show_general_ledger: function() {
 		var me = this;
-		if(this.frm.doc.docstatus===1 && cint(wn.defaults.get_default("auto_accounting_for_stock"))) { 
-			cur_frm.appframe.add_button(wn._('Accounting Ledger'), function() {
-				wn.route_options = {
+		if(this.frm.doc.docstatus===1 && cint(frappe.defaults.get_default("auto_accounting_for_stock"))) { 
+			cur_frm.appframe.add_button(frappe._('Accounting Ledger'), function() {
+				frappe.route_options = {
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
 					company: me.frm.doc.company,
 					group_by_voucher: false
 				};
-				wn.set_route("query-report", "General Ledger");
+				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 		}
 	},

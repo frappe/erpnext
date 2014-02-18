@@ -4,15 +4,15 @@
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return{	query: "erpnext.controllers.queries.customer_query" } }
 
-wn.provide("erpnext.support");
+frappe.provide("erpnext.support");
 
 cur_frm.add_fetch("customer", "customer_name", "customer_name")
 
 $.extend(cur_frm.cscript, {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">'+wn._("Email Settings")+'</a><br>\
-				<span class="help">'+wn._("Integrate incoming support emails to Support Ticket")+'</span></p>';
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Email Settings/Email Settings">'+frappe._("Email Settings")+'</a><br>\
+				<span class="help">'+frappe._("Integrate incoming support emails to Support Ticket")+'</span></p>';
 		}
 	},
 	
@@ -34,7 +34,7 @@ $.extend(cur_frm.cscript, {
 	make_listing: function(doc) {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
 		
-		var comm_list = wn.model.get("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
+		var comm_list = frappe.model.get("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
 		
 		if(!comm_list.length) {
 			comm_list.push({
@@ -44,7 +44,7 @@ $.extend(cur_frm.cscript, {
 				"content": doc.description});
 		}
 					
-		cur_frm.communication_view = new wn.views.CommunicationList({
+		cur_frm.communication_view = new frappe.views.CommunicationList({
 			list: comm_list,
 			parent: wrapper,
 			doc: doc,
@@ -62,7 +62,7 @@ $.extend(cur_frm.cscript, {
 	},
 
 	set_status: function(status) {
-		return wn.call({
+		return frappe.call({
 			method: "erpnext.support.doctype.support_ticket.support_ticket.set_status",
 			args: {
 				name: cur_frm.doc.name,

@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
 def execute():
-	webnotes.reload_doc('buying', 'Print Format', 'Purchase Order Classic')
-	webnotes.reload_doc('buying', 'Print Format', 'Purchase Order Modern')
-	webnotes.reload_doc('buying', 'Print Format', 'Purchase Order Spartan')
+	frappe.reload_doc('buying', 'Print Format', 'Purchase Order Classic')
+	frappe.reload_doc('buying', 'Print Format', 'Purchase Order Modern')
+	frappe.reload_doc('buying', 'Print Format', 'Purchase Order Spartan')

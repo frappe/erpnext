@@ -1,38 +1,38 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import webnotes
+import frappe
 import unittest, json
-from webnotes.utils import flt
-from webnotes.model.bean import DocstatusTransitionError, TimestampMismatchError
+from frappe.utils import flt
+from frappe.model.bean import DocstatusTransitionError, TimestampMismatchError
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
-		w = webnotes.bean(copy=test_records[0])
+		w = frappe.bean(copy=test_records[0])
 		w.doc.is_pos = 0
 		w.insert()
 		w.submit()
 		return w
 		
 	def test_double_submission(self):
-		w = webnotes.bean(copy=test_records[0])
+		w = frappe.bean(copy=test_records[0])
 		w.doc.docstatus = '0'
 		w.insert()
 		
 		w2 = [d for d in w.doclist]
 		w.submit()
 		
-		w = webnotes.bean(w2)
+		w = frappe.bean(w2)
 		self.assertRaises(DocstatusTransitionError, w.submit)
 		
 	def test_timestamp_change(self):
-		w = webnotes.bean(copy=test_records[0])
+		w = frappe.bean(copy=test_records[0])
 		w.doc.docstatus = '0'
 		w.insert()
 
-		w2 = webnotes.bean([d.fields.copy() for d in w.doclist])
+		w2 = frappe.bean([d.fields.copy() for d in w.doclist])
 		
 		import time
 		time.sleep(1)
@@ -43,7 +43,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(TimestampMismatchError, w2.save)
 		
 	def test_sales_invoice_calculation_base_currency(self):
-		si = webnotes.bean(copy=test_records[2])
+		si = frappe.bean(copy=test_records[2])
 		si.insert()
 		
 		expected_values = {
@@ -87,7 +87,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.doc.grand_total_export, 1627.05)
 		
 	def test_sales_invoice_calculation_export_currency(self):
-		si = webnotes.bean(copy=test_records[2])
+		si = frappe.bean(copy=test_records[2])
 		si.doc.currency = "USD"
 		si.doc.conversion_rate = 50
 		si.doclist[1].rate = 1
@@ -137,7 +137,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.doc.grand_total_export, 32.54)
 
 	def test_sales_invoice_discount_amount(self):
-		si = webnotes.bean(copy=test_records[3])
+		si = frappe.bean(copy=test_records[3])
 		si.doc.discount_amount = 104.95
 		si.doclist.append({
 			"doctype": "Sales Taxes and Charges",
@@ -194,7 +194,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.doc.grand_total_export, 1500)
 
 	def test_discount_amount_gl_entry(self):
-		si = webnotes.bean(copy=test_records[3])
+		si = frappe.bean(copy=test_records[3])
 		si.doc.discount_amount = 104.95
 		si.doclist.append({
 			"doctype": "Sales Taxes and Charges",
@@ -210,7 +210,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 
@@ -238,13 +238,13 @@ class TestSalesInvoice(unittest.TestCase):
 		# cancel
 		si.cancel()
 
-		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 
 		self.assertFalse(gle)
 
 	def test_inclusive_rate_validations(self):
-		si = webnotes.bean(copy=test_records[2])
+		si = frappe.bean(copy=test_records[2])
 		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
 			tax.idx = i+1
 		
@@ -254,15 +254,15 @@ class TestSalesInvoice(unittest.TestCase):
 			si.doclist[i].included_in_print_rate = 1
 		
 		# tax type "Actual" cannot be inclusive
-		self.assertRaises(webnotes.ValidationError, si.insert)
+		self.assertRaises(frappe.ValidationError, si.insert)
 		
 		# taxes above included type 'On Previous Row Total' should also be included
 		si.doclist[3].included_in_print_rate = 0
-		self.assertRaises(webnotes.ValidationError, si.insert)
+		self.assertRaises(frappe.ValidationError, si.insert)
 		
 	def test_sales_invoice_calculation_base_currency_with_tax_inclusive_price(self):
 		# prepare
-		si = webnotes.bean(copy=test_records[3])
+		si = frappe.bean(copy=test_records[3])
 		si.insert()
 		
 		expected_values = {
@@ -307,7 +307,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
-		si = webnotes.bean(copy=test_records[3])
+		si = frappe.bean(copy=test_records[3])
 		si.doc.currency = "USD"
 		si.doc.conversion_rate = 50
 		si.doclist[1].price_list_rate = 55.56
@@ -363,55 +363,55 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(w.doc.outstanding_amount, w.doc.grand_total)
 		
 	def test_payment(self):
-		webnotes.conn.sql("""delete from `tabGL Entry`""")
+		frappe.conn.sql("""delete from `tabGL Entry`""")
 		w = self.make()
 		
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = webnotes.bean(webnotes.copy_doclist(jv_test_records[0]))
+		jv = frappe.bean(frappe.copy_doclist(jv_test_records[0]))
 		jv.doclist[1].against_invoice = w.doc.name
 		jv.insert()
 		jv.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
+		self.assertEquals(frappe.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
 			161.8)
 	
 		jv.cancel()
-		self.assertEquals(webnotes.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
+		self.assertEquals(frappe.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
 			561.8)
 			
 	def test_time_log_batch(self):
-		tlb = webnotes.bean("Time Log Batch", "_T-Time Log Batch-00001")
+		tlb = frappe.bean("Time Log Batch", "_T-Time Log Batch-00001")
 		tlb.submit()
 		
-		si = webnotes.bean(webnotes.copy_doclist(test_records[0]))
+		si = frappe.bean(frappe.copy_doclist(test_records[0]))
 		si.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
 		si.insert()
 		si.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001",
+		self.assertEquals(frappe.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001",
 		 	"status"), "Billed")
 
-		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
+		self.assertEquals(frappe.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Billed")
 
 		si.cancel()
 
-		self.assertEquals(webnotes.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", 
+		self.assertEquals(frappe.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", 
 			"status"), "Submitted")
 
-		self.assertEquals(webnotes.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
+		self.assertEquals(frappe.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Batched for Billing")
 			
 	def test_sales_invoice_gl_entry_without_aii(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		si = webnotes.bean(copy=test_records[1])
+		si = frappe.bean(copy=test_records[1])
 		si.insert()
 		si.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 		
@@ -432,7 +432,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# cancel
 		si.cancel()
 		
-		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
 		self.assertFalse(gle)
@@ -444,19 +444,19 @@ class TestSalesInvoice(unittest.TestCase):
 		self._insert_purchase_receipt()
 		self._insert_pos_settings()
 		
-		pos = webnotes.copy_doclist(test_records[1])
+		pos = frappe.copy_doclist(test_records[1])
 		pos[0]["is_pos"] = 1
 		pos[0]["update_stock"] = 1
 		pos[0]["posting_time"] = "12:05"
 		pos[0]["cash_bank_account"] = "_Test Account Bank Account - _TC"
 		pos[0]["paid_amount"] = 600.0
 
-		si = webnotes.bean(copy=pos)
+		si = frappe.bean(copy=pos)
 		si.insert()
 		si.submit()
 		
 		# check stock ledger entries
-		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+		sle = frappe.conn.sql("""select * from `tabStock Ledger Entry` 
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
@@ -464,12 +464,12 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Item", "_Test Warehouse - _TC", -1.0])
 		
 		# check gl entries
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
-		stock_in_hand = webnotes.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
+		stock_in_hand = frappe.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
 		expected_gl_entries = sorted([
 			[si.doc.debit_to, 630.0, 0.0],
@@ -487,7 +487,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 		
 		si.cancel()
-		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
 		self.assertFalse(gle)
@@ -499,28 +499,28 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
-		webnotes.delete_doc("Account", "_Test Warehouse No Account - _TC")
+		frappe.delete_doc("Account", "_Test Warehouse No Account - _TC")
 		
 		# insert purchase receipt
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
-		pr = webnotes.bean(copy=pr_test_records[0])
+		pr = frappe.bean(copy=pr_test_records[0])
 		pr.doc.naming_series = "_T-Purchase Receipt-"
 		pr.doclist[1].warehouse = "_Test Warehouse No Account - _TC"
 		pr.insert()
 		pr.submit()
 		
-		si_doclist = webnotes.copy_doclist(test_records[1])
+		si_doclist = frappe.copy_doclist(test_records[1])
 		si_doclist[0]["update_stock"] = 1
 		si_doclist[0]["posting_time"] = "12:05"
 		si_doclist[1]["warehouse"] = "_Test Warehouse No Account - _TC"
 
-		si = webnotes.bean(copy=si_doclist)
+		si = frappe.bean(copy=si_doclist)
 		si.insert()
 		si.submit()
 		
 		# check stock ledger entries
-		sle = webnotes.conn.sql("""select * from `tabStock Ledger Entry` 
+		sle = frappe.conn.sql("""select * from `tabStock Ledger Entry` 
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
@@ -528,7 +528,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Item", "_Test Warehouse No Account - _TC", -1.0])
 		
 		# check gl entries
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -545,7 +545,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 				
 		si.cancel()
-		gle = webnotes.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.conn.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
 		self.assertFalse(gle)
@@ -555,13 +555,13 @@ class TestSalesInvoice(unittest.TestCase):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
 				
-		si_copy = webnotes.copy_doclist(test_records[1])
+		si_copy = frappe.copy_doclist(test_records[1])
 		si_copy[1]["item_code"] = None
-		si = webnotes.bean(si_copy)		
+		si = frappe.bean(si_copy)		
 		si.insert()
 		si.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -582,13 +582,13 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
-		si_copy = webnotes.copy_doclist(test_records[1])
+		si_copy = frappe.copy_doclist(test_records[1])
 		si_copy[1]["item_code"] = "_Test Non Stock Item"
-		si = webnotes.bean(si_copy)
+		si = frappe.bean(si_copy)
 		si.insert()
 		si.submit()
 		
-		gl_entries = webnotes.conn.sql("""select account, debit, credit
+		gl_entries = frappe.conn.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -609,7 +609,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def _insert_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
-		pr = webnotes.bean(copy=pr_test_records[0])
+		pr = frappe.bean(copy=pr_test_records[0])
 		pr.doc.naming_series = "_T-Purchase Receipt-"
 		pr.insert()
 		pr.submit()
@@ -617,7 +617,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def _insert_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records \
 			as dn_test_records
-		dn = webnotes.bean(copy=dn_test_records[0])
+		dn = frappe.bean(copy=dn_test_records[0])
 		dn.doc.naming_series = "_T-Delivery Note-"
 		dn.insert()
 		dn.submit()
@@ -626,20 +626,20 @@ class TestSalesInvoice(unittest.TestCase):
 	def _insert_pos_settings(self):
 		from erpnext.accounts.doctype.pos_setting.test_pos_setting \
 			import test_records as pos_setting_test_records
-		webnotes.conn.sql("""delete from `tabPOS Setting`""")
+		frappe.conn.sql("""delete from `tabPOS Setting`""")
 		
-		ps = webnotes.bean(copy=pos_setting_test_records[0])
+		ps = frappe.bean(copy=pos_setting_test_records[0])
 		ps.insert()
 		
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = webnotes.bean(copy=jv_test_records[0])
+		jv = frappe.bean(copy=jv_test_records[0])
 		jv.insert()
 		jv.submit()
 		
-		si = webnotes.bean(copy=test_records[0])
+		si = frappe.bean(copy=test_records[0])
 		si.doclist.append({
 			"doctype": "Sales Invoice Advance",
 			"parentfield": "advance_adjustment_details",
@@ -653,24 +653,24 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 		si.load_from_db()
 		
-		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s""", si.doc.name))
 		
-		self.assertTrue(webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s and credit=300""", si.doc.name))
 			
 		self.assertEqual(si.doc.outstanding_amount, 261.8)
 		
 		si.cancel()
 		
-		self.assertTrue(not webnotes.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.conn.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s""", si.doc.name))
 			
 	def test_recurring_invoice(self):
-		from webnotes.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
+		from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
 		from erpnext.accounts.utils import get_fiscal_year
 		today = nowdate()
-		base_si = webnotes.bean(copy=test_records[0])
+		base_si = frappe.bean(copy=test_records[0])
 		base_si.doc.fields.update({
 			"convert_into_recurring_invoice": 1,
 			"recurring_type": "Monthly",
@@ -683,13 +683,13 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		
 		# monthly
-		si1 = webnotes.bean(copy=base_si.doclist)
+		si1 = frappe.bean(copy=base_si.doclist)
 		si1.insert()
 		si1.submit()
 		self._test_recurring_invoice(si1, True)
 		
 		# monthly without a first and last day period
-		si2 = webnotes.bean(copy=base_si.doclist)
+		si2 = frappe.bean(copy=base_si.doclist)
 		si2.doc.fields.update({
 			"invoice_period_from_date": today,
 			"invoice_period_to_date": add_to_date(today, days=30)
@@ -699,7 +699,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si2, False)
 		
 		# quarterly
-		si3 = webnotes.bean(copy=base_si.doclist)
+		si3 = frappe.bean(copy=base_si.doclist)
 		si3.doc.fields.update({
 			"recurring_type": "Quarterly",
 			"invoice_period_from_date": get_first_day(today),
@@ -710,7 +710,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si3, True)
 		
 		# quarterly without a first and last day period
-		si4 = webnotes.bean(copy=base_si.doclist)
+		si4 = frappe.bean(copy=base_si.doclist)
 		si4.doc.fields.update({
 			"recurring_type": "Quarterly",
 			"invoice_period_from_date": today,
@@ -721,7 +721,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si4, False)
 		
 		# yearly
-		si5 = webnotes.bean(copy=base_si.doclist)
+		si5 = frappe.bean(copy=base_si.doclist)
 		si5.doc.fields.update({
 			"recurring_type": "Yearly",
 			"invoice_period_from_date": get_first_day(today),
@@ -732,7 +732,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si5, True)
 		
 		# yearly without a first and last day period
-		si6 = webnotes.bean(copy=base_si.doclist)
+		si6 = frappe.bean(copy=base_si.doclist)
 		si6.doc.fields.update({
 			"recurring_type": "Yearly",
 			"invoice_period_from_date": today,
@@ -743,7 +743,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si6, False)
 		
 		# change posting date but keep recuring day to be today
-		si7 = webnotes.bean(copy=base_si.doclist)
+		si7 = frappe.bean(copy=base_si.doclist)
 		si7.doc.fields.update({
 			"posting_date": add_to_date(today, days=-1)
 		})
@@ -755,14 +755,14 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si7, True)
 
 	def _test_recurring_invoice(self, base_si, first_and_last_day):
-		from webnotes.utils import add_months, get_last_day
+		from frappe.utils import add_months, get_last_day
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice \
 			import manage_recurring_invoices, get_next_date
 		
 		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]
 		
 		def _test(i):
-			self.assertEquals(i+1, webnotes.conn.sql("""select count(*) from `tabSales Invoice`
+			self.assertEquals(i+1, frappe.conn.sql("""select count(*) from `tabSales Invoice`
 				where recurring_id=%s and docstatus=1""", base_si.doc.recurring_id)[0][0])
 			
 			next_date = get_next_date(base_si.doc.posting_date, no_of_months, 
@@ -770,13 +770,13 @@ class TestSalesInvoice(unittest.TestCase):
 
 			manage_recurring_invoices(next_date=next_date, commit=False)
 			
-			recurred_invoices = webnotes.conn.sql("""select name from `tabSales Invoice`
+			recurred_invoices = frappe.conn.sql("""select name from `tabSales Invoice`
 				where recurring_id=%s and docstatus=1 order by name desc""",
 				base_si.doc.recurring_id)
 			
 			self.assertEquals(i+2, len(recurred_invoices))
 			
-			new_si = webnotes.bean("Sales Invoice", recurred_invoices[0][0])
+			new_si = frappe.bean("Sales Invoice", recurred_invoices[0][0])
 			
 			for fieldname in ["convert_into_recurring_invoice", "recurring_type",
 				"repeat_on_day_of_month", "notification_email_address"]:
@@ -805,9 +805,9 @@ class TestSalesInvoice(unittest.TestCase):
 			base_si = _test(i)
 			
 	def clear_stock_account_balance(self):
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("delete from tabBin")
-		webnotes.conn.sql("delete from `tabGL Entry`")
+		frappe.conn.sql("delete from `tabStock Ledger Entry`")
+		frappe.conn.sql("delete from tabBin")
+		frappe.conn.sql("delete from `tabGL Entry`")
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -816,7 +816,7 @@ class TestSalesInvoice(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		si = webnotes.bean(copy=test_records[0])
+		si = frappe.bean(copy=test_records[0])
 		si.doc.update_stock = 1
 		si.doclist[1].item_code = "_Test Serialized Item With Series"
 		si.doclist[1].qty = 1
@@ -824,9 +824,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
-		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"))
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
+		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"), si.doc.name)
 			
 		return si
@@ -838,9 +838,9 @@ class TestSalesInvoice(unittest.TestCase):
 
 		serial_nos = get_serial_nos(si.doclist[1].serial_no)
 
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
-		self.assertEquals(webnotes.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
-		self.assertFalse(webnotes.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
+		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
@@ -850,11 +850,11 @@ class TestSalesInvoice(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		sr = webnotes.bean("Serial No", serial_nos[0])
+		sr = frappe.bean("Serial No", serial_nos[0])
 		sr.doc.status = "Not Available"
 		sr.save()
 		
-		si = webnotes.bean(copy=test_records[0])
+		si = frappe.bean(copy=test_records[0])
 		si.doc.update_stock = 1
 		si.doclist[1].item_code = "_Test Serialized Item With Series"
 		si.doclist[1].qty = 1

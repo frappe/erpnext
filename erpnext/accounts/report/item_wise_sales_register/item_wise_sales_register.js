@@ -1,28 +1,28 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Item-wise Sales Register"] = wn.query_reports["Sales Register"] = {
+frappe.query_reports["Item-wise Sales Register"] = frappe.query_reports["Sales Register"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
-			"label": wn._("From Date"),
+			"label": frappe._("From Date"),
 			"fieldtype": "Date",
-			"default": wn.defaults.get_default("year_start_date"),
+			"default": frappe.defaults.get_default("year_start_date"),
 			"width": "80"
 		},
 		{
 			"fieldname":"to_date",
-			"label": wn._("To Date"),
+			"label": frappe._("To Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},
 		{
 			"fieldname":"account",
-			"label": wn._("Account"),
+			"label": frappe._("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
-				var company = wn.query_report.filters_by_name.company.get_value();
+				var company = frappe.query_report.filters_by_name.company.get_value();
 				return {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
@@ -36,10 +36,10 @@ wn.query_reports["Item-wise Sales Register"] = wn.query_reports["Sales Register"
 		},
 		{
 			"fieldname":"company",
-			"label": wn._("Company"),
+			"label": frappe._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": wn.defaults.get_default("company")
+			"default": frappe.defaults.get_default("company")
 		}
 	]
 }

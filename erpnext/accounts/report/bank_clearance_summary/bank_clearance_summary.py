@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
+import frappe
+from frappe import _, msgprint
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -33,7 +33,7 @@ def get_conditions(filters):
 	
 def get_entries(filters):
 	conditions = get_conditions(filters)
-	entries =  webnotes.conn.sql("""select jv.name, jvd.account, jv.posting_date, 
+	entries =  frappe.conn.sql("""select jv.name, jvd.account, jv.posting_date, 
 		jv.clearance_date, jvd.against_account, jvd.debit, jvd.credit
 		from `tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv 
 		where jvd.parent = jv.name and jv.docstatus=1 %s

@@ -3,20 +3,20 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-import webnotes.defaults
-from webnotes.utils import flt
+import frappe
+import frappe.defaults
+from frappe.utils import flt
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):		
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
-		po = webnotes.bean(copy=test_records[0]).insert()
+		po = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_purchase_receipt, 
+		self.assertRaises(frappe.ValidationError, make_purchase_receipt, 
 			po.doc.name)
 
-		po = webnotes.bean("Purchase Order", po.doc.name)
+		po = frappe.bean("Purchase Order", po.doc.name)
 		po.submit()
 		
 		pr = make_purchase_receipt(po.doc.name)
@@ -26,25 +26,25 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(pr), len(test_records[0]))
 		
 		pr[0].naming_series = "_T-Purchase Receipt-"
-		pr_bean = webnotes.bean(pr)
+		pr_bean = frappe.bean(pr)
 		pr_bean.insert()
 			
 	def test_ordered_qty(self):
-		webnotes.conn.sql("delete from tabBin")
+		frappe.conn.sql("delete from tabBin")
 		
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
-		po = webnotes.bean(copy=test_records[0]).insert()
+		po = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_purchase_receipt, 
+		self.assertRaises(frappe.ValidationError, make_purchase_receipt, 
 			po.doc.name)
 
-		po = webnotes.bean("Purchase Order", po.doc.name)
+		po = frappe.bean("Purchase Order", po.doc.name)
 		po.doc.is_subcontracted = "No"
 		po.doclist[1].item_code = "_Test Item"
 		po.submit()
 		
-		self.assertEquals(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+		self.assertEquals(frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty"), 10)
 		
 		pr = make_purchase_receipt(po.doc.name)
@@ -54,35 +54,35 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr[0]["posting_date"] = "2013-05-12"
 		pr[0].naming_series = "_T-Purchase Receipt-"
 		pr[1].qty = 4.0
-		pr_bean = webnotes.bean(pr)
+		pr_bean = frappe.bean(pr)
 		pr_bean.insert()
 		pr_bean.submit()
 		
-		self.assertEquals(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+		self.assertEquals(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 6.0)
 			
-		webnotes.conn.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.conn.set_value('Item', '_Test Item', 'tolerance', 50)
 			
 		pr1 = make_purchase_receipt(po.doc.name)
 		pr1[0].naming_series = "_T-Purchase Receipt-"
 		pr1[0]["posting_date"] = "2013-05-12"
 		pr1[1].qty = 8
-		pr1_bean = webnotes.bean(pr1)
+		pr1_bean = frappe.bean(pr1)
 		pr1_bean.insert()
 		pr1_bean.submit()
 		
-		self.assertEquals(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item", 
+		self.assertEquals(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)
 		
 	def test_make_purchase_invoice(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
-		po = webnotes.bean(copy=test_records[0]).insert()
+		po = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_purchase_invoice, 
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
 			po.doc.name)
 
-		po = webnotes.bean("Purchase Order", po.doc.name)
+		po = frappe.bean("Purchase Order", po.doc.name)
 		po.submit()
 		pi = make_purchase_invoice(po.doc.name)
 		
@@ -90,23 +90,23 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(pi), len(test_records[0]))
 		pi[0]["posting_date"] = "2013-05-12"
 		pi[0].bill_no = "NA"
-		webnotes.bean(pi).insert()
+		frappe.bean(pi).insert()
 		
 	def test_subcontracting(self):
-		po = webnotes.bean(copy=test_records[0])
+		po = frappe.bean(copy=test_records[0])
 		po.insert()
 		self.assertEquals(len(po.doclist.get({"parentfield": "po_raw_material_details"})), 2)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		po = webnotes.bean(copy=test_records[0])
+		po = frappe.bean(copy=test_records[0])
 		po.doc.company = "_Test Company 1"
 		po.doc.conversion_rate = 0.0167
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
 	def test_uom_integer_validation(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
-		po = webnotes.bean(copy=test_records[0])
+		po = frappe.bean(copy=test_records[0])
 		po.doclist[1].qty = 3.4
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 

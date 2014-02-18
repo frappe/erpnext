@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import DocTypeNestedSet
 
 class DocType(DocTypeNestedSet):
 	def __init__(self, doc, doclist=[]):
@@ -20,6 +20,6 @@ class DocType(DocTypeNestedSet):
 		self.validate_one_root()
 		
 	def validate_name_with_item(self):
-		if webnotes.conn.exists("Item", self.doc.name):
-			webnotes.msgprint("An item exists with same name (%s), please change the \
+		if frappe.conn.exists("Item", self.doc.name):
+			frappe.msgprint("An item exists with same name (%s), please change the \
 				item group name or rename the item" % self.doc.name, raise_exception=1)

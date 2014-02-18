@@ -3,6 +3,6 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
+import frappe
 
 test_records = []

@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import _, msgprint
+import frappe
+from frappe.utils import cstr
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import _, msgprint
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -18,7 +18,7 @@ class DocType(SellingController):
 		self.fname = 'quotation_details'
 
 	def has_sales_order(self):
-		return webnotes.conn.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.conn.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
 
 	def validate_for_items(self):
 		chk_dupl_itm = []
@@ -34,7 +34,7 @@ class DocType(SellingController):
 		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_service_item = webnotes.conn.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
+				is_service_item = frappe.conn.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 				
 				if is_service_item == 'No':
@@ -42,7 +42,7 @@ class DocType(SellingController):
 					raise Exception
 		else:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_sales_item = webnotes.conn.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
+				is_sales_item = frappe.conn.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 				
 				if is_sales_item == 'No':
@@ -58,15 +58,15 @@ class DocType(SellingController):
 
 	def update_opportunity(self):
 		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
-			webnotes.bean("Opportunity", opportunity).get_controller().set_status(update=True)
+			frappe.bean("Opportunity", opportunity).get_controller().set_status(update=True)
 	
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
-			webnotes.conn.set(self.doc, 'status', 'Lost')
-			webnotes.conn.set(self.doc, 'order_lost_reason', arg)
+			frappe.conn.set(self.doc, 'status', 'Lost')
+			frappe.conn.set(self.doc, 'order_lost_reason', arg)
 			self.update_opportunity()
 		else:
-			webnotes.throw(_("Cannot set as Lost as Sales Order is made."))
+			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 	
 	def check_item_table(self):
 		if not getlist(self.doclist, 'quotation_details'):
@@ -97,12 +97,12 @@ class DocType(SellingController):
 		return print_lst
 		
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_sales_order(source_name, target_doclist=None):
 	return _make_sales_order(source_name, target_doclist)
 	
 def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	customer = _make_customer(source_name, ignore_permissions)
 	
@@ -111,7 +111,7 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 			target[0].customer = customer.doc.name
 			target[0].customer_name = customer.doc.customer_name
 			
-		si = webnotes.bean(target)
+		si = frappe.bean(target)
 		si.run_method("onload_post_render")
 			
 	doclist = get_mapped_doclist("Quotation", source_name, {
@@ -142,31 +142,31 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 	return [d.fields for d in doclist]
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = webnotes.conn.get_value("Quotation", source_name, ["lead", "order_type"])
+	quotation = frappe.conn.get_value("Quotation", source_name, ["lead", "order_type"])
 	if quotation and quotation[0]:
 		lead_name = quotation[0]
-		customer_name = webnotes.conn.get_value("Customer", {"lead_name": lead_name})
+		customer_name = frappe.conn.get_value("Customer", {"lead_name": lead_name})
 		if not customer_name:
 			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
-			customer = webnotes.bean(customer_doclist)
+			customer = frappe.bean(customer_doclist)
 			customer.ignore_permissions = ignore_permissions
 			if quotation[1] == "Shopping Cart":
-				customer.doc.customer_group = webnotes.conn.get_value("Shopping Cart Settings", None,
+				customer.doc.customer_group = frappe.conn.get_value("Shopping Cart Settings", None,
 					"default_customer_group")
 			
 			try:
 				customer.insert()
 				return customer
 			except NameError, e:
-				if webnotes.defaults.get_global_default('cust_master_name') == "Customer Name":
+				if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
 					customer.run_method("autoname")
 					customer.doc.name += "-" + lead_name
 					customer.insert()
 					return customer
 				else:
 					raise
-			except webnotes.MandatoryError:
-				from webnotes.utils import get_url_to_form
-				webnotes.throw(_("Before proceeding, please create Customer from Lead") + \
+			except frappe.MandatoryError:
+				from frappe.utils import get_url_to_form
+				frappe.throw(_("Before proceeding, please create Customer from Lead") + \
 					(" - %s" % get_url_to_form("Lead", lead_name)))

@@ -1,12 +1,12 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("assets/erpnext/js/stock_grid_report.js");
+frappe.require("assets/erpnext/js/stock_grid_report.js");
 
 erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper, opts) {
 		var args = {
-			title: wn._("Stock Analytics"),
+			title: frappe._("Stock Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -18,7 +18,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				formatter: function(item) {
 					if(!item.is_group) {
 						return repl("<a \
-							onclick='wn.cur_grid_report.show_stock_ledger(\"%(value)s\")'>\
+							onclick='frappe.cur_grid_report.show_stock_ledger(\"%(value)s\")'>\
 							%(value)s</a>", {
 								value: item.name,
 							});
@@ -36,13 +36,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: wn._("Plot"), field: "check", width: 30,
+			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: wn._("Item"), field: "name", width: 300,
+			{id: "name", name: frappe._("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "brand", name: wn._("Brand"), field: "brand", width: 100},
-			{id: "stock_uom", name: wn._("UOM"), field: "stock_uom", width: 100},
-			{id: "opening", name: wn._("Opening"), field: "opening", hidden: true,
+			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: frappe._("UOM"), field: "stock_uom", width: 100},
+			{id: "opening", name: frappe._("Opening"), field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
 
@@ -50,23 +50,23 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: wn._("Value or Qty"), options:["Value", "Quantity"],
+		{fieldtype:"Select", label: frappe._("Value or Qty"), options:["Value", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: wn._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: wn._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Date", label: wn._("From Date")},
-		{fieldtype:"Label", label: wn._("To")},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Select", label: wn._("Range"), 
+		{fieldtype:"Date", label: frappe._("From Date")},
+		{fieldtype:"Label", label: frappe._("To")},
+		{fieldtype:"Date", label: frappe._("To Date")},
+		{fieldtype:"Select", label: frappe._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: frappe._("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;
@@ -118,7 +118,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		var me = this;
 		var from_date = dateutil.str_to_obj(this.from_date);
 		var to_date = dateutil.str_to_obj(this.to_date);
-		var data = wn.report_dump.data["Stock Ledger Entry"];
+		var data = frappe.report_dump.data["Stock Ledger Entry"];
 
 		this.item_warehouse = {};
 		this.serialized_buying_rates = this.get_serialized_buying_rates();
@@ -185,11 +185,11 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		return [[dateutil.user_to_obj(col.name).getTime(), item[col.field]]]
 	},
 	show_stock_ledger: function(item_code) {
-		wn.route_options = {
+		frappe.route_options = {
 			item_code: item_code,
 			from_date: this.from_date,
 			to_date: this.to_date
 		};
-		wn.set_route("query-report", "Stock Ledger");
+		frappe.set_route("query-report", "Stock Ledger");
 	}
 });

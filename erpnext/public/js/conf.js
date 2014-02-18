@@ -1,13 +1,13 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide('erpnext');
+frappe.provide('erpnext');
 
 // add toolbar icon
 $(document).bind('toolbar_setup', function() {
-	wn.app.name = "ERPNext";
+	frappe.app.name = "ERPNext";
 	
-	var brand = ($("<div></div>").append(wn.boot.website_settings.brand_html).text() || 'erpnext');
+	var brand = ($("<div></div>").append(frappe.boot.website_settings.brand_html).text() || 'erpnext');
 	$('.navbar-brand').html('<div style="display: inline-block;">\
 			<object type="image/svg+xml" data="assets/erpnext/images/splash.svg" class="toolbar-splash"></object>\
 		</div>' + brand)
@@ -20,23 +20,23 @@ $(document).bind('toolbar_setup', function() {
 	});
 });
 
-wn.provide('wn.ui.misc');
-wn.ui.misc.about = function() {
-	if(!wn.ui.misc.about_dialog) {
-		var d = new wn.ui.Dialog({title: wn._('About')})
+frappe.provide('frappe.ui.misc');
+frappe.ui.misc.about = function() {
+	if(!frappe.ui.misc.about_dialog) {
+		var d = new frappe.ui.Dialog({title: frappe._('About')})
 	
 		$(d.body).html(repl("<div>\
 		<h2>ERPNext</h2>  \
-		<p>"+wn._("An open source ERP made for the web.</p>") +
-		"<p>"+wn._("To report an issue, go to ")+"<a href='https://github.com/webnotes/erpnext/issues'>GitHub Issues</a></p> \
+		<p>"+frappe._("An open source ERP made for the web.</p>") +
+		"<p>"+frappe._("To report an issue, go to ")+"<a href='https://github.com/frappe/erpnext/issues'>GitHub Issues</a></p> \
 		<p><a href='http://erpnext.org' target='_blank'>http://erpnext.org</a>.</p>\
 		<p><a href='http://www.gnu.org/copyleft/gpl.html'>License: GNU General Public License Version 3</a></p>\
 		<hr>\
 		<p>&copy; 2014 Web Notes Technologies Pvt. Ltd and contributers </p> \
-		</div>", wn.app));
+		</div>", frappe.app));
 	
-		wn.ui.misc.about_dialog = d;		
+		frappe.ui.misc.about_dialog = d;		
 	}
 	
-	wn.ui.misc.about_dialog.show();
+	frappe.ui.misc.about_dialog.show();
 }

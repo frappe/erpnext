@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.provide("erpnext.utils");
+frappe.provide("erpnext.utils");
 erpnext.utils.get_party_details = function(frm, method, args) {
 	if(!method) {
 		method = "erpnext.accounts.party.get_party_details";
@@ -23,7 +23,7 @@ erpnext.utils.get_party_details = function(frm, method, args) {
 	}
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
-	wn.call({
+	frappe.call({
 		method: method,
 		args: args,
 		callback: function(r) {
@@ -46,7 +46,7 @@ erpnext.utils.get_address_display = function(frm, address_field) {
 		}
 	} 
 	if(frm.doc[address_field]) {
-		wn.call({
+		frappe.call({
 			method: "erpnext.utilities.doctype.address.address.get_address_display",
 			args: {address: frm.doc[address_field] },
 			callback: function(r) {
@@ -61,7 +61,7 @@ erpnext.utils.get_contact_details = function(frm) {
 	if(frm.updating_party_details) return;
 	
 	if(frm.doc[address_field]) {
-		wn.call({
+		frappe.call({
 			method: "erpnext.utilities.doctype.contact.contact.get_contact_details",
 			args: {contact: frm.doc.contact_person },
 			callback: function(r) {

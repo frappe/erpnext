@@ -1,11 +1,11 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Bank Reconciliation Statement"] = {
+frappe.query_reports["Bank Reconciliation Statement"] = {
 	"filters": [
 		{
 			"fieldname":"account",
-			"label": wn._("Bank Account"),
+			"label": frappe._("Bank Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"reqd": 1,
@@ -21,7 +21,7 @@ wn.query_reports["Bank Reconciliation Statement"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": wn._("Date"),
+			"label": frappe._("Date"),
 			"fieldtype": "Date",
 			"default": get_today(),
 			"reqd": 1

@@ -2,25 +2,25 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-import webnotes.defaults
+import frappe
+import frappe.defaults
 
-from webnotes.utils import cstr, cint, flt, comma_or, nowdate
-from webnotes.model.doc import addchild
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from frappe.utils import cstr, cint, flt, comma_or, nowdate
+from frappe.model.doc import addchild
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
 import json
 
 
-class NotUpdateStockError(webnotes.ValidationError): pass
-class StockOverReturnError(webnotes.ValidationError): pass
-class IncorrectValuationRateError(webnotes.ValidationError): pass
-class DuplicateEntryForProductionOrderError(webnotes.ValidationError): pass
-class StockOverProductionError(webnotes.ValidationError): pass
+class NotUpdateStockError(frappe.ValidationError): pass
+class StockOverReturnError(frappe.ValidationError): pass
+class IncorrectValuationRateError(frappe.ValidationError): pass
+class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
+class StockOverProductionError(frappe.ValidationError): pass
 	
 from erpnext.controllers.stock_controller import StockController
 
@@ -154,7 +154,7 @@ class DocType(StockController):
 			self.doc.production_order = None
 	
 	def check_duplicate_entry_for_production_order(self):
-		other_ste = [t[0] for t in webnotes.conn.get_values("Stock Entry",  {
+		other_ste = [t[0] for t in frappe.conn.get_values("Stock Entry",  {
 			"production_order": self.doc.production_order,
 			"purpose": self.doc.purpose,
 			"docstatus": ["!=", 2],
@@ -162,17 +162,17 @@ class DocType(StockController):
 		}, "name")]
 		
 		if other_ste:
-			production_item, qty = webnotes.conn.get_value("Production Order", 
+			production_item, qty = frappe.conn.get_value("Production Order", 
 				self.doc.production_order, ["production_item", "qty"])
 			args = other_ste + [production_item]
-			fg_qty_already_entered = webnotes.conn.sql("""select sum(actual_qty)
+			fg_qty_already_entered = frappe.conn.sql("""select sum(actual_qty)
 				from `tabStock Entry Detail` 
 				where parent in (%s) 
 					and item_code = %s 
 					and ifnull(s_warehouse,'')='' """ % (", ".join(["%s" * len(other_ste)]), "%s"), args)[0][0]
 			
 			if fg_qty_already_entered >= qty:
-				webnotes.throw(_("Stock Entries already created for Production Order ") 
+				frappe.throw(_("Stock Entries already created for Production Order ") 
 					+ self.doc.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
 
 	def set_total_amount(self):
@@ -181,7 +181,7 @@ class DocType(StockController):
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
 		for d in getlist(self.doclist, 'mtn_details'):
-			args = webnotes._dict({
+			args = frappe._dict({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
 				"posting_date": self.doc.posting_date,
@@ -203,7 +203,7 @@ class DocType(StockController):
 		incoming_rate = 0
 		if self.doc.purpose == "Sales Return" and \
 				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
-			sle = webnotes.conn.sql("""select name, posting_date, posting_time, 
+			sle = frappe.conn.sql("""select name, posting_date, posting_time, 
 				actual_qty, stock_value, warehouse from `tabStock Ledger Entry` 
 				where voucher_type = %s and voucher_no = %s and 
 				item_code = %s limit 1""", 
@@ -231,7 +231,7 @@ class DocType(StockController):
 					
 	def validate_bom(self):
 		for d in getlist(self.doclist, 'mtn_details'):
-			if d.bom_no and not webnotes.conn.sql("""select name from `tabBOM`
+			if d.bom_no and not frappe.conn.sql("""select name from `tabBOM`
 					where item = %s and name = %s and docstatus = 1 and is_active = 1""",
 					(d.item_code, d.bom_no)):
 				msgprint(_("Item") + " %s: " % cstr(d.item_code)
@@ -252,12 +252,12 @@ class DocType(StockController):
 		if ref.doclist:
 			# validate docstatus
 			if ref.doclist[0].docstatus != 1:
-				webnotes.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
-					+ _("Status should be Submitted"), raise_exception=webnotes.InvalidStatusError)
+				frappe.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
+					+ _("Status should be Submitted"), raise_exception=frappe.InvalidStatusError)
 			
 			# update stock check
 			if ref.doclist[0].doctype == "Sales Invoice" and cint(ref.doclist[0].update_stock) != 1:
-				webnotes.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
+				frappe.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
 					+ _("Update Stock should be checked."), 
 					raise_exception=NotUpdateStockError)
 			
@@ -267,8 +267,8 @@ class DocType(StockController):
 			this_posting_datetime = "%s %s" % (cstr(self.doc.posting_date), 
 				cstr(self.doc.posting_time))
 			if this_posting_datetime < ref_posting_datetime:
-				from webnotes.utils.dateutils import datetime_in_user_format
-				webnotes.msgprint(_("Posting Date Time cannot be before")
+				from frappe.utils.dateutils import datetime_in_user_format
+				frappe.msgprint(_("Posting Date Time cannot be before")
 					+ ": " + datetime_in_user_format(ref_posting_datetime),
 					raise_exception=True)
 			
@@ -280,23 +280,23 @@ class DocType(StockController):
 				if item.item_code not in stock_items:
 					msgprint(_("Item") + ': "' + item.item_code + _("\" does not exist in ") +
 						ref.doclist[0].doctype + ": " + ref.doclist[0].name, 
-						raise_exception=webnotes.DoesNotExistError)
+						raise_exception=frappe.DoesNotExistError)
 				
 				# validate quantity <= ref item's qty - qty already returned
 				ref_item = ref.doclist.getone({"item_code": item.item_code})
 				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
-					webnotes.throw("{item}: {item_code} {returned}".format(
+					frappe.throw("{item}: {item_code} {returned}".format(
 						item=_("Item"), item_code=item.item_code, 
 						returned=_("already returned though some other documents")), 
 						StockOverReturnError)
 				elif item.transfer_qty > returnable_qty:
-					webnotes.throw("{item}: {item_code}, {returned}: {qty}".format(
+					frappe.throw("{item}: {item_code}, {returned}: {qty}".format(
 						item=_("Item"), item_code=item.item_code,
 						returned=_("Max Returnable Qty"), qty=returnable_qty), StockOverReturnError)
 						
 	def get_already_returned_item_qty(self, ref_fieldname):
-		return dict(webnotes.conn.sql("""select item_code, sum(transfer_qty) as qty
+		return dict(frappe.conn.sql("""select item_code, sum(transfer_qty) as qty
 			from `tabStock Entry Detail` where parent in (
 				select name from `tabStock Entry` where `%s`=%s and docstatus=1)
 			group by item_code""" % (ref_fieldname, "%s"), (self.doc.fields.get(ref_fieldname),)))
@@ -333,7 +333,7 @@ class DocType(StockController):
 	def update_production_order(self):
 		def _validate_production_order(pro_bean):
 			if flt(pro_bean.doc.docstatus) != 1:
-				webnotes.throw(_("Production Order must be submitted") + ": " + 
+				frappe.throw(_("Production Order must be submitted") + ": " + 
 					self.doc.production_order)
 					
 			if pro_bean.doc.status == 'Stopped':
@@ -341,7 +341,7 @@ class DocType(StockController):
 					self.doc.production_order)
 		
 		if self.doc.production_order:
-			pro_bean = webnotes.bean("Production Order", self.doc.production_order)
+			pro_bean = frappe.bean("Production Order", self.doc.production_order)
 			_validate_production_order(pro_bean)
 			self.update_produced_qty(pro_bean)
 			if self.doc.purpose == "Manufacture/Repack":
@@ -353,12 +353,12 @@ class DocType(StockController):
 				(self.doc.docstatus==1 and 1 or -1 ) * flt(self.doc.fg_completed_qty)
 				
 			if produced_qty > flt(pro_bean.doc.qty):
-				webnotes.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
+				frappe.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
 					_("Total Manufactured Qty can not be greater than Planned qty to manufacture") 
 					+ "(%s/%s)" % (produced_qty, flt(pro_bean.doc.qty)), StockOverProductionError)
 					
 			status = 'Completed' if flt(produced_qty) >= flt(pro_bean.doc.qty) else 'In Process'
-			webnotes.conn.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
+			frappe.conn.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
 				where name=%s""", (status, produced_qty, self.doc.production_order))
 			
 	def update_planned_qty(self, pro_bean):
@@ -372,7 +372,7 @@ class DocType(StockController):
 					
 	def get_item_details(self, arg):
 		arg = json.loads(arg)
-		item = webnotes.conn.sql("""select stock_uom, description, item_name, 
+		item = frappe.conn.sql("""select stock_uom, description, item_name, 
 			expense_account, buying_cost_center from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
 			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
@@ -385,7 +385,7 @@ class DocType(StockController):
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
 			'expense_account'		: item and item[0]['expense_account'] or arg.get("expense_account") \
-				or webnotes.conn.get_value("Company", arg.get("company"), "default_expense_account"),
+				or frappe.conn.get_value("Company", arg.get("company"), "default_expense_account"),
 			'cost_center'			: item and item[0]['buying_cost_center'] or arg.get("cost_center"),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
@@ -400,7 +400,7 @@ class DocType(StockController):
 
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
-		uom = webnotes.conn.sql("""select conversion_factor from `tabUOM Conversion Detail` 
+		uom = frappe.conn.sql("""select conversion_factor from `tabUOM Conversion Detail` 
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
 		if not uom or not flt(uom[0].conversion_factor):
 			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
@@ -421,7 +421,7 @@ class DocType(StockController):
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
 			})
-			args = webnotes._dict(args)
+			args = frappe._dict(args)
 		
 			ret = {
 				"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
@@ -451,7 +451,7 @@ class DocType(StockController):
 					item_dict = self.get_pending_raw_materials(pro_obj)
 				else:
 					if not self.doc.fg_completed_qty:
-						webnotes.throw(_("Manufacturing Quantity is mandatory"))
+						frappe.throw(_("Manufacturing Quantity is mandatory"))
 					item_dict = self.get_bom_raw_materials(self.doc.fg_completed_qty)
 					for item in item_dict.values():
 						if pro_obj:
@@ -463,7 +463,7 @@ class DocType(StockController):
 					
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
-				item = webnotes.conn.get_value("Item", pro_obj.doc.production_item, ["item_name", 
+				item = frappe.conn.get_value("Item", pro_obj.doc.production_item, ["item_name", 
 					"description", "stock_uom", "expense_account", "buying_cost_center"], as_dict=1)
 				self.add_to_stock_entry_detail({
 					cstr(pro_obj.doc.production_item): {
@@ -482,7 +482,7 @@ class DocType(StockController):
 				if self.doc.purpose=="Material Receipt":
 					self.doc.from_warehouse = ""
 					
-				item = webnotes.conn.sql("""select name, item_name, description, 
+				item = frappe.conn.sql("""select name, item_name, description, 
 					stock_uom, expense_account, buying_cost_center from `tabItem` 
 					where name=(select item from tabBOM where name=%s)""", 
 					self.doc.bom_no, as_dict=1)
@@ -539,18 +539,18 @@ class DocType(StockController):
 		
 		# show some message
 		if not len(item_dict):
-			webnotes.msgprint(_("""All items have already been transferred \
+			frappe.msgprint(_("""All items have already been transferred \
 				for this Production Order."""))
 			
 		elif only_pending_fetched:
-			webnotes.msgprint(_("""Only quantities pending to be transferred \
+			frappe.msgprint(_("""Only quantities pending to be transferred \
 				were fetched for the following items:\n""" + "\n".join(only_pending_fetched)))
 
 		return item_dict
 
 	def get_issued_qty(self):
 		issued_item_qty = {}
-		result = webnotes.conn.sql("""select t1.item_code, sum(t1.qty)
+		result = frappe.conn.sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
 			and t2.purpose = 'Material Transfer'
@@ -562,7 +562,7 @@ class DocType(StockController):
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None, idx=None):
 		if not idx:	idx = 1
-		expense_account, cost_center = webnotes.conn.get_values("Company", self.doc.company, \
+		expense_account, cost_center = frappe.conn.get_values("Company", self.doc.company, \
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:
@@ -594,28 +594,28 @@ class DocType(StockController):
 	def validate_with_material_request(self):
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
 			if item.material_request:
-				mreq_item = webnotes.conn.get_value("Material Request Item", 
+				mreq_item = frappe.conn.get_value("Material Request Item", 
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
 				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
 					msgprint(_("Row #") + (" %d: " % item.idx) + _("does not match")
 						+ " " + _("Row #") + (" %d %s " % (mreq_item.idx, _("of")))
 						+ _("Material Request") + (" - %s" % item.material_request), 
-						raise_exception=webnotes.MappingMismatchError)
+						raise_exception=frappe.MappingMismatchError)
 	
-@webnotes.whitelist()					
+@frappe.whitelist()					
 def get_party_details(ref_dt, ref_dn):
 	if ref_dt in ["Delivery Note", "Sales Invoice"]:
-		res = webnotes.conn.get_value(ref_dt, ref_dn, 
+		res = frappe.conn.get_value(ref_dt, ref_dn, 
 			["customer", "customer_name", "address_display as customer_address"], as_dict=1)
 	else:
-		res = webnotes.conn.get_value(ref_dt, ref_dn, 
+		res = frappe.conn.get_value(ref_dt, ref_dn, 
 			["supplier", "supplier_name", "address_display as supplier_address"], as_dict=1)
 	return res or {}
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_production_order_details(production_order):
-	result = webnotes.conn.sql("""select bom_no, 
+	result = frappe.conn.sql("""select bom_no, 
 		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom, 
 		wip_warehouse from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 	return result and result[0] or {}
@@ -625,7 +625,7 @@ def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 	if doctype == "Sales Invoice":
 		conditions = "and update_stock=1"
 	
-	return webnotes.conn.sql("""select name, customer, customer_name
+	return frappe.conn.sql("""select name, customer, customer_name
 		from `tab%s` where docstatus = 1
 			and (`%s` like %%(txt)s 
 				or `customer` like %%(txt)s) %s %s
@@ -636,7 +636,7 @@ def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 		as_list=True)
 	
 def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filters):
-	return webnotes.conn.sql("""select name, supplier, supplier_name
+	return frappe.conn.sql("""select name, supplier, supplier_name
 		from `tab%s` where docstatus = 1
 			and (`%s` like %%(txt)s 
 				or `supplier` like %%(txt)s) %s
@@ -685,7 +685,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 	
 	if filters.get("s_warehouse"):
-		batch_nos = webnotes.conn.sql("""select batch_no 
+		batch_nos = frappe.conn.sql("""select batch_no 
 			from `tabStock Ledger Entry` sle 
 			where item_code = '%(item_code)s' 
 				and warehouse = '%(s_warehouse)s'
@@ -704,7 +704,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if batch_nos:
 		return batch_nos
 	else:
-		return webnotes.conn.sql("""select name from `tabBatch` 
+		return frappe.conn.sql("""select name from `tabBatch` 
 			where item = '%(item_code)s'
 			and docstatus < 2
 			and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s 
@@ -721,21 +721,21 @@ def get_stock_items_for_return(ref_doclist, parentfields):
 	
 	all_items = list(set([d.item_code for d in 
 		ref_doclist.get({"parentfield": ["in", parentfields]})]))
-	stock_items = webnotes.conn.sql_list("""select name from `tabItem`
+	stock_items = frappe.conn.sql_list("""select name from `tabItem`
 		where is_stock_item='Yes' and name in (%s)""" % (", ".join(["%s"] * len(all_items))),
 		tuple(all_items))
 
 	return stock_items
 	
 def get_return_doclist_and_details(args):
-	ref = webnotes._dict()
+	ref = frappe._dict()
 	
 	# get ref_doclist
 	if args["purpose"] in return_map:
 		for fieldname, val in return_map[args["purpose"]].items():
 			if args.get(fieldname):
 				ref.fieldname = fieldname
-				ref.doclist = webnotes.get_doclist(val[0], args[fieldname])
+				ref.doclist = frappe.get_doclist(val[0], args[fieldname])
 				ref.parentfields = val[1]
 				break
 				
@@ -752,9 +752,9 @@ return_map = {
 	}
 }
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_return_jv(stock_entry):
-	se = webnotes.bean("Stock Entry", stock_entry)
+	se = frappe.bean("Stock Entry", stock_entry)
 	if not se.doc.purpose in ["Sales Return", "Purchase Return"]:
 		return
 	
@@ -845,7 +845,7 @@ def make_return_jv_from_delivery_note(se, ref):
 	
 	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
 		for sales_invoice in invoices_against_delivery:
-			si = webnotes.bean("Sales Invoice", sales_invoice)
+			si = frappe.bean("Sales Invoice", sales_invoice)
 			
 			if se_item.item_code in packing_item_parent_map:
 				ref_item = si.doclist.get({"item_code": packing_item_parent_map[se_item.item_code]})
@@ -878,7 +878,7 @@ def get_invoice_list(doctype, link_field, value):
 	if isinstance(value, basestring):
 		value = [value]
 	
-	return webnotes.conn.sql_list("""select distinct parent from `tab%s`
+	return frappe.conn.sql_list("""select distinct parent from `tab%s`
 		where docstatus = 1 and `%s` in (%s)""" % (doctype, link_field,
 			", ".join(["%s"]*len(value))), tuple(value))
 			
@@ -902,7 +902,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 	
 	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
 		for purchase_invoice in invoice_against_receipt:
-			pi = webnotes.bean("Purchase Invoice", purchase_invoice)
+			pi = frappe.bean("Purchase Invoice", purchase_invoice)
 			ref_item = pi.doclist.get({"item_code": se_item.item_code})
 			
 			if not ref_item:

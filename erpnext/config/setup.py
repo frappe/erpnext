@@ -1,4 +1,4 @@
-from webnotes import _
+from frappe import _
 
 data = [
 	{

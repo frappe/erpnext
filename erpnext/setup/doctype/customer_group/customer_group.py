@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint
+import frappe
+from frappe import msgprint
 
 	
-from webnotes.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import DocTypeNestedSet
 class DocType(DocTypeNestedSet):
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
@@ -14,7 +14,7 @@ class DocType(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_customer_group';
 
 	def validate(self): 
-		if webnotes.conn.sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", 
+		if frappe.conn.sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", 
 		 		(self.doc.customer_group_name)):
 			msgprint("""Another %s record is trashed. 
 				To untrash please go to Setup -> Recycle Bin.""" % 
@@ -26,13 +26,13 @@ class DocType(DocTypeNestedSet):
 		self.validate_one_root()
 		
 	def validate_name_with_customer(self):
-		if webnotes.conn.exists("Customer", self.doc.name):
-			webnotes.msgprint("An Customer exists with same name (%s), \
+		if frappe.conn.exists("Customer", self.doc.name):
+			frappe.msgprint("An Customer exists with same name (%s), \
 				please change the Customer Group name or rename the Customer" % 
 				self.doc.name, raise_exception=1)
 
 	def on_trash(self):
-		cust = webnotes.conn.sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", 
+		cust = frappe.conn.sql("select name from `tabCustomer` where ifnull(customer_group, '') = %s", 
 		 	self.doc.name)
 		cust = [d[0] for d in cust]
 		if cust:
@@ -41,7 +41,7 @@ class DocType(DocTypeNestedSet):
 				To trash/delete this, remove/change customer group in customer master""" %
 				(self.doc.name, cust or ''), raise_exception=1)
 
-		if webnotes.conn.sql("select name from `tabCustomer Group` where parent_customer_group = %s \
+		if frappe.conn.sql("select name from `tabCustomer Group` where parent_customer_group = %s \
 				and docstatus != 2", self.doc.name):
 			msgprint("Child customer group exists for this customer group. \
 				You can not trash/cancel/delete this customer group.", raise_exception=1)

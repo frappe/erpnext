@@ -4,15 +4,15 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import flt, fmt_money
-from webnotes.model.controller import DocListController
+import frappe
+from frappe import _, msgprint
+from frappe.utils import flt, fmt_money
+from frappe.model.controller import DocListController
 from erpnext.setup.utils import get_company_currency
 
-class OverlappingConditionError(webnotes.ValidationError): pass
-class FromGreaterThanToError(webnotes.ValidationError): pass
-class ManyBlankToValuesError(webnotes.ValidationError): pass
+class OverlappingConditionError(frappe.ValidationError): pass
+class FromGreaterThanToError(frappe.ValidationError): pass
+class ManyBlankToValuesError(frappe.ValidationError): pass
 
 class DocType(DocListController):
 	def __init__(self, d, dl):

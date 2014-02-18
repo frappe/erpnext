@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _, msgprint
-from webnotes.utils import flt
+import frappe
+from frappe import _, msgprint
+from frappe.utils import flt
 import time
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -60,7 +60,7 @@ def get_columns(filters):
 
 #Get territory & item group details
 def get_territory_details(filters):
-	return webnotes.conn.sql("""select t.name, td.item_group, td.target_qty, 
+	return frappe.conn.sql("""select t.name, td.item_group, td.target_qty, 
 		td.target_amount, t.distribution_id 
 		from `tabTerritory` t, `tabTarget Detail` td 
 		where td.parent=t.name and td.fiscal_year=%s order by t.name""", 
@@ -70,7 +70,7 @@ def get_territory_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in webnotes.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
+	for d in frappe.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
@@ -81,7 +81,7 @@ def get_target_distribution_details(filters):
 def get_achieved_details(filters):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
-	item_details = webnotes.conn.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date, 
+	item_details = frappe.conn.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date, 
 		so.territory, MONTHNAME(so.transaction_date) as month_name 
 		from `tabSales Order Item` soi, `tabSales Order` so 
 		where soi.parent=so.name and so.docstatus=1 and so.transaction_date>=%s and 
@@ -108,7 +108,7 @@ def get_territory_item_month_map(filters):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
 			
 			tim_map.setdefault(td.name, {}).setdefault(td.item_group, {})\
-				.setdefault(month, webnotes._dict({
+				.setdefault(month, frappe._dict({
 					"target": 0.0, "achieved": 0.0
 				}))
 
@@ -130,4 +130,4 @@ def get_territory_item_month_map(filters):
 	return tim_map
 
 def get_item_group(item_name):
-	return webnotes.conn.get_value("Item", item_name, "item_group")
+	return frappe.conn.get_value("Item", item_name, "item_group")

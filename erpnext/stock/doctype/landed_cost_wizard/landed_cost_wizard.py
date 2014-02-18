@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint, cstr, flt
-from webnotes.model.doc import addchild
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import cint, cstr, flt
+from frappe.model.doc import addchild
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -30,15 +30,15 @@ class DocType:
 
 	def validate_purchase_receipts(self, purchase_receipts):
 		for pr in purchase_receipts:
-			if webnotes.conn.get_value("Purchase Receipt", pr, "docstatus") != 1:
-				webnotes.throw(_("Purchase Receipt") + ": " + pr + _(" is not submitted document"))
+			if frappe.conn.get_value("Purchase Receipt", pr, "docstatus") != 1:
+				frappe.throw(_("Purchase Receipt") + ": " + pr + _(" is not submitted document"))
 
 	def add_charges_in_pr(self, purchase_receipts):
 		""" Add additional charges in selected pr proportionately"""
 		total_amt = self.get_total_pr_amt(purchase_receipts)
 		
 		for pr in purchase_receipts:
-			pr_bean = webnotes.bean('Purchase Receipt', pr)
+			pr_bean = frappe.bean('Purchase Receipt', pr)
 			idx = max([d.idx for d in pr_bean.doclist.get({"parentfield": "other_charges"})])
 			
 			for lc in self.doclist.get({"parentfield": "landed_cost_details"}):
@@ -76,24 +76,24 @@ class DocType:
 				d.save()
 	
 	def get_total_pr_amt(self, purchase_receipts):
-		return webnotes.conn.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt` 
+		return frappe.conn.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt` 
 			WHERE name in (%s)""" % ', '.join(['%s']*len(purchase_receipts)), 
 			tuple(purchase_receipts))[0][0]
 			
 	def cancel_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
-			pr_bean = webnotes.bean("Purchase Receipt", pr)
+			pr_bean = frappe.bean("Purchase Receipt", pr)
 			
 			pr_bean.run_method("update_ordered_qty")
 			
-			webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+			frappe.conn.sql("""delete from `tabStock Ledger Entry` 
 				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr)
-			webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type='Purchase Receipt' 
+			frappe.conn.sql("""delete from `tabGL Entry` where voucher_type='Purchase Receipt' 
 				and voucher_no=%s""", pr)
 			
 	def submit_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
-			pr_bean = webnotes.bean("Purchase Receipt", pr)
+			pr_bean = frappe.bean("Purchase Receipt", pr)
 			pr_bean.run_method("update_ordered_qty")
 			pr_bean.run_method("update_stock")
 			pr_bean.run_method("make_gl_entries")

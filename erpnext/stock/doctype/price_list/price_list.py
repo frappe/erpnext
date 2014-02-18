@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint, _, throw
-from webnotes.utils import cint
-from webnotes.model.controller import DocListController
-import webnotes.defaults
+import frappe
+from frappe import msgprint, _, throw
+from frappe.utils import cint
+from frappe.model.controller import DocListController
+import frappe.defaults
 
 class DocType(DocListController):
 	def validate(self):
@@ -15,11 +15,11 @@ class DocType(DocListController):
 				
 		if not self.doclist.get({"parentfield": "valid_for_territories"}):
 			# if no territory, set default territory
-			if webnotes.defaults.get_user_default("territory"):
+			if frappe.defaults.get_user_default("territory"):
 				self.doclist.append({
 					"doctype": "Applicable Territory",
 					"parentfield": "valid_for_territories",
-					"territory": webnotes.defaults.get_user_default("territory")
+					"territory": frappe.defaults.get_user_default("territory")
 				})
 			else:
 				# at least one territory
@@ -31,14 +31,14 @@ class DocType(DocListController):
 
 	def set_default_if_missing(self):
 		if cint(self.doc.selling):
-			if not webnotes.conn.get_value("Selling Settings", None, "selling_price_list"):
-				webnotes.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.doc.name)
+			if not frappe.conn.get_value("Selling Settings", None, "selling_price_list"):
+				frappe.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.doc.name)
 
 		elif cint(self.doc.buying):
-			if not webnotes.conn.get_value("Buying Settings", None, "buying_price_list"):
-				webnotes.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)
+			if not frappe.conn.get_value("Buying Settings", None, "buying_price_list"):
+				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)
 
 	def update_item_price(self):
-		webnotes.conn.sql("""update `tabItem Price` set currency=%s, 
+		frappe.conn.sql("""update `tabItem Price` set currency=%s, 
 			buying=%s, selling=%s, modified=NOW() where price_list=%s""", 
 			(self.doc.currency, cint(self.doc.buying), cint(self.doc.selling), self.doc.name))

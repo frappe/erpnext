@@ -12,11 +12,11 @@
 
 from __future__ import unicode_literals
 import os
-import webnotes
-from webnotes.utils import get_request_site_address, cstr
-from webnotes import _
+import frappe
+from frappe.utils import get_request_site_address, cstr
+from frappe import _
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_dropbox_authorize_url():
 	sess = get_dropbox_session()
 	request_token = sess.obtain_request_token()
@@ -31,21 +31,21 @@ def get_dropbox_authorize_url():
 		"secret": request_token.secret,
 	}
 
-@webnotes.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)
 def dropbox_callback(oauth_token=None, not_approved=False):
 	from dropbox import client
 	if not not_approved:
-		if webnotes.conn.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:		
+		if frappe.conn.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:		
 			allowed = 1
 			message = "Dropbox access allowed."
 
 			sess = get_dropbox_session()
-			sess.set_request_token(webnotes.conn.get_value("Backup Manager", None, "dropbox_access_key"), 
-				webnotes.conn.get_value("Backup Manager", None, "dropbox_access_secret"))
+			sess.set_request_token(frappe.conn.get_value("Backup Manager", None, "dropbox_access_key"), 
+				frappe.conn.get_value("Backup Manager", None, "dropbox_access_secret"))
 			access_token = sess.obtain_access_token()
-			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_key", access_token.key)
-			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_secret", access_token.secret)
-			webnotes.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", allowed)
+			frappe.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_key", access_token.key)
+			frappe.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_secret", access_token.secret)
+			frappe.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", allowed)
 			dropbox_client = client.DropboxClient(sess)
 			try:
 				dropbox_client.file_create_folder("files")
@@ -59,28 +59,28 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 		allowed = 0
 		message = "Dropbox Access not approved."
 
-	webnotes.local.message_title = "Dropbox Approval"
-	webnotes.local.message = "<h3>%s</h3><p>Please close this window.</p>" % message
+	frappe.local.message_title = "Dropbox Approval"
+	frappe.local.message = "<h3>%s</h3><p>Please close this window.</p>" % message
 	
 	if allowed:
-		webnotes.local.message_success = True
+		frappe.local.message_success = True
 	
-	webnotes.conn.commit()
-	webnotes.response['type'] = 'page'
-	webnotes.response['page_name'] = 'message.html'
+	frappe.conn.commit()
+	frappe.response['type'] = 'page'
+	frappe.response['page_name'] = 'message.html'
 
 def backup_to_dropbox():
 	from dropbox import client, session
 	from conf import dropbox_access_key, dropbox_secret_key
-	from webnotes.utils.backups import new_backup
-	from webnotes.utils import get_files_path, get_backups_path
-	if not webnotes.conn:
-		webnotes.connect()
+	from frappe.utils.backups import new_backup
+	from frappe.utils import get_files_path, get_backups_path
+	if not frappe.conn:
+		frappe.connect()
 
 	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
 
-	sess.set_token(webnotes.conn.get_value("Backup Manager", None, "dropbox_access_key"),
-		webnotes.conn.get_value("Backup Manager", None, "dropbox_access_secret"))
+	sess.set_token(frappe.conn.get_value("Backup Manager", None, "dropbox_access_key"),
+		frappe.conn.get_value("Backup Manager", None, "dropbox_access_secret"))
 	
 	dropbox_client = client.DropboxClient(sess)
 
@@ -89,7 +89,7 @@ def backup_to_dropbox():
 	filename = os.path.join(get_backups_path(), os.path.basename(backup.backup_path_db))
 	upload_file_to_dropbox(filename, "/database", dropbox_client)
 
-	webnotes.conn.close()
+	frappe.conn.close()
 	response = dropbox_client.metadata("/files")
 	
 	# upload files to files folder
@@ -110,21 +110,21 @@ def backup_to_dropbox():
 				upload_file_to_dropbox(filepath, "/files", dropbox_client)
 			except Exception:
 				did_not_upload.append(filename)
-				error_log.append(webnotes.get_traceback())
+				error_log.append(frappe.get_traceback())
 	
-	webnotes.connect()
+	frappe.connect()
 	return did_not_upload, list(set(error_log))
 
 def get_dropbox_session():
 	try:
 		from dropbox import session
 	except:
-		webnotes.msgprint(_("Please install dropbox python module"), raise_exception=1)
+		frappe.msgprint(_("Please install dropbox python module"), raise_exception=1)
 		
 	try:
 		from conf import dropbox_access_key, dropbox_secret_key
 	except ImportError:
-		webnotes.msgprint(_("Please set Dropbox access keys in") + " conf.py", 
+		frappe.msgprint(_("Please set Dropbox access keys in") + " conf.py", 
 		raise_exception=True)
 	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
 	return sess

@@ -6,8 +6,8 @@ $.extend(cur_frm.cscript, {
 		var me = this;
 		this.timezone = doc.time_zone;
 		
-		wn.call({
-			method: "webnotes.country_info.get_country_timezone_info",
+		frappe.call({
+			method: "frappe.country_info.get_country_timezone_info",
 			callback: function(data) {
 				erpnext.country_info = data.message.country_info;
 				erpnext.all_timezones = data.message.all_timezones;

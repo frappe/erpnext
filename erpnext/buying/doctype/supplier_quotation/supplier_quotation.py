@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.model.code import get_obj
+import frappe
+from frappe.model.code import get_obj
 
 from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -26,10 +26,10 @@ class DocType(BuyingController):
 		self.validate_uom_is_integer("uom", "qty")
 
 	def on_submit(self):
-		webnotes.conn.set(self.doc, "status", "Submitted")
+		frappe.conn.set(self.doc, "status", "Submitted")
 
 	def on_cancel(self):
-		webnotes.conn.set(self.doc, "status", "Cancelled")
+		frappe.conn.set(self.doc, "status", "Cancelled")
 		
 	def on_trash(self):
 		pass
@@ -52,12 +52,12 @@ class DocType(BuyingController):
 		pc = get_obj('Purchase Common')
 		pc.validate_for_items(self)
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_purchase_order(source_name, target_doclist=None):
-	from webnotes.model.mapper import get_mapped_doclist
+	from frappe.model.mapper import get_mapped_doclist
 	
 	def set_missing_values(source, target):
-		bean = webnotes.bean(target)
+		bean = frappe.bean(target)
 		bean.run_method("set_missing_values")
 		bean.run_method("get_schedule_dates")
 

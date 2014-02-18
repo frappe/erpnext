@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, flt
-from webnotes import _
+import frappe
+from frappe.utils import cstr, flt
+from frappe import _
 
 def execute(filters=None):
 	account_details = {}
-	for acc in webnotes.conn.sql("""select name, debit_or_credit, group_or_ledger 
+	for acc in frappe.conn.sql("""select name, debit_or_credit, group_or_ledger 
 		from tabAccount""", as_dict=1):
 			account_details.setdefault(acc.name, acc)
 	
@@ -23,13 +23,13 @@ def execute(filters=None):
 def validate_filters(filters, account_details):
 	if filters.get("account") and filters.get("group_by_account") \
 			and account_details[filters.account].group_or_ledger == "Ledger":
-		webnotes.throw(_("Can not filter based on Account, if grouped by Account"))
+		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 		
 	if filters.get("voucher_no") and filters.get("group_by_voucher"):
-		webnotes.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
+		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 		
 	if filters.from_date > filters.to_date:
-		webnotes.throw(_("From Date must be before To Date"))
+		frappe.throw(_("From Date must be before To Date"))
 	
 def get_columns():
 	return ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Float:100", 
@@ -49,7 +49,7 @@ def get_gl_entries(filters):
 	group_by_condition = "group by voucher_type, voucher_no, account" \
 		if filters.get("group_by_voucher") else "group by name"
 		
-	gl_entries = webnotes.conn.sql("""select posting_date, account, 
+	gl_entries = frappe.conn.sql("""select posting_date, account, 
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit, 
 			voucher_type, voucher_no, cost_center, remarks, is_opening, against 
 		from `tabGL Entry`
@@ -64,7 +64,7 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
-		lft, rgt = webnotes.conn.get_value("Account", filters["account"], ["lft", "rgt"])
+		lft, rgt = frappe.conn.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount 
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 	else:
@@ -74,7 +74,7 @@ def get_conditions(filters):
 		conditions.append("voucher_no=%(voucher_no)s")
 		
 		
-	from webnotes.widgets.reportview import build_match_conditions
+	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 	if match_conditions: conditions.append(match_conditions)
 	
@@ -121,9 +121,9 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	return data
 
 def initialize_gle_map(gl_entries):
-	gle_map = webnotes._dict()
+	gle_map = frappe._dict()
 	for gle in gl_entries:
-		gle_map.setdefault(gle.account, webnotes._dict({
+		gle_map.setdefault(gle.account, frappe._dict({
 			"opening": 0,
 			"entries": [],
 			"total_debit": 0,

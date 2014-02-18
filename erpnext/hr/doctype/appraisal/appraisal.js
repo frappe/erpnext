@@ -12,14 +12,14 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	if(doc.__islocal && doc.employee==wn.defaults.get_user_default("employee")) {
+	if(doc.__islocal && doc.employee==frappe.defaults.get_user_default("employee")) {
 		cur_frm.set_value("employee", "");
 		cur_frm.set_value("employee_name", "")
 	}
 }
 
 cur_frm.cscript.kra_template = function(doc, dt, dn) {
-	wn.model.map_current_doc({
+	frappe.model.map_current_doc({
 		method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
 		source_name: cur_frm.doc.kra_template,
 	});
@@ -40,7 +40,7 @@ cur_frm.cscript.score = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.score) {
 		if (flt(d.score) > 5) {
-			msgprint(wn._("Score must be less than or equal to 5"));
+			msgprint(frappe._("Score must be less than or equal to 5"));
 			d.score = 0;
 			refresh_field('score', d.name, 'appraisal_details');
 		}

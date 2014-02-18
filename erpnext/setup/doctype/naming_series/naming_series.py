@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr
-from webnotes import msgprint, throw, _
-import webnotes.model.doctype
+from frappe.utils import cstr
+from frappe import msgprint, throw, _
+import frappe.model.doctype
 
 class DocType:
 	def __init__(self, d, dl):
@@ -15,13 +15,13 @@ class DocType:
 	def get_transactions(self, arg=None):
 		return {
 			"transactions": "\n".join([''] + sorted(list(set(
-				webnotes.conn.sql_list("""select parent
+				frappe.conn.sql_list("""select parent
 					from `tabDocField` where fieldname='naming_series'""") 
-				+ webnotes.conn.sql_list("""select dt from `tabCustom Field` 
+				+ frappe.conn.sql_list("""select dt from `tabCustom Field` 
 					where fieldname='naming_series'""")
 				)))),
 			"prefixes": "\n".join([''] + [i[0] for i in 
-				webnotes.conn.sql("""select name from tabSeries order by name""")])
+				frappe.conn.sql("""select name from tabSeries order by name""")])
 		}
 
 	def scrub_options_list(self, ol):
@@ -56,10 +56,10 @@ class DocType:
 			default = options[0]
 
 		# update in property setter
-		from webnotes.model.doc import Document
+		from frappe.model.doc import Document
 		prop_dict = {'options': "\n".join(options), 'default': default}
 		for prop in prop_dict:
-			ps_exists = webnotes.conn.sql("""SELECT name FROM `tabProperty Setter`
+			ps_exists = frappe.conn.sql("""SELECT name FROM `tabProperty Setter`
 					WHERE doc_type = %s AND field_name = 'naming_series'
 					AND property = %s""", (doctype, prop))
 			if ps_exists:
@@ -79,23 +79,23 @@ class DocType:
 
 		self.doc.set_options = "\n".join(options)
 
-		webnotes.clear_cache(doctype=doctype)
+		frappe.clear_cache(doctype=doctype)
 
 	def check_duplicate(self):
-		from webnotes.core.doctype.doctype.doctype import DocType
+		from frappe.core.doctype.doctype.doctype import DocType
 		dt = DocType()
 
 		parent = list(set(
-			webnotes.conn.sql_list("""select dt.name 
+			frappe.conn.sql_list("""select dt.name 
 				from `tabDocField` df, `tabDocType` dt 
 				where dt.name = df.parent and df.fieldname='naming_series' and dt.name != %s""",
 				self.doc.select_doc_for_series)
-			+ webnotes.conn.sql_list("""select dt.name 
+			+ frappe.conn.sql_list("""select dt.name 
 				from `tabCustom Field` df, `tabDocType` dt 
 				where dt.name = df.dt and df.fieldname='naming_series' and dt.name != %s""",
 				self.doc.select_doc_for_series)
 			))
-		sr = [[webnotes.model.doctype.get_property(p, 'options', 'naming_series'), p] 
+		sr = [[frappe.model.doctype.get_property(p, 'options', 'naming_series'), p] 
 			for p in parent]
 		options = self.scrub_options_list(self.doc.set_options.split("\n"))
 		for series in options:
@@ -119,39 +119,39 @@ class DocType:
 			throw('Special Characters except "-" and "/" not allowed in naming series')
 
 	def get_options(self, arg=''):
-		sr = webnotes.model.doctype.get_property(self.doc.select_doc_for_series, 
+		sr = frappe.model.doctype.get_property(self.doc.select_doc_for_series, 
 			'options', 'naming_series')
 		return sr
 
 	def get_current(self, arg=None):
 		"""get series current"""
 		if self.doc.prefix:
-			self.doc.current_value = webnotes.conn.get_value("Series", 
+			self.doc.current_value = frappe.conn.get_value("Series", 
 				self.doc.prefix.split('.')[0], "current")
 
 	def insert_series(self, series):
 		"""insert series if missing"""
-		if not webnotes.conn.exists('Series', series):
-			webnotes.conn.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
+		if not frappe.conn.exists('Series', series):
+			frappe.conn.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
 
 	def update_series_start(self):
 		if self.doc.prefix:
 			prefix = self.doc.prefix.split('.')[0]
 			self.insert_series(prefix)
-			webnotes.conn.sql("update `tabSeries` set current = %s where name = %s", 
+			frappe.conn.sql("update `tabSeries` set current = %s where name = %s", 
 				(self.doc.current_value, prefix))
 			msgprint(_("Series Updated Successfully"))
 		else:
 			msgprint(_("Please select prefix first"))
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
-	from webnotes.core.doctype.property_setter.property_setter import make_property_setter
+	from frappe.core.doctype.property_setter.property_setter import make_property_setter
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")
 
 		# set values for mandatory
-		webnotes.conn.sql("""update `tab{doctype}` set naming_series={s} where 
+		frappe.conn.sql("""update `tab{doctype}` set naming_series={s} where 
 			ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"), 
 			get_default_naming_series(doctype))
 
@@ -167,11 +167,11 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 			make_property_setter(doctype, fieldname, "reqd", 1, "Check")
 
 			# set values for mandatory
-			webnotes.conn.sql("""update `tab{doctype}` set `{fieldname}`=`name` where 
+			frappe.conn.sql("""update `tab{doctype}` set `{fieldname}`=`name` where 
 				ifnull({fieldname}, '')=''""".format(doctype=doctype, fieldname=fieldname))
 
 def get_default_naming_series(doctype):
-	from webnotes.model.doctype import get_property
+	from frappe.model.doctype import get_property
 	naming_series = get_property(doctype, "options", "naming_series")
 	naming_series = naming_series.split("\n")
 	return naming_series[0] or naming_series[1]

@@ -4,12 +4,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import _
-from webnotes.utils import cstr
+import frappe
+from frappe import _
+from frappe.utils import cstr
 
 
-class OverlapError(webnotes.ValidationError): pass
+class OverlapError(frappe.ValidationError): pass
 
 class DocType:
 	def __init__(self, d, dl):
@@ -21,7 +21,7 @@ class DocType:
 		self.calculate_total_hours()
 		
 	def calculate_total_hours(self):
-		from webnotes.utils import time_diff_in_hours
+		from frappe.utils import time_diff_in_hours
 		self.doc.hours = time_diff_in_hours(self.doc.to_time, self.doc.from_time)
 
 	def set_status(self):
@@ -38,7 +38,7 @@ class DocType:
 			self.doc.status="Billed"
 			
 	def validate_overlap(self):		
-		existing = webnotes.conn.sql_list("""select name from `tabTime Log` where owner=%s and
+		existing = frappe.conn.sql_list("""select name from `tabTime Log` where owner=%s and
 			(
 				(from_time between %s and %s) or 
 				(to_time between %s and %s) or 
@@ -51,7 +51,7 @@ class DocType:
 				cstr(self.doc.task)))
 
 		if existing:
-			webnotes.msgprint(_("This Time Log conflicts with") + ":" + ', '.join(existing),
+			frappe.msgprint(_("This Time Log conflicts with") + ":" + ', '.join(existing),
 				raise_exception=OverlapError)
 	
 	def before_cancel(self):
@@ -60,14 +60,14 @@ class DocType:
 	def before_update_after_submit(self):
 		self.set_status()
 				
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_events(start, end):
-	from webnotes.widgets.reportview import build_match_conditions
-	if not webnotes.has_permission("Time Log"):
-		webnotes.msgprint(_("No Permission"), raise_exception=1)
+	from frappe.widgets.reportview import build_match_conditions
+	if not frappe.has_permission("Time Log"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	match = build_match_conditions("Time Log")
-	data = webnotes.conn.sql("""select name, from_time, to_time, 
+	data = frappe.conn.sql("""select name, from_time, to_time, 
 		activity_type, task, project from `tabTime Log`
 		where from_time between '%(start)s' and '%(end)s' or to_time between '%(start)s' and '%(end)s'
 		%(match)s""" % {

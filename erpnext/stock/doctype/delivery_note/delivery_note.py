@@ -2,14 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr, flt, cint
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
-import webnotes.defaults
-from webnotes.model.mapper import get_mapped_doclist
+from frappe.utils import cstr, flt, cint
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
+import frappe.defaults
+from frappe.model.mapper import get_mapped_doclist
 from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
@@ -34,7 +34,7 @@ class DocType(SellingController):
 		}]
 		
 	def onload(self):
-		billed_qty = webnotes.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
+		billed_qty = frappe.conn.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.doc.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "delivery_note_details"})))
@@ -46,12 +46,12 @@ class DocType(SellingController):
 	def set_actual_qty(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
 			if d.item_code and d.warehouse:
-				actual_qty = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
+				actual_qty = frappe.conn.sql("select actual_qty from `tabBin` where item_code = '%s' and warehouse = '%s'" % (d.item_code, d.warehouse))
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
-		if webnotes.conn.get_value("Selling Settings", None, 'so_required') == 'Yes':
+		if frappe.conn.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			 for d in getlist(self.doclist,'delivery_note_details'):
 				 if not d.against_sales_order:
 					 msgprint("Sales Order No. required against item %s"%d.item_code)
@@ -92,7 +92,7 @@ class DocType(SellingController):
 					},
 				})
 
-				if cint(webnotes.defaults.get_global_default('maintain_same_sales_rate')):
+				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
 					super(DocType, self).validate_with_previous_doc(self.tname, {
 						fn[0] + " Item": {
 							"ref_dn_field": "prevdoc_detail_docname",
@@ -104,7 +104,7 @@ class DocType(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
-			res = webnotes.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = frappe.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
 				raise Exception
@@ -115,7 +115,7 @@ class DocType(SellingController):
 			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
-			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
+			if frappe.conn.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if e in check_list:
 					msgprint("Please check whether item %s has been entered twice wrongly." 
 						% d.item_code)
@@ -130,7 +130,7 @@ class DocType(SellingController):
 
 	def validate_warehouse(self):
 		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
+			if frappe.conn.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				if not d['warehouse']:
 					msgprint("Please enter Warehouse for item %s as it is stock item"
 						% d['item_code'], raise_exception=1)
@@ -138,11 +138,11 @@ class DocType(SellingController):
 
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'delivery_note_details'):
-			bin = webnotes.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = frappe.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 		for d in getlist(self.doclist, 'packing_details'):
-			bin = webnotes.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = frappe.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 
@@ -163,7 +163,7 @@ class DocType(SellingController):
 		self.make_gl_entries()
 
 		# set DN status
-		webnotes.conn.set(self.doc, 'status', 'Submitted')
+		frappe.conn.set(self.doc, 'status', 'Submitted')
 
 
 	def on_cancel(self):
@@ -174,7 +174,7 @@ class DocType(SellingController):
 		
 		self.update_stock_ledger()
 
-		webnotes.conn.set(self.doc, 'status', 'Cancelled')
+		frappe.conn.set(self.doc, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 		
 		self.make_cancel_gl_entries()
@@ -198,15 +198,15 @@ class DocType(SellingController):
 		if packing_error_list:
 			err_msg = "\n".join([("Item: " + d[0] + ", Qty: " + cstr(d[1]) \
 				+ ", Packed: " + cstr(d[2])) for d in packing_error_list])
-			webnotes.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
+			frappe.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
 
 	def check_next_docstatus(self):
-		submit_rv = webnotes.conn.sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = frappe.conn.sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.delivery_note = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
 
-		submit_in = webnotes.conn.sql("select t1.name from `tabInstallation Note` t1, `tabInstallation Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_in = frappe.conn.sql("select t1.name from `tabInstallation Note` t1, `tabInstallation Note Item` t2 where t1.name = t2.parent and t2.prevdoc_docname = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_in:
 			msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
 			raise Exception , "Validation Error."
@@ -215,21 +215,21 @@ class DocType(SellingController):
 		"""
 			Cancel submitted packing slips related to this delivery note
 		"""
-		res = webnotes.conn.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s 
+		res = frappe.conn.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s 
 			AND docstatus = 1""", self.doc.name)
 
 		if res:
-			from webnotes.model.bean import Bean
+			from frappe.model.bean import Bean
 			for r in res:
 				ps = Bean(dt='Packing Slip', dn=r[0])
 				ps.cancel()
-			webnotes.msgprint(_("Packing Slip(s) Cancelled"))
+			frappe.msgprint(_("Packing Slip(s) Cancelled"))
 
 
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+			if frappe.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				self.update_reserved_qty(d)
 										
@@ -243,7 +243,7 @@ class DocType(SellingController):
 		if d['reserved_qty'] < 0 :
 			# Reduce reserved qty from reserved warehouse mentioned in so
 			if not d["reserved_warehouse"]:
-				webnotes.throw(_("Reserved Warehouse is missing in Sales Order"))
+				frappe.throw(_("Reserved Warehouse is missing in Sales Order"))
 				
 			args = {
 				"item_code": d['item_code'],
@@ -270,7 +270,7 @@ def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
 	invoiced_qty_map = {}
 	
-	for dn_detail, qty in webnotes.conn.sql("""select dn_detail, qty from `tabSales Invoice Item`
+	for dn_detail, qty in frappe.conn.sql("""select dn_detail, qty from `tabSales Invoice Item`
 		where delivery_note=%s and docstatus=1""", delivery_note):
 			if not invoiced_qty_map.get(dn_detail):
 				invoiced_qty_map[dn_detail] = 0
@@ -278,12 +278,12 @@ def get_invoiced_qty_map(delivery_note):
 	
 	return invoiced_qty_map
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_sales_invoice(source_name, target_doclist=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	
 	def update_accounts(source, target):
-		si = webnotes.bean(target)
+		si = frappe.bean(target)
 		si.doc.is_pos = 0
 		si.run_method("onload_post_render")
 		
@@ -291,7 +291,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 			si.doclist.get({"parentfield": "entries", "qty": [">", 0]}))
 		
 		if len(si.doclist.get({"parentfield": "entries"})) == 0:
-			webnotes.msgprint(_("Hey! All these items have already been invoiced."),
+			frappe.msgprint(_("Hey! All these items have already been invoiced."),
 				raise_exception=True)
 				
 		return si.doclist
@@ -332,7 +332,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 	
 	return [d.fields for d in doclist]
 	
-@webnotes.whitelist()
+@frappe.whitelist()
 def make_installation_note(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)

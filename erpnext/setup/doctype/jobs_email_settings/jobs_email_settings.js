@@ -7,9 +7,9 @@ cur_frm.cscript = {
 	refresh: function(doc) {
 		cur_frm.set_intro("");
 		if(doc.extract_emails) {
-			cur_frm.set_intro(wn._("Active: Will extract emails from ") + doc.email_id);
+			cur_frm.set_intro(frappe._("Active: Will extract emails from ") + doc.email_id);
 		} else {
-			cur_frm.set_intro(wn._("Not Active"));
+			cur_frm.set_intro(frappe._("Not Active"));
 		}
 	}
 }

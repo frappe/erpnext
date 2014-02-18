@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -37,19 +37,19 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions = ""
 	if not filters.get("from_date"):
-		webnotes.msgprint("Please enter From Date", raise_exception=1)
+		frappe.msgprint("Please enter From Date", raise_exception=1)
 
 	if filters.get("to_date"):
 		conditions += " and posting_date <= '%s'" % filters["to_date"]
 	else:
-		webnotes.msgprint("Please enter To Date", raise_exception=1)
+		frappe.msgprint("Please enter To Date", raise_exception=1)
 		
 	return conditions
 
 #get all details
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	return webnotes.conn.sql("""select item_code, warehouse, 
+	return frappe.conn.sql("""select item_code, warehouse, 
 		posting_date, actual_qty, company 
 		from `tabStock Ledger Entry` 
 		where docstatus < 2 %s order by item_code, warehouse""" %
@@ -61,7 +61,7 @@ def get_item_warehouse_map(filters):
 
 	for d in sle:
 		iwb_map.setdefault(d.company, {}).setdefault(d.item_code, {}).\
-		setdefault(d.warehouse, webnotes._dict({\
+		setdefault(d.warehouse, frappe._dict({\
 				"opening_qty": 0.0, "in_qty": 0.0, "out_qty": 0.0, "bal_qty": 0.0
 			}))
 		qty_dict = iwb_map[d.company][d.item_code][d.warehouse]
@@ -79,7 +79,7 @@ def get_item_warehouse_map(filters):
 
 def get_item_details(filters):
 	item_map = {}
-	for d in webnotes.conn.sql("select name, item_name, description from tabItem", as_dict=1):
+	for d in frappe.conn.sql("select name, item_name, description from tabItem", as_dict=1):
 		item_map.setdefault(d.name, d)
 
 	return item_map

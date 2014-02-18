@@ -2,9 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.model.bean import getlist
-from webnotes import msgprint, throw, _
+import frappe
+from frappe.model.bean import getlist
+from frappe import msgprint, throw, _
 
 class DocType:
 	def __init__(self, doc, doclist=[]):

@@ -2,18 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import getdate, validate_email_add, cstr, cint
-from webnotes.model.doc import make_autoname
-from webnotes import msgprint, throw, _
-import webnotes.permissions
-from webnotes.defaults import get_restrictions
-from webnotes.model.controller import DocListController
+from frappe.utils import getdate, validate_email_add, cstr, cint
+from frappe.model.doc import make_autoname
+from frappe import msgprint, throw, _
+import frappe.permissions
+from frappe.defaults import get_restrictions
+from frappe.model.controller import DocListController
 
 class DocType(DocListController):
 	def autoname(self):
-		naming_method = webnotes.conn.get_value("HR Settings", None, "emp_created_by")
+		naming_method = frappe.conn.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
@@ -52,33 +52,33 @@ class DocType(DocListController):
 		self.add_restriction_if_required("Employee", self.doc.user_id)
 
 	def update_user_default(self):
-		webnotes.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
-		webnotes.conn.set_default("company", self.doc.company, self.doc.user_id)
+		frappe.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
+		frappe.conn.set_default("company", self.doc.company, self.doc.user_id)
 	
 	def restrict_leave_approver(self):
 		"""restrict to this employee for leave approver"""
 		employee_leave_approvers = [d.leave_approver for d in self.doclist.get({"parentfield": "employee_leave_approvers"})]
 		if self.doc.reports_to and self.doc.reports_to not in employee_leave_approvers:
-			employee_leave_approvers.append(webnotes.conn.get_value("Employee", self.doc.reports_to, "user_id"))
+			employee_leave_approvers.append(frappe.conn.get_value("Employee", self.doc.reports_to, "user_id"))
 			
 		for user in employee_leave_approvers:
 			self.add_restriction_if_required("Employee", user)
 			self.add_restriction_if_required("Leave Application", user)
 				
 	def add_restriction_if_required(self, doctype, user):
-		if webnotes.permissions.has_only_non_restrict_role(webnotes.get_doctype(doctype), user) \
+		if frappe.permissions.has_only_non_restrict_role(frappe.get_doctype(doctype), user) \
 			and self.doc.name not in get_restrictions(user).get("Employee", []):
 			
-			webnotes.defaults.add_default("Employee", self.doc.name, user, "Restriction")
+			frappe.defaults.add_default("Employee", self.doc.name, user, "Restriction")
 	
 	def update_profile(self):
 		# add employee role if missing
-		if not "Employee" in webnotes.conn.sql_list("""select role from tabUserRole
+		if not "Employee" in frappe.conn.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
-			from webnotes.profile import add_role
+			from frappe.profile import add_role
 			add_role(self.doc.user_id, "Employee")
 			
-		profile_wrapper = webnotes.bean("Profile", self.doc.user_id)
+		profile_wrapper = frappe.bean("Profile", self.doc.user_id)
 		
 		# copy details like Fullname, DOB and Image to Profile
 		if self.doc.employee_name:
@@ -101,13 +101,13 @@ class DocType(DocListController):
 			if not profile_wrapper.doc.user_image == self.doc.image:
 				profile_wrapper.doc.user_image = self.doc.image
 				try:
-					webnotes.doc({
+					frappe.doc({
 						"doctype": "File Data",
 						"file_name": self.doc.image,
 						"attached_to_doctype": "Profile",
 						"attached_to_name": self.doc.user_id
 					}).insert()
-				except webnotes.DuplicateEntryError, e:
+				except frappe.DuplicateEntryError, e:
 					# already exists
 					pass
 		profile_wrapper.ignore_permissions = True
@@ -143,7 +143,7 @@ class DocType(DocListController):
 			throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self):
-		enabled = webnotes.conn.sql("""select name from `tabProfile` where 
+		enabled = frappe.conn.sql("""select name from `tabProfile` where 
 			name=%s and enabled=1""", self.doc.user_id)
 		if not enabled:
 			throw("{id}: {user_id} {msg}".format(**{
@@ -153,7 +153,7 @@ class DocType(DocListController):
 			}))
 
 	def validate_duplicate_user_id(self):
-		employee = webnotes.conn.sql_list("""select name from `tabEmployee` where 
+		employee = frappe.conn.sql_list("""select name from `tabEmployee` where 
 			user_id=%s and status='Active' and name!=%s""", (self.doc.user_id, self.doc.name))
 		if employee:
 			throw("{id}: {user_id} {msg}: {employee}".format(**{
@@ -164,7 +164,7 @@ class DocType(DocListController):
 			}))
 			
 	def validate_employee_leave_approver(self):
-		from webnotes.profile import Profile
+		from frappe.profile import Profile
 		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 		
 		for l in self.doclist.get({"parentfield": "employee_leave_approvers"}):
@@ -174,20 +174,20 @@ class DocType(DocListController):
 
 	def update_dob_event(self):
 		if self.doc.status == "Active" and self.doc.date_of_birth \
-			and not cint(webnotes.conn.get_value("HR Settings", None, "stop_birthday_reminders")):
-			birthday_event = webnotes.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
+			and not cint(frappe.conn.get_value("HR Settings", None, "stop_birthday_reminders")):
+			birthday_event = frappe.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
 				and ref_type='Employee' and ref_name=%s""", self.doc.name)
 			
 			starts_on = self.doc.date_of_birth + " 00:00:00"
 			ends_on = self.doc.date_of_birth + " 00:15:00"
 
 			if birthday_event:
-				event = webnotes.bean("Event", birthday_event[0][0])
+				event = frappe.bean("Event", birthday_event[0][0])
 				event.doc.starts_on = starts_on
 				event.doc.ends_on = ends_on
 				event.save()
 			else:
-				webnotes.bean({
+				frappe.bean({
 					"doctype": "Event",
 					"subject": _("Birthday") + ": " + self.doc.employee_name,
 					"description": _("Happy Birthday!") + " " + self.doc.employee_name,
@@ -202,10 +202,10 @@ class DocType(DocListController):
 					"ref_name": self.doc.name
 				}).insert()
 		else:
-			webnotes.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and
+			frappe.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and
 				ref_type='Employee' and ref_name=%s""", self.doc.name)
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
 	import datetime
 	ret = {}

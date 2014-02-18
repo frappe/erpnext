@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cstr, flt, cint, nowdate, add_days
-from webnotes.model.doc import addchild, Document
-from webnotes.model.bean import getlist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import cstr, flt, cint, nowdate, add_days
+from frappe.model.doc import addchild, Document
+from frappe.model.bean import getlist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -17,7 +17,7 @@ class DocType:
 
 	def get_so_details(self, so):
 		"""Pull other details from so"""
-		so = webnotes.conn.sql("""select transaction_date, customer, grand_total 
+		so = frappe.conn.sql("""select transaction_date, customer, grand_total 
 			from `tabSales Order` where name = %s""", so, as_dict = 1)
 		ret = {
 			'sales_order_date': so and so[0]['transaction_date'] or '',
@@ -29,7 +29,7 @@ class DocType:
 	def get_item_details(self, item_code):
 		""" Pull other item details from item master"""
 
-		item = webnotes.conn.sql("""select description, stock_uom, default_bom 
+		item = frappe.conn.sql("""select description, stock_uom, default_bom 
 			from `tabItem` where name = %s""", item_code, as_dict =1)
 		ret = {
 			'description'	: item and item[0]['description'],
@@ -46,7 +46,7 @@ class DocType:
 		
 	def validate_company(self):
 		if not self.doc.company:
-			webnotes.throw(_("Please enter Company"))
+			frappe.throw(_("Please enter Company"))
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
@@ -61,7 +61,7 @@ class DocType:
 		if self.doc.fg_item:
 			item_filter += ' and item.name = "' + self.doc.fg_item + '"'
 		
-		open_so = webnotes.conn.sql("""
+		open_so = frappe.conn.sql("""
 			select distinct so.name, so.transaction_date, so.customer, so.grand_total
 			from `tabSales Order` so, `tabSales Order Item` so_item
 			where so_item.parent = so.name
@@ -108,7 +108,7 @@ class DocType:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
 			
-		items = webnotes.conn.sql("""select distinct parent, item_code, warehouse,
+		items = frappe.conn.sql("""select distinct parent, item_code, warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
@@ -117,7 +117,7 @@ class DocType:
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
 			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 		
-		packed_items = webnotes.conn.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
+		packed_items = frappe.conn.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty) 
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
@@ -136,7 +136,7 @@ class DocType:
 		self.clear_item_table()
 
 		for p in items:
-			item_details = webnotes.conn.sql("""select description, stock_uom, default_bom 
+			item_details = frappe.conn.sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
 			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
 			pi.sales_order				= p['parent']
@@ -154,19 +154,19 @@ class DocType:
 		for d in getlist(self.doclist, 'pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
-				webnotes.throw("Please Enter Planned Qty for item: %s at row no: %s" % 
+				frappe.throw("Please Enter Planned Qty for item: %s at row no: %s" % 
 					(d.item_code, d.idx))
 				
 	def validate_bom_no(self, d):
 		if not d.bom_no:
-			webnotes.throw("Please enter bom no for item: %s at row no: %s" % 
+			frappe.throw("Please enter bom no for item: %s at row no: %s" % 
 				(d.item_code, d.idx))
 		else:
-			bom = webnotes.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
+			bom = frappe.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
 				and docstatus = 1 and is_active = 1""", 
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
-				webnotes.throw("""Incorrect BOM No: %s entered for item: %s at row no: %s
+				frappe.throw("""Incorrect BOM No: %s entered for item: %s at row no: %s
 					May be BOM is inactive or for other item or does not exists in the system""" % 
 					(d.bom_no, d.item_doce, d.idx))
 
@@ -216,17 +216,17 @@ class DocType:
 
 		pro_list = []
 		for key in items:
-			pro = webnotes.new_bean("Production Order")
+			pro = frappe.new_bean("Production Order")
 			pro.doc.fields.update(items[key])
 			
-			webnotes.flags.mute_messages = True
+			frappe.flags.mute_messages = True
 			try:
 				pro.insert()
 				pro_list.append(pro.doc.name)
 			except OverProductionError, e:
 				pass
 				
-			webnotes.flags.mute_messages = False
+			frappe.flags.mute_messages = False
 			
 		return pro_list
 
@@ -249,7 +249,7 @@ class DocType:
 			bom_wise_item_details = {}
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
-				for d in webnotes.conn.sql("""select fb.item_code, 
+				for d in frappe.conn.sql("""select fb.item_code, 
 					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty, 
 					fb.description, fb.stock_uom, it.min_order_qty 
 					from `tabBOM Explosion Item` fb,`tabItem` it 
@@ -261,7 +261,7 @@ class DocType:
 			else:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
-				for d in webnotes.conn.sql("""select bom_item.item_code, 
+				for d in frappe.conn.sql("""select bom_item.item_code, 
 					ifnull(sum(bom_item.qty_consumed_per_unit), 0) as qty, 
 					bom_item.description, bom_item.stock_uom, item.min_order_qty 
 					from `tabBOM Item` bom_item, tabItem item 
@@ -288,7 +288,7 @@ class DocType:
 			total_qty = sum([flt(d[0]) for d in self.item_dict[item]])
 			for item_details in self.item_dict[item]:
 				item_list.append([item, item_details[1], item_details[2], item_details[0]])
-				item_qty = webnotes.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
+				item_qty = frappe.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
 					from `tabBin` where item_code = %s""", item, as_dict=1)
 				i_qty, o_qty, a_qty = 0, 0, 0
 				for w in item_qty:
@@ -307,7 +307,7 @@ class DocType:
 		"""
 		self.validate_data()
 		if not self.doc.purchase_request_for_warehouse:
-			webnotes.throw(_("Please enter Warehouse for which Material Request will be raised"))
+			frappe.throw(_("Please enter Warehouse for which Material Request will be raised"))
 			
 		bom_dict = self.get_distinct_items_and_boms()[0]		
 		self.get_raw_materials(bom_dict)
@@ -317,7 +317,7 @@ class DocType:
 
 	def get_requested_items(self):
 		item_projected_qty = self.get_projected_qty()
-		items_to_be_requested = webnotes._dict()
+		items_to_be_requested = frappe._dict()
 
 		for item, so_item_qty in self.item_dict.items():
 			requested_qty = 0
@@ -353,7 +353,7 @@ class DocType:
 			
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
-		item_projected_qty = webnotes.conn.sql("""select item_code, sum(projected_qty) 
+		item_projected_qty = frappe.conn.sql("""select item_code, sum(projected_qty) 
 			from `tabBin` where item_code in (%s) group by item_code""" % 
 			(", ".join(["%s"]*len(items)),), tuple(items))
 
@@ -368,7 +368,7 @@ class DocType:
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
-				item_wrapper = webnotes.bean("Item", item)
+				item_wrapper = frappe.bean("Item", item)
 				pr_doclist = [{
 					"doctype": "Material Request",
 					"__islocal": 1,
@@ -377,7 +377,7 @@ class DocType:
 					"status": "Draft",
 					"company": self.doc.company,
 					"fiscal_year": fiscal_year,
-					"requested_by": webnotes.session.user,
+					"requested_by": frappe.session.user,
 					"material_request_type": "Purchase"
 				}]
 				for sales_order, requested_qty in items_to_be_requested[item].items():
@@ -397,7 +397,7 @@ class DocType:
 						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
 					})
 
-				pr_wrapper = webnotes.bean(pr_doclist)
+				pr_wrapper = frappe.bean(pr_doclist)
 				pr_wrapper.ignore_permissions = 1
 				pr_wrapper.submit()
 				purchase_request_list.append(pr_wrapper.doc.name)

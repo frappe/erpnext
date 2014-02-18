@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-from webnotes.utils.nestedset import NestedSetRecursionError, NestedSetMultipleRootsError, \
+import frappe
+from frappe.utils.nestedset import NestedSetRecursionError, NestedSetMultipleRootsError, \
 	NestedSetChildExistsError, NestedSetInvalidMergeError, rebuild_tree, get_ancestors_of
 
 test_records = [
@@ -79,18 +79,18 @@ test_records = [
 class TestItem(unittest.TestCase):
 	def test_basic_tree(self, records=None):
 		min_lft = 1
-		max_rgt = webnotes.conn.sql("select max(rgt) from `tabItem Group`")[0][0]
+		max_rgt = frappe.conn.sql("select max(rgt) from `tabItem Group`")[0][0]
 		
 		if not records:
 			records = test_records[2:]
 		
 		for item_group in records:
 			item_group = item_group[0]
-			lft, rgt, parent_item_group = webnotes.conn.get_value("Item Group", item_group["item_group_name"], 
+			lft, rgt, parent_item_group = frappe.conn.get_value("Item Group", item_group["item_group_name"], 
 				["lft", "rgt", "parent_item_group"])
 			
 			if parent_item_group:
-				parent_lft, parent_rgt = webnotes.conn.get_value("Item Group", parent_item_group,
+				parent_lft, parent_rgt = frappe.conn.get_value("Item Group", parent_item_group,
 					["lft", "rgt"])
 			else:
 				# root
@@ -116,7 +116,7 @@ class TestItem(unittest.TestCase):
 		def get_no_of_children(item_groups, no_of_children):
 			children = []
 			for ig in item_groups:
-				children += webnotes.conn.sql_list("""select name from `tabItem Group`
+				children += frappe.conn.sql_list("""select name from `tabItem Group`
 				where ifnull(parent_item_group, '')=%s""", ig or '')
 			
 			if len(children):
@@ -127,7 +127,7 @@ class TestItem(unittest.TestCase):
 		return get_no_of_children([item_group], 0)
 			
 	def test_recursion(self):
-		group_b = webnotes.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.bean("Item Group", "_Test Item Group B")
 		group_b.doc.parent_item_group = "_Test Item Group B - 3"
 		self.assertRaises(NestedSetRecursionError, group_b.save)
 		
@@ -140,17 +140,17 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 		
 	def move_it_back(self):
-		group_b = webnotes.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.bean("Item Group", "_Test Item Group B")
 		group_b.doc.parent_item_group = "All Item Groups"
 		group_b.save()
 		self.test_basic_tree()
 		
 	def test_move_group_into_another(self):
 		# before move
-		old_lft, old_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		old_lft, old_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# put B under C
-		group_b = webnotes.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.bean("Item Group", "_Test Item Group B")
 		lft, rgt = group_b.doc.lft, group_b.doc.rgt
 		
 		group_b.doc.parent_item_group = "_Test Item Group C"
@@ -158,7 +158,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 		
 		# after move
-		new_lft, new_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		new_lft, new_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# lft should reduce
 		self.assertEquals(old_lft - new_lft, rgt - lft + 1)
@@ -169,7 +169,7 @@ class TestItem(unittest.TestCase):
 		self.move_it_back()
 		
 	def test_move_group_into_root(self):
-		group_b = webnotes.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.bean("Item Group", "_Test Item Group B")
 		group_b.doc.parent_item_group = ""
 		self.assertRaises(NestedSetMultipleRootsError, group_b.save)
 
@@ -180,13 +180,13 @@ class TestItem(unittest.TestCase):
 		
 	def print_tree(self):
 		import json
-		print json.dumps(webnotes.conn.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
+		print json.dumps(frappe.conn.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
 		
 	def test_move_leaf_into_another_group(self):
 		# before move
-		old_lft, old_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		old_lft, old_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
-		group_b_3 = webnotes.bean("Item Group", "_Test Item Group B - 3")
+		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
 		lft, rgt = group_b_3.doc.lft, group_b_3.doc.rgt
 		
 		# child of right sibling is moved into it
@@ -194,7 +194,7 @@ class TestItem(unittest.TestCase):
 		group_b_3.save()
 		self.test_basic_tree()
 		
-		new_lft, new_rgt = webnotes.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		new_lft, new_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# lft should remain the same
 		self.assertEquals(old_lft - new_lft, 0)
@@ -203,73 +203,73 @@ class TestItem(unittest.TestCase):
 		self.assertEquals(new_rgt - old_rgt, rgt - lft + 1)
 		
 		# move it back
-		group_b_3 = webnotes.bean("Item Group", "_Test Item Group B - 3")
+		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
 		group_b_3.doc.parent_item_group = "_Test Item Group B"
 		group_b_3.save()
 		self.test_basic_tree()
 		
 	def test_delete_leaf(self):
 		# for checking later
-		parent_item_group = webnotes.conn.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
-		rgt = webnotes.conn.get_value("Item Group", parent_item_group, "rgt")
+		parent_item_group = frappe.conn.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
+		rgt = frappe.conn.get_value("Item Group", parent_item_group, "rgt")
 		
 		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
-		ancestors = webnotes.conn.sql("""select name, rgt from `tabItem Group`
+		ancestors = frappe.conn.sql("""select name, rgt from `tabItem Group`
 			where name in ({})""".format(", ".join(["%s"]*len(ancestors))), tuple(ancestors), as_dict=True)
 		
-		webnotes.delete_doc("Item Group", "_Test Item Group B - 3")
+		frappe.delete_doc("Item Group", "_Test Item Group B - 3")
 		records_to_test = test_records[2:]
 		del records_to_test[4]
 		self.test_basic_tree(records=records_to_test)
 		
 		# rgt of each ancestor would reduce by 2
 		for item_group in ancestors:
-			new_lft, new_rgt = webnotes.conn.get_value("Item Group", item_group.name, ["lft", "rgt"])
+			new_lft, new_rgt = frappe.conn.get_value("Item Group", item_group.name, ["lft", "rgt"])
 			self.assertEquals(new_rgt, item_group.rgt - 2)
 		
 		# insert it back
-		webnotes.bean(copy=test_records[6]).insert()
+		frappe.bean(copy=test_records[6]).insert()
 		
 		self.test_basic_tree()
 		
 	def test_delete_group(self):
 		# cannot delete group with child, but can delete leaf
-		self.assertRaises(NestedSetChildExistsError, webnotes.delete_doc, "Item Group", "_Test Item Group B")
+		self.assertRaises(NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B")
 		
 	def test_merge_groups(self):
-		webnotes.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
+		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
 		records_to_test = test_records[2:]
 		del records_to_test[1]
 		self.test_basic_tree(records=records_to_test)
 		
 		# insert Group B back
-		webnotes.bean(copy=test_records[3]).insert()
+		frappe.bean(copy=test_records[3]).insert()
 		self.test_basic_tree()
 		
 		# move its children back
-		for name in webnotes.conn.sql_list("""select name from `tabItem Group`
+		for name in frappe.conn.sql_list("""select name from `tabItem Group`
 			where parent_item_group='_Test Item Group C'"""):
 			
-			bean = webnotes.bean("Item Group", name)
+			bean = frappe.bean("Item Group", name)
 			bean.doc.parent_item_group = "_Test Item Group B"
 			bean.save()
 
 		self.test_basic_tree()
 		
 	def test_merge_leaves(self):
-		webnotes.rename_doc("Item Group", "_Test Item Group B - 2", "_Test Item Group B - 1", merge=True)
+		frappe.rename_doc("Item Group", "_Test Item Group B - 2", "_Test Item Group B - 1", merge=True)
 		records_to_test = test_records[2:]
 		del records_to_test[3]
 		self.test_basic_tree(records=records_to_test)
 		
 		# insert Group B - 2back
-		webnotes.bean(copy=test_records[5]).insert()
+		frappe.bean(copy=test_records[5]).insert()
 		self.test_basic_tree()
 		
 	def test_merge_leaf_into_group(self):
-		self.assertRaises(NestedSetInvalidMergeError, webnotes.rename_doc, "Item Group", "_Test Item Group B - 3", 
+		self.assertRaises(NestedSetInvalidMergeError, frappe.rename_doc, "Item Group", "_Test Item Group B - 3", 
 			"_Test Item Group B", merge=True)
 		
 	def test_merge_group_into_leaf(self):
-		self.assertRaises(NestedSetInvalidMergeError, webnotes.rename_doc, "Item Group", "_Test Item Group B", 
+		self.assertRaises(NestedSetInvalidMergeError, frappe.rename_doc, "Item Group", "_Test Item Group B", 
 			"_Test Item Group B - 3", merge=True)

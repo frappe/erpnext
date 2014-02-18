@@ -3,32 +3,32 @@
 
 from __future__ import unicode_literals
 
-import webnotes
+import frappe
 
 def after_install():
 	import_defaults()
 	import_country_and_currency()
-	webnotes.conn.set_value('Control Panel', None, 'home_page', 'setup-wizard')
+	frappe.conn.set_value('Control Panel', None, 'home_page', 'setup-wizard')
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
-	webnotes.conn.commit()
+	frappe.conn.commit()
 
 def import_country_and_currency():
-	from webnotes.country_info import get_all
+	from frappe.country_info import get_all
 	data = get_all()
 	
 	for name in data:
-		country = webnotes._dict(data[name])
-		webnotes.doc({
+		country = frappe._dict(data[name])
+		frappe.doc({
 			"doctype": "Country",
 			"country_name": name,
 			"date_format": country.date_format or "dd-mm-yyyy",
 			"time_zones": "\n".join(country.timezones or [])
 		}).insert()
 		
-		if country.currency and not webnotes.conn.exists("Currency", country.currency):
-			webnotes.doc({
+		if country.currency and not frappe.conn.exists("Currency", country.currency):
+			frappe.doc({
 				"doctype": "Currency",
 				"currency_name": country.currency,
 				"fraction": country.currency_fraction,
@@ -103,9 +103,9 @@ def import_defaults():
 		{'uom_name': 'Minute', 'doctype': 'UOM', 'name': 'Minute'}, 
 	]
 	
-	from webnotes.modules import scrub
+	from frappe.modules import scrub
 	for r in records:
-		bean = webnotes.bean(r)
+		bean = frappe.bean(r)
 		
 		# ignore mandatory for root
 		parent_link_field = ("parent_" + scrub(bean.doc.doctype))
@@ -116,7 +116,7 @@ def import_defaults():
 		
 def feature_setup():
 	"""save global defaults and features setup"""
-	bean = webnotes.bean("Features Setup", "Features Setup")
+	bean = frappe.bean("Features Setup", "Features Setup")
 	bean.ignore_permissions = True
 
 	# store value as 1 for all these fields

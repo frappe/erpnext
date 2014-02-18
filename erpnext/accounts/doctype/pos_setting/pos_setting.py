@@ -2,17 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import msgprint, _
-from webnotes.utils import cint
+import frappe
+from frappe import msgprint, _
+from frappe.utils import cint
 
 class DocType:
 	def __init__(self,doc,doclist):
 		self.doc, self.doclist = doc,doclist
 
 	def get_series(self):
-		import webnotes.model.doctype
-		docfield = webnotes.model.doctype.get('Sales Invoice')
+		import frappe.model.doctype
+		docfield = frappe.model.doctype.get('Sales Invoice')
 		series = [d.options for d in docfield 
 			if d.doctype == 'DocField' and d.fieldname == 'naming_series']
 		return series and series[0] or ''
@@ -23,7 +23,7 @@ class DocType:
 		self.validate_all_link_fields()
 		
 	def check_for_duplicate(self):
-		res = webnotes.conn.sql("""select name, user from `tabPOS Setting` 
+		res = frappe.conn.sql("""select name, user from `tabPOS Setting` 
 			where ifnull(user, '') = %s and name != %s and company = %s""", 
 			(self.doc.user, self.doc.name, self.doc.company))
 		if res:
@@ -35,7 +35,7 @@ class DocType:
 					(res[0][0], self.doc.company), raise_exception=1)
 
 	def validate_expense_account(self):
-		if cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")) \
+		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and not self.doc.expense_account:
 			msgprint(_("Expense Account is mandatory"), raise_exception=1)
 
@@ -46,19 +46,19 @@ class DocType:
 		
 		for link_dt, dn_list in accounts.items():
 			for link_dn in dn_list:
-				if link_dn and not webnotes.conn.exists({"doctype": link_dt, 
+				if link_dn and not frappe.conn.exists({"doctype": link_dt, 
 						"company": self.doc.company, "name": link_dn}):
-					webnotes.throw(link_dn +_(" does not belong to ") + self.doc.company)
+					frappe.throw(link_dn +_(" does not belong to ") + self.doc.company)
 
 	def on_update(self):
-		webnotes.defaults.clear_default("is_pos")
+		frappe.defaults.clear_default("is_pos")
 
-		pos_view_users = webnotes.conn.sql_list("""select user from `tabPOS Setting`""")
+		pos_view_users = frappe.conn.sql_list("""select user from `tabPOS Setting`""")
 		for user in pos_view_users:
 			if user:
-				webnotes.defaults.set_user_default("is_pos", 1, user)
+				frappe.defaults.set_user_default("is_pos", 1, user)
 			else:
-				webnotes.defaults.set_global_default("is_pos", 1)
+				frappe.defaults.set_global_default("is_pos", 1)
 
 	def on_trash(self):
 		self.on_update()

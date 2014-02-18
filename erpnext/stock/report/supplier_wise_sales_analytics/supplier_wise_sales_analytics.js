@@ -1,28 +1,28 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Supplier-Wise Sales Analytics"] = {
+frappe.query_reports["Supplier-Wise Sales Analytics"] = {
 	"filters": [
 		{
 			"fieldname":"supplier",
-			"label": wn._("Supplier"),
+			"label": frappe._("Supplier"),
 			"fieldtype": "Link",
 			"options": "Supplier",
 			"width": "80"
 		},
 		{
 			"fieldname":"from_date",
-			"label": wn._("From Date"),
+			"label": frappe._("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default": wn.datetime.month_start()
+			"default": frappe.datetime.month_start()
 		},
 		{
 			"fieldname":"to_date",
-			"label": wn._("To Date"),
+			"label": frappe._("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default": wn.datetime.month_end()
+			"default": frappe.datetime.month_end()
 		},
 	]
 }

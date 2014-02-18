@@ -1,22 +1,22 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.query_reports["Accounts Payable"] = {
+frappe.query_reports["Accounts Payable"] = {
 	"filters": [
 		{
 			"fieldname":"company",
-			"label": wn._("Company"),
+			"label": frappe._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": wn.defaults.get_default("company")
+			"default": frappe.defaults.get_default("company")
 		},
 		{
 			"fieldname":"account",
-			"label": wn._("Account"),
+			"label": frappe._("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
-				var company = wn.query_report.filters_by_name.company.get_value();
+				var company = frappe.query_report.filters_by_name.company.get_value();
 				return {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
@@ -30,13 +30,13 @@ wn.query_reports["Accounts Payable"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": wn._("Date"),
+			"label": frappe._("Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
-			"label": wn._("Ageing Based On"),
+			"label": frappe._("Ageing Based On"),
 			"fieldtype": "Select",
 			"options": 'Posting Date' + NEWLINE + 'Due Date',
 			"default": "Posting Date"

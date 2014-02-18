@@ -2,10 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import flt, getdate
-from webnotes import msgprint
+from frappe.utils import flt, getdate
+from frappe import msgprint
 from erpnext.utilities.transaction_base import delete_events
 
 class DocType:
@@ -32,12 +32,12 @@ class DocType:
 		self.add_calendar_event()
 		
 	def update_percent_complete(self):
-		total = webnotes.conn.sql("""select count(*) from tabTask where project=%s""", 
+		total = frappe.conn.sql("""select count(*) from tabTask where project=%s""", 
 			self.doc.name)[0][0]
 		if total:
-			completed = webnotes.conn.sql("""select count(*) from tabTask where
+			completed = frappe.conn.sql("""select count(*) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.doc.name)[0][0]
-			webnotes.conn.set_value("Project", self.doc.name, "percent_complete",
+			frappe.conn.set_value("Project", self.doc.name, "percent_complete",
 			 	int(float(completed) / total * 100))
 
 	def add_calendar_event(self):
@@ -48,7 +48,7 @@ class DocType:
 		for milestone in self.doclist.get({"parentfield": "project_milestones"}):
 			if milestone.milestone_date:
 				description = (milestone.milestone or "Milestone") + " for " + self.doc.name
-				webnotes.bean({
+				frappe.bean({
 					"doctype": "Event",
 					"owner": self.doc.owner,
 					"subject": description,

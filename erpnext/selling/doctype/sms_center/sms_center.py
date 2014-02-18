@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.utils import cstr
-from webnotes.model import db_exists
-from webnotes.model.bean import copy_doclist
-from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from frappe.utils import cstr
+from frappe.model import db_exists
+from frappe.model.bean import copy_doclist
+from frappe.model.code import get_obj
+from frappe import msgprint, _
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -25,23 +25,23 @@ class DocType:
 			where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % self.doc.sales_partner or " and ifnull(sales_partner, '') != ''"
 
 		if self.doc.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
-			rec = webnotes.conn.sql("""select CONCAT(ifnull(first_name,''), '', ifnull(last_name,'')), 
+			rec = frappe.conn.sql("""select CONCAT(ifnull(first_name,''), '', ifnull(last_name,'')), 
 				mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and 
 				docstatus != 2 %s""", where_clause)
 		
 		elif self.doc.send_to == 'All Lead (Open)':
-			rec = webnotes.conn.sql("""select lead_name, mobile_no from `tabLead` where 
+			rec = frappe.conn.sql("""select lead_name, mobile_no from `tabLead` where 
 				ifnull(mobile_no,'')!='' and docstatus != 2 and status='Open'""")
 		
 		elif self.doc.send_to == 'All Employee (Active)':
 			where_clause = self.doc.department and " and department = '%s'" % self.doc.department or ""
 			where_clause += self.doc.branch and " and branch = '%s'" % self.doc.branch or ""
-			rec = webnotes.conn.sql("""select employee_name, cell_number from 
+			rec = frappe.conn.sql("""select employee_name, cell_number from 
 				`tabEmployee` where status = 'Active' and docstatus < 2 and 
 				ifnull(cell_number,'')!='' %s""", where_clause)
 		
 		elif self.doc.send_to == 'All Sales Person':
-			rec = webnotes.conn.sql("""select sales_person_name, mobile_no from 
+			rec = frappe.conn.sql("""select sales_person_name, mobile_no from 
 				`tabSales Person` where docstatus!=2 and ifnull(mobile_no,'')!=''""")
 			rec_list = ''
 		

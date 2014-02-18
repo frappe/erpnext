@@ -1,6 +1,6 @@
-wn.pages['setup-wizard'].onload = function(wrapper) { 
+frappe.pages['setup-wizard'].onload = function(wrapper) { 
 	if(sys_defaults.company) {
-		wn.set_route("desktop");
+		frappe.set_route("desktop");
 		return;
 	}
 	$(".navbar:first").toggle(false);
@@ -12,22 +12,22 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 		on_complete: function(wiz) {
 			var values = wiz.get_values();
 			wiz.show_working();
-			wn.call({
+			frappe.call({
 				method: "erpnext.setup.page.setup_wizard.setup_wizard.setup_account",
 				args: values,
 				callback: function(r) {
 					if(r.exc) {
-						var d = msgprint(wn._("There were errors."));
+						var d = msgprint(frappe._("There were errors."));
 						d.custom_onhide = function() {
-							wn.set_route(erpnext.wiz.page_name, "0");
+							frappe.set_route(erpnext.wiz.page_name, "0");
 						}
 					} else {
 						wiz.show_complete();
 						setTimeout(function() {
 							if(user==="Administrator") {
-								msgprint(wn._("Login with your new User ID") + ":" + values.email);
+								msgprint(frappe._("Login with your new User ID") + ":" + values.email);
 								setTimeout(function() {
-									wn.app.logout();
+									frappe.app.logout();
 								}, 2000);
 							} else {
 								window.location = "app.html";
@@ -37,46 +37,46 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 				}
 			})
 		},
-		title: wn._("ERPNext Setup Guide"),
+		title: frappe._("ERPNext Setup Guide"),
 		welcome_html: '<h1 class="text-muted text-center"><i class="icon-magic"></i></h1>\
-			<h2 class="text-center">'+wn._('ERPNext Setup')+'</h2>\
+			<h2 class="text-center">'+frappe._('ERPNext Setup')+'</h2>\
 			<p class="text-center">' + 
-			wn._('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') + 
+			frappe._('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') + 
 			'</p>',
 		working_html: '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
-			<h2 class="text-center">'+wn._('Setting up...')+'</h2>\
+			<h2 class="text-center">'+frappe._('Setting up...')+'</h2>\
 			<p class="text-center">' + 
-			wn._('Sit tight while your system is being setup. This may take a few moments.') + 
+			frappe._('Sit tight while your system is being setup. This may take a few moments.') + 
 			'</p>',
 		complete_html: '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
-			<h2 class="text-center">'+wn._('Setup Complete!')+'</h2>\
+			<h2 class="text-center">'+frappe._('Setup Complete!')+'</h2>\
 			<p class="text-center">' + 
-			wn._('Your setup is complete. Refreshing...') + 
+			frappe._('Your setup is complete. Refreshing...') + 
 			'</p>',
 		slides: [
 			// User
 			{
-				title: wn._("The First User: You"),
+				title: frappe._("The First User: You"),
 				icon: "icon-user",
 				fields: [
-					{"fieldname": "first_name", "label": wn._("First Name"), "fieldtype": "Data", 
+					{"fieldname": "first_name", "label": frappe._("First Name"), "fieldtype": "Data", 
 						reqd:1},
-					{"fieldname": "last_name", "label": wn._("Last Name"), "fieldtype": "Data", 
+					{"fieldname": "last_name", "label": frappe._("Last Name"), "fieldtype": "Data", 
 						reqd:1},
-					{"fieldname": "email", "label": wn._("Email Id"), "fieldtype": "Data", 
+					{"fieldname": "email", "label": frappe._("Email Id"), "fieldtype": "Data", 
 						reqd:1, "description":"Your Login Id", "options":"Email"},
-					{"fieldname": "password", "label": wn._("Password"), "fieldtype": "Password", 
+					{"fieldname": "password", "label": frappe._("Password"), "fieldtype": "Password", 
 						reqd:1},
 					{fieldtype:"Attach Image", fieldname:"attach_profile", 
 						label:"Attach Your Profile..."},
 				],
-				help: wn._('The first user will become the System Manager (you can change that later).'),
+				help: frappe._('The first user will become the System Manager (you can change that later).'),
 				onload: function(slide) {
 					if(user!=="Administrator") {
 						slide.form.fields_dict.password.$wrapper.toggle(false);
 						slide.form.fields_dict.email.$wrapper.toggle(false);
-						slide.form.fields_dict.first_name.set_input(wn.boot.profile.first_name);
-						slide.form.fields_dict.last_name.set_input(wn.boot.profile.last_name);
+						slide.form.fields_dict.first_name.set_input(frappe.boot.profile.first_name);
+						slide.form.fields_dict.last_name.set_input(frappe.boot.profile.last_name);
 					
 						delete slide.form.fields_dict.email;
 						delete slide.form.fields_dict.password;
@@ -86,31 +86,31 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 		
 			// Organization
 			{
-				title: wn._("The Organization"),
+				title: frappe._("The Organization"),
 				icon: "icon-building",
 				fields: [
-					{fieldname:'company_name', label: wn._('Company Name'), fieldtype:'Data', reqd:1,
+					{fieldname:'company_name', label: frappe._('Company Name'), fieldtype:'Data', reqd:1,
 						placeholder: 'e.g. "My Company LLC"'},
-					{fieldname:'company_abbr', label: wn._('Company Abbreviation'), fieldtype:'Data',
+					{fieldname:'company_abbr', label: frappe._('Company Abbreviation'), fieldtype:'Data',
 						placeholder:'e.g. "MC"',reqd:1},
 					{fieldname:'fy_start_date', label:'Financial Year Start Date', fieldtype:'Date',
 						description:'Your financial year begins on', reqd:1},
 					{fieldname:'fy_end_date', label:'Financial Year End Date', fieldtype:'Date',
 						description:'Your financial year ends on', reqd:1},
-					{fieldname:'company_tagline', label: wn._('What does it do?'), fieldtype:'Data',
+					{fieldname:'company_tagline', label: frappe._('What does it do?'), fieldtype:'Data',
 						placeholder:'e.g. "Build tools for builders"', reqd:1},
 				],
-				help: wn._('The name of your company for which you are setting up this system.'),
+				help: frappe._('The name of your company for which you are setting up this system.'),
 				onload: function(slide) {
 					slide.get_input("company_name").on("change", function() {
 						var parts = slide.get_input("company_name").val().split(" ");
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
 						slide.get_input("company_abbr").val(abbr.toUpperCase());
-					}).val(wn.boot.control_panel.company_name || "").trigger("change");
+					}).val(frappe.boot.control_panel.company_name || "").trigger("change");
 
 					slide.get_input("fy_start_date").on("change", function() {
 						var year_end_date = 
-							wn.datetime.add_days(wn.datetime.add_months(slide.get_input("fy_start_date").val(), 12), -1);
+							frappe.datetime.add_days(frappe.datetime.add_months(slide.get_input("fy_start_date").val(), 12), -1);
 						slide.get_input("fy_end_date").val(year_end_date);
 					});
 				}
@@ -118,27 +118,27 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 		
 			// Country
 			{
-				title: wn._("Country, Timezone and Currency"),
+				title: frappe._("Country, Timezone and Currency"),
 				icon: "icon-flag",
 				fields: [
-					{fieldname:'country', label: wn._('Country'), reqd:1,
+					{fieldname:'country', label: frappe._('Country'), reqd:1,
 						options: "", fieldtype: 'Select'},
-					{fieldname:'currency', label: wn._('Default Currency'), reqd:1,
+					{fieldname:'currency', label: frappe._('Default Currency'), reqd:1,
 						options: "", fieldtype: 'Select'},
-					{fieldname:'timezone', label: wn._('Time Zone'), reqd:1,
+					{fieldname:'timezone', label: frappe._('Time Zone'), reqd:1,
 						options: "", fieldtype: 'Select'},
 				],
-				help: wn._('Select your home country and check the timezone and currency.'),
+				help: frappe._('Select your home country and check the timezone and currency.'),
 				onload: function(slide, form) {
-					wn.call({
-						method:"webnotes.country_info.get_country_timezone_info",
+					frappe.call({
+						method:"frappe.country_info.get_country_timezone_info",
 						callback: function(data) {
 							erpnext.country_info = data.message.country_info;
 							erpnext.all_timezones = data.message.all_timezones;
 							slide.get_input("country").empty()
 								.add_options([""].concat(keys(erpnext.country_info).sort()));
 							slide.get_input("currency").empty()
-								.add_options(wn.utils.unique([""].concat($.map(erpnext.country_info, 
+								.add_options(frappe.utils.unique([""].concat($.map(erpnext.country_info, 
 									function(opts, country) { return opts.currency; }))).sort());
 							slide.get_input("timezone").empty()
 								.add_options([""].concat(erpnext.all_timezones));
@@ -164,8 +164,8 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			// Logo
 			{
 				icon: "icon-bookmark",
-				title: wn._("Logo and Letter Heads"),
-				help: wn._('Upload your letter head and logo - you can edit them later.'),
+				title: frappe._("Logo and Letter Heads"),
+				help: frappe._('Upload your letter head and logo - you can edit them later.'),
 				fields: [
 					{fieldtype:"Attach Image", fieldname:"attach_letterhead", label:"Attach Letterhead..."},
 					{fieldtype:"Attach Image", fieldname:"attach_logo", label:"Attach Logo..."},
@@ -175,40 +175,40 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 			// Taxes
 			{
 				icon: "icon-money",
-				"title": wn._("Add Taxes"),
-				"help": wn._("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
+				"title": frappe._("Add Taxes"),
+				"help": frappe._("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
 				"fields": [],
 			},
 
 			// Customers
 			{
 				icon: "icon-group",
-				"title": wn._("Your Customers"),
-				"help": wn._("List a few of your customers. They could be organizations or individuals."),
+				"title": frappe._("Your Customers"),
+				"help": frappe._("List a few of your customers. They could be organizations or individuals."),
 				"fields": [],
 			},
 		
 			// Items to Sell
 			{
 				icon: "icon-barcode",
-				"title": wn._("Your Products or Services"),
-				"help": wn._("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
+				"title": frappe._("Your Products or Services"),
+				"help": frappe._("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 				"fields": [],
 			},
 
 			// Suppliers
 			{
 				icon: "icon-group",
-				"title": wn._("Your Suppliers"),
-				"help": wn._("List a few of your suppliers. They could be organizations or individuals."),
+				"title": frappe._("Your Suppliers"),
+				"help": frappe._("List a few of your suppliers. They could be organizations or individuals."),
 				"fields": [],
 			},
 
 			// Items to Buy
 			{
 				icon: "icon-barcode",
-				"title": wn._("Products or Services You Buy"),
-				"help": wn._("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
+				"title": frappe._("Products or Services You Buy"),
+				"help": frappe._("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
 				"fields": [],
 			},
 
@@ -282,17 +282,17 @@ wn.pages['setup-wizard'].onload = function(wrapper) {
 		])
 	}
 	
-	erpnext.wiz = new wn.wiz.Wizard(wizard_settings)
+	erpnext.wiz = new frappe.wiz.Wizard(wizard_settings)
 }
 
-wn.pages['setup-wizard'].onshow = function(wrapper) {
-	if(wn.get_route()[1])
-		erpnext.wiz.show(wn.get_route()[1]);
+frappe.pages['setup-wizard'].onshow = function(wrapper) {
+	if(frappe.get_route()[1])
+		erpnext.wiz.show(frappe.get_route()[1]);
 }
 
-wn.provide("wn.wiz");
+frappe.provide("frappe.wiz");
 
-wn.wiz.Wizard = Class.extend({
+frappe.wiz.Wizard = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 		this.slides = this.slides;
@@ -309,20 +309,20 @@ wn.wiz.Wizard = Class.extend({
 			return;
 		var me = this;
 		this.$welcome = this.get_message(this.welcome_html + 
-			'<br><p class="text-center"><button class="btn btn-primary">'+wn._("Start")+'</button></p>')
+			'<br><p class="text-center"><button class="btn btn-primary">'+frappe._("Start")+'</button></p>')
 			.appendTo(this.parent);
 		
 		this.$welcome.find(".btn").click(function() {
 			me.$welcome.toggle(false);
 			me.welcomed = true;
-			wn.set_route(me.page_name, "0");
+			frappe.set_route(me.page_name, "0");
 		})
 		
 		this.current_slide = {"$wrapper": this.$welcome};
 	},
 	show_working: function() {
 		this.hide_current_slide();
-		wn.set_route(this.page_name);
+		frappe.set_route(this.page_name);
 		this.current_slide = {"$wrapper": this.get_message(this.working_html).appendTo(this.parent)};
 	},
 	show_complete: function() {
@@ -331,14 +331,14 @@ wn.wiz.Wizard = Class.extend({
 	},
 	show: function(id) {
 		if(!this.welcomed) {
-			wn.set_route(this.page_name);
+			frappe.set_route(this.page_name);
 			return;
 		}
 		id = cint(id);
 		if(this.current_slide && this.current_slide.id===id) 
 			return;
 		if(!this.slide_dict[id]) {
-			this.slide_dict[id] = new wn.wiz.WizardSlide($.extend(this.slides[id], {wiz:this, id:id}));
+			this.slide_dict[id] = new frappe.wiz.WizardSlide($.extend(this.slides[id], {wiz:this, id:id}));
 			this.slide_dict[id].make();
 		}
 		
@@ -362,7 +362,7 @@ wn.wiz.Wizard = Class.extend({
 	}
 });
 
-wn.wiz.WizardSlide = Class.extend({
+frappe.wiz.WizardSlide = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
 	},
@@ -400,7 +400,7 @@ wn.wiz.WizardSlide = Class.extend({
 		this.body = this.$wrapper.find(".form")[0];
 		
 		if(this.fields) {
-			this.form = new wn.ui.FieldGroup({
+			this.form = new frappe.ui.FieldGroup({
 				fields: this.fields,
 				body: this.body,
 				no_submit_on_enter: true
@@ -413,7 +413,7 @@ wn.wiz.WizardSlide = Class.extend({
 		if(this.id > 0) {
 			this.$prev = this.$wrapper.find('.prev-btn').removeClass("hide")
 				.click(function() { 
-					wn.set_route(me.wiz.page_name, me.id-1 + ""); 
+					frappe.set_route(me.wiz.page_name, me.id-1 + ""); 
 				})
 				.css({"margin-right": "10px"});
 			}
@@ -423,7 +423,7 @@ wn.wiz.WizardSlide = Class.extend({
 					me.values = me.form.get_values();
 					if(me.values===null) 
 						return;
-					wn.set_route(me.wiz.page_name, me.id+1 + ""); 
+					frappe.set_route(me.wiz.page_name, me.id+1 + ""); 
 				})
 		} else {
 			this.$complete = this.$wrapper.find('.complete-btn').removeClass("hide")

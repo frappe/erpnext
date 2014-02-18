@@ -4,8 +4,8 @@
 
 from __future__ import unicode_literals
 import unittest
-import webnotes
-from webnotes.utils import cstr, getdate
+import frappe
+from frappe.utils import cstr, getdate
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry
 
@@ -13,26 +13,26 @@ from erpnext.manufacturing.doctype.production_order.production_order import make
 class TestProductionOrder(unittest.TestCase):
 	def test_planned_qty(self):
 		set_perpetual_inventory(0)
-		webnotes.conn.sql("delete from `tabStock Ledger Entry`")
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("""delete from `tabGL Entry`""")
+		frappe.conn.sql("delete from `tabStock Ledger Entry`")
+		frappe.conn.sql("""delete from `tabBin`""")
+		frappe.conn.sql("""delete from `tabGL Entry`""")
 		
-		pro_bean = webnotes.bean(copy = test_records[0])
+		pro_bean = frappe.bean(copy = test_records[0])
 		pro_bean.insert()
 		pro_bean.submit()
 		
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
-		mr1 = webnotes.bean(copy = se_test_records[0])
+		mr1 = frappe.bean(copy = se_test_records[0])
 		mr1.insert()
 		mr1.submit()
 		
-		mr2 = webnotes.bean(copy = se_test_records[0])
+		mr2 = frappe.bean(copy = se_test_records[0])
 		mr2.doclist[1].item_code = "_Test Item Home Desktop 100"
 		mr2.insert()
 		mr2.submit()
 		
 		stock_entry = make_stock_entry(pro_bean.doc.name, "Manufacture/Repack")
-		stock_entry = webnotes.bean(stock_entry)
+		stock_entry = frappe.bean(stock_entry)
 		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.doc.fg_completed_qty = 4
 		stock_entry.doc.posting_date = "2013-05-12"
@@ -40,9 +40,9 @@ class TestProductionOrder(unittest.TestCase):
 		stock_entry.run_method("get_items")
 		stock_entry.submit()
 		
-		self.assertEqual(webnotes.conn.get_value("Production Order", pro_bean.doc.name, 
+		self.assertEqual(frappe.conn.get_value("Production Order", pro_bean.doc.name, 
 			"produced_qty"), 4)
-		self.assertEqual(webnotes.conn.get_value("Bin", {"item_code": "_Test FG Item", 
+		self.assertEqual(frappe.conn.get_value("Bin", {"item_code": "_Test FG Item", 
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"), 6)
 			
 		return pro_bean.doc.name
@@ -52,7 +52,7 @@ class TestProductionOrder(unittest.TestCase):
 		pro_order = self.test_planned_qty()
 		
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")
-		stock_entry = webnotes.bean(stock_entry)
+		stock_entry = frappe.bean(stock_entry)
 		stock_entry.doc.posting_date = "2013-05-12"
 		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.doc.fg_completed_qty = 15

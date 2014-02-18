@@ -3,15 +3,15 @@
 
 {% include 'utilities/doctype/sms_control/sms_control.js' %};
 
-wn.ui.form.on_change("Opportunity", "customer", function(frm) { 
+frappe.ui.form.on_change("Opportunity", "customer", function(frm) { 
 	erpnext.utils.get_party_details(frm) });
-wn.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_address_display);
-wn.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);	
+frappe.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_address_display);
+frappe.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);	
 
 
-wn.provide("erpnext.selling");
+frappe.provide("erpnext.selling");
 // TODO commonify this code
-erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
+erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 	onload: function() {
 		if(!this.frm.doc.enquiry_from && this.frm.doc.customer)
 			this.frm.doc.enquiry_from = "Customer";
@@ -22,15 +22,15 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 			set_multiple(cdt, cdn, { status:'Draft' });
 		if(!this.frm.doc.date) 
 			this.frm.doc.transaction_date = date.obj_to_str(new Date());
-		if(!this.frm.doc.company && wn.defaults.get_default("company")) 
-			set_multiple(cdt, cdn, { company:wn.defaults.get_default("company") });
+		if(!this.frm.doc.company && frappe.defaults.get_default("company")) 
+			set_multiple(cdt, cdn, { company:frappe.defaults.get_default("company") });
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year)
 			set_multiple(cdt, cdn, { fiscal_year:sys_defaults.fiscal_year });
 	
 
 		if(!this.frm.doc.__islocal) {
-			cur_frm.communication_view = new wn.views.CommunicationList({
-				list: wn.model.get("Communication", {"opportunity": this.frm.doc.name}),
+			cur_frm.communication_view = new frappe.views.CommunicationList({
+				list: frappe.model.get("Communication", {"opportunity": this.frm.doc.name}),
 				parent: cur_frm.fields_dict.communication_html.wrapper,
 				doc: this.frm.doc,
 				recipients: this.frm.doc.contact_email
@@ -71,7 +71,7 @@ erpnext.selling.Opportunity = wn.ui.form.Controller.extend({
 	},
 		
 	create_quotation: function() {
-		wn.model.open_mapped_doc({
+		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
 			source_name: cur_frm.doc.name
 		})
@@ -85,11 +85,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.clear_custom_buttons();
 	
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
-		cur_frm.add_custom_button(wn._('Create Quotation'), cur_frm.cscript.create_quotation);
+		cur_frm.add_custom_button(frappe._('Create Quotation'), cur_frm.cscript.create_quotation);
 		if(doc.status!=="Quotation")
-			cur_frm.add_custom_button(wn._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
+			cur_frm.add_custom_button(frappe._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
 
-		cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+		cur_frm.add_custom_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 	}	
 }
 
@@ -108,19 +108,19 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
-	wn.model.map_current_doc({
+	frappe.model.map_current_doc({
 		method: "erpnext.selling.doctype.lead.lead.make_opportunity",
 		source_name: cur_frm.doc.lead
 	});
 }
 
 cur_frm.cscript['Declare Opportunity Lost'] = function() {
-	var dialog = new wn.ui.Dialog({
-		title: wn._("Set as Lost"),
+	var dialog = new frappe.ui.Dialog({
+		title: frappe._("Set as Lost"),
 		fields: [
-			{"fieldtype": "Text", "label": wn._("Reason for losing"), "fieldname": "reason",
+			{"fieldtype": "Text", "label": frappe._("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": wn._("Update"), "fieldname": "update"},
+			{"fieldtype": "Button", "label": frappe._("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -133,7 +133,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(wn._("There were errors."));
+					msgprint(frappe._("There were errors."));
 					return;
 				}
 				dialog.hide();

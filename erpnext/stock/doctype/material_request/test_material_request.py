@@ -5,22 +5,22 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import webnotes, unittest
-from webnotes.utils import flt
+import frappe, unittest
+from frappe.utils import flt
 
 class TestMaterialRequest(unittest.TestCase):
 	def setUp(self):
-		webnotes.defaults.set_global_default("auto_accounting_for_stock", 0)
+		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
 
 	def test_make_purchase_order(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
-		mr = webnotes.bean(copy=test_records[0]).insert()
+		mr = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_purchase_order, 
+		self.assertRaises(frappe.ValidationError, make_purchase_order, 
 			mr.doc.name)
 
-		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr = frappe.bean("Material Request", mr.doc.name)
 		mr.submit()
 		po = make_purchase_order(mr.doc.name)
 		
@@ -30,12 +30,12 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_make_supplier_quotation(self):
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
-		mr = webnotes.bean(copy=test_records[0]).insert()
+		mr = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_supplier_quotation, 
+		self.assertRaises(frappe.ValidationError, make_supplier_quotation, 
 			mr.doc.name)
 
-		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr = frappe.bean("Material Request", mr.doc.name)
 		mr.submit()
 		sq = make_supplier_quotation(mr.doc.name)
 		
@@ -46,12 +46,12 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_make_stock_entry(self):
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
-		mr = webnotes.bean(copy=test_records[0]).insert()
+		mr = frappe.bean(copy=test_records[0]).insert()
 
-		self.assertRaises(webnotes.ValidationError, make_stock_entry, 
+		self.assertRaises(frappe.ValidationError, make_stock_entry, 
 			mr.doc.name)
 
-		mr = webnotes.bean("Material Request", mr.doc.name)
+		mr = frappe.bean("Material Request", mr.doc.name)
 		mr.doc.material_request_type = "Transfer"
 		mr.submit()
 		se = make_stock_entry(mr.doc.name)
@@ -65,13 +65,13 @@ class TestMaterialRequest(unittest.TestCase):
 				self.assertEquals(val, doclist[i].fields.get(fieldname))
 				
 	def _test_requested_qty(self, qty1, qty2):
-		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
+		self.assertEqual(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty1)
-		self.assertEqual(flt(webnotes.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
+		self.assertEqual(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty2)
 			
 	def _insert_stock_entry(self, qty1, qty2):
-		se = webnotes.bean([
+		se = frappe.bean([
 			{
 				"company": "_Test Company", 
 				"doctype": "Stock Entry", 
@@ -109,10 +109,10 @@ class TestMaterialRequest(unittest.TestCase):
 		se.submit()
 				
 	def test_completed_qty_for_purchase(self):
-		webnotes.conn.sql("""delete from `tabBin`""")
+		frappe.conn.sql("""delete from `tabBin`""")
 		
 		# submit material request of type Purchase
-		mr = webnotes.bean(copy=test_records[0])
+		mr = frappe.bean(copy=test_records[0])
 		mr.insert()
 		mr.submit()
 		
@@ -133,14 +133,14 @@ class TestMaterialRequest(unittest.TestCase):
 
 		
 		# check for stopped status of Material Request
-		po = webnotes.bean(copy=po_doclist)
+		po = frappe.bean(copy=po_doclist)
 		po.insert()
 		mr.obj.update_status('Stopped')
-		self.assertRaises(webnotes.ValidationError, po.submit)
-		self.assertRaises(webnotes.ValidationError, po.cancel)
+		self.assertRaises(frappe.ValidationError, po.submit)
+		self.assertRaises(frappe.ValidationError, po.cancel)
 
 		mr.obj.update_status('Submitted')
-		po = webnotes.bean(copy=po_doclist)
+		po = frappe.bean(copy=po_doclist)
 		po.insert()
 		po.submit()
 		
@@ -156,11 +156,11 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 	def test_completed_qty_for_transfer(self):
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("""delete from `tabStock Ledger Entry`""")
+		frappe.conn.sql("""delete from `tabBin`""")
+		frappe.conn.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
-		mr = webnotes.bean(copy=test_records[0])
+		mr = frappe.bean(copy=test_records[0])
 		mr.doc.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
@@ -196,14 +196,14 @@ class TestMaterialRequest(unittest.TestCase):
 		self._insert_stock_entry(27.0, 1.5)
 		
 		# check for stopped status of Material Request
-		se = webnotes.bean(copy=se_doclist)
+		se = frappe.bean(copy=se_doclist)
 		se.insert()
 		mr.obj.update_status('Stopped')
-		self.assertRaises(webnotes.ValidationError, se.submit)
-		self.assertRaises(webnotes.ValidationError, se.cancel)
+		self.assertRaises(frappe.ValidationError, se.submit)
+		self.assertRaises(frappe.ValidationError, se.cancel)
 		
 		mr.obj.update_status('Submitted')
-		se = webnotes.bean(copy=se_doclist)
+		se = frappe.bean(copy=se_doclist)
 		se.insert()
 		se.submit()
 		
@@ -219,11 +219,11 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 	def test_completed_qty_for_over_transfer(self):
-		webnotes.conn.sql("""delete from `tabBin`""")
-		webnotes.conn.sql("""delete from `tabStock Ledger Entry`""")
+		frappe.conn.sql("""delete from `tabBin`""")
+		frappe.conn.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
-		mr = webnotes.bean(copy=test_records[0])
+		mr = frappe.bean(copy=test_records[0])
 		mr.doc.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
@@ -259,14 +259,14 @@ class TestMaterialRequest(unittest.TestCase):
 		self._insert_stock_entry(60.0, 3.0)
 		
 		# check for stopped status of Material Request
-		se = webnotes.bean(copy=se_doclist)
+		se = frappe.bean(copy=se_doclist)
 		se.insert()
 		mr.obj.update_status('Stopped')
-		self.assertRaises(webnotes.ValidationError, se.submit)
-		self.assertRaises(webnotes.ValidationError, se.cancel)
+		self.assertRaises(frappe.ValidationError, se.submit)
+		self.assertRaises(frappe.ValidationError, se.cancel)
 		
 		mr.obj.update_status('Submitted')
-		se = webnotes.bean(copy=se_doclist)
+		se = frappe.bean(copy=se_doclist)
 		se.insert()
 		se.submit()
 		
@@ -283,7 +283,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Purchase
-		mr = webnotes.bean(copy=test_records[0])
+		mr = frappe.bean(copy=test_records[0])
 		mr.doc.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
@@ -312,12 +312,12 @@ class TestMaterialRequest(unittest.TestCase):
 		})
 		
 		# check for stopped status of Material Request
-		se = webnotes.bean(copy=se_doclist)
-		self.assertRaises(webnotes.MappingMismatchError, se.insert)
+		se = frappe.bean(copy=se_doclist)
+		self.assertRaises(frappe.MappingMismatchError, se.insert)
 		
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		mr = webnotes.bean(copy=test_records[0])
+		mr = frappe.bean(copy=test_records[0])
 		mr.doc.company = "_Test Company 1"
 		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 

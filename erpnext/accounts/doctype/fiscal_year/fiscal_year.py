@@ -2,25 +2,25 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import throw, msgprint, _
-from webnotes.utils import getdate
+import frappe
+from frappe import msgprint, throw, _
+from frappe.utils import getdate
 
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 
 	def set_as_default(self):
-		webnotes.conn.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)
-		webnotes.get_obj("Global Defaults").on_update()
+		frappe.conn.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)
+		frappe.get_obj("Global Defaults").on_update()
 
-		webnotes.clear_cache()
+		frappe.clear_cache()
 
 		msgprint(self.doc.name + _(""" is now the default Fiscal Year. \
 			Please refresh your browser for the change to take effect."""))
 
 	def validate(self):
-		year_start_end_dates = webnotes.conn.sql("""select year_start_date, year_end_date 
+		year_start_end_dates = frappe.conn.sql("""select year_start_date, year_end_date 
 			from `tabFiscal Year` where name=%s""", (self.doc.name))
 
 		if year_start_end_dates:
@@ -34,7 +34,7 @@ class DocType:
 		if (getdate(self.doc.year_end_date) - getdate(self.doc.year_start_date)).days > 366:
 			throw(_("Year Start Date and Year End Date are not within Fiscal Year."))
 
-		year_start_end_dates = webnotes.conn.sql("""select name, year_start_date, year_end_date 
+		year_start_end_dates = frappe.conn.sql("""select name, year_start_date, year_end_date 
 			from `tabFiscal Year` where name!=%s""", (self.doc.name))
 
 		for fiscal_year, ysd, yed in year_start_end_dates:

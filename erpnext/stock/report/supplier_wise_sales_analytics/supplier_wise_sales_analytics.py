@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import flt
+import frappe
+from frappe.utils import flt
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -63,7 +63,7 @@ def get_consumed_details(filters):
 	conditions, values = get_conditions(filters)
 	consumed_details = {}
 
-	for d in webnotes.conn.sql("""select sle.item_code, i.item_name, i.description, 
+	for d in frappe.conn.sql("""select sle.item_code, i.item_name, i.description, 
 		i.stock_uom, sle.actual_qty, sle.stock_value_difference, 
 		sle.voucher_no, sle.voucher_type
 		from `tabStock Ledger Entry` sle, `tabItem` i 
@@ -76,7 +76,7 @@ def get_suppliers_details(filters):
 	item_supplier_map = {}
 	supplier = filters.get('supplier')
 
-	for d in webnotes.conn.sql("""select pr.supplier, pri.item_code from 
+	for d in frappe.conn.sql("""select pr.supplier, pri.item_code from 
 		`tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri 
 		where pr.name=pri.parent and pr.docstatus=1 and 
 		pri.item_code=(select name from `tabItem` where 
@@ -91,5 +91,5 @@ def get_suppliers_details(filters):
 	return item_supplier_map
 
 def get_material_transfer_vouchers():
-	return webnotes.conn.sql_list("""select name from `tabStock Entry` where 
+	return frappe.conn.sql_list("""select name from `tabStock Entry` where 
 		purpose='Material Transfer' and docstatus=1""")

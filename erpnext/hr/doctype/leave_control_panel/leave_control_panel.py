@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import cint, cstr, flt, nowdate
-from webnotes.model.doc import Document
-from webnotes.model.code import get_obj
-from webnotes import msgprint, throw, _
+import frappe
+from frappe.utils import cint, cstr, flt, nowdate
+from frappe.model.doc import Document
+from frappe.model.code import get_obj
+from frappe import msgprint, throw, _
 
 class DocType:
 	def __init__(self, doc, doclist):
@@ -40,7 +40,7 @@ class DocType:
 		for d in self.get_employees():
 			la = Document('Leave Allocation')
 			la.employee = cstr(d[0])
-			la.employee_name = webnotes.conn.get_value("Employee", cstr(d[0]), "employee_name")
+			la.employee_name = frappe.conn.get_value("Employee", cstr(d[0]), "employee_name")
 			la.leave_type = self.doc.leave_type
 			la.period = self.doc.period
 			la.posting_date = nowdate()

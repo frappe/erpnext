@@ -8,8 +8,8 @@ from __future__ import unicode_literals
 
 import os, json
 from xml.etree import ElementTree as ET
-from webnotes.utils.datautils import read_csv_content
-from webnotes.utils import cstr
+from frappe.utils.datautils import read_csv_content
+from frappe.utils import cstr
 
 path = "/Users/rmehta/Downloads/openerp/openerp/addons"
 chart_roots = []

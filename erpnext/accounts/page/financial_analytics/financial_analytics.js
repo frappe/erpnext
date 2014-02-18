@@ -1,12 +1,12 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.require("assets/erpnext/js/account_tree_grid.js");
+frappe.require("assets/erpnext/js/account_tree_grid.js");
 
-wn.pages['financial-analytics'].onload = function(wrapper) { 
-	wn.ui.make_app_page({
+frappe.pages['financial-analytics'].onload = function(wrapper) { 
+	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: wn._('Financial Analytics'),
+		title: frappe._('Financial Analytics'),
 		single_column: true
 	});
 	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
@@ -16,7 +16,7 @@ wn.pages['financial-analytics'].onload = function(wrapper) {
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
-		{fieldtype:"Select", label: wn._("PL or BS"), options:["Profit and Loss", "Balance Sheet"],
+		{fieldtype:"Select", label: frappe._("PL or BS"), options:["Profit and Loss", "Balance Sheet"],
 			filter: function(val, item, opts, me) {
 				if(item._show) return true;
 				
@@ -26,27 +26,27 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: wn._("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype:"Select", label: frappe._("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value || item._show;
 			}},
-		{fieldtype:"Select", label: wn._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype:"Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: wn._("From Date")},
-		{fieldtype:"Label", label: wn._("To")},
-		{fieldtype:"Date", label: wn._("To Date")},
-		{fieldtype:"Select", label: wn._("Range"), 
+		{fieldtype:"Date", label: frappe._("From Date")},
+		{fieldtype:"Label", label: frappe._("To")},
+		{fieldtype:"Date", label: frappe._("To Date")},
+		{fieldtype:"Select", label: frappe._("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: wn._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: wn._("Reset Filters")}
+		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: frappe._("Reset Filters")}
 	],
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: wn._("Plot"), field: "check", width: 30,
+			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: wn._("Account"), field: "name", width: 300,
+			{id: "name", name: frappe._("Account"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "opening", name: wn._("Opening"), field: "opening", hidden: true,
+			{id: "opening", name: frappe._("Opening"), field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
 		
@@ -59,7 +59,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		this.trigger_refresh_on_change(["pl_or_bs"]);
 		
 		this.filter_inputs.pl_or_bs
-			.add_options($.map(wn.report_dump.data["Cost Center"], function(v) {return v.name;}));
+			.add_options($.map(frappe.report_dump.data["Cost Center"], function(v) {return v.name;}));
 
 		this.setup_plot_check();
 	},
@@ -72,13 +72,13 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		
 		// setup cost center map
 		if(!this.cost_center_by_name) {
-			this.cost_center_by_name = this.make_name_map(wn.report_dump.data["Cost Center"]);
+			this.cost_center_by_name = this.make_name_map(frappe.report_dump.data["Cost Center"]);
 		}
 		
 		var cost_center = inList(["Balance Sheet", "Profit and Loss"], this.pl_or_bs) 
 			? null : this.cost_center_by_name[this.pl_or_bs];
 		
-		$.each(wn.report_dump.data['GL Entry'], function(i, gl) {
+		$.each(frappe.report_dump.data['GL Entry'], function(i, gl) {
 			var filter_by_cost_center = (function() {
 				if(cost_center) {
 					if(gl.cost_center) {

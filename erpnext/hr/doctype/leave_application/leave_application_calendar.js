@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-wn.views.calendar["Leave Application"] = {
+frappe.views.calendar["Leave Application"] = {
 	field_map: {
 		"start": "from_date",
 		"end": "to_date",

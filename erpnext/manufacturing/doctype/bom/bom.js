@@ -6,7 +6,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
 	
 	if (!doc.__islocal && doc.docstatus<2) {
-		cur_frm.add_custom_button(wn._("Update Cost"), cur_frm.cscript.update_cost);
+		cur_frm.add_custom_button(frappe._("Update Cost"), cur_frm.cscript.update_cost);
 	}
 	
 	cur_frm.cscript.with_operations(doc);
@@ -14,7 +14,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 }
 
 cur_frm.cscript.update_cost = function() {
-	return wn.call({
+	return frappe.call({
 		doc: cur_frm.doc,
 		method: "update_cost",
 		callback: function(r) {
@@ -42,7 +42,7 @@ var set_operation_no = function(doc) {
 		if (op && !inList(operations, op)) operations.push(op);
 	}
 		
-	wn.meta.get_docfield("BOM Item", "operation_no", 
+	frappe.meta.get_docfield("BOM Item", "operation_no", 
 		cur_frm.docname).options = operations.join("\n");
 	
 	$.each(getchildren("BOM Item", doc.name, "bom_materials"), function(i, v) {
@@ -61,7 +61,7 @@ cur_frm.add_fetch("item", "stock_uom", "uom");
 
 cur_frm.cscript.workstation = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	wn.model.with_doc("Workstation", d.workstation, function(i, r) {
+	frappe.model.with_doc("Workstation", d.workstation, function(i, r) {
 		d.hour_rate = r.docs[0].hour_rate;
 		refresh_field("hour_rate", dn, "bom_operations");
 		calculate_op_cost(doc);
@@ -93,7 +93,7 @@ cur_frm.cscript.is_default = function(doc) {
 var get_bom_material_detail= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return wn.call({
+		return frappe.call({
 			doc: cur_frm.doc,
 			method: "get_bom_material_detail",
 			args: {
@@ -123,7 +123,7 @@ cur_frm.cscript.qty = function(doc, cdt, cdn) {
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.bom_no) {
-		msgprint(wn._("You can not change rate if BOM mentioned agianst any item"));
+		msgprint(frappe._("You can not change rate if BOM mentioned agianst any item"));
 		get_bom_material_detail(doc, cdt, cdn);
 	} else {
 		calculate_rm_cost(doc);

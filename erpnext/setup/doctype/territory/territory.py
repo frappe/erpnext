@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
+import frappe
 
-from webnotes.model.bean import getlist
-from webnotes.utils import flt
+from frappe.model.bean import getlist
+from frappe.utils import flt
 
-from webnotes.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import DocTypeNestedSet
 	
 class DocType(DocTypeNestedSet):
 	def __init__(self, doc, doclist=[]):

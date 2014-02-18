@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes.utils import add_days, cint,flt, nowdate, get_url_to_form, formatdate
-from webnotes import msgprint, _
+import frappe
+from frappe.utils import add_days, cint,flt, nowdate, get_url_to_form, formatdate
+from frappe import msgprint, _
 
-import webnotes.defaults
+import frappe.defaults
 
 
 class DocType:	
@@ -16,7 +16,7 @@ class DocType:
 		
 	def validate(self):
 		if self.doc.fields.get("__islocal") or not self.doc.stock_uom:
-			self.doc.stock_uom = webnotes.conn.get_value('Item', self.doc.item_code, 'stock_uom')
+			self.doc.stock_uom = frappe.conn.get_value('Item', self.doc.item_code, 'stock_uom')
 				
 		self.validate_mandatory()
 		
@@ -60,7 +60,7 @@ class DocType:
 		self.doc.save()
 		
 	def get_first_sle(self):
-		sle = webnotes.conn.sql("""
+		sle = frappe.conn.sql("""
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s

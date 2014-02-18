@@ -16,12 +16,12 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 		this._super();
 
 		if (this.frm.doc.docstatus === 1) {
-			cur_frm.add_custom_button(wn._("Make Purchase Order"), this.make_purchase_order);
+			cur_frm.add_custom_button(frappe._("Make Purchase Order"), this.make_purchase_order);
 		} 
 		else if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Material Request'), 
+			cur_frm.add_custom_button(frappe._('From Material Request'), 
 				function() {
-					wn.model.map_current_doc({
+					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
 						source_doctype: "Material Request",
 						get_query_filters: {
@@ -37,7 +37,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 	},	
 		
 	make_purchase_order: function() {
-		wn.model.open_mapped_doc({
+		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 			source_name: cur_frm.doc.name
 		})
