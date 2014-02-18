@@ -3,23 +3,21 @@
 
 cur_frm.add_fetch('employee', 'company', 'company');
 
-cur_frm.cscript.onload = function(doc, dt, dn){
+cur_frm.cscript.onload = function(doc, dt, dn) {
 	if((cint(doc.__islocal) == 1) && !doc.amended_from) {
 		if(!doc.month) {
-			var today=new Date();
-			month = (today.getMonth()+01).toString();
+			var today = new Date();
+			month = (today.getMonth() + 01).toString();
 			if(month.length > 1) doc.month = month;
 			else doc.month = '0' + month;
 		}
-		if(!doc.fiscal_year) doc.fiscal_year = sys_defaults['fiscal_year'];
-		refresh_many(['month', 'fiscal_year']);
+		refresh_field('month');
 		cur_frm.cscript.month();
 	}
 }
 
 // Get leave details
-//---------------------------------------------------------------------
-cur_frm.cscript.fiscal_year = function(doc, dt, dn) {
+cur_frm.cscript.employee = function(doc, dt, dn) {
 	return $c_obj(make_doclist(doc.doctype, doc.name), 'get_emp_and_leave_details', '', function(r, rt) {
 		var doc = locals[dt][dn];
 		cur_frm.refresh();
@@ -27,10 +25,10 @@ cur_frm.cscript.fiscal_year = function(doc, dt, dn) {
 	});
 }
 
-cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
+cur_frm.cscript.month = cur_frm.cscript.employee;
 
 cur_frm.cscript.leave_without_pay = function(doc, dt, dn) {
-	if (doc.employee && doc.fiscal_year && doc.month) {
+	if (doc.employee && doc.month) {
 		return $c_obj(make_doclist(doc.doctype, doc.name), 'get_leave_details', doc.leave_without_pay, function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
@@ -53,7 +51,6 @@ cur_frm.cscript.e_modified_amount = function(doc, dt, dn) {
 cur_frm.cscript.e_depends_on_lwp = cur_frm.cscript.e_modified_amount;
 
 // Trigger on earning modified amount and depends on lwp
-// ------------------------------------------------------------------------
 cur_frm.cscript.d_modified_amount = function(doc, dt, dn) {
 	calculate_ded_total(doc, dt, dn);
 	calculate_net_pay(doc, dt, dn);

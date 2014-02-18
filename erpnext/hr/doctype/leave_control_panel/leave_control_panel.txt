@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:15", 
   "docstatus": 0, 
-  "modified": "2014-02-07 17:42:55", 
+  "modified": "2014-02-17 18:15:45", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -50,44 +50,44 @@
   "width": "50%"
  }, 
  {
-  "description": "Leave blank if considered for all employee types", 
+  "description": "Leave blank if considered for all employment types", 
   "doctype": "DocField", 
-  "fieldname": "employee_type", 
-  "fieldtype": "Select", 
-  "label": "Employee Type", 
-  "options": "link:Employment Type"
+  "fieldname": "employment_type", 
+  "fieldtype": "Link", 
+  "label": "Employment Type", 
+  "options": "Employment Type"
  }, 
  {
   "description": "Leave blank if considered for all branches", 
   "doctype": "DocField", 
   "fieldname": "branch", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Branch", 
-  "options": "link:Branch"
+  "options": "Branch"
  }, 
  {
   "description": "Leave blank if considered for all departments", 
   "doctype": "DocField", 
   "fieldname": "department", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Department", 
-  "options": "link:Department"
+  "options": "Department"
  }, 
  {
   "description": "Leave blank if considered for all designations", 
   "doctype": "DocField", 
   "fieldname": "designation", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Designation", 
-  "options": "link:Designation"
+  "options": "Designation"
  }, 
  {
   "description": "Leave blank if considered for all grades", 
   "doctype": "DocField", 
   "fieldname": "grade", 
-  "fieldtype": "Select", 
+  "fieldtype": "Link", 
   "label": "Grade", 
-  "options": "link:Grade"
+  "options": "Grade"
  }, 
  {
   "doctype": "DocField", 

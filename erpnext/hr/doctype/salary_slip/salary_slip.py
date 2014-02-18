@@ -3,24 +3,22 @@
 
 from __future__ import unicode_literals
 import webnotes
-
 from webnotes.utils import add_days, cint, cstr, flt, getdate, nowdate, _round
 from webnotes.model.doc import make_autoname
 from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from webnotes import msgprint, throw, _
 from erpnext.setup.utils import get_company_currency
 
-	
 from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
 	def __init__(self,doc,doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-		
+
 	def autoname(self):
-		self.doc.name = make_autoname('Sal Slip/' +self.doc.employee + '/.#####') 
+		self.doc.name = make_autoname('Sal Slip/' + self.doc.employee + '/.#####') 
 
 	def get_emp_and_leave_details(self):
 		if self.doc.employee:
@@ -40,7 +38,7 @@ class DocType(TransactionBase):
 	def pull_sal_struct(self, struct):
 		from erpnext.hr.doctype.salary_structure.salary_structure import get_mapped_doclist
 		self.doclist = get_mapped_doclist(struct, self.doclist)
-		
+
 	def pull_emp_details(self):
 		emp = webnotes.conn.get_value("Employee", self.doc.employee, 
 			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
@@ -51,43 +49,41 @@ class DocType(TransactionBase):
 			self.doc.pf_no = emp.pf_number
 
 	def get_leave_details(self, lwp=None):
-		if not self.doc.fiscal_year:
-			self.doc.fiscal_year = webnotes.get_default("fiscal_year")
 		if not self.doc.month:
 			self.doc.month = "%02d" % getdate(nowdate()).month
-			
+
 		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
 		holidays = self.get_holidays_for_employee(m)
-		
+
 		if not cint(webnotes.conn.get_value("HR Settings", "HR Settings",
 			"include_holidays_in_total_working_days")):
 				m["month_days"] -= len(holidays)
 				if m["month_days"] < 0:
-					msgprint(_("Bummer! There are more holidays than working days this month."),
-						raise_exception=True)
-			
+					throw(_("Bummer! There are more holidays than working days this month."))
+
 		if not lwp:
 			lwp = self.calculate_lwp(holidays, m)
 		self.doc.total_days_in_month = m['month_days']
 		self.doc.leave_without_pay = lwp
 		payment_days = flt(self.get_payment_days(m)) - flt(lwp)
 		self.doc.payment_days = payment_days > 0 and payment_days or 0
-		
 
 	def get_payment_days(self, m):
 		payment_days = m['month_days']
-		emp = webnotes.conn.sql("select date_of_joining, relieving_date from `tabEmployee` \
-			where name = %s", self.doc.employee, as_dict=1)[0]
-			
+		emp = webnotes.conn.sql("""select date_of_joining, relieving_date from `tabEmployee` 
+			where name = %s""", self.doc.employee, as_dict=1)[0]
+
 		if emp['relieving_date']:
 			if getdate(emp['relieving_date']) > m['month_start_date'] and \
 				getdate(emp['relieving_date']) < m['month_end_date']:
 					payment_days = getdate(emp['relieving_date']).day
 			elif getdate(emp['relieving_date']) < m['month_start_date']:
-				webnotes.msgprint(_("Relieving Date of employee is ") + cstr(emp['relieving_date']
-					+ _(". Please set status of the employee as 'Left'")), raise_exception=1)
-				
-			
+				throw("{emp} {rel_date}. {status}".format(**{
+					"emp": _("Relieving Date of employee is"),
+					"rel_date": cstr(emp['relieving_date']),
+					"status": _("Please set status of the employee as 'Left'")
+				}))
+
 		if emp['date_of_joining']:
 			if getdate(emp['date_of_joining']) > m['month_start_date'] and \
 				getdate(emp['date_of_joining']) < m['month_end_date']:
@@ -96,20 +92,22 @@ class DocType(TransactionBase):
 				payment_days = 0
 
 		return payment_days
-		
+
 	def get_holidays_for_employee(self, m):
-		holidays = webnotes.conn.sql("""select t1.holiday_date 
-			from `tabHoliday` t1, tabEmployee t2 
-			where t1.parent = t2.holiday_list and t2.name = %s 
-			and t1.holiday_date between %s and %s""", 
+		holidays = webnotes.conn.sql("""select h.holiday_date 
+			from `tabHoliday` h, `tabEmployee` emp 
+			where h.parent=emp.holiday_list and emp.name=%s 
+			and h.holiday_date between %s and %s""", 
 			(self.doc.employee, m['month_start_date'], m['month_end_date']))
+
 		if not holidays:
-			holidays = webnotes.conn.sql("""select t1.holiday_date 
-				from `tabHoliday` t1, `tabHoliday List` t2 
-				where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1 
-				and t2.fiscal_year = %s
-				and t1.holiday_date between %s and %s""", (self.doc.fiscal_year, 
+			holidays = webnotes.conn.sql("""select h.holiday_date 
+				from `tabHoliday` h, `tabHoliday List` hl 
+				where h.parent=hl.name and ifnull(hl.is_default, 0)=1 
+				and hl.period=%s
+				and h.holiday_date between %s and %s""", (self.doc.fiscal_year, 
 					m['month_start_date'], m['month_end_date']))
+
 		holidays = [cstr(i[0]) for i in holidays]
 		return holidays
 
@@ -119,12 +117,12 @@ class DocType(TransactionBase):
 			dt = add_days(cstr(m['month_start_date']), d)
 			if dt not in holidays:
 				leave = webnotes.conn.sql("""
-					select t1.name, t1.half_day
-					from `tabLeave Application` t1, `tabLeave Type` t2 
-					where t2.name = t1.leave_type 
-					and ifnull(t2.is_lwp, 0) = 1 
-					and t1.docstatus = 1 
-					and t1.employee = %s
+					select la.name, la.half_day
+					from `tabLeave Application` la, `tabLeave Type` lt 
+					where lt.name=la.leave_type 
+					and ifnull(lt.is_lwp, 0)=1 
+					and la.docstatus=1 
+					and la.employee=%s
 					and %s between from_date and to_date
 				""", (self.doc.employee, dt))
 				if leave:
@@ -133,14 +131,15 @@ class DocType(TransactionBase):
 
 	def check_existing(self):
 		ret_exist = webnotes.conn.sql("""select name from `tabSalary Slip` 
-			where month = %s and fiscal_year = %s and docstatus != 2 
-			and employee = %s and name != %s""", 
-			(self.doc.month, self.doc.fiscal_year, self.doc.employee, self.doc.name))
+			where month=%s and docstatus!=2 and employee=%s and name!=%s""", 
+			(self.doc.month, self.doc.employee, self.doc.name))
 		if ret_exist:
 			self.doc.employee = ''
-			msgprint("Salary Slip of employee '%s' already created for this month" 
-				% self.doc.employee, raise_exception=1)
-
+			throw("{slip}: {emp} {already}".format(**{
+				"slip": _("Salary Slip of Employee"),
+				"emp": self.doc.employee,
+				"already": _("already created for this month")
+			}))
 
 	def validate(self):
 		from webnotes.utils import money_in_words
@@ -154,7 +153,7 @@ class DocType(TransactionBase):
 
 		if not self.doc.net_pay:
 			self.calculate_net_pay()
-			
+
 		company_currency = get_company_currency(self.doc.company)
 		self.doc.total_in_words = money_in_words(self.doc.rounded_total, company_currency)
 
@@ -169,7 +168,7 @@ class DocType(TransactionBase):
 			else:
 				d.e_modified_amount = d.e_amount
 			self.doc.gross_pay += flt(d.e_modified_amount)
-	
+
 	def calculate_ded_total(self):
 		self.doc.total_deduction = 0
 		for d in getlist(self.doclist, 'deduction_details'):
@@ -180,35 +179,35 @@ class DocType(TransactionBase):
 				d.d_modified_amount = 0
 			else:
 				d.d_modified_amount = d.d_amount
-			
+
 			self.doc.total_deduction += flt(d.d_modified_amount)
-				
+
 	def calculate_net_pay(self):
 		self.calculate_earning_total()
 		self.calculate_ded_total()
 		self.doc.net_pay = flt(self.doc.gross_pay) - flt(self.doc.total_deduction)
-		self.doc.rounded_total = _round(self.doc.net_pay)		
+		self.doc.rounded_total = _round(self.doc.net_pay)
 
 	def on_submit(self):
-		if(self.doc.email_check == 1):			
+		if(self.doc.email_check == 1):
 			self.send_mail_funct()
-			
 
-	def send_mail_funct(self):	 
+	def send_mail_funct(self):
 		from webnotes.utils.email_lib import sendmail
+
 		receiver = webnotes.conn.get_value("Employee", self.doc.employee, "company_email")
 		if receiver:
-			subj = 'Salary Slip - ' + cstr(self.doc.month) +'/'+cstr(self.doc.fiscal_year)
-			earn_ret=webnotes.conn.sql("""select e_type, e_modified_amount from `tabSalary Slip Earning` 
-				where parent = %s""", self.doc.name)
-			ded_ret=webnotes.conn.sql("""select d_type, d_modified_amount from `tabSalary Slip Deduction` 
-				where parent = %s""", self.doc.name)
-		 
+			subj = 'Salary Slip - ' + cstr(self.doc.month) + ', ' + getdate(self.doc.from_date).year
+			earn_ret = webnotes.conn.sql("""select e_type, e_modified_amount from 
+				`tabSalary Slip Earning` where parent = %s""", self.doc.name)
+			ded_ret = webnotes.conn.sql("""select d_type, d_modified_amount from 
+				`tabSalary Slip Deduction` where parent = %s""", self.doc.name)
+
 			earn_table = ''
 			ded_table = ''
-			if earn_ret:			
+			if earn_ret:
 				earn_table += "<table cellspacing=5px cellpadding=5px width='100%%'>"
-				
+
 				for e in earn_ret:
 					if not e[1]:
 						earn_table += '<tr><td>%s</td><td align="right">0.00</td></tr>' % cstr(e[0])
@@ -216,11 +215,10 @@ class DocType(TransactionBase):
 						earn_table += '<tr><td>%s</td><td align="right">%s</td></tr>' \
 							% (cstr(e[0]), cstr(e[1]))
 				earn_table += '</table>'
-			
+
 			if ded_ret:
-			
 				ded_table += "<table cellspacing=5px cellpadding=5px width='100%%'>"
-				
+
 				for d in ded_ret:
 					if not d[1]:
 						ded_table +='<tr><td">%s</td><td align="right">0.00</td></tr>' % cstr(d[0])
@@ -228,10 +226,10 @@ class DocType(TransactionBase):
 						ded_table +='<tr><td>%s</td><td align="right">%s</td></tr>' \
 							% (cstr(d[0]), cstr(d[1]))
 				ded_table += '</table>'
-			
+
 			letter_head = webnotes.conn.get_value("Letter Head", {"is_default": 1, "disabled": 0}, 
 				"content")
-			
+
 			msg = '''<div> %s <br>
 			<table cellspacing= "5" cellpadding="5"  width = "100%%">
 				<tr>
@@ -253,15 +251,13 @@ class DocType(TransactionBase):
 					<td width = "50%%">Designation : %s</td>
 					<td width = "50%%">Grade : %s</td>
 				</tr>
-				<tr>				
+				<tr>
 					<td width = "50%%">Bank Account No. : %s</td>
 					<td  width = "50%%">Bank Name : %s</td>
-				
 				</tr>
 				<tr>
 					<td  width = "50%%">Arrear Amount : <b>%s</b></td>
 					<td  width = "50%%">Payment days : %s</td>
-				
 				</tr>
 			</table>
 			<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">

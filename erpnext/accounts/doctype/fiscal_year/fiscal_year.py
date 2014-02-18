@@ -9,14 +9,13 @@ from webnotes.utils import getdate
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
-		
+
 	def set_as_default(self):
 		webnotes.conn.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)
 		webnotes.get_obj("Global Defaults").on_update()
-		
-		# clear cache
+
 		webnotes.clear_cache()
-		
+
 		msgprint(self.doc.name + _(""" is now the default Fiscal Year. \
 			Please refresh your browser for the change to take effect."""))
 
@@ -29,7 +28,6 @@ class DocType:
 				throw(_("Cannot change Year Start Date and Year End Date once the Fiscal Year is saved."))
 
 	def on_update(self):
-		# validate year start date and year end date
 		if getdate(self.doc.year_start_date) > getdate(self.doc.year_end_date):
 			throw(_("Year Start Date should not be greater than Year End Date"))
 

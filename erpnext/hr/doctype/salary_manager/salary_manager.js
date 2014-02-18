@@ -13,11 +13,11 @@ cur_frm.cscript.refresh = function() {
 }
 
 cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
-	var callback = function(r, rt){
+	var callback = function(r, rt) {
 		if (r.message)
 			display_activity_log(r.message);
 	}
-	return $c('runserverobj', args={'method':'create_sal_slip','docs':wn.model.compress(make_doclist (cdt, cdn))},callback);
+	return $c('runserverobj', args={'method': 'create_sal_slip', 'docs': wn.model.compress(make_doclist (cdt, cdn))}, callback);
 }
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
@@ -27,15 +27,15 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 			if (r.message)
 				display_activity_log(r.message);
 		}
-		return $c('runserverobj', args={'method':'submit_salary_slip','docs':wn.model.compress(make_doclist (cdt, cdn))},callback);
+		return $c('runserverobj', args={'method': 'submit_salary_slip', 'docs': wn.model.compress(make_doclist (cdt, cdn))}, callback);
 	}
 }
 
 cur_frm.cscript.make_bank_voucher = function(doc, cdt, cdn) {
-	if(doc.company && doc.month && doc.fiscal_year)
+	if(doc.company && doc.month && doc.from_date && doc.from_date)
 		cur_frm.cscript.make_jv(doc, cdt, cdn);
 	else
-		msgprint(wn._("Company, Month and Fiscal Year is mandatory"));
+		msgprint(wn._("Company, Month, From Date & To Date is mandatory"));
 }
 
 cur_frm.cscript.make_jv = function(doc, dt, dn) {

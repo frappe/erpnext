@@ -6,11 +6,10 @@
 
 from __future__ import unicode_literals
 import webnotes
-
 from webnotes.utils import cstr, flt
 from webnotes.model.utils import getlist
 from webnotes.model.code import get_obj
-from webnotes import msgprint, _
+from webnotes import msgprint, throw, _
 
 from erpnext.controllers.buying_controller import BuyingController
 class DocType(BuyingController):
@@ -48,14 +47,14 @@ class DocType(BuyingController):
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 				
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
-					webnotes.throw("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
+					throw("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
 						\n Anyway, you can add more qty in new row for the same item."
 						% (actual_so_qty - already_indented, item, so_no))
 				
 	def validate_schedule_date(self):
 		for d in getlist(self.doclist, 'indent_details'):
 			if d.schedule_date < self.doc.transaction_date:
-				webnotes.throw(_("Expected Date cannot be before Material Request Date"))
+				throw(_("Expected Date cannot be before Material Request Date"))
 				
 	# Validate
 	# ---------------------
@@ -87,8 +86,11 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist, 'indent_details'):
 			if webnotes.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
-					webnotes.throw("Please Enter Warehouse for Item %s as it is stock item" 
-						% cstr(d.item_code))
+					throw("{enter} {item} {stock}".format(**{
+						"enter": _("Please Enter Warehouse for Item"),
+						"item": cstr(d.item_code),
+						"stock": _("as it is stock item")
+					}))
 					
 				qty =flt(d.qty)
 				if is_stopped:
