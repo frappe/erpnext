@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-25 10:25:16", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:21:46", 
+  "modified": "2014-02-19 18:35:36", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -42,6 +42,7 @@
   "name": "Selling Settings"
  }, 
  {
+  "default": "Customer Name", 
   "doctype": "DocField", 
   "fieldname": "cust_master_name", 
   "fieldtype": "Select", 
