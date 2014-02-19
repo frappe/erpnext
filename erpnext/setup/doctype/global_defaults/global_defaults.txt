@@ -2,14 +2,12 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2013-10-23 18:06:04", 
+  "modified": "2014-02-19 18:06:47", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_copy": 1, 
-  "allow_email": 1, 
-  "allow_print": 1, 
   "doctype": "DocType", 
   "hide_toolbar": 0, 
   "icon": "icon-cog", 
@@ -62,7 +60,7 @@
   "read_only": 0
  }, 
  {
-  "default": "This is the default number format. For currencies, please set the number format in the currency master.", 
+  "description": "This is the default number format. For currencies, please set the number format in the currency master.", 
   "doctype": "DocField", 
   "fieldname": "number_format", 
   "fieldtype": "Select", 
