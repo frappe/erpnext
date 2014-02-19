@@ -109,97 +109,75 @@ erpnext.AccountsChart = Class.extend({
 			args: {ctype: ctype, comp: company},
 			method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
 			click: function(link) {
-				if(me.cur_toolbar) 
-					$(me.cur_toolbar).toggle(false);
-
-				if(!link.toolbar) 
-					me.make_link_toolbar(link);
-
-				if(link.toolbar) {
-					me.cur_toolbar = link.toolbar;
-					$(me.cur_toolbar).toggle(true);
-				}
-				
 				// bold
 				$('.bold').removeClass('bold'); // deselect
 				$(link).parent().find('.balance-area:first').addClass('bold'); // select
 
 			},
-			onrender: function(treenode) {
-				if (ctype == 'Account' && treenode.data) {
-					if(treenode.data.balance) {
-						treenode.parent.append('<span class="balance-area pull-right">' 
-							+ format_currency(treenode.data.balance, treenode.data.currency) 
-							+ '</span>');
+			toolbar: [
+				{ toggle_btn: true },
+				{ 
+					label: __("Open"),
+					condition: function(node) { return !node.root },
+					click: function(node, btn) {
+						 frappe.set_route("Form", me.ctype, node.label);
 					}
+				},
+				{
+					condition: function(node) { return !node.root && node.expandable; },
+					label: __("Add Child"),
+					click: function() {
+						if(me.ctype=='Account') {
+							me.new_account();
+						} else {
+							me.new_cost_center();
+						}
+					}
+				},
+				{
+					condition: function(node) {
+						return !node.root && me.ctype === 'Account' 
+							&& frappe.boot.profile.can_read.indexOf("GL Entry") !== -1
+					},
+					label: __("View Ledger"),
+					click: function(node, btn) {
+						frappe.route_options = {
+							"account": node.label,
+							"from_date": sys_defaults.year_start_date,
+							"to_date": sys_defaults.year_end_date,
+							"company": me.company
+						};
+						frappe.set_route("query-report", "General Ledger");
+					}
+					
+				},
+				{
+					condition: function(node) { return !node.root && me.can_write },
+					label: __("Rename"),
+					click: function(node) {
+						frappe.model.rename_doc(me.ctype, node.label, function(new_name) {
+							node.reload();
+						});
+					}
+				},
+				{
+					condition: function(node) { return !node.root && me.can_delete },
+					label: __("Delete"),
+					click: function(node) {
+						frappe.model.delete_doc(me.ctype, node.label, function() {
+							node.parent.remove();
+						});
+					}
+				}
+			],
+			onrender: function(node) {
+				if (me.ctype == 'Account' && node.data && node.data.balance!==undefined) {
+					$('<span class="balance-area pull-right text-muted">' 
+						+ format_currency(node.data.balance, node.data.currency) 
+						+ '</span>').insertBefore(node.$ul);
 				}
 			}
 		});
-		this.tree.rootnode.$a.click();
-	},
-	make_link_toolbar: function(link) {
-		var data = $(link).data('node-data');
-		if(!data) return;
-
-		link.toolbar = $('<span class="tree-node-toolbar highlight"></span>').insertAfter(link);
-		
-		var node_links = [];
-		// edit
-		if (frappe.model.can_read(this.ctype) !== -1) {
-			node_links.push('<a onclick="erpnext.account_chart.open();">'+frappe._('Edit')+'</a>');
-		}
-		if (data.expandable && frappe.boot.profile.in_create.indexOf(this.ctype) !== -1) {
-			node_links.push('<a onclick="erpnext.account_chart.new_node();">'+frappe._('Add Child')+'</a>');
-		} else if (this.ctype === 'Account' && frappe.boot.profile.can_read.indexOf("GL Entry") !== -1) {
-			node_links.push('<a onclick="erpnext.account_chart.show_ledger();">'+frappe._('View Ledger')+'</a>');
-		}
-
-		if (this.can_write) {
-			node_links.push('<a onclick="erpnext.account_chart.rename()">'+frappe._('Rename')+'</a>');
-		};
-	
-		if (this.can_delete) {
-			node_links.push('<a onclick="erpnext.account_chart.delete()">'+frappe._('Delete')+'</a>');
-		};
-		
-		link.toolbar.append(node_links.join(" | "));
-	},
-	open: function() {
-		var node = this.selected_node();
-		frappe.set_route("Form", this.ctype, node.data("label"));
-	},
-	show_ledger: function() {
-		var me = this;
-		var node = me.selected_node();
-		frappe.route_options = {
-			"account": node.data('label'),
-			"from_date": sys_defaults.year_start_date,
-			"to_date": sys_defaults.year_end_date,
-			"company": me.company
-		};
-		frappe.set_route("query-report", "General Ledger");
-	},
-	rename: function() {
-		var node = this.selected_node();
-		frappe.model.rename_doc(this.ctype, node.data('label'), function(new_name) {
-			node.parents("ul:first").parent().find(".tree-link:first").trigger("reload");
-		});
-	},
-	delete: function() {
-		var node = this.selected_node();
-		frappe.model.delete_doc(this.ctype, node.data('label'), function() {
-			node.parent().remove();
-		});
-	},
-	new_node: function() {
-		if(this.ctype=='Account') {
-			this.new_account();
-		} else {
-			this.new_cost_center();
-		}
-	},
-	selected_node: function() {
-		return this.tree.$w.find('.tree-link.selected');
 	},
 	new_account: function() {
 		var me = this;
@@ -250,12 +228,11 @@ erpnext.AccountsChart = Class.extend({
 		// create
 		$(fd.create_new.input).click(function() {
 			var btn = this;
-			$(btn).set_working();
 			var v = d.get_values();
 			if(!v) return;
 					
-			var node = me.selected_node();
-			v.parent_account = node.data('label');
+			var node = me.tree.get_selected_node();
+			v.parent_account = node.label;
 			v.master_type = '';
 			v.company = me.company;
 			
@@ -263,9 +240,8 @@ erpnext.AccountsChart = Class.extend({
 				args: v,
 				method: 'erpnext.accounts.utils.add_ac',
 				callback: function(r) {
-					$(btn).done_working();
 					d.hide();
-					node.trigger('reload');
+					node.reload;
 				}
 			});
 		});
@@ -296,23 +272,20 @@ erpnext.AccountsChart = Class.extend({
 	
 		// create
 		$(d.fields_dict.create_new.input).click(function() {
-			var btn = this;
-			$(btn).set_working();
 			var v = d.get_values();
 			if(!v) return;
 			
-			var node = me.selected_node();
+			var node = me.tree.get_selected_node();
 			
-			v.parent_cost_center = node.data('label');
+			v.parent_cost_center = node.label;
 			v.company = me.company;
 			
 			return frappe.call({
 				args: v,
 				method: 'erpnext.accounts.utils.add_cc',
 				callback: function(r) {
-					$(btn).done_working();
 					d.hide();
-					node.trigger('reload');
+					node.reload();
 				}
 			});
 		});
