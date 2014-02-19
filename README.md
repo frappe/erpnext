@@ -1,4 +1,4 @@
-# ERPNext - Open Source ERP for small, medium sized businesses
+# ERPNext - Open Source ERP for small, medium sized businesses [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
 
 [https://erpnext.com](https://erpnext.com)
 
