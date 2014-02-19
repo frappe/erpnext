@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-02 17:53:24", 
   "docstatus": 0, 
-  "modified": "2014-02-19 18:06:47", 
+  "modified": "2014-02-19 19:11:58", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -52,6 +52,7 @@
   "label": "Date and Number Settings"
  }, 
  {
+  "default": "dd-mm-yyyy", 
   "doctype": "DocField", 
   "fieldname": "date_format", 
   "fieldtype": "Select", 
