@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.defaults import get_restrictions
+from frappe.utils import add_days
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 
@@ -22,7 +23,8 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 	party_bean = frappe.bean(party_type, party)
 	party = party_bean.doc
 
-	set_address_and_contact(out, party, party_type)
+	set_address_details(out, party, party_type)
+	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, price_list)
 	
@@ -38,20 +40,26 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 	
 	return out
 
-def set_address_and_contact(out, party, party_type):
-	out.update({
-		party_type.lower() + "_address": frappe.conn.get_value("Address", 
-			{party_type.lower(): party.name, "is_primary_address":1}, "name"),
-		"contact_person": frappe.conn.get_value("Contact", 
-			{party_type.lower(): party.name, "is_primary_contact":1}, "name")
-	})
+def set_address_details(out, party, party_type):
+	billing_address_field = "customer_address" if party_type == "Lead" \
+		else party_type.lower() + "_address"
+	out[billing_address_field] = frappe.conn.get_value("Address", 
+		{party_type.lower(): party.name, "is_primary_address":1}, "name")
 	
 	# address display
-	out.address_display = get_address_display(out[party_type.lower() + "_address"])
+	out.address_display = get_address_display(out[billing_address_field])
 	
-	# primary contact details
+	# shipping address
+	if party_type in ["Customer", "Lead"]:
+		out.shipping_address_name = frappe.conn.get_value("Address", 
+			{party_type.lower(): party.name, "is_shipping_address":1}, "name")
+		out.shipping_address = get_address_display(out["shipping_address_name"])
+	
+def set_contact_details(out, party, party_type):
+	out.contact_person = frappe.conn.get_value("Contact", 
+		{party_type.lower(): party.name, "is_primary_contact":1}, "name")
+	
 	out.update(get_contact_details(out.contact_person))
-	
 
 def set_other_values(out, party, party_type):
 	# copy

@@ -21,15 +21,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			doc.quotation_to = "Customer";
 		else if(doc.lead && !doc.quotation_to)
 			doc.quotation_to = "Lead";
-
-		// to overwrite the customer_filter trigger from queries.js
-		if (doc.lead) {
-			$.each(["customer_address", "shipping_address_name"], 
-				function(i, opts) {
-					me.frm.set_query(opts, erpnext.queries["lead_filter"]);
-				}
-			);
-		}
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
@@ -75,11 +66,19 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	
 	quotation_to: function() {
+		var me = this;
 		this.frm.toggle_reqd("lead", this.frm.doc.quotation_to == "Lead");
 		this.frm.toggle_reqd("customer", this.frm.doc.quotation_to == "Customer");
 		if (this.frm.doc.quotation_to == "Lead") {
 			this.frm.set_value("customer", null);
 			this.frm.set_value("contact_person", null);
+			
+			// to overwrite the customer_filter trigger from queries.js
+			$.each(["customer_address", "shipping_address_name"], 
+				function(i, opts) {
+					me.frm.set_query(opts, erpnext.queries["lead_filter"]);
+				}
+			);
 		}
 		else if (this.frm.doc.quotation_to == "Customer")
 			this.frm.set_value("lead", null);
@@ -100,6 +99,23 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			return this._super(party_field);
 		}
 	},
+	
+	lead: function() {
+		var me = this;
+		frappe.call({
+			method: "erpnext.selling.doctype.lead.lead.get_lead_details",
+			args: { "lead": this.frm.doc.lead },
+			callback: function(r) {
+				if(r.message) {
+					me.frm.updating_party_details = true;
+					me.frm.set_value(r.message);
+					me.frm.refresh();
+					me.frm.updating_party_details = false;
+					
+				}
+			}
+		})
+	}
 });
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
@@ -108,24 +124,6 @@ cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
 	return{	query: "erpnext.controllers.queries.lead_query" }
 }
 
-cur_frm.cscript.lead = function(doc, cdt, cdn) {
-	if(doc.lead) {
-		unhide_field('territory');
-		return cur_frm.call({
-			doc: cur_frm.doc,
-			method: "set_lead_defaults",
-			callback: function(r) {
-				if(!r.exc) {
-					cur_frm.refresh_fields();
-				}
-			}
-		});
-	}
-}
-
-
-// Make Sales Order
-// =====================================================================================
 cur_frm.cscript['Make Sales Order'] = function() {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
@@ -133,8 +131,6 @@ cur_frm.cscript['Make Sales Order'] = function() {
 	})
 }
 
-// declare order lost
-//-------------------------
 cur_frm.cscript['Declare Order Lost'] = function(){
 	var dialog = new frappe.ui.Dialog({
 		title: "Set as Lost",

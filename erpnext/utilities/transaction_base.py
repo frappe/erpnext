@@ -31,20 +31,6 @@ class TransactionBase(StatusUpdater):
 					break
 
 		return self._party_type_and_name
-				
-	def get_lead_defaults(self):
-		out = self.get_default_address_and_contact("lead")
-		
-		lead = frappe.conn.get_value("Lead", self.doc.lead, 
-			["territory", "company_name", "lead_name"], as_dict=True) or {}
-
-		out["territory"] = lead.get("territory")
-		out["customer_name"] = lead.get("company_name") or lead.get("lead_name")
-
-		return out
-		
-	def set_lead_defaults(self):
-		self.doc.fields.update(self.get_lead_defaults())
 
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")

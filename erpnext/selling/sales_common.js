@@ -111,6 +111,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.get_address_display(this.frm, "customer_address");
 	},
 	
+	shipping_address_name: function() {
+		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
+	},
+	
 	contact_person: function() {
 		erpnext.utils.get_contact_details(this.frm);
 	},
@@ -552,28 +556,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			if(df) df.label = label;
 		});
 	},
-	
-	shipping_address_name: function () {
-		var me = this;
-		if(this.frm.doc.shipping_address_name) {
-			frappe.model.with_doc("Address", this.frm.doc.shipping_address_name, function(name) {
-				var address = frappe.model.get_doc("Address", name);
-			
-				var out = $.map(["address_line1", "address_line2", "city"], 
-					function(f) { return address[f]; });
-
-				var state_pincode = $.map(["state", "pincode"], function(f) { return address[f]; }).join(" ");
-				if(state_pincode) out.push(state_pincode);
-			
-				if(address["country"]) out.push(address["country"]);
-			
-				out.concat($.map([["Phone:", address["phone"]], ["Fax:", address["fax"]]], 
-					function(val) { return val[1] ? val.join(" ") : null; }));
-			
-				me.frm.set_value("shipping_address", out.join("\n"));
-			});
-		}
-	}
 });
 
 // Help for Sales BOM items

@@ -34,7 +34,7 @@ def get_item_details(args):
 	args = frappe._dict(args)
 	
 	if not args.get("transaction_type"):
-		args.transaction_type = "selling" if args.get("customer") else "buying"
+		args.transaction_type = "buying" if args.get("supplier") else "selling"
 		
 	if not args.get("price_list"):
 		args.price_list = args.get("selling_price_list") or args.get("buying_price_list")

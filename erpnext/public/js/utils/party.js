@@ -36,22 +36,23 @@ erpnext.utils.get_party_details = function(frm, method, args) {
 	});
 }
 
-erpnext.utils.get_address_display = function(frm, address_field) {
+erpnext.utils.get_address_display = function(frm, address_field, display_field) {
 	if(frm.updating_party_details) return;
 	if(!address_field) {
 		if(frm.doc.customer) {
 			address_field = "customer_address";
-		} else {
+		} else if(frm.doc.supplier) {
 			address_field = "supplier_address";
-		}
+		} else return;
 	} 
+	if(!display_field) display_field = "address_display";
 	if(frm.doc[address_field]) {
 		frappe.call({
 			method: "erpnext.utilities.doctype.address.address.get_address_display",
-			args: {address: frm.doc[address_field] },
+			args: {"address_dict": frm.doc[address_field] },
 			callback: function(r) {
 				if(r.message)
-					frm.set_value("address_display", r.message)
+					frm.set_value(display_field, r.message)
 			}
 		})
 	}
@@ -60,7 +61,7 @@ erpnext.utils.get_address_display = function(frm, address_field) {
 erpnext.utils.get_contact_details = function(frm) {
 	if(frm.updating_party_details) return;
 	
-	if(frm.doc[address_field]) {
+	if(frm.doc["contact_person"]) {
 		frappe.call({
 			method: "erpnext.utilities.doctype.contact.contact.get_contact_details",
 			args: {contact: frm.doc.contact_person },
