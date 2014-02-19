@@ -31,9 +31,13 @@ $.extend(erpnext, {
 	add_applicable_territory: function() {
 		if(cur_frm.doc.__islocal && 
 			frappe.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name).length === 1) {
-				var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory", 
-					"valid_for_territories");
-				territory.territory = frappe.defaults.get_default("territory");
+				var default_territory = frappe.defaults.get_default("territory");
+				if(default_territory) {
+					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory", 
+						"valid_for_territories");
+					territory.territory = default_territory;
+				}
+				
 		}
 	},
 	
