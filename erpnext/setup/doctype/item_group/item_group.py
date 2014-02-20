@@ -11,6 +11,11 @@ class DocType(DocTypeNestedSet):
 		self.doc = doc
 		self.doclist = doclist
 		self.nsm_parent_field = 'parent_item_group'
+	
+	def validate(self):
+		if not self.doc.parent_website_sitemap:
+			self.doc.parent_website_sitemap = frappe.get_website_sitemap("Item Group", 
+				self.doc.parent_item_group)
 		
 	def on_update(self):
 		DocTypeNestedSet.on_update(self)

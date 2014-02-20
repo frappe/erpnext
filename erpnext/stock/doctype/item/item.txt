@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2014-02-19 11:04:00", 
+  "modified": "2014-02-20 18:27:01", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -31,6 +31,7 @@
  }, 
  {
   "cancel": 0, 
+  "delete": 0, 
   "doctype": "DocPerm", 
   "email": 1, 
   "name": "__common__", 
@@ -271,7 +272,7 @@
   "doctype": "DocField", 
   "fieldname": "is_asset_item", 
   "fieldtype": "Select", 
-  "label": "Is Fixed Asset Item", 
+  "label": "Is Asset Item", 
   "oldfieldname": "is_asset_item", 
   "oldfieldtype": "Select", 
   "options": "Yes\nNo", 
@@ -848,8 +849,14 @@
   "read_only": 0
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "parent_website_sitemap", 
+  "fieldtype": "Link", 
+  "label": "Parent Website Sitemap", 
+  "options": "Website Sitemap"
+ }, 
+ {
   "create": 1, 
-  "delete": 1, 
   "doctype": "DocPerm", 
   "import": 1, 
   "role": "Material Master Manager", 
@@ -858,7 +865,6 @@
  {
   "amend": 0, 
   "create": 0, 
-  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Material Manager", 
   "write": 0
@@ -866,7 +872,6 @@
  {
   "amend": 0, 
   "create": 0, 
-  "delete": 0, 
   "doctype": "DocPerm", 
   "role": "Material User", 
   "write": 0
