@@ -11,7 +11,6 @@ class DocType:
 		self.doc, self.doclist = doc, doclist
 
 	def validate(self):
-		self.validate_leave_period()
 		self.validate_new_leaves_allocated_value()
 		self.check_existing_leave_allocation()
 		self.validate_new_leaves_allocated()
@@ -25,10 +24,6 @@ class DocType:
 		
 	def on_cancel(self):
 		self.check_for_leave_application()
-
-	def validate_leave_period(self):
-		from erpnext.hr.utils import validate_period
-		validate_period(self.doc.period)
 
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""

@@ -2,11 +2,11 @@
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
-import webnotes
-from webnotes import throw, msgprint, _
-from webnotes.utils import getdate, add_days
+import frappe
+from frappe import throw, msgprint, _
+from frappe.utils import getdate, add_days
 
-class DuplicatePeriodError(webnotes.DuplicateEntryError): pass
+class DuplicatePeriodError(frappe.DuplicateEntryError): pass
 
 class DocType:
 	def __init__(self, d, dl):
@@ -24,7 +24,7 @@ class DocType:
 			throw(_("From Date cannot be greater than To Date."))
 
 	def validate_duplicate_period(self):
-		for period, from_date, to_date in webnotes.conn.sql("""select name, from_date, to_date 
+		for period, from_date, to_date in frappe.conn.sql("""select name, from_date, to_date 
 			from `tabPeriod` where name!=%s and ifnull(enabled, '')=1""", self.doc.name):
 			if from_date == getdate(self.doc.from_date) and to_date == getdate(self.doc.to_date):
 				throw("{msg}: {period}".format(**{
@@ -33,7 +33,7 @@ class DocType:
 				}), exc=DuplicatePeriodError)
 
 	def validate_period_overlapping(self):
-		for period, from_date, to_date in webnotes.conn.sql("""select name, from_date, to_date 
+		for period, from_date, to_date in frappe.conn.sql("""select name, from_date, to_date 
 			from `tabPeriod` where name!=%s and ifnull(enabled, '')=1""", self.doc.name):
 			for x in range((to_date - from_date).days + 1):
 				period_date = add_days(from_date, x)

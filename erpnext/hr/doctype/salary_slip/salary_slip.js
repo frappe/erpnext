@@ -8,11 +8,11 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		if(!doc.month) {
 			var today = new Date();
 			month = (today.getMonth() + 01).toString();
-			if(month.length > 1) doc.month = month;
-			else doc.month = '0' + month;
+			if(month.length > 1)
+				cur_frm.set_value("month", month);
+			else
+				cur_frm.set_value("month", '0' + month);
 		}
-		refresh_field('month');
-		cur_frm.cscript.month();
 	}
 }
 
@@ -25,10 +25,10 @@ cur_frm.cscript.employee = function(doc, dt, dn) {
 	});
 }
 
-cur_frm.cscript.month = cur_frm.cscript.employee;
+cur_frm.cscript.to_date = cur_frm.doc.from_date = cur_frm.cscript.employee;
 
 cur_frm.cscript.leave_without_pay = function(doc, dt, dn) {
-	if (doc.employee && doc.month) {
+	if (doc.employee && doc.from_date && doc.to_date) {
 		return $c_obj(make_doclist(doc.doctype, doc.name), 'get_leave_details', doc.leave_without_pay, function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
@@ -108,14 +108,14 @@ cur_frm.cscript.validate = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.month = function(doc, dt, dn) {
-	if (cur_frm.doc.month) {
-		cur_frm.set_value("from_date", wn.datetime.month_start(null, cur_frm.doc.month));
-		cur_frm.set_value("to_date", wn.datetime.month_end(null, cur_frm.doc.month));
+	if (doc.month) {
+		cur_frm.set_value("from_date", frappe.datetime.month_start(null, doc.month));
+		cur_frm.set_value("to_date", frappe.datetime.month_end(null, doc.month));
 	}
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc, cdt, cdn) {
 	return {
 		query: "erpnext.controllers.queries.employee_query"
-	}		
+	}
 }

@@ -9,6 +9,7 @@ from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint, throw, _
 from erpnext.setup.utils import get_company_currency
+from erpnext.hr.utils import get_period
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -18,7 +19,7 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 
 	def autoname(self):
-		self.doc.name = make_autoname('Sal Slip/' + self.doc.employee + '/.#####') 
+		self.doc.name = make_autoname('Sal Slip/' + self.doc.employee + '/.#####')
 
 	def get_emp_and_leave_details(self):
 		if self.doc.employee:
@@ -49,36 +50,34 @@ class DocType(TransactionBase):
 			self.doc.pf_no = emp.pf_number
 
 	def get_leave_details(self, lwp=None):
-		if not self.doc.month:
-			self.doc.month = "%02d" % getdate(nowdate()).month
+		if not self.doc.from_date and not self.doc.to_date:
+			throw(_("Please enter From Date and To Date"))
 
-		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
-		holidays = self.get_holidays_for_employee(m)
+		period_days = (getdate(self.doc.to_date) - getdate(self.doc.from_date)).days + 1
+		holidays = self.get_holidays_for_employee(self.doc.from_date, self.doc.to_date)
 
 		if not cint(frappe.conn.get_value("HR Settings", "HR Settings",
 			"include_holidays_in_total_working_days")):
-				m["month_days"] -= len(holidays)
-				if m["month_days"] < 0:
-					throw(_("Bummer! There are more holidays than working days this month."))
+				period_days -= len(holidays)
+				if period_days < 0:
+					throw(_("Bummer! There are more holidays than working days this period."))
 
 		if not lwp:
-			lwp = self.calculate_lwp(holidays, m)
-		self.doc.total_days_in_month = m['month_days']
+			lwp = self.calculate_lwp(holidays, period_days)
+		self.doc.total_days_in_month = period_days
 		self.doc.leave_without_pay = lwp
-		payment_days = flt(self.get_payment_days(m)) - flt(lwp)
+		payment_days = flt(self.get_payment_days(period_days)) - flt(lwp)
 		self.doc.payment_days = payment_days > 0 and payment_days or 0
 
-	def get_payment_days(self, m):
-		payment_days = m['month_days']
-
+	def get_payment_days(self, payment_days):
 		emp = frappe.conn.sql("""select date_of_joining, relieving_date from `tabEmployee` 
 			where name=%s""", self.doc.employee, as_dict=1)[0]
 
 		if emp['relieving_date']:
-			if getdate(emp['relieving_date']) > m['month_start_date'] and \
-				getdate(emp['relieving_date']) < m['month_end_date']:
+			if getdate(emp['relieving_date']) > self.doc.from_date and \
+				getdate(emp['relieving_date']) < self.doc.to_date:
 					payment_days = getdate(emp['relieving_date']).day
-			elif getdate(emp['relieving_date']) < m['month_start_date']:
+			elif getdate(emp['relieving_date']) < self.doc.from_date:
 				throw("{emp} {rel_date}. {status}".format(**{
 					"emp": _("Relieving Date of employee is"),
 					"rel_date": cstr(emp['relieving_date']),
@@ -86,36 +85,36 @@ class DocType(TransactionBase):
 				}))
 
 		if emp['date_of_joining']:
-			if getdate(emp['date_of_joining']) > m['month_start_date'] and \
-				getdate(emp['date_of_joining']) < m['month_end_date']:
+			if getdate(emp['date_of_joining']) > self.doc.from_date and \
+				getdate(emp['date_of_joining']) < self.doc.to_date:
 					payment_days = payment_days - getdate(emp['date_of_joining']).day + 1
-			elif getdate(emp['date_of_joining']) > m['month_end_date']:
+			elif getdate(emp['date_of_joining']) > self.doc.from_date:
 				payment_days = 0
 
 		return payment_days
 
-	def get_holidays_for_employee(self, m):
+	def get_holidays_for_employee(self, from_date, to_date):
 		holidays = frappe.conn.sql("""select h.holiday_date 
 			from `tabHoliday` h, `tabEmployee` emp 
 			where h.parent=emp.holiday_list and emp.name=%s 
 			and h.holiday_date between %s and %s""", 
-			(self.doc.employee, m['month_start_date'], m['month_end_date']))
+			(self.doc.employee, from_date, to_date))
 
+		period = get_period(self.doc.from_date, self.doc.to_date)[0]
 		if not holidays:
 			holidays = frappe.conn.sql("""select h.holiday_date 
 				from `tabHoliday` h, `tabHoliday List` hl 
 				where h.parent=hl.name and ifnull(hl.is_default, 0)=1 
 				and hl.period=%s
-				and h.holiday_date between %s and %s""", (self.doc.fiscal_year, 
-				m['month_start_date'], m['month_end_date']))
+				and h.holiday_date between %s and %s""", (period, from_date, to_date))
 
 		holidays = [cstr(i[0]) for i in holidays]
 		return holidays
 
-	def calculate_lwp(self, holidays, m):
+	def calculate_lwp(self, holidays, period_days):
 		lwp = 0
-		for d in range(m['month_days']):
-			dt = add_days(cstr(m['month_start_date']), d)
+		for d in range(period_days):
+			dt = add_days(cstr(self.doc.from_date), d)
 			if dt not in holidays:
 				leave = frappe.conn.sql("""select la.name, la.half_day 
 					from `tabLeave Application` la, `tabLeave Type` lt 
@@ -127,22 +126,27 @@ class DocType(TransactionBase):
 		return lwp
 
 	def check_existing(self):
-		ret_exist = frappe.conn.sql("""select name from `tabSalary Slip` 
-			where month=%s and docstatus!=2 and employee=%s and name!=%s""", 
-			(self.doc.month, self.doc.employee, self.doc.name))
+		ret_exist = frappe.conn.sql("""select name, from_date, to_date from `tabSalary Slip` 
+			where and docstatus!=2 and employee=%s and name!=%s and 
+			(from_date not between %s and %s) and 
+			(to_date not between %s and %s)""", 
+			(self.doc.from_date, self.doc.to_date, self.doc.from_date, self.doc.to_date, 
+			self.doc.employee, self.doc.name), as_dict=1)
 
 		if ret_exist:
 			self.doc.employee = ''
-			throw("{slip}: {emp} {already}".format(**{
-				"slip": _("Salary Slip of Employee"),
+			throw("{slip}: {emp} {already}: {from_date} to {to_date}".format(**{
+				"slip": _("Salary Slip for Employee"),
 				"emp": self.doc.employee,
-				"already": _("already created for this month")
+				"already": _("already created for date range"),
+				"from_date": ret_exist.from_date,
+				"to_date": ret_exist.to_date
 			}))
 
 	def validate(self):
 		from frappe.utils import money_in_words
 		self.check_existing()
-		
+
 		if not (len(self.doclist.get({"parentfield": "earning_details"})) or 
 			len(self.doclist.get({"parentfield": "deduction_details"}))):
 				self.get_emp_and_leave_details()
@@ -195,7 +199,7 @@ class DocType(TransactionBase):
 
 		receiver = frappe.conn.get_value("Employee", self.doc.employee, "company_email")
 		if receiver:
-			subj = 'Salary Slip - ' + cstr(self.doc.month) + ', ' + getdate(self.doc.from_date).year
+			subj = 'Salary Slip: ' + cstr(self.doc.from_date) + ' - ' + cstr(self.doc.to_date)
 			earn_ret = frappe.conn.sql("""select e_type, e_modified_amount from 
 				`tabSalary Slip Earning` where parent = %s""", self.doc.name)
 			ded_ret = frappe.conn.sql("""select d_type, d_modified_amount from 
@@ -238,8 +242,8 @@ class DocType(TransactionBase):
 					<td width = "50%%"><b>Employee Name : %s</b></td>
 				</tr>
 				<tr>
-					<td width = "50%%">Month : %s</td>
-					<td width = "50%%">Fiscal Year : %s</td>
+					<td width = "50%%">From Date: %s</td>
+					<td width = "50%%">To Date: %s</td>
 				</tr>
 				<tr>
 					<td width = "50%%">Department : %s</td>
@@ -287,7 +291,7 @@ class DocType(TransactionBase):
 					<td colspan = '3' width = '50%%'>%s</b></td>
 				</tr>
 			</table></div>''' % (cstr(letter_head), cstr(self.doc.employee), 
-				cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), 
+				cstr(self.doc.employee_name), cstr(self.doc.from_date), cstr(self.doc.to_date), 
 				cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), 
 				cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), 
 				cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, 

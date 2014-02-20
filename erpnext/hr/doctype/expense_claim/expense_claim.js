@@ -91,7 +91,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			cur_frm.savesubmit();
 
-		if(doc.docstatus==1 && wn.model.can_create("Journal Voucher"))
+		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher"))
 			cur_frm.add_custom_button(frappe._("Make Bank Voucher"), cur_frm.cscript.make_bank_voucher);
 	}
 }

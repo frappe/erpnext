@@ -38,7 +38,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				cur_frm.set_intro(frappe._("You are the Leave Approver for this record. Please Update the 'Status' and Save"));
 				cur_frm.toggle_enable("status", true);
 			} else {
-				cur_frm.set_intro(frappe._("This Leave Application is pending approval. Only the Leave Apporver can update status."));
+				cur_frm.set_intro(frappe._("This Leave Application is pending approval. Only the Leave Approver can update status."));
 				cur_frm.toggle_enable("status", false);
 				if(!doc.__islocal)
 					cur_frm.frm_head.appframe.set_title_right("");
@@ -85,7 +85,7 @@ cur_frm.cscript.to_date = function(doc, dt, dn) {
 cur_frm.cscript.get_leave_balance = function(doc, dt, dn) {
 	if(doc.docstatus==0 && doc.employee && doc.leave_type && doc.period) {
 		return cur_frm.call({
-			method: "get_leave_balance",
+			method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_balance",
 			args: {
 				employee: doc.employee,
 				period: doc.period,
@@ -98,14 +98,17 @@ cur_frm.cscript.get_leave_balance = function(doc, dt, dn) {
 cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 	if (doc.from_date && doc.to_date) {
 		if (cint(doc.half_day) == 1)
-			set_multiple(dt, dn, {total_leave_days:0.5});
-		else
-			return get_server_fields('get_total_leave_days', '', '', doc, dt, dn, 1);
+			set_multiple(dt, dn, {total_leave_days: 0.5});
+		else {
+			return cur_frm.call({
+				method: "erpnext.hr.doctype.leave_application.leave_application.get_total_leave_days"
+			});
+		}
 	}
 }
 
 cur_frm.fields_dict.employee.get_query = function() {
 	return {
-		query: "hr.doctype.leave_application.leave_application.query_for_permitted_employees"
+		query: "erpnext.hr.doctype.leave_application.leave_application.query_for_permitted_employees"
 	}
 }

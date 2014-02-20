@@ -8,6 +8,17 @@ var display_activity_log = function(msg) {
 		'</div>' + msg + '</div>';
 }
 
+cur_frm.cscript.onload = function() {
+	if(!cur_frm.doc.month) {
+		var today = new Date();
+		month = (today.getMonth() + 01).toString();
+		if(month.length > 1)
+			cur_frm.set_value("month", month);
+		else
+			cur_frm.set_value("month", '0' + month);
+	}
+}
+
 cur_frm.cscript.refresh = function() {
 	cur_frm.set_intro(frappe._("Generate, submit & mail multiple salary slips based on selected criteria for employee."));
 }
@@ -21,7 +32,8 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
-	var check = confirm(frappe._("Do you really want to Submit all Salary Slip for month : ") + doc.month + frappe._(" and fiscal year : ") + doc.fiscal_year);
+	var check = confirm(frappe._("Do you really want to Submit all Salary Slip.\nFrom Date: ") + 
+		doc.from_date + frappe._("\nTo Date: ") + doc.to_date);
 	if(check) {
 		var callback = function(r, rt) {
 			if (r.message)
@@ -32,10 +44,10 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.make_bank_voucher = function(doc, cdt, cdn) {
-	if(doc.company && doc.month && doc.from_date && doc.from_date)
+	if(doc.company && doc.from_date && doc.from_date)
 		cur_frm.cscript.make_jv(doc, cdt, cdn);
 	else
-		msgprint(frappe._("Company, Month, From Date & To Date is mandatory"));
+		msgprint(frappe._("Company, From Date & To Date is mandatory"));
 }
 
 cur_frm.cscript.make_jv = function(doc, dt, dn) {
@@ -43,9 +55,8 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		var jv = frappe.model.make_new_doc_and_get_name('Journal Voucher');
 		jv = locals['Journal Voucher'][jv];
 		jv.voucher_type = 'Bank Voucher';
-		jv.user_remark = frappe._('Payment of salary for the month: ') + doc.month + 
-			frappe._(' and fiscal year: ') + doc.fiscal_year;
-		jv.fiscal_year = doc.fiscal_year;
+		jv.user_remark = frappe._('Payment of salary.\nFrom Date: ') + doc.from_date + 
+			frappe._('\nTo Date: ') + doc.to_date;
 		jv.company = doc.company;
 		jv.posting_date = dateutil.obj_to_str(new Date());
 
@@ -61,4 +72,11 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		loaddoc('Journal Voucher', jv.name);
 	}
 	return $c_obj(make_doclist(dt, dn), 'get_acc_details', '', call_back);
+}
+
+cur_frm.cscript.month = function(doc, dt, dn) {
+	if (cur_frm.doc.month) {
+		cur_frm.set_value("from_date", frappe.datetime.month_start(null, cur_frm.doc.month));
+		cur_frm.set_value("to_date", frappe.datetime.month_end(null, cur_frm.doc.month));
+	}
 }

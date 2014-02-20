@@ -39,7 +39,7 @@ class DocType:
 
 		for fiscal_year, ysd, yed in year_start_end_dates:
 			if (getdate(self.doc.year_start_date) == ysd and getdate(self.doc.year_end_date) == yed) \
-				and (not webnotes.flags.in_test):
+				and (not frappe.flags.in_test):
 					throw("{msg}: {year}".format(**{
 						"msg": _("Year Start Date and Year End Date are already set in Fiscal Year"),
 						"year": fiscal_year

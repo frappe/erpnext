@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, throw, _
 
-class PeriodError(webnotes.ValidationError): pass
+class PeriodError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_leave_approver_list():
@@ -25,29 +25,29 @@ def get_expense_approver_list():
 
 	return roles
 
-def get_period(date):
-	return webnotes.conn.sql("""select name, from_date, to_date from `tabPeriod` 
-		where from_date<=%s and to_date>=%s""", (date, date))[0]
+def get_period(from_date, to_date):
+	period = frappe.conn.sql_list("""select name from `tabPeriod` 
+		where (%s between from_date and to_date) and 
+		(%s between from_date and to_date)""", (from_date, to_date))
 
-def validate_period(date, period, label="Date"):
-	cond = ""
-	if period:
-		cond = "name = '%s'" % period
-	else:
-		cond = "'%s' >= from_date and '%s' <= to_date" % (date, date)
+	if not period:
+		throw(_("{msg}: {from_date} to {to_date}").format(**{
+			"msg": _("No Period found for date range"),
+			"from_date": from_date,
+			"to_date": to_date
+		}))
 
-	period_list = webnotes.conn.sql("""select name, from_date, to_date 
-		from `tabPeriod` where %s""", cond)
+	return period
 
-	if not period_list:
-		throw("{msg}: {date}".format(**{
-			"msg": _("Period does not exist for date"), 
-			"date": date
+def validate_period(period, from_date, to_date, label="Date"):
+	pr = frappe.conn.sql("""select name, from_date, to_date 
+		from `tabPeriod` where name=%s and (%s between from_date and to_date) and 
+		(%s between from_date and to_date)""", (period, from_date, to_date))
+
+	if not pr:
+		throw("From Date: {from_date} and To Date: {to_date} {not}: {period}".format(**{
+			"from_date": from_date, 
+			"to_date": to_date,
+			"not": _("not within Period"),
+			"period": period
 		}), exc=PeriodError)
-	elif period == period_list:
-		throw("{label}: {date} {not}: {period}".format(**{
-				"label": label,
-				"date": formatdate(date),
-				"not": _("not within Period"),
-				"period": period
-			}))

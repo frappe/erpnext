@@ -22,8 +22,11 @@ cur_frm.cscript.carry_forwarded_leaves = function(doc, dt, dn) {
 cur_frm.cscript.new_leaves_allocated = cur_frm.cscript.carry_forwarded_leaves;
 
 var calculate_total_leaves_allocated = function(doc, dt, dn) {
-	if(cint(doc.carry_forward) == 1 && doc.leave_type && doc.period && doc.employee)
-		return get_server_fields('get_carry_forwarded_leaves','','', doc, dt, dn, 1);
+	if(cint(doc.carry_forward) == 1 && doc.leave_type && doc.period && doc.employee) {
+		return cur_frm.call({
+			mehtod: "erpnext.hr.doctype.leave_allocation.leave_alloacation.get_carry_forwarded_leaves"
+		});
+	}
 	else if(cint(doc.carry_forward) == 0)
 		set_multiple(dt, dn, {carry_forwarded_leaves : 0, total_leaves_allocated : flt(doc.new_leaves_allocated)});
 }

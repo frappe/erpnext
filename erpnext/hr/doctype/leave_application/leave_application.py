@@ -8,10 +8,10 @@ from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_ur
 from frappe import msgprint, throw, _
 from frappe.model.controller import DocListController
 
-class LeaveDayBlockedError(webnotes.ValidationError): pass
-class OverlapError(webnotes.ValidationError): pass
-class InvalidLeaveApproverError(webnotes.ValidationError): pass
-class LeaveApproverIdentityError(webnotes.ValidationError): pass
+class LeaveDayBlockedError(frappe.ValidationError): pass
+class OverlapError(frappe.ValidationError): pass
+class InvalidLeaveApproverError(frappe.ValidationError): pass
+class LeaveApproverIdentityError(frappe.ValidationError): pass
 
 class DocType(DocListController):
 	def setup(self):
@@ -22,6 +22,7 @@ class DocType(DocListController):
 
 	def validate(self):
 		self.validate_to_date()
+		self.validate_leave_period()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
 		self.validate_max_days()
@@ -79,7 +80,7 @@ class DocType(DocListController):
 		if not tot_hol:
 			tot_hol = frappe.conn.sql("""select count(*) from `tabHoliday` h, `tabHoliday List` hl 
 				where h.parent = hl.name and h.holiday_date between %s and %s
-				and ifnull(hl.is_default,0) = 1 and hl.period = %s""",
+				and ifnull(hl.is_default,0)=1 and hl.period=%s""",
 				(self.doc.from_date, self.doc.to_date, self.doc.period))
 
 		return tot_hol and flt(tot_hol[0][0]) or 0
@@ -96,9 +97,12 @@ class DocType(DocListController):
 		return ret
 
 	def validate_to_date(self):
-		if self.doc.from_date and self.doc.to_date and \
-				(getdate(self.doc.to_date) < getdate(self.doc.from_date)):
-			throw(_("To date cannot be before from date"))
+		if getdate(self.doc.to_date) < getdate(self.doc.from_date):
+			throw(_("To Date cannot be before From Date"))
+
+	def validate_leave_period(self):
+		from erpnext.hr.utils import validate_period
+		validate_period(self.doc.period, self.doc.from_date, self.doc.to_date)
 
 	def validate_balance_leaves(self):
 		if self.doc.from_date and self.doc.to_date:
@@ -119,7 +123,7 @@ class DocType(DocListController):
 					throw("{msg}: {leave_type}".format(**{
 						"msg": _("There is not enough leave balance for Leave Type"),
 						"leave_type": self.doc.leave_type
-					}), exc=not(webnotes.conn.get_value("Leave Type", self.doc.leave_type, "allow_negative") or None))
+					}), exc=not(frappe.conn.get_value("Leave Type", self.doc.leave_type, "allow_negative") or None))
 
 	def validate_leave_overlap(self):
 		if not self.doc.name:
@@ -217,7 +221,7 @@ class DocType(DocListController):
 		post({"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.doc.follow_via_email)})
 
-@webnotes.whitelist()
+@frappe.whitelist()
 def get_leave_balance(employee, leave_type, period):	
 	leave_all = frappe.conn.sql("""select total_leaves_allocated 
 		from `tabLeave Allocation` where employee=%s and leave_type=%s

@@ -58,37 +58,41 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new erpnext.support.MaintenanceVisit({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
-	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
-	if(doc.__islocal) set_multiple(dt,dn,{mntc_date:get_today()});
+	if(!doc.status) set_multiple(dt, dn, {status:'Draft'});
+	if(doc.__islocal) set_multiple(dt, dn, {mntc_date:get_today()});
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
-	return{
-    	filters:{'customer': doc.customer}
-  	}
-}
-
-cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
-  	return{
-    	filters:{'customer': doc.customer}
-  	}
-}
-
-cur_frm.fields_dict['maintenance_visit_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return{
-    	filters:{ 'is_service_item': "Yes"}
-  	}
-}
-
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var fname = cur_frm.cscript.fname;
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		return get_server_fields('get_item_details',d.item_code, 'maintenance_visit_details',doc,cdt,cdn,1);
+	return {
+		filters: { 'customer': doc.customer }
 	}
 }
 
+cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
+	return {
+		filters: { 'customer': doc.customer }
+	}
+}
 
-cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
-	return {query: "erpnext.controllers.queries.customer_query" }
+cur_frm.fields_dict['maintenance_visit_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
+	return {
+		filters: { 'is_service_item': "Yes" }
+	}
+}
+
+cur_frm.cscript.item_code = function(doc, cdt, cdn) {
+	var item = frappe.model.get_doc(cdt, cdn);
+	if (item.item_code) {
+		return cur_frm.call({
+			method: "erpnext.support.doctype.maintenance_visit.maintenance_visit.get_item_details",
+			child: item,
+			args: {
+				"item_code": item.item_code
+			}
+		});
+	}
+}
+
+cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
+	return { query: "erpnext.controllers.queries.customer_query" }
 }

@@ -65,5 +65,5 @@ class DocType:
 		self.doclist = self.doc.clear_table(self.doclist, 'holiday_list_details')
 
 	def update_default_holiday_list(self):
-		webnotes.conn.sql("""update `tabHoliday List` set is_default=0 
+		frappe.conn.sql("""update `tabHoliday List` set is_default=0 
 			where ifnull(is_default, 0)=1 and period=%s""", (self.doc.period,))

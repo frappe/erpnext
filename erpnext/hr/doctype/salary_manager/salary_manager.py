@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 from frappe.model.code import get_obj
 from frappe import msgprint, throw, _
 
@@ -48,31 +48,13 @@ class DocType:
 		return cond
 
 	def check_mandatory(self):
-		for f in ['company', 'month', 'from_date', 'to_date']:
+		for f in ['company', 'from_date', 'to_date']:
 			if not self.doc.fields[f]:
 				throw("{select} {field} {proceed}".format(**{
 					"select": _("Please select"),
 					"field": f.replace("_", " ").title(),
 					"proceed": _("to proceed")
 				}))
-
-	def get_month_details(self, year, month):
-		ysd = frappe.conn.sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
-		if ysd:
-			from dateutil.relativedelta import relativedelta
-			import calendar, datetime
-			diff_mnt = cint(month)-cint(ysd.month)
-			if diff_mnt<0:
-				diff_mnt = 12-int(ysd.month)+cint(month)
-			msd = ysd + relativedelta(months=diff_mnt) # month start date
-			month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
-			med = datetime.date(msd.year, cint(month), month_days) # month end date
-			return {
-				'year': msd.year, 
-				'month_start_date': msd, 
-				'month_end_date': med, 
-				'month_days': month_days
-			}
 
 	def create_sal_slip(self):
 		"""Creates salary slip for selected employees if already not created"""
@@ -81,13 +63,15 @@ class DocType:
 		ss_list = []
 		for emp in emp_list:
 			if not frappe.conn.sql("""select name from `tabSalary Slip` 
-					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
-					""", (emp[0], self.doc.month, self.doc.fiscal_year, self.doc.company)):
+					where docstatus!=2 and employee=%s and company = %s 
+					and 
+					""", (emp[0], self.doc.company)):
 				ss = frappe.bean({
 					"doctype": "Salary Slip",
-					"fiscal_year": self.doc.fiscal_year,
 					"employee": emp[0],
 					"month": self.doc.month,
+					"from_date": self.doc.from_date,
+					"to_date": self.doc.to_date,
 					"email_check": self.doc.send_email,
 					"company": self.doc.company,
 				})
@@ -168,7 +152,7 @@ class DocType:
 			Get total salary amount from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		tot = webnotes.conn.sql("""select sum(rounded_total) from `tabSalary Slip` 
+		tot = frappe.conn.sql("""select sum(rounded_total) from `tabSalary Slip` 
 			where docstatus=1 and month=%s and fiscal_year=%s %s""", (self.doc.month, 
 			self.doc.fiscal_year, cond))
 
