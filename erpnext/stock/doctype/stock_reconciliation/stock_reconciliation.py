@@ -9,7 +9,6 @@ from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.utils import update_bin
 
 class DocType(StockController):
 	def setup(self):
@@ -42,18 +41,20 @@ class DocType(StockController):
 				raise_exception=1)
 		
 		# remove the help part and save the json
+		head_row_no = 0
 		if data.index(self.head_row) != 0:
-			data = data[data.index(self.head_row):]
+			head_row_no = data.index(self.head_row)
+			data = data[head_row_no:]
 			self.doc.reconciliation_json = json.dumps(data)
 				
 		def _get_msg(row_num, msg):
-			return _("Row # ") + ("%d: " % (row_num+2)) + _(msg)
+			return _("Row # ") + ("%d: " % (row_num+head_row_no+2)) + _(msg)
 		
 		self.validation_messages = []
 		item_warehouse_combinations = []
 		
 		# validate no of rows
-		rows = data[data.index(self.head_row)+1:]
+		rows = data[1:]
 		if len(rows) > 100:
 			msgprint(_("""Sorry! We can only allow upto 100 rows for Stock Reconciliation."""),
 				raise_exception=True)
@@ -64,7 +65,7 @@ class DocType(StockController):
 			else:
 				item_warehouse_combinations.append([row[0], row[1]])
 			
-			self.validate_item(row[0], row_num)
+			self.validate_item(row[0], row_num+head_row_no+2)
 			# note: warehouse will be validated through link validation
 			
 			# if both not specified
@@ -113,7 +114,7 @@ class DocType(StockController):
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
 				
 		except Exception, e:
-			self.validation_messages.append(_("Row # ") + ("%d: " % (row_num+2)) + cstr(e))
+			self.validation_messages.append(_("Row # ") + ("%d: " % (row_num)) + cstr(e))
 			
 	def insert_stock_ledger_entries(self):
 		"""	find difference between current and expected entries
