@@ -7,8 +7,7 @@ def execute():
 	records = webnotes.conn.sql("""
 		select against_voucher_type, against_voucher, 
 			sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) as outstanding from `tabGL Entry`
-		where ifnull(is_cancelled, 'No') = 'No' 
-		and against_voucher_type in ("Sales Invoice", "Purchase Invoice")
+		where against_voucher_type in ("Sales Invoice", "Purchase Invoice")
 		and ifnull(against_voucher, '') != ''
 		group by against_voucher_type, against_voucher""", as_dict=1)
 	for r in records:
