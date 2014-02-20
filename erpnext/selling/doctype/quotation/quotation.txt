@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:08", 
   "docstatus": 0, 
-  "modified": "2014-01-31 19:42:32", 
+  "modified": "2014-01-31 19:43:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -333,7 +333,7 @@
   "oldfieldtype": "Table", 
   "options": "Quotation Item", 
   "read_only": 0, 
-  "reqd": 1, 
+  "reqd": 0, 
   "width": "40px"
  }, 
  {
