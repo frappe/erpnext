@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, validate_email_add, cint, extract_email_id
-from frappe import session, msgprint
+from frappe.utils import cstr, validate_email_add, cint
+from frappe import session
 
 	
 from erpnext.controllers.selling_controller import SellingController
@@ -122,3 +122,26 @@ def make_opportunity(source_name, target_doclist=None):
 		}}, target_doclist)
 		
 	return [d if isinstance(d, dict) else d.fields for d in doclist]
+	
+@frappe.whitelist()
+def get_lead_details(lead):
+	if not lead: return {}
+	
+	from erpnext.accounts.party import set_address_details
+	out = frappe._dict()
+	
+	lead_bean = frappe.bean("Lead", lead)
+	lead = lead_bean.doc
+		
+	out.update({
+		"territory": lead.territory,
+		"customer_name": lead.company_name or lead.lead_name,
+		"contact_display": lead.lead_name,
+		"contact_email": lead.email_id,
+		"contact_mobile": lead.mobile_no,
+		"contact_phone": lead.phone,
+	})
+	
+	set_address_details(out, lead, "Lead")
+
+	return out

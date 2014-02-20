@@ -158,7 +158,7 @@ def _make_customer(source_name, ignore_permissions=False):
 			try:
 				customer.insert()
 				return customer
-			except NameError, e:
+			except NameError:
 				if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
 					customer.run_method("autoname")
 					customer.doc.name += "-" + lead_name

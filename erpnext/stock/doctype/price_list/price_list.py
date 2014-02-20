@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _, throw
+from frappe import _, throw
 from frappe.utils import cint
 from frappe.model.controller import DocListController
 import frappe.defaults
@@ -42,3 +42,15 @@ class DocType(DocListController):
 		frappe.conn.sql("""update `tabItem Price` set currency=%s, 
 			buying=%s, selling=%s, modified=NOW() where price_list=%s""", 
 			(self.doc.currency, cint(self.doc.buying), cint(self.doc.selling), self.doc.name))
+
+	def on_trash(self):
+		def _update_default_price_list(module):
+			b = frappe.bean(module + " Settings")
+			price_list_fieldname = module.lower() + "_price_list"
+
+			if self.doc.name == b.doc.fields[price_list_fieldname]:
+				b.doc.fields[price_list_fieldname] = None
+				b.save()
+		
+		for module in ["Selling", "Buying"]:
+			_update_default_price_list(module)

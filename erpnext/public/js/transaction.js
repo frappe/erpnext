@@ -503,7 +503,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var me = this;
 		var valid = true;
 		
-		$.each(["company", "customer", "supplier"], function(i, fieldname) {
+		$.each(["company", "customer"], function(i, fieldname) {
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname)) {
 				if (!me.frm.doc[fieldname]) {
 					msgprint(frappe._("Please specify") + ": " + 

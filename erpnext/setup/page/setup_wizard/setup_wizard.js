@@ -371,11 +371,11 @@ frappe.wiz.WizardSlide = Class.extend({
 		this.$wrapper = $(repl('<div class="panel panel-default">\
 			<div class="panel-heading">\
 				<div class="panel-title row">\
-					<div class="col-sm-8">\
-						<i class="%(icon)s text-muted"></i> %(title)s</div>\
-					<div class="col-sm-4 text-right"><a class="prev-btn hide">Previous</a> \
-						<a class="next-btn hide">Next</a> \
-						<a class="complete-btn hide"><b>Complete Setup</b></a>\
+					<div class="col-sm-8"><h3 style="margin: 0px;">\
+						<i class="%(icon)s text-muted"></i> %(title)s</h3></div>\
+					<div class="col-sm-4 text-right"><a class="prev-btn hide btn btn-default">Previous</a> \
+						<a class="next-btn hide btn btn-primary">Next</a> \
+						<a class="complete-btn hide btn btn-primary"><b>Complete Setup</b></a>\
 					</div>\
 				</div>\
 			</div>\

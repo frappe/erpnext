@@ -2,7 +2,7 @@
  {
   "creation": "2013-08-02 13:45:23", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:14", 
+  "modified": "2014-02-19 17:40:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -47,6 +47,7 @@
   "label": "Employee Settings"
  }, 
  {
+  "default": "Naming Series", 
   "description": "Employee record is created using selected field. ", 
   "doctype": "DocField", 
   "fieldname": "emp_created_by", 

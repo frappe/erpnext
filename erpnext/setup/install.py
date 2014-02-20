@@ -12,6 +12,7 @@ def after_install():
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
+	set_single_defaults()
 	frappe.conn.commit()
 
 def import_country_and_currency():
@@ -129,3 +130,14 @@ def feature_setup():
 	]
 	bean.doc.fields.update(dict(zip(flds, [1]*len(flds))))
 	bean.save()
+
+def set_single_defaults():
+	sql = "select dt.name, df.fieldname, df.default from `tabDocType` dt, `tabDocField` df where dt.issingle=1 and df.parent=dt.name and ifnull(df.default, '')!=''"
+	for doctype, field, value in frappe.conn.sql(sql):
+		b = frappe.bean(doctype, doctype)
+		try:
+			setattr(b.doc.fields, field, value)
+			b.save()
+		except frappe.MandatoryError:
+			pass
+	frappe.conn.set_default("date_format", "dd-mm-yyyy")

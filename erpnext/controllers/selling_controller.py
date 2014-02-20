@@ -32,12 +32,13 @@ class SellingController(StockController):
 			self.set_taxes("other_charges", "taxes_and_charges")
 					
 	def set_missing_lead_customer_details(self):
-		from erpnext.accounts.party import get_party_details
 		if self.doc.customer:
+			from erpnext.accounts.party import get_party_details
 			self.doc.update_if_missing(get_party_details(self.doc.customer))
 		
 		elif self.doc.lead:
-			self.doc.update_if_missing(self.get_lead_defaults())
+			from erpnext.selling.doctype.lead.lead import get_lead_details
+			self.doc.update_if_missing(get_lead_details(self.doc.lead))
 						
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")

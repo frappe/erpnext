@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2014-02-10 17:27:49", 
+  "modified": "2014-02-19 11:04:00", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -271,7 +271,7 @@
   "doctype": "DocField", 
   "fieldname": "is_asset_item", 
   "fieldtype": "Select", 
-  "label": "Is Asset Item", 
+  "label": "Is Fixed Asset Item", 
   "oldfieldname": "is_asset_item", 
   "oldfieldtype": "Select", 
   "options": "Yes\nNo", 

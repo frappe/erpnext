@@ -56,57 +56,56 @@ erpnext.SalesChart = Class.extend({
 		$(parent).empty();
 		var me = this;
 		me.ctype = ctype;
+		me.can_read = frappe.model.can_read(this.ctype);
+		me.can_create = frappe.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
+					frappe.boot.profile.in_create.indexOf(this.ctype) !== -1;
+		me.can_write = frappe.model.can_write(this.ctype);
+		me.can_delete = frappe.model.can_delete(this.ctype);
+		
 		this.tree = new frappe.ui.Tree({
 			parent: $(parent), 
 			label: root,
 			args: {ctype: ctype},
 			method: 'erpnext.selling.page.sales_browser.sales_browser.get_children',
-			click: function(link) {
-				if(me.cur_toolbar) 
-					$(me.cur_toolbar).toggle(false);
-
-				if(!link.toolbar) 
-					me.make_link_toolbar(link);
-
-				if(link.toolbar) {
-					me.cur_toolbar = link.toolbar;
-					$(me.cur_toolbar).toggle(true);					
+			toolbar: [
+				{toggle_btn: true},
+				{
+					label:__("Edit"), 
+					condition: function(node) { 
+						return !node.root && me.can_read;
+					},
+					click: function(node) {
+						frappe.set_route("Form", me.ctype, node.label);
+					}
+				},
+				{
+					label:__("Add Child"),
+					condition: function(node) { return me.can_create && node.expandable; },
+					click: function(node) {
+						me.new_node();
+					}
+				},
+				{
+					label:__("Rename"),
+					condition: function(node) { return !node.root && me.can_write; },
+					click: function(node) {
+						frappe.model.rename_doc(me.ctype, node.label, function(new_name) {
+							node.$a.html(new_name);
+						});
+					}
+				},
+				{
+					label:__("Delete"),
+					condition: function(node) { return !node.root && me.can_delete; },
+					click: function(node) {
+						frappe.model.delete_doc(me.ctype, node.label, function() {
+							node.parent.remove();
+						});
+					}
 				}
-			}
+				
+			]
 		});
-		this.tree.rootnode.$a
-			.data('node-data', {value: root, expandable:1})
-			.click();		
-	},
-	make_link_toolbar: function(link) {
-		var data = $(link).data('node-data');
-		if(!data) return;
-
-		link.toolbar = $('<span class="tree-node-toolbar"></span>').insertAfter(link);
-		
-		// edit
-		var node_links = [];
-		
-		if (frappe.model.can_read(this.ctype)) {
-			node_links.push('<a onclick="erpnext.sales_chart.open();">'+frappe._('Edit')+'</a>');
-		}
-
-		if(data.expandable) {
-			if (frappe.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
-					frappe.boot.profile.in_create.indexOf(this.ctype) !== -1) {
-				node_links.push('<a onclick="erpnext.sales_chart.new_node();">' + frappe._('Add Child') + '</a>');
-			}
-		}
-
-		if (frappe.model.can_write(this.ctype)) {
-			node_links.push('<a onclick="erpnext.sales_chart.rename()">' + frappe._('Rename') + '</a>');
-		};
-	
-		if (frappe.model.can_delete(this.ctype)) {
-			node_links.push('<a onclick="erpnext.sales_chart.delete()">' + frappe._('Delete') + '</a>');
-		};
-		
-		link.toolbar.append(node_links.join(" | "));
 	},
 	new_node: function() {
 		var me = this;
@@ -134,44 +133,23 @@ erpnext.SalesChart = Class.extend({
 		// create
 		$(d.fields_dict.create_new.input).click(function() {
 			var btn = this;
-			$(btn).set_working();
 			var v = d.get_values();
 			if(!v) return;
 			
-			var node = me.selected_node();
+			var node = me.tree.get_selected_node();
 			
-			v.parent = node.data('label');
+			v.parent = node.label;
 			v.ctype = me.ctype;
 			
 			return frappe.call({
 				method: 'erpnext.selling.page.sales_browser.sales_browser.add_node',
 				args: v,
 				callback: function() {
-					$(btn).done_working();
 					d.hide();
-					node.trigger('reload');
+					node.reload();
 				}	
 			})			
 		});
 		d.show();		
-	},
-	selected_node: function() {
-		return this.tree.$w.find('.tree-link.selected');
-	},
-	open: function() {
-		var node = this.selected_node();
-		frappe.set_route("Form", this.ctype, node.data("label"));
-	},
-	rename: function() {
-		var node = this.selected_node();
-		frappe.model.rename_doc(this.ctype, node.data('label'), function(new_name) {
-			node.data('label', new_name).find(".tree-label").html(new_name);
-		});
-	},
-	delete: function() {
-		var node = this.selected_node();
-		frappe.model.delete_doc(this.ctype, node.data('label'), function() {
-			node.parent().remove();
-		});
 	},
 });
