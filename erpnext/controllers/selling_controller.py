@@ -222,7 +222,7 @@ class SellingController(StockController):
 		# NOTE: 
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
-		if self.doc.doctype == "Sales Invoice" and self.doc.docstatus < 2:
+		if self.doc.doctype == "Sales Invoice" and self.doc.docstatus == 0:
 			self.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount",
 				"paid_amount"])
 			total_amount_to_pay = self.doc.grand_total - self.doc.write_off_amount
