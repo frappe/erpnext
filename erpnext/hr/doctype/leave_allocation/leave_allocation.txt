@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 19:10:38", 
   "docstatus": 0, 
-  "modified": "2014-02-07 17:43:19", 
+  "modified": "2014-02-21 11:52:22", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -122,6 +122,14 @@
   "fieldname": "carry_forward", 
   "fieldtype": "Check", 
   "label": "Carry Forward"
+ }, 
+ {
+  "depends_on": "eval:doc.carry_forward==1", 
+  "doctype": "DocField", 
+  "fieldname": "from_period", 
+  "fieldtype": "Link", 
+  "label": "From Period", 
+  "options": "Period"
  }, 
  {
   "depends_on": "carry_forward", 

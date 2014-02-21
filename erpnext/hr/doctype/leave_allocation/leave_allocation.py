@@ -13,6 +13,7 @@ class DocType:
 	def validate(self):
 		self.validate_new_leaves_allocated_value()
 		self.check_existing_leave_allocation()
+		self.validate_carry_forward_leaves()
 		self.validate_new_leaves_allocated()
 
 	def on_update_after_submit(self):
@@ -50,6 +51,23 @@ class DocType:
 				<a href="#Form/Leave Allocation/%s">%s</a>""" % \
 				(self.doc.leave_type, self.doc.employee, self.doc.period,
 				leave_allocation[0][0], leave_allocation[0][0]))
+
+	def validate_carry_forward_leaves(self):
+		if carry_forward and from_period:
+			already_carry_forward = frappe.conn.sql("""select name from `tabAllocation` where name!=%s 
+				and docstatus=1 and employee=%s and carry_forward=1 and from_period=%s""", 
+				(self.doc.name, self.doc.employee, self.doc.from_period))
+		elif not carry_forward:
+			throw(_("Please set Carry Forward"))
+		elif not from_period:
+			throw(_("Please select From Period for carry forwarding leaves"))
+
+		if already_carry_forward:
+			throw("{leaves}: {period} for {emp}".format(**{
+				"leaves": _("Leaves are already carry forwaded from Period"),
+				"period": self.doc.from_period,
+				"emp": self.doc.employee
+			}))
 
 	def validate_new_leaves_allocated(self):
 		"""check if Total Leaves Allocated >= Leave Applications"""
@@ -126,3 +144,10 @@ class DocType:
 				Please check Leave Application: \
 				<a href="#Form/Leave Application/%s">%s</a>""" % \
 				(self.doc.employee, self.doc.leave_type, exists[0][0], exists[0][0]))
+
+@frappe.whitelist()
+def from_period_query(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.conn.sql("""select name from `tabPeriod` where 
+		to_date<(select from_date from `tabPeriod` where name=%(period)s) 
+		limit %(start)s, %(page_len)s""", {'period': filters.get("period"), 'start': start, 
+		'page_len': page_len})

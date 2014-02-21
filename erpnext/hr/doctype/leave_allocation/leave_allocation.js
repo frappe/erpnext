@@ -24,7 +24,7 @@ cur_frm.cscript.new_leaves_allocated = cur_frm.cscript.carry_forwarded_leaves;
 var calculate_total_leaves_allocated = function(doc, dt, dn) {
 	if(cint(doc.carry_forward) == 1 && doc.leave_type && doc.period && doc.employee) {
 		return cur_frm.call({
-			mehtod: "erpnext.hr.doctype.leave_allocation.leave_alloacation.get_carry_forwarded_leaves"
+			method: "erpnext.hr.doctype.leave_allocation.leave_allocation.get_carry_forwarded_leaves"
 		});
 	}
 	else if(cint(doc.carry_forward) == 0)
@@ -36,3 +36,14 @@ cur_frm.fields_dict.employee.get_query = function(doc, cdt, cdn) {
 		query: "erpnext.controllers.queries.employee_query"
 	}
 }
+
+cur_frm.set_query("from_period", function(doc) {
+	if (!doc.period)
+		frappe.throw(frappe._("Please select Period first"))
+	else if (doc.carry_forward) {
+		return	{
+			query: "erpnext.hr.doctype.leave_allocation.leave_allocation.from_period_query",
+			filters: { "period": doc.period }
+		}
+	}
+});
