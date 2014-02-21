@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:12", 
   "docstatus": 0, 
-  "modified": "2014-01-22 16:05:34", 
+  "modified": "2014-02-07 12:20:31", 
   "modified_by": "Administrator", 
   "owner": "ashwini@webnotestech.com"
  }, 
@@ -86,6 +86,17 @@
   "read_only": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
   "depends_on": "kra_template", 
   "doctype": "DocField", 
   "fieldname": "column_break0", 
@@ -134,6 +145,13 @@
   "reqd": 1
  }, 
  {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "label": "Posting Date", 
+  "reqd": 1
+ }, 
+ {
   "depends_on": "kra_template", 
   "doctype": "DocField", 
   "fieldname": "section_break0", 
@@ -153,15 +171,6 @@
   "options": "Appraisal Goal"
  }, 
  {
-  "allow_on_submit": 0, 
-  "doctype": "DocField", 
-  "fieldname": "calculate_total_score", 
-  "fieldtype": "Button", 
-  "label": "Calculate Total Score", 
-  "oldfieldtype": "Button", 
-  "options": "calculate_total"
- }, 
- {
   "doctype": "DocField", 
   "fieldname": "total_score", 
   "fieldtype": "Float", 
@@ -171,6 +180,15 @@
   "oldfieldname": "total_score", 
   "oldfieldtype": "Currency", 
   "read_only": 1
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "calculate_total_score", 
+  "fieldtype": "Button", 
+  "label": "Calculate Total Score", 
+  "oldfieldtype": "Button", 
+  "options": "calculate_total"
  }, 
  {
   "depends_on": "kra_template", 
@@ -184,35 +202,6 @@
   "fieldname": "comments", 
   "fieldtype": "Text", 
   "label": "Comments"
- }, 
- {
-  "depends_on": "kra_template", 
-  "doctype": "DocField", 
-  "fieldname": "other_details", 
-  "fieldtype": "Section Break", 
-  "label": "Other Details"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "company", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Company", 
-  "oldfieldname": "company", 
-  "oldfieldtype": "Link", 
-  "options": "link:Company", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "oldfieldtype": "Select", 
-  "options": "link:Fiscal Year", 
-  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

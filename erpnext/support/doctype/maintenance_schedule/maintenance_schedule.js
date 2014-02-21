@@ -73,8 +73,11 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var fname = cur_frm.cscript.fname;
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code, 'item_maintenance_detail', 
-			doc, cdt, cdn, 1);
+		return cur_frm.call({
+			method: "get_item_details",
+			args: d.item_code,
+			doc: cur_frm.doc
+		});
 	}
 }
 

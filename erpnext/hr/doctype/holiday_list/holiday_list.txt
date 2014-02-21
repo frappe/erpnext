@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:46", 
+  "modified": "2014-02-07 17:49:46", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -70,13 +70,13 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
+  "fieldname": "period", 
+  "fieldtype": "Link", 
   "in_filter": 1, 
-  "label": "Fiscal Year", 
+  "label": "Period", 
   "oldfieldname": "fiscal_year", 
   "oldfieldtype": "Link", 
-  "options": "link:Fiscal Year", 
+  "options": "Period", 
   "reqd": 1
  }, 
  {

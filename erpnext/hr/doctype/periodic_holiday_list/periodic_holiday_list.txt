@@ -1,0 +1,69 @@
+[
+ {
+  "creation": "2014-02-11 18:28:14", 
+  "docstatus": 0, 
+  "modified": "2014-02-11 18:36:10", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "autoname": "PHL/.######", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "icon": "icon-calendar", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "period", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Period", 
+  "name": "__common__", 
+  "options": "Period", 
+  "parent": "Periodic Holiday List", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Periodic Holiday List", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Periodic Holiday List"
+ }, 
+ {
+  "doctype": "DocField"
+ }, 
+ {
+  "create": 1, 
+  "delete": 1, 
+  "doctype": "DocPerm", 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "create": 1, 
+  "delete": 1, 
+  "doctype": "DocPerm", 
+  "print": 0, 
+  "role": "HR Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }
+]

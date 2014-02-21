@@ -3,12 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import add_days, add_months, cstr, getdate
-from frappe import _
+from frappe.utils import getdate
+from frappe import msgprint, throw, _
 
 def get_columns(filters, trans):
 	validate_filters(filters)
-	
+
 	# get conditions for based_on filter cond
 	based_on_details = based_wise_colums_query(filters.get("based_on"), trans)
 	# get conditions for periodic filter cond
@@ -17,7 +17,7 @@ def get_columns(filters, trans):
 	group_by_cols = group_wise_column(filters.get("group_by"))
 
 	columns = based_on_details["based_on_cols"] + period_cols + ["Total(Qty):Float:120", "Total(Amt):Currency:120"]
-	if group_by_cols:	
+	if group_by_cols:
 		columns = based_on_details["based_on_cols"] + group_by_cols + period_cols + \
 			["Total(Qty):Float:120", "Total(Amt):Currency:120"] 
 
@@ -30,16 +30,16 @@ def get_columns(filters, trans):
 def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
-			frappe.msgprint(f + _(" is mandatory"), raise_exception=1)
-	
+			throw(f + _(" is mandatory"))
+
 	if filters.get("based_on") == filters.get("group_by"):
-		frappe.msgprint("'Based On' and 'Group By' can not be same", raise_exception=1)
+		throw(_("'Based On' and 'Group By' can not be same"))
 
 def get_data(filters, conditions):
 	data = []
 	inc, cond= '',''
 	query_details =  conditions["based_on_select"] + conditions["period_wise_select"]
-	
+
 	if conditions["based_on_select"] in ["t1.project_name,", "t2.project_name,"]:
 		cond = 'and '+ conditions["based_on_select"][:-1] +' IS Not NULL'
 
@@ -69,7 +69,7 @@ def get_data(filters, conditions):
 		for d in range(len(data1)):
 			#to add blanck column
 			dt = data1[d]
-			dt.insert(ind,'')  
+			dt.insert(ind,'')
 			data.append(dt)
 
 			#to get distinct value of col specified by group_by in filter
@@ -98,7 +98,7 @@ def get_data(filters, conditions):
 				des[ind] = row[i]
 				for j in range(1,len(conditions["columns"])-inc):	
 					des[j+inc] = row1[0][j]
-					
+
 				data.append(des)
 	else:
 		data = frappe.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
@@ -124,7 +124,7 @@ def period_wise_colums_query(filters, trans):
 		trans_date = 'posting_date'
 	else:
 		trans_date = 'transaction_date'
-	
+
 	if filters.get("period") != 'Yearly':
 		for dt in bet_dates:
 			get_period_wise_columns(dt, filters.get("period"), pwc)
@@ -249,7 +249,7 @@ def based_wise_colums_query(based_on, trans):
 			based_on_details["based_on_group_by"] = 't2.project_name'
 			based_on_details["addl_tables"] = ''
 		else:
-			frappe.msgprint("Project-wise data is not available for Quotation", raise_exception=1)
+			throw(_("Project-wise data is not available for Quotation"))
 
 	return based_on_details
 

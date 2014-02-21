@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:14", 
   "docstatus": 0, 
-  "modified": "2014-01-22 16:05:34", 
+  "modified": "2014-02-07 12:09:13", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -148,17 +148,6 @@
   "read_only": 1, 
   "search_index": 0, 
   "width": "150px"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "fiscal_year", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Fiscal Year", 
-  "oldfieldname": "fiscal_year", 
-  "oldfieldtype": "Select", 
-  "options": "link:Fiscal Year", 
-  "reqd": 1
  }, 
  {
   "doctype": "DocField", 

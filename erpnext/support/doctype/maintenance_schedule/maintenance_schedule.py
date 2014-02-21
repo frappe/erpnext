@@ -16,13 +16,7 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = frappe.conn.sql("""select item_name, description from `tabItem` 
-			where name=%s""", (item_code), as_dict=1)
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'description' : item and item[0]['description'] or ''
-		}
-		return ret
+		return frappe.conn.get_value("Item", item_code, ["item_name", "description"], as_dict=1)
 		
 	def generate_schedule(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')

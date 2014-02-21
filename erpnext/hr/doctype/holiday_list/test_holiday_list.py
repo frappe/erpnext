@@ -1,10 +1,13 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-test_records = [[{
+from __future__ import unicode_literals
+
+test_records = [
+	[{
 		"doctype": "Holiday List",
 		"holiday_list_name": "_Test Holiday List",
-		"fiscal_year": "_Test Fiscal Year 2013",
+		"period": "_Test Period",
 		"is_default": 1
 	}, {
 		"doctype": "Holiday",
@@ -13,4 +16,5 @@ test_records = [[{
 		"parentfield": "holiday_list_details",
 		"holiday_date": "2013-01-01",
 		"description": "New Year"
-	}]]
+	}]
+]

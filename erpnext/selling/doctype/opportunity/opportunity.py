@@ -8,7 +8,6 @@ from frappe.utils import cstr, cint
 from frappe.model.bean import getlist
 from frappe import msgprint, _
 
-	
 from erpnext.utilities.transaction_base import TransactionBase
 
 class DocType(TransactionBase):
@@ -17,57 +16,45 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 		self.fname = 'enq_details'
 		self.tname = 'Opportunity Item'
-		
+
 		self._prev = frappe._dict({
 			"contact_date": frappe.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
 			"contact_by": frappe.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
 		})
-		
-	def get_item_details(self, item_code):
-		item = frappe.conn.sql("""select item_name, stock_uom, description_html, description, item_group, brand
-			from `tabItem` where name = %s""", item_code, as_dict=1)
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'uom': item and item[0]['stock_uom'] or '',
-			'description': item and item[0]['description_html'] or item[0]['description'] or '',
-			'item_group': item and item[0]['item_group'] or '',
-			'brand': item and item[0]['brand'] or ''
-		}
-		return ret
 
 	def get_cust_address(self,name):
 		details = frappe.conn.sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if details:
 			ret = {
-				'customer_name':	details and details[0]['customer_name'] or '',
-				'address'	:	details and details[0]['address'] or '',
-				'territory'			 :	details and details[0]['territory'] or '',
-				'customer_group'		:	details and details[0]['customer_group'] or ''
+				'customer_name': details and details[0]['customer_name'] or '',
+				'address': details and details[0]['address'] or '',
+				'territory': details and details[0]['territory'] or '',
+				'customer_group': details and details[0]['customer_group'] or ''
 			}
 			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
 
 			contact_det = frappe.conn.sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
-			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
-			ret['email_id']			 = contact_det and contact_det[0]['email_id'] or ''
-		
+			ret['contact_no'] = contact_det and contact_det[0]['contact_no'] or ''
+			ret['email_id']	= contact_det and contact_det[0]['email_id'] or ''
+
 			return ret
 		else:
 			msgprint("Customer : %s does not exist in system." % (name))
 			raise Exception
-			
+
 	def on_update(self):
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):
 		if not opts:
 			opts = frappe._dict()
-		
+
 		opts.description = ""
-		
+
 		if self.doc.customer:
 			if self.doc.contact_person:
 				opts.description = 'Contact '+cstr(self.doc.contact_person)
@@ -116,7 +103,7 @@ class DocType(TransactionBase):
 			frappe.throw(_("Cannot Cancel Opportunity as Quotation Exists"))
 		self.set_status(update=True)
 		
-	def declare_enquiry_lost(self,arg):
+	def declare_enquiry_lost(self, arg):
 		if not self.has_quotation():
 			frappe.conn.set(self.doc, 'status', 'Lost')
 			frappe.conn.set(self.doc, 'order_lost_reason', arg)
@@ -162,3 +149,16 @@ def make_quotation(source_name, target_doclist=None):
 	}, target_doclist, set_missing_values)
 		
 	return [d.fields for d in doclist]
+
+@frappe.whitelist()
+def get_item_details(item_code):
+	item = frappe.conn.sql("""select item_name, stock_uom, description_html, description, item_group, 
+		brand from `tabItem` where name = %s""", item_code, as_dict=1)
+	ret = {
+		'item_name': item and item[0]['item_name'] or '',
+		'uom': item and item[0]['stock_uom'] or '',
+		'description': item and item[0]['description_html'] or item[0]['description'] or '',
+		'item_group': item and item[0]['item_group'] or '',
+		'brand': item and item[0]['brand'] or ''
+	}
+	return ret

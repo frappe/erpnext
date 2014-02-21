@@ -99,10 +99,15 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code, 
-			'enquiry_details', doc, cdt, cdn, 1);
+	var item = frappe.model.get_doc(cdt, cdn);
+	if (item.item_code) {
+		return cur_frm.call({
+			method: "erpnext.selling.doctype.opportunity.opportunity.get_item_details",
+			child: item,
+			args: {
+				"item_code": item.item_code
+			}
+		});
 	}
 }
 

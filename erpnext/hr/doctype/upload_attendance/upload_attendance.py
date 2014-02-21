@@ -1,12 +1,10 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, add_days, date_diff
-from frappe import msgprint, _
+from frappe import msgprint, throw, _
 from frappe.utils.datautils import UnicodeWriter
 
 # doclist = None
@@ -21,7 +19,7 @@ class DocType():
 def get_template():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
-	
+
 	args = frappe.local.form_dict
 	frappe.local.uploadattendance_doclist = frappe.model.doctype.get("Attendance")
 
@@ -34,7 +32,7 @@ def get_template():
 	frappe.response['result'] = cstr(w.getvalue())
 	frappe.response['type'] = 'csv'
 	frappe.response['doctype'] = "Attendance"
-	
+
 def getdocfield(fieldname):
 	"""get docfield from doclist of doctype"""
 	l = [d for d in doclist if d.doctype=='DocField' and d.fieldname==fieldname]
@@ -49,10 +47,10 @@ def add_header(w):
 	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status", 
 		"Fiscal Year", "Company", "Naming Series"])
 	return w
-	
+
 def add_data(w, args):
 	from erpnext.accounts.utils import get_fiscal_year
-	
+
 	dates = get_dates(args)
 	employees = get_active_employees()
 	existing_attendance_records = get_existing_attendance_records(args)
@@ -77,39 +75,40 @@ def get_dates(args):
 	no_of_days = date_diff(add_days(args["to_date"], 1), args["from_date"])
 	dates = [add_days(args["from_date"], i) for i in range(0, no_of_days)]
 	return dates
-	
+
 def get_active_employees():
 	employees = frappe.conn.sql("""select name, employee_name, company 
 		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	return employees
-	
+
 def get_existing_attendance_records(args):
 	attendance = frappe.conn.sql("""select name, att_date, employee, status, naming_series 
 		from `tabAttendance` where att_date between %s and %s and docstatus < 2""", 
 		(args["from_date"], args["to_date"]), as_dict=1)
-		
+
 	existing_attendance = {}
 	for att in attendance:
 		existing_attendance[tuple([att.att_date, att.employee])] = att
-	
+
 	return existing_attendance
-	
+
 def get_naming_series():
 	series = getdocfield("naming_series").options.strip().split("\n")
 	if not series:
-		msgprint("""Please create naming series for Attendance \
-			through Setup -> Numbering Series.""", raise_exception=1)
+		throw("{msg} -> {series}".format(**{
+			"msg": _("Please create naming series for Attendance through Setup"),
+			"series": _("Numbering Series")
+		}))
 	return series[0]
-
 
 @frappe.whitelist()
 def upload():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
-	
+
 	from frappe.utils.datautils import read_csv_content_from_uploaded_file
 	from frappe.modules import scrub
-	
+
 	rows = read_csv_content_from_uploaded_file()
 	if not rows:
 		msg = [_("Please select a csv file")]
@@ -119,10 +118,10 @@ def upload():
 	columns[3] = "att_date"
 	ret = []
 	error = False
-	
+
 	from frappe.utils.datautils import check_record, import_doc
 	doctype_dl = frappe.get_doctype("Attendance")
-	
+
 	for i, row in enumerate(rows[5:]):
 		if not row: continue
 		row_idx = i + 5
@@ -130,7 +129,7 @@ def upload():
 		d["doctype"] = "Attendance"
 		if d.name:
 			d["docstatus"] = frappe.conn.get_value("Attendance", d.name, "docstatus")
-			
+
 		try:
 			check_record(d, doctype_dl=doctype_dl)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))

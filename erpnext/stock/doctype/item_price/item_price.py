@@ -52,6 +52,6 @@ class DocType:
 				["buying", "selling", "currency"])
 
 	def update_item_details(self):
-		self.doc.item_name, self.doc.item_description = frappe.conn.get_value("Item", 
-			self.doc.item_code, ["item_name", "description"])
-				
+		if self.doc.item_code:
+			self.doc.item_name, self.doc.item_description = frappe.conn.get_value("Item", 
+				self.doc.item_code, ["item_name", "description"])
