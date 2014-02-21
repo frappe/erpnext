@@ -3,35 +3,13 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _
-from frappe.utils import cstr, flt, now_datetime, cint
+from frappe import _
+from frappe.utils import cstr, now_datetime, cint
 
 from erpnext.controllers.status_updater import StatusUpdater
 
 
 class TransactionBase(StatusUpdater):
-	def set_contact_fields(self):
-		party_type, party_name = self.get_party_type_and_name()
-		
-		if party_type == "Lead":
-			contact_dict = map_lead_contact_details(party_name)
-		else:
-			contact_dict = map_party_contact_details(self.doc.contact_person, party_type, party_name)
-			
-		for fieldname, value in contact_dict.items():
-			if self.meta.get_field(fieldname):
-				self.doc.fields[fieldname] = value
-		
-	def get_party_type_and_name(self):
-		if not hasattr(self, "_party_type_and_name"):
-			for party_type in ("Lead", "Customer", "Supplier"):
-				party_field = party_type.lower()
-				if self.meta.get_field(party_field) and self.doc.fields.get(party_field):
-					self._party_type_and_name = (party_type, self.doc.fields.get(party_field))
-					break
-
-		return self._party_type_and_name
-
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")
 		if int(frappe.conn.get_value("Notification Control", None, dt) or 0):
@@ -112,69 +90,6 @@ class TransactionBase(StatusUpdater):
 				for field, condition in fields:
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
-
-def get_default_contact(party_field, party_name):
-	contact = frappe.conn.sql("""select name from `tabContact` where `%s`=%s
-		order by is_primary_contact desc, name asc limit 1""" % (party_field, "%s"), 
-		(party_name,))
-		
-	return contact[0][0] if contact else None
-		
-def map_lead_contact_details(party_name):
-	out = {}
-	for fieldname in ["contact_display", "contact_email", "contact_mobile", "contact_phone"]:
-		out[fieldname] = None
-	
-	lead = frappe.conn.sql("""select * from `tabLead` where name=%s""", party_name, as_dict=True)
-	if lead:
-		lead = lead[0]
-		out.update({
-			"contact_display": lead.get("lead_name"),
-			"contact_email": lead.get("email_id"),
-			"contact_mobile": lead.get("mobile_no"),
-			"contact_phone": lead.get("phone"),
-		})
-
-	return out
-
-def map_party_contact_details(contact_name=None, party_field=None, party_name=None):
-	out = {}
-	for fieldname in ["contact_person", "contact_display", "contact_email",
-		"contact_mobile", "contact_phone", "contact_designation", "contact_department"]:
-			out[fieldname] = None
-			
-	if not contact_name and party_field:
-		contact_name = get_default_contact(party_field, party_name)
-	
-	if contact_name:
-		contact = frappe.conn.sql("""select * from `tabContact` where name=%s""", 
-			contact_name, as_dict=True)
-
-		if contact:
-			contact = contact[0]
-			out.update({
-				"contact_person": contact.get("name"),
-				"contact_display": " ".join(filter(None, 
-					[contact.get("first_name"), contact.get("last_name")])),
-				"contact_email": contact.get("email_id"),
-				"contact_mobile": contact.get("mobile_no"),
-				"contact_phone": contact.get("phone"),
-				"contact_designation": contact.get("designation"),
-				"contact_department": contact.get("department")
-			})
-
-	return out
-	
-def get_address_territory(address_doc):
-	territory = None
-	for fieldname in ("city", "state", "country"):
-		value = address_doc.fields.get(fieldname)
-		if value:
-			territory = frappe.conn.get_value("Territory", value.strip())
-			if territory:
-				break
-	
-	return territory
 	
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.conn.sql_list("""select name from `tabEvent` 
