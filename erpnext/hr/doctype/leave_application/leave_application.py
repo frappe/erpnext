@@ -144,7 +144,8 @@ class DocType(DocListController):
 				formatdate(d['posting_date']), d['name'], d['name']), exc=OverlapError)
 
 	def validate_max_days(self):
-		max_days = frappe.conn.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
+		max_days = frappe.conn.sql("""select max_days_allowed from `tabLeave Type` 
+			where name=%s""", self.doc.leave_type)
 		max_days = max_days and flt(max_days[0][0]) or 0
 		if max_days and self.doc.total_leave_days > max_days:
 			throw("{cannot} {leave_type} {more} {days} {msg}".format(**{

@@ -53,21 +53,21 @@ class DocType:
 				leave_allocation[0][0], leave_allocation[0][0]))
 
 	def validate_carry_forward_leaves(self):
-		if carry_forward and from_period:
-			already_carry_forward = frappe.conn.sql("""select name from `tabAllocation` where name!=%s 
-				and docstatus=1 and employee=%s and carry_forward=1 and from_period=%s""", 
-				(self.doc.name, self.doc.employee, self.doc.from_period))
-		elif not carry_forward:
-			throw(_("Please set Carry Forward"))
-		elif not from_period:
-			throw(_("Please select From Period for carry forwarding leaves"))
+		if self.doc.carry_forward:
+			if not self.doc.from_period:
+				throw(_("Please set From Period"))
+			else:
+				already_carry_forward = frappe.conn.sql("""select name from `tabLeave Allocation` 
+					where name!=%s and docstatus=1 and employee=%s and carry_forward=1 and 
+					from_period=%s""", (self.doc.name, self.doc.employee, self.doc.from_period))
 
-		if already_carry_forward:
-			throw("{leaves}: {period} for {emp}".format(**{
-				"leaves": _("Leaves are already carry forwaded from Period"),
-				"period": self.doc.from_period,
-				"emp": self.doc.employee
-			}))
+				if already_carry_forward:
+					throw("{leaves}: {period} for employee: {emp} in {existing_la}".format(**{
+						"leaves": _("Leaves are already carry forwaded from Period"),
+						"period": self.doc.from_period,
+						"emp": self.doc.employee,
+						"existing_la": already_carry_forward[0][0]
+					}))
 
 	def validate_new_leaves_allocated(self):
 		"""check if Total Leaves Allocated >= Leave Applications"""
@@ -114,14 +114,10 @@ class DocType:
 	def get_carry_forwarded_leaves(self):
 		if self.doc.carry_forward:
 			self.allow_carry_forward()
-		prev_period = frappe.conn.sql("""select name from `tabPeriod` 
-			where from_date = (select date_add(from_date, interval -1 year) 
-				from `tabPeriod` where name=%s) 
-			order by name desc limit 1""", self.doc.period)
-		prev_period = prev_period and prev_period[0][0] or ''
+
 		prev_bal = 0
-		if prev_period and cint(self.doc.carry_forward) == 1:
-			prev_bal = self.get_leave_bal(prev_period)
+		if self.doc.from_period and cint(self.doc.carry_forward) == 1:
+			prev_bal = self.get_leave_bal(self.doc.from_period)
 		ret = {
 			'carry_forwarded_leaves': prev_bal,
 			'total_leaves_allocated': flt(prev_bal) + flt(self.doc.new_leaves_allocated)

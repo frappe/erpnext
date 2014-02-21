@@ -15,7 +15,7 @@ class DocType:
 	def validate(self):
 		self.validate_from_to_dates()
 		self.validate_duplicate_period()
-		self.validate_period_overlapping()
+		# self.validate_period_overlapping()
 
 	def validate_from_to_dates(self):
 		if self.doc.from_date == self.doc.to_date:
@@ -32,14 +32,14 @@ class DocType:
 					"period": period
 				}), exc=DuplicatePeriodError)
 
-	def validate_period_overlapping(self):
-		for period, from_date, to_date in frappe.conn.sql("""select name, from_date, to_date 
-			from `tabPeriod` where name!=%s and ifnull(enabled, '')=1""", self.doc.name):
-			for x in range((to_date - from_date).days + 1):
-				period_date = add_days(from_date, x)
-				if getdate(self.doc.from_date) == period_date or getdate(self.doc.to_date) == period_date:
-					throw("{msg}: {period}".format(**{
-						"msg": _("Overlapping with period"),
-						"period": period
-					}))
-					break
+	# def validate_period_overlapping(self):
+	# 	for period, from_date, to_date in frappe.conn.sql("""select name, from_date, to_date 
+	# 		from `tabPeriod` where name!=%s and ifnull(enabled, '')=1""", self.doc.name):
+	# 		for x in range((to_date - from_date).days + 1):
+	# 			period_date = add_days(from_date, x)
+	# 			if getdate(self.doc.from_date) == period_date or getdate(self.doc.to_date) == period_date:
+	# 				throw("{msg}: {period}".format(**{
+	# 					"msg": _("Overlapping with period"),
+	# 					"period": period
+	# 				}))
+	# 				break
