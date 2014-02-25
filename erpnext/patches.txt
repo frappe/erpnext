@@ -20,3 +20,4 @@ execute:frappe.reload_doc('support', 'doctype', 'newsletter') # 2014-01-31
 execute:frappe.reload_doc('hr', 'doctype', 'employee') # 2014-02-03
 execute:frappe.conn.sql("update tabPage set module='Core' where name='Setup'")
 erpnext.patches.4_0.fields_to_be_renamed
+erpnext.patches.4_0.rename_sitemap_to_route

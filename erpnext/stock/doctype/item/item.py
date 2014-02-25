@@ -42,8 +42,8 @@ class DocType(DocListController):
 		self.cant_change()
 		self.validate_item_type_for_reorder()
 		
-		if not self.doc.parent_website_sitemap:
-			self.doc.parent_website_sitemap = frappe.get_website_sitemap("Item Group", self.doc.item_group)
+		if not self.doc.parent_website_route:
+			self.doc.parent_website_route = frappe.get_website_route("Item Group", self.doc.item_group)
 
 		if self.doc.name:
 			self.old_page_name = frappe.conn.get_value('Item', self.doc.name, 'page_name')
