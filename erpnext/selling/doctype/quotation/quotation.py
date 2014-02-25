@@ -112,6 +112,7 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 			target[0].customer_name = customer.doc.customer_name
 			
 		si = frappe.bean(target)
+		si.ignore_permissions = ignore_permissions
 		si.run_method("onload_post_render")
 			
 	doclist = get_mapped_doclist("Quotation", source_name, {

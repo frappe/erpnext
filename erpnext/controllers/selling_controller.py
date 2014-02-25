@@ -33,13 +33,14 @@ class SellingController(StockController):
 					
 	def set_missing_lead_customer_details(self):
 		if self.doc.customer:
-			from erpnext.accounts.party import get_party_details
-			self.doc.update_if_missing(get_party_details(self.doc.customer))
+			from erpnext.accounts.party import _get_party_details
+			self.doc.update_if_missing(_get_party_details(self.doc.customer,
+				ignore_permissions=self.bean.ignore_permissions))
 		
 		elif self.doc.lead:
 			from erpnext.selling.doctype.lead.lead import get_lead_details
 			self.doc.update_if_missing(get_lead_details(self.doc.lead))
-						
+	
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")
 		self.set_missing_item_details()
