@@ -18,7 +18,7 @@ class TestItem(unittest.TestCase):
 		item.doc.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)
 		
-	def atest_get_item_details(self):
+	def test_get_item_details(self):
 		from erpnext.stock.get_item_details import get_item_details
 		to_check = {
 			"item_code": "_Test Item",
