@@ -20,7 +20,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")))
 		
 		wrapper = frappe.bean(copy=test_records[0])
-		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -47,7 +46,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		pi = frappe.bean(copy=test_records[1])
-		pi.run_method("calculate_taxes_and_totals")
 		pi.insert()
 		pi.submit()
 		
@@ -80,7 +78,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
 		pi.doclist.pop(3)
-		pi.run_method("calculate_taxes_and_totals")
 		pi.insert()
 		pi.submit()
 		
@@ -103,7 +100,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			
 	def test_purchase_invoice_calculation(self):
 		wrapper = frappe.bean(copy=test_records[0])
-		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -138,7 +134,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_purchase_invoice_with_subcontracted_item(self):
 		wrapper = frappe.bean(copy=test_records[0])
 		wrapper.doclist[1].item_code = "_Test FG Item"
-		wrapper.run_method("calculate_taxes_and_totals")
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -188,7 +183,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"allocated_amount": 300,
 			"remarks": jv.doc.remark
 		})
-		pi.run_method("calculate_taxes_and_totals")
 		pi.insert()
 		pi.submit()
 		pi.load_from_db()
