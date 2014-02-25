@@ -73,7 +73,7 @@ class DocType:
 					"doctype": "Web Page",
 					"title": self.doc.name + " Home",
 					"published": 1,
-					"description": "Standard Home Page for " + self.doc.company,
+					"description": "Standard Home Page for " + self.doc.name,
 					"main_section": webfile.read() % self.doc.fields
 				}).insert()
 			
