@@ -10,7 +10,8 @@ def execute(filters=None):
 	data = frappe.db.sql("""select 
 			item.name, item.item_name, description, item_group, brand, warehouse, item.stock_uom, 
 			actual_qty, planned_qty, indented_qty, ordered_qty, reserved_qty, 
-			projected_qty, item.re_order_level, item.re_order_qty
+			projected_qty, item.re_order_level, item.re_order_qty, 
+			(item.re_order_level - projected_qty) as shortage_qty
 		from `tabBin` bin, 
 			(select name, company from tabWarehouse 
 				{warehouse_conditions}) wh,
@@ -29,7 +30,8 @@ def get_columns():
 		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100", "Warehouse:Link/Warehouse:120", 
 		"UOM:Link/UOM:100", "Actual Qty:Float:100", "Planned Qty:Float:100", 
 		"Requested Qty:Float:110", "Ordered Qty:Float:100", "Reserved Qty:Float:100", 
-		"Projected Qty:Float:100", "Reorder Level:Float:100", "Reorder Qty:Float:100"]
+		"Projected Qty:Float:100", "Reorder Level:Float:100", "Reorder Qty:Float:100", 
+		"Shortage Qty:Float:100"]
 	
 def get_item_conditions(filters):
 	conditions = []
