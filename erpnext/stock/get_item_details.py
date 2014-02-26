@@ -265,9 +265,13 @@ def get_pos_settings(company):
 def apply_pricing_rule(out, args):
 	args_dict = frappe._dict().update(args)
 	args_dict.update(out)
-	
+	pricing_rules = get_pricing_rules(args_dict)
 	for rule_for in ["price", "discount"]:
-		pricing_rules = get_pricing_rules(args_dict, rule_for)
+		pricing_rules = filter(lambda x: x[rule_for] > 0, pricing_rules)
+		pricing_rules = filter_pricing_rules(args_dict, pricing_rules)
+		
+		if len(pricing_rules) > 1:
+			pricing_rules = sorted(pricing_rules, key=lambda x: x[rule_for])
 		if pricing_rules:
 			if rule_for == "discount":
 				out["discount_percentage"] = pricing_rules[-1]["discount"]
@@ -277,8 +281,8 @@ def apply_pricing_rule(out, args):
 					flt(args_dict.plc_conversion_rate) / flt(args_dict.conversion_rate)
 	
 	
-def get_pricing_rules(args_dict, price_or_discount):	
-	def _filter_pricing_rule(pricing_rules, field_set):
+def filter_pricing_rules(args_dict, pricing_rules):	
+	def _filter_pricing_rules(pricing_rules, field_set):
 		p_rules = []
 		for field in field_set:
 			if not p_rules:
@@ -289,13 +293,11 @@ def get_pricing_rules(args_dict, price_or_discount):
 				break
 		
 		return p_rules or pricing_rules
-		
-	pricing_rules = get_all_pricing_rules(args_dict, price_or_discount)
 
 	for field_set in [["item_code", "item_group", "brand"], ["customer", "customer_group", 
 		"territory", "supplier", "supplier_type", "campaign", "sales_partner"]]:
 			if pricing_rules:
-				pricing_rules = _filter_pricing_rule(pricing_rules, field_set)
+				pricing_rules = _filter_pricing_rules(pricing_rules, field_set)
 
 	# filter for price list
 	if pricing_rules:
@@ -312,15 +314,11 @@ def get_pricing_rules(args_dict, price_or_discount):
 		max_priority = min([cint(p.priority) for p in pricing_rules])
 		if max_priority:
 			pricing_rules = filter(lambda x: x.priority==max_priority, pricing_rules)
-			
-	if len(pricing_rules) > 1:
-		pricing_rules = sorted(pricing_rules, key=lambda x: x[price_or_discount])
 
 	return pricing_rules
 	
-def get_all_pricing_rules(args_dict, price_or_discount):	
-	conditions = " and ifnull(%s, 0) > 0" % price_or_discount
-	
+def get_pricing_rules(args_dict):	
+	conditions = ""
 	for field in ["customer", "customer_group", "territory", "supplier", "supplier_type", 
 		"campaign", "sales_partner"]:
 			if args_dict.get(field):

@@ -45,7 +45,16 @@ class TestPricingRule(unittest.TestCase):
 		prule.insert()
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 20)
-
+		
+		prule = frappe.bean(copy=test_records[0])
+		prule.doc.applicable_for = "Campaign"
+		prule.doc.campaign = "_Test Campaign"
+		prule.doc.discount = 30
+		prule.insert()
+		args.campaign = "_Test Campaign"
+		details = get_item_details(args)
+		self.assertEquals(details.get("discount_percentage"), 30)
+		
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 15)
@@ -53,6 +62,8 @@ class TestPricingRule(unittest.TestCase):
 		args.customer = None
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 15)
+		
+		
 		
 
 test_records = [
