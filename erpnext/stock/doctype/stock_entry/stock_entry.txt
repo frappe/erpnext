@@ -2,13 +2,14 @@
  {
   "creation": "2013-04-09 11:43:55", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:27", 
+  "modified": "2014-02-26 10:59:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "allow_attach": 0, 
   "allow_copy": 0, 
+  "allow_import": 1, 
   "allow_rename": 0, 
   "autoname": "naming_series:", 
   "doctype": "DocType", 
