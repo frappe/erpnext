@@ -9,10 +9,10 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_
 
 def execute(filters=None):
 	if not filters: filters = {}
-	supplier_naming_by = frappe.conn.get_value("Buying Settings", None, "supp_master_name")
+	supplier_naming_by = frappe.db.get_value("Buying Settings", None, "supp_master_name")
 	columns = get_columns(supplier_naming_by)
 	entries = get_gl_entries(filters)
-	account_map = dict(((r.name, r) for r in frappe.conn.sql("""select acc.name, 
+	account_map = dict(((r.name, r) for r in frappe.db.sql("""select acc.name, 
 		supp.supplier_name, supp.name as supplier 
 		from `tabAccount` acc, `tabSupplier` supp 
 		where acc.master_type="Supplier" and supp.name=acc.master_name""", as_dict=1)))
@@ -85,7 +85,7 @@ def get_columns(supplier_naming_by):
 def get_gl_entries(filters, before_report_date=True):
 	conditions, supplier_accounts = get_conditions(filters, before_report_date)
 	gl_entries = []
-	gl_entries = frappe.conn.sql("""select * from `tabGL Entry` 
+	gl_entries = frappe.db.sql("""select * from `tabGL Entry` 
 		where docstatus < 2 %s order by posting_date, account""" % 
 		(conditions), tuple(supplier_accounts), as_dict=1)
 	return gl_entries
@@ -99,7 +99,7 @@ def get_conditions(filters, before_report_date=True):
 	if filters.get("account"):
 		supplier_accounts = [filters["account"]]
 	else:
-		supplier_accounts = frappe.conn.sql_list("""select name from `tabAccount` 
+		supplier_accounts = frappe.db.sql_list("""select name from `tabAccount` 
 			where ifnull(master_type, '') = 'Supplier' and docstatus < 2 %s""" % 
 			conditions, filters)
 	
@@ -118,7 +118,7 @@ def get_conditions(filters, before_report_date=True):
 	
 def get_account_supplier_type_map():
 	account_supplier_type_map = {}
-	for each in frappe.conn.sql("""select acc.name, supp.supplier_type from `tabSupplier` supp, 
+	for each in frappe.db.sql("""select acc.name, supp.supplier_type from `tabSupplier` supp, 
 			`tabAccount` acc where supp.name = acc.master_name group by acc.name"""):
 		account_supplier_type_map[each[0]] = each[1]
 
@@ -128,14 +128,14 @@ def get_voucher_details():
 	voucher_details = {}
 	for dt in ["Purchase Invoice", "Journal Voucher"]:
 		voucher_details.setdefault(dt, frappe._dict())
-		for t in frappe.conn.sql("""select name, due_date, bill_no, bill_date 
+		for t in frappe.db.sql("""select name, due_date, bill_no, bill_date 
 				from `tab%s`""" % dt, as_dict=1):
 			voucher_details[dt].setdefault(t.name, t)
 		
 	return voucher_details
 
 def get_outstanding_amount(gle, report_date):
-	payment_amount = frappe.conn.sql("""
+	payment_amount = frappe.db.sql("""
 		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		from `tabGL Entry` 
 		where account = %s and posting_date <= %s and against_voucher_type = %s 

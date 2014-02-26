@@ -14,7 +14,7 @@ class DocType:
 	def validate(self):
 		for key in ["item_naming_by", "item_group", "stock_uom",
 			"allow_negative_stock"]:
-			frappe.conn.set_default(key, self.doc.fields.get(key, ""))
+			frappe.db.set_default(key, self.doc.fields.get(key, ""))
 			
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code", 

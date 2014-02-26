@@ -79,12 +79,12 @@ def get_dates(args):
 	return dates
 	
 def get_active_employees():
-	employees = frappe.conn.sql("""select name, employee_name, company 
+	employees = frappe.db.sql("""select name, employee_name, company 
 		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	return employees
 	
 def get_existing_attendance_records(args):
-	attendance = frappe.conn.sql("""select name, att_date, employee, status, naming_series 
+	attendance = frappe.db.sql("""select name, att_date, employee, status, naming_series 
 		from `tabAttendance` where att_date between %s and %s and docstatus < 2""", 
 		(args["from_date"], args["to_date"]), as_dict=1)
 		
@@ -129,7 +129,7 @@ def upload():
 		d = frappe._dict(zip(columns, row))
 		d["doctype"] = "Attendance"
 		if d.name:
-			d["docstatus"] = frappe.conn.get_value("Attendance", d.name, "docstatus")
+			d["docstatus"] = frappe.db.get_value("Attendance", d.name, "docstatus")
 			
 		try:
 			check_record(d, doctype_dl=doctype_dl)
@@ -141,7 +141,7 @@ def upload():
 			frappe.errprint(frappe.get_traceback())
 
 	if error:
-		frappe.conn.rollback()		
+		frappe.db.rollback()		
 	else:
-		frappe.conn.commit()
+		frappe.db.commit()
 	return {"messages": ret, "error": error}

@@ -16,7 +16,7 @@ class DocType:
 		
 	def validate(self):
 		if self.doc.fields.get("__islocal") or not self.doc.stock_uom:
-			self.doc.stock_uom = frappe.conn.get_value('Item', self.doc.item_code, 'stock_uom')
+			self.doc.stock_uom = frappe.db.get_value('Item', self.doc.item_code, 'stock_uom')
 				
 		self.validate_mandatory()
 		
@@ -60,7 +60,7 @@ class DocType:
 		self.doc.save()
 		
 	def get_first_sle(self):
-		sle = frappe.conn.sql("""
+		sle = frappe.db.sql("""
 			select * from `tabStock Ledger Entry`
 			where item_code = %s
 			and warehouse = %s

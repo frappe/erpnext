@@ -84,14 +84,14 @@ class StockController(AccountsController):
 		
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
-		for sle in frappe.conn.sql("""select warehouse, stock_value_difference, voucher_detail_no
+		for sle in frappe.db.sql("""select warehouse, stock_value_difference, voucher_detail_no
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 			(self.doc.doctype, self.doc.name), as_dict=True):
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
 		
 	def get_warehouse_account(self):
-		warehouse_account = dict(frappe.conn.sql("""select master_name, name from tabAccount 
+		warehouse_account = dict(frappe.db.sql("""select master_name, name from tabAccount 
 			where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 		return warehouse_account
 		
@@ -134,7 +134,7 @@ class StockController(AccountsController):
 		else:
 			condition = ""
 		
-		for d in frappe.conn.sql("""select distinct sle.voucher_type, sle.voucher_no 
+		for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no 
 			from `tabStock Ledger Entry` sle
 			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
 			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" % 
@@ -147,7 +147,7 @@ class StockController(AccountsController):
 	def get_voucherwise_gl_entries(self, future_stock_vouchers):
 		gl_entries = {}
 		if future_stock_vouchers:
-			for d in frappe.conn.sql("""select * from `tabGL Entry` 
+			for d in frappe.db.sql("""select * from `tabGL Entry` 
 				where posting_date >= %s and voucher_no in (%s)""" % 
 				('%s', ', '.join(['%s']*len(future_stock_vouchers))), 
 				tuple([self.doc.posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
@@ -156,7 +156,7 @@ class StockController(AccountsController):
 		return gl_entries
 		
 	def delete_gl_entries(self, voucher_type, voucher_no):
-		frappe.conn.sql("""delete from `tabGL Entry` 
+		frappe.db.sql("""delete from `tabGL Entry` 
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 					
 	def make_adjustment_entry(self, expected_gle, voucher_obj):
@@ -236,7 +236,7 @@ class StockController(AccountsController):
 			item_list, warehouse_list = self.get_distinct_item_warehouse()
 			
 		if item_list and warehouse_list:
-			res = frappe.conn.sql("""select item_code, voucher_type, voucher_no,
+			res = frappe.db.sql("""select item_code, voucher_type, voucher_no,
 				voucher_detail_no, posting_date, posting_time, stock_value,
 				warehouse, actual_qty as qty from `tabStock Ledger Entry` 
 				where company = %s and item_code in (%s) and warehouse in (%s)
@@ -264,6 +264,6 @@ class StockController(AccountsController):
 		return list(set(item_list)), list(set(warehouse_list))
 		
 	def make_cancel_gl_entries(self):
-		if frappe.conn.sql("""select name from `tabGL Entry` where voucher_type=%s 
+		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s 
 			and voucher_no=%s""", (self.doc.doctype, self.doc.name)):
 				self.make_gl_entries()

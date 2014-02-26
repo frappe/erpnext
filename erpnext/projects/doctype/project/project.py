@@ -32,12 +32,12 @@ class DocType:
 		self.add_calendar_event()
 		
 	def update_percent_complete(self):
-		total = frappe.conn.sql("""select count(*) from tabTask where project=%s""", 
+		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", 
 			self.doc.name)[0][0]
 		if total:
-			completed = frappe.conn.sql("""select count(*) from tabTask where
+			completed = frappe.db.sql("""select count(*) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.doc.name)[0][0]
-			frappe.conn.set_value("Project", self.doc.name, "percent_complete",
+			frappe.db.set_value("Project", self.doc.name, "percent_complete",
 			 	int(float(completed) / total * 100))
 
 	def add_calendar_event(self):

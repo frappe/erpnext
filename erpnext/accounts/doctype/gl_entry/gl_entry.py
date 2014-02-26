@@ -42,7 +42,7 @@ class DocType:
 				self.doc.account)
 			
 	def pl_must_have_cost_center(self):
-		if frappe.conn.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
+		if frappe.db.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
 			if not self.doc.cost_center and self.doc.voucher_type != 'Period Closing Voucher':
 				frappe.throw(_("Cost Center must be specified for PL Account: ") + 
 					self.doc.account)
@@ -55,13 +55,13 @@ class DocType:
 
 	def check_pl_account(self):
 		if self.doc.is_opening=='Yes' and \
-				frappe.conn.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
+				frappe.db.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
 			frappe.throw(_("For opening balance entry account can not be a PL account"))			
 
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 		
-		ret = frappe.conn.sql("""select group_or_ledger, docstatus, company 
+		ret = frappe.db.sql("""select group_or_ledger, docstatus, company 
 			from tabAccount where name=%s""", self.doc.account, as_dict=1)[0]
 		
 		if ret.group_or_ledger=='Group':
@@ -80,7 +80,7 @@ class DocType:
 		
 		def _get_cost_center_company():
 			if not self.cost_center_company.get(self.doc.cost_center):
-				self.cost_center_company[self.doc.cost_center] = frappe.conn.get_value(
+				self.cost_center_company[self.doc.cost_center] = frappe.db.get_value(
 					"Cost Center", self.doc.cost_center, "company")
 			
 			return self.cost_center_company[self.doc.cost_center]
@@ -91,10 +91,10 @@ class DocType:
 						
 def check_negative_balance(account, adv_adj=False):
 	if not adv_adj and account:
-		account_details = frappe.conn.get_value("Account", account, 
+		account_details = frappe.db.get_value("Account", account, 
 				["allow_negative_balance", "debit_or_credit"], as_dict=True)
 		if not account_details["allow_negative_balance"]:
-			balance = frappe.conn.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
+			balance = frappe.db.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
 				where account = %s""", account)
 			balance = account_details["debit_or_credit"] == "Debit" and \
 				flt(balance[0][0]) or -1*flt(balance[0][0])
@@ -108,9 +108,9 @@ def check_freezing_date(posting_date, adv_adj=False):
 		except authorized person
 	"""
 	if not adv_adj:
-		acc_frozen_upto = frappe.conn.get_value('Accounts Settings', None, 'acc_frozen_upto')
+		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
 		if acc_frozen_upto:
-			bde_auth_role = frappe.conn.get_value( 'Accounts Settings', None,'bde_auth_role')
+			bde_auth_role = frappe.db.get_value( 'Accounts Settings', None,'bde_auth_role')
 			if getdate(posting_date) <= getdate(acc_frozen_upto) \
 					and not bde_auth_role in frappe.user.get_roles():
 				frappe.throw(_("You are not authorized to do/modify back dated entries before ")
@@ -118,7 +118,7 @@ def check_freezing_date(posting_date, adv_adj=False):
 
 def update_outstanding_amt(account, against_voucher_type, against_voucher, on_cancel=False):
 	# get final outstanding amt
-	bal = flt(frappe.conn.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		from `tabGL Entry` 
 		where against_voucher_type=%s and against_voucher=%s and account = %s""", 
 		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
@@ -126,7 +126,7 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Voucher":
-		against_voucher_amount = flt(frappe.conn.sql("""
+		against_voucher_amount = flt(frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
 			and account = %s and ifnull(against_voucher, '') = ''""", 
@@ -143,13 +143,13 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-		frappe.conn.sql("update `tab%s` set outstanding_amount=%s where name='%s'" %
+		frappe.db.sql("update `tab%s` set outstanding_amount=%s where name='%s'" %
 		 	(against_voucher_type, bal, against_voucher))
 			
 def validate_frozen_account(account, adv_adj=None):
-	frozen_account = frappe.conn.get_value("Account", account, "freeze_account")
+	frozen_account = frappe.db.get_value("Account", account, "freeze_account")
 	if frozen_account == 'Yes' and not adv_adj:
-		frozen_accounts_modifier = frappe.conn.get_value( 'Accounts Settings', None, 
+		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None, 
 			'frozen_accounts_modifier')
 		
 		if not frozen_accounts_modifier:

@@ -32,7 +32,7 @@ class DocType:
 		
 	def validate_bom_no(self):
 		if self.doc.bom_no:
-			bom = frappe.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
+			bom = frappe.db.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
@@ -42,7 +42,7 @@ class DocType:
 					
 	def validate_sales_order(self):
 		if self.doc.sales_order:
-			so = frappe.conn.sql("""select name, delivery_date from `tabSales Order` 
+			so = frappe.db.sql("""select name, delivery_date from `tabSales Order` 
 				where name=%s and docstatus = 1""", self.doc.sales_order, as_dict=1)[0]
 
 			if not so.name:
@@ -61,18 +61,18 @@ class DocType:
 	
 	def validate_production_order_against_so(self):
 		# already ordered qty
-		ordered_qty_against_so = frappe.conn.sql("""select sum(qty) from `tabProduction Order`
+		ordered_qty_against_so = frappe.db.sql("""select sum(qty) from `tabProduction Order`
 			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""", 
 			(self.doc.production_item, self.doc.sales_order, self.doc.name))[0][0]
 
 		total_qty = flt(ordered_qty_against_so) + flt(self.doc.qty)
 		
 		# get qty from Sales Order Item table
-		so_item_qty = frappe.conn.sql("""select sum(qty) from `tabSales Order Item` 
+		so_item_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item` 
 			where parent = %s and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# get qty from Packing Item table
-		dnpi_qty = frappe.conn.sql("""select sum(qty) from `tabPacked Item` 
+		dnpi_qty = frappe.db.sql("""select sum(qty) from `tabPacked Item` 
 			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO
@@ -95,32 +95,32 @@ class DocType:
 
 	def update_status(self, status):
 		if status == 'Stopped':
-			frappe.conn.set(self.doc, 'status', cstr(status))
+			frappe.db.set(self.doc, 'status', cstr(status))
 		else:
 			if flt(self.doc.qty) == flt(self.doc.produced_qty):
-				frappe.conn.set(self.doc, 'status', 'Completed')
+				frappe.db.set(self.doc, 'status', 'Completed')
 			if flt(self.doc.qty) > flt(self.doc.produced_qty):
-				frappe.conn.set(self.doc, 'status', 'In Process')
+				frappe.db.set(self.doc, 'status', 'In Process')
 			if flt(self.doc.produced_qty) == 0:
-				frappe.conn.set(self.doc, 'status', 'Submitted')
+				frappe.db.set(self.doc, 'status', 'Submitted')
 
 
 	def on_submit(self):
 		if not self.doc.wip_warehouse:
 			frappe.throw(_("WIP Warehouse required before Submit"))
-		frappe.conn.set(self.doc,'status', 'Submitted')
+		frappe.db.set(self.doc,'status', 'Submitted')
 		self.update_planned_qty(self.doc.qty)
 		
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		stock_entry = frappe.conn.sql("""select name from `tabStock Entry` 
+		stock_entry = frappe.db.sql("""select name from `tabStock Entry` 
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
 			frappe.throw("""Submitted Stock Entry %s exists against this production order. 
 				Hence can not be cancelled.""" % stock_entry[0][0])
 
-		frappe.conn.set(self.doc,'status', 'Cancelled')
+		frappe.db.set(self.doc,'status', 'Cancelled')
 		self.update_planned_qty(-self.doc.qty)
 
 	def update_planned_qty(self, qty):
@@ -136,7 +136,7 @@ class DocType:
 
 @frappe.whitelist()	
 def get_item_details(item):
-	res = frappe.conn.sql("""select stock_uom, description
+	res = frappe.db.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
 	
@@ -144,7 +144,7 @@ def get_item_details(item):
 		return {}
 		
 	res = res[0]
-	bom = frappe.conn.sql("""select name from `tabBOM` where item=%s 
+	bom = frappe.db.sql("""select name from `tabBOM` where item=%s 
 		and ifnull(is_default, 0)=1""", item)
 	if bom:
 		res.bom_no = bom[0][0]

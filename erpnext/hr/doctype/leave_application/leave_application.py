@@ -17,7 +17,7 @@ class LeaveApproverIdentityError(frappe.ValidationError): pass
 from frappe.model.controller import DocListController
 class DocType(DocListController):
 	def setup(self):
-		if frappe.conn.exists(self.doc.doctype, self.doc.name):
+		if frappe.db.exists(self.doc.doctype, self.doc.name):
 			self.previous_doc = frappe.doc(self.doc.doctype, self.doc.name)
 		else:
 			self.previous_doc = None
@@ -76,11 +76,11 @@ class DocType(DocListController):
 				raise LeaveDayBlockedError
 			
 	def get_holidays(self):
-		tot_hol = frappe.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
+		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
 			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name 
 			and h1.holiday_date between %s and %s""", (self.doc.employee, self.doc.from_date, self.doc.to_date))
 		if not tot_hol:
-			tot_hol = frappe.conn.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2 
+			tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2 
 				where h1.parent = h2.name and h1.holiday_date between %s and %s
 				and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s""",
 				(self.doc.from_date, self.doc.to_date, self.doc.fiscal_year))
@@ -120,13 +120,13 @@ class DocType(DocListController):
 					#check if this leave type allow the remaining balance to be in negative. If yes then warn the user and continue to save else warn the user and don't save.
 					msgprint("There is not enough leave balance for Leave Type: %s" % \
 						(self.doc.leave_type,), 
-						raise_exception=not(frappe.conn.get_value("Leave Type", self.doc.leave_type,"allow_negative") or None))
+						raise_exception=not(frappe.db.get_value("Leave Type", self.doc.leave_type,"allow_negative") or None))
 					
 	def validate_leave_overlap(self):
 		if not self.doc.name:
 			self.doc.name = "New Leave Application"
 			
-		for d in frappe.conn.sql("""select name, leave_type, posting_date, 
+		for d in frappe.db.sql("""select name, leave_type, posting_date, 
 			from_date, to_date 
 			from `tabLeave Application` 
 			where 
@@ -141,7 +141,7 @@ class DocType(DocListController):
 			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
 
 	def validate_max_days(self):
-		max_days = frappe.conn.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
+		max_days = frappe.db.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
 		max_days = max_days and flt(max_days[0][0]) or 0
 		if max_days and self.doc.total_leave_days > max_days:
 			msgprint("Sorry ! You cannot apply for %s for more than %s days" % (self.doc.leave_type, max_days))
@@ -157,7 +157,7 @@ class DocType(DocListController):
 				+ _("Leave Approver can be one of") + ": "
 				+ comma_or(leave_approvers)), raise_exception=InvalidLeaveApproverError)
 		
-		elif self.doc.leave_approver and not frappe.conn.sql("""select name from `tabUserRole` 
+		elif self.doc.leave_approver and not frappe.db.sql("""select name from `tabUserRole` 
 			where parent=%s and role='Leave Approver'""", self.doc.leave_approver):
 				msgprint(get_fullname(self.doc.leave_approver) + ": " \
 					+ _("does not have role 'Leave Approver'"), raise_exception=InvalidLeaveApproverError)
@@ -215,14 +215,14 @@ class DocType(DocListController):
 
 @frappe.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):	
-	leave_all = frappe.conn.sql("""select total_leaves_allocated 
+	leave_all = frappe.db.sql("""select total_leaves_allocated 
 		from `tabLeave Allocation` where employee = %s and leave_type = %s
 		and fiscal_year = %s and docstatus = 1""", (employee, 
 			leave_type, fiscal_year))
 	
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
 	
-	leave_app = frappe.conn.sql("""select SUM(total_leave_days) 
+	leave_app = frappe.db.sql("""select SUM(total_leave_days) 
 		from `tabLeave Application` 
 		where employee = %s and leave_type = %s and fiscal_year = %s
 		and status="Approved" and docstatus = 1""", (employee, leave_type, fiscal_year))
@@ -232,14 +232,14 @@ def get_leave_balance(employee, leave_type, fiscal_year):
 	return ret
 
 def is_lwp(leave_type):
-	lwp = frappe.conn.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
+	lwp = frappe.db.sql("select is_lwp from `tabLeave Type` where name = %s", leave_type)
 	return lwp and cint(lwp[0][0]) or 0
 	
 @frappe.whitelist()
 def get_events(start, end):
 	events = []
-	employee = frappe.conn.get_default("employee", frappe.session.user)
-	company = frappe.conn.get_default("company", frappe.session.user)
+	employee = frappe.db.get_default("employee", frappe.session.user)
+	company = frappe.db.get_default("company", frappe.session.user)
 	
 	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")
@@ -256,13 +256,13 @@ def get_events(start, end):
 	return events
 	
 def add_department_leaves(events, start, end, employee, company):
-	department = frappe.conn.get_value("Employee", employee, "department")
+	department = frappe.db.get_value("Employee", employee, "department")
 	
 	if not department:
 		return
 	
 	# department leaves
-	department_employees = frappe.conn.sql_list("""select name from tabEmployee where department=%s
+	department_employees = frappe.db.sql_list("""select name from tabEmployee where department=%s
 		and company=%s""", (department, company))
 	
 	match_conditions = "employee in (\"%s\")" % '", "'.join(department_employees)
@@ -278,7 +278,7 @@ def add_leaves(events, start, end, employee, company, match_conditions=None):
 	if match_conditions:
 		query += " and " + match_conditions
 	
-	for d in frappe.conn.sql(query, (start, end, start, end), as_dict=True):
+	for d in frappe.db.sql(query, (start, end, start, end), as_dict=True):
 		e = {
 			"name": d.name,
 			"doctype": "Leave Application",
@@ -309,11 +309,11 @@ def add_block_dates(events, start, end, employee, company):
 		cnt+=1
 
 def add_holidays(events, start, end, employee, company):
-	applicable_holiday_list = frappe.conn.get_value("Employee", employee, "holiday_list")
+	applicable_holiday_list = frappe.db.get_value("Employee", employee, "holiday_list")
 	if not applicable_holiday_list:
 		return
 	
-	for holiday in frappe.conn.sql("""select name, holiday_date, description
+	for holiday in frappe.db.sql("""select name, holiday_date, description
 		from `tabHoliday` where parent=%s and holiday_date between %s and %s""", 
 		(applicable_holiday_list, start, end), as_dict=True):
 			events.append({
@@ -338,7 +338,7 @@ def query_for_permitted_employees(doctype, txt, searchfield, start, page_len, fi
 		condition = build_match_conditions("Employee")
 		condition = ("and " + condition) if condition else ""
 	
-	return frappe.conn.sql("""select name, employee_name from `tabEmployee`
+	return frappe.db.sql("""select name, employee_name from `tabEmployee`
 		where status = 'Active' and docstatus < 2 and
 		(`%s` like %s or employee_name like %s) %s
 		order by

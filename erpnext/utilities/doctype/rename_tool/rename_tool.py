@@ -13,7 +13,7 @@ class DocType:
 		
 @frappe.whitelist()
 def get_doctypes():
-	return frappe.conn.sql_list("""select name from tabDocType
+	return frappe.db.sql_list("""select name from tabDocType
 		where ifnull(allow_rename,0)=1 and module!='Core' order by name""")
 		
 @frappe.whitelist()
@@ -45,7 +45,7 @@ def upload(select_doctype=None, rows=None):
 			try:
 				if rename_doc(select_doctype, row[0], row[1]):
 					rename_log.append(_("Successful: ") + row[0] + " -> " + row[1])
-					frappe.conn.commit()
+					frappe.db.commit()
 				else:
 					rename_log.append(_("Ignored: ") + row[0] + " -> " + row[1])
 			except Exception, e:

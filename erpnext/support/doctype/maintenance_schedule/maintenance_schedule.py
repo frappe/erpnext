@@ -16,7 +16,7 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = frappe.conn.sql("""select item_name, description from `tabItem` 
+		item = frappe.db.sql("""select item_name, description from `tabItem` 
 			where name=%s""", (item_code), as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
@@ -26,7 +26,7 @@ class DocType(TransactionBase):
 		
 	def generate_schedule(self):
 		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
-		frappe.conn.sql("""delete from `tabMaintenance Schedule Detail` 
+		frappe.db.sql("""delete from `tabMaintenance Schedule Detail` 
 			where parent=%s""", (self.doc.name))
 		count = 1
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
@@ -64,7 +64,7 @@ class DocType(TransactionBase):
 				sp = frappe.bean("Sales Person", d.sales_person).make_controller()
 				email_map[d.sales_person] = sp.get_email_id()
 
-			scheduled_date = frappe.conn.sql("""select scheduled_date from 
+			scheduled_date = frappe.db.sql("""select scheduled_date from 
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and 
 				parent=%s""", (d.sales_person, d.item_code, self.doc.name), as_dict=1)
 
@@ -83,7 +83,7 @@ class DocType(TransactionBase):
 						"ref_name": self.doc.name
 					}).insert()
 
-		frappe.conn.set(self.doc, 'status', 'Submitted')		
+		frappe.db.set(self.doc, 'status', 'Submitted')		
 		
 	#get schedule dates
 	#----------------------
@@ -117,7 +117,7 @@ class DocType(TransactionBase):
 
 		if fy_details and fy_details[0]:
 			# check holiday list in employee master
-			holiday_list = frappe.conn.sql_list("""select h.holiday_date from `tabEmployee` emp, 
+			holiday_list = frappe.db.sql_list("""select h.holiday_date from `tabEmployee` emp, 
 				`tabSales Person` sp, `tabHoliday` h, `tabHoliday List` hl 
 				where sp.name=%s and emp.name=sp.employee 
 				and hl.name=emp.holiday_list and 
@@ -125,7 +125,7 @@ class DocType(TransactionBase):
 				hl.fiscal_year=%s""", (sales_person, fy_details[0]))
 			if not holiday_list:
 				# check global holiday list
-				holiday_list = frappe.conn.sql("""select h.holiday_date from 
+				holiday_list = frappe.db.sql("""select h.holiday_date from 
 					`tabHoliday` h, `tabHoliday List` hl 
 					where h.parent=hl.name and ifnull(hl.is_default, 0) = 1 
 					and hl.fiscal_year=%s""", fy_details[0])
@@ -197,7 +197,7 @@ class DocType(TransactionBase):
 	def validate_sales_order(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.prevdoc_docname:
-				chk = frappe.conn.sql("""select ms.name from `tabMaintenance Schedule` ms, 
+				chk = frappe.db.sql("""select ms.name from `tabMaintenance Schedule` ms, 
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and 
 					msi.prevdoc_docname=%s and ms.docstatus=1""", d.prevdoc_docname)
 				if chk:
@@ -212,7 +212,7 @@ class DocType(TransactionBase):
 				cur_s_no = cur_serial_no.split(',')
 				
 				for x in cur_s_no:
-					chk = frappe.conn.sql("""select name, status from `tabSerial No` 
+					chk = frappe.db.sql("""select name, status from `tabSerial No` 
 						where docstatus!=2 and name=%s""", (x))
 					chk1 = chk and chk[0][0] or ''
 					status = chk and chk[0][1] or ''
@@ -235,7 +235,7 @@ class DocType(TransactionBase):
 				cur_s_no = cur_serial_no.split(',')
 				
 				for x in cur_s_no:
-					dt = frappe.conn.sql("""select delivery_date from `tabSerial No` 
+					dt = frappe.db.sql("""select delivery_date from `tabSerial No` 
 						where name=%s""", x)
 					dt = dt and dt[0][0] or ''
 					
@@ -251,16 +251,16 @@ class DocType(TransactionBase):
 		cur_s_no = cur_serial_no.split(',')
 		
 		for x in cur_s_no:
-			frappe.conn.sql("""update `tabSerial No` set amc_expiry_date=%s, 
+			frappe.db.sql("""update `tabSerial No` set amc_expiry_date=%s, 
 				maintenance_status='Under AMC' where name=%s""", (amc_end_date, x))
 	
 	def on_update(self):
-		frappe.conn.set(self.doc, 'status', 'Draft')
+		frappe.db.set(self.doc, 'status', 'Draft')
 	
 	def validate_serial_no_warranty(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if cstr(d.serial_no).strip():
-				dt = frappe.conn.sql("""select warranty_expiry_date, amc_expiry_date 
+				dt = frappe.db.sql("""select warranty_expiry_date, amc_expiry_date 
 					from `tabSerial No` where name=%s""", d.serial_no, as_dict=1)
 				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
 					throw("""Serial No: %s is already under warranty upto %s. 
@@ -307,7 +307,7 @@ class DocType(TransactionBase):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
 				self.update_amc_date(d.serial_no, '')
-		frappe.conn.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self.doc, 'status', 'Cancelled')
 		delete_events(self.doc.doctype, self.doc.name)
 
 	def on_trash(self):

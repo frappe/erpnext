@@ -28,7 +28,7 @@ def get_applicable_block_dates(from_date, to_date, employee=None,
 	company=None, all_lists=False):
 	block_dates = []
 	for block_list in get_applicable_block_lists(employee, company, all_lists):
-		block_dates.extend(frappe.conn.sql("""select block_date, reason 
+		block_dates.extend(frappe.db.sql("""select block_date, reason 
 			from `tabLeave Block List Date` where parent=%s 
 			and block_date between %s and %s""", (block_list, from_date, to_date), 
 			as_dict=1))
@@ -39,12 +39,12 @@ def get_applicable_block_lists(employee=None, company=None, all_lists=False):
 	block_lists = []
 	
 	if not employee:
-		employee = frappe.conn.get_value("Employee", {"user_id":frappe.session.user})
+		employee = frappe.db.get_value("Employee", {"user_id":frappe.session.user})
 		if not employee:
 			return []
 	
 	if not company:
-		company = frappe.conn.get_value("Employee", employee, "company")
+		company = frappe.db.get_value("Employee", employee, "company")
 		
 	def add_block_list(block_list):
 		if block_list:
@@ -52,18 +52,18 @@ def get_applicable_block_lists(employee=None, company=None, all_lists=False):
 				block_lists.append(block_list)
 
 	# per department
-	department = frappe.conn.get_value("Employee",employee, "department")
+	department = frappe.db.get_value("Employee",employee, "department")
 	if department:
-		block_list = frappe.conn.get_value("Department", department, "leave_block_list")
+		block_list = frappe.db.get_value("Department", department, "leave_block_list")
 		add_block_list(block_list)
 
 	# global
-	for block_list in frappe.conn.sql_list("""select name from `tabLeave Block List`
+	for block_list in frappe.db.sql_list("""select name from `tabLeave Block List`
 		where ifnull(applies_to_all_departments,0)=1 and company=%s""", company):
 		add_block_list(block_list)
 		
 	return list(set(block_lists))
 	
 def is_user_in_allow_list(block_list):
-	return frappe.session.user in frappe.conn.sql_list("""select allow_user
+	return frappe.session.user in frappe.db.sql_list("""select allow_user
 		from `tabLeave Block List Allow` where parent=%s""", block_list)

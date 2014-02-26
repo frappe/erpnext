@@ -13,7 +13,7 @@ class TestJournalVoucher(unittest.TestCase):
 		jv_invoice.insert()
 		jv_invoice.submit()
 		
-		self.assertTrue(not frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_jv=%s""", jv_invoice.doc.name))
 		
 		jv_payment = frappe.bean(copy=test_records[0])
@@ -21,16 +21,16 @@ class TestJournalVoucher(unittest.TestCase):
 		jv_payment.insert()
 		jv_payment.submit()
 		
-		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_jv=%s""", jv_invoice.doc.name))
 			
-		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_jv=%s and credit=400""", jv_invoice.doc.name))
 		
 		# cancel jv_invoice
 		jv_invoice.cancel()
 		
-		self.assertTrue(not frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_jv=%s""", jv_invoice.doc.name))
 	
 	def test_jv_against_stock_account(self):
@@ -47,7 +47,7 @@ class TestJournalVoucher(unittest.TestCase):
 		set_perpetual_inventory(0)
 			
 	def test_monthly_budget_crossed_ignore(self):
-		frappe.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		self.clear_account_balance()
 		
 		jv = frappe.bean(copy=test_records[0])
@@ -57,12 +57,12 @@ class TestJournalVoucher(unittest.TestCase):
 		jv.doclist[1].credit = 20000.0
 		jv.insert()
 		jv.submit()
-		self.assertTrue(frappe.conn.get_value("GL Entry", 
+		self.assertTrue(frappe.db.get_value("GL Entry", 
 			{"voucher_type": "Journal Voucher", "voucher_no": jv.doc.name}))
 			
 	def test_monthly_budget_crossed_stop(self):
 		from erpnext.accounts.utils import BudgetError
-		frappe.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
+		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		self.clear_account_balance()
 		
 		jv = frappe.bean(copy=test_records[0])
@@ -74,14 +74,14 @@ class TestJournalVoucher(unittest.TestCase):
 		
 		self.assertRaises(BudgetError, jv.submit)
 		
-		frappe.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		
 	def test_yearly_budget_crossed_stop(self):
 		from erpnext.accounts.utils import BudgetError
 		self.clear_account_balance()
 		self.test_monthly_budget_crossed_ignore()
 		
-		frappe.conn.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
+		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
 		
 		jv = frappe.bean(copy=test_records[0])
 		jv.doc.posting_date = "2013-08-12"
@@ -93,11 +93,11 @@ class TestJournalVoucher(unittest.TestCase):
 		
 		self.assertRaises(BudgetError, jv.submit)
 		
-		frappe.conn.set_value("Company", "_Test Company", "yearly_bgt_flag", "Ignore")
+		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Ignore")
 		
 	def test_monthly_budget_on_cancellation(self):
 		from erpnext.accounts.utils import BudgetError
-		frappe.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
+		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		self.clear_account_balance()
 		
 		jv = frappe.bean(copy=test_records[0])
@@ -107,7 +107,7 @@ class TestJournalVoucher(unittest.TestCase):
 		jv.doclist[2].debit = 30000.0
 		jv.submit()
 		
-		self.assertTrue(frappe.conn.get_value("GL Entry", 
+		self.assertTrue(frappe.db.get_value("GL Entry", 
 			{"voucher_type": "Journal Voucher", "voucher_no": jv.doc.name}))
 		
 		jv1 = frappe.bean(copy=test_records[0])
@@ -117,15 +117,15 @@ class TestJournalVoucher(unittest.TestCase):
 		jv1.doclist[1].credit = 40000.0
 		jv1.submit()
 		
-		self.assertTrue(frappe.conn.get_value("GL Entry", 
+		self.assertTrue(frappe.db.get_value("GL Entry", 
 			{"voucher_type": "Journal Voucher", "voucher_no": jv1.doc.name}))
 		
 		self.assertRaises(BudgetError, jv.cancel)
 		
-		frappe.conn.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
+		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		
 	def clear_account_balance(self):
-		frappe.conn.sql("""delete from `tabGL Entry`""")
+		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 
 test_records = [

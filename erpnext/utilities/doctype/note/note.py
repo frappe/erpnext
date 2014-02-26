@@ -23,6 +23,6 @@ class DocType:
 	def validate(self):
 		if not self.doc.fields.get("__islocal"):
 			if frappe.session.user != self.doc.owner:
-				if frappe.session.user not in frappe.conn.sql_list("""select user from `tabNote User` 
+				if frappe.session.user not in frappe.db.sql_list("""select user from `tabNote User` 
 					where parent=%s and permission='Edit'""", self.doc.name):
 					frappe.msgprint("You are not authorized to edit this record.", raise_exception=True)

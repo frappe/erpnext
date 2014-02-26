@@ -25,6 +25,6 @@ class DocType(DocTypeNestedSet):
 		self.validate_one_root()
 		
 	def validate_name_with_item(self):
-		if frappe.conn.exists("Item", self.doc.name):
+		if frappe.db.exists("Item", self.doc.name):
 			frappe.msgprint("An item exists with same name (%s), please change the \
 				item group name or rename the item" % self.doc.name, raise_exception=1)

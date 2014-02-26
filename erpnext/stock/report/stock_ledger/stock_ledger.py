@@ -32,7 +32,7 @@ def get_columns():
 		"Batch:Link/Batch:100", "Serial #:Link/Serial No:100", "Company:Link/Company:100"]
 	
 def get_stock_ledger_entries(filters):
-	return frappe.conn.sql("""select concat_ws(" ", posting_date, posting_time) as date,
+	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, 
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
 		from `tabStock Ledger Entry`
@@ -44,7 +44,7 @@ def get_stock_ledger_entries(filters):
 
 def get_item_details(filters):
 	item_details = {}
-	for item in frappe.conn.sql("""select name, item_name, description, item_group, 
+	for item in frappe.db.sql("""select name, item_name, description, item_group, 
 			brand, stock_uom from `tabItem` {item_conditions}"""\
 			.format(item_conditions=get_item_conditions(filters)), filters, as_dict=1):
 		item_details.setdefault(item.name, item)

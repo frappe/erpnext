@@ -51,7 +51,7 @@ class DocType(StockController):
 
 	def validate_warehouse(self):
 		if not self.doc.fields.get("__islocal"):
-			item_code, warehouse = frappe.conn.get_value("Serial No", 
+			item_code, warehouse = frappe.db.get_value("Serial No", 
 				self.doc.name, ["item_code", "warehouse"])
 			if item_code != self.doc.item_code:
 				frappe.throw(_("Item Code cannot be changed for Serial No."), 
@@ -77,7 +77,7 @@ class DocType(StockController):
 	def set_status(self, last_sle):
 		if last_sle:
 			if last_sle.voucher_type == "Stock Entry":
-				document_type = frappe.conn.get_value("Stock Entry", last_sle.voucher_no, 
+				document_type = frappe.db.get_value("Stock Entry", last_sle.voucher_no, 
 					"purpose")
 			else:
 				document_type = last_sle.voucher_type
@@ -106,7 +106,7 @@ class DocType(StockController):
 			self.doc.purchase_rate = purchase_sle.incoming_rate
 			if purchase_sle.voucher_type == "Purchase Receipt":
 				self.doc.supplier, self.doc.supplier_name = \
-					frappe.conn.get_value("Purchase Receipt", purchase_sle.voucher_no, 
+					frappe.db.get_value("Purchase Receipt", purchase_sle.voucher_no, 
 						["supplier", "supplier_name"])
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no", 
@@ -120,7 +120,7 @@ class DocType(StockController):
 			self.doc.delivery_date = delivery_sle.posting_date
 			self.doc.delivery_time = delivery_sle.posting_time
 			self.doc.customer, self.doc.customer_name = \
-				frappe.conn.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no, 
+				frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no, 
 					["customer", "customer_name"])
 			if self.doc.warranty_period:
 				self.doc.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date), 
@@ -148,7 +148,7 @@ class DocType(StockController):
 		
 	def get_stock_ledger_entries(self):
 		sle_dict = {}
-		for sle in frappe.conn.sql("""select * from `tabStock Ledger Entry` 
+		for sle in frappe.db.sql("""select * from `tabStock Ledger Entry` 
 			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No' 
 			order by posting_date desc, posting_time desc, name desc""", 
 			("%%%s%%" % self.doc.name, self.doc.item_code), as_dict=1):
@@ -173,14 +173,14 @@ class DocType(StockController):
 			
 	def after_rename(self, old, new, merge=False):
 		"""rename serial_no text fields"""
-		for dt in frappe.conn.sql("""select parent from tabDocField 
+		for dt in frappe.db.sql("""select parent from tabDocField 
 			where fieldname='serial_no' and fieldtype='Text'"""):
 			
-			for item in frappe.conn.sql("""select name, serial_no from `tab%s` 
+			for item in frappe.db.sql("""select name, serial_no from `tab%s` 
 				where serial_no like '%%%s%%'""" % (dt[0], old)):
 				
 				serial_nos = map(lambda i: i==old and new or i, item[1].split('\n'))
-				frappe.conn.sql("""update `tab%s` set serial_no = %s 
+				frappe.db.sql("""update `tab%s` set serial_no = %s 
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(serial_nos), item[0]))
 	
@@ -219,7 +219,7 @@ def validate_serial_no(sle, item_det):
 					(": %s" % sle.item_code), SerialNoDuplicateError)
 			
 			for serial_no in serial_nos:
-				if frappe.conn.exists("Serial No", serial_no):
+				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.bean("Serial No", serial_no)
 					
 					if sr.doc.item_code!=sle.item_code:
@@ -254,12 +254,12 @@ def update_serial_nos(sle, item_det):
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):
 			serial_nos.append(make_autoname(item_det.serial_no_series))
-		frappe.conn.set(sle, "serial_no", "\n".join(serial_nos))
+		frappe.db.set(sle, "serial_no", "\n".join(serial_nos))
 		
 	if sle.serial_no:
 		serial_nos = get_serial_nos(sle.serial_no)
 		for serial_no in serial_nos:
-			if frappe.conn.exists("Serial No", serial_no):
+			if frappe.db.exists("Serial No", serial_no):
 				sr = frappe.bean("Serial No", serial_no)
 				sr.make_controller().via_stock_ledger = True
 				sr.doc.warehouse = sle.warehouse if sle.actual_qty > 0 else None
@@ -268,7 +268,7 @@ def update_serial_nos(sle, item_det):
 				make_serial_no(serial_no, sle)
 
 def get_item_details(item_code):
-	return frappe.conn.sql("""select name, has_batch_no, docstatus, 
+	return frappe.db.sql("""select name, has_batch_no, docstatus, 
 		is_stock_item, has_serial_no, serial_no_series 
 		from tabItem where name=%s""", item_code, as_dict=True)[0]
 		
@@ -289,7 +289,7 @@ def make_serial_no(serial_no, sle):
 	return sr.doc.name
 	
 def update_serial_nos_after_submit(controller, parentfield):
-	stock_ledger_entries = frappe.conn.sql("""select voucher_detail_no, serial_no
+	stock_ledger_entries = frappe.db.sql("""select voucher_detail_no, serial_no
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
 		(controller.doc.doctype, controller.doc.name), as_dict=True)
 		
@@ -304,4 +304,4 @@ def update_serial_nos_after_submit(controller, parentfield):
 
 		if d.serial_no != serial_no:
 			d.serial_no = serial_no
-			frappe.conn.set_value(d.doctype, d.name, "serial_no", serial_no)
+			frappe.db.set_value(d.doctype, d.name, "serial_no", serial_no)

@@ -19,14 +19,14 @@ class DocType(TransactionBase):
 		self.tname = 'Opportunity Item'
 		
 		self._prev = frappe._dict({
-			"contact_date": frappe.conn.get_value("Opportunity", self.doc.name, "contact_date") if \
+			"contact_date": frappe.db.get_value("Opportunity", self.doc.name, "contact_date") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": frappe.conn.get_value("Opportunity", self.doc.name, "contact_by") if \
+			"contact_by": frappe.db.get_value("Opportunity", self.doc.name, "contact_by") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
 		})
 		
 	def get_item_details(self, item_code):
-		item = frappe.conn.sql("""select item_name, stock_uom, description_html, description, item_group, brand
+		item = frappe.db.sql("""select item_name, stock_uom, description_html, description, item_group, brand
 			from `tabItem` where name = %s""", item_code, as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
@@ -38,7 +38,7 @@ class DocType(TransactionBase):
 		return ret
 
 	def get_cust_address(self,name):
-		details = frappe.conn.sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
+		details = frappe.db.sql("select customer_name, address, territory, customer_group from `tabCustomer` where name = '%s' and docstatus != 2" %(name), as_dict = 1)
 		if details:
 			ret = {
 				'customer_name':	details and details[0]['customer_name'] or '',
@@ -48,7 +48,7 @@ class DocType(TransactionBase):
 			}
 			# ********** get primary contact details (this is done separately coz. , in case there is no primary contact thn it would not be able to fetch customer details in case of join query)
 
-			contact_det = frappe.conn.sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
+			contact_det = frappe.db.sql("select contact_name, contact_no, email_id from `tabContact` where customer = '%s' and is_customer = 1 and is_primary_contact = 'Yes' and docstatus != 2" %(name), as_dict = 1)
 
 			ret['contact_person'] = contact_det and contact_det[0]['contact_name'] or ''
 			ret['contact_no']		 = contact_det and contact_det[0]['contact_no'] or ''
@@ -118,8 +118,8 @@ class DocType(TransactionBase):
 		
 	def declare_enquiry_lost(self,arg):
 		if not self.has_quotation():
-			frappe.conn.set(self.doc, 'status', 'Lost')
-			frappe.conn.set(self.doc, 'order_lost_reason', arg)
+			frappe.db.set(self.doc, 'status', 'Lost')
+			frappe.db.set(self.doc, 'order_lost_reason', arg)
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
@@ -127,7 +127,7 @@ class DocType(TransactionBase):
 		self.delete_events()
 		
 	def has_quotation(self):
-		return frappe.conn.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
 		
 @frappe.whitelist()
 def make_quotation(source_name, target_doclist=None):

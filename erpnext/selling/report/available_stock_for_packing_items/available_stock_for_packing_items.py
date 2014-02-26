@@ -41,7 +41,7 @@ def get_columns():
 
 def get_sales_bom_items():
 	sbom_item_map = {}
-	for sbom in frappe.conn.sql("""select parent, item_code, qty from `tabSales BOM Item` 
+	for sbom in frappe.db.sql("""select parent, item_code, qty from `tabSales BOM Item` 
 		where docstatus < 2""", as_dict=1):
 			sbom_item_map.setdefault(sbom.parent, {}).setdefault(sbom.item_code, sbom.qty)
 			
@@ -49,7 +49,7 @@ def get_sales_bom_items():
 
 def get_item_details():
 	item_map = {}
-	for item in frappe.conn.sql("""select name, item_name, description, stock_uom 
+	for item in frappe.db.sql("""select name, item_name, description, stock_uom 
 		from `tabItem`""", as_dict=1):
 			item_map.setdefault(item.name, item)
 			
@@ -57,7 +57,7 @@ def get_item_details():
 
 def get_item_warehouse_quantity():
 	iwq_map = {}
-	bin = frappe.conn.sql("""select item_code, warehouse, actual_qty from `tabBin` 
+	bin = frappe.db.sql("""select item_code, warehouse, actual_qty from `tabBin` 
 		where actual_qty > 0""")
 	for item, wh, qty in bin:
 		iwq_map.setdefault(item, {}).setdefault(wh, qty)

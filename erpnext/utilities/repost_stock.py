@@ -11,21 +11,21 @@ def repost(allow_negative_stock=False):
 	"""
 	Repost everything!
 	"""
-	frappe.conn.auto_commit_on_many_writes = 1
+	frappe.db.auto_commit_on_many_writes = 1
 	
 	if allow_negative_stock:
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.set_default("allow_negative_stock", 1)
 	
-	for d in frappe.conn.sql("""select distinct item_code, warehouse from 
+	for d in frappe.db.sql("""select distinct item_code, warehouse from 
 		(select item_code, warehouse from tabBin
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
 			repost_stock(d[0], d[1], allow_negative_stock)
 			
 	if allow_negative_stock:
-		frappe.conn.set_default("allow_negative_stock", 
-			frappe.conn.get_value("Stock Settings", None, "allow_negative_stock"))
-	frappe.conn.auto_commit_on_many_writes = 0
+		frappe.db.set_default("allow_negative_stock", 
+			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+	frappe.db.auto_commit_on_many_writes = 0
 
 def repost_stock(item_code, warehouse):
 	repost_actual_qty(item_code, warehouse)
@@ -46,7 +46,7 @@ def repost_actual_qty(item_code, warehouse):
 		pass
 	
 def get_reserved_qty(item_code, warehouse):
-	reserved_qty = frappe.conn.sql("""
+	reserved_qty = frappe.db.sql("""
 		select 
 			sum((dnpi_qty / so_item_qty) * (so_item_qty - so_item_delivered_qty))
 		from 
@@ -88,7 +88,7 @@ def get_reserved_qty(item_code, warehouse):
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 	
 def get_indented_qty(item_code, warehouse):
-	indented_qty = frappe.conn.sql("""select sum(pr_item.qty - ifnull(pr_item.ordered_qty, 0))
+	indented_qty = frappe.db.sql("""select sum(pr_item.qty - ifnull(pr_item.ordered_qty, 0))
 		from `tabMaterial Request Item` pr_item, `tabMaterial Request` pr
 		where pr_item.item_code=%s and pr_item.warehouse=%s 
 		and pr_item.qty > ifnull(pr_item.ordered_qty, 0) and pr_item.parent=pr.name 
@@ -97,7 +97,7 @@ def get_indented_qty(item_code, warehouse):
 	return flt(indented_qty[0][0]) if indented_qty else 0
 
 def get_ordered_qty(item_code, warehouse):
-	ordered_qty = frappe.conn.sql("""
+	ordered_qty = frappe.db.sql("""
 		select sum((po_item.qty - ifnull(po_item.received_qty, 0))*po_item.conversion_factor)
 		from `tabPurchase Order Item` po_item, `tabPurchase Order` po
 		where po_item.item_code=%s and po_item.warehouse=%s 
@@ -107,7 +107,7 @@ def get_ordered_qty(item_code, warehouse):
 	return flt(ordered_qty[0][0]) if ordered_qty else 0
 			
 def get_planned_qty(item_code, warehouse):
-	planned_qty = frappe.conn.sql("""
+	planned_qty = frappe.db.sql("""
 		select sum(ifnull(qty, 0) - ifnull(produced_qty, 0)) from `tabProduction Order` 
 		where production_item = %s and fg_warehouse = %s and status != "Stopped"
 		and docstatus=1 and ifnull(qty, 0) > ifnull(produced_qty, 0)""", (item_code, warehouse))

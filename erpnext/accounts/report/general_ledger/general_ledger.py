@@ -8,7 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	account_details = {}
-	for acc in frappe.conn.sql("""select name, debit_or_credit, group_or_ledger 
+	for acc in frappe.db.sql("""select name, debit_or_credit, group_or_ledger 
 		from tabAccount""", as_dict=1):
 			account_details.setdefault(acc.name, acc)
 	
@@ -49,7 +49,7 @@ def get_gl_entries(filters):
 	group_by_condition = "group by voucher_type, voucher_no, account" \
 		if filters.get("group_by_voucher") else "group by name"
 		
-	gl_entries = frappe.conn.sql("""select posting_date, account, 
+	gl_entries = frappe.db.sql("""select posting_date, account, 
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit, 
 			voucher_type, voucher_no, cost_center, remarks, is_opening, against 
 		from `tabGL Entry`
@@ -64,7 +64,7 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
-		lft, rgt = frappe.conn.get_value("Account", filters["account"], ["lft", "rgt"])
+		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount 
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 	else:

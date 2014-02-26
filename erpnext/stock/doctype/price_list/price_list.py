@@ -31,15 +31,15 @@ class DocType(DocListController):
 
 	def set_default_if_missing(self):
 		if cint(self.doc.selling):
-			if not frappe.conn.get_value("Selling Settings", None, "selling_price_list"):
+			if not frappe.db.get_value("Selling Settings", None, "selling_price_list"):
 				frappe.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.doc.name)
 
 		elif cint(self.doc.buying):
-			if not frappe.conn.get_value("Buying Settings", None, "buying_price_list"):
+			if not frappe.db.get_value("Buying Settings", None, "buying_price_list"):
 				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)
 
 	def update_item_price(self):
-		frappe.conn.sql("""update `tabItem Price` set currency=%s, 
+		frappe.db.sql("""update `tabItem Price` set currency=%s, 
 			buying=%s, selling=%s, modified=NOW() where price_list=%s""", 
 			(self.doc.currency, cint(self.doc.buying), cint(self.doc.selling), self.doc.name))
 

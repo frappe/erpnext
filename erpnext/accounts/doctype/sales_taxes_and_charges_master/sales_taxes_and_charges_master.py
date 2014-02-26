@@ -9,7 +9,7 @@ from frappe.model.controller import DocListController
 class DocType(DocListController):		
 	def validate(self):
 		if self.doc.is_default == 1:
-			frappe.conn.sql("""update `tabSales Taxes and Charges Master` set is_default = 0 
+			frappe.db.sql("""update `tabSales Taxes and Charges Master` set is_default = 0 
 				where ifnull(is_default,0) = 1 and name != %s and company = %s""", 
 				(self.doc.name, self.doc.company))
 				

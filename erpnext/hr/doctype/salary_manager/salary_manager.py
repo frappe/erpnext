@@ -21,7 +21,7 @@ class DocType:
 		cond = self.get_filter_condition()
 		cond += self.get_joining_releiving_condition()
 		
-		emp_list = frappe.conn.sql("""
+		emp_list = frappe.db.sql("""
 			select t1.name
 			from `tabEmployee` t1, `tabSalary Structure` t2 
 			where t1.docstatus!=2 and t2.docstatus != 2 
@@ -58,7 +58,7 @@ class DocType:
 		
 	
 	def get_month_details(self, year, month):
-		ysd = frappe.conn.sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
+		ysd = frappe.db.sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
 		if ysd:
 			from dateutil.relativedelta import relativedelta
 			import calendar, datetime
@@ -84,7 +84,7 @@ class DocType:
 		emp_list = self.get_emp_list()
 		ss_list = []
 		for emp in emp_list:
-			if not frappe.conn.sql("""select name from `tabSalary Slip` 
+			if not frappe.db.sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
 					""", (emp[0], self.doc.month, self.doc.fiscal_year, self.doc.company)):
 				ss = frappe.bean({
@@ -115,7 +115,7 @@ class DocType:
 			which are not submitted
 		"""
 		cond = self.get_filter_condition()
-		ss_list = frappe.conn.sql("""
+		ss_list = frappe.db.sql("""
 			select t1.name from `tabSalary Slip` t1 
 			where t1.docstatus = 0 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
@@ -131,11 +131,11 @@ class DocType:
 		for ss in ss_list:
 			ss_obj = get_obj("Salary Slip",ss[0],with_children=1)
 			try:
-				frappe.conn.set(ss_obj.doc, 'email_check', cint(self.doc.send_mail))
+				frappe.db.set(ss_obj.doc, 'email_check', cint(self.doc.send_mail))
 				if cint(self.doc.send_email) == 1:
 					ss_obj.send_mail_funct()
 					
-				frappe.conn.set(ss_obj.doc, 'docstatus', 1)
+				frappe.db.set(ss_obj.doc, 'docstatus', 1)
 			except Exception,e:
 				not_submitted_ss.append(ss[0])
 				msgprint(e)
@@ -177,7 +177,7 @@ class DocType:
 			Get total salary amount from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		tot = frappe.conn.sql("""
+		tot = frappe.db.sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1 
 			where t1.docstatus = 1 and month = '%s' and fiscal_year = '%s' %s
 		""" % (self.doc.month, self.doc.fiscal_year, cond))
@@ -190,7 +190,7 @@ class DocType:
 			get default bank account,default salary acount from company
 		"""
 		amt = self.get_total_salary()
-		default_bank_account = frappe.conn.get_value("Company", self.doc.company, 
+		default_bank_account = frappe.db.get_value("Company", self.doc.company, 
 			"default_bank_account")
 		if not default_bank_account:
 			msgprint("You can set Default Bank Account in Company master.")

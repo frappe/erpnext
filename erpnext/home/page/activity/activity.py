@@ -7,7 +7,7 @@ import frappe
 @frappe.whitelist()
 def get_feed(arg=None):
 	"""get feed"""	
-	return frappe.conn.sql("""select
+	return frappe.db.sql("""select
 		distinct t1.name, t1.feed_type, t1.doc_type, t1.doc_name, t1.subject, t1.owner,
 		t1.modified
 		from tabFeed t1, tabDocPerm t2

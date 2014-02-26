@@ -210,7 +210,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 
@@ -238,7 +238,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# cancel
 		si.cancel()
 
-		gle = frappe.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.db.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 
 		self.assertFalse(gle)
@@ -363,7 +363,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(w.doc.outstanding_amount, w.doc.grand_total)
 		
 	def test_payment(self):
-		frappe.conn.sql("""delete from `tabGL Entry`""")
+		frappe.db.sql("""delete from `tabGL Entry`""")
 		w = self.make()
 		
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
@@ -374,11 +374,11 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
+		self.assertEquals(frappe.db.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
 			161.8)
 	
 		jv.cancel()
-		self.assertEquals(frappe.conn.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
+		self.assertEquals(frappe.db.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
 			561.8)
 			
 	def test_time_log_batch(self):
@@ -390,18 +390,18 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001",
+		self.assertEquals(frappe.db.get_value("Time Log Batch", "_T-Time Log Batch-00001",
 		 	"status"), "Billed")
 
-		self.assertEquals(frappe.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
+		self.assertEquals(frappe.db.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Billed")
 
 		si.cancel()
 
-		self.assertEquals(frappe.conn.get_value("Time Log Batch", "_T-Time Log Batch-00001", 
+		self.assertEquals(frappe.db.get_value("Time Log Batch", "_T-Time Log Batch-00001", 
 			"status"), "Submitted")
 
-		self.assertEquals(frappe.conn.get_value("Time Log", "_T-Time Log-00001", "status"), 
+		self.assertEquals(frappe.db.get_value("Time Log", "_T-Time Log-00001", "status"), 
 			"Batched for Billing")
 			
 	def test_sales_invoice_gl_entry_without_aii(self):
@@ -411,7 +411,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 		
@@ -432,7 +432,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# cancel
 		si.cancel()
 		
-		gle = frappe.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.db.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
 		self.assertFalse(gle)
@@ -456,7 +456,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 		
 		# check stock ledger entries
-		sle = frappe.conn.sql("""select * from `tabStock Ledger Entry` 
+		sle = frappe.db.sql("""select * from `tabStock Ledger Entry` 
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
@@ -464,12 +464,12 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Item", "_Test Warehouse - _TC", -1.0])
 		
 		# check gl entries
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
-		stock_in_hand = frappe.conn.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
+		stock_in_hand = frappe.db.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
 		expected_gl_entries = sorted([
 			[si.doc.debit_to, 630.0, 0.0],
@@ -487,7 +487,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 		
 		si.cancel()
-		gle = frappe.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.db.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
 		self.assertFalse(gle)
@@ -520,7 +520,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 		
 		# check stock ledger entries
-		sle = frappe.conn.sql("""select * from `tabStock Ledger Entry` 
+		sle = frappe.db.sql("""select * from `tabStock Ledger Entry` 
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
 			si.doc.name, as_dict=1)[0]
 		self.assertTrue(sle)
@@ -528,7 +528,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Item", "_Test Warehouse No Account - _TC", -1.0])
 		
 		# check gl entries
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc, debit asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -545,7 +545,7 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
 				
 		si.cancel()
-		gle = frappe.conn.sql("""select * from `tabGL Entry` 
+		gle = frappe.db.sql("""select * from `tabGL Entry` 
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
 		
 		self.assertFalse(gle)
@@ -561,7 +561,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -588,7 +588,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.doc.name, as_dict=1)
 		self.assertTrue(gl_entries)
@@ -626,7 +626,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def _insert_pos_settings(self):
 		from erpnext.accounts.doctype.pos_setting.test_pos_setting \
 			import test_records as pos_setting_test_records
-		frappe.conn.sql("""delete from `tabPOS Setting`""")
+		frappe.db.sql("""delete from `tabPOS Setting`""")
 		
 		ps = frappe.bean(copy=pos_setting_test_records[0])
 		ps.insert()
@@ -653,17 +653,17 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 		si.load_from_db()
 		
-		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s""", si.doc.name))
 		
-		self.assertTrue(frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s and credit=300""", si.doc.name))
 			
 		self.assertEqual(si.doc.outstanding_amount, 261.8)
 		
 		si.cancel()
 		
-		self.assertTrue(not frappe.conn.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_invoice=%s""", si.doc.name))
 			
 	def test_recurring_invoice(self):
@@ -762,7 +762,7 @@ class TestSalesInvoice(unittest.TestCase):
 		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]
 		
 		def _test(i):
-			self.assertEquals(i+1, frappe.conn.sql("""select count(*) from `tabSales Invoice`
+			self.assertEquals(i+1, frappe.db.sql("""select count(*) from `tabSales Invoice`
 				where recurring_id=%s and docstatus=1""", base_si.doc.recurring_id)[0][0])
 			
 			next_date = get_next_date(base_si.doc.posting_date, no_of_months, 
@@ -770,7 +770,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 			manage_recurring_invoices(next_date=next_date, commit=False)
 			
-			recurred_invoices = frappe.conn.sql("""select name from `tabSales Invoice`
+			recurred_invoices = frappe.db.sql("""select name from `tabSales Invoice`
 				where recurring_id=%s and docstatus=1 order by name desc""",
 				base_si.doc.recurring_id)
 			
@@ -805,9 +805,9 @@ class TestSalesInvoice(unittest.TestCase):
 			base_si = _test(i)
 			
 	def clear_stock_account_balance(self):
-		frappe.conn.sql("delete from `tabStock Ledger Entry`")
-		frappe.conn.sql("delete from tabBin")
-		frappe.conn.sql("delete from `tabGL Entry`")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("delete from tabBin")
+		frappe.db.sql("delete from `tabGL Entry`")
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -824,9 +824,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
-		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"))
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Delivered")
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"), si.doc.name)
 			
 		return si
@@ -838,9 +838,9 @@ class TestSalesInvoice(unittest.TestCase):
 
 		serial_nos = get_serial_nos(si.doclist[1].serial_no)
 
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
-		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"))
 
 	def test_serialize_status(self):

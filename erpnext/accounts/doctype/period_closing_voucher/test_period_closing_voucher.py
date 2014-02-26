@@ -9,7 +9,7 @@ import frappe
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
 		# clear GL Entries
-		frappe.conn.sql("""delete from `tabGL Entry`""")
+		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher import test_records as jv_records
 		jv = frappe.bean(copy=jv_records[2])
@@ -27,7 +27,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		pcv.insert()
 		pcv.submit()
 		
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Period Closing Voucher' and voucher_no=%s
 			order by account asc, debit asc""", pcv.doc.name, as_dict=1)
 

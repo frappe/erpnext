@@ -9,26 +9,26 @@ test_records = []
 
 # from frappe.model.doc import Document
 # from frappe.model.code import get_obj
-# frappe.conn.sql = frappe.conn.sql
+# frappe.db.sql = frappe.db.sql
 # 
 # class TestSalaryManager(unittest.TestCase):
 # 	def setUp(self):
-# 		frappe.conn.begin()
+# 		frappe.db.begin()
 # 		for rec in [des1, dep1, branch1, grade1, comp1, emp1, emp2]:
 # 			rec.save(1)
 # 					
 # 		ss1[0].employee = emp1.name
 # 		for s in ss1: s.save(1)
 # 		for s in ss1[1:]:
-# 			frappe.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
-# 			frappe.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
+# 			frappe.db.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
+# 			frappe.db.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss1[0].name, s.name))
 # 			
 # 		
 # 		ss2[0].employee = emp2.name
 # 		for s in ss2: s.save(1)		
 # 		for s in ss2[1:]:
-# 			frappe.conn.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
-# 			frappe.conn.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
+# 			frappe.db.sql("update `tabSalary Structure Earning` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
+# 			frappe.db.sql("update `tabSalary Structure Deduction` set parent = '%s' where name = '%s'" % (ss2[0].name, s.name))
 # 			
 # 		sman.save()
 # 		self.sm = get_obj('Salary Manager')	
@@ -36,7 +36,7 @@ test_records = []
 # 		self.sm.create_sal_slip()
 # 		
 # 	def test_creation(self):
-# 		ssid = frappe.conn.sql("""
+# 		ssid = frappe.db.sql("""
 # 			select name, department 
 # 			from `tabSalary Slip` 
 # 			where month = '08' and fiscal_year='2011-2012'""")
@@ -46,7 +46,7 @@ test_records = []
 # 		
 # 		
 # 	def test_lwp_calc(self):
-# 		ss = frappe.conn.sql("""
+# 		ss = frappe.db.sql("""
 # 			select payment_days
 # 			from `tabSalary Slip` 
 # 			where month = '08' and fiscal_year='2011-2012' and employee = '%s'
@@ -55,7 +55,7 @@ test_records = []
 # 		self.assertTrue(ss[0][0]==27)
 # 		
 # 	def test_net_pay(self):
-# 		ss = frappe.conn.sql("""
+# 		ss = frappe.db.sql("""
 # 			select rounded_total 
 # 			from `tabSalary Slip` 
 # 			where month = '08'
@@ -64,7 +64,7 @@ test_records = []
 # 
 # 	def test_submit(self):
 # 		self.sm.submit_salary_slip()
-# 		ss = frappe.conn.sql("""
+# 		ss = frappe.db.sql("""
 # 			select docstatus 
 # 			from `tabSalary Slip` 
 # 			where month = '08'
@@ -72,7 +72,7 @@ test_records = []
 # 		self.assertTrue(ss[0][0]==1)
 # 		
 # 	def tearDown(self):
-# 		frappe.conn.rollback()
+# 		frappe.db.rollback()
 # 		
 # #--------------------------------------------
 # # test data

@@ -8,9 +8,9 @@ class TestNewsletter(unittest.TestCase):
 		w = frappe.bean(test_records[0])
 		w.insert()
 		self.assertTrue("test_lead@example.com" in w.controller.get_recipients())
-		frappe.conn.sql("""delete from `tabBulk Email`""")
+		frappe.db.sql("""delete from `tabBulk Email`""")
 		w.controller.send_emails()
-		self.assertTrue(frappe.conn.get_value("Bulk Email", {"recipient": "test_lead@example.com"}))
+		self.assertTrue(frappe.db.get_value("Bulk Email", {"recipient": "test_lead@example.com"}))
 
 	def test_get_recipients_lead_by_status(self):
 		w = frappe.bean(test_records[0])
@@ -33,7 +33,7 @@ class TestNewsletter(unittest.TestCase):
 		w = frappe.bean(test_records[2])
 		w.insert()
 		self.assertTrue("test_custom2@example.com" in w.controller.get_recipients())
-		self.assertTrue(frappe.conn.get("Lead", 
+		self.assertTrue(frappe.db.get("Lead", 
 			{"email_id": "test_custom2@example.com"}))
 
 

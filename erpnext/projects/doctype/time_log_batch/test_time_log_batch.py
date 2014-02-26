@@ -15,15 +15,15 @@ class TimeLogBatchTest(unittest.TestCase):
 		time_log.insert()
 		time_log.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Time Log", time_log.doc.name, "status"), "Submitted")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log.doc.name, "status"), "Submitted")
 		tlb = frappe.bean(copy=test_records[0])
 		tlb.doclist[1].time_log = time_log.doc.name
 		tlb.insert()
 		tlb.submit()
 
-		self.assertEquals(frappe.conn.get_value("Time Log", time_log.doc.name, "status"), "Batched for Billing")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log.doc.name, "status"), "Batched for Billing")
 		tlb.cancel()
-		self.assertEquals(frappe.conn.get_value("Time Log", time_log.doc.name, "status"), "Submitted")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log.doc.name, "status"), "Submitted")
 
 test_records = [[
 	{

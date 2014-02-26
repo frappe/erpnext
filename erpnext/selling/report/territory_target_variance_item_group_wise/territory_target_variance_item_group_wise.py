@@ -60,7 +60,7 @@ def get_columns(filters):
 
 #Get territory & item group details
 def get_territory_details(filters):
-	return frappe.conn.sql("""select t.name, td.item_group, td.target_qty, 
+	return frappe.db.sql("""select t.name, td.item_group, td.target_qty, 
 		td.target_amount, t.distribution_id 
 		from `tabTerritory` t, `tabTarget Detail` td 
 		where td.parent=t.name and td.fiscal_year=%s order by t.name""", 
@@ -70,7 +70,7 @@ def get_territory_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in frappe.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
+	for d in frappe.db.sql("""select bd.name, bdd.month, bdd.percentage_allocation 
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
@@ -81,7 +81,7 @@ def get_target_distribution_details(filters):
 def get_achieved_details(filters):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
-	item_details = frappe.conn.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date, 
+	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date, 
 		so.territory, MONTHNAME(so.transaction_date) as month_name 
 		from `tabSales Order Item` soi, `tabSales Order` so 
 		where soi.parent=so.name and so.docstatus=1 and so.transaction_date>=%s and 
@@ -130,4 +130,4 @@ def get_territory_item_month_map(filters):
 	return tim_map
 
 def get_item_group(item_name):
-	return frappe.conn.get_value("Item", item_name, "item_group")
+	return frappe.db.get_value("Item", item_name, "item_group")

@@ -8,12 +8,12 @@ import frappe
 def after_install():
 	import_defaults()
 	import_country_and_currency()
-	frappe.conn.set_value('Control Panel', None, 'home_page', 'setup-wizard')
+	frappe.db.set_value('Control Panel', None, 'home_page', 'setup-wizard')
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	set_single_defaults()
-	frappe.conn.commit()
+	frappe.db.commit()
 
 def import_country_and_currency():
 	from frappe.country_info import get_all
@@ -28,7 +28,7 @@ def import_country_and_currency():
 			"time_zones": "\n".join(country.timezones or [])
 		}).insert()
 		
-		if country.currency and not frappe.conn.exists("Currency", country.currency):
+		if country.currency and not frappe.db.exists("Currency", country.currency):
 			frappe.doc({
 				"doctype": "Currency",
 				"currency_name": country.currency,
@@ -133,11 +133,11 @@ def feature_setup():
 
 def set_single_defaults():
 	sql = "select dt.name, df.fieldname, df.default from `tabDocType` dt, `tabDocField` df where dt.issingle=1 and df.parent=dt.name and ifnull(df.default, '')!=''"
-	for doctype, field, value in frappe.conn.sql(sql):
+	for doctype, field, value in frappe.db.sql(sql):
 		b = frappe.bean(doctype, doctype)
 		try:
 			setattr(b.doc.fields, field, value)
 			b.save()
 		except frappe.MandatoryError:
 			pass
-	frappe.conn.set_default("date_format", "dd-mm-yyyy")
+	frappe.db.set_default("date_format", "dd-mm-yyyy")

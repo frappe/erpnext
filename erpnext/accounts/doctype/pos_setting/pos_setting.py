@@ -23,7 +23,7 @@ class DocType:
 		self.validate_all_link_fields()
 		
 	def check_for_duplicate(self):
-		res = frappe.conn.sql("""select name, user from `tabPOS Setting` 
+		res = frappe.db.sql("""select name, user from `tabPOS Setting` 
 			where ifnull(user, '') = %s and name != %s and company = %s""", 
 			(self.doc.user, self.doc.name, self.doc.company))
 		if res:
@@ -46,14 +46,14 @@ class DocType:
 		
 		for link_dt, dn_list in accounts.items():
 			for link_dn in dn_list:
-				if link_dn and not frappe.conn.exists({"doctype": link_dt, 
+				if link_dn and not frappe.db.exists({"doctype": link_dt, 
 						"company": self.doc.company, "name": link_dn}):
 					frappe.throw(link_dn +_(" does not belong to ") + self.doc.company)
 
 	def on_update(self):
 		frappe.defaults.clear_default("is_pos")
 
-		pos_view_users = frappe.conn.sql_list("""select user from `tabPOS Setting`""")
+		pos_view_users = frappe.db.sql_list("""select user from `tabPOS Setting`""")
 		for user in pos_view_users:
 			if user:
 				frappe.defaults.set_user_default("is_pos", 1, user)

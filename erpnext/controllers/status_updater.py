@@ -85,7 +85,7 @@ class StatusUpdater(DocListController):
 					break
 		
 			if update:
-				frappe.conn.set_value(self.doc.doctype, self.doc.name, "status", self.doc.status)
+				frappe.db.set_value(self.doc.doctype, self.doc.name, "status", self.doc.status)
 	
 	def on_communication(self):
 		self.communication_set = True
@@ -118,7 +118,7 @@ class StatusUpdater(DocListController):
 					args['name'] = d.fields[args['join_field']]
 
 					# get all qty where qty > target_field
-					item = frappe.conn.sql("""select item_code, `%(target_ref_field)s`, 
+					item = frappe.db.sql("""select item_code, `%(target_ref_field)s`, 
 						`%(target_field)s`, parenttype, parent from `tab%(target_dt)s` 
 						where `%(target_ref_field)s` < `%(target_field)s` 
 						and name="%(name)s" and docstatus=1""" % args, as_dict=1)
@@ -204,7 +204,7 @@ class StatusUpdater(DocListController):
 							and (docstatus=1))""" % args
 			
 					if args['detail_id']:
-						frappe.conn.sql("""update `tab%(target_dt)s` 
+						frappe.db.sql("""update `tab%(target_dt)s` 
 							set %(target_field)s = (select sum(%(source_field)s) 
 								from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s" 
 								and (docstatus=1 %(cond)s)) %(second_source_condition)s
@@ -217,7 +217,7 @@ class StatusUpdater(DocListController):
 					args['name'] = name
 				
 					# update percent complete in the parent table
-					frappe.conn.sql("""update `tab%(target_parent_dt)s` 
+					frappe.db.sql("""update `tab%(target_parent_dt)s` 
 						set %(target_parent_field)s = (select sum(if(%(target_ref_field)s > 
 							ifnull(%(target_field)s, 0), %(target_field)s, 
 							%(target_ref_field)s))/sum(%(target_ref_field)s)*100 
@@ -226,7 +226,7 @@ class StatusUpdater(DocListController):
 
 					# update field
 					if args.get('status_field'):
-						frappe.conn.sql("""update `tab%(target_parent_dt)s` 
+						frappe.db.sql("""update `tab%(target_parent_dt)s` 
 							set %(status_field)s = if(ifnull(%(target_parent_field)s,0)<0.001, 
 								'Not %(keyword)s', if(%(target_parent_field)s>=99.99, 
 								'Fully %(keyword)s', 'Partly %(keyword)s'))
@@ -236,7 +236,7 @@ class StatusUpdater(DocListController):
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")
 		zero_amount_refdoc = []
-		all_zero_amount_refdoc = frappe.conn.sql_list("""select name from `tab%s` 
+		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s` 
 			where docstatus=1 and net_total = 0""" % ref_dt)
 	
 		for item in self.doclist.get({"parentfield": "entries"}):
@@ -250,16 +250,16 @@ class StatusUpdater(DocListController):
 	
 	def update_biling_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
-			ref_doc_qty = flt(frappe.conn.sql("""select sum(ifnull(qty, 0)) from `tab%s Item` 
+			ref_doc_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0)) from `tab%s Item` 
 				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])
 			
-			billed_qty = flt(frappe.conn.sql("""select sum(ifnull(qty, 0)) 
+			billed_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0)) 
 				from `tab%s Item` where %s=%s and docstatus=1""" % 
 				(self.doc.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 			
 			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
 				/ ref_doc_qty)*100
-			frappe.conn.set_value(ref_dt, ref_dn, "per_billed", per_billed)
+			frappe.db.set_value(ref_dt, ref_dn, "per_billed", per_billed)
 			
 			from frappe.model.meta import has_field
 			if has_field(ref_dt, "billing_status"):
@@ -267,7 +267,7 @@ class StatusUpdater(DocListController):
 				elif per_billed >= 99.99: billing_status = "Fully Billed"
 				else: billing_status = "Partly Billed"
 			
-				frappe.conn.set_value(ref_dt, ref_dn, "billing_status", billing_status)
+				frappe.db.set_value(ref_dt, ref_dn, "billing_status", billing_status)
 							
 def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	"""
@@ -276,11 +276,11 @@ def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 	if item_tolerance.get(item_code):
 		return item_tolerance[item_code], item_tolerance, global_tolerance
 	
-	tolerance = flt(frappe.conn.get_value('Item',item_code,'tolerance') or 0)
+	tolerance = flt(frappe.db.get_value('Item',item_code,'tolerance') or 0)
 
 	if not tolerance:
 		if global_tolerance == None:
-			global_tolerance = flt(frappe.conn.get_value('Global Defaults', None, 
+			global_tolerance = flt(frappe.db.get_value('Global Defaults', None, 
 				'tolerance'))
 		tolerance = global_tolerance
 	

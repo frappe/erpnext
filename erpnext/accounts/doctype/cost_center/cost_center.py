@@ -14,7 +14,7 @@ class DocType(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_cost_center'
 				
 	def autoname(self):
-		company_abbr = frappe.conn.sql("select abbr from tabCompany where name=%s", 
+		company_abbr = frappe.db.sql("select abbr from tabCompany where name=%s", 
 			self.doc.company)[0][0]
 		self.doc.name = self.doc.cost_center_name.strip() + ' - ' + company_abbr
 		
@@ -46,10 +46,10 @@ class DocType(DocTypeNestedSet):
 			return 1
 
 	def check_gle_exists(self):
-		return frappe.conn.get_value("GL Entry", {"cost_center": self.doc.name})
+		return frappe.db.get_value("GL Entry", {"cost_center": self.doc.name})
 		
 	def check_if_child_exists(self):
-		return frappe.conn.sql("select name from `tabCost Center` where \
+		return frappe.db.sql("select name from `tabCost Center` where \
 			parent_cost_center = %s and docstatus != 2", self.doc.name)
 
 	def validate_budget_details(self):
@@ -67,7 +67,7 @@ class DocType(DocTypeNestedSet):
 		"""
 			Cost Center name must be unique
 		"""
-		if (self.doc.fields.get("__islocal") or not self.doc.name) and frappe.conn.sql("select name from `tabCost Center` where cost_center_name = %s and company=%s", (self.doc.cost_center_name, self.doc.company)):
+		if (self.doc.fields.get("__islocal") or not self.doc.name) and frappe.db.sql("select name from `tabCost Center` where cost_center_name = %s and company=%s", (self.doc.cost_center_name, self.doc.company)):
 			msgprint("Cost Center Name already exists, please rename", raise_exception=1)
 			
 		self.validate_mandatory()
@@ -85,7 +85,7 @@ class DocType(DocTypeNestedSet):
 		
 	def after_rename(self, olddn, newdn, merge=False):
 		if not merge:
-			frappe.conn.set_value("Cost Center", newdn, "cost_center_name", 
+			frappe.db.set_value("Cost Center", newdn, "cost_center_name", 
 				" - ".join(newdn.split(" - ")[:-1]))
 		else:
 			super(DocType, self).after_rename(olddn, newdn, merge)

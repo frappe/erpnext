@@ -8,7 +8,7 @@ import frappe
 
 @frappe.whitelist()
 def get_time_log_list(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.conn.get_values("Time Log", filters, ["name", "activity_type", "owner"])
+	return frappe.db.get_values("Time Log", filters, ["name", "activity_type", "owner"])
 
 @frappe.whitelist()
 def query_task(doctype, txt, searchfield, start, page_len, filters):
@@ -19,7 +19,7 @@ def query_task(doctype, txt, searchfield, start, page_len, filters):
 	match_conditions = build_match_conditions("Task")
 	match_conditions = ("and" + match_conditions) if match_conditions else ""
 	
-	return frappe.conn.sql("""select name, subject from `tabTask`
+	return frappe.db.sql("""select name, subject from `tabTask`
 		where (`%s` like %s or `subject` like %s) %s
 		order by
 			case when `subject` like %s then 0 else 1 end,

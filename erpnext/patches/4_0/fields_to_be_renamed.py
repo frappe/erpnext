@@ -112,7 +112,7 @@ def reload_docs(docs):
 		frappe.reload_doc(get_module(dn),	"doctype", dn.lower().replace(" ", "_"))
 	
 	# reload all standard print formats
-	for pf in frappe.conn.sql("""select name, module from `tabPrint Format` 
+	for pf in frappe.db.sql("""select name, module from `tabPrint Format` 
 			where ifnull(standard, 'No') = 'Yes'""", as_dict=1):
 		try:
 			frappe.reload_doc(pf.module, "Print Format", pf.name)
@@ -121,10 +121,10 @@ def reload_docs(docs):
 			pass
 		
 	# reload all standard reports
-	for r in frappe.conn.sql("""select name, ref_doctype from `tabReport` 
+	for r in frappe.db.sql("""select name, ref_doctype from `tabReport` 
 		where ifnull(is_standard, 'No') = 'Yes'
 		and report_type in ('Report Builder', 'Query Report')""", as_dict=1):
 			frappe.reload_doc(get_module(r.ref_doctype), "Report", r.name)
 			
 def get_module(dn):
-	return frappe.conn.get_value("DocType", dn, "module").lower().replace(" ", "_")
+	return frappe.db.get_value("DocType", dn, "module").lower().replace(" ", "_")

@@ -90,7 +90,7 @@ def validate_total_debit_credit(total_debit, total_credit):
 			
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Voucher":
-		aii_accounts = [d[0] for d in frappe.conn.sql("""select name from tabAccount 
+		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount 
 			where account_type = 'Warehouse' and ifnull(master_name, '')!=''""")]
 		
 		for entry in gl_map:
@@ -107,12 +107,12 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 		
 	if not gl_entries:
-		gl_entries = frappe.conn.sql("""select * from `tabGL Entry` 
+		gl_entries = frappe.db.sql("""select * from `tabGL Entry` 
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
 	if gl_entries:
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 	
-	frappe.conn.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
+	frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", 
 		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
 	
 	for entry in gl_entries:

@@ -30,7 +30,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr_bean.insert()
 			
 	def test_ordered_qty(self):
-		frappe.conn.sql("delete from tabBin")
+		frappe.db.sql("delete from tabBin")
 		
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
@@ -44,7 +44,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.doclist[1].item_code = "_Test Item"
 		po.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
+		self.assertEquals(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty"), 10)
 		
 		pr = make_purchase_receipt(po.doc.name)
@@ -58,10 +58,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr_bean.insert()
 		pr_bean.submit()
 		
-		self.assertEquals(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
+		self.assertEquals(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 6.0)
 			
-		frappe.conn.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
 			
 		pr1 = make_purchase_receipt(po.doc.name)
 		pr1[0].naming_series = "_T-Purchase Receipt-"
@@ -71,7 +71,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr1_bean.insert()
 		pr1_bean.submit()
 		
-		self.assertEquals(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
+		self.assertEquals(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)
 		
 	def test_make_purchase_invoice(self):

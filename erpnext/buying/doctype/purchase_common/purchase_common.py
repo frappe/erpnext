@@ -42,7 +42,7 @@ class DocType(BuyingController):
 
 			# update last purchsae rate
 			if last_purchase_rate:
-				frappe.conn.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
+				frappe.db.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
 					(flt(last_purchase_rate), d.item_code))
 	
 	def get_last_purchase_rate(self, obj):
@@ -64,7 +64,7 @@ class DocType(BuyingController):
 					# if no last purchase found, reset all values to 0
 					d.base_price_list_rate = d.base_rate = d.price_list_rate = d.rate = d.discount_percentage = 0
 					
-					item_last_purchase_rate = frappe.conn.get_value("Item",
+					item_last_purchase_rate = frappe.db.get_value("Item",
 						d.item_code, "last_purchase_rate")
 					if item_last_purchase_rate:
 						d.base_price_list_rate = d.base_rate = d.price_list_rate \
@@ -78,7 +78,7 @@ class DocType(BuyingController):
 				frappe.throw("Please enter valid qty for item %s" % cstr(d.item_code))
 			
 			# udpate with latest quantities
-			bin = frappe.conn.sql("""select projected_qty from `tabBin` where 
+			bin = frappe.db.sql("""select projected_qty from `tabBin` where 
 				item_code = %s and warehouse = %s""", (d.item_code, d.warehouse), as_dict=1)
 			
 			f_lst ={'projected_qty': bin and flt(bin[0]['projected_qty']) or 0, 'ordered_qty': 0, 'received_qty' : 0}
@@ -88,7 +88,7 @@ class DocType(BuyingController):
 				if d.fields.has_key(x):
 					d.fields[x] = f_lst[x]
 			
-			item = frappe.conn.sql("""select is_stock_item, is_purchase_item, 
+			item = frappe.db.sql("""select is_stock_item, is_purchase_item, 
 				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""", d.item_code)
 			if not item:
 				frappe.throw("Item %s does not exist in Item Master." % cstr(d.item_code))
@@ -113,7 +113,7 @@ class DocType(BuyingController):
 			# if is not stock item
 			f = [d.schedule_date, d.item_code, d.description]
 			
-			ch = frappe.conn.sql("""select is_stock_item from `tabItem` where name = %s""", d.item_code)
+			ch = frappe.db.sql("""select is_stock_item from `tabItem` where name = %s""", d.item_code)
 			
 			if ch and ch[0][0] == 'Yes':	
 				# check for same items
@@ -139,21 +139,21 @@ class DocType(BuyingController):
 		# but if in Material Request uom KG it can change in PO
 		
 		get_qty = (transaction == 'Material Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
-		qty = frappe.conn.sql("""select sum(%s) from `tab%s` where %s = %s and 
+		qty = frappe.db.sql("""select sum(%s) from `tab%s` where %s = %s and 
 			docstatus = 1 and parent != %s""" % (get_qty, curr_doctype, ref_tab_fname, '%s', '%s'), 
 			(ref_tab_dn, curr_parent_name))
 		qty = qty and flt(qty[0][0]) or 0 
 		
 		# get total qty of ref doctype
 		#--------------------
-		max_qty = frappe.conn.sql("""select qty from `tab%s` where name = %s 
+		max_qty = frappe.db.sql("""select qty from `tab%s` where name = %s 
 			and docstatus = 1""" % (ref_doc_tname, '%s'), ref_tab_dn)
 		max_qty = max_qty and flt(max_qty[0][0]) or 0
 		
 		return cstr(qty)+'~~~'+cstr(max_qty)
 
 	def check_for_stopped_status(self, doctype, docname):
-		stopped = frappe.conn.sql("""select name from `tab%s` where name = %s and 
+		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and 
 			status = 'Stopped'""" % (doctype, '%s'), docname)
 		if stopped:
 			frappe.throw("One cannot do any transaction against %s : %s, it's status is 'Stopped'" % 
@@ -161,7 +161,7 @@ class DocType(BuyingController):
 	
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
 		if check == 'Next':
-			submitted = frappe.conn.sql("""select t1.name from `tab%s` t1,`tab%s` t2 
+			submitted = frappe.db.sql("""select t1.name from `tab%s` t1,`tab%s` t2 
 				where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1""" 
 				% (doctype, detail_doctype, '%s'), docname)
 			if submitted:
@@ -169,7 +169,7 @@ class DocType(BuyingController):
 					+ _("has already been submitted."))
 
 		if check == 'Previous':
-			submitted = frappe.conn.sql("""select name from `tab%s` 
+			submitted = frappe.db.sql("""select name from `tab%s` 
 				where docstatus = 1 and name = %s""" % (doctype, '%s'), docname)
 			if not submitted:
 				frappe.throw(cstr(doctype) + ": " + cstr(submitted[0][0]) + _("not submitted"))

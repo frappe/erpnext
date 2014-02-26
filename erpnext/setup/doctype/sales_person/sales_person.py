@@ -23,9 +23,9 @@ class DocType(DocTypeNestedSet):
 		self.validate_one_root()
 	
 	def get_email_id(self):
-		profile = frappe.conn.get_value("Employee", self.doc.employee, "user_id")
+		profile = frappe.db.get_value("Employee", self.doc.employee, "user_id")
 		if not profile:
 			frappe.throw("User ID (Profile) not set for Employee %s" % self.doc.employee)
 		else:
-			return frappe.conn.get_value("Profile", profile, "email") or profile
+			return frappe.db.get_value("Profile", profile, "email") or profile
 		

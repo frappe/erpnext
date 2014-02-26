@@ -28,14 +28,14 @@ class DocType:
 			msgprint("Current BOM and New BOM can not be same", raise_exception=1)
 	
 	def update_new_bom(self):
-		current_bom_unitcost = frappe.conn.sql("""select total_cost/quantity 
+		current_bom_unitcost = frappe.db.sql("""select total_cost/quantity 
 			from `tabBOM` where name = %s""", self.doc.current_bom)
 		current_bom_unitcost = current_bom_unitcost and flt(current_bom_unitcost[0][0]) or 0
-		frappe.conn.sql("""update `tabBOM Item` set bom_no=%s, 
+		frappe.db.sql("""update `tabBOM Item` set bom_no=%s, 
 			rate=%s, amount=qty*%s where bom_no = %s and docstatus < 2""", 
 			(self.doc.new_bom, current_bom_unitcost, current_bom_unitcost, self.doc.current_bom))
 				
 	def get_parent_boms(self):
-		return [d[0] for d in frappe.conn.sql("""select distinct parent 
+		return [d[0] for d in frappe.db.sql("""select distinct parent 
 			from `tabBOM Item` where ifnull(bom_no, '') = %s and docstatus < 2""",
 			self.doc.new_bom)]

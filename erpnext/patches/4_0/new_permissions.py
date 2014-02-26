@@ -11,14 +11,14 @@ def execute():
 	reset("Report")
 	
 	# patch to move print, email into DocPerm
-	for doctype, hide_print, hide_email in frappe.conn.sql("""select name, ifnull(allow_print, 0), ifnull(allow_email, 0)
+	for doctype, hide_print, hide_email in frappe.db.sql("""select name, ifnull(allow_print, 0), ifnull(allow_email, 0)
 		from `tabDocType` where ifnull(issingle, 0)=0 and ifnull(istable, 0)=0 and
 		(ifnull(allow_print, 0)=0 or ifnull(allow_email, 0)=0)"""):
 		
 		if not hide_print:
-			frappe.conn.sql("""update `tabDocPerm` set `print`=1
+			frappe.db.sql("""update `tabDocPerm` set `print`=1
 				where permlevel=0 and `read`=1 and parent=%s""", doctype)
 		
 		if not hide_email:
-			frappe.conn.sql("""update `tabDocPerm` set `email`=1
+			frappe.db.sql("""update `tabDocPerm` set `email`=1
 				where permlevel=0 and `read`=1 and parent=%s""", doctype)

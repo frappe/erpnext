@@ -45,7 +45,7 @@ def get_item_details():
 	
 	item_map = {}
 	
-	for i in frappe.conn.sql("select name, item_name, description, \
+	for i in frappe.db.sql("select name, item_name, description, \
 		stock_uom, standard_rate from tabItem \
 		order by item_code", as_dict=1):
 			item_map.setdefault(i.name, i)
@@ -57,7 +57,7 @@ def get_price_list():
 
 	rate = {}
 
-	price_list = frappe.conn.sql("""select ip.item_code, ip.buying, ip.selling, 
+	price_list = frappe.db.sql("""select ip.item_code, ip.buying, ip.selling, 
 		concat(ip.price_list, " - ", ip.currency, " ", ip.price_list_rate) as price 
 		from `tabItem Price` ip, `tabPrice List` pl 
 		where ip.price_list=pl.name and pl.enabled=1""", as_dict=1)
@@ -105,7 +105,7 @@ def get_last_purchase_rate():
 				order by result.item_code asc, result.posting_date desc) result_wrapper
 				group by item_code"""
 
-	for d in frappe.conn.sql(query, as_dict=1):
+	for d in frappe.db.sql(query, as_dict=1):
 		item_last_purchase_rate_map.setdefault(d.item_code, d.base_rate)
 
 	return item_last_purchase_rate_map
@@ -115,7 +115,7 @@ def get_item_bom_rate():
 
 	item_bom_map = {}
 	
-	for b in frappe.conn.sql("""select item, (total_cost/quantity) as bom_rate 
+	for b in frappe.db.sql("""select item, (total_cost/quantity) as bom_rate 
 		from `tabBOM` where is_active=1 and is_default=1""", as_dict=1):
 			item_bom_map.setdefault(b.item, flt(b.bom_rate))
 
@@ -126,7 +126,7 @@ def get_valuation_rate():
 
 	item_val_rate_map = {}
 	
-	for d in frappe.conn.sql("""select item_code, 
+	for d in frappe.db.sql("""select item_code, 
 		sum(actual_qty*valuation_rate)/sum(actual_qty) as val_rate
 		from tabBin where actual_qty > 0 group by item_code""", as_dict=1):
 			item_val_rate_map.setdefault(d.item_code, d.val_rate)

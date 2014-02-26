@@ -16,7 +16,7 @@ class DocType:
 
 		for d in getlist(self.doclist, 'invoice_details'):
 			if d.invoice_no:
-				inv = frappe.conn.sql("""select c_form_applicable, c_form_no from
+				inv = frappe.db.sql("""select c_form_applicable, c_form_no from
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
 				
 				if not inv:
@@ -42,17 +42,17 @@ class DocType:
 		
 	def before_cancel(self):
 		# remove cform reference
-		frappe.conn.sql("""update `tabSales Invoice` set c_form_no=null
+		frappe.db.sql("""update `tabSales Invoice` set c_form_no=null
 			where c_form_no=%s""", self.doc.name)
 		
 	def set_cform_in_sales_invoices(self):
 		inv = [d.invoice_no for d in getlist(self.doclist, 'invoice_details')]
 		if inv:
-			frappe.conn.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s 
+			frappe.db.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s 
 				where name in (%s)""" % ('%s', '%s', ', '.join(['%s'] * len(inv))), 
 				tuple([self.doc.name, self.doc.modified] + inv))
 				
-			frappe.conn.sql("""update `tabSales Invoice` set c_form_no = null, modified = %s 
+			frappe.db.sql("""update `tabSales Invoice` set c_form_no = null, modified = %s 
 				where name not in (%s) and ifnull(c_form_no, '') = %s""" % 
 				('%s', ', '.join(['%s']*len(inv)), '%s'),
 				tuple([self.doc.modified] + inv + [self.doc.name]))
@@ -61,12 +61,12 @@ class DocType:
 
 	def set_total_invoiced_amount(self):
 		total = sum([flt(d.grand_total) for d in getlist(self.doclist, 'invoice_details')])
-		frappe.conn.set(self.doc, 'total_invoiced_amount', total)
+		frappe.db.set(self.doc, 'total_invoiced_amount', total)
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
 
-		inv = frappe.conn.sql("""select posting_date, territory, net_total, grand_total 
+		inv = frappe.db.sql("""select posting_date, territory, net_total, grand_total 
 			from `tabSales Invoice` where name = %s""", invoice_no)	
 		return {
 			'invoice_date' : inv and getdate(inv[0][0]).strftime('%Y-%m-%d') or '',
@@ -79,7 +79,7 @@ def get_invoice_nos(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.utilities import build_filter_conditions
 	conditions, filter_values = build_filter_conditions(filters)
 	
-	return frappe.conn.sql("""select name from `tabSales Invoice` where docstatus = 1 
+	return frappe.db.sql("""select name from `tabSales Invoice` where docstatus = 1 
 		and c_form_applicable = 'Yes' and ifnull(c_form_no, '') = '' %s 
 		and %s like %s order by name limit %s, %s""" % 
 		(conditions, searchfield, "%s", "%s", "%s"), 

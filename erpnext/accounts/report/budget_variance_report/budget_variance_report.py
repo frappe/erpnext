@@ -62,7 +62,7 @@ def get_columns(filters):
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):
-	return frappe.conn.sql("""select cc.name, cc.distribution_id, 
+	return frappe.db.sql("""select cc.name, cc.distribution_id, 
 		cc.parent_cost_center, bd.account, bd.budget_allocated 
 		from `tabCost Center` cc, `tabBudget Detail` bd 
 		where bd.parent=cc.name and bd.fiscal_year=%s and 
@@ -73,7 +73,7 @@ def get_costcenter_target_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in frappe.conn.sql("""select bd.name, bdd.month, bdd.percentage_allocation  
+	for d in frappe.db.sql("""select bd.name, bdd.month, bdd.percentage_allocation  
 		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
 		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
@@ -82,7 +82,7 @@ def get_target_distribution_details(filters):
 
 #Get actual details from gl entry
 def get_actual_details(filters):
-	ac_details = frappe.conn.sql("""select gl.account, gl.debit, gl.credit, 
+	ac_details = frappe.db.sql("""select gl.account, gl.debit, gl.credit, 
 		gl.cost_center, MONTHNAME(gl.posting_date) as month_name 
 		from `tabGL Entry` gl, `tabBudget Detail` bd 
 		where gl.fiscal_year=%s and company=%s

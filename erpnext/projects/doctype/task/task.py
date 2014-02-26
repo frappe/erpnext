@@ -21,7 +21,7 @@ class DocType:
 		}
 		
 	def get_customer_details(self):
-		cust = frappe.conn.sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
+		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
 		if cust:
 			ret = {'customer_name': cust and cust[0][0] or ''}
 			return ret
@@ -38,7 +38,7 @@ class DocType:
 		self.update_status()
 
 	def update_status(self):
-		status = frappe.conn.get_value("Task", self.doc.name, "status")
+		status = frappe.db.get_value("Task", self.doc.name, "status")
 		if self.doc.status=="Working" and status !="Working" and not self.doc.act_start_date:
 			self.doc.act_start_date = today()
 			
@@ -66,7 +66,7 @@ def get_events(start, end, filters=None):
 			if filters[key]:
 				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
 	
-	data = frappe.conn.sql("""select name, exp_start_date, exp_end_date, 
+	data = frappe.db.sql("""select name, exp_start_date, exp_end_date, 
 		subject, status, project from `tabTask`
 		where ((exp_start_date between '%(start)s' and '%(end)s') \
 			or (exp_end_date between '%(start)s' and '%(end)s'))
@@ -80,7 +80,7 @@ def get_events(start, end, filters=None):
 
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	return frappe.conn.sql(""" select name from `tabProject`
+	return frappe.db.sql(""" select name from `tabProject`
 			where %(key)s like "%(txt)s"
 				%(mcond)s
 			order by name 

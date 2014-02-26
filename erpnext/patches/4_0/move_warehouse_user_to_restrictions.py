@@ -6,7 +6,7 @@ import frappe
 
 def execute():
 	from frappe.core.page.user_properties import user_properties
-	for warehouse, profile in frappe.conn.sql("""select parent, user from `tabWarehouse User`"""):
+	for warehouse, profile in frappe.db.sql("""select parent, user from `tabWarehouse User`"""):
 		user_properties.add(profile, "Warehouse", warehouse)
 	
 	frappe.delete_doc("DocType", "Warehouse User")

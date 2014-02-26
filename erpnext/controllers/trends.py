@@ -58,7 +58,7 @@ def get_data(filters, conditions):
 			inc = 2
 		else :
 			inc = 1
-		data1 = frappe.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
+		data1 = frappe.db.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and 
 					t1.docstatus = 1 %s 
 					group by %s 
@@ -73,7 +73,7 @@ def get_data(filters, conditions):
 			data.append(dt)
 
 			#to get distinct value of col specified by group_by in filter
-			row = frappe.conn.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
+			row = frappe.db.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
 						where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 						and t1.docstatus = 1 and %s = %s 
 					""" % 
@@ -85,7 +85,7 @@ def get_data(filters, conditions):
 				des = ['' for q in range(len(conditions["columns"]))]
 				
 				#get data for group_by filter 
-				row1 = frappe.conn.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
+				row1 = frappe.db.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
 							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s 
 							and t1.docstatus = 1 and %s = %s and %s = %s 
 						""" % 
@@ -101,7 +101,7 @@ def get_data(filters, conditions):
 					
 				data.append(des)
 	else:
-		data = frappe.conn.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
+		data = frappe.db.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and 
 					t1.docstatus = 1 %s 
 					group by %s	
@@ -156,7 +156,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	from dateutil.relativedelta import relativedelta
 
 	if not year_start_date:
-		year_start_date, year_end_date = frappe.conn.get_value("Fiscal Year", 
+		year_start_date, year_end_date = frappe.db.get_value("Fiscal Year", 
 			fiscal_year, ["year_start_date", "year_end_date"])
 
 	increment = {

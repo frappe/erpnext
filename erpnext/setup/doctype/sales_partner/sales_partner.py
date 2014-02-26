@@ -16,7 +16,7 @@ class DocType():
 
 	def get_contacts(self,nm):
 		if nm:
-			contact_details =frappe.conn.convert_to_lists(frappe.conn.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where sales_partner = '%s'"%nm))
+			contact_details =frappe.db.convert_to_lists(frappe.db.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where sales_partner = '%s'"%nm))
 			return contact_details
 		else:
 			return ''

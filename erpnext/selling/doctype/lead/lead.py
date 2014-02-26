@@ -16,14 +16,14 @@ class DocType(SellingController):
 		self.doclist = doclist
 
 		self._prev = frappe._dict({
-			"contact_date": frappe.conn.get_value("Lead", self.doc.name, "contact_date") if \
+			"contact_date": frappe.db.get_value("Lead", self.doc.name, "contact_date") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": frappe.conn.get_value("Lead", self.doc.name, "contact_by") if \
+			"contact_by": frappe.db.get_value("Lead", self.doc.name, "contact_by") if \
 				(not cint(self.doc.fields.get("__islocal"))) else None,
 		})
 
 	def onload(self):
-		customer = frappe.conn.get_value("Customer", {"lead_name": self.doc.name})
+		customer = frappe.db.get_value("Customer", {"lead_name": self.doc.name})
 		if customer:
 			self.doc.fields["__is_customer"] = customer
 	
@@ -53,7 +53,7 @@ class DocType(SellingController):
 	def check_email_id_is_unique(self):
 		if self.doc.email_id:
 			# validate email is unique
-			email_list = frappe.conn.sql("""select name from tabLead where email_id=%s""", 
+			email_list = frappe.db.sql("""select name from tabLead where email_id=%s""", 
 				self.doc.email_id)
 			if len(email_list) > 1:
 				items = [e[0] for e in email_list if e[0]!=self.doc.name]
@@ -61,16 +61,16 @@ class DocType(SellingController):
 					", ".join(items), raise_exception=True)
 
 	def on_trash(self):
-		frappe.conn.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
+		frappe.db.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
 			self.doc.name)
 		
 		self.delete_events()
 		
 	def has_customer(self):
-		return frappe.conn.get_value("Customer", {"lead_name": self.doc.name})
+		return frappe.db.get_value("Customer", {"lead_name": self.doc.name})
 		
 	def has_opportunity(self):
-		return frappe.conn.get_value("Opportunity", {"lead": self.doc.name, "docstatus": 1,
+		return frappe.db.get_value("Opportunity", {"lead": self.doc.name, "docstatus": 1,
 			"status": ["!=", "Lost"]})
 
 @frappe.whitelist()
@@ -88,7 +88,7 @@ def _make_customer(source_name, target_doclist=None, ignore_permissions=False):
 			target[0].customer_type = "Individual"
 			target[0].customer_name = source.doc.lead_name
 			
-		target[0].customer_group = frappe.conn.get_default("customer_group")
+		target[0].customer_group = frappe.db.get_default("customer_group")
 			
 	doclist = get_mapped_doclist("Lead", source_name, 
 		{"Lead": {

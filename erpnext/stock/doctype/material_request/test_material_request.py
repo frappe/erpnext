@@ -65,9 +65,9 @@ class TestMaterialRequest(unittest.TestCase):
 				self.assertEquals(val, doclist[i].fields.get(fieldname))
 				
 	def _test_requested_qty(self, qty1, qty2):
-		self.assertEqual(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
+		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty1)
-		self.assertEqual(flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
+		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty2)
 			
 	def _insert_stock_entry(self, qty1, qty2):
@@ -109,7 +109,7 @@ class TestMaterialRequest(unittest.TestCase):
 		se.submit()
 				
 	def test_completed_qty_for_purchase(self):
-		frappe.conn.sql("""delete from `tabBin`""")
+		frappe.db.sql("""delete from `tabBin`""")
 		
 		# submit material request of type Purchase
 		mr = frappe.bean(copy=test_records[0])
@@ -156,8 +156,8 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 	def test_completed_qty_for_transfer(self):
-		frappe.conn.sql("""delete from `tabBin`""")
-		frappe.conn.sql("""delete from `tabStock Ledger Entry`""")
+		frappe.db.sql("""delete from `tabBin`""")
+		frappe.db.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
 		mr = frappe.bean(copy=test_records[0])
@@ -219,8 +219,8 @@ class TestMaterialRequest(unittest.TestCase):
 		self._test_requested_qty(54.0, 3.0)
 		
 	def test_completed_qty_for_over_transfer(self):
-		frappe.conn.sql("""delete from `tabBin`""")
-		frappe.conn.sql("""delete from `tabStock Ledger Entry`""")
+		frappe.db.sql("""delete from `tabBin`""")
+		frappe.db.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
 		mr = frappe.bean(copy=test_records[0])

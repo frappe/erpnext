@@ -6,7 +6,7 @@ from frappe.utils import getdate, flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	float_preceision = frappe.conn.get_default("float_preceision")
+	float_preceision = frappe.db.get_default("float_preceision")
 
 	condition =get_condition(filters)
 
@@ -42,12 +42,12 @@ def get_columns():
 	]
 
 def get_item_info():
-	return frappe.conn.sql("""select name, item_name, description, min_order_qty,
+	return frappe.db.sql("""select name, item_name, description, min_order_qty,
 		lead_time_days	from tabItem""", as_dict=1)
 
 def get_consumed_items(condition):
 
-	cn_items = frappe.conn.sql("""select se_item.item_code, 
+	cn_items = frappe.db.sql("""select se_item.item_code, 
 				sum(se_item.actual_qty) as 'consume_qty'
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
 		where se.name = se_item.parent and se.docstatus = 1 
@@ -62,12 +62,12 @@ def get_consumed_items(condition):
 
 def get_delivered_items(condition):
 
-	dn_items = frappe.conn.sql("""select dn_item.item_code, sum(dn_item.qty) as dn_qty
+	dn_items = frappe.db.sql("""select dn_item.item_code, sum(dn_item.qty) as dn_qty
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where dn.name = dn_item.parent and dn.docstatus = 1 %s 
 		group by dn_item.item_code""" % (condition), as_dict=1)
 
-	si_items = frappe.conn.sql("""select si_item.item_name, sum(si_item.qty) as si_qty
+	si_items = frappe.db.sql("""select si_item.item_name, sum(si_item.qty) as si_qty
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 and 
 		ifnull(si.update_stock, 0) = 1 and ifnull(si.is_pos, 0) = 1 %s 

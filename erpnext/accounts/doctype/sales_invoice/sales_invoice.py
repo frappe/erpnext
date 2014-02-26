@@ -167,7 +167,7 @@ class DocType(SellingController):
 	def validate_time_logs_are_submitted(self):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
-				status = frappe.conn.get_value("Time Log Batch", d.time_log_batch, "status")
+				status = frappe.db.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
 					frappe.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
 						raise_exception=True)
@@ -202,7 +202,7 @@ class DocType(SellingController):
 
 			# fetch terms	
 			if self.doc.tc_name and not self.doc.terms:
-				self.doc.terms = frappe.conn.get_value("Terms and Conditions", self.doc.tc_name, "terms")
+				self.doc.terms = frappe.db.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
 			# fetch charges
 			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
@@ -213,7 +213,7 @@ class DocType(SellingController):
 			"Sales Invoice Advance", "advance_adjustment_details", "credit")
 		
 	def get_company_abbr(self):
-		return frappe.conn.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
+		return frappe.db.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
 
 	def update_against_document_in_jv(self):
 		"""
@@ -246,7 +246,7 @@ class DocType(SellingController):
 	def validate_customer_account(self):
 		"""Validates Debit To Account and Customer Matches"""
 		if self.doc.customer and self.doc.debit_to and not cint(self.doc.is_pos):
-			acc_head = frappe.conn.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
+			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.doc.debit_to)
 			
 			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.customer)) or \
 				(not acc_head and (self.doc.debit_to != cstr(self.doc.customer) + " - " + self.get_company_abbr())):
@@ -255,7 +255,7 @@ class DocType(SellingController):
 
 
 	def validate_debit_acc(self):
-		acc = frappe.conn.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
+		acc = frappe.db.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
 		if not acc:
 			msgprint("Account: "+ self.doc.debit_to + " does not exist")
 			raise Exception
@@ -270,8 +270,8 @@ class DocType(SellingController):
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset Account and whether Income Account Entered Exists"""
 		for d in getlist(self.doclist,'entries'):
-			item = frappe.conn.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
-			acc =	frappe.conn.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
+			item = frappe.db.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
+			acc =	frappe.db.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
 			if not acc:
 				msgprint("Account: "+d.income_account+" does not exist in the system", raise_exception=True)
 			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
@@ -332,9 +332,9 @@ class DocType(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:
-			if frappe.conn.get_value('Selling Settings', None, dic[i]) == 'Yes':
+			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
 				for d in getlist(self.doclist,'entries'):
-					if frappe.conn.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
+					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
 						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
 
@@ -342,7 +342,7 @@ class DocType(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
-			res = frappe.conn.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = frappe.db.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project."%(self.doc.customer,self.doc.project_name))
 				raise Exception
@@ -377,28 +377,28 @@ class DocType(SellingController):
 	def validate_c_form(self):
 		""" Blank C-form no if C-form applicable marked as 'No'"""
 		if self.doc.amended_from and self.doc.c_form_applicable == 'No' and self.doc.c_form_no:
-			frappe.conn.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
+			frappe.db.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
 					and parent = %s""", (self.doc.amended_from,	self.doc.c_form_no))
 
-			frappe.conn.set(self.doc, 'c_form_no', '')
+			frappe.db.set(self.doc, 'c_form_no', '')
 			
 	def update_current_stock(self):
 		for d in getlist(self.doclist, 'entries'):
 			if d.item_code and d.warehouse:
-				bin = frappe.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 		for d in getlist(self.doclist, 'packing_details'):
-			bin = frappe.conn.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
+			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 	 
 	
 	def get_warehouse(self):
-		w = frappe.conn.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (frappe.session['user'], self.doc.company))
+		w = frappe.db.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (frappe.session['user'], self.doc.company))
 		w = w and w[0][0] or ''
 		if not w:
-			ps = frappe.conn.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
+			ps = frappe.db.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
 			if not ps:
 				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
 			elif not ps[0][1]:
@@ -425,25 +425,25 @@ class DocType(SellingController):
 		if cint(self.doc.is_pos) == 1:
 			if flt(self.doc.paid_amount) == 0:
 				if self.doc.cash_bank_account: 
-					frappe.conn.set(self.doc, 'paid_amount', 
+					frappe.db.set(self.doc, 'paid_amount', 
 						(flt(self.doc.grand_total) - flt(self.doc.write_off_amount)))
 				else:
 					# show message that the amount is not paid
-					frappe.conn.set(self.doc,'paid_amount',0)
+					frappe.db.set(self.doc,'paid_amount',0)
 					frappe.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
 		else:
-			frappe.conn.set(self.doc,'paid_amount',0)
+			frappe.db.set(self.doc,'paid_amount',0)
 		
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.sales_order:
-				submitted = frappe.conn.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
+				submitted = frappe.db.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
 				if not submitted:
 					msgprint("Sales Order : "+ cstr(d.sales_order) +" is not submitted")
 					raise Exception , "Validation Error."
 
 			if d.delivery_note:
-				submitted = frappe.conn.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
+				submitted = frappe.db.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
 				if not submitted:
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
 					raise Exception , "Validation Error."
@@ -451,11 +451,11 @@ class DocType(SellingController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if frappe.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d.qty),
-					"stock_uom": frappe.conn.get_value("Item", d.item_code, "stock_uom")
+					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom")
 				}))
 		
 		self.make_sl_entries(sl_entries)
@@ -584,7 +584,7 @@ class DocType(SellingController):
 	def update_c_form(self):
 		"""Update amended id in C-form"""
 		if self.doc.c_form_no and self.doc.amended_from:
-			frappe.conn.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
+			frappe.db.sql("""update `tabC-Form Invoice Detail` set invoice_no = %s,
 				invoice_date = %s, territory = %s, net_total = %s,
 				grand_total = %s where invoice_no = %s and parent = %s""", 
 				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
@@ -613,13 +613,13 @@ class DocType(SellingController):
 	def convert_to_recurring(self):
 		if self.doc.convert_into_recurring_invoice:
 			if not self.doc.recurring_id:
-				frappe.conn.set(self.doc, "recurring_id",
+				frappe.db.set(self.doc, "recurring_id",
 					make_autoname("RECINV/.#####"))
 			
 			self.set_next_date()
 
 		elif self.doc.recurring_id:
-			frappe.conn.sql("""update `tabSales Invoice`
+			frappe.db.sql("""update `tabSales Invoice`
 				set convert_into_recurring_invoice = 0
 				where recurring_id = %s""", (self.doc.recurring_id,))
 			
@@ -649,7 +649,7 @@ class DocType(SellingController):
 		next_date = get_next_date(self.doc.posting_date,
 			month_map[self.doc.recurring_type], cint(self.doc.repeat_on_day_of_month))
 		
-		frappe.conn.set(self.doc, 'next_date', next_date)
+		frappe.db.set(self.doc, 'next_date', next_date)
 	
 def get_next_date(dt, mcount, day=None):
 	dt = getdate(dt)
@@ -665,14 +665,14 @@ def manage_recurring_invoices(next_date=None, commit=True):
 		and notify the concerned people
 	"""
 	next_date = next_date or nowdate()
-	recurring_invoices = frappe.conn.sql("""select name, recurring_id
+	recurring_invoices = frappe.db.sql("""select name, recurring_id
 		from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0)=1
 		and docstatus=1 and next_date=%s
 		and next_date <= ifnull(end_date, '2199-12-31')""", next_date)
 	
 	exception_list = []
 	for ref_invoice, recurring_id in recurring_invoices:
-		if not frappe.conn.sql("""select name from `tabSales Invoice`
+		if not frappe.db.sql("""select name from `tabSales Invoice`
 				where posting_date=%s and recurring_id=%s and docstatus=1""",
 				(next_date, recurring_id)):
 			try:
@@ -680,21 +680,21 @@ def manage_recurring_invoices(next_date=None, commit=True):
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
 				if commit:
-					frappe.conn.commit()
+					frappe.db.commit()
 			except:
 				if commit:
-					frappe.conn.rollback()
+					frappe.db.rollback()
 
-					frappe.conn.begin()
-					frappe.conn.sql("update `tabSales Invoice` set \
+					frappe.db.begin()
+					frappe.db.sql("update `tabSales Invoice` set \
 						convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
 					notify_errors(ref_invoice, ref_wrapper.doc.customer, ref_wrapper.doc.owner)
-					frappe.conn.commit()
+					frappe.db.commit()
 
 				exception_list.append(frappe.get_traceback())
 			finally:
 				if commit:
-					frappe.conn.begin()
+					frappe.db.begin()
 			
 	if exception_list:
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
@@ -746,7 +746,7 @@ def send_notification(new_rv):
 def notify_errors(inv, customer, owner):
 	from frappe.profile import get_system_managers
 	
-	frappe.sendmail(recipients=get_system_managers() + [frappe.conn.get_value("Profile", owner, "email")],
+	frappe.sendmail(recipients=get_system_managers() + [frappe.db.get_value("Profile", owner, "email")],
 		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
 		message = frappe.get_template("template/emails/recurring_invoice_failed.html").render({
 			"name": inv,
@@ -769,7 +769,7 @@ def assign_task_to_owner(inv, msg, users):
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment):
-	val = frappe.conn.get_value("Mode of Payment", mode_of_payment, "default_account")
+	val = frappe.db.get_value("Mode of Payment", mode_of_payment, "default_account")
 	if not val:
 		frappe.msgprint("Default Bank / Cash Account not set in Mode of Payment: %s. Please add a Default Account in Mode of Payment master." % mode_of_payment)
 	return {
@@ -783,7 +783,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	# income account can be any Credit account, 
 	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
 	# Hence the first condition is an "OR"
-	return frappe.conn.sql("""select tabAccount.name from `tabAccount` 
+	return frappe.db.sql("""select tabAccount.name from `tabAccount` 
 			where (tabAccount.debit_or_credit="Credit" 
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 

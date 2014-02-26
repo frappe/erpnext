@@ -25,23 +25,23 @@ class DocType:
 			where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % self.doc.sales_partner or " and ifnull(sales_partner, '') != ''"
 
 		if self.doc.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
-			rec = frappe.conn.sql("""select CONCAT(ifnull(first_name,''), '', ifnull(last_name,'')), 
+			rec = frappe.db.sql("""select CONCAT(ifnull(first_name,''), '', ifnull(last_name,'')), 
 				mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and 
 				docstatus != 2 %s""", where_clause)
 		
 		elif self.doc.send_to == 'All Lead (Open)':
-			rec = frappe.conn.sql("""select lead_name, mobile_no from `tabLead` where 
+			rec = frappe.db.sql("""select lead_name, mobile_no from `tabLead` where 
 				ifnull(mobile_no,'')!='' and docstatus != 2 and status='Open'""")
 		
 		elif self.doc.send_to == 'All Employee (Active)':
 			where_clause = self.doc.department and " and department = '%s'" % self.doc.department or ""
 			where_clause += self.doc.branch and " and branch = '%s'" % self.doc.branch or ""
-			rec = frappe.conn.sql("""select employee_name, cell_number from 
+			rec = frappe.db.sql("""select employee_name, cell_number from 
 				`tabEmployee` where status = 'Active' and docstatus < 2 and 
 				ifnull(cell_number,'')!='' %s""", where_clause)
 		
 		elif self.doc.send_to == 'All Sales Person':
-			rec = frappe.conn.sql("""select sales_person_name, mobile_no from 
+			rec = frappe.db.sql("""select sales_person_name, mobile_no from 
 				`tabSales Person` where docstatus!=2 and ifnull(mobile_no,'')!=''""")
 			rec_list = ''
 		

@@ -20,7 +20,7 @@ def get_children():
 	
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
-		acc = frappe.conn.sql(""" select 
+		acc = frappe.db.sql(""" select 
 			name as value, if(group_or_ledger='Group', 1, 0) as expandable
 			from `tab%s`
 			where ifnull(parent_%s,'') = ''
@@ -29,7 +29,7 @@ def get_children():
 				company, as_dict=1)
 	else:	
 		# other
-		acc = frappe.conn.sql("""select 
+		acc = frappe.db.sql("""select 
 			name as value, if(group_or_ledger='Group', 1, 0) as expandable
 	 		from `tab%s` 
 			where ifnull(parent_%s,'') = %s
@@ -38,7 +38,7 @@ def get_children():
 				args['parent'], as_dict=1)
 				
 	if ctype == 'Account':
-		currency = frappe.conn.sql("select default_currency from `tabCompany` where name = %s", company)[0][0]
+		currency = frappe.db.sql("select default_currency from `tabCompany` where name = %s", company)[0][0]
 		for each in acc:
 			bal = get_balance_on(each.get("value"))
 			each["currency"] = currency

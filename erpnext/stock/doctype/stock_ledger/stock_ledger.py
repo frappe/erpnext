@@ -25,7 +25,7 @@ class DocType:
 			if v.get('is_cancelled') == 'Yes':
 				v['actual_qty'] = -flt(v['actual_qty'])
 				# cancel matching entry
-				frappe.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
+				frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
 					modified=%s, modified_by=%s
 					where voucher_no=%s and voucher_type=%s""", 
 					(now(), frappe.session.user, v['voucher_no'], v['voucher_type']))
@@ -53,5 +53,5 @@ class DocType:
 		"""
 		Repost everything!
 		"""
-		for wh in frappe.conn.sql("select name from tabWarehouse"):
+		for wh in frappe.db.sql("select name from tabWarehouse"):
 			get_obj('Warehouse', wh[0]).repost_stock()

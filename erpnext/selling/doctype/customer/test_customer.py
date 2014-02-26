@@ -41,8 +41,8 @@ class TestCustomer(unittest.TestCase):
 	def test_rename(self):
 		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
-		self.assertTrue(frappe.conn.exists("Customer", "_Test Customer 1 Renamed"))
-		self.assertFalse(frappe.conn.exists("Customer", "_Test Customer 1"))
+		self.assertTrue(frappe.db.exists("Customer", "_Test Customer 1 Renamed"))
+		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
 		
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 		

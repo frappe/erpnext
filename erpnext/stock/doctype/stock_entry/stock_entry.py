@@ -154,7 +154,7 @@ class DocType(StockController):
 			self.doc.production_order = None
 	
 	def check_duplicate_entry_for_production_order(self):
-		other_ste = [t[0] for t in frappe.conn.get_values("Stock Entry",  {
+		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
 			"production_order": self.doc.production_order,
 			"purpose": self.doc.purpose,
 			"docstatus": ["!=", 2],
@@ -162,10 +162,10 @@ class DocType(StockController):
 		}, "name")]
 		
 		if other_ste:
-			production_item, qty = frappe.conn.get_value("Production Order", 
+			production_item, qty = frappe.db.get_value("Production Order", 
 				self.doc.production_order, ["production_item", "qty"])
 			args = other_ste + [production_item]
-			fg_qty_already_entered = frappe.conn.sql("""select sum(actual_qty)
+			fg_qty_already_entered = frappe.db.sql("""select sum(actual_qty)
 				from `tabStock Entry Detail` 
 				where parent in (%s) 
 					and item_code = %s 
@@ -203,7 +203,7 @@ class DocType(StockController):
 		incoming_rate = 0
 		if self.doc.purpose == "Sales Return" and \
 				(self.doc.delivery_note_no or self.doc.sales_invoice_no):
-			sle = frappe.conn.sql("""select name, posting_date, posting_time, 
+			sle = frappe.db.sql("""select name, posting_date, posting_time, 
 				actual_qty, stock_value, warehouse from `tabStock Ledger Entry` 
 				where voucher_type = %s and voucher_no = %s and 
 				item_code = %s limit 1""", 
@@ -231,7 +231,7 @@ class DocType(StockController):
 					
 	def validate_bom(self):
 		for d in getlist(self.doclist, 'mtn_details'):
-			if d.bom_no and not frappe.conn.sql("""select name from `tabBOM`
+			if d.bom_no and not frappe.db.sql("""select name from `tabBOM`
 					where item = %s and name = %s and docstatus = 1 and is_active = 1""",
 					(d.item_code, d.bom_no)):
 				msgprint(_("Item") + " %s: " % cstr(d.item_code)
@@ -296,7 +296,7 @@ class DocType(StockController):
 						returned=_("Max Returnable Qty"), qty=returnable_qty), StockOverReturnError)
 						
 	def get_already_returned_item_qty(self, ref_fieldname):
-		return dict(frappe.conn.sql("""select item_code, sum(transfer_qty) as qty
+		return dict(frappe.db.sql("""select item_code, sum(transfer_qty) as qty
 			from `tabStock Entry Detail` where parent in (
 				select name from `tabStock Entry` where `%s`=%s and docstatus=1)
 			group by item_code""" % (ref_fieldname, "%s"), (self.doc.fields.get(ref_fieldname),)))
@@ -358,7 +358,7 @@ class DocType(StockController):
 					+ "(%s/%s)" % (produced_qty, flt(pro_bean.doc.qty)), StockOverProductionError)
 					
 			status = 'Completed' if flt(produced_qty) >= flt(pro_bean.doc.qty) else 'In Process'
-			frappe.conn.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
+			frappe.db.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
 				where name=%s""", (status, produced_qty, self.doc.production_order))
 			
 	def update_planned_qty(self, pro_bean):
@@ -372,7 +372,7 @@ class DocType(StockController):
 					
 	def get_item_details(self, arg):
 		arg = json.loads(arg)
-		item = frappe.conn.sql("""select stock_uom, description, item_name, 
+		item = frappe.db.sql("""select stock_uom, description, item_name, 
 			expense_account, buying_cost_center from `tabItem` 
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00' 
 			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
@@ -385,7 +385,7 @@ class DocType(StockController):
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
 			'expense_account'		: item and item[0]['expense_account'] or arg.get("expense_account") \
-				or frappe.conn.get_value("Company", arg.get("company"), "default_expense_account"),
+				or frappe.db.get_value("Company", arg.get("company"), "default_expense_account"),
 			'cost_center'			: item and item[0]['buying_cost_center'] or arg.get("cost_center"),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
@@ -400,7 +400,7 @@ class DocType(StockController):
 
 	def get_uom_details(self, arg = ''):
 		arg, ret = eval(arg), {}
-		uom = frappe.conn.sql("""select conversion_factor from `tabUOM Conversion Detail` 
+		uom = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail` 
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
 		if not uom or not flt(uom[0].conversion_factor):
 			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
@@ -463,7 +463,7 @@ class DocType(StockController):
 					
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.doc.production_order and self.doc.purpose == "Manufacture/Repack":
-				item = frappe.conn.get_value("Item", pro_obj.doc.production_item, ["item_name", 
+				item = frappe.db.get_value("Item", pro_obj.doc.production_item, ["item_name", 
 					"description", "stock_uom", "expense_account", "buying_cost_center"], as_dict=1)
 				self.add_to_stock_entry_detail({
 					cstr(pro_obj.doc.production_item): {
@@ -482,7 +482,7 @@ class DocType(StockController):
 				if self.doc.purpose=="Material Receipt":
 					self.doc.from_warehouse = ""
 					
-				item = frappe.conn.sql("""select name, item_name, description, 
+				item = frappe.db.sql("""select name, item_name, description, 
 					stock_uom, expense_account, buying_cost_center from `tabItem` 
 					where name=(select item from tabBOM where name=%s)""", 
 					self.doc.bom_no, as_dict=1)
@@ -550,7 +550,7 @@ class DocType(StockController):
 
 	def get_issued_qty(self):
 		issued_item_qty = {}
-		result = frappe.conn.sql("""select t1.item_code, sum(t1.qty)
+		result = frappe.db.sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
 			and t2.purpose = 'Material Transfer'
@@ -562,7 +562,7 @@ class DocType(StockController):
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None, idx=None):
 		if not idx:	idx = 1
-		expense_account, cost_center = frappe.conn.get_values("Company", self.doc.company, \
+		expense_account, cost_center = frappe.db.get_values("Company", self.doc.company, \
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:
@@ -594,7 +594,7 @@ class DocType(StockController):
 	def validate_with_material_request(self):
 		for item in self.doclist.get({"parentfield": "mtn_details"}):
 			if item.material_request:
-				mreq_item = frappe.conn.get_value("Material Request Item", 
+				mreq_item = frappe.db.get_value("Material Request Item", 
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
 				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
@@ -606,16 +606,16 @@ class DocType(StockController):
 @frappe.whitelist()					
 def get_party_details(ref_dt, ref_dn):
 	if ref_dt in ["Delivery Note", "Sales Invoice"]:
-		res = frappe.conn.get_value(ref_dt, ref_dn, 
+		res = frappe.db.get_value(ref_dt, ref_dn, 
 			["customer", "customer_name", "address_display as customer_address"], as_dict=1)
 	else:
-		res = frappe.conn.get_value(ref_dt, ref_dn, 
+		res = frappe.db.get_value(ref_dt, ref_dn, 
 			["supplier", "supplier_name", "address_display as supplier_address"], as_dict=1)
 	return res or {}
 	
 @frappe.whitelist()
 def get_production_order_details(production_order):
-	result = frappe.conn.sql("""select bom_no, 
+	result = frappe.db.sql("""select bom_no, 
 		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom, 
 		wip_warehouse from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 	return result and result[0] or {}
@@ -625,7 +625,7 @@ def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 	if doctype == "Sales Invoice":
 		conditions = "and update_stock=1"
 	
-	return frappe.conn.sql("""select name, customer, customer_name
+	return frappe.db.sql("""select name, customer, customer_name
 		from `tab%s` where docstatus = 1
 			and (`%s` like %%(txt)s 
 				or `customer` like %%(txt)s) %s %s
@@ -636,7 +636,7 @@ def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 		as_list=True)
 	
 def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.conn.sql("""select name, supplier, supplier_name
+	return frappe.db.sql("""select name, supplier, supplier_name
 		from `tab%s` where docstatus = 1
 			and (`%s` like %%(txt)s 
 				or `supplier` like %%(txt)s) %s
@@ -685,7 +685,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 	
 	if filters.get("s_warehouse"):
-		batch_nos = frappe.conn.sql("""select batch_no 
+		batch_nos = frappe.db.sql("""select batch_no 
 			from `tabStock Ledger Entry` sle 
 			where item_code = '%(item_code)s' 
 				and warehouse = '%(s_warehouse)s'
@@ -704,7 +704,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if batch_nos:
 		return batch_nos
 	else:
-		return frappe.conn.sql("""select name from `tabBatch` 
+		return frappe.db.sql("""select name from `tabBatch` 
 			where item = '%(item_code)s'
 			and docstatus < 2
 			and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s 
@@ -721,7 +721,7 @@ def get_stock_items_for_return(ref_doclist, parentfields):
 	
 	all_items = list(set([d.item_code for d in 
 		ref_doclist.get({"parentfield": ["in", parentfields]})]))
-	stock_items = frappe.conn.sql_list("""select name from `tabItem`
+	stock_items = frappe.db.sql_list("""select name from `tabItem`
 		where is_stock_item='Yes' and name in (%s)""" % (", ".join(["%s"] * len(all_items))),
 		tuple(all_items))
 
@@ -878,7 +878,7 @@ def get_invoice_list(doctype, link_field, value):
 	if isinstance(value, basestring):
 		value = [value]
 	
-	return frappe.conn.sql_list("""select distinct parent from `tab%s`
+	return frappe.db.sql_list("""select distinct parent from `tab%s`
 		where docstatus = 1 and `%s` in (%s)""" % (doctype, link_field,
 			", ".join(["%s"]*len(value))), tuple(value))
 			

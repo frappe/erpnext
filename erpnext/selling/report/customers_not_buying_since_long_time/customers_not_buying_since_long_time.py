@@ -23,7 +23,7 @@ def execute(filters=None):
 	return columns, data 
 
 def get_so_details():
-	return frappe.conn.sql("""select 
+	return frappe.db.sql("""select 
 			cust.name, 
 			cust.customer_name, 
 			cust.territory, 
@@ -41,7 +41,7 @@ def get_so_details():
 		order by 'days_since_last_order' desc """,as_list=1)
 
 def get_last_so_amt(customer):
-	res =  frappe.conn.sql("""select net_total from `tabSales Order`
+	res =  frappe.db.sql("""select net_total from `tabSales Order`
 		where customer ='%(customer)s' and docstatus = 1 order by transaction_date desc 
 		limit 1""" % {'customer':customer})
 

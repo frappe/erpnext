@@ -32,7 +32,7 @@ class DocType:
 		"""
 			Validates if delivery note has status as draft
 		"""
-		if cint(frappe.conn.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
+		if cint(frappe.db.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
 			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again."""), raise_exception=1)
 	
 	def validate_items_mandatory(self):
@@ -53,7 +53,7 @@ class DocType:
 				raise_exception=1)
 		
 		
-		res = frappe.conn.sql("""SELECT name FROM `tabPacking Slip`
+		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
 			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
@@ -94,7 +94,7 @@ class DocType:
 			condition = " and item_code in (%s)" % (", ".join(["%s"]*len(rows)))
 		
 		# gets item code, qty per item code, latest packed qty per item code and stock uom
-		res = frappe.conn.sql("""select item_code, ifnull(sum(qty), 0) as qty,
+		res = frappe.db.sql("""select item_code, ifnull(sum(qty), 0) as qty,
 			(select sum(ifnull(psi.qty, 0) * (abs(ps.to_case_no - ps.from_case_no) + 1))
 				from `tabPacking Slip` ps, `tabPacking Slip Item` psi
 				where ps.name = psi.parent and ps.docstatus = 1
@@ -133,7 +133,7 @@ class DocType:
 			self.doc.from_case_no = self.get_recommended_case_no()
 
 		for d in self.doclist.get({"parentfield": "item_details"}):
-			res = frappe.conn.get_value("Item", d.item_code, 
+			res = frappe.db.get_value("Item", d.item_code, 
 				["net_weight", "weight_uom"], as_dict=True)
 			
 			if res and len(res)>0:
@@ -145,7 +145,7 @@ class DocType:
 			Returns the next case no. for a new packing slip for a delivery
 			note
 		"""
-		recommended_case_no = frappe.conn.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
+		recommended_case_no = frappe.db.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
 		
 		return cint(recommended_case_no[0][0]) + 1
@@ -165,7 +165,7 @@ class DocType:
 
 def item_details(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	return frappe.conn.sql("""select name, item_name, description from `tabItem` 
+	return frappe.db.sql("""select name, item_name, description from `tabItem` 
 				where name in ( select item_code FROM `tabDelivery Note Item` 
 	 						where parent= %s 
 	 							and ifnull(qty, 0) > ifnull(packed_qty, 0)) 

@@ -11,7 +11,7 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 	def set_as_default(self):
-		frappe.conn.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)
+		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)
 		frappe.get_obj("Global Defaults").on_update()
 		
 		# clear cache
@@ -21,7 +21,7 @@ class DocType:
 			Please refresh your browser for the change to take effect."""))
 
 	def validate(self):
-		year_start_end_dates = frappe.conn.sql("""select year_start_date, year_end_date 
+		year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date 
 			from `tabFiscal Year` where name=%s""", (self.doc.name))
 
 		if year_start_end_dates:
@@ -36,7 +36,7 @@ class DocType:
 		if (getdate(self.doc.year_end_date) - getdate(self.doc.year_start_date)).days > 366:
 			frappe.throw(_("Year Start Date and Year End Date are not within Fiscal Year."))
 
-		year_start_end_dates = frappe.conn.sql("""select name, year_start_date, year_end_date 
+		year_start_end_dates = frappe.db.sql("""select name, year_start_date, year_end_date 
 			from `tabFiscal Year` where name!=%s""", (self.doc.name))
 
 		for fiscal_year, ysd, yed in year_start_end_dates:

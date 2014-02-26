@@ -18,7 +18,7 @@ class DocType(DocListController):
 		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
 	
 	def autoname(self):
-		if frappe.conn.get_default("item_naming_by")=="Naming Series":
+		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			from frappe.model.doc import make_autoname
 			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
 		elif not self.doc.item_code:
@@ -46,7 +46,7 @@ class DocType(DocListController):
 			self.doc.parent_website_route = frappe.get_website_route("Item Group", self.doc.item_group)
 
 		if self.doc.name:
-			self.old_page_name = frappe.conn.get_value('Item', self.doc.name, 'page_name')
+			self.old_page_name = frappe.db.get_value('Item', self.doc.name, 'page_name')
 			
 	def on_update(self):
 		self.validate_name_with_item_group()
@@ -72,13 +72,13 @@ class DocType(DocListController):
 	def check_stock_uom_with_bin(self):
 		if not self.doc.fields.get("__islocal"):
 			matched=True
-			ref_uom = frappe.conn.get_value("Stock Ledger Entry", 
+			ref_uom = frappe.db.get_value("Stock Ledger Entry", 
 				{"item_code": self.doc.name}, "stock_uom")
 			if ref_uom:
 				if cstr(ref_uom) != cstr(self.doc.stock_uom):
 					matched = False
 			else:
-				bin_list = frappe.conn.sql("select * from tabBin where item_code=%s", 
+				bin_list = frappe.db.sql("select * from tabBin where item_code=%s", 
 					self.doc.item_code, as_dict=1)
 				for bin in bin_list:
 					if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
@@ -87,7 +87,7 @@ class DocType(DocListController):
 							break
 						
 				if matched and bin_list:
-					frappe.conn.sql("""update tabBin set stock_uom=%s where item_code=%s""",
+					frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""",
 						(self.doc.stock_uom, self.doc.name))
 				
 			if not matched:
@@ -122,7 +122,7 @@ class DocType(DocListController):
 			
 	def check_for_active_boms(self):
 		if self.doc.is_purchase_item != "Yes":
-			bom_mat = frappe.conn.sql("""select distinct t1.parent 
+			bom_mat = frappe.db.sql("""select distinct t1.parent 
 				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
 				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
@@ -132,7 +132,7 @@ class DocType(DocListController):
 					as it is present in one or many Active BOMs"))
 					
 		if self.doc.is_manufactured_item != "Yes":
-			bom = frappe.conn.sql("""select name from `tabBOM` where item = %s 
+			bom = frappe.db.sql("""select name from `tabBOM` where item = %s 
 				and is_active = 1""", (self.doc.name,))
 			if bom and bom[0][0]:
 				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many \
@@ -150,7 +150,7 @@ class DocType(DocListController):
 		check_list=[]
 		for d in getlist(self.doclist,'item_tax'):
 			if d.tax_type:
-				account_type = frappe.conn.get_value("Account", d.tax_type, "account_type")
+				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
 				
 				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
 					msgprint("'%s' is not Tax / Chargeable / Income / Expense Account" % d.tax_type, raise_exception=1)
@@ -162,7 +162,7 @@ class DocType(DocListController):
 						
 	def validate_barcode(self):
 		if self.doc.barcode:
-			duplicate = frappe.conn.sql("""select name from tabItem where barcode = %s 
+			duplicate = frappe.db.sql("""select name from tabItem where barcode = %s 
 				and name != %s""", (self.doc.barcode, self.doc.name))
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % 
@@ -170,7 +170,7 @@ class DocType(DocListController):
 
 	def cant_change(self):
 		if not self.doc.fields.get("__islocal"):
-			vals = frappe.conn.get_value("Item", self.doc.name, 
+			vals = frappe.db.get_value("Item", self.doc.name, 
 				["has_serial_no", "is_stock_item", "valuation_method"], as_dict=True)
 			
 			if vals and ((self.doc.is_stock_item == "No" and vals.is_stock_item == "Yes") or 
@@ -187,19 +187,19 @@ class DocType(DocListController):
 					raise_exception=1)
 	
 	def check_if_sle_exists(self):
-		sle = frappe.conn.sql("""select name from `tabStock Ledger Entry` 
+		sle = frappe.db.sql("""select name from `tabStock Ledger Entry` 
 			where item_code = %s""", self.doc.name)
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
 		# causes problem with tree build
-		if frappe.conn.exists("Item Group", self.doc.name):
+		if frappe.db.exists("Item Group", self.doc.name):
 			frappe.msgprint("An item group exists with same name (%s), \
 				please change the item name or rename the item group" % 
 				self.doc.name, raise_exception=1)
 
 	def update_item_price(self):
-		frappe.conn.sql("""update `tabItem Price` set item_name=%s, 
+		frappe.db.sql("""update `tabItem Price` set item_name=%s, 
 			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.doc.item_name, self.doc.description, self.doc.name))
 
@@ -212,10 +212,10 @@ class DocType(DocListController):
 		return page_name_from
 		
 	def get_tax_rate(self, tax_type):
-		return { "tax_rate": frappe.conn.get_value("Account", tax_type, "tax_rate") }
+		return { "tax_rate": frappe.db.get_value("Account", tax_type, "tax_rate") }
 
 	def get_file_details(self, arg = ''):
-		file = frappe.conn.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
+		file = frappe.db.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
 
 		ret = {
 			'file_group'	:	file and file[0]['file_group'] or '',
@@ -224,24 +224,24 @@ class DocType(DocListController):
 		return ret
 		
 	def on_trash(self):
-		frappe.conn.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		frappe.db.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
 			# Validate properties before merging
-			if not frappe.conn.exists("Item", newdn):
+			if not frappe.db.exists("Item", newdn):
 				frappe.throw(_("Item ") + newdn +_(" does not exists"))
 			
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.conn.get_value("Item", newdn, field_list)]
+			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]
 			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:
 				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
-			frappe.conn.sql("delete from `tabBin` where item_code=%s", olddn)
+			frappe.db.sql("delete from `tabBin` where item_code=%s", olddn)
 
 	def after_rename(self, olddn, newdn, merge):
-		frappe.conn.set_value("Item", newdn, "item_code", newdn)
+		frappe.db.set_value("Item", newdn, "item_code", newdn)
 			
 		if merge:
 			self.set_last_purchase_rate(newdn)
@@ -249,23 +249,23 @@ class DocType(DocListController):
 			
 	def set_last_purchase_rate(self, newdn):
 		last_purchase_rate = get_last_purchase_details(newdn).get("base_rate", 0)
-		frappe.conn.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
+		frappe.db.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
 			
 	def recalculate_bin_qty(self, newdn):
 		from erpnext.utilities.repost_stock import repost_stock
-		frappe.conn.auto_commit_on_many_writes = 1
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.auto_commit_on_many_writes = 1
+		frappe.db.set_default("allow_negative_stock", 1)
 		
-		for warehouse in frappe.conn.sql("select name from `tabWarehouse`"):
+		for warehouse in frappe.db.sql("select name from `tabWarehouse`"):
 			repost_stock(newdn, warehouse[0])
 		
-		frappe.conn.set_default("allow_negative_stock", 
-			frappe.conn.get_value("Stock Settings", None, "allow_negative_stock"))
-		frappe.conn.auto_commit_on_many_writes = 0
+		frappe.db.set_default("allow_negative_stock", 
+			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		frappe.db.auto_commit_on_many_writes = 0
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
-		end_of_life = frappe.conn.get_value("Item", item_code, "end_of_life")
+		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
 	
 	if end_of_life and getdate(end_of_life) <= now_datetime().date():
 		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
@@ -280,7 +280,7 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 		
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:
-		is_stock_item = frappe.conn.get_value("Item", item_code, "is_stock_item")
+		is_stock_item = frappe.db.get_value("Item", item_code, "is_stock_item")
 		
 	if is_stock_item != "Yes":
 		msg = (_("Item") + " %(item_code)s: " + _("is not a Stock Item")) % {
@@ -291,7 +291,7 @@ def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 		
 def validate_cancelled_item(item_code, docstatus=None, verbose=1):
 	if docstatus is None:
-		docstatus = frappe.conn.get_value("Item", item_code, "docstatus")
+		docstatus = frappe.db.get_value("Item", item_code, "docstatus")
 	
 	if docstatus == 2:
 		msg = (_("Item") + " %(item_code)s: " + _("is a cancelled Item")) % {
@@ -310,7 +310,7 @@ def _msgprint(msg, verbose):
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
-	last_purchase_order = frappe.conn.sql("""\
+	last_purchase_order = frappe.db.sql("""\
 		select po.name, po.transaction_date, po.conversion_rate,
 			po_item.conversion_factor, po_item.base_price_list_rate, 
 			po_item.discount_percentage, po_item.base_rate
@@ -321,7 +321,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
 	# get last purchase receipt item details		
-	last_purchase_receipt = frappe.conn.sql("""\
+	last_purchase_receipt = frappe.db.sql("""\
 		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
 			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
 			pr_item.base_rate

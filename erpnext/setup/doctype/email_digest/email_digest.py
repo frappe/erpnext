@@ -49,12 +49,12 @@ class DocType(DocListController):
 		self.doc, self.doclist = doc, doclist
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.future_from_date, self.future_to_date = self.get_future_from_to_date()
-		self.currency = frappe.conn.get_value("Company", self.doc.company,
+		self.currency = frappe.db.get_value("Company", self.doc.company,
 			"default_currency")
 
 	def get_profiles(self):
 		"""get list of profiles"""
-		profile_list = frappe.conn.sql("""
+		profile_list = frappe.db.sql("""
 			select name, enabled from tabProfile
 			where docstatus=0 and name not in ('Administrator', 'Guest')
 			and user_type = "System User"
@@ -71,7 +71,7 @@ class DocType(DocListController):
 	
 	def send(self):
 		# send email only to enabled users
-		valid_users = [p[0] for p in frappe.conn.sql("""select name from `tabProfile`
+		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabProfile`
 			where enabled=1""")]
 		recipients = filter(lambda r: r in valid_users,
 			self.doc.recipient_list.split("\n"))
@@ -153,7 +153,7 @@ class DocType(DocListController):
 		return msg
 	
 	def get_income_year_to_date(self):
-		return self.get_income(frappe.conn.get_defaults("year_start_date"), 
+		return self.get_income(frappe.db.get_defaults("year_start_date"), 
 			self.meta.get_label("income_year_to_date"))
 			
 	def get_bank_balance(self):
@@ -339,7 +339,7 @@ class DocType(DocListController):
 			company = """and company="%s" """ % self.doc.company
 		else:
 			company = ""
-		count = frappe.conn.sql("""select count(*) from `tab%s`
+		count = frappe.db.sql("""select count(*) from `tab%s`
 			where docstatus=%s %s and
 			date(creation)>=%s and date(creation)<=%s""" % 
 			(doctype, docstatus, company, "%s", "%s"), (self.from_date, self.to_date))
@@ -348,7 +348,7 @@ class DocType(DocListController):
 		return count, self.get_html(label, None, count)
 		
 	def get_new_sum(self, doctype, label, sum_field):
-		count_sum = frappe.conn.sql("""select count(*), sum(ifnull(`%s`, 0))
+		count_sum = frappe.db.sql("""select count(*), sum(ifnull(`%s`, 0))
 			from `tab%s` where docstatus=1 and company = %s and
 			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
 			"%s", "%s"), (self.doc.company, self.from_date, self.to_date))
@@ -372,7 +372,7 @@ class DocType(DocListController):
 				hasattr(self, "gl_entries"):
 			return self.gl_entries
 		
-		gl_entries = frappe.conn.sql("""select `account`, 
+		gl_entries = frappe.db.sql("""select `account`, 
 			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
 			from `tabGL Entry`
 			where company=%s 
@@ -388,7 +388,7 @@ class DocType(DocListController):
 		
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
-			self.accounts = frappe.conn.sql("""select name, is_pl_account,
+			self.accounts = frappe.db.sql("""select name, is_pl_account,
 				debit_or_credit, account_type, account_name, master_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
@@ -451,7 +451,7 @@ class DocType(DocListController):
 		return send_date
 	
 	def get_open_tickets(self):
-		open_tickets = frappe.conn.sql("""select name, subject, modified, raised_by
+		open_tickets = frappe.db.sql("""select name, subject, modified, raised_by
 			from `tabSupport Ticket` where status='Open'
 			order by modified desc limit 10""", as_dict=True)
 			
@@ -479,7 +479,7 @@ def send():
 		# do not send email digests to expired accounts
 		return
 	
-	for ed in frappe.conn.sql("""select name from `tabEmail Digest`
+	for ed in frappe.db.sql("""select name from `tabEmail Digest`
 			where enabled=1 and docstatus<2""", as_list=1):
 		ed_obj = get_obj('Email Digest', ed[0])
 		if (now_date == ed_obj.get_next_sending()):

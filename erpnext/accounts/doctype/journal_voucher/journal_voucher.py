@@ -75,7 +75,7 @@ class DocType(AccountsController):
 		for d in getlist(self.doclist,'entries'):
 			if not d.is_advance and not d.against_voucher and \
 					not d.against_invoice and not d.against_jv:
-				master_type = frappe.conn.get_value("Account", d.account, "master_type")
+				master_type = frappe.db.get_value("Account", d.account, "master_type")
 				if (master_type == 'Customer' and flt(d.credit) > 0) or \
 						(master_type == 'Supplier' and flt(d.debit) > 0):
 					msgprint("Message: Please check Is Advance as 'Yes' against \
@@ -87,7 +87,7 @@ class DocType(AccountsController):
 				if d.against_jv == self.doc.name:
 					msgprint("You can not enter current voucher in 'Against JV' column",
 						raise_exception=1)
-				elif not frappe.conn.sql("""select name from `tabJournal Voucher Detail` 
+				elif not frappe.db.sql("""select name from `tabJournal Voucher Detail` 
 						where account = '%s' and docstatus = 1 and parent = '%s'""" % 
 						(d.account, d.against_jv)):
 					msgprint("Against JV: %s is not valid." % d.against_jv, raise_exception=1)
@@ -125,12 +125,12 @@ class DocType(AccountsController):
 		
 		for d in getlist(self.doclist, 'entries'):
 			if d.against_invoice and d.credit:
-				currency = frappe.conn.get_value("Sales Invoice", d.against_invoice, "currency")
+				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
 				r.append('%s %s against Invoice: %s' % 
 					(cstr(currency), fmt_money(flt(d.credit)), d.against_invoice))
 					
 			if d.against_voucher and d.debit:
-				bill_no = frappe.conn.sql("""select bill_no, bill_date, currency 
+				bill_no = frappe.db.sql("""select bill_no, bill_date, currency 
 					from `tabPurchase Invoice` where name=%s""", d.against_voucher)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
@@ -153,7 +153,7 @@ class DocType(AccountsController):
 			# check account type whether supplier or customer
 			exists = False
 			for d in getlist(self.doclist, 'entries'):
-				account_type = frappe.conn.get_value("Account", d.account, "account_type")
+				account_type = frappe.db.get_value("Account", d.account, "account_type")
 				if account_type in ["Supplier", "Customer"]:
 					exists = True
 					break
@@ -166,12 +166,12 @@ class DocType(AccountsController):
 
 	def set_print_format_fields(self):
 		for d in getlist(self.doclist, 'entries'):
-			account_type, master_type = frappe.conn.get_value("Account", d.account, 
+			account_type, master_type = frappe.db.get_value("Account", d.account, 
 				["account_type", "master_type"])
 				
 			if master_type in ['Supplier', 'Customer']:
 				if not self.doc.pay_to_recd_from:
-					self.doc.pay_to_recd_from = frappe.conn.get_value(master_type, 
+					self.doc.pay_to_recd_from = frappe.db.get_value(master_type, 
 						' - '.join(d.account.split(' - ')[:-1]), 
 						master_type == 'Customer' and 'customer_name' or 'supplier_name')
 			
@@ -190,7 +190,7 @@ class DocType(AccountsController):
 		if date_diff <= 0: return
 		
 		# Get List of Customer Account
-		acc_list = filter(lambda d: frappe.conn.get_value("Account", d.account, 
+		acc_list = filter(lambda d: frappe.db.get_value("Account", d.account, 
 		 	"master_type")=='Customer', getlist(self.doclist,'entries'))
 		
 		for d in acc_list:
@@ -202,11 +202,11 @@ class DocType(AccountsController):
 					
 	def get_credit_days_for(self, ac):
 		if not self.credit_days_for.has_key(ac):
-			self.credit_days_for[ac] = cint(frappe.conn.get_value("Account", ac, "credit_days"))
+			self.credit_days_for[ac] = cint(frappe.db.get_value("Account", ac, "credit_days"))
 
 		if not self.credit_days_for[ac]:
 			if self.credit_days_global==-1:
-				self.credit_days_global = cint(frappe.conn.get_value("Company", 
+				self.credit_days_global = cint(frappe.db.get_value("Company", 
 					self.doc.company, "credit_days"))
 					
 			return self.credit_days_global
@@ -218,7 +218,7 @@ class DocType(AccountsController):
 			self.is_approving_authority = 0
 
 			# Fetch credit controller role
-			approving_authority = frappe.conn.get_value("Global Defaults", None, 
+			approving_authority = frappe.db.get_value("Global Defaults", None, 
 				"credit_controller")
 			
 			# Check logged-in user is authorized
@@ -229,12 +229,12 @@ class DocType(AccountsController):
 
 	def check_account_against_entries(self):
 		for d in self.doclist.get({"parentfield": "entries"}):
-			if d.against_invoice and frappe.conn.get_value("Sales Invoice", 
+			if d.against_invoice and frappe.db.get_value("Sales Invoice", 
 					d.against_invoice, "debit_to") != d.account:
 				frappe.throw(_("Row #") + cstr(d.idx) +  ": " +
 					_("Account is not matching with Debit To account of Sales Invoice"))
 			
-			if d.against_voucher and frappe.conn.get_value("Purchase Invoice", 
+			if d.against_voucher and frappe.db.get_value("Purchase Invoice", 
 					d.against_voucher, "credit_to") != d.account:
 				frappe.throw(_("Row #") + cstr(d.idx) + ": " +
 					_("Account is not matching with Credit To account of Purchase Invoice"))
@@ -267,7 +267,7 @@ class DocType(AccountsController):
 			
 	def check_credit_limit(self):
 		for d in self.doclist.get({"parentfield": "entries"}):
-			master_type, master_name = frappe.conn.get_value("Account", d.account, 
+			master_type, master_name = frappe.db.get_value("Account", d.account, 
 				["master_type", "master_name"])
 			if master_type == "Customer" and master_name:
 				super(DocType, self).check_credit_limit(d.account)
@@ -328,18 +328,18 @@ class DocType(AccountsController):
 		cond = (flt(self.doc.write_off_amount) > 0) and \
 			' and outstanding_amount <= '+ self.doc.write_off_amount or ''
 		if self.doc.write_off_based_on == 'Accounts Receivable':
-			return frappe.conn.sql("""select name, debit_to, outstanding_amount 
+			return frappe.db.sql("""select name, debit_to, outstanding_amount 
 				from `tabSales Invoice` where docstatus = 1 and company = %s 
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
 		elif self.doc.write_off_based_on == 'Accounts Payable':
-			return frappe.conn.sql("""select name, credit_to, outstanding_amount 
+			return frappe.db.sql("""select name, credit_to, outstanding_amount 
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s 
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
 	from erpnext.accounts.utils import get_balance_on
-	account = frappe.conn.get_value("Company", company,
+	account = frappe.db.get_value("Company", company,
 		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
 	if account:
 		return {
@@ -412,27 +412,27 @@ def get_payment_entry(doc):
 def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
 	from erpnext.accounts.utils import get_balance_on
-	accounts = frappe.conn.sql_list("""select name from tabAccount 
+	accounts = frappe.db.sql_list("""select name from tabAccount 
 		where group_or_ledger='Ledger' and is_pl_account='No' and company=%s""", company)
 	
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 	
 def get_against_purchase_invoice(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.conn.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 
+	return frappe.db.sql("""select name, credit_to, outstanding_amount, bill_no, bill_date 
 		from `tabPurchase Invoice` where credit_to = %s and docstatus = 1 
 		and outstanding_amount > 0 and %s like %s order by name desc limit %s, %s""" %
 		("%s", searchfield, "%s", "%s", "%s"), 
 		(filters["account"], "%%%s%%" % txt, start, page_len))
 		
 def get_against_sales_invoice(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.conn.sql("""select name, debit_to, outstanding_amount 
+	return frappe.db.sql("""select name, debit_to, outstanding_amount 
 		from `tabSales Invoice` where debit_to = %s and docstatus = 1 
 		and outstanding_amount > 0 and `%s` like %s order by name desc limit %s, %s""" %
 		("%s", searchfield, "%s", "%s", "%s"), 
 		(filters["account"], "%%%s%%" % txt, start, page_len))
 		
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.conn.sql("""select jv.name, jv.posting_date, jv.user_remark 
+	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark 
 		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail 
 		where jv_detail.parent = jv.name and jv_detail.account = %s and jv.docstatus = 1 
 		and jv.%s like %s order by jv.name desc limit %s, %s""" % 
@@ -443,7 +443,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 def get_outstanding(args):
 	args = eval(args)
 	if args.get("doctype") == "Journal Voucher" and args.get("account"):
-		against_jv_amount = frappe.conn.sql("""
+		against_jv_amount = frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 			from `tabJournal Voucher Detail` where parent=%s and account=%s 
 			and ifnull(against_invoice, '')='' and ifnull(against_voucher, '')=''
@@ -457,11 +457,11 @@ def get_outstanding(args):
 		
 	elif args.get("doctype") == "Sales Invoice":
 		return {
-			"credit": flt(frappe.conn.get_value("Sales Invoice", args["docname"], 
+			"credit": flt(frappe.db.get_value("Sales Invoice", args["docname"], 
 				"outstanding_amount"))
 		}
 	elif args.get("doctype") == "Purchase Invoice":
 		return {
-			"debit": flt(frappe.conn.get_value("Purchase Invoice", args["docname"], 
+			"debit": flt(frappe.db.get_value("Purchase Invoice", args["docname"], 
 				"outstanding_amount"))
 		}

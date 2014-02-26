@@ -13,13 +13,13 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_sender(self, comm):
-		return frappe.conn.get_value('Email Settings',None,'support_email')
+		return frappe.db.get_value('Email Settings',None,'support_email')
 
 	def get_subject(self, comm):
 		return '[' + self.doc.name + '] ' + (comm.subject or 'No Subject Specified')
 	
 	def get_content(self, comm):
-		signature = frappe.conn.get_value('Email Settings',None,'support_signature')
+		signature = frappe.db.get_value('Email Settings',None,'support_signature')
 		content = comm.content
 		if signature:
 			content += '<p>' + signature + '</p>'
@@ -41,16 +41,16 @@ class DocType(TransactionBase):
 		email_id = email.utils.parseaddr(email_id)
 		if email_id:
 			if not self.doc.lead:
-				self.doc.lead = frappe.conn.get_value("Lead", {"email_id": email_id})
+				self.doc.lead = frappe.db.get_value("Lead", {"email_id": email_id})
 			if not self.doc.contact:
-				self.doc.contact = frappe.conn.get_value("Contact", {"email_id": email_id})
+				self.doc.contact = frappe.db.get_value("Contact", {"email_id": email_id})
 				
 			if not self.doc.company:		
-				self.doc.company = frappe.conn.get_value("Lead", self.doc.lead, "company") or \
-					frappe.conn.get_default("company")
+				self.doc.company = frappe.db.get_value("Lead", self.doc.lead, "company") or \
+					frappe.db.get_default("company")
 
 	def update_status(self):
-		status = frappe.conn.get_value("Support Ticket", self.doc.name, "status")
+		status = frappe.db.get_value("Support Ticket", self.doc.name, "status")
 		if self.doc.status!="Open" and status =="Open" and not self.doc.first_responded_on:
 			self.doc.first_responded_on = now()
 		if self.doc.status=="Closed" and status !="Closed":
@@ -65,6 +65,6 @@ def set_status(name, status):
 	st.save()
 		
 def auto_close_tickets():
-	frappe.conn.sql("""update `tabSupport Ticket` set status = 'Closed' 
+	frappe.db.sql("""update `tabSupport Ticket` set status = 'Closed' 
 		where status = 'Replied' 
 		and date_sub(curdate(),interval 15 Day) > modified""")

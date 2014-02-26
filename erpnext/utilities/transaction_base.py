@@ -12,9 +12,9 @@ from erpnext.controllers.status_updater import StatusUpdater
 class TransactionBase(StatusUpdater):
 	def load_notification_message(self):
 		dt = self.doc.doctype.lower().replace(" ", "_")
-		if int(frappe.conn.get_value("Notification Control", None, dt) or 0):
+		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
 			self.doc.fields["__notification_message"] = \
-				frappe.conn.get_value("Notification Control", None, dt + "_message")
+				frappe.db.get_value("Notification Control", None, dt + "_message")
 							
 	def validate_posting_time(self):
 		if not self.doc.posting_time:
@@ -28,7 +28,7 @@ class TransactionBase(StatusUpdater):
 			self._add_calendar_event(opts)
 			
 	def delete_events(self):
-		frappe.delete_doc("Event", frappe.conn.sql_list("""select name from `tabEvent` 
+		frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent` 
 			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)), 
 			ignore_permissions=True)
 			
@@ -47,7 +47,7 @@ class TransactionBase(StatusUpdater):
 				"ref_name": self.doc.name
 			}]
 			
-			if frappe.conn.exists("Profile", self.doc.contact_by):
+			if frappe.db.exists("Profile", self.doc.contact_by):
 				event_doclist.append({
 					"doctype": "Event User",
 					"parentfield": "event_individuals",
@@ -84,7 +84,7 @@ class TransactionBase(StatusUpdater):
 	def compare_values(self, ref_doc, fields, doc=None):
 		for ref_doctype, ref_dn_list in ref_doc.items():
 			for ref_docname in ref_dn_list:
-				prevdoc_values = frappe.conn.get_value(ref_doctype, ref_docname, 
+				prevdoc_values = frappe.db.get_value(ref_doctype, ref_docname, 
 					[d[0] for d in fields], as_dict=1)
 
 				for field, condition in fields:
@@ -92,7 +92,7 @@ class TransactionBase(StatusUpdater):
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 	
 def delete_events(ref_type, ref_name):
-	frappe.delete_doc("Event", frappe.conn.sql_list("""select name from `tabEvent` 
+	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent` 
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
@@ -101,7 +101,7 @@ def validate_uom_is_integer(doclist, uom_field, qty_fields):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
 	
-	integer_uoms = filter(lambda uom: frappe.conn.get_value("UOM", uom, 
+	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom, 
 		"must_be_whole_number") or None, doclist.get_distinct_values(uom_field))
 		
 	if not integer_uoms:

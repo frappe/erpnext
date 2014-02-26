@@ -64,11 +64,11 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 
 	if feedtype in ('Login', 'Comment', 'Assignment'):
 		# delete old login, comment feed
-		frappe.conn.sql("""delete from tabFeed where 
+		frappe.db.sql("""delete from tabFeed where 
 			datediff(curdate(), creation) > 7 and doc_type in ('Comment', 'Login', 'Assignment')""")
 	else:
 		# one feed per item
-		frappe.conn.sql("""delete from tabFeed
+		frappe.db.sql("""delete from tabFeed
 			where doc_type=%s and doc_name=%s 
 			and ifnull(feed_type,'') != 'Comment'""", (doctype, name))
 

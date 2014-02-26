@@ -13,7 +13,7 @@ class DocType:
 	def validate(self):
 		for key in ["cust_master_name", "customer_group", "territory", "maintain_same_sales_rate",
 			"editable_price_list_rate", "selling_price_list"]:
-				frappe.conn.set_default(key, self.doc.fields.get(key, ""))
+				frappe.db.set_default(key, self.doc.fields.get(key, ""))
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Customer", "customer_name", 

@@ -15,8 +15,8 @@ class DocType:
     self.doc, self.doclist = d, dl
 	
 def on_doctype_update():
-	if not frappe.conn.sql("""show index from `tabFeed` 
+	if not frappe.db.sql("""show index from `tabFeed` 
 		where Key_name="feed_doctype_docname_index" """):
-		frappe.conn.commit()
-		frappe.conn.sql("""alter table `tabFeed` 
+		frappe.db.commit()
+		frappe.db.sql("""alter table `tabFeed` 
 			add index feed_doctype_docname_index(doc_type, doc_name)""")

@@ -21,11 +21,11 @@ class DocType(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		frappe.conn.sql("""delete from `tabGL Entry` 
+		frappe.db.sql("""delete from `tabGL Entry` 
 			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.doc.name)
 
 	def validate_account_head(self):
-		debit_or_credit, is_pl_account = frappe.conn.get_value("Account", 
+		debit_or_credit, is_pl_account = frappe.db.get_value("Account", 
 			self.doc.closing_account_head, ["debit_or_credit", "is_pl_account"])
 			
 		if debit_or_credit != 'Credit' or is_pl_account != 'No':
@@ -36,7 +36,7 @@ class DocType(AccountsController):
 		from erpnext.accounts.utils import get_fiscal_year
 		self.year_start_date = get_fiscal_year(self.doc.posting_date, self.doc.fiscal_year)[1]
 
-		pce = frappe.conn.sql("""select name from `tabPeriod Closing Voucher`
+		pce = frappe.db.sql("""select name from `tabPeriod Closing Voucher`
 			where posting_date > %s and fiscal_year = %s and docstatus = 1""", 
 			(self.doc.posting_date, self.doc.fiscal_year))
 		if pce and pce[0][0]:
@@ -44,7 +44,7 @@ class DocType(AccountsController):
 				  _("has been made after posting date") + ": " + self.doc.posting_date)
 		 
 	def validate_pl_balances(self):
-		income_bal = frappe.conn.sql("""
+		income_bal = frappe.db.sql("""
 			select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) 
 			from `tabGL Entry` t1, tabAccount t2 
 			where t1.account = t2.name and t1.posting_date between %s and %s 
@@ -52,7 +52,7 @@ class DocType(AccountsController):
 			and t2.docstatus < 2 and t2.company = %s""", 
 			(self.year_start_date, self.doc.posting_date, self.doc.company))
 			
-		expense_bal = frappe.conn.sql("""
+		expense_bal = frappe.db.sql("""
 			select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0))
 			from `tabGL Entry` t1, tabAccount t2 
 			where t1.account = t2.name and t1.posting_date between %s and %s
@@ -68,7 +68,7 @@ class DocType(AccountsController):
 		
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""
-		return frappe.conn.sql("""
+		return frappe.db.sql("""
 			select t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance
 			from `tabGL Entry` t1, `tabAccount` t2 
 			where t1.account = t2.name and ifnull(t2.is_pl_account, 'No') = 'Yes'

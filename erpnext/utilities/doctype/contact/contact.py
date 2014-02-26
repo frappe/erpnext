@@ -30,24 +30,24 @@ class DocType(StatusUpdater):
 	def validate_primary_contact(self):
 		if self.doc.is_primary_contact == 1:
 			if self.doc.customer:
-				frappe.conn.sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
+				frappe.db.sql("update tabContact set is_primary_contact=0 where customer = '%s'" % (self.doc.customer))
 			elif self.doc.supplier:
-				frappe.conn.sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
+				frappe.db.sql("update tabContact set is_primary_contact=0 where supplier = '%s'" % (self.doc.supplier))	
 			elif self.doc.sales_partner:
-				frappe.conn.sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
+				frappe.db.sql("update tabContact set is_primary_contact=0 where sales_partner = '%s'" % (self.doc.sales_partner))
 		else:
 			if self.doc.customer:
-				if not frappe.conn.sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
+				if not frappe.db.sql("select name from tabContact where is_primary_contact=1 and customer = '%s'" % (self.doc.customer)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.supplier:
-				if not frappe.conn.sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
+				if not frappe.db.sql("select name from tabContact where is_primary_contact=1 and supplier = '%s'" % (self.doc.supplier)):
 					self.doc.is_primary_contact = 1
 			elif self.doc.sales_partner:
-				if not frappe.conn.sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
+				if not frappe.db.sql("select name from tabContact where is_primary_contact=1 and sales_partner = '%s'" % (self.doc.sales_partner)):
 					self.doc.is_primary_contact = 1
 
 	def on_trash(self):
-		frappe.conn.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
+		frappe.db.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
 			self.doc.name)
 
 @frappe.whitelist()

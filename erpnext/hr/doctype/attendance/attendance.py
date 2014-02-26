@@ -14,7 +14,7 @@ class DocType:
 		self.doclist = doclist
 	
 	def validate_duplicate_record(self):	 
-		res = frappe.conn.sql("""select name from `tabAttendance` where employee = %s and att_date = %s 
+		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and att_date = %s 
 			and name != %s and docstatus = 1""", 
 			(self.doc.employee, self.doc.att_date, self.doc.name))
 		if res:
@@ -23,7 +23,7 @@ class DocType:
 			
 	def check_leave_record(self):
 		if self.doc.status == 'Present':
-			leave = frappe.conn.sql("""select name from `tabLeave Application` 
+			leave = frappe.db.sql("""select name from `tabLeave Application` 
 				where employee = %s and %s between from_date and to_date and status = 'Approved' 
 				and docstatus = 1""", (self.doc.employee, self.doc.att_date))
 			
@@ -41,7 +41,7 @@ class DocType:
 			msgprint(_("Attendance can not be marked for future dates"), raise_exception=1)
 
 	def validate_employee(self):
-		emp = frappe.conn.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
+		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
 		 	self.doc.employee)
 		if not emp:
 			msgprint(_("Employee: ") + self.doc.employee + 
@@ -58,5 +58,5 @@ class DocType:
 	def on_update(self):
 		# this is done because sometimes user entered wrong employee name 
 		# while uploading employee attendance
-		employee_name = frappe.conn.get_value("Employee", self.doc.employee, "employee_name")
-		frappe.conn.set(self.doc, 'employee_name', employee_name)
+		employee_name = frappe.db.get_value("Employee", self.doc.employee, "employee_name")
+		frappe.db.set(self.doc, 'employee_name', employee_name)

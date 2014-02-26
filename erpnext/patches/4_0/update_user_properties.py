@@ -20,13 +20,13 @@ def execute():
 def update_user_properties():
 	frappe.reload_doc("core", "doctype", "docfield")
 	
-	for d in frappe.conn.sql("""select parent, defkey, defvalue from tabDefaultValue
+	for d in frappe.db.sql("""select parent, defkey, defvalue from tabDefaultValue
 		where parent not in ('__global', 'Control Panel')""", as_dict=True):
-		df = frappe.conn.sql("""select options from tabDocField
+		df = frappe.db.sql("""select options from tabDocField
 			where fieldname=%s and fieldtype='Link'""", d.defkey, as_dict=True)
 		
 		if df:
-			frappe.conn.sql("""update tabDefaultValue
+			frappe.db.sql("""update tabDefaultValue
 				set defkey=%s, parenttype='Restriction'
 				where defkey=%s and
 				parent not in ('__global', 'Control Panel')""", (df[0].options, d.defkey))
@@ -34,7 +34,7 @@ def update_user_properties():
 def update_user_match():
 	import frappe.defaults
 	doctype_matches = {}
-	for doctype, match in frappe.conn.sql("""select parent, `match` from `tabDocPerm`
+	for doctype, match in frappe.db.sql("""select parent, `match` from `tabDocPerm`
 		where `match` like %s and ifnull(`match`, '')!="leave_approver:user" """, "%:user"):
 		doctype_matches.setdefault(doctype, []).append(match)
 	
@@ -42,7 +42,7 @@ def update_user_match():
 		meta = frappe.get_doctype(doctype)
 		
 		# for each user with roles of this doctype, check if match condition applies
-		for profile in frappe.conn.sql_list("""select name from `tabProfile`
+		for profile in frappe.db.sql_list("""select name from `tabProfile`
 			where enabled=1 and user_type='System User'"""):
 			
 			user_roles = frappe.get_roles(profile)
@@ -68,7 +68,7 @@ def update_user_match():
 			# if match condition applies, restrict that user
 			# add that doc's restriction to that user
 			for match in user_matches:
-				for name in frappe.conn.sql_list("""select name from `tab{doctype}`
+				for name in frappe.db.sql_list("""select name from `tab{doctype}`
 					where `{field}`=%s""".format(doctype=doctype, field=match.split(":")[0]), profile):
 					
 					frappe.defaults.add_default(doctype, name, profile, "Restriction")
@@ -77,12 +77,12 @@ def add_employee_restrictions_to_leave_approver():
 	from frappe.core.page.user_properties import user_properties
 	
 	# add restrict rights to HR User and HR Manager
-	frappe.conn.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')
+	frappe.db.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')
 		and role in ('HR User', 'HR Manager') and permlevel=0 and `read`=1""")
 	frappe.model.doctype.clear_cache()
 	
 	# add Employee restrictions (in on_update method)
-	for employee in frappe.conn.sql_list("""select name from `tabEmployee`
+	for employee in frappe.db.sql_list("""select name from `tabEmployee`
 		where exists(select leave_approver from `tabEmployee Leave Approver`
 			where `tabEmployee Leave Approver`.parent=`tabEmployee`.name)
 		or ifnull(`reports_to`, '')!=''"""):
@@ -91,16 +91,16 @@ def add_employee_restrictions_to_leave_approver():
 
 def update_permissions():
 	# clear match conditions other than owner
-	frappe.conn.sql("""update tabDocPerm set `match`=''
+	frappe.db.sql("""update tabDocPerm set `match`=''
 		where ifnull(`match`,'') not in ('', 'owner')""")
 
 def remove_duplicate_restrictions():
 	# remove duplicate restrictions (if they exist)
-	for d in frappe.conn.sql("""select parent, defkey, defvalue,
+	for d in frappe.db.sql("""select parent, defkey, defvalue,
 		count(*) as cnt from tabDefaultValue
 		where parent not in ('__global', 'Control Panel')
 		group by parent, defkey, defvalue""", as_dict=1):
 		if d.cnt > 1:
 			# order by parenttype so that restriction does not get removed!
-			frappe.conn.sql("""delete from tabDefaultValue where parent=%s, defkey=%s,
+			frappe.db.sql("""delete from tabDefaultValue where parent=%s, defkey=%s,
 				defvalue=%s order by parenttype limit %s""", (d.parent, d.defkey, d.defvalue, d.cnt-1))

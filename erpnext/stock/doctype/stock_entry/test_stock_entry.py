@@ -13,14 +13,14 @@ class TestStockEntry(unittest.TestCase):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
 		if hasattr(self, "old_default_company"):
-			frappe.conn.set_default("company", self.old_default_company)
+			frappe.db.set_default("company", self.old_default_company)
 
 	def test_auto_material_request(self):
-		frappe.conn.sql("""delete from `tabMaterial Request Item`""")
-		frappe.conn.sql("""delete from `tabMaterial Request`""")
+		frappe.db.sql("""delete from `tabMaterial Request Item`""")
+		frappe.db.sql("""delete from `tabMaterial Request`""")
 		self._clear_stock_account_balance()
 
-		frappe.conn.set_value("Stock Settings", None, "auto_indent", True)
+		frappe.db.set_value("Stock Settings", None, "auto_indent", True)
 
 		st1 = frappe.bean(copy=test_records[0])
 		st1.insert()
@@ -34,12 +34,12 @@ class TestStockEntry(unittest.TestCase):
 
 		reorder_item()
 
-		mr_name = frappe.conn.sql("""select parent from `tabMaterial Request Item`
+		mr_name = frappe.db.sql("""select parent from `tabMaterial Request Item`
 			where item_code='_Test Item'""")
 
 		self.assertTrue(mr_name)
 
-		frappe.conn.set_default("company", self.old_default_company)
+		frappe.db.set_default("company", self.old_default_company)
 
 	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
@@ -49,7 +49,7 @@ class TestStockEntry(unittest.TestCase):
 		mr.insert()
 		mr.submit()
 
-		stock_in_hand_account = frappe.conn.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"master_name": mr.doclist[1].t_warehouse})
 
 		self.check_stock_ledger_entries("Stock Entry", mr.doc.name,
@@ -64,10 +64,10 @@ class TestStockEntry(unittest.TestCase):
 
 		mr.cancel()
 
-		self.assertFalse(frappe.conn.sql("""select * from `tabStock Ledger Entry`
+		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.doc.name))
 
-		self.assertFalse(frappe.conn.sql("""select * from `tabGL Entry`
+		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.doc.name))
 
 
@@ -84,7 +84,7 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mi.doc.name,
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 
-		stock_in_hand_account = frappe.conn.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"master_name": mi.doclist[1].s_warehouse})
 
 		self.check_gl_entries("Stock Entry", mi.doc.name,
@@ -95,16 +95,16 @@ class TestStockEntry(unittest.TestCase):
 		)
 
 		mi.cancel()
-		self.assertFalse(frappe.conn.sql("""select * from `tabStock Ledger Entry`
+		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mi.doc.name))
 
-		self.assertFalse(frappe.conn.sql("""select * from `tabGL Entry`
+		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mi.doc.name))
 
-		self.assertEquals(frappe.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse,
+		self.assertEquals(frappe.db.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse,
 			"item_code": mi.doclist[1].item_code}, "actual_qty"), 50)
 
-		self.assertEquals(frappe.conn.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse,
+		self.assertEquals(frappe.db.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse,
 			"item_code": mi.doclist[1].item_code}, "stock_value"), 5000)
 
 	def test_material_transfer_gl_entry(self):
@@ -120,10 +120,10 @@ class TestStockEntry(unittest.TestCase):
 		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name,
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
-		stock_in_hand_account = frappe.conn.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"master_name": mtn.doclist[1].s_warehouse})
 
-		fixed_asset_account = frappe.conn.get_value("Account", {"account_type": "Warehouse",
+		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"master_name": mtn.doclist[1].t_warehouse})
 
 
@@ -136,10 +136,10 @@ class TestStockEntry(unittest.TestCase):
 
 
 		mtn.cancel()
-		self.assertFalse(frappe.conn.sql("""select * from `tabStock Ledger Entry`
+		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.doc.name))
 
-		self.assertFalse(frappe.conn.sql("""select * from `tabGL Entry`
+		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.doc.name))
 
 
@@ -157,7 +157,7 @@ class TestStockEntry(unittest.TestCase):
 			[["_Test Item", "_Test Warehouse - _TC", -50.0],
 				["_Test Item Home Desktop 100", "_Test Warehouse - _TC", 1]])
 
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
 			order by account desc""", repack.doc.name, as_dict=1)
 		self.assertFalse(gl_entries)
@@ -175,7 +175,7 @@ class TestStockEntry(unittest.TestCase):
 		repack.insert()
 		repack.submit()
 
-		stock_in_hand_account = frappe.conn.get_value("Account", {"account_type": "Warehouse",
+		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"master_name": repack.doclist[2].t_warehouse})
 
 		self.check_gl_entries("Stock Entry", repack.doc.name,
@@ -190,7 +190,7 @@ class TestStockEntry(unittest.TestCase):
 		expected_sle.sort(key=lambda x: x[0])
 
 		# check stock ledger entries
-		sle = frappe.conn.sql("""select item_code, warehouse, actual_qty
+		sle = frappe.db.sql("""select item_code, warehouse, actual_qty
 			from `tabStock Ledger Entry` where voucher_type = %s
 			and voucher_no = %s order by item_code, warehouse, actual_qty""",
 			(voucher_type, voucher_no), as_list=1)
@@ -205,7 +205,7 @@ class TestStockEntry(unittest.TestCase):
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		expected_gl_entries.sort(key=lambda x: x[0])
 
-		gl_entries = frappe.conn.sql("""select account, debit, credit
+		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 			order by account asc, debit asc""", (voucher_type, voucher_no), as_list=1)
 		self.assertTrue(gl_entries)
@@ -227,10 +227,10 @@ class TestStockEntry(unittest.TestCase):
 		se2.insert()
 		se2.submit()
 
-		frappe.conn.set_default("company", self.old_default_company)
+		frappe.db.set_default("company", self.old_default_company)
 
 	def _get_actual_qty(self):
-		return flt(frappe.conn.get_value("Bin", {"item_code": "_Test Item",
+		return flt(frappe.db.get_value("Bin", {"item_code": "_Test Item",
 			"warehouse": "_Test Warehouse - _TC"}, "actual_qty"))
 
 	def _test_sales_invoice_return(self, item_code, delivered_qty, returned_qty):
@@ -506,7 +506,7 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
 
-		frappe.conn.set_default("company", self.old_default_company)
+		frappe.db.set_default("company", self.old_default_company)
 
 		return se, pr.doc.name
 
@@ -608,17 +608,17 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertEquals(actual_qty_1 - 5, actual_qty_2)
 
-		frappe.conn.set_default("company", self.old_default_company)
+		frappe.db.set_default("company", self.old_default_company)
 
 		return se, pr.doc.name
 
 	def _clear_stock_account_balance(self):
-		frappe.conn.sql("delete from `tabStock Ledger Entry`")
-		frappe.conn.sql("""delete from `tabBin`""")
-		frappe.conn.sql("""delete from `tabGL Entry`""")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("""delete from `tabBin`""")
+		frappe.db.sql("""delete from `tabGL Entry`""")
 
-		self.old_default_company = frappe.conn.get_default("company")
-		frappe.conn.set_default("company", "_Test Company")
+		self.old_default_company = frappe.db.get_default("company")
+		frappe.db.set_default("company", "_Test Company")
 
 	def test_serial_no_not_reqd(self):
 		se = frappe.bean(copy=test_records[0])
@@ -662,11 +662,11 @@ class TestStockEntry(unittest.TestCase):
 		se.insert()
 		se.submit()
 
-		self.assertTrue(frappe.conn.exists("Serial No", "ABCD"))
-		self.assertTrue(frappe.conn.exists("Serial No", "EFGH"))
+		self.assertTrue(frappe.db.exists("Serial No", "ABCD"))
+		self.assertTrue(frappe.db.exists("Serial No", "EFGH"))
 
 		se.cancel()
-		self.assertFalse(frappe.conn.get_value("Serial No", "ABCD", "warehouse"))
+		self.assertFalse(frappe.db.get_value("Serial No", "ABCD", "warehouse"))
 
 	def test_serial_no_not_exists(self):
 		self._clear_stock_account_balance()
@@ -699,8 +699,8 @@ class TestStockEntry(unittest.TestCase):
 
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 
-		self.assertTrue(frappe.conn.exists("Serial No", serial_nos[0]))
-		self.assertTrue(frappe.conn.exists("Serial No", serial_nos[1]))
+		self.assertTrue(frappe.db.exists("Serial No", serial_nos[0]))
+		self.assertTrue(frappe.db.exists("Serial No", serial_nos[1]))
 
 		return se
 
@@ -734,10 +734,10 @@ class TestStockEntry(unittest.TestCase):
 		se.doclist[1].t_warehouse = "_Test Warehouse 1 - _TC"
 		se.insert()
 		se.submit()
-		self.assertTrue(frappe.conn.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
+		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
 
 		se.cancel()
-		self.assertTrue(frappe.conn.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
+		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse - _TC")
 
 	def test_serial_warehouse_error(self):
 		self._clear_stock_account_balance()
@@ -760,7 +760,7 @@ class TestStockEntry(unittest.TestCase):
 		se.cancel()
 
 		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
-		self.assertFalse(frappe.conn.get_value("Serial No", serial_no, "warehouse"))
+		self.assertFalse(frappe.db.get_value("Serial No", serial_no, "warehouse"))
 		
 	def test_warehouse_company_validation(self):
 		set_perpetual_inventory(0)
@@ -806,20 +806,20 @@ class TestStockEntry(unittest.TestCase):
 		
 	def test_freeze_stocks (self):
 		self._clear_stock_account_balance()
-		frappe.conn.set_value('Stock Settings', None,'stock_auth_role', '')
+		frappe.db.set_value('Stock Settings', None,'stock_auth_role', '')
 
 		# test freeze_stocks_upto
 		date_newer_than_test_records = add_days(getdate(test_records[0][0]['posting_date']), 5)
-		frappe.conn.set_value("Stock Settings", None, "stock_frozen_upto", date_newer_than_test_records)
+		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", date_newer_than_test_records)
 		se = frappe.bean(copy=test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
-		frappe.conn.set_value("Stock Settings", None, "stock_frozen_upto", '')
+		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", '')
 
 		# test freeze_stocks_upto_days
-		frappe.conn.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
+		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
 		se = frappe.bean(copy=test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
-		frappe.conn.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
+		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 def make_serialized_item():
 	se = frappe.bean(copy=test_records[0])

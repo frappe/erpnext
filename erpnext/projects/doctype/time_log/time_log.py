@@ -38,7 +38,7 @@ class DocType:
 			self.doc.status="Billed"
 			
 	def validate_overlap(self):		
-		existing = frappe.conn.sql_list("""select name from `tabTime Log` where owner=%s and
+		existing = frappe.db.sql_list("""select name from `tabTime Log` where owner=%s and
 			(
 				(from_time between %s and %s) or 
 				(to_time between %s and %s) or 
@@ -67,7 +67,7 @@ def get_events(start, end):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	match = build_match_conditions("Time Log")
-	data = frappe.conn.sql("""select name, from_time, to_time, 
+	data = frappe.db.sql("""select name, from_time, to_time, 
 		activity_type, task, project from `tabTime Log`
 		where from_time between '%(start)s' and '%(end)s' or to_time between '%(start)s' and '%(end)s'
 		%(match)s""" % {

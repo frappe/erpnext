@@ -22,7 +22,7 @@ def get_columns():
 	
 def get_employees(filters):
 	conditions = get_conditions(filters)
-	return frappe.conn.sql("""select name, date_of_birth, branch, department, designation, 
+	return frappe.db.sql("""select name, date_of_birth, branch, department, designation, 
 	gender, company from tabEmployee where status = 'Active' %s""" % conditions, as_list=1)
 	
 def get_conditions(filters):

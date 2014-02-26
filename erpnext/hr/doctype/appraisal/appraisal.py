@@ -22,7 +22,7 @@ class DocType:
 		self.calculate_total()
 
 	def get_employee_name(self):
-		emp_nm = frappe.conn.sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
+		emp_nm = frappe.db.sql("select employee_name from `tabEmployee` where name=%s", self.doc.employee)
 		emp_nm= emp_nm and emp_nm[0][0] or ''
 		self.doc.employee_name = emp_nm
 		return emp_nm
@@ -33,7 +33,7 @@ class DocType:
 			raise Exception
 	
 	def validate_existing_appraisal(self):
-		chk = frappe.conn.sql("""select name from `tabAppraisal` where employee=%s 
+		chk = frappe.db.sql("""select name from `tabAppraisal` where employee=%s 
 			and (status='Submitted' or status='Completed') 
 			and ((start_date>=%s and start_date<=%s) 
 			or (end_date>=%s and end_date<=%s))""",(self.doc.employee,self.doc.start_date,self.doc.end_date,self.doc.start_date,self.doc.end_date))
@@ -55,17 +55,17 @@ class DocType:
 			msgprint("Total weightage assigned should be 100%. It is :" + str(total_w) + "%", 
 				raise_exception=1)
 
-		if frappe.conn.get_value("Employee", self.doc.employee, "user_id") != \
+		if frappe.db.get_value("Employee", self.doc.employee, "user_id") != \
 				frappe.session.user and total == 0:
 			msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
 
 		self.doc.total_score = total
 			
 	def on_submit(self):
-		frappe.conn.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self): 
-		frappe.conn.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self.doc, 'status', 'Cancelled')
 
 @frappe.whitelist()
 def fetch_appraisal_template(source_name, target_doclist=None):

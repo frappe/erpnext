@@ -6,8 +6,8 @@ import unittest
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		frappe.conn.sql("""delete from `tabLeave Application`""")
-		frappe.conn.sql("""delete from `tabSalary Slip`""")
+		frappe.db.sql("""delete from `tabLeave Application`""")
+		frappe.db.sql("""delete from `tabSalary Slip`""")
 		from erpnext.hr.doctype.leave_application.test_leave_application import test_records as leave_applications
 		la = frappe.bean(copy=leave_applications[4])
 		la.insert()
@@ -15,10 +15,10 @@ class TestSalarySlip(unittest.TestCase):
 		la.submit()
 		
 	def tearDown(self):
-		frappe.conn.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
+		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
 		
 	def test_salary_slip_with_holidays_included(self):
-		frappe.conn.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
+		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
 		ss = frappe.bean(copy=test_records[0])
 		ss.insert()
 		self.assertEquals(ss.doc.total_days_in_month, 31)

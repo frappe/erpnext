@@ -18,7 +18,7 @@ class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
 		if self.doc.supplier and not self.doc.supplier_name:
-			self.doc.supplier_name = frappe.conn.get_value("Supplier", 
+			self.doc.supplier_name = frappe.db.get_value("Supplier", 
 				self.doc.supplier, "supplier_name")
 		self.is_item_table_empty()
 		self.validate_stock_or_nonstock_items()
@@ -41,7 +41,7 @@ class BuyingController(StockController):
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.doc.supplier:
 			for d in self.doclist.get({"doctype": self.tname}):
-				supplier = frappe.conn.get_value("Item", d.item_code, "default_supplier")
+				supplier = frappe.db.get_value("Item", d.item_code, "default_supplier")
 				if supplier:
 					self.doc.supplier = supplier
 					break
@@ -198,7 +198,7 @@ class BuyingController(StockController):
 
 				self.round_floats_in(item)
 				
-				item.conversion_factor = item.conversion_factor or flt(frappe.conn.get_value(
+				item.conversion_factor = item.conversion_factor or flt(frappe.db.get_value(
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
@@ -256,7 +256,7 @@ class BuyingController(StockController):
 			d.rm_supp_cost = raw_materials_cost
 
 	def get_items_from_default_bom(self, item_code):
-		bom_items = frappe.conn.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
+		bom_items = frappe.db.sql("""select t2.item_code, t2.qty_consumed_per_unit, 
 			t2.rate, t2.stock_uom, t2.name, t2.description 
 			from `tabBOM` t1, `tabBOM Item` t2 
 			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1 
@@ -273,7 +273,7 @@ class BuyingController(StockController):
 			item_codes = list(set(item.item_code for item in 
 				self.doclist.get({"parentfield": self.fname})))
 			if item_codes:
-				self._sub_contracted_items = [r[0] for r in frappe.conn.sql("""select name
+				self._sub_contracted_items = [r[0] for r in frappe.db.sql("""select name
 					from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
@@ -286,7 +286,7 @@ class BuyingController(StockController):
 			item_codes = list(set(item.item_code for item in 
 				self.doclist.get({"parentfield": self.fname})))
 			if item_codes:
-				self._purchase_items = [r[0] for r in frappe.conn.sql("""select name
+				self._purchase_items = [r[0] for r in frappe.db.sql("""select name
 					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 

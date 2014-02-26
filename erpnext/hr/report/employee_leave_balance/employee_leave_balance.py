@@ -12,19 +12,19 @@ def execute(filters=None):
 		[["Employee", "company", "=", filters.get("company")]] or None
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
 		filters=employee_filters)
-	leave_types = frappe.conn.sql_list("select name from `tabLeave Type`")
+	leave_types = frappe.db.sql_list("select name from `tabLeave Type`")
 	
 	if filters.get("fiscal_year"):
 		fiscal_years = [filters["fiscal_year"]]
 	else:
-		fiscal_years = frappe.conn.sql_list("select name from `tabFiscal Year` order by name desc")
+		fiscal_years = frappe.db.sql_list("select name from `tabFiscal Year` order by name desc")
 		
 	employee_in = '", "'.join([e.name for e in employees])
 	
-	allocations = frappe.conn.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
+	allocations = frappe.db.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
 	 	from `tabLeave Allocation` 
 		where docstatus=1 and employee in ("%s")""" % employee_in, as_dict=True)
-	applications = frappe.conn.sql("""select employee, fiscal_year, leave_type, SUM(total_leave_days) as leaves
+	applications = frappe.db.sql("""select employee, fiscal_year, leave_type, SUM(total_leave_days) as leaves
 			from `tabLeave Application` 
 			where status="Approved" and docstatus = 1 and employee in ("%s")
 			group by employee, fiscal_year, leave_type""" % employee_in, as_dict=True)

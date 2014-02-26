@@ -30,7 +30,7 @@ class DocType:
 
 	def validate_purchase_receipts(self, purchase_receipts):
 		for pr in purchase_receipts:
-			if frappe.conn.get_value("Purchase Receipt", pr, "docstatus") != 1:
+			if frappe.db.get_value("Purchase Receipt", pr, "docstatus") != 1:
 				frappe.throw(_("Purchase Receipt") + ": " + pr + _(" is not submitted document"))
 
 	def add_charges_in_pr(self, purchase_receipts):
@@ -76,7 +76,7 @@ class DocType:
 				d.save()
 	
 	def get_total_pr_amt(self, purchase_receipts):
-		return frappe.conn.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt` 
+		return frappe.db.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt` 
 			WHERE name in (%s)""" % ', '.join(['%s']*len(purchase_receipts)), 
 			tuple(purchase_receipts))[0][0]
 			
@@ -86,9 +86,9 @@ class DocType:
 			
 			pr_bean.run_method("update_ordered_qty")
 			
-			frappe.conn.sql("""delete from `tabStock Ledger Entry` 
+			frappe.db.sql("""delete from `tabStock Ledger Entry` 
 				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr)
-			frappe.conn.sql("""delete from `tabGL Entry` where voucher_type='Purchase Receipt' 
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_type='Purchase Receipt' 
 				and voucher_no=%s""", pr)
 			
 	def submit_pr(self, purchase_receipts):

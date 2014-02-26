@@ -79,18 +79,18 @@ test_records = [
 class TestItem(unittest.TestCase):
 	def test_basic_tree(self, records=None):
 		min_lft = 1
-		max_rgt = frappe.conn.sql("select max(rgt) from `tabItem Group`")[0][0]
+		max_rgt = frappe.db.sql("select max(rgt) from `tabItem Group`")[0][0]
 		
 		if not records:
 			records = test_records[2:]
 		
 		for item_group in records:
 			item_group = item_group[0]
-			lft, rgt, parent_item_group = frappe.conn.get_value("Item Group", item_group["item_group_name"], 
+			lft, rgt, parent_item_group = frappe.db.get_value("Item Group", item_group["item_group_name"], 
 				["lft", "rgt", "parent_item_group"])
 			
 			if parent_item_group:
-				parent_lft, parent_rgt = frappe.conn.get_value("Item Group", parent_item_group,
+				parent_lft, parent_rgt = frappe.db.get_value("Item Group", parent_item_group,
 					["lft", "rgt"])
 			else:
 				# root
@@ -116,7 +116,7 @@ class TestItem(unittest.TestCase):
 		def get_no_of_children(item_groups, no_of_children):
 			children = []
 			for ig in item_groups:
-				children += frappe.conn.sql_list("""select name from `tabItem Group`
+				children += frappe.db.sql_list("""select name from `tabItem Group`
 				where ifnull(parent_item_group, '')=%s""", ig or '')
 			
 			if len(children):
@@ -147,7 +147,7 @@ class TestItem(unittest.TestCase):
 		
 	def test_move_group_into_another(self):
 		# before move
-		old_lft, old_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# put B under C
 		group_b = frappe.bean("Item Group", "_Test Item Group B")
@@ -158,7 +158,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 		
 		# after move
-		new_lft, new_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		new_lft, new_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# lft should reduce
 		self.assertEquals(old_lft - new_lft, rgt - lft + 1)
@@ -180,11 +180,11 @@ class TestItem(unittest.TestCase):
 		
 	def print_tree(self):
 		import json
-		print json.dumps(frappe.conn.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
+		print json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
 		
 	def test_move_leaf_into_another_group(self):
 		# before move
-		old_lft, old_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
 		lft, rgt = group_b_3.doc.lft, group_b_3.doc.rgt
@@ -194,7 +194,7 @@ class TestItem(unittest.TestCase):
 		group_b_3.save()
 		self.test_basic_tree()
 		
-		new_lft, new_rgt = frappe.conn.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
+		new_lft, new_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# lft should remain the same
 		self.assertEquals(old_lft - new_lft, 0)
@@ -210,11 +210,11 @@ class TestItem(unittest.TestCase):
 		
 	def test_delete_leaf(self):
 		# for checking later
-		parent_item_group = frappe.conn.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
-		rgt = frappe.conn.get_value("Item Group", parent_item_group, "rgt")
+		parent_item_group = frappe.db.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
+		rgt = frappe.db.get_value("Item Group", parent_item_group, "rgt")
 		
 		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
-		ancestors = frappe.conn.sql("""select name, rgt from `tabItem Group`
+		ancestors = frappe.db.sql("""select name, rgt from `tabItem Group`
 			where name in ({})""".format(", ".join(["%s"]*len(ancestors))), tuple(ancestors), as_dict=True)
 		
 		frappe.delete_doc("Item Group", "_Test Item Group B - 3")
@@ -224,7 +224,7 @@ class TestItem(unittest.TestCase):
 		
 		# rgt of each ancestor would reduce by 2
 		for item_group in ancestors:
-			new_lft, new_rgt = frappe.conn.get_value("Item Group", item_group.name, ["lft", "rgt"])
+			new_lft, new_rgt = frappe.db.get_value("Item Group", item_group.name, ["lft", "rgt"])
 			self.assertEquals(new_rgt, item_group.rgt - 2)
 		
 		# insert it back
@@ -247,7 +247,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 		
 		# move its children back
-		for name in frappe.conn.sql_list("""select name from `tabItem Group`
+		for name in frappe.db.sql_list("""select name from `tabItem Group`
 			where parent_item_group='_Test Item Group C'"""):
 			
 			bean = frappe.bean("Item Group", name)

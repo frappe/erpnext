@@ -21,7 +21,7 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 		condition += " and CONCAT(i.name, i.item_name) like %(name)s"
 		args["name"] = "%%%s%%" % item
 
-	return frappe.conn.sql("""select i.name, i.item_name, i.image, 
+	return frappe.db.sql("""select i.name, i.item_name, i.image, 
 		item_det.price_list_rate, item_det.currency 
 		from `tabItem` i LEFT JOIN 
 			(select item_code, price_list_rate, currency from 
@@ -34,12 +34,12 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 @frappe.whitelist()
 def get_item_code(barcode_serial_no):
 	input_via = "serial_no"
-	item_code = frappe.conn.sql("""select name, item_code from `tabSerial No` where 
+	item_code = frappe.db.sql("""select name, item_code from `tabSerial No` where 
 		name=%s""", (barcode_serial_no), as_dict=1)
 
 	if not item_code:
 		input_via = "barcode"
-		item_code = frappe.conn.sql("""select name from `tabItem` where barcode=%s""",
+		item_code = frappe.db.sql("""select name from `tabItem` where barcode=%s""",
 			(barcode_serial_no), as_dict=1)
 
 	if item_code:
@@ -49,4 +49,4 @@ def get_item_code(barcode_serial_no):
 
 @frappe.whitelist()
 def get_mode_of_payment():
-	return frappe.conn.sql("""select name from `tabMode of Payment`""", as_dict=1)
+	return frappe.db.sql("""select name from `tabMode of Payment`""", as_dict=1)

@@ -8,7 +8,7 @@ def execute(filters=None):
 	account_map = get_account_map()
 	columns = get_columns(account_map)
 	data = []
-	customers = frappe.conn.sql("select name from tabCustomer where docstatus < 2")
+	customers = frappe.db.sql("select name from tabCustomer where docstatus < 2")
 	for cust in customers:
 		row = [cust[0]]
 		for company in sorted(account_map):
@@ -18,7 +18,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_account_map():
-	accounts = frappe.conn.sql("""select name, company, master_name 
+	accounts = frappe.db.sql("""select name, company, master_name 
 		from `tabAccount` where master_type = 'Customer' 
 		and ifnull(master_name, '') != '' and docstatus < 2""", as_dict=1)
 

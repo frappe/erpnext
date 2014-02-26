@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import flt, fmt_money, cstr, cint
 from frappe import msgprint, throw, _
 
-get_value = frappe.conn.get_value
+get_value = frappe.db.get_value
 
 class DocType:
 	def __init__(self,d,dl):
@@ -16,11 +16,11 @@ class DocType:
 
 	def autoname(self):
 		self.doc.name = self.doc.account_name.strip() + ' - ' + \
-			frappe.conn.get_value("Company", self.doc.company, "abbr")
+			frappe.db.get_value("Company", self.doc.company, "abbr")
 
 	def get_address(self):
 		return {
-			'address': frappe.conn.get_value(self.doc.master_type, 
+			'address': frappe.db.get_value(self.doc.master_type, 
 				self.doc.master_name, "address")
 		}
 		
@@ -41,14 +41,14 @@ class DocType:
 		if self.doc.master_type in ('Customer', 'Supplier') or self.doc.account_type == "Warehouse":
 			if not self.doc.master_name:
 				msgprint(_("Please enter Master Name once the account is created."))
-			elif not frappe.conn.exists(self.doc.master_type or self.doc.account_type, 
+			elif not frappe.db.exists(self.doc.master_type or self.doc.account_type, 
 					self.doc.master_name):
 				throw(_("Invalid Master Name"))
 			
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = frappe.conn.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
+			par = frappe.db.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
 				throw(_("Parent account does not exists"))
@@ -72,15 +72,15 @@ class DocType:
 
 	def validate_max_root_accounts(self):
 		"""Raise exception if there are more than 4 root accounts"""
-		if frappe.conn.sql("""select count(*) from tabAccount where
+		if frappe.db.sql("""select count(*) from tabAccount where
 			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
 			self.doc.company)[0][0] > 4:
 			throw(_("One company cannot have more than 4 root Accounts"))
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
-			company_abbr = frappe.conn.get_value("Company", self.doc.company, "abbr")
-			if frappe.conn.sql("""select name from tabAccount where name=%s""", 
+			company_abbr = frappe.db.get_value("Company", self.doc.company, "abbr")
+			if frappe.db.sql("""select name from tabAccount where name=%s""", 
 				(self.doc.account_name + " - " + company_abbr)):
 					throw("{name}: {acc_name} {exist}, {rename}".format(**{
 						"name": _("Account Name"),
@@ -91,14 +91,14 @@ class DocType:
 				
 	def validate_root_details(self):
 		#does not exists parent
-		if frappe.conn.exists("Account", self.doc.name):
-			if not frappe.conn.get_value("Account", self.doc.name, "parent_account"):
+		if frappe.db.exists("Account", self.doc.name):
+			if not frappe.db.get_value("Account", self.doc.name, "parent_account"):
 				throw(_("Root cannot be edited."))
 				
 	def validate_frozen_accounts_modifier(self):
-		old_value = frappe.conn.get_value("Account", self.doc.name, "freeze_account")
+		old_value = frappe.db.get_value("Account", self.doc.name, "freeze_account")
 		if old_value and old_value != self.doc.freeze_account:
-			frozen_accounts_modifier = frappe.conn.get_value( 'Accounts Settings', None, 
+			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None, 
 				'frozen_accounts_modifier')
 			if not frozen_accounts_modifier or \
 				frozen_accounts_modifier not in frappe.user.get_roles():
@@ -131,10 +131,10 @@ class DocType:
 
 	# Check if any previous balance exists
 	def check_gle_exists(self):
-		return frappe.conn.get_value("GL Entry", {"account": self.doc.name})
+		return frappe.db.get_value("GL Entry", {"account": self.doc.name})
 
 	def check_if_child_exists(self):
-		return frappe.conn.sql("""select name from `tabAccount` where parent_account = %s 
+		return frappe.db.sql("""select name from `tabAccount` where parent_account = %s 
 			and docstatus != 2""", self.doc.name)
 	
 	def validate_mandatory(self):
@@ -148,7 +148,7 @@ class DocType:
 			return
 			
 		if self.doc.account_type == "Warehouse":
-			old_warehouse = cstr(frappe.conn.get_value("Account", self.doc.name, "master_name"))
+			old_warehouse = cstr(frappe.db.get_value("Account", self.doc.name, "master_name"))
 			if old_warehouse != cstr(self.doc.master_name):
 				if old_warehouse:
 					self.validate_warehouse(old_warehouse)
@@ -158,7 +158,7 @@ class DocType:
 					throw(_("Master Name is mandatory if account type is Warehouse"))
 		
 	def validate_warehouse(self, warehouse):
-		if frappe.conn.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
+		if frappe.db.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
 			throw(_("Stock transactions exist against warehouse ") + warehouse + 
 				_(" .You can not assign / modify / remove Master Name"))
 
@@ -174,7 +174,7 @@ class DocType:
 
 	def get_authorized_user(self):
 		# Check logged-in user is authorized
-		if frappe.conn.get_value('Accounts Settings', None, 'credit_controller') \
+		if frappe.db.get_value('Accounts Settings', None, 'credit_controller') \
 				in frappe.user.get_roles():
 			return 1
 			
@@ -182,11 +182,11 @@ class DocType:
 		# Get credit limit
 		credit_limit_from = 'Customer'
 
-		cr_limit = frappe.conn.sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
+		cr_limit = frappe.db.sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2 
 			where t2.name=%s and t1.name = t2.master_name""", self.doc.name)
 		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
 		if not credit_limit:
-			credit_limit = frappe.conn.get_value('Company', self.doc.company, 'credit_limit')
+			credit_limit = frappe.db.get_value('Company', self.doc.company, 'credit_limit')
 			credit_limit_from = 'Company'
 		
 		# If outstanding greater than credit limit and not authorized person raise exception
@@ -219,10 +219,10 @@ class DocType:
 		
 		# Validate properties before merging
 		if merge:
-			if not frappe.conn.exists("Account", new):
+			if not frappe.db.exists("Account", new):
 				throw(_("Account ") + new +_(" does not exists"))
 				
-			val = list(frappe.conn.get_value("Account", new_account, 
+			val = list(frappe.db.get_value("Account", new_account, 
 				["group_or_ledger", "debit_or_credit", "is_pl_account", "company"]))
 			
 			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account, self.doc.company]:
@@ -234,7 +234,7 @@ class DocType:
 
 	def after_rename(self, old, new, merge=False):
 		if not merge:
-			frappe.conn.set_value("Account", new, "account_name", 
+			frappe.db.set_value("Account", new, "account_name", 
 				" - ".join(new.split(" - ")[:-1]))
 		else:
 			from frappe.utils.nestedset import rebuild_tree
@@ -243,13 +243,13 @@ class DocType:
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
 	conditions = (" and company='%s'"% filters["company"]) if doctype == "Warehouse" else ""
 		
-	return frappe.conn.sql("""select name from `tab%s` where %s like %s %s
+	return frappe.db.sql("""select name from `tab%s` where %s like %s %s
 		order by name limit %s, %s""" %
 		(filters["master_type"], searchfield, "%s", conditions, "%s", "%s"), 
 		("%%%s%%" % txt, start, page_len), as_list=1)
 		
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.conn.sql("""select name from tabAccount 
+	return frappe.db.sql("""select name from tabAccount 
 		where group_or_ledger = 'Group' and docstatus != 2 and company = %s
 		and %s like %s order by name limit %s, %s""" % 
 		("%s", searchfield, "%s", "%s", "%s"), 

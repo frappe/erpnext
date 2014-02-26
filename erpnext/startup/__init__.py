@@ -34,7 +34,7 @@ mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><smal
 def get_monthly_bulk_mail_limit():
 	import frappe
 	# if global settings, then 500 or unlimited
-	if frappe.conn.get_value('Email Settings', None, 'outgoing_mail_server'):
+	if frappe.db.get_value('Email Settings', None, 'outgoing_mail_server'):
 		return 999999
 	else:
 		return 500

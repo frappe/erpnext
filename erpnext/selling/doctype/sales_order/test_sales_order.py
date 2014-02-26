@@ -91,11 +91,11 @@ class TestSalesOrder(unittest.TestCase):
 		return dn
 		
 	def get_bin_reserved_qty(self, item_code, warehouse):
-		return flt(frappe.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
+		return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 
 			"reserved_qty"))
 	
 	def delete_bin(self, item_code, warehouse):
-		bin = frappe.conn.exists({"doctype": "Bin", "item_code": item_code, 
+		bin = frappe.db.exists({"doctype": "Bin", "item_code": item_code, 
 			"warehouse": warehouse})
 		if bin:
 			frappe.delete_doc("Bin", bin[0][0])
@@ -125,7 +125,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so()
 		
 		# allow negative stock
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.set_default("allow_negative_stock", 1)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so)
@@ -154,10 +154,10 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so()
 		
 		# allow negative stock
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.set_default("allow_negative_stock", 1)
 		
 		# set over-delivery tolerance
-		frappe.conn.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
+		frappe.db.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)
@@ -210,7 +210,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so(test_record)
 		
 		# allow negative stock
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.set_default("allow_negative_stock", 1)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so)
@@ -259,10 +259,10 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so(test_record)
 		
 		# allow negative stock
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.set_default("allow_negative_stock", 1)
 		
 		# set over-delivery tolerance
-		frappe.conn.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
+		frappe.db.set_value('Item', so.doclist[1].item_code, 'tolerance', 50)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)

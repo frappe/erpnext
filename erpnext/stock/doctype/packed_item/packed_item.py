@@ -14,16 +14,16 @@ class DocType:
 		self.doc, self.doclist = d, dl
 		
 def get_sales_bom_items(item_code):
-	return frappe.conn.sql("""select t1.item_code, t1.qty, t1.uom 
+	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom 
 		from `tabSales BOM Item` t1, `tabSales BOM` t2 
 		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
 def get_packing_item_details(item):
-	return frappe.conn.sql("""select item_name, description, stock_uom from `tabItem` 
+	return frappe.db.sql("""select item_name, description, stock_uom from `tabItem` 
 		where name = %s""", item, as_dict = 1)[0]
 
 def get_bin_qty(item, warehouse):
-	det = frappe.conn.sql("""select actual_qty, projected_qty from `tabBin` 
+	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin` 
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or ''
 
@@ -66,7 +66,7 @@ def make_packing_list(obj, item_table_fieldname):
 	for d in obj.doclist.get({"parentfield": item_table_fieldname}):
 		warehouse = (item_table_fieldname == "sales_order_details") \
 			and d.warehouse or d.warehouse
-		if frappe.conn.get_value("Sales BOM", {"new_item_code": d.item_code}):
+		if frappe.db.get_value("Sales BOM", {"new_item_code": d.item_code}):
 			for i in get_sales_bom_items(d.item_code):
 				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), 
 					warehouse, d, packing_list_idx)

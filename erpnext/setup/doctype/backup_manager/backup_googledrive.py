@@ -38,7 +38,7 @@ def get_gdrive_authorize_url():
 	}
 
 def upload_files(name, mimetype, service, folder_id):
-	if not frappe.conn:
+	if not frappe.db:
 		frappe.connect()
 	file_name = os.path.basename(name)
 	media_body = MediaFileUpload(name, mimetype=mimetype, resumable=True)
@@ -58,10 +58,10 @@ def upload_files(name, mimetype, service, folder_id):
 
 def backup_to_gdrive():
 	from frappe.utils.backups import new_backup
-	if not frappe.conn:
+	if not frappe.db:
 		frappe.connect()
 	get_gdrive_flow()
-	credentials_json = frappe.conn.get_value("Backup Manager", None, "gdrive_credentials")
+	credentials_json = frappe.db.get_value("Backup Manager", None, "gdrive_credentials")
 	credentials = oauth2client.client.Credentials.new_from_json(credentials_json)
 	http = httplib2.Http()
 	http = credentials.authorize(http)
@@ -74,15 +74,15 @@ def backup_to_gdrive():
 	
 	# upload files to database folder
 	upload_files(filename, 'application/x-gzip', drive_service, 
-		frappe.conn.get_value("Backup Manager", None, "database_folder_id"))
+		frappe.db.get_value("Backup Manager", None, "database_folder_id"))
 	
 	# upload files to files folder
 	did_not_upload = []
 	error_log = []
 	
-	files_folder_id = frappe.conn.get_value("Backup Manager", None, "files_folder_id")
+	files_folder_id = frappe.db.get_value("Backup Manager", None, "files_folder_id")
 	
-	frappe.conn.close()
+	frappe.db.close()
 	path = os.path.join(frappe.local.site_path, "public", "files")
 	for filename in os.listdir(path):
 		filename = cstr(filename)
@@ -139,16 +139,16 @@ def gdrive_callback(verification_code = None):
 	database_folder_id = create_folder('database', drive_service, erpnext_folder_id)
 	files_folder_id = create_folder('files', drive_service, erpnext_folder_id)
 
-	frappe.conn.set_value("Backup Manager", "Backup Manager", "gdrive_access_allowed", allowed)
-	frappe.conn.set_value("Backup Manager", "Backup Manager", "database_folder_id", database_folder_id)
-	frappe.conn.set_value("Backup Manager", "Backup Manager", "files_folder_id", files_folder_id)
+	frappe.db.set_value("Backup Manager", "Backup Manager", "gdrive_access_allowed", allowed)
+	frappe.db.set_value("Backup Manager", "Backup Manager", "database_folder_id", database_folder_id)
+	frappe.db.set_value("Backup Manager", "Backup Manager", "files_folder_id", files_folder_id)
 	final_credentials = credentials.to_json()
-	frappe.conn.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
+	frappe.db.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
 
 	frappe.msgprint("Updated")
 
 def create_erpnext_folder(service):
-	if not frappe.conn:
+	if not frappe.db:
 		frappe.connect()
 	erpnext = {
 		'title': 'erpnext',

@@ -52,7 +52,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.insert()
 		dn.submit()
 		
-		stock_value, stock_value_difference = frappe.conn.get_value("Stock Ledger Entry", 
+		stock_value, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
 			{"voucher_type": "Delivery Note", "voucher_no": dn.doc.name, 
 				"item_code": "_Test Item"}, ["stock_value", "stock_value_difference"])
 		self.assertEqual(stock_value, 0)
@@ -64,7 +64,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-		frappe.conn.set_value("Item", "_Test Item", "valuation_method", "FIFO")
+		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 		
 		_insert_purchase_receipt()
 		
@@ -72,7 +72,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
 		dn.doclist[1].cost_center = "Main - _TC"
 
-		stock_in_hand_account = frappe.conn.get_value("Account", 
+		stock_in_hand_account = frappe.db.get_value("Account", 
 			{"master_name": dn.doclist[1].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
@@ -127,7 +127,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.doclist[1].item_code = "_Test Sales BOM Item"
 		dn.doclist[1].qty = 1
 	
-		stock_in_hand_account = frappe.conn.get_value("Account", 
+		stock_in_hand_account = frappe.db.get_value("Account", 
 			{"master_name": dn.doclist[1].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
@@ -169,9 +169,9 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.insert()
 		dn.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Delivered")
-		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"))
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Delivered")
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"), dn.doc.name)
 			
 		return dn
@@ -183,9 +183,9 @@ class TestDeliveryNote(unittest.TestCase):
 
 		serial_nos = get_serial_nos(dn.doclist[1].serial_no)
 
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "status"), "Available")
-		self.assertEquals(frappe.conn.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
-		self.assertFalse(frappe.conn.get_value("Serial No", serial_nos[0], 
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
+		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
+		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], 
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
@@ -208,9 +208,9 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertRaises(SerialNoStatusError, dn.submit)
 		
 	def clear_stock_account_balance(self):
-		frappe.conn.sql("""delete from `tabBin`""")
-		frappe.conn.sql("delete from `tabStock Ledger Entry`")
-		frappe.conn.sql("delete from `tabGL Entry`")
+		frappe.db.sql("""delete from `tabBin`""")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("delete from `tabGL Entry`")
 
 test_dependencies = ["Sales BOM"]
 

@@ -9,8 +9,8 @@ from frappe.core.doctype.communication.communication import _make
 
 def add_sales_communication(subject, content, sender, real_name, mail=None, 
 	status="Open", date=None):
-	lead_name = frappe.conn.get_value("Lead", {"email_id": sender})
-	contact_name = frappe.conn.get_value("Contact", {"email_id": sender})
+	lead_name = frappe.db.get_value("Lead", {"email_id": sender})
+	contact_name = frappe.db.get_value("Contact", {"email_id": sender})
 
 	if not (lead_name or contact_name):
 		# none, create a new Lead
@@ -48,5 +48,5 @@ class SalesMailbox(POP3Mailbox):
 			mail.from_real_name, mail=mail, date=mail.date)
 
 def get_leads():
-	if cint(frappe.conn.get_value('Sales Email Settings', None, 'extract_emails')):
+	if cint(frappe.db.get_value('Sales Email Settings', None, 'extract_emails')):
 		SalesMailbox()

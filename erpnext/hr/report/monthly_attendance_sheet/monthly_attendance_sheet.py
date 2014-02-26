@@ -54,7 +54,7 @@ def get_columns(filters):
 	return columns
 	
 def get_attendance_list(conditions, filters):
-	attendance_list = frappe.conn.sql("""select employee, day(att_date) as day_of_month, 
+	attendance_list = frappe.db.sql("""select employee, day(att_date) as day_of_month, 
 		status from tabAttendance where docstatus = 1 %s order by employee, att_date""" % 
 		conditions, filters, as_dict=1)
 		
@@ -84,7 +84,7 @@ def get_conditions(filters):
 	return conditions, filters
 	
 def get_employee_details():
-	employee = frappe.conn.sql("""select name, employee_name, designation, department, 
+	employee = frappe.db.sql("""select name, employee_name, designation, department, 
 		branch, company from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	
 	emp_map = {}

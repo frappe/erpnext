@@ -12,7 +12,7 @@ def get_children():
 	if not frappe.form_dict.get('parent'):
 		frappe.local.form_dict['parent'] = ''
 		
-	return frappe.conn.sql("""select name as value, 
+	return frappe.db.sql("""select name as value, 
 		if(is_group='Yes', 1, 0) as expandable
 		from `tab%(ctype)s`
 		where docstatus < 2

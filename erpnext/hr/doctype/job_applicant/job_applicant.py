@@ -13,7 +13,7 @@ class DocType(TransactionBase):
 		self.doc, self.doclist = d, dl
 	
 	def get_sender(self, comm):
-		return frappe.conn.get_value('Jobs Email Settings',None,'email_id')	
+		return frappe.db.get_value('Jobs Email Settings',None,'email_id')	
 	
 	def validate(self):
 		self.set_status()	

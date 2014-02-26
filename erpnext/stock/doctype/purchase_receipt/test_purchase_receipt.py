@@ -37,14 +37,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 		
-		stock_value, stock_value_difference = frappe.conn.get_value("Stock Ledger Entry", 
+		stock_value, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
 			{"voucher_type": "Purchase Receipt", "voucher_no": pr.doc.name, 
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
 			["stock_value", "stock_value_difference"])
 		self.assertEqual(stock_value, 375)
 		self.assertEqual(stock_value_difference, 375)
 		
-		bin_stock_value = frappe.conn.get_value("Bin", {"item_code": "_Test Item", 
+		bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
 		self.assertEqual(bin_stock_value, 375)
 		
@@ -64,9 +64,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		self.assertTrue(gl_entries)
 		
-		stock_in_hand_account = frappe.conn.get_value("Account", 
+		stock_in_hand_account = frappe.db.get_value("Account", 
 			{"master_name": pr.doclist[1].warehouse})		
-		fixed_asset_account = frappe.conn.get_value("Account", 
+		fixed_asset_account = frappe.db.get_value("Account", 
 			{"master_name": pr.doclist[2].warehouse})
 		
 		expected_values = {
@@ -85,9 +85,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		
 	def _clear_stock_account_balance(self):
-		frappe.conn.sql("delete from `tabStock Ledger Entry`")
-		frappe.conn.sql("""delete from `tabBin`""")
-		frappe.conn.sql("""delete from `tabGL Entry`""")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("""delete from `tabBin`""")
+		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 	def test_subcontracting(self):
 		pr = frappe.bean(copy=test_records[1])
@@ -105,7 +105,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 		
-		self.assertEquals(frappe.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+		self.assertEquals(frappe.db.get_value("Serial No", pr.doclist[1].serial_no, 
 			"supplier"), pr.doc.supplier)
 			
 		return pr
@@ -114,11 +114,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = self.test_serial_no_supplier()
 		pr.cancel()
 		
-		self.assertFalse(frappe.conn.get_value("Serial No", pr.doclist[1].serial_no, 
+		self.assertFalse(frappe.db.get_value("Serial No", pr.doclist[1].serial_no, 
 			"warehouse"))
 			
 def get_gl_entries(voucher_type, voucher_no):
-	return frappe.conn.sql("""select account, debit, credit
+	return frappe.db.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 		

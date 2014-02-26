@@ -13,7 +13,7 @@ from frappe.model.controller import DocListController
 
 class DocType(DocListController):
 	def autoname(self):
-		naming_method = frappe.conn.get_value("HR Settings", None, "emp_created_by")
+		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
 			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
 		else:
@@ -52,14 +52,14 @@ class DocType(DocListController):
 		self.add_restriction_if_required("Employee", self.doc.user_id)
 
 	def update_user_default(self):
-		frappe.conn.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
-		frappe.conn.set_default("company", self.doc.company, self.doc.user_id)
+		frappe.db.set_default("employee_name", self.doc.employee_name, self.doc.user_id)
+		frappe.db.set_default("company", self.doc.company, self.doc.user_id)
 	
 	def restrict_leave_approver(self):
 		"""restrict to this employee for leave approver"""
 		employee_leave_approvers = [d.leave_approver for d in self.doclist.get({"parentfield": "employee_leave_approvers"})]
 		if self.doc.reports_to and self.doc.reports_to not in employee_leave_approvers:
-			employee_leave_approvers.append(frappe.conn.get_value("Employee", self.doc.reports_to, "user_id"))
+			employee_leave_approvers.append(frappe.db.get_value("Employee", self.doc.reports_to, "user_id"))
 			
 		for user in employee_leave_approvers:
 			self.add_restriction_if_required("Employee", user)
@@ -73,7 +73,7 @@ class DocType(DocListController):
 	
 	def update_profile(self):
 		# add employee role if missing
-		if not "Employee" in frappe.conn.sql_list("""select role from tabUserRole
+		if not "Employee" in frappe.db.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
 			from frappe.profile import add_role
 			add_role(self.doc.user_id, "Employee")
@@ -143,7 +143,7 @@ class DocType(DocListController):
 			throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self):
-		enabled = frappe.conn.sql("""select name from `tabProfile` where 
+		enabled = frappe.db.sql("""select name from `tabProfile` where 
 			name=%s and enabled=1""", self.doc.user_id)
 		if not enabled:
 			throw("{id}: {user_id} {msg}".format(**{
@@ -153,7 +153,7 @@ class DocType(DocListController):
 			}))
 
 	def validate_duplicate_user_id(self):
-		employee = frappe.conn.sql_list("""select name from `tabEmployee` where 
+		employee = frappe.db.sql_list("""select name from `tabEmployee` where 
 			user_id=%s and status='Active' and name!=%s""", (self.doc.user_id, self.doc.name))
 		if employee:
 			throw("{id}: {user_id} {msg}: {employee}".format(**{
@@ -174,8 +174,8 @@ class DocType(DocListController):
 
 	def update_dob_event(self):
 		if self.doc.status == "Active" and self.doc.date_of_birth \
-			and not cint(frappe.conn.get_value("HR Settings", None, "stop_birthday_reminders")):
-			birthday_event = frappe.conn.sql("""select name from `tabEvent` where repeat_on='Every Year' 
+			and not cint(frappe.db.get_value("HR Settings", None, "stop_birthday_reminders")):
+			birthday_event = frappe.db.sql("""select name from `tabEvent` where repeat_on='Every Year' 
 				and ref_type='Employee' and ref_name=%s""", self.doc.name)
 			
 			starts_on = self.doc.date_of_birth + " 00:00:00"
@@ -202,7 +202,7 @@ class DocType(DocListController):
 					"ref_name": self.doc.name
 				}).insert()
 		else:
-			frappe.conn.sql("""delete from `tabEvent` where repeat_on='Every Year' and
+			frappe.db.sql("""delete from `tabEvent` where repeat_on='Every Year' and
 				ref_type='Employee' and ref_name=%s""", self.doc.name)
 
 @frappe.whitelist()

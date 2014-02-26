@@ -33,7 +33,7 @@ class DocType:
     emp_query = "select name from `tabEmployee` "
     if flag == 1:
       emp_query += condition 
-    e = frappe.conn.sql(emp_query)
+    e = frappe.db.sql(emp_query)
     return e
 
   # ----------------
@@ -54,7 +54,7 @@ class DocType:
     for d in self.get_employees():
       la = Document('Leave Allocation')
       la.employee = cstr(d[0])
-      la.employee_name = frappe.conn.get_value('Employee',cstr(d[0]),'employee_name')
+      la.employee_name = frappe.db.get_value('Employee',cstr(d[0]),'employee_name')
       la.leave_type = self.doc.leave_type
       la.fiscal_year = self.doc.fiscal_year
       la.posting_date = nowdate()

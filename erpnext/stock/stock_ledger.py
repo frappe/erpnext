@@ -42,7 +42,7 @@ def make_sl_entries(sl_entries, is_amended=None):
 				sl_entries[0].get('voucher_no'))
 			
 def set_as_cancel(voucher_type, voucher_no):
-	frappe.conn.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
+	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
 		modified=%s, modified_by=%s
 		where voucher_no=%s and voucher_type=%s""", 
 		(now(), frappe.session.user, voucher_type, voucher_no))
@@ -56,7 +56,7 @@ def make_entry(args):
 	return sle.doc.name
 	
 def delete_cancelled_entry(voucher_type, voucher_no):
-	frappe.conn.sql("""delete from `tabStock Ledger Entry` 
+	frappe.db.sql("""delete from `tabStock Ledger Entry` 
 		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 def update_entries_after(args, verbose=1):
@@ -89,7 +89,7 @@ def update_entries_after(args, verbose=1):
 	stock_value_difference = 0.0
 
 	for sle in entries_to_fix:
-		if sle.serial_no or not cint(frappe.conn.get_default("allow_negative_stock")):
+		if sle.serial_no or not cint(frappe.db.get_default("allow_negative_stock")):
 			# validate negative stock for serialized items, fifo valuation 
 			# or when negative stock is not allowed for moving average
 			if not validate_negative_stock(qty_after_transaction, sle):
@@ -125,7 +125,7 @@ def update_entries_after(args, verbose=1):
 		prev_stock_value = stock_value
 			
 		# update current sle
-		frappe.conn.sql("""update `tabStock Ledger Entry`
+		frappe.db.sql("""update `tabStock Ledger Entry`
 			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,
 			stock_value=%s, stock_value_difference=%s where name=%s""", 
 			(qty_after_transaction, valuation_rate,
@@ -135,7 +135,7 @@ def update_entries_after(args, verbose=1):
 		_raise_exceptions(args, verbose)
 	
 	# update bin
-	if not frappe.conn.exists({"doctype": "Bin", "item_code": args["item_code"], 
+	if not frappe.db.exists({"doctype": "Bin", "item_code": args["item_code"], 
 			"warehouse": args["warehouse"]}):
 		bin_wrapper = frappe.bean([{
 			"doctype": "Bin",
@@ -145,7 +145,7 @@ def update_entries_after(args, verbose=1):
 		bin_wrapper.ignore_permissions = 1
 		bin_wrapper.insert()
 	
-	frappe.conn.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,
+	frappe.db.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,
 		stock_value=%s, 
 		projected_qty = (actual_qty + indented_qty + ordered_qty + planned_qty - reserved_qty)
 		where item_code=%s and warehouse=%s""", (valuation_rate, qty_after_transaction,
@@ -181,7 +181,7 @@ def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, fo
 	if not args.get("posting_time"):
 		args["posting_time"] = "00:00"
 	
-	return frappe.conn.sql("""select * from `tabStock Ledger Entry`
+	return frappe.db.sql("""select * from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
 		and warehouse = %%(warehouse)s
 		and ifnull(is_cancelled, 'No')='No'
@@ -223,7 +223,7 @@ def get_serialized_values(qty_after_transaction, sle, valuation_rate):
 	elif incoming_rate == 0 or flt(sle.actual_qty) < 0:
 		# In case of delivery/stock issue, get average purchase rate
 		# of serial nos of current entry
-		incoming_rate = flt(frappe.conn.sql("""select avg(ifnull(purchase_rate, 0))
+		incoming_rate = flt(frappe.db.sql("""select avg(ifnull(purchase_rate, 0))
 			from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
 			tuple(serial_no))[0][0])
 	

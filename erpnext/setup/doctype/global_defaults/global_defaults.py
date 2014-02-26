@@ -32,22 +32,22 @@ class DocType:
 		self.update_control_panel()
 		
 		for key in keydict:
-			frappe.conn.set_default(key, self.doc.fields.get(keydict[key], ''))
+			frappe.db.set_default(key, self.doc.fields.get(keydict[key], ''))
 			
 		# update year start date and year end date from fiscal_year
-		year_start_end_date = frappe.conn.sql("""select year_start_date, year_end_date 
+		year_start_end_date = frappe.db.sql("""select year_start_date, year_end_date 
 			from `tabFiscal Year` where name=%s""", self.doc.current_fiscal_year)
 
 		ysd = year_start_end_date[0][0] or ''
 		yed = year_start_end_date[0][1] or ''
 
 		if ysd and yed:
-			frappe.conn.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
-			frappe.conn.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
+			frappe.db.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
+			frappe.db.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
 		
 		# enable default currency
 		if self.doc.default_currency:
-			frappe.conn.set_value("Currency", self.doc.default_currency, "enabled", 1)
+			frappe.db.set_value("Currency", self.doc.default_currency, "enabled", 1)
 		
 		# clear cache
 		frappe.clear_cache()

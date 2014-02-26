@@ -57,7 +57,7 @@ def get_items(filters):
 	conditions = get_conditions(filters)
 	match_conditions = frappe.build_match_conditions("Purchase Invoice")
 	
-	return frappe.conn.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.company, 
+	return frappe.db.sql("""select pi_item.parent, pi.posting_date, pi.credit_to, pi.company, 
 		pi.supplier, pi.remarks, pi_item.item_code, pi_item.item_name, pi_item.item_group, 
 		pi_item.project_name, pi_item.purchase_order, pi_item.purchase_receipt, 
 		pi_item.expense_account, pi_item.qty, pi_item.base_rate, pi_item.base_amount, pi.supplier_name
@@ -66,14 +66,14 @@ def get_items(filters):
 		order by pi.posting_date desc, pi_item.item_code desc""" % (conditions, match_conditions), filters, as_dict=1)
 		
 def get_aii_accounts():
-	return dict(frappe.conn.sql("select name, stock_received_but_not_billed from tabCompany"))
+	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))
 	
 def get_tax_accounts(item_list, columns):
 	import json
 	item_tax = {}
 	tax_accounts = []
 	
-	tax_details = frappe.conn.sql("""select parent, account_head, item_wise_tax_detail
+	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail
 		from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice' 
 		and docstatus = 1 and ifnull(account_head, '') != '' and category in ('Total', 'Valuation and Total') 
 		and parent in (%s)""" % ', '.join(['%s']*len(item_list)), tuple([item.parent for item in item_list]))

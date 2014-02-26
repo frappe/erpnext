@@ -35,17 +35,17 @@ def get_dropbox_authorize_url():
 def dropbox_callback(oauth_token=None, not_approved=False):
 	from dropbox import client
 	if not not_approved:
-		if frappe.conn.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:		
+		if frappe.db.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:		
 			allowed = 1
 			message = "Dropbox access allowed."
 
 			sess = get_dropbox_session()
-			sess.set_request_token(frappe.conn.get_value("Backup Manager", None, "dropbox_access_key"), 
-				frappe.conn.get_value("Backup Manager", None, "dropbox_access_secret"))
+			sess.set_request_token(frappe.db.get_value("Backup Manager", None, "dropbox_access_key"), 
+				frappe.db.get_value("Backup Manager", None, "dropbox_access_secret"))
 			access_token = sess.obtain_access_token()
-			frappe.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_key", access_token.key)
-			frappe.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_secret", access_token.secret)
-			frappe.conn.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", allowed)
+			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_key", access_token.key)
+			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_secret", access_token.secret)
+			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", allowed)
 			dropbox_client = client.DropboxClient(sess)
 			try:
 				dropbox_client.file_create_folder("files")
@@ -65,7 +65,7 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 	if allowed:
 		frappe.local.message_success = True
 	
-	frappe.conn.commit()
+	frappe.db.commit()
 	frappe.response['type'] = 'page'
 	frappe.response['page_name'] = 'message.html'
 
@@ -74,13 +74,13 @@ def backup_to_dropbox():
 	from conf import dropbox_access_key, dropbox_secret_key
 	from frappe.utils.backups import new_backup
 	from frappe.utils import get_files_path, get_backups_path
-	if not frappe.conn:
+	if not frappe.db:
 		frappe.connect()
 
 	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
 
-	sess.set_token(frappe.conn.get_value("Backup Manager", None, "dropbox_access_key"),
-		frappe.conn.get_value("Backup Manager", None, "dropbox_access_secret"))
+	sess.set_token(frappe.db.get_value("Backup Manager", None, "dropbox_access_key"),
+		frappe.db.get_value("Backup Manager", None, "dropbox_access_secret"))
 	
 	dropbox_client = client.DropboxClient(sess)
 
@@ -89,7 +89,7 @@ def backup_to_dropbox():
 	filename = os.path.join(get_backups_path(), os.path.basename(backup.backup_path_db))
 	upload_file_to_dropbox(filename, "/database", dropbox_client)
 
-	frappe.conn.close()
+	frappe.db.close()
 	response = dropbox_client.metadata("/files")
 	
 	# upload files to files folder

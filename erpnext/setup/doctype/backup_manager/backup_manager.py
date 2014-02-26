@@ -18,10 +18,10 @@ def take_backups_weekly():
 	take_backups_if("Weekly")
 
 def take_backups_if(freq):
-	if frappe.conn.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
+	if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
 		take_backups_dropbox()
 		
-	# if frappe.conn.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
+	# if frappe.db.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
 	# 	take_backups_gdrive()
 	
 @frappe.whitelist()
@@ -71,8 +71,8 @@ def send_email(success, service_name, error_status=None):
 		<p>Please contact your system manager for more information.</p>
 		""" % (service_name, error_status)
 	
-	if not frappe.conn:
+	if not frappe.db:
 		frappe.connect()
 	
-	recipients = frappe.conn.get_value("Backup Manager", None, "send_notifications_to").split(",")
+	recipients = frappe.db.get_value("Backup Manager", None, "send_notifications_to").split(",")
 	sendmail(recipients, subject=subject, msg=message)

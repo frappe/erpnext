@@ -243,7 +243,7 @@ class DocType(StockController):
 			"voucher_type": self.doc.doctype,
 			"voucher_no": self.doc.name,
 			"company": self.doc.company,
-			"stock_uom": frappe.conn.get_value("Item", row.item_code, "stock_uom"),
+			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.doc.fiscal_year,
 			"is_cancelled": "No"
@@ -258,12 +258,12 @@ class DocType(StockController):
 		"""	Delete Stock Ledger Entries related to this voucher
 			and repost future Stock Ledger Entries"""
 				
-		existing_entries = frappe.conn.sql("""select distinct item_code, warehouse 
+		existing_entries = frappe.db.sql("""select distinct item_code, warehouse 
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
 			(self.doc.doctype, self.doc.name), as_dict=1)
 				
 		# delete entries
-		frappe.conn.sql("""delete from `tabStock Ledger Entry` 
+		frappe.db.sql("""delete from `tabStock Ledger Entry` 
 			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
 		
 		# repost future entries for selected item_code, warehouse
@@ -289,8 +289,8 @@ class DocType(StockController):
 			
 		if not self.doc.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
-		elif not frappe.conn.sql("""select * from `tabStock Ledger Entry`"""):
-			if frappe.conn.get_value("Account", self.doc.expense_account, 
+		elif not frappe.db.sql("""select * from `tabStock Ledger Entry`"""):
+			if frappe.db.get_value("Account", self.doc.expense_account, 
 					"is_pl_account") == "Yes":
 				msgprint(_("""Expense Account can not be a PL Account, as this stock \
 					reconciliation is an opening entry. \

@@ -24,7 +24,7 @@ class SupportMailbox(POP3Mailbox):
 		thread_id = mail.get_thread_id()
 		new_ticket = False
 
-		if not (thread_id and frappe.conn.exists("Support Ticket", thread_id)):
+		if not (thread_id and frappe.db.exists("Support Ticket", thread_id)):
 			new_ticket = True
 		
 		ticket = add_support_communication(mail.subject, mail.content, mail.from_email,
@@ -53,7 +53,7 @@ Original Query:
 			msg = cstr(response))
 		
 def get_support_mails():
-	if cint(frappe.conn.get_value('Email Settings', None, 'sync_support_mails')):
+	if cint(frappe.db.get_value('Email Settings', None, 'sync_support_mails')):
 		SupportMailbox()
 		
 def add_support_communication(subject, content, sender, docname=None, mail=None):

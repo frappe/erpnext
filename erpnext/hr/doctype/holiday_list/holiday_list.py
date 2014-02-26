@@ -41,7 +41,7 @@ class DocType:
 			throw(_("Please select weekly off day"))
 
 	def get_fy_start_end_dates(self):
-		return frappe.conn.sql("""select year_start_date, year_end_date
+		return frappe.db.sql("""select year_start_date, year_end_date
 			from `tabFiscal Year` where name=%s""", (self.doc.fiscal_year,))[0]
 
 	def get_weekly_off_date_list(self, year_start_date, year_end_date):
@@ -66,5 +66,5 @@ class DocType:
 		self.doclist = self.doc.clear_table(self.doclist, 'holiday_list_details')
 
 	def update_default_holiday_list(self):
-		frappe.conn.sql("""update `tabHoliday List` set is_default = 0 
+		frappe.db.sql("""update `tabHoliday List` set is_default = 0 
 			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.doc.fiscal_year,))

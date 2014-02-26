@@ -18,7 +18,7 @@ class DocType(SellingController):
 		self.fname = 'quotation_details'
 
 	def has_sales_order(self):
-		return frappe.conn.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
 
 	def validate_for_items(self):
 		chk_dupl_itm = []
@@ -34,7 +34,7 @@ class DocType(SellingController):
 		
 		if self.doc.order_type in ['Maintenance', 'Service']:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_service_item = frappe.conn.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
+				is_service_item = frappe.db.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 				
 				if is_service_item == 'No':
@@ -42,7 +42,7 @@ class DocType(SellingController):
 					raise Exception
 		else:
 			for d in getlist(self.doclist, 'quotation_details'):
-				is_sales_item = frappe.conn.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
+				is_sales_item = frappe.db.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 				
 				if is_sales_item == 'No':
@@ -62,8 +62,8 @@ class DocType(SellingController):
 	
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
-			frappe.conn.set(self.doc, 'status', 'Lost')
-			frappe.conn.set(self.doc, 'order_lost_reason', arg)
+			frappe.db.set(self.doc, 'status', 'Lost')
+			frappe.db.set(self.doc, 'order_lost_reason', arg)
 			self.update_opportunity()
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
@@ -143,17 +143,17 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 	return [d.fields for d in doclist]
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.conn.get_value("Quotation", source_name, ["lead", "order_type"])
+	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type"])
 	if quotation and quotation[0]:
 		lead_name = quotation[0]
-		customer_name = frappe.conn.get_value("Customer", {"lead_name": lead_name})
+		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name})
 		if not customer_name:
 			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 			customer = frappe.bean(customer_doclist)
 			customer.ignore_permissions = ignore_permissions
 			if quotation[1] == "Shopping Cart":
-				customer.doc.customer_group = frappe.conn.get_value("Shopping Cart Settings", None,
+				customer.doc.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
 					"default_customer_group")
 			
 			try:

@@ -30,7 +30,7 @@ class DocType(TransactionBase):
 				self.pull_sal_struct(struct)
 
 	def check_sal_struct(self):
-		struct = frappe.conn.sql("""select name from `tabSalary Structure` 
+		struct = frappe.db.sql("""select name from `tabSalary Structure` 
 			where employee=%s and is_active = 'Yes'""", self.doc.employee)
 		if not struct:
 			msgprint("Please create Salary Structure for employee '%s'" % self.doc.employee)
@@ -42,7 +42,7 @@ class DocType(TransactionBase):
 		self.doclist = get_mapped_doclist(struct, self.doclist)
 		
 	def pull_emp_details(self):
-		emp = frappe.conn.get_value("Employee", self.doc.employee, 
+		emp = frappe.db.get_value("Employee", self.doc.employee, 
 			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
 		if emp:
 			self.doc.bank_name = emp.bank_name
@@ -59,7 +59,7 @@ class DocType(TransactionBase):
 		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
 		holidays = self.get_holidays_for_employee(m)
 		
-		if not cint(frappe.conn.get_value("HR Settings", "HR Settings",
+		if not cint(frappe.db.get_value("HR Settings", "HR Settings",
 			"include_holidays_in_total_working_days")):
 				m["month_days"] -= len(holidays)
 				if m["month_days"] < 0:
@@ -76,7 +76,7 @@ class DocType(TransactionBase):
 
 	def get_payment_days(self, m):
 		payment_days = m['month_days']
-		emp = frappe.conn.sql("select date_of_joining, relieving_date from `tabEmployee` \
+		emp = frappe.db.sql("select date_of_joining, relieving_date from `tabEmployee` \
 			where name = %s", self.doc.employee, as_dict=1)[0]
 			
 		if emp['relieving_date']:
@@ -98,13 +98,13 @@ class DocType(TransactionBase):
 		return payment_days
 		
 	def get_holidays_for_employee(self, m):
-		holidays = frappe.conn.sql("""select t1.holiday_date 
+		holidays = frappe.db.sql("""select t1.holiday_date 
 			from `tabHoliday` t1, tabEmployee t2 
 			where t1.parent = t2.holiday_list and t2.name = %s 
 			and t1.holiday_date between %s and %s""", 
 			(self.doc.employee, m['month_start_date'], m['month_end_date']))
 		if not holidays:
-			holidays = frappe.conn.sql("""select t1.holiday_date 
+			holidays = frappe.db.sql("""select t1.holiday_date 
 				from `tabHoliday` t1, `tabHoliday List` t2 
 				where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1 
 				and t2.fiscal_year = %s
@@ -118,7 +118,7 @@ class DocType(TransactionBase):
 		for d in range(m['month_days']):
 			dt = add_days(cstr(m['month_start_date']), d)
 			if dt not in holidays:
-				leave = frappe.conn.sql("""
+				leave = frappe.db.sql("""
 					select t1.name, t1.half_day
 					from `tabLeave Application` t1, `tabLeave Type` t2 
 					where t2.name = t1.leave_type 
@@ -132,7 +132,7 @@ class DocType(TransactionBase):
 		return lwp
 
 	def check_existing(self):
-		ret_exist = frappe.conn.sql("""select name from `tabSalary Slip` 
+		ret_exist = frappe.db.sql("""select name from `tabSalary Slip` 
 			where month = %s and fiscal_year = %s and docstatus != 2 
 			and employee = %s and name != %s""", 
 			(self.doc.month, self.doc.fiscal_year, self.doc.employee, self.doc.name))
@@ -196,12 +196,12 @@ class DocType(TransactionBase):
 
 	def send_mail_funct(self):	 
 		from frappe.utils.email_lib import sendmail
-		receiver = frappe.conn.get_value("Employee", self.doc.employee, "company_email")
+		receiver = frappe.db.get_value("Employee", self.doc.employee, "company_email")
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.doc.month) +'/'+cstr(self.doc.fiscal_year)
-			earn_ret=frappe.conn.sql("""select e_type, e_modified_amount from `tabSalary Slip Earning` 
+			earn_ret=frappe.db.sql("""select e_type, e_modified_amount from `tabSalary Slip Earning` 
 				where parent = %s""", self.doc.name)
-			ded_ret=frappe.conn.sql("""select d_type, d_modified_amount from `tabSalary Slip Deduction` 
+			ded_ret=frappe.db.sql("""select d_type, d_modified_amount from `tabSalary Slip Deduction` 
 				where parent = %s""", self.doc.name)
 		 
 			earn_table = ''
@@ -229,7 +229,7 @@ class DocType(TransactionBase):
 							% (cstr(d[0]), cstr(d[1]))
 				ded_table += '</table>'
 			
-			letter_head = frappe.conn.get_value("Letter Head", {"is_default": 1, "disabled": 0}, 
+			letter_head = frappe.db.get_value("Letter Head", {"is_default": 1, "disabled": 0}, 
 				"content")
 			
 			msg = '''<div> %s <br>

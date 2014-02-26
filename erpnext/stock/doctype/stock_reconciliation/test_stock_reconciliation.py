@@ -37,20 +37,20 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 		
 			# check stock value
-			res = frappe.conn.sql("""select stock_value from `tabStock Ledger Entry`
+			res = frappe.db.sql("""select stock_value from `tabStock Ledger Entry`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
 			self.assertEqual(res and flt(res[0][0]) or 0, d[4])
 			
 			# check bin qty and stock value
-			bin = frappe.conn.sql("""select actual_qty, stock_value from `tabBin`
+			bin = frappe.db.sql("""select actual_qty, stock_value from `tabBin`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
 			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1])] or [], [d[5], d[6]])
 			
 			# no gl entries
-			gl_entries = frappe.conn.sql("""select name from `tabGL Entry` 
+			gl_entries = frappe.db.sql("""select name from `tabGL Entry` 
 				where voucher_type = 'Stock Reconciliation' and voucher_no = %s""",
 				 stock_reco.doc.name)
 			self.assertFalse(gl_entries)
@@ -82,7 +82,7 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_reco = self.submit_stock_reconciliation(d[0], d[1], d[2], d[3])
 			
 			# check stock value in sle
-			res = frappe.conn.sql("""select stock_value from `tabStock Ledger Entry`
+			res = frappe.db.sql("""select stock_value from `tabStock Ledger Entry`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'
 				and posting_date = %s and posting_time = %s order by name desc limit 1""", 
 				(d[2], d[3]))
@@ -90,14 +90,14 @@ class TestStockReconciliation(unittest.TestCase):
 			self.assertEqual(res and flt(res[0][0], 4) or 0, d[4])
 			
 			# bin qty and stock value
-			bin = frappe.conn.sql("""select actual_qty, stock_value from `tabBin`
+			bin = frappe.db.sql("""select actual_qty, stock_value from `tabBin`
 				where item_code = '_Test Item' and warehouse = '_Test Warehouse - _TC'""")
 			
 			self.assertEqual(bin and [flt(bin[0][0]), flt(bin[0][1], 4)] or [], 
 				[flt(d[5]), flt(d[6])])
 				
 			# no gl entries
-			gl_entries = frappe.conn.sql("""select name from `tabGL Entry` 
+			gl_entries = frappe.db.sql("""select name from `tabGL Entry` 
 				where voucher_type = 'Stock Reconciliation' and voucher_no = %s""", 
 				stock_reco.doc.name)
 			self.assertFalse(gl_entries)
@@ -170,9 +170,9 @@ class TestStockReconciliation(unittest.TestCase):
 
 
 	def cleanup_data(self):
-		frappe.conn.sql("delete from `tabStock Ledger Entry`")
-		frappe.conn.sql("delete from tabBin")
-		frappe.conn.sql("delete from `tabGL Entry`")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("delete from tabBin")
+		frappe.db.sql("delete from `tabGL Entry`")
 						
 	def submit_stock_reconciliation(self, qty, rate, posting_date, posting_time):
 		stock_reco = frappe.bean([{
@@ -193,8 +193,8 @@ class TestStockReconciliation(unittest.TestCase):
 		return stock_reco
 		
 	def insert_existing_sle(self, valuation_method):
-		frappe.conn.set_value("Item", "_Test Item", "valuation_method", valuation_method)
-		frappe.conn.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Item", "_Test Item", "valuation_method", valuation_method)
+		frappe.db.set_default("allow_negative_stock", 1)
 		
 		stock_entry = [
 			{

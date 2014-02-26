@@ -16,7 +16,7 @@ def execute(filters=None):
 	if filters.get("company"):
 		company_condition = ' and company=%(company)s'
 
-	for si in frappe.conn.sql("""select posting_date, customer, grand_total from `tabSales Invoice`
+	for si in frappe.db.sql("""select posting_date, customer, grand_total from `tabSales Invoice`
 		where docstatus=1 and posting_date <= %(to_date)s 
 		{company_condition} order by posting_date""".format(company_condition=company_condition), 
 		filters, as_dict=1):

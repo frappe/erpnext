@@ -15,7 +15,7 @@ class JobsMailbox(POP3Mailbox):
 		if mail.from_email == self.settings.email_id:
 			return
 			
-		name = frappe.conn.get_value("Job Applicant", {"email_id": mail.from_email}, 
+		name = frappe.db.get_value("Job Applicant", {"email_id": mail.from_email}, 
 			"name")
 		if name:
 			applicant = frappe.bean("Job Applicant", name)
@@ -40,5 +40,5 @@ class JobsMailbox(POP3Mailbox):
 			doctype="Job Applicant", name=applicant.doc.name, sent_or_received="Received")
 
 def get_job_applications():
-	if cint(frappe.conn.get_value('Jobs Email Settings', None, 'extract_emails')):
+	if cint(frappe.db.get_value('Jobs Email Settings', None, 'extract_emails')):
 		JobsMailbox()

@@ -32,7 +32,7 @@ class DocType(BuyingController):
 		}]
 		
 	def onload(self):
-		billed_qty = frappe.conn.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
+		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
 			where purchase_receipt=%s""", self.doc.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "purchase_receipt_details"})))
@@ -96,7 +96,7 @@ class DocType(BuyingController):
 	def validate_challan_no(self):
 		"Validate if same challan no exists for same supplier in a submitted purchase receipt"
 		if self.doc.challan_no:
-			exists = frappe.conn.sql("""
+			exists = frappe.db.sql("""
 			SELECT name FROM `tabPurchase Receipt`
 			WHERE name!=%s AND supplier=%s AND challan_no=%s
 		AND docstatus=1""", (self.doc.name, self.doc.supplier, self.doc.challan_no))
@@ -128,7 +128,7 @@ class DocType(BuyingController):
 			
 
 	def po_required(self):
-		if frappe.conn.get_value("Buying Settings", None, "po_required") == 'Yes':
+		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in getlist(self.doclist,'purchase_receipt_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
@@ -186,14 +186,14 @@ class DocType(BuyingController):
 				})
 
 	def get_already_received_qty(self, po, po_detail):
-		qty = frappe.conn.sql("""select sum(qty) from `tabPurchase Receipt Item` 
+		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item` 
 			where prevdoc_detail_docname = %s and docstatus = 1 
 			and prevdoc_doctype='Purchase Order' and prevdoc_docname=%s 
 			and parent != %s""", (po_detail, po, self.doc.name))
 		return qty and flt(qty[0][0]) or 0.0
 		
 	def get_po_qty_and_warehouse(self, po_detail):
-		po_qty, po_warehouse = frappe.conn.get_value("Purchase Order Item", po_detail, 
+		po_qty, po_warehouse = frappe.db.get_value("Purchase Order Item", po_detail, 
 			["qty", "warehouse"])
 		return po_qty, po_warehouse
 	
@@ -210,7 +210,7 @@ class DocType(BuyingController):
 
 	def validate_inspection(self):
 		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = frappe.conn.sql("select inspection_required from `tabItem` where name = %s",
+			ins_reqd = frappe.db.sql("select inspection_required from `tabItem` where name = %s",
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
@@ -232,7 +232,7 @@ class DocType(BuyingController):
 		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
 
 		# Set status as Submitted
-		frappe.conn.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self.doc, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
 		
@@ -248,7 +248,7 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = frappe.db.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -261,13 +261,13 @@ class DocType(BuyingController):
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		# pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
 
-		submitted = frappe.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = frappe.db.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
 
 		
-		frappe.conn.set(self.doc,'status','Cancelled')
+		frappe.db.set(self.doc,'status','Cancelled')
 
 		self.update_ordered_qty()
 		
@@ -281,7 +281,7 @@ class DocType(BuyingController):
 	def get_current_stock(self):
 		for d in getlist(self.doclist, 'pr_raw_material_details'):
 			if self.doc.supplier_warehouse:
-				bin = frappe.conn.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
+				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 	def get_rate(self,arg):

@@ -67,7 +67,7 @@ class DocType(BuyingController):
 	def get_schedule_dates(self):
 		for d in getlist(self.doclist, 'po_details'):
 			if d.prevdoc_detail_docname and not d.schedule_date:
-				d.schedule_date = frappe.conn.get_value("Material Request Item",
+				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
 	
 	def get_last_purchase_rate(self):
@@ -87,7 +87,7 @@ class DocType(BuyingController):
 		pc_obj = get_obj('Purchase Common')
 		for d in getlist(self.doclist, 'po_details'):
 			#1. Check if is_stock_item == 'Yes'
-			if frappe.conn.get_value("Item", d.item_code, "is_stock_item") == "Yes":
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				# this happens when item is changed from non-stock to stock item
 				if not d.warehouse:
 					continue
@@ -127,8 +127,8 @@ class DocType(BuyingController):
 				update_bin(args)
 				
 	def check_modified_date(self):
-		mod_db = frappe.conn.sql("select modified from `tabPurchase Order` where name = '%s'" % self.doc.name)
-		date_diff = frappe.conn.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
+		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = '%s'" % self.doc.name)
+		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
 		
 		if date_diff and date_diff[0][0]:
 			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
@@ -137,7 +137,7 @@ class DocType(BuyingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		# step 1:=> Set Status
-		frappe.conn.set(self.doc,'status',cstr(status))
+		frappe.db.set(self.doc,'status',cstr(status))
 
 		# step 2:=> Update Bin
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
@@ -156,7 +156,7 @@ class DocType(BuyingController):
 		
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 		
-		frappe.conn.set(self.doc,'status','Submitted')
+		frappe.db.set(self.doc,'status','Submitted')
 	 
 	def on_cancel(self):
 		pc_obj = get_obj(dt = 'Purchase Common')		
@@ -166,12 +166,12 @@ class DocType(BuyingController):
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.doc.name, detail_doctype = 'Purchase Receipt Item')
 
 		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.conn.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_order = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = frappe.db.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_order = '%s' and t1.docstatus = 1" % self.doc.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
 
-		frappe.conn.set(self.doc,'status','Cancelled')
+		frappe.db.set(self.doc,'status','Cancelled')
 		self.update_prevdoc_status()
 		self.update_bin( is_submit = 0, is_stopped = 0)
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)

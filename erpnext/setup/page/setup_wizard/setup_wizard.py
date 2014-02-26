@@ -10,7 +10,7 @@ from frappe.utils.file_manager import save_file
 
 @frappe.whitelist()
 def setup_account(args=None):
-	# if frappe.conn.sql("select name from tabCompany"):
+	# if frappe.db.sql("select name from tabCompany"):
 	# 	frappe.throw(_("Setup Already Complete!!"))
 		
 	if not args:
@@ -31,10 +31,10 @@ def setup_account(args=None):
 	create_items(args)
 	create_customers(args)
 	create_suppliers(args)
-	frappe.conn.set_value('Control Panel', None, 'home_page', 'desktop')
+	frappe.db.set_value('Control Panel', None, 'home_page', 'desktop')
 
 	frappe.clear_cache()
-	frappe.conn.commit()
+	frappe.db.commit()
 	
 	# suppress msgprints
 	frappe.local.message_log = []
@@ -61,13 +61,13 @@ def update_profile_name(args):
 		# Update Profile
 		if not args.get('last_name') or args.get('last_name')=='None': 
 				args['last_name'] = None
-		frappe.conn.sql("""update `tabProfile` SET first_name=%(first_name)s,
+		frappe.db.sql("""update `tabProfile` SET first_name=%(first_name)s,
 			last_name=%(last_name)s WHERE name=%(name)s""", args)
 		
 	if args.get("attach_profile"):
 		filename, filetype, content = args.get("attach_profile").split(",")
 		fileurl = save_file(filename, content, "Profile", args.get("name"), decode=True).file_name
-		frappe.conn.set_value("Profile", args.get("name"), "user_image", fileurl)
+		frappe.db.set_value("Profile", args.get("name"), "user_image", fileurl)
 		
 	add_all_roles_to(args.get("name"))
 	
@@ -112,14 +112,14 @@ def create_price_lists(args):
 	
 def set_defaults(args):
 	# enable default currency
-	frappe.conn.set_value("Currency", args.get("currency"), "enabled", 1)
+	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
 	
 	global_defaults = frappe.bean("Global Defaults", "Global Defaults")
 	global_defaults.doc.fields.update({
 		'current_fiscal_year': args.curr_fiscal_year,
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name'),
-		'date_format': frappe.conn.get_value("Country", args.get("country"), "date_format"),
+		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
 		"float_precision": 3,
 		"country": args.get("country"),
 		"time_zone": args.get("time_zone")
@@ -181,9 +181,9 @@ def create_email_digest():
 	if not system_managers: 
 		return
 	
-	companies = frappe.conn.sql_list("select name FROM `tabCompany`")
+	companies = frappe.db.sql_list("select name FROM `tabCompany`")
 	for company in companies:
-		if not frappe.conn.exists("Email Digest", "Default Weekly Digest - " + company):
+		if not frappe.db.exists("Email Digest", "Default Weekly Digest - " + company):
 			edigest = frappe.bean({
 				"doctype": "Email Digest",
 				"name": "Default Weekly Digest - " + company,
@@ -253,7 +253,7 @@ def create_items(args):
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
 				fileurl = save_file(filename, content, "Item", item, decode=True).file_name
-				frappe.conn.set_value("Item", item, "image", fileurl)
+				frappe.db.set_value("Item", item, "image", fileurl)
 					
 	for i in xrange(1,6):
 		item = args.get("item_buy_" + str(i))
@@ -274,7 +274,7 @@ def create_items(args):
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
 				fileurl = save_file(filename, content, "Item", item, decode=True).file_name
-				frappe.conn.set_value("Item", item, "image", fileurl)
+				frappe.db.set_value("Item", item, "image", fileurl)
 
 
 def create_customers(args):
@@ -330,13 +330,13 @@ def create_letter_head(args):
 		
 		filename, filetype, content = args.get("attach_letterhead").split(",")
 		fileurl = save_file(filename, content, "Letter Head", "Standard", decode=True).file_name
-		frappe.conn.set_value("Letter Head", "Standard", "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		frappe.db.set_value("Letter Head", "Standard", "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
 		
 		
 				
 def add_all_roles_to(name):
 	profile = frappe.doc("Profile", name)
-	for role in frappe.conn.sql("""select name from tabRole"""):
+	for role in frappe.db.sql("""select name from tabRole"""):
 		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
 			d = profile.addchild("user_roles", "UserRole")
 			d.role = role[0]
@@ -345,10 +345,10 @@ def add_all_roles_to(name):
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
 	from frappe.utils.nestedset import get_root_of
-	country = frappe.conn.get_value("Control Panel", None, "country")
+	country = frappe.db.get_value("Control Panel", None, "country")
 	root_territory = get_root_of("Territory")
 	for name in (country, "Rest Of The World"):
-		if name and not frappe.conn.exists("Territory", name):
+		if name and not frappe.db.exists("Territory", name):
 			frappe.bean({
 				"doctype": "Territory",
 				"territory_name": name.replace("'", ""),

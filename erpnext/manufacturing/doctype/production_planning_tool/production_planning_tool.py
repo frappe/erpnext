@@ -17,7 +17,7 @@ class DocType:
 
 	def get_so_details(self, so):
 		"""Pull other details from so"""
-		so = frappe.conn.sql("""select transaction_date, customer, grand_total 
+		so = frappe.db.sql("""select transaction_date, customer, grand_total 
 			from `tabSales Order` where name = %s""", so, as_dict = 1)
 		ret = {
 			'sales_order_date': so and so[0]['transaction_date'] or '',
@@ -29,7 +29,7 @@ class DocType:
 	def get_item_details(self, item_code):
 		""" Pull other item details from item master"""
 
-		item = frappe.conn.sql("""select description, stock_uom, default_bom 
+		item = frappe.db.sql("""select description, stock_uom, default_bom 
 			from `tabItem` where name = %s""", item_code, as_dict =1)
 		ret = {
 			'description'	: item and item[0]['description'],
@@ -61,7 +61,7 @@ class DocType:
 		if self.doc.fg_item:
 			item_filter += ' and item.name = "' + self.doc.fg_item + '"'
 		
-		open_so = frappe.conn.sql("""
+		open_so = frappe.db.sql("""
 			select distinct so.name, so.transaction_date, so.customer, so.grand_total
 			from `tabSales Order` so, `tabSales Order Item` so_item
 			where so_item.parent = so.name
@@ -108,7 +108,7 @@ class DocType:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
 			
-		items = frappe.conn.sql("""select distinct parent, item_code, warehouse,
+		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
@@ -117,7 +117,7 @@ class DocType:
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
 			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
 		
-		packed_items = frappe.conn.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
+		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty) 
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
@@ -136,7 +136,7 @@ class DocType:
 		self.clear_item_table()
 
 		for p in items:
-			item_details = frappe.conn.sql("""select description, stock_uom, default_bom 
+			item_details = frappe.db.sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
 			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
 			pi.sales_order				= p['parent']
@@ -162,7 +162,7 @@ class DocType:
 			frappe.throw("Please enter bom no for item: %s at row no: %s" % 
 				(d.item_code, d.idx))
 		else:
-			bom = frappe.conn.sql("""select name from `tabBOM` where name = %s and item = %s 
+			bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s 
 				and docstatus = 1 and is_active = 1""", 
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
@@ -249,7 +249,7 @@ class DocType:
 			bom_wise_item_details = {}
 			if self.doc.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
-				for d in frappe.conn.sql("""select fb.item_code, 
+				for d in frappe.db.sql("""select fb.item_code, 
 					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty, 
 					fb.description, fb.stock_uom, it.min_order_qty 
 					from `tabBOM Explosion Item` fb,`tabItem` it 
@@ -261,7 +261,7 @@ class DocType:
 			else:
 				# Get all raw materials considering SA items as raw materials, 
 				# so no childs of SA items
-				for d in frappe.conn.sql("""select bom_item.item_code, 
+				for d in frappe.db.sql("""select bom_item.item_code, 
 					ifnull(sum(bom_item.qty_consumed_per_unit), 0) as qty, 
 					bom_item.description, bom_item.stock_uom, item.min_order_qty 
 					from `tabBOM Item` bom_item, tabItem item 
@@ -288,7 +288,7 @@ class DocType:
 			total_qty = sum([flt(d[0]) for d in self.item_dict[item]])
 			for item_details in self.item_dict[item]:
 				item_list.append([item, item_details[1], item_details[2], item_details[0]])
-				item_qty = frappe.conn.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
+				item_qty = frappe.db.sql("""select warehouse, indented_qty, ordered_qty, actual_qty 
 					from `tabBin` where item_code = %s""", item, as_dict=1)
 				i_qty, o_qty, a_qty = 0, 0, 0
 				for w in item_qty:
@@ -353,7 +353,7 @@ class DocType:
 			
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
-		item_projected_qty = frappe.conn.sql("""select item_code, sum(projected_qty) 
+		item_projected_qty = frappe.db.sql("""select item_code, sum(projected_qty) 
 			from `tabBin` where item_code in (%s) group by item_code""" % 
 			(", ".join(["%s"]*len(items)),), tuple(items))
 

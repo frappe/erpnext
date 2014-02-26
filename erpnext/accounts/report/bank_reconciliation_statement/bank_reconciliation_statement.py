@@ -8,7 +8,7 @@ from frappe.utils import flt
 def execute(filters=None):
 	if not filters: filters = {}
 	
-	debit_or_credit = frappe.conn.get_value("Account", filters["account"], "debit_or_credit")
+	debit_or_credit = frappe.db.get_value("Account", filters["account"], "debit_or_credit")
 	
 	columns = get_columns()
 	data = get_entries(filters)
@@ -41,7 +41,7 @@ def get_columns():
 	]
 	
 def get_entries(filters):
-	entries = frappe.conn.sql("""select 
+	entries = frappe.db.sql("""select 
 			jv.name, jv.posting_date, jv.clearance_date, jvd.against_account, jvd.debit, jvd.credit
 		from 
 			`tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv 

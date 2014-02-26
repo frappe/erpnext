@@ -14,7 +14,7 @@ class DocType():
 		
 	def onload(self):
 		if self.doc.email_sent:
-			self.doc.fields["__status_count"] = dict(frappe.conn.sql("""select status, count(*)
+			self.doc.fields["__status_count"] = dict(frappe.db.sql("""select status, count(*)
 				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
 				group by status""", (self.doc.doctype, self.doc.name))) or None
 
@@ -41,18 +41,18 @@ class DocType():
 			"doctype": self.send_to_doctype
 		}))
 
-		frappe.conn.set(self.doc, "email_sent", 1)
+		frappe.db.set(self.doc, "email_sent", 1)
 	
 	def get_recipients(self):
 		self.email_field = None
 		if self.doc.send_to_type=="Contact":
 			self.send_to_doctype = "Contact"
 			if self.doc.contact_type == "Customer":		
-				return frappe.conn.sql_list("""select email_id from tabContact 
+				return frappe.db.sql_list("""select email_id from tabContact 
 					where ifnull(email_id, '') != '' and ifnull(customer, '') != ''""")
 
 			elif self.doc.contact_type == "Supplier":		
-				return frappe.conn.sql_list("""select email_id from tabContact 
+				return frappe.db.sql_list("""select email_id from tabContact 
 					where ifnull(email_id, '') != '' and ifnull(supplier, '') != ''""")
 	
 		elif self.doc.send_to_type=="Lead":
@@ -66,14 +66,14 @@ class DocType():
 			if conditions:
 				conditions = "".join(conditions)
 				
-			return frappe.conn.sql_list("""select email_id from tabLead 
+			return frappe.db.sql_list("""select email_id from tabLead 
 				where ifnull(email_id, '') != '' %s""" % (conditions or ""))
 
 		elif self.doc.send_to_type=="Employee":
 			self.send_to_doctype = "Employee"
 			self.email_field = "company_email"
 
-			return frappe.conn.sql_list("""select 
+			return frappe.db.sql_list("""select 
 				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id 
 				from `tabEmployee` where status='Active'""")
 
@@ -93,7 +93,7 @@ class DocType():
 		from frappe.utils.email_lib.bulk import send
 		
 		if not frappe.flags.in_test:
-			frappe.conn.auto_commit_on_many_writes = True
+			frappe.db.auto_commit_on_many_writes = True
 
 		send(recipients = self.recipients, sender = sender, 
 			subject = self.doc.subject, message = self.doc.message,
@@ -101,7 +101,7 @@ class DocType():
 			ref_doctype = self.doc.doctype, ref_docname = self.doc.name)
 
 		if not frappe.flags.in_test:
-			frappe.conn.auto_commit_on_many_writes = False
+			frappe.db.auto_commit_on_many_writes = False
 
 	def validate_send(self):
 		if self.doc.fields.get("__islocal"):
@@ -116,9 +116,9 @@ class DocType():
 def get_lead_options():
 	return {
 		"sources": ["All"] + filter(None, 
-			frappe.conn.sql_list("""select distinct source from tabLead""")),
+			frappe.db.sql_list("""select distinct source from tabLead""")),
 		"statuses": ["All"] + filter(None, 
-			frappe.conn.sql_list("""select distinct status from tabLead"""))
+			frappe.db.sql_list("""select distinct status from tabLead"""))
 	}
 
 
@@ -128,7 +128,7 @@ def create_lead(email_id):
 	from frappe.model.doc import get_default_naming_series
 	real_name, email_id = parseaddr(email_id)
 	
-	if frappe.conn.get_value("Lead", {"email_id": email_id}):
+	if frappe.db.get_value("Lead", {"email_id": email_id}):
 		return
 	
 	lead = frappe.bean({
@@ -137,7 +137,7 @@ def create_lead(email_id):
 		"lead_name": real_name or email_id,
 		"status": "Contacted",
 		"naming_series": get_default_naming_series("Lead"),
-		"company": frappe.conn.get_default("company"),
+		"company": frappe.db.get_default("company"),
 		"source": "Email"
 	})
 	lead.insert()

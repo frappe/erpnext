@@ -26,10 +26,10 @@ class DocType(BuyingController):
 		self.validate_uom_is_integer("uom", "qty")
 
 	def on_submit(self):
-		frappe.conn.set(self.doc, "status", "Submitted")
+		frappe.db.set(self.doc, "status", "Submitted")
 
 	def on_cancel(self):
-		frappe.conn.set(self.doc, "status", "Cancelled")
+		frappe.db.set(self.doc, "status", "Cancelled")
 		
 	def on_trash(self):
 		pass

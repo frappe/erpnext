@@ -49,7 +49,7 @@ def get_conditions(filters):
 #get all details
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	return frappe.conn.sql("""select item_code, batch_no, warehouse, 
+	return frappe.db.sql("""select item_code, batch_no, warehouse, 
 		posting_date, actual_qty 
 		from `tabStock Ledger Entry` 
 		where docstatus < 2 %s order by item_code, warehouse""" %
@@ -79,7 +79,7 @@ def get_item_warehouse_batch_map(filters):
 
 def get_item_details(filters):
 	item_map = {}
-	for d in frappe.conn.sql("select name, item_name, description from tabItem", as_dict=1):
+	for d in frappe.db.sql("select name, item_name, description from tabItem", as_dict=1):
 		item_map.setdefault(d.name, d)
 
 	return item_map

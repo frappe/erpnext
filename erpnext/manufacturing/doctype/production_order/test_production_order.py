@@ -13,9 +13,9 @@ from erpnext.manufacturing.doctype.production_order.production_order import make
 class TestProductionOrder(unittest.TestCase):
 	def test_planned_qty(self):
 		set_perpetual_inventory(0)
-		frappe.conn.sql("delete from `tabStock Ledger Entry`")
-		frappe.conn.sql("""delete from `tabBin`""")
-		frappe.conn.sql("""delete from `tabGL Entry`""")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+		frappe.db.sql("""delete from `tabBin`""")
+		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 		pro_bean = frappe.bean(copy = test_records[0])
 		pro_bean.insert()
@@ -40,9 +40,9 @@ class TestProductionOrder(unittest.TestCase):
 		stock_entry.run_method("get_items")
 		stock_entry.submit()
 		
-		self.assertEqual(frappe.conn.get_value("Production Order", pro_bean.doc.name, 
+		self.assertEqual(frappe.db.get_value("Production Order", pro_bean.doc.name, 
 			"produced_qty"), 4)
-		self.assertEqual(frappe.conn.get_value("Bin", {"item_code": "_Test FG Item", 
+		self.assertEqual(frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"), 6)
 			
 		return pro_bean.doc.name
