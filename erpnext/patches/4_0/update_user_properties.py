@@ -102,5 +102,5 @@ def remove_duplicate_restrictions():
 		group by parent, defkey, defvalue""", as_dict=1):
 		if d.cnt > 1:
 			# order by parenttype so that restriction does not get removed!
-			frappe.db.sql("""delete from tabDefaultValue where parent=%s, defkey=%s,
-				defvalue=%s order by parenttype limit %s""", (d.parent, d.defkey, d.defvalue, d.cnt-1))
+			frappe.db.sql("""delete from tabDefaultValue where `parent`=%s and `defkey`=%s and
+				`defvalue`=%s order by parenttype limit %s""", (d.parent, d.defkey, d.defvalue, d.cnt-1))

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model import rename_field
-
+from frappe.modules import scrub, get_doctype_module
 
 def execute():
 	rename_map = {
@@ -109,7 +109,7 @@ def execute():
 			
 def reload_docs(docs):
 	for dn in docs:
-		frappe.reload_doc(get_module(dn),	"doctype", dn.lower().replace(" ", "_"))
+		frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
 	
 	# reload all standard print formats
 	for pf in frappe.db.sql("""select name, module from `tabPrint Format` 
@@ -124,7 +124,8 @@ def reload_docs(docs):
 	for r in frappe.db.sql("""select name, ref_doctype from `tabReport` 
 		where ifnull(is_standard, 'No') = 'Yes'
 		and report_type in ('Report Builder', 'Query Report')""", as_dict=1):
-			frappe.reload_doc(get_module(r.ref_doctype), "Report", r.name)
-			
-def get_module(dn):
-	return frappe.db.get_value("DocType", dn, "module").lower().replace(" ", "_")
+			try:
+				frappe.reload_doc(get_doctype_module(r.ref_doctype), "Report", r.name)
+			except Exception, e:
+				print e
+				pass
