@@ -281,16 +281,16 @@ def get_pricing_rules(args_dict):
 				
 		
 	conditions = ""
-	for field in ["customer", "territory", "supplier", "supplier_type", 
-		"campaign", "sales_partner"]:
+	for field in ["customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
 			if args_dict.get(field):
 				conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
 			else:
 				conditions += " and ifnull("+field+", '') = ''"
 	
-	customer_group_condition = _get_tree_conditions("Customer Group")
-	if customer_group_condition:
-		conditions += " and " + customer_group_condition
+	for doctype in ["Customer Group", "Territory"]:
+		group_condition = _get_tree_conditions(doctype)
+		if group_condition:
+			conditions += " and " + group_condition
 	
 	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
 
