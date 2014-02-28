@@ -68,7 +68,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 15)
 		
-		frappe.db.sql("delete * from `tabPricing Rule`")
+		frappe.db.sql("delete from `tabPricing Rule`")
 
 test_records = [
 	[{
