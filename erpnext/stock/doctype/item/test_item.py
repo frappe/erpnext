@@ -37,12 +37,14 @@ class TestItem(unittest.TestCase):
 			"amount": 0.0,
 			"base_amount": 0.0,
 			"batch_no": None,
-			"item_tax_rate": {},
+			"item_tax_rate": '{}',
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
 		}
 		
 		make_test_records("Item Price")
+		
+		frappe.db.sql("delete from `tabPricing Rule`")
 		
 		details = get_item_details({
 			"item_code": "_Test Item",

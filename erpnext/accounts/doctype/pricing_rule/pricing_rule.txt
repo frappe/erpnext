@@ -2,7 +2,7 @@
  {
   "creation": "2014-02-21 15:02:51", 
   "docstatus": 0, 
-  "modified": "2014-02-27 18:08:42", 
+  "modified": "2014-02-28 14:49:15", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -24,6 +24,7 @@
  }, 
  {
   "create": 1, 
+  "delete": 1, 
   "doctype": "DocPerm", 
   "name": "__common__", 
   "parent": "Pricing Rule", 
