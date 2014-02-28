@@ -22,3 +22,4 @@ execute:frappe.db.sql("update tabPage set module='Core' where name='Setup'")
 erpnext.patches.4_0.fields_to_be_renamed
 erpnext.patches.4_0.rename_sitemap_to_route
 erpnext.patches.4_0.fix_contact_address
+erpnext.patches.4_0.customer_discount_to_pricing_rule

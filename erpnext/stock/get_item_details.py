@@ -206,23 +206,6 @@ def validate_conversion_rate(args, meta):
 		args.plc_conversion_rate = flt(args.plc_conversion_rate, 
 			get_field_precision(meta.get_field("plc_conversion_rate"), 
 			frappe._dict({"fields": args})))
-
-def get_item_discount(item_group, customer):
-	parent_item_groups = [x[0] for x in frappe.db.sql("""SELECT parent.name 
-		FROM `tabItem Group` AS node, `tabItem Group` AS parent 
-		WHERE parent.lft <= node.lft and parent.rgt >= node.rgt and node.name = %s
-		GROUP BY parent.name 
-		ORDER BY parent.lft desc""", (item_group,))]
-		
-	discount = 0
-	for d in parent_item_groups:
-		res = frappe.db.sql("""select discount, name from `tabCustomer Discount` 
-			where parent = %s and item_group = %s""", (customer, d))
-		if res:
-			discount = flt(res[0][0])
-			break
-			
-	return {"discount_percentage": discount}
 	
 def get_party_item_code(args, item_bean, out):
 	if args.transaction_type == "selling":
