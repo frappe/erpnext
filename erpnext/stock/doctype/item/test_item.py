@@ -43,9 +43,7 @@ class TestItem(unittest.TestCase):
 		}
 		
 		make_test_records("Item Price")
-		
-		frappe.db.sql("delete from `tabPricing Rule`")
-		
+				
 		details = get_item_details({
 			"item_code": "_Test Item",
 			"company": "_Test Company",

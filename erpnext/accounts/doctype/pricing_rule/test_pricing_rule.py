@@ -10,6 +10,16 @@ class TestPricingRule(unittest.TestCase):
 	def test_pricing_rule_for_discount(self):
 		from erpnext.stock.get_item_details import get_item_details
 		from frappe import MandatoryError
+
+		test_record = [{
+			"doctype": "Pricing Rule", 
+			"apply_on": "Item Code", 
+			"item_code": "_Test Item", 
+			"price_or_discount": "Discount Percentage", 
+			"price": 0, 
+			"discount_percentage": 10, 
+		}]
+		frappe.bean(copy=test_record).insert()
 		
 		args = frappe._dict({
 			"item_code": "_Test Item",
@@ -28,7 +38,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
-		prule = frappe.bean(copy=test_records[0])
+		prule = frappe.bean(copy=test_record)
 		prule.doc.applicable_for = "Customer"
 		self.assertRaises(MandatoryError, prule.insert)
 		prule.doc.customer = "_Test Customer"
@@ -37,7 +47,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 20)
 		
-		prule = frappe.bean(copy=test_records[0])
+		prule = frappe.bean(copy=test_record)
 		prule.doc.apply_on = "Item Group"
 		prule.doc.item_group = "All Item Groups"
 		prule.doc.discount_percentage = 15
@@ -47,9 +57,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
-
-		
-		prule = frappe.bean(copy=test_records[0])
+		prule = frappe.bean(copy=test_record)
 		prule.doc.applicable_for = "Campaign"
 		prule.doc.campaign = "_Test Campaign"
 		prule.doc.discount_percentage = 5
@@ -69,14 +77,3 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(details.get("discount_percentage"), 15)
 		
 		frappe.db.sql("delete from `tabPricing Rule`")
-
-test_records = [
-	[{
-		"doctype": "Pricing Rule", 
-		"apply_on": "Item Code", 
-		"item_code": "_Test Item", 
-		"price_or_discount": "Discount Percentage", 
-		"price": 0, 
-		"discount_percentage": 10, 
-	}],
-]

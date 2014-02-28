@@ -253,7 +253,6 @@ def apply_pricing_rule(out, args):
 	for rule_for in ["price", "discount_percentage"]:
 		pricing_rules = filter(lambda x: x[rule_for] > 0.0, all_pricing_rules)
 		pricing_rules = filter_pricing_rules(args_dict, pricing_rules, rule_for)
-
 		if pricing_rules:
 			if rule_for == "discount_percentage":
 				out["discount_percentage"] = pricing_rules[-1]["discount_percentage"]
@@ -265,17 +264,17 @@ def apply_pricing_rule(out, args):
 				out["pricing_rule_for_price"] = pricing_rules[-1]["name"]
 	
 def get_pricing_rules(args_dict):
-	def _get_tree_conditions(doctype):
+	def _get_tree_conditions(doctype, allow_blank=True):
 		field = frappe.scrub(doctype)
 		condition = ""
 		if args_dict.get(field):
 			lft, rgt = frappe.db.get_value(doctype, args_dict[field], ["lft", "rgt"])
 			parent_groups = frappe.db.sql_list("""select name from `tab%s` 
-				where lft<=%s and rgt>=%s""" % 
-				(doctype, '%s', '%s'), (lft, rgt))
+				where lft<=%s and rgt>=%s""" % (doctype, '%s', '%s'), (lft, rgt))
 				
 			if parent_groups:
-				condition = " ifnull("+field+", '') in ('" + "', '".join(parent_groups)+"', '')"
+				if allow_blank: parent_groups.append('')
+				condition = " ifnull("+field+", '') in ('" + "', '".join(parent_groups)+"')"
 
 		return condition
 				
@@ -303,7 +302,7 @@ def get_pricing_rules(args_dict):
 		where (item_code=%(item_code)s or {item_group_condition} or brand=%(brand)s) 
 			and docstatus < 2 and ifnull(disable, 0) = 0 {conditions}
 		order by priority desc, name desc""".format(
-			item_group_condition=_get_tree_conditions("Item Group"), conditions=conditions), 
+			item_group_condition=_get_tree_conditions("Item Group", False), conditions=conditions), 
 			args_dict, as_dict=1)
 
 def filter_pricing_rules(args_dict, pricing_rules, price_or_discount):
