@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext.home import make_feed
 
 def on_session_creation(login_manager):
 	"""
