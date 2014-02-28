@@ -2,7 +2,7 @@
  {
   "creation": "2013-06-04 11:02:19", 
   "docstatus": 0, 
-  "modified": "2014-02-10 17:28:47", 
+  "modified": "2014-02-28 11:04:19", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -220,6 +220,22 @@
   "print_hide": 1, 
   "read_only": 1, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pricing_rule_for_price", 
+  "fieldtype": "Link", 
+  "label": "Pricing Rule For Price", 
+  "options": "Pricing Rule", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pricing_rule_for_discount", 
+  "fieldtype": "Link", 
+  "label": "Pricing Rule For Discount", 
+  "options": "Pricing Rule", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 

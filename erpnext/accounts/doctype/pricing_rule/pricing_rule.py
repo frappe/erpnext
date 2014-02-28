@@ -23,8 +23,9 @@ class DocType:
 					frappe.MandatoryError)
 		
 	def cleanup_fields_value(self):
-		fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory", 
-			"supplier", "supplier_type", "campaign", "sales_partner", "price", "discount"]
+		fields = ["item_code", "item_group", "brand", "customer", "customer_group", 
+			"territory", "supplier", "supplier_type", "campaign", "sales_partner", 
+			"price", "discount_percentage"]
 			
 		for field_with_value in ["apply_on", "applicable_for", "price_or_discount"]:
 			val = self.doc.fields.get(field_with_value)

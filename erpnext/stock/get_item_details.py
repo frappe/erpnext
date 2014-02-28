@@ -100,16 +100,16 @@ def validate_item_details(args, item):
 		if args.get("order_type") == "Maintenance":
 			if item.is_service_item != "Yes":
 				throw(_("Item") + (" %s: " % item.name) + 
-					_("not a service item.") +
+					_("is not a service item.") +
 					_("Please select a service item or change the order type to Sales."))
 		
 		elif item.is_sales_item != "Yes":
-			throw(_("Item") + (" %s: " % item.name) + _("not a sales item"))
+			throw(_("Item") + (" %s: " % item.name) + _("is not a sales item"))
 
 	elif args.transaction_type == "buying":
 		# validate if purchase item or subcontracted item
 		if item.is_purchase_item != "Yes":
-			throw(_("Item") + (" %s: " % item.name) + _("not a purchase item"))
+			throw(_("Item") + (" %s: " % item.name) + _("is not a purchase item"))
 	
 		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != "Yes":
 			throw(_("Item") + (" %s: " % item.name) + 
@@ -265,57 +265,21 @@ def get_pos_settings(company):
 def apply_pricing_rule(out, args):
 	args_dict = frappe._dict().update(args)
 	args_dict.update(out)
-	pricing_rules = get_pricing_rules(args_dict)
-	for rule_for in ["price", "discount"]:
-		pricing_rules = filter(lambda x: x[rule_for] > 0, pricing_rules)
-		pricing_rules = filter_pricing_rules(args_dict, pricing_rules)
-		
-		if len(pricing_rules) > 1:
-			pricing_rules = sorted(pricing_rules, key=lambda x: x[rule_for])
+	all_pricing_rules = get_pricing_rules(args_dict)
+
+	for rule_for in ["price", "discount_percentage"]:
+		pricing_rules = filter(lambda x: x[rule_for] > 0.0, all_pricing_rules)
+		pricing_rules = filter_pricing_rules(args_dict, pricing_rules, rule_for)
+
 		if pricing_rules:
-			if rule_for == "discount":
-				out["discount_percentage"] = pricing_rules[-1]["discount"]
+			if rule_for == "discount_percentage":
+				out["discount_percentage"] = pricing_rules[-1]["discount_percentage"]
+				out["pricing_rule_for_discount"] = pricing_rules[-1]["name"]
 			else:
 				out["base_price_list_rate"] = pricing_rules[0]["price"]
 				out["price_list_rate"] = pricing_rules[0]["price"] * \
 					flt(args_dict.plc_conversion_rate) / flt(args_dict.conversion_rate)
-	
-	
-def filter_pricing_rules(args_dict, pricing_rules):	
-	def _filter_pricing_rules(pricing_rules, field_set):
-		p_rules = []
-		for field in field_set:
-			if not p_rules:
-				for p_rule in pricing_rules:
-					if p_rule[field] == args_dict.get(field):
-						p_rules.append(p_rule)
-			else:
-				break
-		
-		return p_rules or pricing_rules
-
-	for field_set in [["item_code", "item_group", "brand"], ["customer", "customer_group", 
-		"territory", "supplier", "supplier_type", "campaign", "sales_partner"]]:
-			if pricing_rules:
-				pricing_rules = _filter_pricing_rules(pricing_rules, field_set)
-
-	# filter for price list
-	if pricing_rules:
-		pricing_rules = filter(lambda x: (not x.for_price_list or 
-			x.for_price_list==args_dict.price_list), pricing_rules)
-			
-	# filter for qty
-	if pricing_rules and args_dict.get("qty"):
-		pricing_rules = filter(lambda x: (args_dict.qty>=flt(x.min_qty) 
-			and (args_dict.qty<=x.max_qty if x.max_qty else True)), pricing_rules)
-			
-	# find pricing rule with highest priority
-	if pricing_rules:
-		max_priority = min([cint(p.priority) for p in pricing_rules])
-		if max_priority:
-			pricing_rules = filter(lambda x: x.priority==max_priority, pricing_rules)
-
-	return pricing_rules
+				out["pricing_rule_for_price"] = pricing_rules[-1]["name"]
 	
 def get_pricing_rules(args_dict):	
 	conditions = ""
@@ -323,17 +287,68 @@ def get_pricing_rules(args_dict):
 		"campaign", "sales_partner"]:
 			if args_dict.get(field):
 				conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
-				
+			else:
+				conditions += " and ifnull("+field+", '') = ''"
+	
+	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
+	
 	if args_dict.get("transaction_date"):
 		conditions += """ and %(transaction_date)s between ifnull(valid_from, '2000-01-01') 
 			and ifnull(valid_upto, '2500-12-31')"""
 	
-	return frappe.conn.sql("""select * from `tabPricing Rule` 
+	return frappe.db.sql("""select * from `tabPricing Rule` 
 		where (item_code=%(item_code)s or item_group=%(item_group)s or brand=%(brand)s) 
 			and docstatus < 2 and ifnull(disable, 0) = 0 {0}
 		order by priority desc, name desc""".format(conditions), args_dict, as_dict=1)
-		
+
+def filter_pricing_rules(args_dict, pricing_rules, price_or_discount):
+	# filter for qty
+	if pricing_rules and args_dict.get("qty"):
+		pricing_rules = filter(lambda x: (args_dict.qty>=flt(x.min_qty) 
+			and (args_dict.qty<=x.max_qty if x.max_qty else True)), pricing_rules)
+ 
+	# find pricing rule with highest priority
+	if pricing_rules:
+		max_priority = max([cint(p.priority) for p in pricing_rules])
+		if max_priority:
+			pricing_rules = filter(lambda x: cint(x.priority)==max_priority, pricing_rules)
+			
+	# apply internal priority
+	all_fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory", 
+		"supplier", "supplier_type", "campaign", "for_price_list", "sales_partner"]
 	
+	if len(pricing_rules) > 1:
+		for field_set in [["item_code", "item_group", "brand"], 
+			["customer", "customer_group", "territory"], ["supplier", "supplier_type"]]:
+				remaining_fields = list(set(all_fields) - set(field_set))
+				if if_all_rules_same(pricing_rules, remaining_fields):
+					pricing_rules = apply_internal_priority(pricing_rules, field_set, args_dict)
+					break
+
+		if len(pricing_rules) > 1:
+			pricing_rules = sorted(pricing_rules, key=lambda x: x[price_or_discount])
+	
+	return pricing_rules
+
+def if_all_rules_same(pricing_rules, fields):
+	all_rules_same = True
+	val = [pricing_rules[0][k] for k in fields]
+	for p in pricing_rules[1:]:
+		if val != [p[k] for k in fields]:
+			all_rules_same = False
+			break
+	
+	return all_rules_same
+
+def apply_internal_priority(pricing_rules, field_set, args_dict):
+	filtered_rules = []
+	for field in field_set:
+		if args_dict.get(field):
+			filtered_rules = filter(lambda x: x[field]==args_dict[field], pricing_rules)
+			if filtered_rules: break
+
+	return filtered_rules or pricing_rules
+
 def get_serial_nos_by_fifo(args, item_bean):
 	return "\n".join(frappe.db.sql_list("""select name from `tabSerial No` 
 		where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available' 
@@ -342,17 +357,17 @@ def get_serial_nos_by_fifo(args, item_bean):
 			"warehouse": args.warehouse,
 			"qty": cint(args.qty)
 		}))
-		
+
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
 	return {"conversion_factor": frappe.db.get_value("UOM Conversion Detail",
 		{"parent": item_code, "uom": uom}, "conversion_factor")}
-		
+
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):
 	return {"projected_qty": frappe.db.get_value("Bin", 
 		{"item_code": item_code, "warehouse": warehouse}, "projected_qty")}
-		
+
 @frappe.whitelist()
 def get_available_qty(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, 

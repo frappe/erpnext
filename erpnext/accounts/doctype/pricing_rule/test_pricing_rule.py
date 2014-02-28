@@ -29,39 +29,45 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
 		prule = frappe.bean(copy=test_records[0])
-		prule.doc.apply_on = "Item Group"
-		prule.doc.item_group = "_Test Item Group"
-		prule.doc.discount = 15
-		prule.insert()
-		
-		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 10)
-		
-		prule = frappe.bean(copy=test_records[0])
 		prule.doc.applicable_for = "Customer"
 		self.assertRaises(MandatoryError, prule.insert)
 		prule.doc.customer = "_Test Customer"
-		prule.doc.discount = 20
+		prule.doc.discount_percentage = 20
 		prule.insert()
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 20)
 		
 		prule = frappe.bean(copy=test_records[0])
+		prule.doc.apply_on = "Item Group"
+		prule.doc.item_group = "_Test Item Group"
+		prule.doc.discount_percentage = 15
+		prule.insert()
+		
+		args.customer = None
+		details = get_item_details(args)
+		self.assertEquals(details.get("discount_percentage"), 10)
+		
+
+		
+		prule = frappe.bean(copy=test_records[0])
 		prule.doc.applicable_for = "Campaign"
 		prule.doc.campaign = "_Test Campaign"
-		prule.doc.discount = 30
+		prule.doc.discount_percentage = 5
+		prule.doc.priority = 8
 		prule.insert()
+		
 		args.campaign = "_Test Campaign"
 		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 30)
+		self.assertEquals(details.get("discount_percentage"), 5)
+		
+		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
+		details = get_item_details(args)
+		self.assertEquals(details.get("discount_percentage"), 15)
 		
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 15)
-		
-		args.customer = None
-		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 15)
+
 		
 		
 		
@@ -71,9 +77,8 @@ test_records = [
 		"doctype": "Pricing Rule", 
 		"apply_on": "Item Code", 
 		"item_code": "_Test Item", 
-		"price_or_discount": "Discount", 
+		"price_or_discount": "Discount Percentage", 
 		"price": 0, 
-		"discount": 10, 
+		"discount_percentage": 10, 
 	}],
-
 ]

@@ -2,7 +2,7 @@
  {
   "creation": "2014-02-21 15:02:51", 
   "docstatus": 0, 
-  "modified": "2014-02-25 13:59:13", 
+  "modified": "2014-02-27 18:08:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -44,6 +44,85 @@
   "label": "Basic Section"
  }, 
  {
+  "default": "Today", 
+  "doctype": "DocField", 
+  "fieldname": "valid_from", 
+  "fieldtype": "Date", 
+  "label": "Valid From"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "valid_upto", 
+  "fieldtype": "Date", 
+  "label": "Valid Upto"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "priority", 
+  "fieldtype": "Select", 
+  "label": "Priority", 
+  "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "disable", 
+  "fieldtype": "Check", 
+  "label": "Disable"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_discount_section", 
+  "fieldtype": "Section Break", 
+  "label": "Price / Discount"
+ }, 
+ {
+  "default": "Discount Percentage", 
+  "doctype": "DocField", 
+  "fieldname": "price_or_discount", 
+  "fieldtype": "Select", 
+  "label": "Price or Discount", 
+  "options": "\nPrice\nDiscount Percentage", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:doc.price_or_discount==\"Price\"", 
+  "doctype": "DocField", 
+  "fieldname": "price", 
+  "fieldtype": "Float", 
+  "label": "Price"
+ }, 
+ {
+  "depends_on": "eval:doc.price_or_discount==\"Discount Percentage\"", 
+  "doctype": "DocField", 
+  "fieldname": "discount_percentage", 
+  "fieldtype": "Float", 
+  "label": "Discount Percentage"
+ }, 
+ {
+  "depends_on": "eval:doc.price_or_discount==\"Discount Percentage\"", 
+  "doctype": "DocField", 
+  "fieldname": "for_price_list", 
+  "fieldtype": "Link", 
+  "label": "For Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "applicability_section", 
+  "fieldtype": "Section Break", 
+  "label": "Applicability"
+ }, 
+ {
   "default": "Item Code", 
   "doctype": "DocField", 
   "fieldname": "apply_on", 
@@ -79,94 +158,15 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "priority", 
-  "fieldtype": "Select", 
-  "label": "Priority", 
-  "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break1", 
+  "fieldname": "col_break3", 
   "fieldtype": "Column Break"
- }, 
- {
-  "default": "Today", 
-  "doctype": "DocField", 
-  "fieldname": "valid_from", 
-  "fieldtype": "Date", 
-  "label": "Valid From"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "valid_upto", 
-  "fieldtype": "Date", 
-  "label": "Valid Upto"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "disable", 
-  "fieldtype": "Check", 
-  "label": "Disable"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "price_discount_section", 
-  "fieldtype": "Section Break", 
-  "label": "Price / Discount"
- }, 
- {
-  "default": "Discount", 
-  "doctype": "DocField", 
-  "fieldname": "price_or_discount", 
-  "fieldtype": "Select", 
-  "label": "Price or Discount", 
-  "options": "\nPrice\nDiscount", 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break2", 
-  "fieldtype": "Column Break"
- }, 
- {
-  "depends_on": "eval:doc.price_or_discount==\"Price\"", 
-  "doctype": "DocField", 
-  "fieldname": "price", 
-  "fieldtype": "Float", 
-  "label": "Price"
- }, 
- {
-  "depends_on": "eval:doc.price_or_discount==\"Discount\"", 
-  "doctype": "DocField", 
-  "fieldname": "discount", 
-  "fieldtype": "Float", 
-  "label": "Discount"
- }, 
- {
-  "depends_on": "eval:doc.price_or_discount==\"Discount\"", 
-  "doctype": "DocField", 
-  "fieldname": "for_price_list", 
-  "fieldtype": "Link", 
-  "label": "For Price List", 
-  "options": "Price List"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "applicability_section", 
-  "fieldtype": "Section Break", 
-  "label": "Applicability"
  }, 
  {
   "doctype": "DocField", 
   "fieldname": "applicable_for", 
   "fieldtype": "Select", 
   "label": "Applicable For", 
-  "options": "\nCustomer\nCustomer Group\nTerritory\nSales Person\nSales Partner\nCampaign\nSupplier\nSupplier Type"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break3", 
-  "fieldtype": "Column Break"
+  "options": "\nCustomer\nCustomer Group\nTerritory\nSales Partner\nCampaign\nSupplier\nSupplier Type"
  }, 
  {
   "depends_on": "eval:doc.applicable_for==\"Customer\"", 
@@ -226,20 +226,9 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "qty_section", 
-  "fieldtype": "Section Break", 
-  "label": "Based on Qty"
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "min_qty", 
   "fieldtype": "Float", 
   "label": "Min Qty"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "col_break4", 
-  "fieldtype": "Column Break"
  }, 
  {
   "doctype": "DocField", 
