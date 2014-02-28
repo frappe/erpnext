@@ -264,25 +264,47 @@ def apply_pricing_rule(out, args):
 					flt(args_dict.plc_conversion_rate) / flt(args_dict.conversion_rate)
 				out["pricing_rule_for_price"] = pricing_rules[-1]["name"]
 	
-def get_pricing_rules(args_dict):	
+def get_pricing_rules(args_dict):
+	def _get_tree_conditions(doctype):
+		field = frappe.scrub(doctype)
+		condition = ""
+		if args_dict.get(field):
+			lft, rgt = frappe.db.get_value(doctype, args_dict[field], ["lft", "rgt"])
+			parent_groups = frappe.db.sql_list("""select name from `tab%s` 
+				where lft<=%s and rgt>=%s""" % 
+				(doctype, '%s', '%s'), (lft, rgt))
+				
+			if parent_groups:
+				condition = " ifnull("+field+", '') in ('" + "', '".join(parent_groups)+"', '')"
+
+		return condition
+				
+		
 	conditions = ""
-	for field in ["customer", "customer_group", "territory", "supplier", "supplier_type", 
+	for field in ["customer", "territory", "supplier", "supplier_type", 
 		"campaign", "sales_partner"]:
 			if args_dict.get(field):
 				conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
 			else:
 				conditions += " and ifnull("+field+", '') = ''"
 	
+	customer_group_condition = _get_tree_conditions("Customer Group")
+	if customer_group_condition:
+		conditions += " and " + customer_group_condition
+	
 	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
+
 	
 	if args_dict.get("transaction_date"):
 		conditions += """ and %(transaction_date)s between ifnull(valid_from, '2000-01-01') 
 			and ifnull(valid_upto, '2500-12-31')"""
 	
 	return frappe.db.sql("""select * from `tabPricing Rule` 
-		where (item_code=%(item_code)s or item_group=%(item_group)s or brand=%(brand)s) 
-			and docstatus < 2 and ifnull(disable, 0) = 0 {0}
-		order by priority desc, name desc""".format(conditions), args_dict, as_dict=1)
+		where (item_code=%(item_code)s or {item_group_condition} or brand=%(brand)s) 
+			and docstatus < 2 and ifnull(disable, 0) = 0 {conditions}
+		order by priority desc, name desc""".format(
+			item_group_condition=_get_tree_conditions("Item Group"), conditions=conditions), 
+			args_dict, as_dict=1)
 
 def filter_pricing_rules(args_dict, pricing_rules, price_or_discount):
 	# filter for qty

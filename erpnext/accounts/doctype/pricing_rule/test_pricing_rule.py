@@ -39,7 +39,7 @@ class TestPricingRule(unittest.TestCase):
 		
 		prule = frappe.bean(copy=test_records[0])
 		prule.doc.apply_on = "Item Group"
-		prule.doc.item_group = "_Test Item Group"
+		prule.doc.item_group = "All Item Groups"
 		prule.doc.discount_percentage = 15
 		prule.insert()
 		
