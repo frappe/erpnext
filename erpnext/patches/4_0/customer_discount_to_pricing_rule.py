@@ -9,10 +9,16 @@ def execute():
 	
 	for d in frappe.db.sql("""select * from `tabCustomer Discount` 
 		where ifnull(parent, '') != '' and docstatus < 2""", as_dict=1):
+			if not d.item_group:
+				item_group = frappe.db.sql("""select name from `tabItem Group` 
+					where ifnull(parent_item_group, '') = ''""")[0][0]
+			else:
+				item_group = d.item_group
+				
 			frappe.bean([{
 				"doctype": "Pricing Rule",
 				"apply_on": "Item Group",
-				"item_group": d.item_group,
+				"item_group": item_group,
 				"applicable_for": "Customer",
 				"customer": d.parent,
 				"price_or_discount": "Discount",
