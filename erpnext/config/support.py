@@ -48,7 +48,8 @@ data = [
 		"items": [
 			{
 				"type": "doctype",
-				"name": "Support Email Settings",
+				"name": "Email Settings",
+				"label": _("Support Email Settings"),
 				"description": _("Setup incoming server for support email id. (e.g. support@example.com)")
 			},
 		]

@@ -7,22 +7,22 @@ data = [
 		"items": [
 			{
 				"type": "doctype",
-				"name": "Task",,
+				"name": "Task",
 				"description": _("Project activity / task."),
 			},
 			{
 				"type": "doctype",
-				"name": "Project",,
+				"name": "Project",
 				"description": _("Project master."),
 			},
 			{
 				"type": "doctype",
-				"name": "Time Log",,
+				"name": "Time Log",
 				"description": _("Time Log for tasks."),
 			},
 			{
 				"type": "doctype",
-				"name": "Time Log Batch",,
+				"name": "Time Log Batch",
 				"description": _("Batch Time Logs for billing."),
 			},
 			{
@@ -39,7 +39,7 @@ data = [
 			{
 				"type": "report",
 				"route": "Gantt/Task",
-				"doctype": "Task"
+				"doctype": "Task",
 				"name": "Gantt Chart",
 				"description": _("Gantt chart of all tasks.")
 			},

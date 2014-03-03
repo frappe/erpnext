@@ -35,7 +35,8 @@ data = [
 			},
 			{
 				"type": "doctype",
-				"name": "Support Email Settings",
+				"name": "Email Settings",
+				"label": _("Support Email Settings"),
 				"description": _("Setup incoming server for support email id. (e.g. support@example.com)")
 			},
 			{
@@ -97,6 +98,7 @@ def get_data():
 		("selling", _("Selling"), "icon-tag"),
 		("buying", _("Buying"), "icon-shopping-cart"),
 		("hr", _("Human Resources"), "icon-group"),
+		("support", _("Support"), "icon-phone"),
 		("website", _("Website"), "icon-globe")):
 		
 		try:
