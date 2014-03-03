@@ -22,7 +22,7 @@ class DocType:
 		self.validate_account_details(adv_adj)
 		validate_frozen_account(self.doc.account, adv_adj)
 		check_freezing_date(self.doc.posting_date, adv_adj)
-		check_negative_balance(self.doc.account, adv_adj)
+		validate_balance_type(self.doc.account, adv_adj)
 
 		# Update outstanding amt on against voucher
 		if self.doc.against_voucher and self.doc.against_voucher_type != "POS" \
@@ -89,19 +89,18 @@ class DocType:
 				frappe.throw(_("Cost Center") + ": " + self.doc.cost_center + 
 					_(" does not belong to the company") + ": " + self.doc.company)
 						
-def check_negative_balance(account, adv_adj=False):
+def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
-		account_details = frappe.db.get_value("Account", account, 
-				["allow_negative_balance", "debit_or_credit"], as_dict=True)
-		if not account_details["allow_negative_balance"]:
-			balance = frappe.db.sql("""select sum(debit) - sum(credit) from `tabGL Entry` 
-				where account = %s""", account)
-			balance = account_details["debit_or_credit"] == "Debit" and \
-				flt(balance[0][0]) or -1*flt(balance[0][0])
-		
-			if flt(balance) < 0:
-				frappe.throw(_("Negative balance is not allowed for account ") + account)
-
+		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
+		if balance_must_be:
+			balance = frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
+				from `tabGL Entry` where account = %s""", account)[0][0]
+			
+			if (balance_must_be=="Debit" and flt(balance) < 0) or \
+				(balance_must_be=="Credit" and flt(balance) > 0):
+					frappe.throw("Credit" if balance_must_be=="Debit" else "Credit" 
+						+ _(" balance is not allowed for account ") + account)
+				
 def check_freezing_date(posting_date, adv_adj=False):
 	"""
 		Nobody can do GL Entries where posting date is before freezing date 

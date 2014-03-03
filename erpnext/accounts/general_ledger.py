@@ -103,7 +103,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None, 
 		adv_adj=False, update_outstanding="Yes"):
 	
-	from erpnext.accounts.doctype.gl_entry.gl_entry import check_negative_balance, \
+	from erpnext.accounts.doctype.gl_entry.gl_entry import validate_balance_type, \
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
 		
 	if not gl_entries:
@@ -117,7 +117,7 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 	
 	for entry in gl_entries:
 		validate_frozen_account(entry["account"], adv_adj)
-		check_negative_balance(entry["account"], adv_adj)
+		validate_balance_type(entry["account"], adv_adj)
 		validate_expense_against_budget(entry)
 		
 		if entry.get("against_voucher") and entry.get("against_voucher_type") != "POS" \

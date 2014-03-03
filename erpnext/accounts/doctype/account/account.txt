@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2014-03-03 17:21:07", 
+  "modified": "2014-03-03 18:43:33", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -216,12 +216,11 @@
   "options": "[Select]"
  }, 
  {
-  "default": "1", 
-  "depends_on": "eval:doc.group_or_ledger==\"Ledger\"", 
   "doctype": "DocField", 
-  "fieldname": "allow_negative_balance", 
-  "fieldtype": "Check", 
-  "label": "Allow Negative Balance"
+  "fieldname": "balance_must_be", 
+  "fieldtype": "Select", 
+  "label": "Balance must be", 
+  "options": "\nDebit\nCredit"
  }, 
  {
   "doctype": "DocField", 
