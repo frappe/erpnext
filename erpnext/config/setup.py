@@ -3,6 +3,19 @@ from frappe.widgets.moduleview import get_config
 
 data = [
 	{
+		"label": _("Tools"),
+		"icon": "icon-wrench",
+		"items": [
+			{
+				"type": "doctype",
+				"name": "Global Defaults",
+				"label": _("Global Settings"),
+				"description": _("Set the Date & Number Formats, Default Currency, Current Fiscal Year, etc."),
+				"hide_count": True
+			}
+		]
+	},
+	{
 		"label": _("Customize"),
 		"icon": "icon-glass",
 		"items": [
