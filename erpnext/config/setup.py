@@ -48,8 +48,7 @@ data = [
 			},
 			{
 				"type": "doctype",
-				"name": "Email Settings",
-				"label": _("Support Email Settings"),
+				"name": "Support Email Settings",
 				"description": _("Setup incoming server for support email id. (e.g. support@example.com)")
 			},
 			{
