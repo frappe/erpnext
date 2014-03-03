@@ -14,10 +14,12 @@ class DocType():
 		if self.doc.partner_website and not self.doc.partner_website.startswith("http"):
 			self.doc.partner_website = "http://" + self.doc.partner_website
 
-	def get_contacts(self,nm):
+	def get_contacts(self, nm):
 		if nm:
-			contact_details =frappe.db.convert_to_lists(frappe.db.sql("select name, CONCAT(IFNULL(first_name,''),' ',IFNULL(last_name,'')),contact_no,email_id from `tabContact` where sales_partner = '%s'"%nm))
-			return contact_details
+			return frappe.db.convert_to_lists(frappe.db.sql("""
+				select name, CONCAT(IFNULL(first_name,''), 
+					' ',IFNULL(last_name,'')),contact_no,email_id 
+				from `tabContact` where sales_partner = %s""", nm))
 		else:
 			return ''
 

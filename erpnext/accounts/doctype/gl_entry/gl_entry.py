@@ -143,7 +143,7 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-		frappe.db.sql("update `tab%s` set outstanding_amount=%s where name='%s'" %
+		frappe.db.sql("update `tab%s` set outstanding_amount=%s where name=%s",
 		 	(against_voucher_type, bal, against_voucher))
 			
 def validate_frozen_account(account, adv_adj=None):

@@ -51,7 +51,8 @@ def get_conditions(filters):
 	if filters.get("account"):
 		party_accounts = [filters["account"]]
 	else:
-		cond = filters.get("company") and (" and company = '%s'" % filters["company"]) or ""
+		cond = filters.get("company") and (" and company = '%s'" % 
+			filters["company"].replace("'", "\'")) or ""
 		
 		if filters.get("payment_type") == "Incoming":
 			cond += " and master_type = 'Customer'"

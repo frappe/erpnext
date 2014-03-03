@@ -60,8 +60,9 @@ class DocType(DocListController):
 			if not self.doc.fields.get(k):
 				msgprint("Stock Ledger Entry: '%s' is mandatory" % k, raise_exception = 1)
 			elif k == 'warehouse':
-				if not frappe.db.sql("select name from tabWarehouse where name = '%s'" % self.doc.fields.get(k)):
-					msgprint("Warehouse: '%s' does not exist in the system. Please check." % self.doc.fields.get(k), raise_exception = 1)
+				if not frappe.db.exists("Warehouse", self.doc.fields.get(k)):
+					msgprint("Warehouse: '%s' does not exist in the system. Please check." % 
+						self.doc.fields.get(k), raise_exception = 1)
 
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, has_batch_no, docstatus,
@@ -78,9 +79,10 @@ class DocType(DocListController):
 				frappe.throw("Batch number is mandatory for Item '%s'" % self.doc.item_code)
 
 			# check if batch belongs to item
-			if not frappe.db.sql("""select name from `tabBatch`
-				where item='%s' and name ='%s' and docstatus != 2""" % (self.doc.item_code, self.doc.batch_no)):
-				frappe.throw("'%s' is not a valid Batch Number for Item '%s'" % (self.doc.batch_no, self.doc.item_code))
+			if not frappe.db.get_value("Batch", 
+					{"item": self.doc.item_code, "name": self.doc.batch_no}):
+				frappe.throw("'%s' is not a valid Batch Number for Item '%s'" % 
+					(self.doc.batch_no, self.doc.item_code))
 
 		if not self.doc.stock_uom:
 			self.doc.stock_uom = item_det.stock_uom

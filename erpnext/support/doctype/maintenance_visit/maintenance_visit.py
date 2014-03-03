@@ -18,18 +18,12 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = frappe.db.sql("select item_name,description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
-		ret = {
-			'item_name' : item and item[0]['item_name'] or '',
-			'description' : item and item[0]['description'] or ''
-		}
-		return ret
+		return frappe.db.get_value("Item", item_code, ["item_name", "description"], as_dict=1)
 			
 	def validate_serial_no(self):
 		for d in getlist(self.doclist, 'maintenance_visit_details'):
-			if d.serial_no and not frappe.db.sql("select name from `tabSerial No` where name = '%s' and docstatus != 2" % d.serial_no):
-				msgprint("Serial No: "+ d.serial_no + " not exists in the system")
-				raise Exception
+			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
+				frappe.throw("Serial No: "+ d.serial_no + " not exists in the system")
 
 	
 	def validate(self):

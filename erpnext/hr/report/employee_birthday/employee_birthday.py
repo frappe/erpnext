@@ -32,6 +32,7 @@ def get_conditions(filters):
 			"Dec"].index(filters["month"]) + 1
 		conditions += " and month(date_of_birth) = '%s'" % month
 	
-	if filters.get("company"): conditions += " and company = '%s'" % filters["company"]
+	if filters.get("company"): conditions += " and company = '%s'" % \
+		filters["company"].repalce("'", "\'")
 	
 	return conditions

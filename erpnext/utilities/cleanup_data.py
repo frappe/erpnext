@@ -34,7 +34,8 @@ def delete_transactions():
 		"Job Applicant", "Web Page", "Website Slideshow", "Blog Post", "Blog Category", "Blogger", 
 		"Time Log", "Time Log Batch", "Workflow"]
 	for d in trans:
-		for t in frappe.db.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
+		for t in frappe.db.sql("select options from tabDocField \
+				where parent=%s and fieldtype='Table'", d):
 			frappe.db.sql("delete from `tab%s`" % (t))
 		frappe.db.sql("delete from `tab%s`" % (d))
 		print "Deleted " + d
@@ -95,11 +96,11 @@ def delete_masters():
 		'BOM': ''
 	}
 	for d in masters.keys():
-		for t in frappe.db.sql("select options from tabDocField where parent='%s' \
-			and fieldtype='Table'" % d):
-			frappe.db.sql("delete from `tab%s`" % (t))
-		lst = '"'+'","'.join(masters[d])+ '"'
-		frappe.db.sql("delete from `tab%s` where name not in (%s)" % (d, lst))
+		for t in frappe.db.sql("select options from tabDocField where parent=%s \
+			and fieldtype='Table'", d):
+				frappe.db.sql("delete from `tab%s`" % (t))
+		frappe.db.sql("delete from `tab%s` where name not in (%s)" % 
+			(d, ', '.join(['%s']*len(masters[d]), masters[d])))
 		print "Deleted " + d
 
 
@@ -125,7 +126,8 @@ def reset_transaction_series():
 def delete_main_masters():
 	main_masters = ['Fiscal Year', 'Company', 'DefaultValue']
 	for d in main_masters:
-		for t in frappe.db.sql("select options from tabDocField where parent='%s' and fieldtype='Table'" % d):
+		for t in frappe.db.sql("select options from tabDocField \
+				where parent=%s and fieldtype='Table'", d):
 			frappe.db.sql("delete from `tab%s`" % (t))
 		frappe.db.sql("delete from `tab%s`" % (d))
 		print "Deleted " + d

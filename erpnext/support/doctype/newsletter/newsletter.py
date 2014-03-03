@@ -59,9 +59,9 @@ class DocType():
 			self.send_to_doctype = "Lead"
 			conditions = []
 			if self.doc.lead_source and self.doc.lead_source != "All":
-				conditions.append(" and source='%s'" % self.doc.lead_source)
+				conditions.append(" and source='%s'" % self.doc.lead_source.replace("'", "\'"))
 			if self.doc.lead_status and self.doc.lead_status != "All":
-				conditions.append(" and status='%s'" % self.doc.lead_status)
+				conditions.append(" and status='%s'" % self.doc.lead_status.replace("'", "\'"))
 
 			if conditions:
 				conditions = "".join(conditions)

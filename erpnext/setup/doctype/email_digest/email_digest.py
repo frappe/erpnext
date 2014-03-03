@@ -339,7 +339,7 @@ class DocType(DocListController):
 	
 	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True):
 		if filter_by_company:
-			company = """and company="%s" """ % self.doc.company
+			company = """and company="%s" """ % self.doc.company.replace('"', '\"')
 		else:
 			company = ""
 		count = frappe.db.sql("""select count(*) from `tab%s`

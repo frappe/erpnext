@@ -241,7 +241,7 @@ class DocType:
 			rebuild_tree("Account", "parent_account")
 
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
-	conditions = (" and company='%s'"% filters["company"]) if doctype == "Warehouse" else ""
+	conditions = (" and company='%s'"% filters["company"].replace("'", "\'")) if doctype == "Warehouse" else ""
 		
 	return frappe.db.sql("""select name from `tab%s` where %s like %s %s
 		order by name limit %s, %s""" %

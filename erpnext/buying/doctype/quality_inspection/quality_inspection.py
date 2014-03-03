@@ -23,16 +23,19 @@ class DocType:
 
 	def on_submit(self):
 		if self.doc.purchase_receipt_no:
-			frappe.db.sql("update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 set t1.qa_no = '%s', t2.modified = '%s' \
-				where t1.parent = '%s' and t1.item_code = '%s' and t1.parent = t2.name" \
-				% (self.doc.name, self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))
+			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 
+				set t1.qa_no = %s, t2.modified = %s 
+				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""",  
+				(self.doc.name, self.doc.modified, self.doc.purchase_receipt_no, 
+					self.doc.item_code))
 		
 
 	def on_cancel(self):
 		if self.doc.purchase_receipt_no:
-			frappe.db.sql("update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 set t1.qa_no = '', t2.modified = '%s' \
-				where t1.parent = '%s' and t1.item_code = '%s' and t1.parent = t2.name" \
-				% (self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))
+			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 
+				set t1.qa_no = '', t2.modified = %s
+				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""", 
+				(self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))
 
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):

@@ -71,7 +71,7 @@ class DocType(SellingController):
 			d.transaction_date = self.doc.transaction_date
 			
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
-				where item_code = '%s' and warehouse = '%s'" % (d.item_code,d.warehouse))
+				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
 	def validate_sales_mntc_quotation(self):
@@ -94,7 +94,9 @@ class DocType(SellingController):
 
 	def validate_proj_cust(self):
 		if self.doc.project_name and self.doc.customer_name:
-			res = frappe.db.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = frappe.db.sql("""select name from `tabProject` where name = %s 
+				and (customer = %s or ifnull(customer,'')='')""", 
+					(self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
 				raise Exception
@@ -187,7 +189,10 @@ class DocType(SellingController):
 			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
 		# Checks Sales Invoice
-		submit_rv = frappe.db.sql("select t1.name from `tabSales Invoice` t1,`tabSales Invoice Item` t2 where t1.name = t2.parent and t2.sales_order = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = frappe.db.sql("""select t1.name 
+			from `tabSales Invoice` t1,`tabSales Invoice Item` t2 
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""", 
+			self.doc.name)
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
 			
@@ -209,8 +214,9 @@ class DocType(SellingController):
 				pro_order[0][0], raise_exception=1)
 
 	def check_modified_date(self):
-		mod_db = frappe.db.sql("select modified from `tabSales Order` where name = '%s'" % self.doc.name)
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
+		mod_db = frappe.db.get_value("Sales Order", self.doc.name, "modified")
+		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % 
+			( mod_db, cstr(self.doc.modified)))
 		if date_diff and date_diff[0][0]:
 			msgprint("%s: %s has been modified after you have opened. Please Refresh"
 				% (self.doc.doctype, self.doc.name), raise_exception=1)

@@ -5,12 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cint, cstr, flt, has_common
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
 from frappe import msgprint
-
-	
-
 
 class DocType:
 	def __init__(self, d, dl):
@@ -38,12 +33,12 @@ class DocType:
 
 	def validate_master_name(self):
 		if self.doc.based_on == 'Customerwise Discount' and \
-				not frappe.db.sql("select name from tabCustomer where name = '%s' and docstatus != 2" % \
-				 	(self.doc.master_name)):
+				not frappe.db.sql("""select name from tabCustomer 
+					where name = %s and docstatus != 2""", (self.doc.master_name)):
 			msgprint("Please select valid Customer Name for Customerwise Discount", 
 			 	raise_exception=1)
 		elif self.doc.based_on == 'Itemwise Discount' and \
-				not frappe.db.sql("select name from tabItem where name = '%s' and docstatus != 2" % \
+				not frappe.db.sql("select name from tabItem where name = %s and docstatus != 2", 
 				 	(self.doc.master_name)):
 			msgprint("Please select valid Item Name for Itemwise Discount", raise_exception=1)
 		elif (self.doc.based_on == 'Grand Total' or \
@@ -64,7 +59,7 @@ class DocType:
 					Applicable To (Role).", raise_exception=1)
 			elif self.doc.system_user and self.doc.approving_role and \
 			 		has_common([self.doc.approving_role], [x[0] for x in \
-					frappe.db.sql("select role from `tabUserRole` where parent = '%s'" % \
+					frappe.db.sql("select role from `tabUserRole` where parent = %s", \
 					 	(self.doc.system_user))]):
 				msgprint("System User : %s is assigned role : %s. So rule does not make sense" % 
 				 	(self.doc.system_user,self.doc.approving_role), raise_exception=1)

@@ -3,11 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import cstr, flt, now, cint
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
-from frappe.model.code import get_obj
+from frappe.utils import cstr, flt, cint
 from frappe import msgprint, _
 
 
@@ -33,8 +29,7 @@ class DocType:
 			msgprint("Please Enter Conversion Factor.")
 			raise Exception
 		
-		stock_uom = frappe.db.sql("select stock_uom from `tabItem` where name = '%s'" % self.doc.item_code)
-		stock_uom = stock_uom and stock_uom[0][0]
+		stock_uom = frappe.db.get_value("Item", self.doc.item_code, "stock_uom")
 		if cstr(self.doc.new_stock_uom) == cstr(stock_uom):
 			msgprint("Item Master is already updated with New Stock UOM " + cstr(self.doc.new_stock_uom))
 			raise Exception
@@ -49,9 +44,20 @@ class DocType:
 	def update_bin(self):
 		# update bin
 		if flt(self.doc.conversion_factor) != flt(1):
-			frappe.db.sql("update `tabBin` set stock_uom = '%s' , indented_qty = ifnull(indented_qty,0) * %s, ordered_qty = ifnull(ordered_qty,0) * %s, reserved_qty = ifnull(reserved_qty,0) * %s, planned_qty = ifnull(planned_qty,0) * %s, projected_qty = actual_qty + ordered_qty + indented_qty + planned_qty - reserved_qty	where item_code = '%s'" % (self.doc.new_stock_uom, self.doc.conversion_factor, self.doc.conversion_factor, self.doc.conversion_factor, self.doc.conversion_factor, self.doc.item_code) )
+			frappe.db.sql("""update `tabBin` 
+				set stock_uom = %s, 
+					indented_qty = ifnull(indented_qty,0) * %s, 
+					ordered_qty = ifnull(ordered_qty,0) * %s, 
+					reserved_qty = ifnull(reserved_qty,0) * %s, 
+					planned_qty = ifnull(planned_qty,0) * %s, 
+					projected_qty = actual_qty + ordered_qty + indented_qty + 
+						planned_qty - reserved_qty 
+				where item_code = %s""", (self.doc.new_stock_uom, self.doc.conversion_factor, 
+					self.doc.conversion_factor, self.doc.conversion_factor, 
+					self.doc.conversion_factor, self.doc.item_code))
 		else:
-			frappe.db.sql("update `tabBin` set stock_uom = '%s' where item_code = '%s'" % (self.doc.new_stock_uom, self.doc.item_code) )
+			frappe.db.sql("update `tabBin` set stock_uom = %s where item_code = %s", 
+				 (self.doc.new_stock_uom, self.doc.item_code) )
 
 		# acknowledge user
 		msgprint(" All Bins Updated Successfully.")
@@ -61,9 +67,13 @@ class DocType:
 		from erpnext.stock.stock_ledger import update_entries_after
 		
 		if flt(self.doc.conversion_factor) != flt(1):
-			frappe.db.sql("update `tabStock Ledger Entry` set stock_uom = '%s', actual_qty = ifnull(actual_qty,0) * '%s' where item_code = '%s' " % (self.doc.new_stock_uom, self.doc.conversion_factor, self.doc.item_code))
+			frappe.db.sql("""update `tabStock Ledger Entry` 
+				set stock_uom = %s, actual_qty = ifnull(actual_qty,0) * %s 
+				where item_code = %s""", 
+				(self.doc.new_stock_uom, self.doc.conversion_factor, self.doc.item_code))
 		else:
-			frappe.db.sql("update `tabStock Ledger Entry` set stock_uom = '%s' where item_code = '%s' " % (self.doc.new_stock_uom, self.doc.item_code))
+			frappe.db.sql("""update `tabStock Ledger Entry` set stock_uom=%s 
+				where item_code=%s""", (self.doc.new_stock_uom, self.doc.item_code))
 		
 		# acknowledge user
 		msgprint("Stock Ledger Entries Updated Successfully.")

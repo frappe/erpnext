@@ -137,7 +137,7 @@ class DocType(BuyingController):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purhcase_order)
-				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = '%s'" % d.purchase_order)
+				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = %s", d.purchase_order)
 				if stopped:
 					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
 					raise Exception
@@ -238,11 +238,11 @@ class DocType(BuyingController):
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.purchase_order:
-				submitted = frappe.db.sql("select name from `tabPurchase Order` where docstatus = 1 and name = '%s'" % d.purchase_order)
+				submitted = frappe.db.sql("select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order)
 				if not submitted:
 					frappe.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
 			if d.purchase_receipt:
-				submitted = frappe.db.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = '%s'" % d.purchase_receipt)
+				submitted = frappe.db.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = %s", d.purchase_receipt)
 				if not submitted:
 					frappe.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
 					

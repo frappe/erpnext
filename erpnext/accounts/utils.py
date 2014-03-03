@@ -22,7 +22,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = ""
 	if fiscal_year:
-		cond = "name = '%s'" % fiscal_year
+		cond = "name = '%s'" % fiscal_year.replace("'", "\'")
 	else:
 		cond = "'%s' >= year_start_date and '%s' <= year_end_date" % \
 			(date, date)
@@ -88,7 +88,7 @@ def get_balance_on(account=None, date=None):
 			and ac.lft >= %s and ac.rgt <= %s
 		)""" % (acc.lft, acc.rgt))
 	else:
-		cond.append("""gle.account = "%s" """ % (account, ))
+		cond.append("""gle.account = "%s" """ % (account.replace('"', '\"'), ))
 	
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 

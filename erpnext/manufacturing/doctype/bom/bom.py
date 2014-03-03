@@ -271,8 +271,8 @@ class DocType:
 		for d in check_list:
 			bom_list, count = [self.doc.name], 0
 			while (len(bom_list) > count ):
-				boms = frappe.db.sql(" select %s from `tabBOM Item` where %s = '%s' " % 
-					(d[0], d[1], cstr(bom_list[count])))
+				boms = frappe.db.sql(" select %s from `tabBOM Item` where %s = %s " % 
+					(d[0], d[1], '%s'), cstr(bom_list[count]))
 				count = count + 1
 				for b in boms:
 					if b[0] == self.doc.name:
@@ -388,10 +388,6 @@ class DocType:
 			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.doc.quantity)
 			ch.docstatus = self.doc.docstatus
 			ch.save(1)
-
-	def get_parent_bom_list(self, bom_no):
-		p_bom = frappe.db.sql("select parent from `tabBOM Item` where bom_no = '%s'" % bom_no)
-		return p_bom and [i[0] for i in p_bom] or []
 
 	def validate_bom_links(self):
 		if not self.doc.is_active:

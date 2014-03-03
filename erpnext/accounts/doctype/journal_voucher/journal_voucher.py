@@ -88,7 +88,7 @@ class DocType(AccountsController):
 					msgprint("You can not enter current voucher in 'Against JV' column",
 						raise_exception=1)
 				elif not frappe.db.sql("""select name from `tabJournal Voucher Detail` 
-						where account = '%s' and docstatus = 1 and parent = '%s'""" % 
+						where account = %s and docstatus = 1 and parent = %s""", 
 						(d.account, d.against_jv)):
 					msgprint("Against JV: %s is not valid." % d.against_jv, raise_exception=1)
 		
