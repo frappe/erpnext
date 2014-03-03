@@ -69,13 +69,6 @@ class DocType:
 				self.doc.is_pl_account = par[0][2]
 			if not self.doc.debit_or_credit:
 				self.doc.debit_or_credit = par[0][3]
-
-	def validate_max_root_accounts(self):
-		"""Raise exception if there are more than 4 root accounts"""
-		if frappe.db.sql("""select count(*) from tabAccount where
-			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
-			self.doc.company)[0][0] > 4:
-			throw(_("One company cannot have more than 4 root Accounts"))
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
@@ -169,7 +162,6 @@ class DocType:
 		frappe.utils.nestedset.update_nsm(self)
 			
 	def on_update(self):
-		self.validate_max_root_accounts()
 		self.update_nsm_model()		
 
 	def get_authorized_user(self):
