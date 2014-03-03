@@ -21,7 +21,7 @@ frappe.query_reports["Accounts Payable"] = {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
 						"is_pl_account": "No",
-						"debit_or_credit": "Credit",
+						"root_type": "Liability",
 						"company": company,
 						"master_type": "Supplier"
 					}

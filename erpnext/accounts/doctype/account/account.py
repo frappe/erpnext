@@ -48,7 +48,7 @@ class DocType:
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = frappe.db.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
+			par = frappe.db.sql("""select name, group_or_ledger, is_pl_account 
 				from tabAccount where name =%s""", self.doc.parent_account)
 			if not par:
 				throw(_("Parent account does not exists"))
@@ -56,19 +56,9 @@ class DocType:
 				throw(_("You can not assign itself as parent account"))
 			elif par[0][1] != 'Group':
 				throw(_("Parent account can not be a ledger"))
-			elif self.doc.debit_or_credit and par[0][3] != self.doc.debit_or_credit:
-				throw("{msg} {debit_or_credit} {under} {account} {acc}".format(**{
-					"msg": _("You cannot move a"),
-					"debit_or_credit": self.doc.debit_or_credit,
-					"under": _("account under"),
-					"account": par[0][3],
-					"acc": _("account")
-				}))
 			
 			if not self.doc.is_pl_account:
 				self.doc.is_pl_account = par[0][2]
-			if not self.doc.debit_or_credit:
-				self.doc.debit_or_credit = par[0][3]
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
@@ -131,8 +121,6 @@ class DocType:
 			and docstatus != 2""", self.doc.name)
 	
 	def validate_mandatory(self):
-		if not self.doc.debit_or_credit:
-			throw(_("Debit or Credit field is mandatory"))
 		if not self.doc.is_pl_account:
 			throw(_("Is PL Account field is mandatory"))
 			
@@ -215,9 +203,9 @@ class DocType:
 				throw(_("Account ") + new +_(" does not exists"))
 				
 			val = list(frappe.db.get_value("Account", new_account, 
-				["group_or_ledger", "debit_or_credit", "is_pl_account", "company"]))
+				["group_or_ledger", "is_pl_account", "company"]))
 			
-			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account, self.doc.company]:
+			if val != [self.doc.group_or_ledger, self.doc.is_pl_account, self.doc.company]:
 				throw(_("""Merging is only possible if following \
 					properties are same in both records.
 					Group or Ledger, Debit or Credit, Is PL Account"""))

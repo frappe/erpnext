@@ -15,7 +15,6 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 					filters:[
 						['Account', 'company', '=', me.frm.doc.company],
 						['Account', 'is_pl_account', '=', 'Yes'],
-						['Account', 'debit_or_credit', '=', 'Debit'],
 						['Account', 'group_or_ledger', '!=', 'Group'],
 					]
 				}

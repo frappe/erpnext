@@ -16,7 +16,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 cur_frm.fields_dict['cash_bank_account'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{
-			'debit_or_credit': "Debit",
+			'root_type': "Asset",
 			'is_pl_account': "No",
 			'group_or_ledger': "Ledger",
 			'company': doc.company
@@ -29,7 +29,6 @@ cur_frm.fields_dict['cash_bank_account'].get_query = function(doc,cdt,cdn) {
 cur_frm.fields_dict['income_account'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{
-			'debit_or_credit': "Credit",
 			'group_or_ledger': "Ledger",
 			'company': doc.company,
 			'account_type': "Income Account"
@@ -56,7 +55,7 @@ cur_frm.fields_dict["expense_account"].get_query = function(doc) {
 	return {
 		filters: {
 			"is_pl_account": "Yes",
-			"debit_or_credit": "Debit",
+			"root_type": "Expense",
 			"company": doc.company,
 			"group_or_ledger": "Ledger"
 		}

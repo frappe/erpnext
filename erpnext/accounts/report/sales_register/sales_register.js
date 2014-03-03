@@ -27,7 +27,7 @@ frappe.query_reports["Sales Register"] = {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
 						"is_pl_account": "No",
-						"debit_or_credit": "Debit",
+						"root_type": "Asset",
 						"company": company,
 						"master_type": "Customer"
 					}

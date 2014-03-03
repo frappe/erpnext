@@ -106,7 +106,7 @@ cur_frm.fields_dict.default_expense_account.get_query = function(doc) {
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
 			'is_pl_account': "Yes",
-			'debit_or_credit': "Debit"
+			'root_type': "Expense"
 		}
 	}  
 }
@@ -117,7 +117,7 @@ cur_frm.fields_dict.default_income_account.get_query = function(doc) {
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
 			'is_pl_account': "Yes",
-			'debit_or_credit': "Credit"
+			'root_type': "Income"
 		}
 	}  
 }
@@ -136,7 +136,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 			"filters": {
 				"is_pl_account": "Yes",
-				"debit_or_credit": "Debit",
+				"root_type": "Expense",
 				"company": doc.name,
 				'group_or_ledger': "Ledger"
 			}
@@ -150,7 +150,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 			"filters": {
 				"is_pl_account": "No",
-				"debit_or_credit": "Credit",
+				"root_type": "Liability",
 				"company": doc.name,
 				'group_or_ledger': "Ledger"
 			}

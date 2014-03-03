@@ -15,8 +15,10 @@ class DocType:
 		self.doclist = doclist
 	
 	def set_account_type(self):
-		self.doc.account_type = self.doc.account and \
-			frappe.db.get_value("Account", self.doc.account, "debit_or_credit").lower() or ""
+		self.doc.account_type = ""
+		if self.doc.account:
+			root_type = frappe.db.get_value("Account", self.doc.account, "root_type")
+			self.doc.account_type = "debit" if root_type in ["Asset", "Income"] else "credit"
 		
 	def get_voucher_details(self):
 		total_amount = frappe.db.sql("""select sum(%s) from `tabGL Entry` 

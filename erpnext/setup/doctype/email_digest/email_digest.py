@@ -177,8 +177,7 @@ class DocType(DocListController):
 		
 	def get_income(self, from_date=None, label=None):
 		# account is PL Account and Credit type account
-		accounts = [a["name"] for a in self.get_accounts()
-			if a["is_pl_account"]=="Yes" and a["debit_or_credit"]=="Credit"]
+		accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Income"]
 			
 		income = 0
 		for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
@@ -190,8 +189,7 @@ class DocType(DocListController):
 		
 	def get_expenses_booked(self):
 		# account is PL Account and Debit type account
-		accounts = [a["name"] for a in self.get_accounts()
-			if a["is_pl_account"]=="Yes" and a["debit_or_credit"]=="Debit"]
+		accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Expense"]
 			
 		expense = 0
 		for gle in self.get_gl_entries(self.from_date, self.to_date):
@@ -392,7 +390,7 @@ class DocType(DocListController):
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
 			self.accounts = frappe.db.sql("""select name, is_pl_account,
-				debit_or_credit, account_type, account_name, master_type
+				root_type, account_type, account_name, master_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
 				(self.doc.company,), as_dict=1)

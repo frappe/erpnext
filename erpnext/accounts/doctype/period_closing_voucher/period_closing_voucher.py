@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, getdate
-from frappe import msgprint, _
+from frappe.utils import cstr, flt
+from frappe import _
 from erpnext.controllers.accounts_controller import AccountsController
 
 class DocType(AccountsController):
@@ -25,10 +25,8 @@ class DocType(AccountsController):
 			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.doc.name)
 
 	def validate_account_head(self):
-		debit_or_credit, is_pl_account = frappe.db.get_value("Account", 
-			self.doc.closing_account_head, ["debit_or_credit", "is_pl_account"])
-			
-		if debit_or_credit != 'Credit' or is_pl_account != 'No':
+		if frappe.db.get_value("Account", self.doc.closing_account_head, "root_type") \
+				!= "Liability":
 			frappe.throw(_("Account") + ": " + self.doc.closing_account_head + 
 				_("must be a Liability account"))
 
@@ -48,16 +46,14 @@ class DocType(AccountsController):
 			select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) 
 			from `tabGL Entry` t1, tabAccount t2 
 			where t1.account = t2.name and t1.posting_date between %s and %s 
-			and t2.debit_or_credit = 'Credit' and t2.is_pl_account = 'Yes' 
-			and t2.docstatus < 2 and t2.company = %s""", 
+			and t2.root_type = 'Income' and t2.docstatus < 2 and t2.company = %s""", 
 			(self.year_start_date, self.doc.posting_date, self.doc.company))
 			
 		expense_bal = frappe.db.sql("""
 			select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0))
 			from `tabGL Entry` t1, tabAccount t2 
 			where t1.account = t2.name and t1.posting_date between %s and %s
-			and t2.debit_or_credit = 'Debit' and t2.is_pl_account = 'Yes' 
-			and t2.docstatus < 2 and t2.company=%s""", 
+			and t2.root_type = 'Expense' and t2.docstatus < 2 and t2.company=%s""", 
 			(self.year_start_date, self.doc.posting_date, self.doc.company))
 		
 		income_bal = income_bal and income_bal[0][0] or 0

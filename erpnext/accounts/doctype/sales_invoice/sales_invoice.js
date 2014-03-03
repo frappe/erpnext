@@ -289,7 +289,7 @@ cur_frm.cscript.make_bank_voucher = function() {
 cur_frm.fields_dict.debit_to.get_query = function(doc) {
 	return{
 		filters: {
-			'debit_or_credit': 'Debit',
+			'root_type': 'Asset',
 			'is_pl_account': 'No',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
@@ -300,7 +300,7 @@ cur_frm.fields_dict.debit_to.get_query = function(doc) {
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return{
 		filters: {
-			'debit_or_credit': 'Debit',
+			'root_type': 'Asset',
 			'is_pl_account': 'No',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
@@ -311,7 +311,7 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 	return{
 		filters:{
-			'debit_or_credit': 'Debit',
+			'root_type': 'Expense',
 			'is_pl_account': 'Yes',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
@@ -354,7 +354,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 			filters: {
 				'is_pl_account': 'Yes',
-				'debit_or_credit': 'Debit',
+				'root_type': 'Expense',
 				'company': doc.company,
 				'group_or_ledger': 'Ledger'
 			}

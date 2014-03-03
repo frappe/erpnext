@@ -218,7 +218,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 			filters: {
 				"is_pl_account": "Yes",
-				"debit_or_credit": "Debit",
+				"root_type": "Expense",
 				"company": doc.company,
 				"group_or_ledger": "Ledger"
 			}

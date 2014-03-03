@@ -7,9 +7,7 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	
-	debit_or_credit = frappe.db.get_value("Account", filters["account"], "debit_or_credit")
-	
+		
 	columns = get_columns()
 	data = get_entries(filters)
 	
@@ -21,15 +19,12 @@ def execute(filters=None):
 		total_debit += flt(d[4])
 		total_credit += flt(d[5])
 
-	if debit_or_credit == 'Debit':
-		bank_bal = flt(balance_as_per_company) - flt(total_debit) + flt(total_credit)
-	else:
-		bank_bal = flt(balance_as_per_company) + flt(total_debit) - flt(total_credit)
+	bank_bal = flt(balance_as_per_company) + flt(total_debit) - flt(total_credit)
 		
 	data += [
-		get_balance_row("Balance as per company books", balance_as_per_company, debit_or_credit),
+		get_balance_row("Balance as per company books", balance_as_per_company),
 		["", "", "", "Amounts not reflected in bank", total_debit, total_credit], 
-		get_balance_row("Balance as per bank", bank_bal, debit_or_credit)
+		get_balance_row("Balance as per bank", bank_bal)
 	]
 	
 	return columns, data
@@ -52,8 +47,8 @@ def get_entries(filters):
 		
 	return entries
 	
-def get_balance_row(label, amount, debit_or_credit):
-	if debit_or_credit == "Debit":
+def get_balance_row(label, amount):
+	if amount > 0:
 		return ["", "", "", label, amount, 0]
 	else:
 		return ["", "", "", label, 0, amount]

@@ -55,7 +55,7 @@ cur_frm.fields_dict['default_bom'].get_query = function(doc) {
 cur_frm.fields_dict['expense_account'].get_query = function(doc) {
 	return {
 		filters: {
-			'debit_or_credit': "Debit",
+			'root_type': "Expense",
 			'group_or_ledger': "Ledger"
 		}
 	}
@@ -66,7 +66,7 @@ cur_frm.fields_dict['expense_account'].get_query = function(doc) {
 cur_frm.fields_dict['income_account'].get_query = function(doc) {
 	return {
 		filters: {
-			'debit_or_credit': "Credit",
+			'root_type': "Income",
 			'group_or_ledger': "Ledger",
 			'account_type': "Income Account"
 		}

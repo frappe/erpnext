@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cint, cstr, flt, formatdate
+from frappe.utils import cint, cstr, flt, formatdate
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint, _
@@ -109,17 +109,8 @@ class DocType(BuyingController):
 			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		acc = frappe.db.sql("select debit_or_credit, is_pl_account from tabAccount where name = %s", 
-			self.doc.credit_to)
-		if not acc:
-			msgprint("Account: "+ self.doc.credit_to + "does not exist")
-			raise Exception
-		elif acc[0][0] and acc[0][0] != 'Credit':
-			msgprint("Account: "+ self.doc.credit_to + "is not a credit account")
-			raise Exception
-		elif acc[0][1] and acc[0][1] != 'No':
-			msgprint("Account: "+ self.doc.credit_to + "is a pl account")
-			raise Exception
+		if frappe.db.get_value("Account", self.doc.debit_to, "root_type") != "Liability":
+			frappe.throw(_("Account must be an liability account"))
 	
 	# Validate Acc Head of Supplier and Credit To Account entered
 	# ------------------------------------------------------------
@@ -433,7 +424,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount` 
-			where (tabAccount.debit_or_credit="Debit" 
+			where (tabAccount.root_type in ("Asset", "Expense")
 					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2 

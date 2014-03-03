@@ -8,6 +8,16 @@ cur_frm.cscript.fname = "indent_details";
 {% include 'utilities/doctype/sms_control/sms_control.js' %}
 
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
+	onload: function(doc) {
+		this._super();
+		this.frm.set_query("item_code", this.frm.cscript.fname, function() {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: {'is_stock_item': 'Yes'}
+			}
+		});
+	},
+	
 	refresh: function(doc) {
 		this._super();
 		

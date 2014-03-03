@@ -74,7 +74,7 @@ def get_balance_on(account=None, date=None):
 			return 0.0
 		
 	acc = frappe.db.get_value('Account', account, \
-		['lft', 'rgt', 'debit_or_credit', 'is_pl_account', 'group_or_ledger'], as_dict=1)
+		['lft', 'rgt', 'is_pl_account', 'group_or_ledger'], as_dict=1)
 	
 	# for pl accounts, get balance within a fiscal year
 	if acc.is_pl_account == 'Yes':
@@ -94,10 +94,6 @@ def get_balance_on(account=None, date=None):
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		FROM `tabGL Entry` gle
 		WHERE %s""" % " and ".join(cond))[0][0]
-
-	# if credit account, it should calculate credit - debit
-	if bal and acc.debit_or_credit == 'Credit':
-		bal = -bal
 
 	# if bal is None, return 0
 	return flt(bal)
@@ -290,7 +286,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
 	if frappe.db.get_value("Account", {"name": args.account, "is_pl_account": "Yes", 
-		"debit_or_credit": "Debit"}):
+		"root_type": "Expense"}):
 			budget = frappe.db.sql("""
 				select bd.budget_allocated, cc.distribution_id 
 				from `tabCost Center` cc, `tabBudget Detail` bd
