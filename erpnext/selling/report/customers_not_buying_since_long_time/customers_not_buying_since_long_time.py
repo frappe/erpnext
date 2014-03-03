@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate, cint
+from frappe.utils import cint
 
 def execute(filters=None):
 	if not filters: filters ={}
@@ -17,7 +17,7 @@ def execute(filters=None):
 
 	data = []
 	for cust in customers:
-		if cust[8] >= days_since_last_order:
+		if cint(cust[8]) >= cint(days_since_last_order):
 			cust.insert(7,get_last_so_amt(cust[0]))
 			data.append(cust)
 	return columns, data 
