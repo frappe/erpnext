@@ -1,5 +1,5 @@
 from frappe import _
-from frappe.widgets.moduleview import get_config
+from frappe.widgets.moduleview import add_setup_section
 
 data = [
 	{
@@ -110,21 +110,8 @@ def get_data():
 		("selling", _("Selling"), "icon-tag"),
 		("buying", _("Buying"), "icon-shopping-cart"),
 		("hr", _("Human Resources"), "icon-group"),
-		("support", _("Support"), "icon-phone"),
-		("website", _("Website"), "icon-globe")):
+		("support", _("Support"), "icon-phone")):
 		
-		try:
-			config = get_config("erpnext", module)
-		except ImportError:
-			continue
-		
-		for section in config:
-			if section.get("label")==_("Setup"):
-				out.append({
-					"label": label,
-					"icon": icon,
-					"items": section["items"]
-				})
-				break
-	
+		add_setup_section(out, "erpnext", module, label, icon)
+
 	return out
