@@ -13,13 +13,13 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_sender(self, comm):
-		return frappe.db.get_value('Email Settings',None,'support_email')
+		return frappe.db.get_value('Support Email Settings',None,'support_email')
 
 	def get_subject(self, comm):
 		return '[' + self.doc.name + '] ' + (comm.subject or 'No Subject Specified')
 	
 	def get_content(self, comm):
-		signature = frappe.db.get_value('Email Settings',None,'support_signature')
+		signature = frappe.db.get_value('Support Email Settings',None,'support_signature')
 		content = comm.content
 		if signature:
 			content += '<p>' + signature + '</p>'

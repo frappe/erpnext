@@ -160,7 +160,7 @@ def set_defaults(args):
 	hr_settings.doc.emp_created_by = "Naming Series"
 	hr_settings.save()
 
-	email_settings = frappe.bean("Email Settings")
+	email_settings = frappe.bean("Outgoing Email Settings")
 	email_settings.doc.send_print_in_body_and_attachment = 1
 	email_settings.save()
 

@@ -1,0 +1,111 @@
+[
+ {
+  "creation": "2014-03-03 19:48:46", 
+  "docstatus": 0, 
+  "modified": "2014-03-03 20:20:34", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "description": "Email Settings for Outgoing and Incoming Emails.", 
+  "doctype": "DocType", 
+  "icon": "icon-cog", 
+  "in_create": 1, 
+  "issingle": 1, 
+  "module": "Support", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Support Email Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Support Email Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Support Email Settings"
+ }, 
+ {
+  "description": "Check this to pull emails from your mailbox", 
+  "doctype": "DocField", 
+  "fieldname": "sync_support_mails", 
+  "fieldtype": "Check", 
+  "label": "Sync Support Mails"
+ }, 
+ {
+  "description": "Your support email id - must be a valid email - this is where your emails will come!", 
+  "doctype": "DocField", 
+  "fieldname": "support_email", 
+  "fieldtype": "Data", 
+  "label": "Support Email"
+ }, 
+ {
+  "description": "POP3 mail server (e.g. pop.gmail.com)", 
+  "doctype": "DocField", 
+  "fieldname": "mail_server", 
+  "fieldtype": "Data", 
+  "label": "POP3 Mail Server"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "use_ssl", 
+  "fieldtype": "Check", 
+  "label": "Use SSL"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "mail_login", 
+  "fieldtype": "Data", 
+  "label": "User Name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "mail_password", 
+  "fieldtype": "Password", 
+  "label": "Support Password"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Signature to be appended at the end of every email", 
+  "doctype": "DocField", 
+  "fieldname": "support_signature", 
+  "fieldtype": "Text", 
+  "label": "Signature"
+ }, 
+ {
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "send_autoreply", 
+  "fieldtype": "Check", 
+  "label": "Send Autoreply"
+ }, 
+ {
+  "description": "Autoreply when a new mail is received", 
+  "doctype": "DocField", 
+  "fieldname": "support_autoreply", 
+  "fieldtype": "Text", 
+  "label": "Custom Autoreply Message"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

@@ -10,12 +10,12 @@ from frappe.core.doctype.communication.communication import _make
 
 class SupportMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.email_settings = frappe.doc("Email Settings", "Email Settings")
+		self.email_settings = frappe.doc("Support Email Settings", "Support Email Settings")
 		self.settings = args or frappe._dict({
-			"use_ssl": self.email_settings.support_use_ssl,
-			"host": self.email_settings.support_host,
-			"username": self.email_settings.support_username,
-			"password": self.email_settings.support_password
+			"use_ssl": self.email_settings.use_ssl,
+			"host": self.email_settings.mail_server,
+			"username": self.email_settings.mail_login,
+			"password": self.email_settings.mail_password
 		})
 		
 	def process_message(self, mail):
@@ -53,7 +53,7 @@ Original Query:
 			msg = cstr(response))
 		
 def get_support_mails():
-	if cint(frappe.db.get_value('Email Settings', None, 'sync_support_mails')):
+	if cint(frappe.db.get_value('Support Email Settings', None, 'sync_support_mails')):
 		SupportMailbox()
 		
 def add_support_communication(subject, content, sender, docname=None, mail=None):
