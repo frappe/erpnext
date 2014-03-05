@@ -152,7 +152,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 				// balance of previous fiscal_year should 
 				//	not be part of opening of pl account balance
 			} else {
-				if(account.debit_or_credit=='Debit') {
+				if(in_list(["Asset", "Expense"], account.root_type)) {
 					account.opening_debit += (v.debit - v.credit);
 				} else {
 					account.opening_credit += (v.credit - v.debit);
@@ -164,7 +164,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			account.credit += v.credit;
 		}
 		// closing
-		if(account.debit_or_credit=='Debit') {
+		if(in_list(["Asset", "Expense"], account.root_type)) {
 			account.closing_debit = account.opening_debit + account.debit - account.credit;
 		} else {
 			account.closing_credit = account.opening_credit - account.debit + account.credit;

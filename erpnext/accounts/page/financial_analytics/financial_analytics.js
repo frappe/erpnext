@@ -148,16 +148,16 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				if(!ac.parent_account && me.apply_filter(ac, "company")) {
 					if(me.pl_or_bs == "Balance Sheet") {
 						var valid_account = ac.is_pl_account!="Yes";
-						var do_addition_for = "Debit";
+						var do_addition_for = "Asset";
 					} else {
 						var valid_account = ac.is_pl_account=="Yes";
-						var do_addition_for = "Credit";
+						var do_addition_for = "Income";
 					}
 					if(valid_account) {
 						$.each(me.columns, function(i, col) {
 							if(col.formatter==me.currency_formatter) {
 								if(!net_profit[col.field]) net_profit[col.field] = 0;
-								if(ac.debit_or_credit==do_addition_for) {
+								if(ac.root_type==do_addition_for) {
 									net_profit[col.field] += ac[col.field];
 								} else {
 									net_profit[col.field] -= ac[col.field];
@@ -172,8 +172,8 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		}
 	},
 	add_balance: function(field, account, gl) {
-		account[field] = flt(account[field]) + 
-			((account.debit_or_credit == "Debit" ? 1 : -1) * (flt(gl.debit) - flt(gl.credit)))
+		account[field] = flt(account[field]) + ((in_list(["Asset", "Expense"], 
+			account.root_type) ? 1 : -1) * (flt(gl.debit) - flt(gl.credit)));
 	},
 	init_account: function(d) {
 		// set 0 values for all columns
