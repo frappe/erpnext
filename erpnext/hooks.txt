@@ -29,10 +29,6 @@ bean_event:*:on_update = erpnext.home.update_feed
 bean_event:*:on_submit = erpnext.home.update_feed
 bean_event:Comment:on_update = erpnext.home.make_comment_feed
 
-bean_event:*:on_update = frappe.core.doctype.notification_count.notification_count.clear_doctype_notifications
-bean_event:*:on_cancel = frappe.core.doctype.notification_count.notification_count.clear_doctype_notifications
-bean_event:*:on_trash = frappe.core.doctype.notification_count.notification_count.clear_doctype_notifications
-
 bean_event:Stock Entry:on_submit = erpnext.stock.doctype.material_request.material_request.update_completed_qty
 bean_event:Stock Entry:on_cancel = erpnext.stock.doctype.material_request.material_request.update_completed_qty
 

@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-03 10:45:46", 
   "docstatus": 0, 
-  "modified": "2014-02-20 18:27:02", 
+  "modified": "2014-03-05 15:20:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -111,6 +111,7 @@
   "doctype": "DocField", 
   "fieldname": "stock_uom", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Unit of Measure", 
   "oldfieldname": "stock_uom", 
   "oldfieldtype": "Link", 
@@ -217,6 +218,7 @@
   "doctype": "DocField", 
   "fieldname": "default_warehouse", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Warehouse", 
   "oldfieldname": "default_warehouse", 
   "oldfieldtype": "Link", 
@@ -349,6 +351,7 @@
   "doctype": "DocField", 
   "fieldname": "weight_uom", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Weight UOM", 
   "options": "UOM", 
   "read_only": 0
@@ -420,6 +423,7 @@
   "doctype": "DocField", 
   "fieldname": "default_supplier", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Supplier", 
   "options": "Supplier"
  }, 
@@ -441,6 +445,7 @@
   "doctype": "DocField", 
   "fieldname": "expense_account", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Expense Account", 
   "oldfieldname": "purchase_account", 
   "oldfieldtype": "Link", 
@@ -453,6 +458,7 @@
   "doctype": "DocField", 
   "fieldname": "buying_cost_center", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Buying Cost Center", 
   "oldfieldname": "cost_center", 
   "oldfieldtype": "Link", 
@@ -579,6 +585,7 @@
   "doctype": "DocField", 
   "fieldname": "income_account", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Income Account", 
   "options": "Account", 
   "read_only": 0
@@ -588,6 +595,7 @@
   "doctype": "DocField", 
   "fieldname": "selling_cost_center", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default Selling Cost Center", 
   "options": "Cost Center", 
   "read_only": 0
@@ -691,6 +699,7 @@
   "doctype": "DocField", 
   "fieldname": "default_bom", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Default BOM", 
   "no_copy": 1, 
   "oldfieldname": "default_bom", 
@@ -802,6 +811,7 @@
   "doctype": "DocField", 
   "fieldname": "website_warehouse", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Website Warehouse", 
   "options": "Warehouse", 
   "read_only": 0
@@ -852,6 +862,7 @@
   "doctype": "DocField", 
   "fieldname": "parent_website_route", 
   "fieldtype": "Link", 
+  "ignore_restrictions": 1, 
   "label": "Parent Website Route", 
   "options": "Website Route"
  }, 
