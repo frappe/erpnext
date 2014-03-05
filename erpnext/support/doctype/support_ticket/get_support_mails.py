@@ -72,6 +72,7 @@ def add_support_communication(subject, content, sender, docname=None, mail=None)
 			"status": "Open",
 		})])
 		ticket.ignore_permissions = True
+		ticket.ignore_mandatory = True
 		ticket.insert()
 	
 	_make(content=content, sender=sender, subject = subject,
