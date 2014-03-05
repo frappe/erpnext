@@ -12,7 +12,6 @@ class DocType:
 		self.doc = doc
 		self.doclist = doclist
 		self.account_list = []
-		self.ac_details = {} # key: account id, values: debit_or_credit, lft, rgt
 		
 		self.period_list = []
 		self.period_start_date = {}
@@ -76,23 +75,22 @@ class DocType:
 		return self.return_data
 
 	def get_children(self, parent_account, level, pl, company, fy):
-		cl = frappe.db.sql("select distinct account_name, name, debit_or_credit, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s and docstatus != 2 order by name asc", (parent_account, pl, company))
+		cl = frappe.db.sql("select distinct account_name, name, root_type, lft, rgt from `tabAccount` where ifnull(parent_account, '') = %s and ifnull(is_pl_account, 'No')=%s and company=%s and docstatus != 2 order by name asc", (parent_account, pl, company))
 		level0_diff = [0 for p in self.period_list]
 		if pl=='Yes' and level==0: # switch for income & expenses
 			cl = [c for c in cl]
 			cl.reverse()
 		if cl:
 			for c in cl:
-				self.ac_details[c[1]] = [c[2], c[3], c[4]]
-				bal_list = self.get_period_balance(c[1], pl)
+				bal_list = self.get_period_balance(c[1], pl, c[2])
 				if level==0: # top level - put balances as totals
 					self.return_data.append([level, c[0]] + ['' for b in bal_list])
 					totals = bal_list
 					for i in range(len(totals)): # make totals
-						if c[2]=='Credit':
-							level0_diff[i] += flt(totals[i])
-						else:
+						if c[2] in ["Asset", "Expense"]:
 							level0_diff[i] -= flt(totals[i])
+						else:
+							level0_diff[i] += flt(totals[i])
 				else:
 					self.return_data.append([level, c[0]]+bal_list)
 					
@@ -103,18 +101,18 @@ class DocType:
 				if level==0:
 					# add rows for profit / loss in B/S
 					if pl=='No':
-						if c[2]=='Credit':
+						if c[2] == "Asset":
+							self.return_data.append([4, 'Total '+c[0]] + totals)
+						else:
 							self.return_data.append([1, 'Total Liabilities'] + totals)
 							level0_diff = [-i for i in level0_diff] # convert to debit
 							self.return_data.append([5, 'Profit/Loss (Provisional)'] + level0_diff)
 							for i in range(len(totals)): # make totals
 								level0_diff[i] = flt(totals[i]) + level0_diff[i]
-						else:
-							self.return_data.append([4, 'Total '+c[0]] + totals)
 
 					# add rows for profit / loss in P/L
 					else:
-						if c[2]=='Debit':
+						if c[2]=='Expense':
 							self.return_data.append([1, 'Total Expenses'] + totals)
 							self.return_data.append([5, 'Profit/Loss (Provisional)'] + level0_diff)
 							for i in range(len(totals)): # make totals
@@ -154,11 +152,14 @@ class DocType:
 				self.period_start_date[pn] = fd
 				self.period_end_date[pn] = get_last_day(fd)
 			
-	def get_period_balance(self, acc, pl):
+	def get_period_balance(self, acc, pl, root_type):
 		ret, i = [], 0
 		for p in self.period_list:
 			period_end_date = self.period_end_date[p].strftime('%Y-%m-%d')
 			bal = get_balance_on(acc, period_end_date)
+			if root_type not in ["Asset", "Expense"]:
+				bal = -bal
+				
 			if pl=='Yes': 
 				bal = bal - sum(ret)
 				
