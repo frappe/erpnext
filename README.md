@@ -30,7 +30,6 @@ ERPNext is built on [frappe](https://github.com/frappe/frappe)
 1. Install pip: `sudo easy_install pip`
 1. Create a `bench` directory
 1. Clone `frappe` in the `bench` : `git clone https://github.com/frappe/frappe`
-1. Install python libraries `sudo pip install webnotes/requirements.txt`
 1. Clone `erpnext` in the `bench`: `git clone https://github.com/frappe/erpnext.git`
 1. Clone `shopping-cart` in the `bench`: `git clone https://github.com/frappe/shopping-cart.git`
 1. Install the packages: `pip install -e frappe/ erpnext/ shopping-cart/`
