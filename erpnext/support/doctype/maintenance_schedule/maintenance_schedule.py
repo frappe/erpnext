@@ -81,7 +81,7 @@ class DocType(TransactionBase):
 						"event_type": "Private",
 						"ref_type": self.doc.doctype,
 						"ref_name": self.doc.name
-					}).insert()
+					}).insert(ignore_permissions=1)
 
 		frappe.db.set(self.doc, 'status', 'Submitted')		
 		

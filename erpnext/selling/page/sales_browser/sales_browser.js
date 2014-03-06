@@ -144,9 +144,14 @@ erpnext.SalesChart = Class.extend({
 			return frappe.call({
 				method: 'erpnext.selling.page.sales_browser.sales_browser.add_node',
 				args: v,
-				callback: function() {
-					d.hide();
-					node.reload();
+				callback: function(r) {
+					if(!r.exc) {
+						d.hide();
+						node.reload();
+						if(!node.expanded) {
+							node.toggle_node();
+						}
+					}
 				}	
 			})			
 		});
