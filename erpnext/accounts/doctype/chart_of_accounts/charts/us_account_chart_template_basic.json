@@ -24,6 +24,25 @@
      {
       "children": [
        {
+        "name": "Client Trust Account"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Account Receivable"
+         }
+        ], 
+        "name": "Receivable"
+       }, 
+       {
+        "name": "Cash or Cash Equivalents"
+       }
+      ], 
+      "name": "Current Assets"
+     }, 
+     {
+      "children": [
+       {
         "name": "Furniture and Equipment"
        }, 
        {
@@ -35,32 +54,13 @@
      {
       "children": [
        {
-        "children": [
-         {
-          "name": "Account Receivable"
-         }
-        ], 
-        "name": "Receivable"
-       }, 
-       {
-        "name": "Client Trust Account"
-       }, 
-       {
-        "name": "Cash or Cash Equivalents"
-       }
-      ], 
-      "name": "Current Assets"
-     }, 
-     {
-      "children": [
-       {
         "name": "Filing Fees"
        }, 
        {
-        "name": "Expert Witness Fees"
+        "name": "Advanced Client Costs"
        }, 
        {
-        "name": "Advanced Client Costs"
+        "name": "Expert Witness Fees"
        }, 
        {
         "name": "Court Costs"
@@ -139,9 +139,6 @@
    {
     "children": [
      {
-      "name": "Freight and Shipping Costs"
-     }, 
-     {
       "name": "Commissions Paid"
      }, 
      {
@@ -160,6 +157,9 @@
       "name": "Media Purchased for Clients"
      }, 
      {
+      "name": "Commissions Paid"
+     }, 
+     {
       "name": "Tools and Small Equipment"
      }, 
      {
@@ -169,13 +169,13 @@
       "name": "Purchases - Resale Items"
      }, 
      {
-      "name": "Commissions Paid"
-     }, 
-     {
       "name": "Other Job Related Costs"
      }, 
      {
       "name": "Merchant Account Fees"
+     }, 
+     {
+      "name": "Freight and Shipping Costs"
      }, 
      {
       "name": "Merchant Account Fees"
@@ -202,9 +202,6 @@
      }, 
      {
       "name": "Janitorial Expense"
-     }, 
-     {
-      "name": "Freight and Trucking"
      }, 
      {
       "name": "Payroll Expenses"
@@ -260,13 +257,13 @@
         "name": "Worker's Compensation"
        }, 
        {
-        "name": "Health Insurance"
-       }, 
-       {
         "name": "General Liability Insurance"
        }, 
        {
         "name": "Professional Liability"
+       }, 
+       {
+        "name": "Health Insurance"
        }
       ], 
       "name": "Insurance Expense"
@@ -303,6 +300,9 @@
      }, 
      {
       "name": "Feed Purchased"
+     }, 
+     {
+      "name": "Freight and Trucking"
      }, 
      {
       "name": "Meals and Entertainment"
@@ -352,6 +352,9 @@
       "name": "Crop Sales"
      }, 
      {
+      "name": "Sales Discounts"
+     }, 
+     {
       "name": "Commission income"
      }, 
      {
@@ -371,9 +374,6 @@
      }, 
      {
       "name": "Fuel Tax Credits and Other Inc."
-     }, 
-     {
-      "name": "Sales Discounts"
      }, 
      {
       "name": "Sales Discounts"

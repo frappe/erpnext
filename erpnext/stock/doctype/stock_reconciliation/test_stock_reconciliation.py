@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt
 import json
-from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference, get_balance_on
+from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference
 
 
 class TestStockReconciliation(unittest.TestCase):

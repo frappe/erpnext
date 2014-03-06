@@ -1,8 +1,10 @@
 {
  "name": "Italy - Generic Chart of Accounts", 
  "root": {
+  "account_type": "view", 
   "children": [
    {
+    "account_type": "view", 
     "name": "CUENTAS DE ORDEN"
    }
   ], 

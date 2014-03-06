@@ -1,95 +1,27 @@
 {
  "name": "Plantilla de cuentas de Honduras (sencilla)", 
  "root": {
+  "account_type": "Vista", 
   "children": [
    {
+    "account_type": "Vista", 
     "children": [
      {
+      "account_type": "Vista", 
       "children": [
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
-            "name": "Gastos de Ventas", 
-            "root_type": "Expense"
-           }
-          ], 
-          "name": "Gastos de Ventas"
-         }
-        ], 
-        "name": "Gastos de Ventas"
-       }, 
-       {
-        "children": [
-         {
-          "children": [
-           {
-            "name": "Gastos no Deducibles", 
-            "root_type": "Expense"
-           }
-          ], 
-          "name": "Gastos no Deducibles"
-         }
-        ], 
-        "name": "Gastos no Deducibles"
-       }, 
-       {
-        "children": [
-         {
-          "children": [
-           {
-            "name": "Gastos de Administraci\u00f3n", 
-            "root_type": "Expense"
-           }
-          ], 
-          "name": "Gastos de Administraci\u00f3n"
-         }, 
-         {
-          "children": [
-           {
-            "name": "Otros Gastos de Operaci\u00f3n", 
-            "root_type": "Expense"
-           }
-          ], 
-          "name": "Otros Gastos de Operaci\u00f3n"
-         }
-        ], 
-        "name": "Gastos de Operaci\u00f3n"
-       }
-      ], 
-      "name": "Gastos"
-     }, 
-     {
-      "children": [
-       {
-        "children": [
-         {
-          "children": [
-           {
-            "name": "Costos de Ventas", 
-            "root_type": "Expense"
-           }
-          ], 
-          "name": "Costos de Ventas"
-         }
-        ], 
-        "name": "Costos"
-       }
-      ], 
-      "name": "Egresos"
-     }, 
-     {
-      "children": [
-       {
-        "children": [
-         {
-          "children": [
-           {
+            "account_type": "gastos", 
             "name": "Intereses", 
             "root_type": "Expense"
            }, 
            {
+            "account_type": "gastos", 
             "name": "Otros Gastos Financieros", 
             "root_type": "Expense"
            }
@@ -103,17 +35,90 @@
       "name": "Otros Gastos y Productos Financieros"
      }, 
      {
+      "account_type": "Vista", 
       "children": [
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
-            "name": "Descuentos Sobre Ventas", 
+            "account_type": "gastos", 
+            "name": "Gastos de Ventas", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Gastos de Ventas"
+         }
+        ], 
+        "name": "Gastos de Ventas"
+       }, 
+       {
+        "account_type": "Vista", 
+        "children": [
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "gastos", 
+            "name": "Gastos no Deducibles", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Gastos no Deducibles"
+         }
+        ], 
+        "name": "Gastos no Deducibles"
+       }, 
+       {
+        "account_type": "Vista", 
+        "children": [
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "gastos", 
+            "name": "Gastos de Administraci\u00f3n", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Gastos de Administraci\u00f3n"
+         }, 
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "gastos", 
+            "name": "Otros Gastos de Operaci\u00f3n", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Otros Gastos de Operaci\u00f3n"
+         }
+        ], 
+        "name": "Gastos de Operaci\u00f3n"
+       }
+      ], 
+      "name": "Gastos"
+     }, 
+     {
+      "account_type": "Vista", 
+      "children": [
+       {
+        "account_type": "Vista", 
+        "children": [
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "ingresos", 
+            "name": "Ventas", 
             "root_type": "Income"
            }, 
            {
-            "name": "Ventas", 
+            "account_type": "ingresos", 
+            "name": "Descuentos Sobre Ventas", 
             "root_type": "Income"
            }
           ], 
@@ -123,10 +128,13 @@
         "name": "Ventas"
        }, 
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "ingresos", 
             "name": "Otros Ingresos", 
             "root_type": "Income"
            }
@@ -138,19 +146,58 @@
        }
       ], 
       "name": "Ingresos"
+     }, 
+     {
+      "account_type": "Vista", 
+      "children": [
+       {
+        "account_type": "Vista", 
+        "children": [
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "gastos", 
+            "name": "Costos de Ventas", 
+            "root_type": "Expense"
+           }
+          ], 
+          "name": "Costos de Ventas"
+         }
+        ], 
+        "name": "Costos"
+       }
+      ], 
+      "name": "Egresos"
      }
     ], 
     "name": "Estado de Resultados"
    }, 
    {
+    "account_type": "Vista", 
     "children": [
      {
+      "account_type": "Vista", 
       "children": [
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Pasivo", 
+            "name": "Impuestos", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Impuestos"
+         }, 
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "Pasivo", 
             "name": "ISV por Pagar", 
             "root_type": "Liability"
            }
@@ -158,31 +205,27 @@
           "name": "ISV por Pagar"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "cxp", 
             "name": "Cuentas y Documentos por Pagar", 
             "root_type": "Liability"
            }
           ], 
           "name": "Cuentas y Documentos por Pagar"
-         }, 
-         {
-          "children": [
-           {
-            "name": "Impuestos", 
-            "root_type": "Liability"
-           }
-          ], 
-          "name": "Impuestos"
          }
         ], 
         "name": "Pasivo Corto Plazo"
        }, 
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Pasivo", 
             "name": "Anticipos", 
             "root_type": "Liability"
            }
@@ -193,10 +236,13 @@
         "name": "Cr\u00e9ditos Diferidos"
        }, 
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Pasivo", 
             "name": "Provisi\u00f3n para Indemnizaciones", 
             "root_type": "Liability"
            }
@@ -210,20 +256,26 @@
       "name": "Pasivo"
      }, 
      {
+      "account_type": "Vista", 
       "children": [
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "capital", 
             "name": "Reservas", 
             "root_type": "Asset"
            }, 
            {
+            "account_type": "capital", 
             "name": "Perdidas y Ganancias", 
             "root_type": "Asset"
            }, 
            {
+            "account_type": "capital", 
             "name": "Capital Autorizado, Suscr\u00edto y Pagado", 
             "root_type": "Asset"
            }
@@ -237,40 +289,51 @@
       "name": "Patrimonio"
      }, 
      {
+      "account_type": "Vista", 
       "children": [
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "name": "Inventario"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
-            "name": "ISV por Cobrar", 
+            "account_type": "Activo", 
+            "name": "Retenciones de ISV recibidas", 
             "root_type": "Asset"
            }, 
            {
-            "name": "Retenciones de ISV recibidas", 
+            "account_type": "Activo", 
+            "name": "ISV por Cobrar", 
             "root_type": "Asset"
            }
           ], 
           "name": "ISV por Cobrar"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "cxc", 
             "name": "Prestamos al Personal", 
             "root_type": "Asset"
            }, 
            {
-            "name": "Cuentas por Cobrar Empresas Afilidas", 
-            "root_type": "Asset"
-           }, 
-           {
+            "account_type": "cxc", 
             "name": "Cuentas por Cobrar Generales", 
             "root_type": "Asset"
            }, 
            {
+            "account_type": "cxc", 
+            "name": "Cuentas por Cobrar Empresas Afilidas", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "cxc", 
             "name": "Otras Cuentas por Cobrar", 
             "root_type": "Asset"
            }
@@ -278,8 +341,10 @@
           "name": "Cuentas y Documentos por Cobrar"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Efectivo", 
             "name": "Caja Chica", 
             "root_type": "Asset"
            }
@@ -290,10 +355,13 @@
         "name": "Activo Corriente"
        }, 
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Activo", 
             "name": "Propiedad, Planta y Equipo", 
             "root_type": "Asset"
            }
@@ -301,8 +369,10 @@
           "name": "Propiedad, Planta y Equipo"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Activo", 
             "name": "Depreciaciones Acumuladas", 
             "root_type": "Asset"
            }
@@ -313,10 +383,24 @@
         "name": "No Corriente"
        }, 
        {
+        "account_type": "Vista", 
         "children": [
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Activo", 
+            "name": "Otros Activos", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Otros Activos"
+         }, 
+         {
+          "account_type": "Vista", 
+          "children": [
+           {
+            "account_type": "Activo", 
             "name": "Gastos de Organizaci\u00f3n", 
             "root_type": "Asset"
            }
@@ -324,8 +408,10 @@
           "name": "Gastos de Organizaci\u00f3n"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Activo", 
             "name": "Gastos por Amortizar", 
             "root_type": "Asset"
            }
@@ -333,22 +419,15 @@
           "name": "Gastos por Amortizar"
          }, 
          {
+          "account_type": "Vista", 
           "children": [
            {
+            "account_type": "Activo", 
             "name": "Gastos Anticipados", 
             "root_type": "Asset"
            }
           ], 
           "name": "Gastos Anticipados"
-         }, 
-         {
-          "children": [
-           {
-            "name": "Otros Activos", 
-            "root_type": "Asset"
-           }
-          ], 
-          "name": "Otros Activos"
          }
         ], 
         "name": "Diferido"

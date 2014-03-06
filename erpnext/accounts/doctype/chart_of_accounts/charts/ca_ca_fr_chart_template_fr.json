@@ -1,38 +1,49 @@
 {
  "name": "Canada - Plan comptable pour les provinces francophones", 
  "root": {
+  "account_type": "view", 
   "children": [
    {
+    "account_type": "view", 
     "children": [
      {
+      "account_type": "view", 
       "children": [
        {
+        "account_type": "view", 
         "name": "INT\u00c9R\u00caTS"
        }, 
        {
+        "account_type": "view", 
         "name": "AUTRES PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION"
        }
       ], 
       "name": "PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION"
      }, 
      {
+      "account_type": "view", 
       "children": [
        {
-        "name": "AUTRES PRODUITS D'EXPLOITATION"
-       }, 
-       {
+        "account_type": "income", 
         "name": "Ventes avec des provinces non-harmonis\u00e9es", 
         "root_type": "Income"
        }, 
        {
-        "name": "Ventes", 
-        "root_type": "Income"
-       }, 
-       {
+        "account_type": "income", 
         "name": "Ventes avec des provinces harmonis\u00e9es", 
         "root_type": "Income"
        }, 
        {
+        "account_type": "income", 
+        "name": "Ventes", 
+        "root_type": "Income"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "AUTRES PRODUITS D'EXPLOITATION"
+       }, 
+       {
+        "account_type": "income", 
         "name": "Ventes \u00e0 l'\u00e9tranger", 
         "root_type": "Income"
        }
@@ -43,27 +54,91 @@
     "name": "PRODUITS"
    }, 
    {
+    "account_type": "view", 
     "children": [
      {
+      "account_type": "view", 
       "children": [
        {
+        "account_type": "view", 
+        "children": [
+         {
+          "account_type": "expense", 
+          "name": "Assurance Emploi", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Vacances", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Fonds des services de sant\u00e9", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Sant\u00e9 et s\u00e9curit\u00e9 au travail", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Salaires", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Rentes", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Assurance parentale", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Imp\u00f4t f\u00e9d\u00e9ral", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Imp\u00f4t provincial", 
+          "root_type": "Expense"
+         }, 
+         {
+          "account_type": "expense", 
+          "name": "Normes du travail", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "SALAIRES ET CHARGES SOCIALES"
+       }, 
+       {
+        "account_type": "view", 
         "name": "FRAIS SUR VENTE"
        }, 
        {
+        "account_type": "view", 
         "children": [
          {
+          "account_type": "expense", 
           "name": "Achats dans des provinces harmonis\u00e9es", 
-          "root_type": "Income"
+          "root_type": "Expense"
          }, 
          {
+          "account_type": "expense", 
           "name": "Achats dans des provinces non-harmonis\u00e9es", 
-          "root_type": "Income"
+          "root_type": "Expense"
          }, 
          {
+          "account_type": "expense", 
           "name": "Achats \u00e0 l'\u00e9tranger", 
-          "root_type": "Income"
+          "root_type": "Expense"
          }, 
          {
+          "account_type": "expense", 
           "name": "Achats", 
           "root_type": "Expense"
          }
@@ -71,68 +146,29 @@
         "name": "CO\u00dbT DES PRODUITS VENDUS"
        }, 
        {
+        "account_type": "view", 
         "name": "AUTRES FRAIS D'EXPLOITATION"
        }, 
        {
+        "account_type": "view", 
         "name": "FRAIS G\u00c9N\u00c9RAUX"
        }, 
        {
+        "account_type": "view", 
         "name": "FRAIS DE RECHERCHE ET D\u00c9VELOPPEMENT"
-       }, 
-       {
-        "children": [
-         {
-          "name": "Vacances", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Imp\u00f4t f\u00e9d\u00e9ral", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Assurance Emploi", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Fonds des services de sant\u00e9", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Assurance parentale", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Sant\u00e9 et s\u00e9curit\u00e9 au travail", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Salaires", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Rentes", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Imp\u00f4t provincial", 
-          "root_type": "Expense"
-         }, 
-         {
-          "name": "Normes du travail", 
-          "root_type": "Expense"
-         }
-        ], 
-        "name": "SALAIRES ET CHARGES SOCIALES"
        }
       ], 
       "name": "CHARGES D'EXPLOITATION"
      }, 
      {
+      "account_type": "view", 
       "children": [
        {
+        "account_type": "view", 
         "name": "INT\u00c9R\u00caTS D\u00c9BITEURS"
        }, 
        {
+        "account_type": "view", 
         "name": "AUTRES FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION"
        }
       ], 
@@ -142,145 +178,53 @@
     "name": "CHARGES"
    }, 
    {
+    "account_type": "view", 
     "children": [
      {
+      "account_type": "view", 
       "children": [
        {
+        "account_type": "view", 
         "children": [
          {
-          "name": "BREVETS, MARQUES DE COMMERCE ET DROITS D'AUTEURS"
-         }
-        ], 
-        "name": "IMMOBILISATIONS INCORPORELLES"
-       }, 
-       {
-        "name": "PLACEMENTS DISPONIBLES \u00c0 LA VENTE"
-       }, 
-       {
-        "children": [
-         {
-          "name": "AMORTISSEMENTS CUMUL\u00c9S"
-         }
-        ], 
-        "name": "IMMOBILISATIONS CORPORELLES"
-       }
-      ], 
-      "name": "ACTIFS NON-COURANTS"
-     }, 
-     {
-      "children": [
-       {
-        "children": [
-         {
-          "name": "Stock", 
-          "root_type": "Asset"
-         }, 
-         {
-          "name": "Stock exp\u00e9di\u00e9 non-factur\u00e9", 
-          "root_type": "Asset"
-         }
-        ], 
-        "name": "STOCKS"
-       }, 
-       {
-        "name": "TR\u00c9SORERIE OU \u00c9QUIVALENTS DE TR\u00c9SORERIE"
-       }, 
-       {
-        "name": "ENCAISSE"
-       }, 
-       {
-        "name": "CERTIFICATS DE D\u00c9P\u00d4TS"
-       }, 
-       {
-        "children": [
-         {
-          "name": "TVP/TVQ \u00e0 recevoir", 
-          "root_type": "Asset"
-         }, 
-         {
-          "name": "TVH \u00e0 recevoir", 
-          "root_type": "Asset"
-         }, 
-         {
-          "name": "TPS \u00e0 recevoir", 
-          "root_type": "Asset"
-         }
-        ], 
-        "name": "IMP\u00d4TS \u00c0 RECEVOIR"
-       }, 
-       {
-        "name": "FRAIS PAY\u00c9S D'AVANCE"
-       }, 
-       {
-        "name": "PLACEMENTS D\u00c9TENUS \u00c0 DES FINS DE TRANSACTION"
-       }, 
-       {
-        "children": [
-         {
-          "name": "PROVISION POUR CR\u00c9ANCES DOUTEUSES"
-         }, 
-         {
-          "name": "Comptes clients"
-         }
-        ], 
-        "name": "COMPTES CLIENTS"
-       }
-      ], 
-      "name": "ACTIFS COURANTS"
-     }
-    ], 
-    "name": "ACTIF"
-   }, 
-   {
-    "children": [
-     {
-      "name": "AUTRES \u00c9L\u00c9MENTS DU R\u00c9SULTAT GLOBAL"
-     }, 
-     {
-      "name": "B\u00c9N\u00c9FICES NON R\u00c9PARTIS"
-     }, 
-     {
-      "name": "PRIMES"
-     }, 
-     {
-      "name": "CAPITAL-ACTIONS"
-     }, 
-     {
-      "name": "\u00c9CARTS DE CONVERSION"
-     }, 
-     {
-      "name": "SURPLUS D'APPORT"
-     }, 
-     {
-      "name": "DIVIDENDES"
-     }
-    ], 
-    "name": "CAPITAUX PROPRES"
-   }, 
-   {
-    "children": [
-     {
-      "children": [
-       {
-        "children": [
-         {
+          "account_type": "liability", 
           "name": "TPS \u00e0 payer", 
           "root_type": "Liability"
          }, 
          {
-          "name": "TVH \u00e0 payer", 
+          "account_type": "liability", 
+          "name": "TVP/TVQ \u00e0 payer", 
           "root_type": "Liability"
          }, 
          {
-          "name": "TVP/TVQ \u00e0 payer", 
-          "root_type": "Liability"
+          "account_type": "view", 
+          "children": [
+           {
+            "account_type": "liability", 
+            "name": "TVH \u00e0 payer - 15%", 
+            "root_type": "Liability"
+           }, 
+           {
+            "account_type": "liability", 
+            "name": "TVH \u00e0 payer - 14%", 
+            "root_type": "Liability"
+           }, 
+           {
+            "account_type": "liability", 
+            "name": "TVH \u00e0 payer - 13%", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "TVH \u00e0 payer"
          }
         ], 
         "name": "IMP\u00d4TS \u00c0 PAYER"
        }, 
        {
+        "account_type": "view", 
         "children": [
          {
+          "account_type": "liability", 
           "name": "Stock re\u00e7u non factur\u00e9", 
           "root_type": "Liability"
          }
@@ -288,37 +232,49 @@
         "name": "PASSIFS DE STOCK"
        }, 
        {
+        "account_type": "view", 
         "name": "AUTRES COMPTES CR\u00c9DITEURS"
        }, 
        {
+        "account_type": "view", 
         "name": "PASSIFS LI\u00c9S AUX ACTIFS D\u00c9TENUS EN VUE DE LEUR CESSION"
        }, 
        {
+        "account_type": "view", 
         "name": "DETTES FINANCI\u00c8RES COURANTES"
        }, 
        {
+        "account_type": "view", 
         "children": [
          {
-          "name": "Comptes fournisseurs"
+          "account_type": "payable", 
+          "name": "Comptes fournisseurs", 
+          "root_type": "Liability"
          }
         ], 
         "name": "FOURNISSEURS ET COMPTES RATTACH\u00c9S"
        }, 
        {
+        "account_type": "view", 
         "children": [
          {
+          "account_type": "view", 
           "children": [
            {
+            "account_type": "liability", 
             "name": "Imp\u00f4t f\u00e9d\u00e9ral sur les revenus", 
             "root_type": "Liability"
            }, 
            {
+            "account_type": "view", 
             "children": [
              {
+              "account_type": "liability", 
               "name": "AE - Contribution de l'employeur", 
               "root_type": "Liability"
              }, 
              {
+              "account_type": "liability", 
               "name": "AE - Contribution des employ\u00e9s", 
               "root_type": "Liability"
              }
@@ -329,14 +285,18 @@
           "name": "AGENCE DU REVENU DU CANADA"
          }, 
          {
+          "account_type": "view", 
           "children": [
            {
+            "account_type": "view", 
             "children": [
              {
+              "account_type": "liability", 
               "name": "Rentes - Contribution de l'employeur", 
               "root_type": "Liability"
              }, 
              {
+              "account_type": "liability", 
               "name": "Rentes - Contribution des employ\u00e9s", 
               "root_type": "Liability"
              }
@@ -344,32 +304,39 @@
             "name": "RENTES \u00c0 PAYER"
            }, 
            {
+            "account_type": "liability", 
+            "name": "Sant\u00e9 et S\u00e9curit\u00e9 au Travail \u00e0 payer", 
+            "root_type": "Liability"
+           }, 
+           {
+            "account_type": "liability", 
             "name": "Normes du Travail \u00e0 payer", 
             "root_type": "Liability"
            }, 
            {
+            "account_type": "liability", 
             "name": "Imp\u00f4t provincial sur les revenus", 
             "root_type": "Liability"
            }, 
            {
+            "account_type": "view", 
             "children": [
              {
-              "name": "AP - Contribution des employ\u00e9s", 
+              "account_type": "liability", 
+              "name": "AP - Contribution de l'employeur", 
               "root_type": "Liability"
              }, 
              {
-              "name": "AP - Contribution de l'employeur", 
+              "account_type": "liability", 
+              "name": "AP - Contribution des employ\u00e9s", 
               "root_type": "Liability"
              }
             ], 
             "name": "ASSURANCE PARENTALE \u00c0 PAYER"
            }, 
            {
+            "account_type": "liability", 
             "name": "Fond des Services de Sant\u00e9 \u00e0 payer", 
-            "root_type": "Liability"
-           }, 
-           {
-            "name": "Sant\u00e9 et S\u00e9curit\u00e9 au Travail \u00e0 payer", 
             "root_type": "Liability"
            }
           ], 
@@ -382,17 +349,22 @@
       "name": "PASSIFS COURANTS"
      }, 
      {
+      "account_type": "view", 
       "children": [
        {
+        "account_type": "view", 
         "name": "IMP\u00d4TS DIFF\u00c9R\u00c9S"
        }, 
        {
+        "account_type": "view", 
         "name": "PROVISIONS POUR RETRAITES ET AUTRES AVANTAGES POST\u00c9RIEURS \u00c0 L'EMPLOI"
        }, 
        {
+        "account_type": "view", 
         "name": "DETTES FINANCI\u00c8RES NON-COURANTES"
        }, 
        {
+        "account_type": "view", 
         "name": "AUTRES PASSIFS NON-COURANTS"
        }
       ], 
@@ -400,6 +372,170 @@
      }
     ], 
     "name": "PASSIF"
+   }, 
+   {
+    "account_type": "view", 
+    "children": [
+     {
+      "account_type": "view", 
+      "children": [
+       {
+        "account_type": "view", 
+        "children": [
+         {
+          "account_type": "view", 
+          "name": "AMORTISSEMENTS CUMUL\u00c9S"
+         }
+        ], 
+        "name": "IMMOBILISATIONS CORPORELLES"
+       }, 
+       {
+        "account_type": "view", 
+        "children": [
+         {
+          "account_type": "view", 
+          "name": "BREVETS, MARQUES DE COMMERCE ET DROITS D'AUTEURS"
+         }
+        ], 
+        "name": "IMMOBILISATIONS INCORPORELLES"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "PLACEMENTS DISPONIBLES \u00c0 LA VENTE"
+       }
+      ], 
+      "name": "ACTIFS NON-COURANTS"
+     }, 
+     {
+      "account_type": "view", 
+      "children": [
+       {
+        "account_type": "view", 
+        "children": [
+         {
+          "account_type": "asset", 
+          "name": "Stock", 
+          "root_type": "Asset"
+         }, 
+         {
+          "account_type": "asset", 
+          "name": "Stock exp\u00e9di\u00e9 non-factur\u00e9", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "STOCKS"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "TR\u00c9SORERIE OU \u00c9QUIVALENTS DE TR\u00c9SORERIE"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "ENCAISSE"
+       }, 
+       {
+        "account_type": "view", 
+        "children": [
+         {
+          "account_type": "view", 
+          "children": [
+           {
+            "account_type": "asset", 
+            "name": "TVH \u00e0 recevoir - 13%", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "asset", 
+            "name": "TVH \u00e0 recevoir - 15%", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "asset", 
+            "name": "TVH \u00e0 recevoir - 14%", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "TVH \u00e0 recevoir"
+         }, 
+         {
+          "account_type": "asset", 
+          "name": "TVP/TVQ \u00e0 recevoir", 
+          "root_type": "Asset"
+         }, 
+         {
+          "account_type": "asset", 
+          "name": "TPS \u00e0 recevoir", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "IMP\u00d4TS \u00c0 RECEVOIR"
+       }, 
+       {
+        "account_type": "view", 
+        "children": [
+         {
+          "account_type": "view", 
+          "name": "PROVISION POUR CR\u00c9ANCES DOUTEUSES"
+         }, 
+         {
+          "account_type": "receivable", 
+          "name": "Comptes clients", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "COMPTES CLIENTS"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "FRAIS PAY\u00c9S D'AVANCE"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "CERTIFICATS DE D\u00c9P\u00d4TS"
+       }, 
+       {
+        "account_type": "view", 
+        "name": "PLACEMENTS D\u00c9TENUS \u00c0 DES FINS DE TRANSACTION"
+       }
+      ], 
+      "name": "ACTIFS COURANTS"
+     }
+    ], 
+    "name": "ACTIF"
+   }, 
+   {
+    "account_type": "view", 
+    "children": [
+     {
+      "account_type": "view", 
+      "name": "B\u00c9N\u00c9FICES NON R\u00c9PARTIS"
+     }, 
+     {
+      "account_type": "view", 
+      "name": "AUTRES \u00c9L\u00c9MENTS DU R\u00c9SULTAT GLOBAL"
+     }, 
+     {
+      "account_type": "view", 
+      "name": "PRIMES"
+     }, 
+     {
+      "account_type": "view", 
+      "name": "CAPITAL-ACTIONS"
+     }, 
+     {
+      "account_type": "view", 
+      "name": "\u00c9CARTS DE CONVERSION"
+     }, 
+     {
+      "account_type": "view", 
+      "name": "SURPLUS D'APPORT"
+     }, 
+     {
+      "account_type": "view", 
+      "name": "DIVIDENDES"
+     }
+    ], 
+    "name": "CAPITAUX PROPRES"
    }
   ], 
   "name": "Account Chart CA FR"
