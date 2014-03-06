@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.widgets.reportview import get_match_cond
+from frappe.model.db_query import DatabaseQuery
 
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
@@ -16,9 +17,12 @@ def get_filters_cond(doctype, filters, conditions):
 				else:
 					flt.append([doctype, f[0], '=', f[1]])
 		
-		from frappe.widgets.reportview import build_filter_conditions
-		build_filter_conditions(flt, conditions)
-		cond = ' and ' + ' and '.join(conditions)	
+		query = DatabaseQuery(doctype)
+		query.filters = flt
+		query.conditions = conditions
+		query.build_filter_conditions()
+		
+		cond = ' and ' + ' and '.join(query.conditions)	
 	else:
 		cond = ''
 	return cond
