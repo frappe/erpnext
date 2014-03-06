@@ -88,6 +88,7 @@ def create_fiscal_year_and_company(args):
 		'company_name':args.get('company_name'),
 		'abbr':args.get('company_abbr'),
 		'default_currency':args.get('currency'),
+		'country': args.get('country')
 	}]).insert()
 	
 	args["curr_fiscal_year"] = curr_fiscal_year
