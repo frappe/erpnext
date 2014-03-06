@@ -36,7 +36,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			case when employee_name like "%(txt)s" then 0 else 1 end, 
 			name 
 		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,  
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
+		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
 
  # searches for leads which are not converted
 def lead_query(doctype, txt, searchfield, start, page_len, filters): 
@@ -53,7 +53,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			case when company_name like "%(txt)s" then 0 else 1 end, 
 			lead_name asc 
 		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,  
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
+		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
 
  # searches for customer
 def customer_query(doctype, txt, searchfield, start, page_len, filters):
@@ -76,7 +76,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			case when customer_name like "%(txt)s" then 0 else 1 end, 
 			name, customer_name 
 		limit %(start)s, %(page_len)s""" % {'field': fields,'key': searchfield, 
-		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
+		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype), 
 		'start': start, 'page_len': page_len})
 
 # searches for supplier
@@ -98,7 +98,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 			case when supplier_name like "%(txt)s" then 0 else 1 end, 
 			name, supplier_name 
 		limit %(start)s, %(page_len)s """ % {'field': fields,'key': searchfield, 
-		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 'start': start, 
+		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype), 'start': start, 
 		'page_len': page_len})
 		
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
@@ -134,7 +134,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			{fcond} {mcond}
 		limit %(start)s, %(page_len)s """.format(key=searchfield,
 			fcond=get_filters_cond(doctype, filters, conditions),
-			mcond=get_match_cond(doctype, searchfield)), 
+			mcond=get_match_cond(doctype)), 
 			{
 				"today": nowdate(),
 				"txt": "%%%s%%" % txt,
@@ -153,7 +153,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			%(fcond)s  %(mcond)s  
 		limit %(start)s, %(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt, 
 		'fcond': get_filters_cond(doctype, filters, conditions), 
-		'mcond':get_match_cond(doctype, searchfield), 'start': start, 'page_len': page_len})
+		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
@@ -165,7 +165,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			and %(cond)s `tabProject`.name like "%(txt)s" %(mcond)s 
 		order by `tabProject`.name asc 
 		limit %(start)s, %(page_len)s """ % {'cond': cond,'txt': "%%%s%%" % txt, 
-		'mcond':get_match_cond(doctype, searchfield),'start': start, 'page_len': page_len})
+		'mcond':get_match_cond(doctype),'start': start, 'page_len': page_len})
 			
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
@@ -202,7 +202,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				order by batch_no desc 
 				limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'], 
 					'warehouse': filters['warehouse'], 'posting_date': filters['posting_date'], 
-					'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield), 
+					'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype), 
 					'start': start, 'page_len': page_len})
 	else:
 		return frappe.db.sql("""select name from tabBatch 
@@ -214,5 +214,5 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				order by name desc 
 				limit %(start)s, %(page_len)s""" % {'item_code': filters['item_code'], 
 				'posting_date': filters['posting_date'], 'txt': "%%%s%%" % txt, 
-				'mcond':get_match_cond(doctype, searchfield),'start': start, 
+				'mcond':get_match_cond(doctype),'start': start, 
 				'page_len': page_len})

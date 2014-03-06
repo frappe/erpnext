@@ -793,7 +793,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				and tabAccount.company = '%(company)s' 
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield, 
-			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype, searchfield)})
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype)})
 
 
 @frappe.whitelist()

@@ -153,7 +153,7 @@ def gl_entry_details(doctype, txt, searchfield, start, page_len, filters):
 			"dt":filters["dt"], 
 			"acc":filters["acc"], 
 			"account_type": filters['account_type'], 
-			'mcond':get_match_cond(doctype, searchfield), 
+			'mcond':get_match_cond(doctype), 
 			'txt': "%%%s%%" % txt, 
 			"start": start, 
 			"page_len": page_len
