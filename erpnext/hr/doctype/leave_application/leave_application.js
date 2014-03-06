@@ -116,6 +116,6 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 
 cur_frm.fields_dict.employee.get_query = function() {
 	return {
-		query: "hr.doctype.leave_application.leave_application.query_for_permitted_employees"
+		query: "erpnext.hr.doctype.leave_application.leave_application.query_for_permitted_employees"
 	};
 }
