@@ -57,6 +57,16 @@ class DocType:
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
 			if not frappe.db.exists("Warehouse", whname + " - " + self.doc.abbr):
+				if not frappe.db.exists("Account", "Stock Assets - " + self.doc.abbr):
+					frappe.bean({
+						"doctype": "Account",
+						"account_name": "Stock Assets",
+						"company": self.doc.name,
+						"group_or_ledger": "Group",
+						"root_type": "Asset",
+						"is_pl_account": "No"
+					}).insert()
+				
 				frappe.bean({
 					"doctype":"Warehouse",
 					"warehouse_name": whname,
@@ -101,6 +111,108 @@ class DocType:
 				style_settings.save()
 
 	def create_default_accounts(self):
+		if self.doc.chart_of_accounts:
+			self.import_chart_of_account()
+		else:
+			self.create_standard_accounts()
+			
+	def import_chart_of_account(self):
+		chart = frappe.bean("Chart of Accounts", self.doc.chart_of_accounts)
+		chart.make_controller().create_accounts(self.doc.name)
+
+	def add_acc(self,lst):
+		account = frappe.bean({
+			"doctype": "Account",
+			"freeze_account": "No",
+			"master_type": "",
+		})
+		for d in self.fld_dict.keys():
+			account.doc.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
+		
+		account.insert()
+
+	def set_default_accounts(self):
+		def _set_default_accounts(accounts):
+			for a in accounts:
+				account_name = accounts[a] + " - " + self.doc.abbr
+				if not self.doc.fields.get(a) and frappe.db.exists("Account", account_name):
+					frappe.db.set(self.doc, a, account_name)
+			
+		_set_default_accounts({
+			"receivables_group": "Accounts Receivable",
+			"payables_group": "Accounts Payable",
+			"default_cash_account": "Cash"
+		})
+		
+		if cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+			_set_default_accounts({
+				"stock_received_but_not_billed": "Stock Received But Not Billed",
+				"stock_adjustment_account": "Stock Adjustment",
+				"expenses_included_in_valuation": "Expenses Included In Valuation"
+			})
+
+	def create_default_cost_center(self):
+		cc_list = [
+			{
+				'cost_center_name': self.doc.name,
+				'company':self.doc.name,
+				'group_or_ledger':'Group',
+				'parent_cost_center':''
+			}, 
+			{
+				'cost_center_name':'Main', 
+				'company':self.doc.name,
+				'group_or_ledger':'Ledger',
+				'parent_cost_center':self.doc.name + ' - ' + self.doc.abbr
+			},
+		]
+		for cc in cc_list:
+			cc.update({"doctype": "Cost Center"})
+			cc_bean = frappe.bean(cc)
+			cc_bean.ignore_permissions = True
+		
+			if cc.get("cost_center_name") == self.doc.name:
+				cc_bean.ignore_mandatory = True
+			cc_bean.insert()
+			
+		frappe.db.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
+
+	def on_trash(self):
+		"""
+			Trash accounts and cost centers for this company if no gl entry exists
+		"""
+		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
+		if not rec:
+			#delete tabAccount
+			frappe.db.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
+			
+			#delete cost center child table - budget detail
+			frappe.db.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
+			#delete cost center
+			frappe.db.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
+			
+		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.doc.name}):
+			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.doc.name)
+			
+		frappe.defaults.clear_default("company", value=self.doc.name)
+			
+		frappe.db.sql("""update `tabSingles` set value=""
+			where doctype='Global Defaults' and field='default_company' 
+			and value=%s""", self.doc.name)
+			
+	def before_rename(self, olddn, newdn, merge=False):
+		if merge:
+			frappe.throw(_("Sorry, companies cannot be merged"))
+	
+	def after_rename(self, olddn, newdn, merge=False):
+		frappe.db.set(self.doc, "company_name", newdn)
+
+		frappe.db.sql("""update `tabDefaultValue` set defvalue=%s 
+			where defkey='Company' and defvalue=%s""", (newdn, olddn))
+
+		frappe.defaults.clear_cache()
+		
+	def create_standard_accounts(self):
 		self.fld_dict = {'account_name':0,'parent_account':1,'group_or_ledger':2,'is_pl_account':3,'account_type':4,'root_type':5,'company':6,'tax_rate':7}
 		acc_list_common = [
 			['Application of Funds (Assets)','','Group','No','','Asset',self.doc.name,''],
@@ -224,98 +336,6 @@ class DocType:
 		if country == 'India':
 			for d in acc_list_india:
 				self.add_acc(d)
-
-	def add_acc(self,lst):
-		account = frappe.bean({
-			"doctype": "Account",
-			"freeze_account": "No",
-			"master_type": "",
-		})
-		for d in self.fld_dict.keys():
-			account.doc.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
-			
-		account.insert()
-
-	def set_default_accounts(self):
-		def _set_default_accounts(accounts):
-			for a in accounts:
-				account_name = accounts[a] + " - " + self.doc.abbr
-				if not self.doc.fields.get(a) and frappe.db.exists("Account", account_name):
-					frappe.db.set(self.doc, a, account_name)
-			
-		_set_default_accounts({
-			"receivables_group": "Accounts Receivable",
-			"payables_group": "Accounts Payable",
-			"default_cash_account": "Cash"
-		})
-		
-		if cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
-			_set_default_accounts({
-				"stock_received_but_not_billed": "Stock Received But Not Billed",
-				"stock_adjustment_account": "Stock Adjustment",
-				"expenses_included_in_valuation": "Expenses Included In Valuation"
-			})
-
-	def create_default_cost_center(self):
-		cc_list = [
-			{
-				'cost_center_name': self.doc.name,
-				'company':self.doc.name,
-				'group_or_ledger':'Group',
-				'parent_cost_center':''
-			}, 
-			{
-				'cost_center_name':'Main', 
-				'company':self.doc.name,
-				'group_or_ledger':'Ledger',
-				'parent_cost_center':self.doc.name + ' - ' + self.doc.abbr
-			},
-		]
-		for cc in cc_list:
-			cc.update({"doctype": "Cost Center"})
-			cc_bean = frappe.bean(cc)
-			cc_bean.ignore_permissions = True
-		
-			if cc.get("cost_center_name") == self.doc.name:
-				cc_bean.ignore_mandatory = True
-			cc_bean.insert()
-			
-		frappe.db.set(self.doc, "cost_center", "Main - " + self.doc.abbr)
-
-	def on_trash(self):
-		"""
-			Trash accounts and cost centers for this company if no gl entry exists
-		"""
-		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.doc.name)
-		if not rec:
-			#delete tabAccount
-			frappe.db.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.doc.name)
-			
-			#delete cost center child table - budget detail
-			frappe.db.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.doc.name)
-			#delete cost center
-			frappe.db.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.doc.name)
-			
-		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.doc.name}):
-			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.doc.name)
-			
-		frappe.defaults.clear_default("company", value=self.doc.name)
-			
-		frappe.db.sql("""update `tabSingles` set value=""
-			where doctype='Global Defaults' and field='default_company' 
-			and value=%s""", self.doc.name)
-			
-	def before_rename(self, olddn, newdn, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, companies cannot be merged"))
-	
-	def after_rename(self, olddn, newdn, merge=False):
-		frappe.db.set(self.doc, "company_name", newdn)
-
-		frappe.db.sql("""update `tabDefaultValue` set defvalue=%s 
-			where defkey='Company' and defvalue=%s""", (newdn, olddn))
-
-		frappe.defaults.clear_cache()
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):

@@ -98,7 +98,16 @@ cur_frm.fields_dict.receivables_group.get_query = function(doc) {
 	}  
 }
 
+cur_frm.get_field("chart_of_accounts").get_query = function(doc) {
+	return {
+		filters: {
+			"country": doc.country
+		}
+	}
+}
+
 cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
+
 
 cur_frm.fields_dict.default_expense_account.get_query = function(doc) {    
 	return{
