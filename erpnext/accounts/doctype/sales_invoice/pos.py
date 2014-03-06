@@ -49,4 +49,4 @@ def get_item_code(barcode_serial_no):
 
 @frappe.whitelist()
 def get_mode_of_payment():
-	return frappe.db.sql("""select name from `tabMode of Payment`""", as_dict=1)
+	return frappe.get_list("Mode of Payment")

@@ -19,7 +19,7 @@ erpnext.POS = Class.extend({
 							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
 								<thead>\
 									<tr>\
-										<th style="width: 40%">Item</th>\
+										<th style="width: 40%">'+__("Item")+'</th>\
 										<th style="width: 9%"></th>\
 										<th style="width: 17%; text-align: right;">Qty</th>\
 										<th style="width: 9%"></th>\
@@ -35,7 +35,7 @@ erpnext.POS = Class.extend({
 							<div class="net-total-area">\
 								<table class="table table-condensed">\
 									<tr>\
-										<td><b>Net Total</b></td>\
+										<td><b>'+__("Net Total")+'</b></td>\
 										<td style="text-align: right;" class="net-total"></td>\
 									</tr>\
 								</table>\
@@ -44,7 +44,7 @@ erpnext.POS = Class.extend({
 								<table class="table table-condensed">\
 									<thead>\
 										<tr>\
-											<th style="width: 60%">Taxes</th>\
+											<th style="width: 60%">'+__("Taxes")+'</th>\
 											<th style="width: 40%; text-align: right;"></th>\
 										</tr>\
 									</thead>\
@@ -55,7 +55,7 @@ erpnext.POS = Class.extend({
 							<div class="discount-amount-area">\
 								<table class="table table-condensed">\
 									<tr>\
-										<td style="vertical-align: middle;" width="50%"><b>Discount Amount</b></td>\
+										<td style="vertical-align: middle;" width="50%"><b>'+__("Discount Amount")+'</b></td>\
 										<td width="20%"></td>\
 										<td style="text-align: right;">\
 											<input type="text" class="form-control discount-amount" \
@@ -67,10 +67,19 @@ erpnext.POS = Class.extend({
 							<div class="grand-total-area">\
 								<table class="table table-condensed">\
 									<tr>\
-										<td style="vertical-align: middle;"><b>Grand Total</b></td>\
+										<td style="vertical-align: middle;"><b>'+__("Grand Total")+'</b></td>\
 										<td style="text-align: right; font-size: 200%; \
 											font-size: bold;" class="grand-total"></td>\
 									</tr>\
+								</table>\
+							</div>\
+							<div class="paid-amount-area">\
+								<table class="table table-condensed">\
+								<tr>\
+									<td style="vertical-align: middle;">'+__("Amount Paid")+'</td>\
+									<td style="text-align: right; \
+										font-size: bold;" class="paid-amount"></td>\
+								</tr>\
 								</table>\
 							</div>\
 						</div>\
@@ -79,11 +88,11 @@ erpnext.POS = Class.extend({
 					<div class="row">\
 						<div class="col-sm-9">\
 							<button class="btn btn-success btn-lg make-payment">\
-								<i class="icon-money"></i> Make Payment</button>\
+								<i class="icon-money"></i> '+__("Make Payment")+'</button>\
 						</div>\
 						<div class="col-sm-3">\
 							<button class="btn btn-default btn-lg remove-items" style="display: none;">\
-								<i class="icon-trash"></i> Del</button>\
+								<i class="icon-trash"></i> '+__("Del")+'</button>\
 						</div>\
 					</div>\
 					<br><br>\
@@ -439,6 +448,12 @@ erpnext.POS = Class.extend({
 			me.frm.doc.currency));
 		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total], 
 			me.frm.doc.currency));
+		
+		$(".paid-amount-area").toggle(!!this.frm.doc.paid_amount);
+		if(this.frm.doc.paid_amount) {
+			this.wrapper.find(".paid-amount").text(format_currency(this.frm.doc.paid_amount, 
+				me.frm.doc.currency));
+		}
 	},
 	call_when_local: function() {
 		var me = this;
@@ -484,25 +499,16 @@ erpnext.POS = Class.extend({
 	disable_text_box_and_button: function() {
 		var me = this;
 		// if form is submitted & cancelled then disable all input box & buttons
-		if (this.frm.doc.docstatus>=1) {
-			$(this.wrapper).find('input, button').each(function () {
-				$(this).prop('disabled', true);
-			});
-			$(this.wrapper).find(".remove-items").hide();
-			$(this.wrapper).find(".make-payment").hide();
-		}
-		else {
-			$(this.wrapper).find('input, button').each(function () {
-				$(this).prop('disabled', false);
-			});
-			$(this.wrapper).find(".make-payment").show();
-		}
+		$(this.wrapper)
+			.find(".remove-items, .make-payment, .increase-qty, .decrease-qty")
+			.toggle(this.frm.doc.docstatus===0);
+			
+		$(this.wrapper).find('input, button').prop("disabled", !(this.frm.doc.docstatus===0));
 	},
 	hide_payment_button: function() {
-		var me = this;
-		// Show Make Payment button only in Sales Invoice
-		if (this.frm.doctype != "Sales Invoice")
-			$(this.wrapper).find(".make-payment").hide();
+		$(this.wrapper)
+			.find(".make-payment")
+			.toggle(this.frm.doctype == "Sales Invoice" && this.frm.doc.is_pos);
 	},
 	refresh_delete_btn: function() {
 		$(this.wrapper).find(".remove-items").toggle($(".item-cart .warning").length ? true : false);
@@ -568,6 +574,9 @@ erpnext.POS = Class.extend({
 			frappe.call({
 				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',
 				callback: function(r) {
+					if(!r.message.length) {
+						msgprint(__("Please add to Modes of Payment from Setup."))
+					}
 					for (x=0; x<=r.message.length - 1; x++) {
 						mode_of_payment.push(r.message[x].name);
 					}
