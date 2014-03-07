@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2014-03-03 18:43:33", 
+  "modified": "2014-03-07 16:26:42", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -140,7 +140,7 @@
   "fieldname": "root_type", 
   "fieldtype": "Select", 
   "label": "Root Type", 
-  "options": "\nAsset\nLiability\nExpense\nIncome\nEquity"
+  "options": "\nAsset\nLiability\nExpense\nIncome"
  }, 
  {
   "description": "Setting Account Type helps in selecting this Account in transactions.", 
@@ -151,7 +151,7 @@
   "label": "Account Type", 
   "oldfieldname": "account_type", 
   "oldfieldtype": "Select", 
-  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable\nWarehouse", 
+  "options": "Bank or Cash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nIncome Account", 
   "search_index": 0
  }, 
  {

@@ -30,3 +30,4 @@ erpnext.patches.4_0.split_email_settings
 erpnext.patches.4_0.fix_employee_user_id
 erpnext.patches.4_0.set_account_details
 erpnext.patches.4_0.import_country_codes
+execute:patches.4_0.countrywise_coa

@@ -193,7 +193,7 @@ erpnext.AccountsChart = Class.extend({
 					options:'Group\nLedger', description: frappe._('Further accounts can be made under Groups,')+
 					 	frappe._('but entries can be made against Ledger')},
 				{fieldtype:'Select', fieldname:'account_type', label:frappe._('Account Type'),
-					options: ['', 'Fixed Asset Account', 'Bank or Cash', 'Expense Account', 'Tax',
+					options: ['', 'Fixed Asset', 'Bank or Cash', 'Expense Account', 'Tax',
 						'Income Account', 'Chargeable'].join('\n'),
 					description: frappe._("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:frappe._('Tax Rate')},

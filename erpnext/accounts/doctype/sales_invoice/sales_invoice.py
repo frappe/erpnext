@@ -261,7 +261,7 @@ class DocType(SellingController):
 			frappe.throw(_("Account must be an asset account"))
 			
 	def validate_fixed_asset_account(self):
-		"""Validate Fixed Asset Account and whether Income Account Entered Exists"""
+		"""Validate Fixed Asset and whether Income Account Entered Exists"""
 		for d in getlist(self.doclist,'entries'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem` 
 				where name = %s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' 
@@ -270,8 +270,8 @@ class DocType(SellingController):
 				where name = %s and docstatus != 2""", d.income_account)
 			if not acc:
 				msgprint("Account: "+d.income_account+" does not exist in the system", raise_exception=True)
-			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
-				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code, raise_exception=True)				
+			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset':
+				msgprint("Please select income head with account type 'Fixed Asset' as Item %s is an asset item" % d.item_code, raise_exception=True)				
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
