@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-07 18:09:42", 
   "docstatus": 0, 
-  "modified": "2013-05-07 18:09:42", 
+  "modified": "2014-03-07 15:30:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "add_total_row": 1, 
   "doctype": "Report", 
   "is_standard": "Yes", 
+  "module": "HR", 
   "name": "__common__", 
   "ref_doctype": "Salary Slip", 
   "report_name": "Monthly Salary Register", 

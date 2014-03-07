@@ -2,7 +2,7 @@
  {
   "creation": "2013-11-29 15:45:39", 
   "docstatus": 0, 
-  "modified": "2013-11-29 15:45:40", 
+  "modified": "2014-03-07 15:30:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "add_total_row": 1, 
   "doctype": "Report", 
   "is_standard": "Yes", 
+  "module": "Stock", 
   "name": "__common__", 
   "ref_doctype": "Stock Ledger Entry", 
   "report_name": "Supplier-Wise Sales Analytics", 
