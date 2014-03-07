@@ -14,23 +14,203 @@ import frappe
 
 
 path = "/Users/nabinhait/Documents/openerp/openerp/addons"
-chart_roots = frappe._dict()
 
 accounts = {}
 charts = {}
-types = {}
+all_account_types = []
 
 def go():
-	find_charts()
-	make_maps()
-	make_trees()
-	make_charts()
+	global accounts, charts
+	# get default account types
+	default_types_root = ET.parse(os.path.join(path, "account", "data", 
+			"data_account_type.xml")).getroot()
+	default_account_types = get_account_types([default_types_root], None, prefix="account")
+	
+	for basepath, folders, files in os.walk(path):
+		basename = os.path.basename(basepath)
+		if basename.startswith("l10n"):
+			accounts, charts = {}, {}
+			xml_roots = get_xml_roots(basepath, files)
+			csv_content = get_csv_contents(basepath, files)
+			
+			prefix = basename if csv_content else None
+			account_types = get_account_types(xml_roots.get("account.account.type", []), 
+				csv_content.get("account.account.type", []), prefix)
+			account_types.update(default_account_types)
+			
+			if xml_roots:
+				make_maps_for_xml(xml_roots, account_types, basename)
+				make_account_trees()
+			
+			if csv_content:
+				make_maps_for_csv(csv_content, account_types)
+			
+			make_charts()
+					
+def get_xml_roots(basepath, files):
+	xml_roots = frappe._dict()
+	for fname in files:
+		fname = cstr(fname)
+		filepath = os.path.join(basepath, fname)
+		if fname.endswith(".xml"):
+			tree = ET.parse(filepath)
+			root = tree.getroot()
+			for node in root[0].findall("record"):
+				if node.get("model") in ["account.account.template", 
+					"account.chart.template", "account.account.type"]:
+					xml_roots.setdefault(node.get("model"), []).append(root)
+					break
+	return xml_roots
+	
+def get_csv_contents(basepath, files):
+	csv_content = {}
+	for fname in files:
+		fname = cstr(fname)
+		filepath = os.path.join(basepath, fname)
+		for file_type in ["account.account.template", "account.account.type"]:
+			if fname.startswith(file_type) and fname.endswith(".csv"):
+				with open(filepath, "r") as csvfile:
+					try:
+						csv_content.setdefault(file_type, [])\
+							.append(read_csv_content(csvfile.read()))
+					except Exception, e:
+						continue
+	return csv_content
+	
+def get_account_types(root_list, csv_content, prefix=None):
+	types = {}
+	account_type_map = {
+		'cash': 'Bank or Cash', 
+		'bank': 'Bank or Cash', 
+		'tr_cash': 'Bank or Cash', 
+		'tr_bank': 'Bank or Cash',
+		'receivable': 'Receivable', 
+		'tr_receivable': 'Receivable',
+		'account rec': 'Receivable',
+		'payable': 'Payable', 
+		'tr_payable': 'Payable', 
+		'equity': 'Equity', 
+		'stocks': 'Stock', 
+		'stock': 'Stock', 
+		'tax': 'Tax', 
+		'tr_tax': 'Tax', 
+		'tax-out': 'Tax', 
+		'tax-in': 'Tax',
+		'charges_personnel': 'Chargeable', 
+		'fixed asset': 'Fixed Asset',
+		'cogs': 'Cost of Goods Sold',
 
+	}
+	for root in root_list:
+		for node in root[0].findall("record"):
+			if node.get("model")=="account.account.type":
+				data = {}
+				for field in node.findall("field"):
+					if field.get("name")=="report_type" and field.text.lower() != "none":
+						data["root_type"] = field.text.title()
+					if field.get("name")=="code" and field.text.lower() != "none" \
+						and account_type_map.get(field.text):
+							data["account_type"] = account_type_map[field.text]
+						
+				node_id = prefix + "." + node.get("id") if prefix else node.get("id")
+				types[node_id] = data
+				
+	if csv_content and csv_content[0][0]=="id":
+		for row in csv_content[1:]:
+			row_dict = dict(zip(csv_content[0], row))
+			data = {}
+			if row_dict.get("report_type"):
+				data["root_type"] = row_dict.get("report_type")
+			if row_dict.get("code") and account_type_map.get(row_dict["code"]):
+				data["account_type"] = account_type_map[row_dict["code"]]
+			if data and data.get("id"):
+				node_id = prefix + "." + data.get("id") if prefix else data.get("id")
+				types[node_id] = data
+	return types
+	
+def make_maps_for_xml(xml_roots, account_types, folder):
+	"""make maps for `charts` and `accounts`"""	
+	for model, root_list in xml_roots.iteritems():
+		for root in root_list:
+			for node in root[0].findall("record"):
+				if node.get("model")=="account.account.template":
+					data = {}
+					for field in node.findall("field"):
+						if field.get("name")=="name":
+							data["name"] = field.text
+						if field.get("name")=="parent_id":
+							data["parent_id"] = field.get("ref")
+						if field.get("name")=="user_type":
+							value = field.get("ref")
+
+							if account_types.get(value, {}).get("root_type"):
+								data["root_type"] = account_types[value]["root_type"]
+							else:
+								if "asset" in value: data["root_type"] = "Asset"
+								elif "liability" in value: data["root_type"] = "Liability"
+								elif "income" in value: data["root_type"] = "Income"
+								elif "expense" in value: data["root_type"] = "Expense"
+								
+							if account_types.get(value, {}).get("account_type"):
+								data["account_type"] = account_types[value]["account_type"]
+								if data["account_type"] not in all_account_types:
+									all_account_types.append(data["account_type"])
+									
+					data["children"] = []
+					accounts[node.get("id")] = data
+				
+				if node.get("model")=="account.chart.template":
+					data = {}
+					for field in node.findall("field"):
+						if field.get("name")=="name":
+							data["name"] = field.text
+						if field.get("name")=="account_root_id":
+							data["account_root_id"] = field.get("ref")
+						data["id"] = folder
+					charts.setdefault(node.get("id"), {}).update(data)
+
+def make_account_trees():
+	"""build tree hierarchy"""
+	for id in accounts.keys():
+		account = accounts[id]
+		if account.get("parent_id") and accounts[account["parent_id"]]:
+			accounts[account["parent_id"]]["children"].append(account)
+			del account["parent_id"]
+
+	# remove empty children
+	for id in accounts.keys():
+		if "children" in accounts[id] and not accounts[id].get("children"):
+			del accounts[id]["children"]
+	
+def make_maps_for_csv(csv_content, account_types):
+	for content in csv_content.get("account.account.template"):
+		if content[0][0]=="id":
+			for row in content[1:]:
+				data = dict(zip(content[0], row))
+				
+				account = {
+					"name": data.get("name"),
+					"parent_id": data.get("parent_id:id") or data.get("parent_id/id"),
+					"children": []
+				}
+				user_type = data.get("user_type/id") or data.get("user_type:id")
+				if account_types.get(user_type, {}).get("root_type"):
+					account["root_type"] = account_types[user_type]["root_type"]
+					
+				if account_types.get(user_type, {}).get("account_type"):
+					account["account_type"] = account_types[user_type]["account_type"]
+					if account["account_type"] not in all_account_types:
+						all_account_types.append(account["account_type"])
+					
+				accounts[data.get("id")] = account
+				if not account.get("parent_id") and data.get("chart_template_id:id"):
+					chart_id = data.get("chart_template_id:id")
+					charts.setdefault(chart_id, {}).update({"account_root_id": data.get("id")})
+					
 def make_charts():
 	"""write chart files in app/setup/doctype/company/charts"""
 	for chart_id in charts:
 		src = charts[chart_id]
-		
 		if not src.get("name") or not src.get("account_root_id"):
 			continue
 			
@@ -47,123 +227,6 @@ def make_charts():
 		with open(os.path.join("erpnext", "accounts", "doctype", "chart_of_accounts", 
 			"charts", filename + ".json"), "w") as chartfile:
 			chartfile.write(json.dumps(chart, indent=1, sort_keys=True))
-
-def make_trees():
-	"""build tree hierarchy"""
-	print "making trees..."
-	for id in accounts.keys():
-		account = accounts[id]
-		if account.get("parent_id") and accounts[account["parent_id"]]:
-			accounts[account["parent_id"]]["children"].append(account)
-			del account["parent_id"]
-
-	# remove empty children
-	for id in accounts.keys():
-		if "children" in accounts[id] and not accounts[id].get("children"):
-			del accounts[id]["children"]
-
-def make_maps():
-	"""make maps for `charts` and `accounts`"""
-	print "making maps..."
-	
-	# get default account types
-	default_types_root = ET.parse(os.path.join(path, "account", "data", 
-			"data_account_type.xml")).getroot()
-	default_account_types = get_account_types([default_types_root], default=True)
-	
-	for folder, root_list in chart_roots.iteritems():
-		types = get_account_types(root_list)
-		types.update(default_account_types)
-		
-		for root in root_list:
-			for node in root[0].findall("record"):
-				if node.get("model")=="account.account.template":
-					data = {}
-					for field in node.findall("field"):
-						if field.get("name")=="name":
-							data["name"] = field.text
-						if field.get("name")=="parent_id":
-							data["parent_id"] = field.get("ref")
-						if field.get("name")=="user_type":
-							value = field.get("ref")
-
-							if types.get(value, {}).get("root_type"):
-								data["root_type"] = types[value]["root_type"]
-							else:
-								if "asset" in value: data["root_type"] = "Asset"
-								elif "liability" in value: data["root_type"] = "Liability"
-								elif "income" in value: data["root_type"] = "Income"
-								elif "expense" in value: data["root_type"] = "Expense"
-								
-							if types.get(value, {}).get("account_type"):
-								data["account_type"] = types[value]["account_type"]
-
-					
-					data["children"] = []
-					accounts[node.get("id")] = data
-				
-				if node.get("model")=="account.chart.template":
-					data = {}
-					for field in node.findall("field"):
-						if field.get("name")=="name":
-							data["name"] = field.text
-						if field.get("name")=="account_root_id":
-							data["account_root_id"] = field.get("ref")
-						data["id"] = folder
-					charts.setdefault(node.get("id"), {}).update(data)
-				
-def get_account_types(root_list, default=False):
-	types = {}
-	for root in root_list:
-		for node in root[0].findall("record"):
-			if node.get("model")=="account.account.type":
-				data = {}
-				for field in node.findall("field"):
-					if field.get("name")=="report_type" and field.text.lower() != "none":
-						data["root_type"] = field.text.title()
-					if field.get("name")=="code" and field.text.lower() != "none":
-						data["account_type"] = field.text
-				node_id = "account." + node.get("id") if default else node.get("id")
-				types[node_id] = data
-	return types
-				
-def find_charts():
-	print "finding charts..."
-	for basepath, folders, files in os.walk(path):
-		basename = os.path.basename(basepath)
-		if basename.startswith("l10n"):
-			for fname in files:
-				fname = cstr(fname)
-				filepath = os.path.join(basepath, fname)
-				if fname.endswith(".xml"):
-					tree = ET.parse(filepath)
-					root = tree.getroot()
-					for node in root[0].findall("record"):
-						if node.get("model") in ["account.account.template", 
-							"account.chart.template", "account.account.type"]:
-							chart_roots.setdefault(basename, []).append(root)
-							break
-				
-				if fname.endswith(".csv"):
-					with open(filepath, "r") as csvfile:
-						try:
-							content = read_csv_content(csvfile.read())
-						except Exception, e:
-							continue
-					
-					if content[0][0]=="id":
-						for row in content[1:]:
-							data = dict(zip(content[0], row))
-							account = {
-								"name": data.get("name"),
-								"parent_id": data.get("parent_id:id"),
-								"children": []
-							}
-							accounts[data.get("id")] = account
-							if not account.get("parent_id"):
-								chart_id = data.get("chart_id:id")
-								charts.setdefault(chart_id, {}).update({
-									"account_root_id": data.get("id")})
 
 if __name__=="__main__":
 	go()

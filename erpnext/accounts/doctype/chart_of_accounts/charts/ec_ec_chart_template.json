@@ -1,11 +1,2090 @@
 {
  "name": "Ecuador - Chart of Accounts", 
  "root": {
-  "account_type": "view", 
   "children": [
    {
-    "account_type": "view", 
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Garant\u00edas en titularizaci\u00f3n", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Garant\u00edas", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "ACREEDORAS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Garant\u00edas ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Garant\u00edas en titularizaci\u00f3n", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "DEUDORAS"
+     }
+    ], 
+    "name": "CUENTAS CONTINGENTES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Acreedores por  contra", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "ACREEDORES POR  CONTRA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Derechos sobre instrumentos financieros derivados", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "OTRAS CUENTAS DE ORDEN DEUDORAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bienes en garant\u00eda", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores en garant\u00eda", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "VALORES Y BIENES PROPIOS EN PODER DE TERCEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Emisiones no colocadas ", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "EMISIONES NO COLOCADAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Colaterales de las operaciones de reporto burs\u00e1til", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "COLATERALES DE LAS OPERACIONES DE REPORTO BURSATIL"
+       }
+      ], 
+      "name": "DEUDORAS"
+     }, 
+     {
+      "name": "DEUDORES POR  CONTRA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "T\u00edtulos de Renta Variable", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Depositos en efectivo", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "T\u00edtulos de Renta Fija", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "En Garant\u00eda", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T\u00edtulos de Renta Fija", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Depositos en efectivo", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "T\u00edtulos de Renta Variable", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "En Custodia", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "VALORES Y BIENES RECIBIDOS DE TERCEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intermediaci\u00f3n de valores"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Intereses", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Principal", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Fondos Colectivos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Principal", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Intereses", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Fondos Administrados", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Patrimonio de Fondos de Inversi\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Principal", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Intereses", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Administraci\u00f3n de portafolio "
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Garant\u00eda", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inmobiliario", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Titularizaci\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Fideicomisos mercantiles inscritos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Garant\u00eda", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inmobiliario", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Encargos fiduciarios inscritos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Garant\u00eda", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inmobiliario", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Fideicomisos mercantiles no inscritos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Inmobiliario", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "root_type": "Asset"
+             }, 
+             {
+              "name": "Garant\u00eda", 
+              "root_type": "Asset"
+             }
+            ], 
+            "name": "Encargos fiduciarios no inscritos", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Patrimonio de Negocios Fiduciarios"
+         }
+        ], 
+        "name": "ADMINISTRACION DE RECURSOS DE TERCEROS"
+       }
+      ], 
+      "name": "ACREEDORAS"
+     }
+    ], 
     "name": "CUENTAS DE ORDEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "OTROS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Participaciones de los trabajadores en utilidades", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Beneficios a empleados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Remuneraciones ", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Provisi\u00f3n para jubilaci\u00f3n patronal", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Aportes y descuentos al IESS", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Fondo reserva del IESS", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "OBLIGACIONES PATRONALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Proveedores", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Acreedores Varios", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Por administraci\u00f3n", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Otras comisiones", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Dividendos por pagar", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Intereses por pagar", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Comisiones por pagar ", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Por Operaciones Burs\u00e1tiles", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Por custodia", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Deuda Sector No Financiero"
+         }
+        ], 
+        "name": "PASIVO NO FINANCIERO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Valores", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Obligaciones por Arrendamiento Financiero ", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Otras En el exterior", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Obligaciones", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Papel Comercial", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Valores de Titularizaci\u00f3n", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "A valor razonable con cambios en resultados"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Pr\u00e9stamos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Anticipos recibidos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Otras cuentas y documentos por pagar", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Cuentas y documentos por pagar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Accionistas", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Compa\u00f1\u00edas relacionadas / vinculadas", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Administradores", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Relacionadas"
+         }, 
+         {
+          "name": "Pasivos por compra de activos no corrientes"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Intereses por pagar", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Pr\u00e9stamos", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Sobregiros bancarios", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Obligaciones por contratos de underwriting", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "Porci\u00f3n corriente de deuda a largo plazo", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "Obligaciones financieras"
+         }, 
+         {
+          "name": "Otros pasivos financieros"
+         }
+        ], 
+        "name": "PASIVOS FINANCIEROS"
+       }, 
+       {
+        "name": "OTROS PASIVOS CORRIENTES"
+       }, 
+       {
+        "name": "ACREEDORES POR INTERMEDIACION            "
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Litigios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Indemnizaciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones Judiciales", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "SANCIONES Y MULTAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Impuestos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Retenciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Contribuciones", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "OBLIGACIONES TRIBUTARIAS"
+       }
+      ], 
+      "name": "PASIVO CORRIENTE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Intereses diferidos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Pasivos por impuestos diferidos", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "PASIVOS DIFERIDOS"
+       }
+      ], 
+      "name": "PASIVOS NO CORRIENTES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "DEUDA SECTOR FINANCIERO"
+       }
+      ], 
+      "name": "PASIVO LARGO PLAZO"
+     }
+    ], 
+    "name": "PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inversiones en el exterior", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Otros ", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores de  titularizaci\u00f3n de participaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Unidades de participaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cuotas de fondos colectivos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Acciones y participaciones", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Renta variable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "P\u00f3lizas de Acumulaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Papel Comercial", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones Convertibles en acciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Overnights", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Facturas Comerciales Negociables", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Letras de Cambio", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Dep\u00f3sitos a Plazo", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores de Titularizaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "T\u00edtulos del Banco Central ", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Pagar\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Notas de Cr\u00e9dito", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inversiones en el exterior", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Dep\u00f3sito", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cupones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "C\u00e9dulas Hipotecarias", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados Financieros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Inversi\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Tesorer\u00eda", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Avales", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Bonos del Estado", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Bonos de Prenda", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Renta Fija"
+       }
+      ], 
+      "name": "DISPONIBLES PARA LA VENTA"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inversiones mantenidas hasta el vencimiento ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Pr\u00e9stamos y partidas a cobrar", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "PROVISI\u00d3N POR DETERIORO DE ACTIVOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Acciones y participaciones", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Acciones y participaciones"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inversiones en el exterior", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Otros"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Valores de Titularizaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "T\u00edtulos del Banco Central ", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Pagar\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "P\u00f3lizas de Acumulaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones Convertibles en acciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Papel Comercial", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Facturas Comerciales Negociables", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Overnights", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Notas de Cr\u00e9dito", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Dep\u00f3sitos a Plazo", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Letras de Cambio", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Avales", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Bonos de Prenda", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Bonos del Estado", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados Financieros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "C\u00e9dulas Hipotecarias", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Tesorer\u00eda", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Inversi\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cupones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Dep\u00f3sito", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Renta Fija"
+       }
+      ], 
+      "name": "INVERSIONES MANTENIDAS HASTA EL VENCIMIENTO "
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cuentas por cobrar a terceros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cuentas por cobrar accionistas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cuentas por cobrar al originador", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Cuentas y Documentos a cobrar a terceros"
+       }
+      ], 
+      "name": "PRESTAMOS Y PARTIDAS A COBRAR "
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cuotas de fondos colectivos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores de  titularizaci\u00f3n de participaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Acciones y participaciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Otros ", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Renta variable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Forward", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Futuros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Opciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Inversiones en el exterior", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Derivados"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores de Titularizaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "T\u00edtulos del Banco Central ", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones Convertibles en acciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Papel Comercial", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Facturas Comerciales Negociables", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Overnights", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Notas de Cr\u00e9dito", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Obligaciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Dep\u00f3sitos a Plazo", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Letras de Cambio", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Pagar\u00e9s", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "P\u00f3lizas de Acumulaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Bonos de Prenda", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Inversi\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cupones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Dep\u00f3sito", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Avales", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Bonos del Estado", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados Financieros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "C\u00e9dulas Hipotecarias", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Certificados de Tesorer\u00eda", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Renta Fija"
+       }
+      ], 
+      "name": "A VALOR RAZONABLE CON CAMBIOS EN RESULTADOS"
+     }
+    ], 
+    "name": "ACTIVOS FINANCIEROS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Fondos rotativos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Otras monedas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Moneda de curso legal", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Caja"
+       }, 
+       {
+        "name": "Instituciones financieras"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cta. Cte. Otras monedas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cta. Cte. Moneda de curso legal", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Banco Central del Ecuador"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cta. Cte. Moneda de curso legal", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cta. Ahorros Moneda de curso legal", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cta. Cte. En el exterior", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Cta Ahorros En el exterior", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Otras Instituciones Financieras"
+       }
+      ], 
+      "name": "ACTIVO DISPONIBLE"
+     }
+    ], 
+    "name": "ACTIVO CORRIENTE "
+   }, 
+   {
+    "name": "DEUDORES POR INTERMEDIACION"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Comisiones por cobrar ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Cuentas por cobrar a terceros ", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "PROVISI\u00d3N POR DETERIORO DE CUENTAS POR COBRAR"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Dividendos", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Intereses   ", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "RENDIMIENTOS POR COBRAR"
+     }, 
+     {
+      "name": "DERECHOS POR COMPROMISO DE RECOMPRA"
+     }, 
+     {
+      "name": "ANTICIPO A CONSTRUCTOR POR AVANCE DE OBRA"
+     }, 
+     {
+      "name": "ANTICIPO COMITENTES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Al Originador", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "A Terceros", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "CUENTAS POR COBRAR"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Otras comisiones"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Puestos inactivos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Operaciones", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Por servicios burs\u00e1tiles"
+       }, 
+       {
+        "name": "Asesor\u00eda"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Operaciones  Extraburs\u00e1tiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Operaciones  Burs\u00e1tiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Contrato de Underwriting", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Intermediaci\u00f3n de valores"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Por Manejo de Fondos Administrados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por  Manejo de Fideicomisos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por Manejo de Encargos Fiduciarios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por comisiones de administraci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por Contratos de Administraci\u00f3n Portafolio de Terceros", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Por  administraci\u00f3n y manejo"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Valores Materializados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por Manejo de Libro de Acciones y Accionistas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores Desmaterializados", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Por Custodia y Conservaci\u00f3n de Valores"
+       }
+      ], 
+      "name": "COMISIONES POR COBRAR"
+     }, 
+     {
+      "children": [
+       {
+        "name": "A Terceros", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Otros", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "A Personal", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "DOCUMENTOS POR COBRAR"
+     }, 
+     {
+      "name": "OTROS"
+     }, 
+     {
+      "name": "PROVISIONES PARA CUENTAS POR COBRAR"
+     }
+    ], 
+    "name": "CUENTAS Y DOCUMENTOS POR COBRAR"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "En desarrollo", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "En producci\u00f3n", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Plantas en crecimiento", 
+      "root_type": "Asset"
+     }, 
+     {
+      "name": "PROVISI\u00d3N POR DETERIORO DE ACTIVOS BIOL\u00d3GICOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "En producci\u00f3n", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "En desarrollo", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Animales vivos", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "ACTIVOS BIOLOGICOS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "PRODUCTOS TERMINADOS"
+     }, 
+     {
+      "name": "PRODUCTOS EN PROCESO"
+     }, 
+     {
+      "name": "MATERIA PRIMA"
+     }, 
+     {
+      "name": "PROVISI\u00d3N POR DETERIORO DE EXISTENCIAS"
+     }, 
+     {
+      "name": "MATERIALES Y SUMINISTROS"
+     }
+    ], 
+    "name": "EXISTENCIAS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "ACTIVOS ADQUIRIDOS EN ARRENDAMIENTO FINANCIERO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Edificios", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Maquinaria y Equipo", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Muebles y enseres ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipo de Computaci\u00f3n ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Veh\u00edculos", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Terrenos", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "PROPIEDADES"
+     }, 
+     {
+      "name": "CONSTRUCCIONES EN CURSO "
+     }, 
+     {
+      "name": "PROPIEDADES DE INVERSI\u00d3N"
+     }, 
+     {
+      "name": "PLUSVAL\u00cdA MERCANTIL (Goodwill)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Costos de exploraci\u00f3n y desarrollo", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Reservas de recursos extra\u00edbles", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Concesiones", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Licencias", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Patentes y propiedad industrial", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Programas de computaci\u00f3n", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "INTANGIBLES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Intangibles", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Propiedades"
+       }, 
+       {
+        "name": "Plusval\u00eda mercantil (Goodwill) ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Propiedades de inversi\u00f3n ", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "PROVISI\u00d3N POR DETERIORO DE ACTIVOS NO CORRIENTES"
+     }
+    ], 
+    "name": "ACTIVOS NO CORRIENTES"
+   }, 
+   {
+    "children": [
+     {
+      "name": "OTROS"
+     }, 
+     {
+      "name": "ACTIVO NO CORRIENTE DISPONIBLE PARA LA VENTA"
+     }, 
+     {
+      "name": "UNIDADES DE PARTICIPACION"
+     }, 
+     {
+      "name": "ACTIVO POR IMPUESTO CORRIENTE"
+     }
+    ], 
+    "name": "OTROS ACTIVOS CORRIENTES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Activo por impuesto diferido  ", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "ACTIVO POR IMPUESTO DIFERIDO"
+     }, 
+     {
+      "name": "ACTIVOS DE EXPLORACION Y EVALUACION MINERA"
+     }, 
+     {
+      "name": "DERECHOS FIDUCIARIOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cuota patrimonial bolsa de valores", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Acciones Dep\u00f3sito Centralizado de Valores", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Acciones Dep\u00f3sito Centralizado de Valores", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Cuota patrimonial bolsa de valores"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dep\u00f3sitos en Garant\u00eda por reporto", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Dep\u00f3sitos en Garant\u00eda por operaciones burs\u00e1tiles", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Dep\u00f3sitos en Garant\u00eda"
+       }
+      ], 
+      "name": "OTROS ACTIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Concesiones", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Licencias", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Otros", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "AMORTIZACION ACUMULADA"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos adquiridos en arrendamiento financiero", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Propiedades de inversi\u00f3n", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipo de Computaci\u00f3n ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Veh\u00edculos", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Maquinaria y Equipo", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Muebles y enseres ", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Edificios", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Activos de exploraci\u00f3n y evaluaci\u00f3n minera", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "DEPRECIACION ACUMULADA"
+     }
+    ], 
+    "name": "OTROS ACTIVOS NO CORRIENTES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "ACUMULADOS"
+       }, 
+       {
+        "name": "UTILIDAD (PERDIDA) DEL EJERCICIO"
+       }, 
+       {
+        "name": "RESULTADOS ACUMULADOS POR APLICACI\u00d3N DE LAS NIIF POR PRIMERA VEZ"
+       }
+      ], 
+      "name": "RESULTADOS"
+     }, 
+     {
+      "name": "APORTES PARA FUTURAS CAPITALIZACIONES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "PATRIMONIO DE LOS NEGOCIOS FIDUCIARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Patrimonio del fondo colectivo", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Patrimonio del fondo administrado", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "PATRIMONIO DE LOS FONDOS DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "PAGADO"
+       }, 
+       {
+        "name": "ACCIONES EN TESORER\u00cdA"
+       }, 
+       {
+        "name": "FONDO PATRIMONIAL"
+       }
+      ], 
+      "name": "CAPITAL"
+     }, 
+     {
+      "children": [
+       {
+        "name": "RESERVA LEGAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reserva por Valuaci\u00f3n Activos Financieros Disponibles para la Venta", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Reserva por valuaci\u00f3n Propiedades", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "RESERVA POR VALUACI\u00d3N"
+       }, 
+       {
+        "name": "RESERVA FACULTATIVA"
+       }, 
+       {
+        "name": "OTRAS RESERVAS"
+       }
+      ], 
+      "name": "RESERVAS "
+     }
+    ], 
+    "name": "PATRIMONIO NETO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "INGRESOS DE ACTIVOS POR IMPUESTOS DIFERIDOS"
+       }
+      ], 
+      "name": "INGRESOS DE ACTIVOS POR IMPUESTOS DIFERIDOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Negocios Fiduciarios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Oferta p\u00fablica de Valores", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "INGRESOS POR ESTRUCTURACI\u00d3N"
+       }, 
+       {
+        "name": "INGRESOS POR ASESORIA"
+       }
+      ], 
+      "name": "INGRESOS POR ASESOR\u00cdA Y ESTRUCTURACI\u00d3N"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INTERESES Y RENDIMIENTOS"
+       }, 
+       {
+        "name": "UTILIDAD EN CAMBIO"
+       }, 
+       {
+        "name": "DIVIDENDOS"
+       }, 
+       {
+        "name": "UTILIDAD POR VALUACI\u00d3N DE ACTIVOS FINANCIEROS A VALOR RAZONABLE"
+       }
+      ], 
+      "name": "INGRESOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "UTILIDAD POR OPERACIONES DESCONTINUADAS"
+       }, 
+       {
+        "name": "OTRAS UTILIDADES EN VENTAS"
+       }, 
+       {
+        "name": "UTILIDAD EN VENTA DE VALORES"
+       }, 
+       {
+        "name": "UTILIDAD EN VENTA DE PROPIEDAD"
+       }
+      ], 
+      "name": "UTILIDADES EN VENTAS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "OBLIGACIONES FINANCIERAS"
+       }, 
+       {
+        "name": "ACTIVOS BIOL\u00d3GICOS"
+       }, 
+       {
+        "name": "CUENTAS POR COBRAR"
+       }, 
+       {
+        "name": "PROPIEDADES DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "ACTIVOS NO CORRIENTES"
+       }
+      ], 
+      "name": "UTILIDAD POR ACTIVOS NO FINANCIEROS AL VALOR RAZONABLE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inscripciones", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Mantenimiento de Inscripci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Comisiones en operaciones ", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "SERVICIOS BURS\u00c1TILES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Fondos colectivos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Fondos administrados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Portafolio de terceros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por representaci\u00f3n de obligacionistas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Encargos Fiduciarios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Fideicomisos mercantiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Titularizaci\u00f3n", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "POR PRESTACI\u00d3N DE SERVICIOS DE ADMINISTRACI\u00d3N Y MANEJO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Operaciones Burs\u00e1tiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Operaciones Extraburs\u00e1tiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por Contratos de Underwriting", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "INTERMEDIACI\u00d3N DE VALORES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores materializados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores desmaterializados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Compensaci\u00f3n y liquidaci\u00f3n de valores", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "CUSTODIA  REGISTRO\n        COMPENSACI\u00d3N Y LIQUIDACI\u00d3N"
+       }, 
+       {
+        "name": "OTRAS COMISIONES GANADAS"
+       }
+      ], 
+      "name": "COMISIONES GANADAS"
+     }
+    ], 
+    "name": "CUENTAS DE RESULTADOS ACREEDORAS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "PRIMA POR OPERACIONES DE REPORTO"
+       }, 
+       {
+        "name": "OBLIGACIONES FINANCIERAS"
+       }, 
+       {
+        "name": "ACTIVOS BIOL\u00d3GICOS"
+       }, 
+       {
+        "name": "PROPIEDADES DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "ACTIVOS NO CORRIENTES "
+       }, 
+       {
+        "name": "CUENTAS POR COBRAR"
+       }, 
+       {
+        "name": "ORGANISMOS DE CONTROL"
+       }, 
+       {
+        "name": "COSTO DE VENTAS"
+       }, 
+       {
+        "name": "COSTO DE PRODUCCI\u00d3N "
+       }, 
+       {
+        "name": "COSTO "
+       }, 
+       {
+        "name": "OTROS GASTOS"
+       }, 
+       {
+        "name": "OTROS GASTOS"
+       }, 
+       {
+        "name": "PRIMA POR OPERACIONES DE REPORTO"
+       }, 
+       {
+        "name": "MUNICIPALES"
+       }, 
+       {
+        "name": "OTROS"
+       }, 
+       {
+        "name": "FISCALES"
+       }
+      ], 
+      "name": "P\u00c9RDIDA POR MEDICI\u00d3N DE ACTIVOS NO FINANCIEROS AL VALOR RAZONABLE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Valores Materializados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Valores Desmaterializados", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Compensaci\u00f3n y Liquidaci\u00f3n de Valores", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "CUSTODIA  REGISTRO COMPENSACI\u00d3N Y LIQUIDACI\u00d3N \n      "
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otras Comisiones Pagadas", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "OTRAS COMISIONES PAGADAS "
+       }, 
+       {
+        "children": [
+         {
+          "name": "P\u00e9rdida en Valuaci\u00f3n de activos financieros", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "P\u00c9RDIDA EN VALUACI\u00d3N DE ACTIVOS FINANCIEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Deterioro de activos financieros", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "DETERIORO DE ACTIVOS FINANCIEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intereses por cr\u00e9ditos de bancos y otras Instituciones financieras", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Intereses por otros pasivos no financieros", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "INTERESES CAUSADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intermediaci\u00f3n de Valores", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Por Contratos de Underwriting", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Operaciones Burs\u00e1tiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Operaciones Extraburs\u00e1tlies", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "COMISIONES PAGADAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Encargos fiduciarios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Fideicomisos mercantiles", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Fondos colectivos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Administraci\u00f3n de portafolio", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Titularizaci\u00f3n", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Fondos administrados", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "POR SERVICIOS DE ADMINISTRACI\u00d3N Y MANEJO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "P\u00e9rdida en cambio", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "P\u00c9RDIDA EN CAMBIO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Arrendamiento operativo", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "ARRENDAMIENTO OPERATIVO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "P\u00e9rdida por operaciones descontinuadas", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "P\u00e9rdida en venta de Propiedad ", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "P\u00e9rdida en venta activos biol\u00f2gicos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "P\u00e9rdida en venta de Valores", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "P\u00c9RDIDAS EN VENTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Negocios Fiduciarios", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Oferta P\u00fablica de Valores", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "GASTOS POR ESTRUCTURACI\u00d3N"
+       }
+      ], 
+      "name": "GASTOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "POR PUBLICIDAD"
+       }, 
+       {
+        "name": "ARRENDAMIENTOS"
+       }, 
+       {
+        "name": "SEGUROS"
+       }, 
+       {
+        "name": "MATERIALES Y SUMINISTROS"
+       }, 
+       {
+        "name": "SERVICIOS Y MANTENIMIENTO"
+       }, 
+       {
+        "name": "DEPRECIACI\u00d3N"
+       }, 
+       {
+        "name": "AMORTIZACIONES"
+       }, 
+       {
+        "name": "PROVISIONES"
+       }, 
+       {
+        "name": "OTROS"
+       }
+      ], 
+      "name": "GASTOS GENERALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Honorarios", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "HONORARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Beneficios sociales de los trabajadores", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Provisi\u00f3n para jubilaci\u00f3n patronal", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Remuneraciones", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "GASTOS DE PERSONAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Servicios de terceros", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "SERVICIOS DE TERCEROS "
+       }
+      ], 
+      "name": "GASTOS ADMINISTRATIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ACTIVOS DE EXPLORACI\u00d3N Y EVALUACI\u00d3N MINERA"
+       }, 
+       {
+        "name": "PLUSVAL\u00cdA MERCANTIL (GOODWILL)"
+       }, 
+       {
+        "name": "ACTIVOS BIOL\u00d3GICOS"
+       }, 
+       {
+        "name": "PROPIEDADES DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "CUENTAS Y DOCUMENTOS POR COBRAR"
+       }, 
+       {
+        "name": "EXISTENCIAS"
+       }, 
+       {
+        "name": "PROPIEDADES  PLANTA Y EQUIPO"
+       }
+      ], 
+      "name": "GASTOS POR  DETERIORO"
+     }, 
+     {
+      "name": "IMPUESTOS  TASAS Y CONTRIBUCIONES"
+     }
+    ], 
+    "name": "CUENTAS DE RESULTADOS DEUDORAS"
    }
   ], 
   "name": "PLAN DE CTAS. ECUADOR"

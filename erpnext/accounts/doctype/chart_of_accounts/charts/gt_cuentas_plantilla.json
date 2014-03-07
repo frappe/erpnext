@@ -1,5 +1,5 @@
 {
- "name": "Plantilla de cuentas de Honduras (sencilla)", 
+ "name": "Plantilla de cuentas de Guatemala (sencilla)", 
  "root": {
   "children": [
    {
@@ -20,11 +20,11 @@
          {
           "children": [
            {
-            "name": "ISV por Pagar", 
+            "name": "IVA por Pagar", 
             "root_type": "Liability"
            }
           ], 
-          "name": "ISV por Pagar"
+          "name": "IVA por Pagar"
          }, 
          {
           "children": [
@@ -106,15 +106,15 @@
          {
           "children": [
            {
-            "name": "Retenciones de ISV recibidas", 
+            "name": "Retenciones de IVA recibidas", 
             "root_type": "Asset"
            }, 
            {
-            "name": "ISV por Cobrar", 
+            "name": "IVA por Cobrar", 
             "root_type": "Asset"
            }
           ], 
-          "name": "ISV por Cobrar"
+          "name": "IVA por Cobrar"
          }, 
          {
           "children": [
@@ -360,6 +360,6 @@
     "name": "Estado de Resultados"
    }
   ], 
-  "name": "Plan contable de Honduras (sencillo)"
+  "name": "Plan contable de Guatemala (sencillo)"
  }
 }

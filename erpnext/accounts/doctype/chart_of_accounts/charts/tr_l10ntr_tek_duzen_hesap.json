@@ -1,284 +1,165 @@
 {
  "name": "Tek D\u00fczen Hesap Plan\u0131", 
  "root": {
-  "account_type": "tr_view", 
   "children": [
    {
-    "account_type": "tr_view", 
     "children": [
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Enflasyon D\u00fczeltme Hesab\u0131"
+        "name": "Hizmet \u00dcretim Maliyeti"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "D\u00f6nem Net K\u00e2r\u0131 Veya Zarar\u0131"
+        "name": "Hizmet \u00dcretim Maliyeti Fark Hesaplar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "D\u00f6nem K\u00e2r\u0131 Veya Zarar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "D\u00f6nem K\u00e2r\u0131 Vergi Ve Di\u011fer Yasal Y\u00fck\u00fcml\u00fcl\u00fck Kar\u015f\u0131l\u0131klar\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Enflasyon D\u00fczeltme Hesab\u0131"
+        "name": "Hizmet \u00dcretim Maliyeti Yans\u0131tma Hesab\u0131"
        }
       ], 
-      "name": "D\u00f6nem Net K\u00e2r\u0131 Ve Zarar\u0131"
+      "name": "Hizmet \u00dcretim Maliyeti"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Yurt D\u0131\u015f\u0131 Sat\u0131\u015flar"
+        "name": "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri Fark Hesab\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Yurt \u0130\u00e7i Sat\u0131\u015flar"
+        "name": "Atra\u015ft\u0131rma Ve Geli\u015ftirme Giderleri"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Gelirler"
+        "name": "Pazarlama Sat\u0131\u015f Ve Dag\u0131t\u0131m Giderleri Yans\u0131tma Hesab\u0131"
        }
       ], 
-      "name": "Br\u00fct Sat\u0131\u015flar"
+      "name": "Pazarlama, Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Sat\u0131\u015flar\u0131n Maliyeti(-)"
+        "name": "Direkt \u0130\u015f\u00e7ilik \u00dccret Farklar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Sat\u0131lan Hizmet Maliyeti(-)"
+        "name": "Direkt \u0130\u015f\u00e7ilik S\u00fcre Farklar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Sat\u0131lan Ticari Mallar Maliyeti(-)"
+        "name": "Direkt \u0130\u015f\u00e7ilik Giderleri"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Sat\u0131lan Mamuller Maliyeti(-)"
+        "name": "Direkt \u0130\u015f\u00e7ilik Giderleri Yans\u0131tma Hesab\u0131"
        }
       ], 
-      "name": "Sat\u0131\u015flar\u0131n Maliyeti(-)"
+      "name": "Direkt \u0130\u015f\u00e7ilik Giderleri"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri(-)"
+        "name": "Direk \u0130lk Madde Ve Malzeme Giderleri Hesab\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri(-)"
+        "name": "Direkt \u0130lk Madde Ve Malzeme Miktar Fark\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Genel Y\u00f6netim Giderleri(-)"
+        "name": "Direkt \u0130lk Madde Ve Malzeme Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Direkt \u0130lk Madde Ve Malzeme Fiyat Fark\u0131"
        }
       ], 
-      "name": "Faaliyet Giderleri(-)"
+      "name": "Direkt \u0130lk Madde Ve Malzeme Giderleri"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Menkul K\u0131ymet Sat\u0131\u015f K\u00e2rlar\u0131"
+        "name": "Maliyet Muhasebesi Yans\u0131tma Hesab\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Konusu Kalmayan Kar\u015f\u0131l\u0131klar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Reeskont Faiz Gelirleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Kambiyo K\u00e2rlar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Temett\u00fc Gelirleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015ftiraklerden Temett\u00fc Gelirleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Komisyon Gelirleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Faiz Gelirleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Ola\u011fan Gelir Ve K\u00e2rlar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Enflasyon D\u00fczeltme K\u00e2rlar\u0131"
+        "name": "Maliyet Muhasebesi Ba\u011flant\u0131 Hesab\u0131"
        }
       ], 
-      "name": "Di\u011fer Faaliyetlerden Olu\u015fan Gelir ve K\u00e2rlar"
+      "name": "Maliyet Muhasebesi Ba\u011flant\u0131 Hesaplar\u0131"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Kambiyo Zararlar\u0131(-)"
+        "name": "Genel Y\u00f6netim Giderleri"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Reeskont Faiz Giderleri(-)"
+        "name": "Genel Y\u00f6netim Giderleri Yans\u0131tma Hesab\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Kar\u015f\u0131l\u0131k Giderleri(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Menkul K\u0131ymet Sat\u0131\u015f Zararlar\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Komisyon Giderleri(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Enflasyon D\u00fczeltmesi Zararlar\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Ola\u011fan Gider Ve Zararlar(-)"
+        "name": "Genel Y\u00f6netim Gider Farklar\u0131 Hesab\u0131"
        }
       ], 
-      "name": "Di\u011fer Faaliyetlerden Olu\u015fan Gider ve Zararlar (-)"
+      "name": "Genel Y\u00f6netim Giderleri"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Uzun Vadeli Bor\u00e7lanma Giderleri(-)"
+        "name": "Genel \u00dcretim Giderleri Kapasite Farklar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "K\u0131sa Vadeli Bor\u00e7lanma Giderleri(-)"
+        "name": "Genel \u00dcretim Giderleri"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri Verimlilik Giderleri"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri B\u00fct\u00e7e Farklar\u0131"
+       }
+      ], 
+      "name": "Genel \u00dcretim Giderleri"
+     }, 
+     {
+      "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Finansman Giderleri Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Finansman Giderleri"
+       }, 
+       {
+        "name": "Finansman Giderleri Fark Hesab\u0131"
        }
       ], 
       "name": "Finansman Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Ola\u011fan D\u0131\u015f\u0131 Gelir Ve K\u00e2rlar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u00d6nceki D\u00f6nem Gelir Ve K\u00e2rlar\u0131"
-       }
-      ], 
-      "name": "Ola\u011fan D\u0131\u015f\u0131 Gelir Ve K\u00e2rlar"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "\u00c7al\u0131\u015fmayan K\u0131s\u0131m Gider Ve Zararlar\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Ola\u011fan D\u0131\u015f\u0131 Gider Ve Zararlar(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u00d6nceki D\u00f6nem Gider Ve Zararlar\u0131(-)"
-       }
-      ], 
-      "name": "Ola\u011fan D\u0131\u015f\u0131 Gider Ve Zaralar(-)"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer \u0130ndirimler"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Sat\u0131\u015ftan \u0130adeler(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Sat\u0131\u015f \u0130ndirimleri(-)"
-       }
-      ], 
-      "name": "Sat\u0131\u015f \u0130ndirimleri (-)"
      }
     ], 
-    "name": "Gelir Tablosu Hesaplar\u0131"
+    "name": "Maliyet Hesaplar\u0131"
    }, 
    {
-    "account_type": "tr_view", 
-    "name": "Naz\u0131m Hesaplar"
-   }, 
-   {
-    "account_type": "tr_view", 
     "name": "Serbest Hesaplar"
    }, 
    {
-    "account_type": "tr_asset", 
     "children": [
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
         "name": "Verilen Sipari\u015f Avanslar\u0131", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Ticari Mallar", 
+        "name": "Yar\u0131 Mamuller", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Mamuller", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
         "name": "\u0130lk Madde Malzeme", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Yar\u0131 Mamuller", 
+        "name": "Ticari Mallar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Mamuller", 
         "root_type": "Asset"
        }
       ], 
@@ -286,15 +167,12 @@
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_expense", 
       "children": [
        {
-        "account_type": "tr_expense", 
         "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Maliyetleri", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_expense", 
         "name": "Ta\u015feronlara Verilen Avanslar", 
         "root_type": "Expense"
        }
@@ -303,30 +181,24 @@
       "root_type": "Expense"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
         "name": "\u00d6zel Kesim Tahvil Senet Ve Bonolar\u0131", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Hisse Senetleri", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Kamu Kesimi Tahvil, Senet ve Bonolar\u0131", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Menkul K\u0131ymetler De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Di\u011fer Menkul K\u0131ymetler", 
         "root_type": "Asset"
        }
@@ -335,171 +207,136 @@
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_bank", 
+        "account_type": "Bank or Cash", 
         "name": "Bankalar"
        }, 
        {
-        "account_type": "tr_cash", 
+        "name": "Verilen \u00c7ekler ve \u00d6deme Emirleri(-)", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Bank or Cash", 
         "name": "Kasa"
        }, 
        {
-        "account_type": "tr_check", 
         "name": "Al\u0131nan \u00c7ekler", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Di\u011fer Haz\u0131r De\u011ferler", 
         "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_liability", 
-        "name": "Verilen \u00c7ekler ve \u00d6deme Emirleri(-)", 
-        "root_type": "Liability"
        }
       ], 
       "name": "Haz\u0131r De\u011ferler", 
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer D\u00f6nen Varl\u0131klar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015f Avanslar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Say\u0131m Ve Tesell\u00fcm Noksanlar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130ndirilecek KDV"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Pe\u015fin \u00d6denen Vergiler Ve Fonlar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer KDV"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer \u00c7e\u015fitli D\u00f6nen Varl\u0131klar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Personel Avanslar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Devreden KDV"
-       }
-      ], 
-      "name": "Di\u011fer D\u00f6nen Varl\u0131klar"
-     }, 
-     {
-      "account_type": "tr_asset", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Gelir Tahakkuklar\u0131"
-       }, 
-       {
-        "account_type": "tr_expense", 
-        "name": "Gelecek Aylara Ait Giderler", 
-        "root_type": "Expense"
-       }
-      ], 
-      "name": "Gelecek Aylara Ait Giderler ve Gelir Tahakkuklar\u0131", 
-      "root_type": "Asset"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Alacaklar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015ftiraklerden Alacaklar"
-       }, 
-       {
-        "account_type": "tr_view", 
         "name": "Ortaklardan Alacaklar"
        }, 
        {
-        "account_type": "tr_view", 
+        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Alacaklar"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklerden Alacaklar"
+       }, 
+       {
         "name": "Di\u011fer Alacak Senetleri Reeskontu(-)"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Di\u011fer \u00c7e\u015fitli Alacaklar"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Personelden Alacaklar"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "\u015e\u00fcpheli Di\u011fer Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar"
        }
       ], 
       "name": "Di\u011fer Alacaklar"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
         "name": "\u015e\u00fcpheli Ticari Alacaklar", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Kazan\u0131lmam\u0131\u015f Finansal Kiralama Faiz Gelirleri(-)"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Verilen Depozito ve Teminatlar"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Di\u011fer Ticari Alacaklar"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Al\u0131c\u0131lar", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Alacak Senetleri"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Alacak Senetleri Reeskontu(-)"
        }
       ], 
       "name": "Ticari Alacaklar", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Di\u011fer D\u00f6nen Varl\u0131klar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli D\u00f6nen Varl\u0131klar"
+       }, 
+       {
+        "name": "\u0130\u015f Avanslar\u0131"
+       }, 
+       {
+        "name": "Say\u0131m Ve Tesell\u00fcm Noksanlar\u0131"
+       }, 
+       {
+        "name": "Personel Avanslar\u0131"
+       }, 
+       {
+        "name": "\u0130ndirilecek KDV"
+       }, 
+       {
+        "name": "Devreden KDV"
+       }, 
+       {
+        "name": "Pe\u015fin \u00d6denen Vergiler Ve Fonlar"
+       }, 
+       {
+        "name": "Di\u011fer KDV"
+       }
+      ], 
+      "name": "Di\u011fer D\u00f6nen Varl\u0131klar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gelecek Aylara Ait Giderler", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gelir Tahakkuklar\u0131"
+       }
+      ], 
+      "name": "Gelecek Aylara Ait Giderler ve Gelir Tahakkuklar\u0131", 
       "root_type": "Asset"
      }
     ], 
@@ -507,103 +344,94 @@
     "root_type": "Asset"
    }, 
    {
-    "account_type": "tr_view", 
     "children": [
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_tax", 
+        "name": "Merkez Ve \u015eubeler Cari Hesab\u0131"
+       }, 
+       {
+        "account_type": "Tax", 
         "name": "Di\u011fer KDV", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_tax", 
+        "account_type": "Tax", 
         "name": "Hesaplanan KDV", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Merkez Ve \u015eubeler Cari Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
         "name": "Say\u0131m Ve Tesell\u00fcm Fazlalar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Di\u011fer \u00c7e\u015fitli Yabanc\u0131 Kaynaklar"
        }
       ], 
       "name": "Di\u011fer K\u0131sa Vadeli Yabanc\u0131 Kaynaklar"
      }, 
      {
-      "account_type": "tr_income", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Gider Tahakkuklar\u0131"
-       }, 
-       {
-        "account_type": "tr_income", 
         "name": "Gelecek Aylara Ait Gelirler", 
         "root_type": "Income"
+       }, 
+       {
+        "name": "Gider Tahakkuklar\u0131"
        }
       ], 
       "name": "Gelecek Aylara Ait Gelirler Ve Gider Tahakkuklar\u0131", 
       "root_type": "Income"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_tax", 
+        "account_type": "Tax", 
         "name": "D\u00f6nem K\u00e2r\u0131n\u0131n Pe\u015fin \u00d6denen Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler(-)", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_tax", 
+        "account_type": "Tax", 
         "name": "D\u00f6nem K\u00e2r\u0131 Vergi Ve Di\u011fer Yasal Y\u00fck\u00fcml\u00fcl\u00fck Kar\u015f\u0131l\u0131klar\u0131", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_expense", 
         "name": "Maliyet Giderleri Kar\u015f\u0131l\u0131\u011f\u0131", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_liability", 
         "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
         "root_type": "Liability"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Di\u011fer Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
        }
       ], 
       "name": "Bor\u00e7 ve Gider Kar\u015f\u0131l\u0131klar\u0131"
      }, 
      {
-      "account_type": "tr_tax", 
+      "account_type": "Tax", 
       "children": [
        {
-        "account_type": "tr_tax", 
-        "name": "\u00d6denecek Vergi Ve Fonlar", 
-        "root_type": "Expense"
-       }, 
-       {
-        "account_type": "tr_tax", 
-        "name": "\u00d6denecek Sosyal G\u00fcvenl\u00fck Kesintileri", 
-        "root_type": "Expense"
-       }, 
-       {
-        "account_type": "tr_tax", 
+        "account_type": "Tax", 
         "name": "Vadesi Ge\u00e7mi\u015f, Ertelenmi\u015f Veya Taksitlendirilmi\u015f Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
         "root_type": "Expense"
        }, 
        {
-        "account_type": "tr_tax", 
+        "account_type": "Tax", 
         "name": "\u00d6denecek Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
+        "root_type": "Expense"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "\u00d6denecek Vergi Ve Fonlar", 
+        "root_type": "Expense"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "\u00d6denecek Sosyal G\u00fcvenl\u00fck Kesintileri", 
         "root_type": "Expense"
        }
       ], 
@@ -611,144 +439,389 @@
       "root_type": "Expense"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "350 Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Hakedi\u015fleri Bedelleri"
        }
       ], 
       "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Hakedi\u015fleri"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "Al\u0131nan Sipari\u015f Avanslar\u0131"
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Di\u011fer Avanslar"
        }, 
        {
-        "account_type": "tr_payable", 
-        "name": "Al\u0131nan Di\u011fer Avanslar"
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Sipari\u015f Avanslar\u0131"
        }
       ], 
       "name": "Al\u0131nan Avanslar"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "Personele Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer Bor\u00e7 Senetleri Reeskontu(-)"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer \u00c7e\u015fitli Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Ortaklara Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Ba\u011fl\u0131 Ortakl\u0131klara Bor\u00e7lar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
+        "name": "Personele Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Senetleri Reeskontu(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer \u00c7e\u015fitli Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Ortaklara Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
         "name": "\u0130\u015ftiraklere Bor\u00e7lar"
        }
       ], 
       "name": "Di\u011fer Bor\u00e7lar"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "Sat\u0131c\u0131lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer Ticari Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Al\u0131nan Depozito Ve Teminatlar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Bor\u00e7 Senetleri Reeskontu(-)"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Bor\u00e7 Senetleri"
-       }
-      ], 
-      "name": "Ticari Bor\u00e7lar"
-     }, 
-     {
-      "account_type": "tr_payable", 
-      "children": [
-       {
-        "account_type": "tr_payable", 
-        "name": "Tahvil Anapara Bor\u00e7, Taksit Ve Faizleri"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "\u00c7\u0131kar\u0131lan Bonolar Ve Senetler"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Di\u011fer Menkul K\u0131ymetler"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Banka Kredileri"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Finansal Kiralama \u0130\u015flemlerinden Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Ertelenmi\u015f Finansal Kiralama Bor\u00e7lanma Maliyetleri(-)"
        }, 
        {
-        "account_type": "tr_payable", 
-        "name": "Uzun Vadeli Kredilerin Anapara Taksitleri Ve Faizleri"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Menkul K\u0131ymetler \u0130hra\u00e7 Fark\u0131(-)"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Di\u011fer Mali Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Uzun Vadeli Kredilerin Anapara Taksitleri Ve Faizleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Tahvil Anapara Bor\u00e7, Taksit Ve Faizleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00c7\u0131kar\u0131lan Bonolar Ve Senetler"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Di\u011fer Menkul K\u0131ymetler"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Banka Kredileri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Finansal Kiralama \u0130\u015flemlerinden Bor\u00e7lar"
        }
       ], 
       "name": "Mali Bor\u00e7lar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Ticari Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri Reeskontu(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Sat\u0131c\u0131lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Depozito Ve Teminatlar"
+       }
+      ], 
+      "name": "Ticari Bor\u00e7lar"
      }
     ], 
     "name": "K\u0131sa Vadeli Yabanc\u0131 Kaynaklar"
    }, 
    {
-    "account_type": "tr_asset", 
     "children": [
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
-        "name": "D\u00f6nem Net Zarar\u0131(-)", 
+        "name": "Gelir Tahakkuklar\u0131", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llara Ait Giderler", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Gelecek Y\u0131llara Ait Giderler ve Gelir Tahakkuklar\u0131", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ba\u011fl\u0131 Menkul K\u0131ymetler De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Menkul K\u0131ymetler"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklere Sermaye Taahh\u00fctleri(-)"
+       }, 
+       {
+        "name": "\u0130\u015ftirakler"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klar"
+       }, 
+       {
+        "name": "\u0130\u015ftirakler Sermaye Paylar\u0131 De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klar Sermaye Paylar\u0131 De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klara Sermaye Taahh\u00fctleri(-)"
+       }, 
+       {
+        "name": "Di\u011fer Mali Duran Varl\u0131klar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Di\u011fer Mali Duran Varl\u0131klar"
+       }
+      ], 
+      "name": "Mali Duran Varl\u0131klar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Binalar", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
+        "name": "Tesis, Makine Ve Cihazlar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Arazi Ve Arsalar"
+       }, 
+       {
+        "name": "Yer Alt\u0131 Ve Yer \u00dcst\u00fc D\u00fczenleri", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Di\u011fer Maddi Duran Varl\u0131klar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Birikmi\u015f Amortismanlar(-)", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Ta\u015f\u0131tlar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Demirba\u015flar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Yap\u0131lmakta Olan Yat\u0131r\u0131mlar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Verilen Avanslar", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Maddi Duran Varl\u0131klar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Birikmi\u015f Amortismanlar(-)", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "\u015eerefiye", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Verilen Avanslar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Di\u011fer Maddi Olmayan Duran Varl\u0131klar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "\u00d6zel Maliyetler", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Kurulu\u015f Ve \u00d6rg\u00fctlenme Giderleri", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Haklar", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Maddi Olmayan Duran Varl\u0131klar", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Birikmi\u015f T\u00fckenme Paylar\u0131(-)", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Verilen Avanslar", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Arama Giderleri", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Haz\u0131rl\u0131k Ve Geli\u015ftirme Giderleri", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Di\u011fer \u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "\u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Alacak Senetleri Reeskontu(-)"
+       }, 
+       {
+        "name": "Alacak Senetleri"
+       }, 
+       {
+        "name": "Al\u0131c\u0131lar"
+       }, 
+       {
+        "name": "Verilen Depozito Ve Teminatlar"
+       }, 
+       {
+        "name": "Kazaqn\u0131lmam\u0131\u015f Finansal Kiralama Faiz Gelirleri(-)"
+       }
+      ], 
+      "name": "Ticari Alacaklar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Personelden Alacaklar"
+       }, 
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli Alacaklar"
+       }, 
+       {
+        "name": "Di\u011fer Alacak Senetleri Reeskontu(-)"
+       }, 
+       {
+        "name": "Ortaklardan Alacaklar"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklerden Alacaklar"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Alacaklar"
+       }, 
+       {
+        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }
+      ], 
+      "name": "Di\u011fer Alacaklar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli Duran Varl\u0131klar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Elden \u00c7\u0131kar\u0131lacak Stoklar Ve Maddi Duran Varl\u0131klar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Pe\u015fin \u00d6denen Vergi Ve Fonlar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Di\u011fer KDV", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llar \u0130htiyac\u0131 Stoklar", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llarda \u0130ndirilecek KDV", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Birikmi\u015f Amortismanlar(-)", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Di\u011fer Duran Varl\u0131klar", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "Duran Varl\u0131klar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
         "name": "D\u00f6nem Net K\u00e2r\u0131", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "D\u00f6nem Net Zarar\u0131(-)", 
         "root_type": "Asset"
        }
       ], 
@@ -756,10 +829,8 @@
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
         "name": "Ge\u00e7mi\u015f Y\u0131llar Zararlar\u0131(-)", 
         "root_type": "Asset"
        }
@@ -768,52 +839,43 @@
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "\u00d6denmi\u015f Sermaye(-)"
-       }, 
-       {
-        "account_type": "tr_asset", 
         "name": "Sermaye", 
         "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00d6denmi\u015f Sermaye(-)"
        }
       ], 
       "name": "\u00d6denmi\u015f Sermaye", 
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
         "name": "Di\u011fer Sermaye Yedekleri", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Hisse Senetleri \u0130hra\u00e7 Primleri", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Hisse Senedi \u0130ptal K\u00e2rlar\u0131", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "\u0130\u015ftirakler Yeniden De\u011ferleme Art\u0131\u015flar\u0131", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
         "name": "Maliyet Art\u0131\u015flar\u0131 Fonu", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
+        "name": "Hisse Senetleri \u0130hra\u00e7 Primleri", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Hisse Senedi \u0130ptal K\u00e2rlar\u0131", 
+        "root_type": "Asset"
+       }, 
+       {
         "name": "Maddi Duran Varl\u0131k Yeniden De\u011ferlenme Art\u0131\u015flar\u0131", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "\u0130\u015ftirakler Yeniden De\u011ferleme Art\u0131\u015flar\u0131", 
         "root_type": "Asset"
        }
       ], 
@@ -821,31 +883,25 @@
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
-        "name": "Di\u011fer K\u00e2r Yedekleri", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
         "name": "\u00d6zel Fonlar", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
+        "name": "Stat\u00fc Yedekleri", 
+        "root_type": "Asset"
+       }, 
+       {
         "name": "Ola\u011fan\u00fcst\u00fc Yedekler", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
         "name": "Yasal Yedekler", 
         "root_type": "Asset"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Stat\u00fc Yedekleri", 
+        "name": "Di\u011fer K\u00e2r Yedekleri", 
         "root_type": "Asset"
        }
       ], 
@@ -853,10 +909,8 @@
       "root_type": "Asset"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
         "name": "Ge\u00e7mi\u015f Y\u0131llar K\u00e2rlar\u0131", 
         "root_type": "Asset"
        }
@@ -869,641 +923,340 @@
     "root_type": "Asset"
    }, 
    {
-    "account_type": "tr_view", 
     "children": [
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
         "name": "Gider Tahakkuklar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
         "name": "Gelecek Y\u0131llara Ait Gelirler"
        }
       ], 
       "name": "Gelecek Y\u0131llara Ait Gelirler Ve Gider Tahakkuklar\u0131"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
+        "name": "Di\u011fer \u00c7e\u015fitli Uzun Vadeli Yabanc\u0131 Kaynaklar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Gelecek Y\u0131llara Ertelenmi\u015f Veya Terkin Edilecek KDV"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Tesise Kat\u0131lma Paylar\u0131"
+       }
+      ], 
+      "name": "Di\u011fer Uzun Vadeli Yabanc\u0131 Kaynaklar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
+       }
+      ], 
+      "name": "Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
         "name": "Al\u0131nan Di\u011fer Avanslar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Al\u0131nan Sipari\u015f Avanslar\u0131"
        }
       ], 
       "name": "Al\u0131nan Avanslar"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "Sat\u0131c\u0131lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Bor\u00e7 Senetleri Reeskontu(-)"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Di\u011fer Ticari Bor\u00e7lar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Al\u0131nan Depozito Ve Teminatlar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Bor\u00e7 Senetleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Sat\u0131c\u0131lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri Reeskontu(-)"
        }
       ], 
       "name": "Ticari Bor\u00e7lar"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer \u00c7e\u015fitli Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Kamuya Olan Ertelenmi\u015f Veya Taksitlendirilmi\u015f Bor\u00e7lar"
        }, 
        {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer Bor\u00e7 Senetleri Reeskontu(-)"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "\u0130\u015ftiraklere Bor\u00e7lar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Ba\u011fl\u0131 Ortakl\u0131klara Bor\u00e7lar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Ortaklara Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Senetleri Reeskontu(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer \u00c7e\u015fitli Bor\u00e7lar"
        }
       ], 
       "name": "Di\u011fer Bor\u00e7lar"
      }, 
      {
-      "account_type": "tr_payable", 
+      "account_type": "Payable", 
       "children": [
        {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer Mali Bor\u00e7lar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Menkul K\u0131ymetler \u0130hra\u00e7 Fark\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Ertelenmi\u015f Finansal Kiralama Bor\u00e7lanma Maliyetleri(-)"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "Finansal Kiralama \u0130\u015flemlerinden Bor\u00e7lar"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
+        "name": "Banka Kredileri"
+       }, 
+       {
+        "account_type": "Payable", 
         "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Di\u011fer Menkul K\u0131ymetler"
        }, 
        {
-        "account_type": "tr_payable", 
+        "account_type": "Payable", 
         "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Tahviller"
        }, 
        {
-        "account_type": "tr_payable", 
-        "name": "Banka Kredileri"
+        "account_type": "Payable", 
+        "name": "Di\u011fer Mali Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Menkul K\u0131ymetler \u0130hra\u00e7 Fark\u0131(-)"
        }
       ], 
       "name": "Mali Bor\u00e7lar"
-     }, 
-     {
-      "account_type": "tr_payable", 
-      "children": [
-       {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer \u00c7e\u015fitli Uzun Vadeli Yabanc\u0131 Kaynaklar"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Tesise Kat\u0131lma Paylar\u0131"
-       }, 
-       {
-        "account_type": "tr_payable", 
-        "name": "Gelecek Y\u0131llara Ertelenmi\u015f Veya Terkin Edilecek KDV"
-       }
-      ], 
-      "name": "Di\u011fer Uzun Vadeli Yabanc\u0131 Kaynaklar"
-     }, 
-     {
-      "account_type": "tr_payable", 
-      "children": [
-       {
-        "account_type": "tr_payable", 
-        "name": "Di\u011fer Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
-       }, 
-       {
-        "account_type": "tr_liability", 
-        "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
-        "root_type": "Liability"
-       }
-      ], 
-      "name": "Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
      }
     ], 
     "name": "Uzun Vadeli Yabanc\u0131 Kaynaklar"
    }, 
    {
-    "account_type": "tr_view", 
     "children": [
      {
-      "account_type": "tr_expense", 
       "children": [
        {
-        "account_type": "tr_expense", 
-        "name": "Gelir Tahakkuklar\u0131", 
-        "root_type": "Expense"
+        "name": "Di\u011fer Ola\u011fan Gider Ve Zararlar(-)"
        }, 
        {
-        "account_type": "tr_expense", 
-        "name": "Gelecek Y\u0131llara Ait Giderler", 
-        "root_type": "Expense"
+        "name": "Kar\u015f\u0131l\u0131k Giderleri(-)"
+       }, 
+       {
+        "name": "Menkul K\u0131ymet Sat\u0131\u015f Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "Kambiyo Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "Reeskont Faiz Giderleri(-)"
+       }, 
+       {
+        "name": "Komisyon Giderleri(-)"
+       }, 
+       {
+        "name": "Enflasyon D\u00fczeltmesi Zararlar\u0131(-)"
        }
       ], 
-      "name": "Gelecek Y\u0131llara Ait Giderler ve Gelir Tahakkuklar\u0131", 
-      "root_type": "Expense"
+      "name": "Di\u011fer Faaliyetlerden Olu\u015fan Gider ve Zararlar (-)"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Kazaqn\u0131lmam\u0131\u015f Finansal Kiralama Faiz Gelirleri(-)"
+        "name": "Kambiyo K\u00e2rlar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+        "name": "Menkul K\u0131ymet Sat\u0131\u015f K\u00e2rlar\u0131"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Alacak Senetleri Reeskontu(-)"
+        "name": "Konusu Kalmayan Kar\u015f\u0131l\u0131klar"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Alacak Senetleri"
+        "name": "Komisyon Gelirleri"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Al\u0131c\u0131lar"
+        "name": "Faiz Gelirleri"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Verilen Depozito Ve Teminatlar"
+        "name": "Reeskont Faiz Gelirleri"
+       }, 
+       {
+        "name": "Enflasyon D\u00fczeltme K\u00e2rlar\u0131"
+       }, 
+       {
+        "name": "Di\u011fer Ola\u011fan Gelir Ve K\u00e2rlar"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Temett\u00fc Gelirleri"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklerden Temett\u00fc Gelirleri"
        }
       ], 
-      "name": "Ticari Alacaklar"
+      "name": "Di\u011fer Faaliyetlerden Olu\u015fan Gelir ve K\u00e2rlar"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
-        "name": "Di\u011fer \u00c7e\u015fitli Duran Varl\u0131klar", 
-        "root_type": "Asset"
+        "name": "Yurt D\u0131\u015f\u0131 Sat\u0131\u015flar"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Elden \u00c7\u0131kar\u0131lacak Stoklar Ve Maddi Duran Varl\u0131klar", 
-        "root_type": "Asset"
+        "name": "Yurt \u0130\u00e7i Sat\u0131\u015flar"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Pe\u015fin \u00d6denen Vergi Ve Fonlar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Gelecek Y\u0131llarda \u0130ndirilecek KDV", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Di\u011fer KDV", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Birikmi\u015f Amortismanlar(-)", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Gelecek Y\u0131llar \u0130htiyac\u0131 Stoklar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
-        "root_type": "Asset"
+        "name": "Di\u011fer Gelirler"
        }
       ], 
-      "name": "Di\u011fer Duran Varl\u0131klar", 
-      "root_type": "Asset"
+      "name": "Br\u00fct Sat\u0131\u015flar"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Mali Duran Varl\u0131klar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+        "name": "Di\u011fer \u0130ndirimler"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Menkul K\u0131ymetler De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+        "name": "Sat\u0131\u015f \u0130ndirimleri(-)"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Menkul K\u0131ymetler"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015ftiraklere Sermaye Taahh\u00fctleri(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015ftirakler"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Ortakl\u0131klar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015ftirakler Sermaye Paylar\u0131 De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Ortakl\u0131klar Sermaye Paylar\u0131 De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Ortakl\u0131klara Sermaye Taahh\u00fctleri(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Mali Duran Varl\u0131klar"
+        "name": "Sat\u0131\u015ftan \u0130adeler(-)"
        }
       ], 
-      "name": "Mali Duran Varl\u0131klar"
+      "name": "Sat\u0131\u015f \u0130ndirimleri (-)"
      }, 
      {
-      "account_type": "tr_view", 
       "children": [
        {
-        "account_type": "tr_asset", 
-        "name": "Binalar", 
-        "root_type": "Asset"
+        "name": "Sat\u0131lan Hizmet Maliyeti(-)"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Tesis, Makine Ve Cihazlar", 
-        "root_type": "Asset"
+        "name": "Sat\u0131lan Ticari Mallar Maliyeti(-)"
        }, 
        {
-        "account_type": "tr_view", 
-        "name": "Arazi Ve Arsalar"
+        "name": "Sat\u0131lan Mamuller Maliyeti(-)"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Yer Alt\u0131 Ve Yer \u00dcst\u00fc D\u00fczenleri", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Di\u011fer Maddi Duran Varl\u0131klar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Birikmi\u015f Amortismanlar(-)", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Ta\u015f\u0131tlar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Demirba\u015flar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Yap\u0131lmakta Olan Yat\u0131r\u0131mlar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Verilen Avanslar", 
-        "root_type": "Asset"
+        "name": "Di\u011fer Sat\u0131\u015flar\u0131n Maliyeti(-)"
        }
       ], 
-      "name": "Maddi Duran Varl\u0131klar"
+      "name": "Sat\u0131\u015flar\u0131n Maliyeti(-)"
      }, 
      {
-      "account_type": "tr_asset", 
       "children": [
        {
-        "account_type": "tr_asset", 
-        "name": "Verilen Avanslar", 
-        "root_type": "Asset"
+        "name": "Uzun Vadeli Bor\u00e7lanma Giderleri(-)"
        }, 
        {
-        "account_type": "tr_asset", 
-        "name": "Birikmi\u015f Amortismanlar(-)", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Di\u011fer Maddi Olmayan Duran Varl\u0131klar", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "\u00d6zel Maliyetler", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Kurulu\u015f Ve \u00d6rg\u00fctlenme Giderleri", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "\u015eerefiye", 
-        "root_type": "Asset"
-       }, 
-       {
-        "account_type": "tr_asset", 
-        "name": "Haklar", 
-        "root_type": "Asset"
-       }
-      ], 
-      "name": "Maddi Olmayan Duran Varl\u0131klar", 
-      "root_type": "Asset"
-     }, 
-     {
-      "account_type": "tr_expense", 
-      "children": [
-       {
-        "account_type": "tr_expense", 
-        "name": "Verilen Avanslar", 
-        "root_type": "Expense"
-       }, 
-       {
-        "account_type": "tr_expense", 
-        "name": "Di\u011fer \u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
-        "root_type": "Expense"
-       }, 
-       {
-        "account_type": "tr_expense", 
-        "name": "Birikmi\u015f T\u00fckenme Paylar\u0131(-)", 
-        "root_type": "Expense"
-       }, 
-       {
-        "account_type": "tr_expense", 
-        "name": "Arama Giderleri", 
-        "root_type": "Expense"
-       }, 
-       {
-        "account_type": "tr_expense", 
-        "name": "Haz\u0131rl\u0131k Ve Geli\u015ftirme Giderleri", 
-        "root_type": "Expense"
-       }
-      ], 
-      "name": "\u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
-      "root_type": "Expense"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Alacaklar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Personelden Alacaklar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer \u00c7e\u015fitli Alacaklar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Di\u011fer Alacak Senetleri Reeskontu(-)"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Ortaklardan Alacaklar"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "\u0130\u015ftiraklerden Alacaklar"
-       }
-      ], 
-      "name": "Di\u011fer Alacaklar"
-     }
-    ], 
-    "name": "Duran Varl\u0131klar"
-   }, 
-   {
-    "account_type": "tr_view", 
-    "children": [
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Genel \u00dcretim Giderleri Yans\u0131tma Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Genel \u00dcretim Giderleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Genel \u00dcretim Giderleri Verimlilik Giderleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Genel \u00dcretim Giderleri B\u00fct\u00e7e Farklar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Genel \u00dcretim Giderleri Kapasite Farklar\u0131"
-       }
-      ], 
-      "name": "Genel \u00dcretim Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130\u015f\u00e7ilik S\u00fcre Farklar\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130\u015f\u00e7ilik Giderleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130\u015f\u00e7ilik Giderleri Yans\u0131tma Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130\u015f\u00e7ilik \u00dccret Farklar\u0131"
-       }
-      ], 
-      "name": "Direkt \u0130\u015f\u00e7ilik Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130lk Madde Ve Malzeme Miktar Fark\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130lk Madde Ve Malzeme Fiyat Fark\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Direkt \u0130lk Madde Ve Malzeme Yans\u0131tma Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Direk \u0130lk Madde Ve Malzeme Giderleri Hesab\u0131"
-       }
-      ], 
-      "name": "Direkt \u0130lk Madde Ve Malzeme Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Maliyet Muhasebesi Ba\u011flant\u0131 Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Maliyet Muhasebesi Yans\u0131tma Hesab\u0131"
-       }
-      ], 
-      "name": "Maliyet Muhasebesi Ba\u011flant\u0131 Hesaplar\u0131"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Genel Y\u00f6netim Giderleri Yans\u0131tma Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Genel Y\u00f6netim Gider Farklar\u0131 Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Genel Y\u00f6netim Giderleri"
-       }
-      ], 
-      "name": "Genel Y\u00f6netim Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri Fark Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Atra\u015ft\u0131rma Ve Geli\u015ftirme Giderleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Pazarlama Sat\u0131\u015f Ve Dag\u0131t\u0131m Giderleri Yans\u0131tma Hesab\u0131"
-       }
-      ], 
-      "name": "Pazarlama, Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Hizmet \u00dcretim Maliyeti"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Hizmet \u00dcretim Maliyeti Yans\u0131tma Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Hizmet \u00dcretim Maliyeti Fark Hesaplar\u0131"
-       }
-      ], 
-      "name": "Hizmet \u00dcretim Maliyeti"
-     }, 
-     {
-      "account_type": "tr_view", 
-      "children": [
-       {
-        "account_type": "tr_view", 
-        "name": "Finansman Giderleri"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Finansman Giderleri Fark Hesab\u0131"
-       }, 
-       {
-        "account_type": "tr_view", 
-        "name": "Finansman Giderleri Yans\u0131tma Hesab\u0131"
+        "name": "K\u0131sa Vadeli Bor\u00e7lanma Giderleri(-)"
        }
       ], 
       "name": "Finansman Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00d6nceki D\u00f6nem Gelir Ve K\u00e2rlar\u0131"
+       }, 
+       {
+        "name": "Di\u011fer Ola\u011fan D\u0131\u015f\u0131 Gelir Ve K\u00e2rlar"
+       }
+      ], 
+      "name": "Ola\u011fan D\u0131\u015f\u0131 Gelir Ve K\u00e2rlar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00c7al\u0131\u015fmayan K\u0131s\u0131m Gider Ve Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "\u00d6nceki D\u00f6nem Gider Ve Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "Di\u011fer Ola\u011fan D\u0131\u015f\u0131 Gider Ve Zararlar(-)"
+       }
+      ], 
+      "name": "Ola\u011fan D\u0131\u015f\u0131 Gider Ve Zaralar(-)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "D\u00f6nem K\u00e2r\u0131 Vergi Ve Di\u011fer Yasal Y\u00fck\u00fcml\u00fcl\u00fck Kar\u015f\u0131l\u0131klar\u0131(-)"
+       }, 
+       {
+        "name": "D\u00f6nem Net K\u00e2r\u0131 Veya Zarar\u0131"
+       }, 
+       {
+        "name": "D\u00f6nem K\u00e2r\u0131 Veya Zarar\u0131"
+       }, 
+       {
+        "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Enflasyon D\u00fczeltme Hesab\u0131"
+       }, 
+       {
+        "name": "Enflasyon D\u00fczeltme Hesab\u0131"
+       }
+      ], 
+      "name": "D\u00f6nem Net K\u00e2r\u0131 Ve Zarar\u0131"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri(-)"
+       }, 
+       {
+        "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri(-)"
+       }, 
+       {
+        "name": "Genel Y\u00f6netim Giderleri(-)"
+       }
+      ], 
+      "name": "Faaliyet Giderleri(-)"
      }
     ], 
-    "name": "Maliyet Hesaplar\u0131"
+    "name": "Gelir Tablosu Hesaplar\u0131"
+   }, 
+   {
+    "name": "Naz\u0131m Hesaplar"
    }
   ], 
   "name": "Tek D\u00fczen Hesap Plan\u0131"

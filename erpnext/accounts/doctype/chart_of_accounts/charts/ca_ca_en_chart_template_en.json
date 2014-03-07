@@ -1,177 +1,146 @@
 {
  "name": "Canada - Chart of Accounts for english-speaking provinces", 
  "root": {
-  "account_type": "view", 
   "children": [
    {
-    "account_type": "view", 
     "children": [
      {
-      "account_type": "view", 
       "children": [
        {
-        "account_type": "view", 
-        "name": "OTHER NON-OPERATING INCOMES"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "INTERESTS"
-       }
-      ], 
-      "name": "NON-OPERATING INCOMES"
-     }, 
-     {
-      "account_type": "view", 
-      "children": [
-       {
-        "account_type": "income", 
-        "name": "Inside Sales", 
-        "root_type": "Income"
-       }, 
-       {
-        "account_type": "income", 
-        "name": "Non-Harmonized Provinces Sales", 
-        "root_type": "Income"
-       }, 
-       {
-        "account_type": "income", 
         "name": "International Sales", 
         "root_type": "Income"
        }, 
        {
-        "account_type": "income", 
-        "name": "Harmonized Provinces Sales", 
+        "name": "Inside Sales", 
         "root_type": "Income"
        }, 
        {
-        "account_type": "view", 
+        "name": "Non-Harmonized Provinces Sales", 
+        "root_type": "Income"
+       }, 
+       {
         "name": "OTHER OPERATING INCOMES"
+       }, 
+       {
+        "name": "Harmonized Provinces Sales", 
+        "root_type": "Income"
        }
       ], 
       "name": "OPERATING INCOMES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "OTHER NON-OPERATING INCOMES"
+       }, 
+       {
+        "name": "INTERESTS"
+       }
+      ], 
+      "name": "NON-OPERATING INCOMES"
      }
     ], 
     "name": "INCOMES"
    }, 
    {
-    "account_type": "view", 
     "children": [
      {
-      "account_type": "view", 
       "children": [
        {
-        "account_type": "view", 
-        "name": "PREPAID EXPENSES"
+        "name": "TREASURY OR TREASURY EQUIVALENTS"
        }, 
        {
-        "account_type": "view", 
         "children": [
          {
-          "account_type": "view", 
-          "name": "ALLOWANCE FOR DOUBTFUL ACCOUNTS"
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "HST receivable - 13%", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "HST receivable - 15%", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "HST receivable - 14%", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "HST receivable"
          }, 
          {
-          "account_type": "receivable", 
-          "name": "Customers Account", 
+          "account_type": "Receivable", 
+          "name": "PST/QST receivable", 
+          "root_type": "Asset"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "GST receivable", 
           "root_type": "Asset"
          }
         ], 
-        "name": "ACCOUNTS RECEIVABLES"
+        "name": "TAXES RECEIVABLES"
        }, 
        {
-        "account_type": "view", 
+        "name": "INVESTMENTS HELD FOR TRADING"
+       }, 
+       {
+        "name": "CERTIFICATES OF DEPOSITS"
+       }, 
+       {
         "children": [
          {
-          "account_type": "asset", 
-          "name": "Stock Delivered But Not Billed", 
+          "name": "Stock In Hand", 
           "root_type": "Asset"
          }, 
          {
-          "account_type": "asset", 
-          "name": "Stock In Hand", 
+          "name": "Stock Delivered But Not Billed", 
           "root_type": "Asset"
          }
         ], 
         "name": "STOCKS"
        }, 
        {
-        "account_type": "view", 
-        "name": "CERTIFICATES OF DEPOSITS"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "INVESTMENTS HELD FOR TRADING"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "TREASURY OR TREASURY EQUIVALENTS"
-       }, 
-       {
-        "account_type": "view", 
         "name": "CASH"
        }, 
        {
-        "account_type": "view", 
+        "name": "PREPAID EXPENSES"
+       }, 
+       {
         "children": [
          {
-          "account_type": "receivable", 
-          "name": "GST receivable", 
+          "account_type": "Receivable", 
+          "name": "Customers Account", 
           "root_type": "Asset"
          }, 
          {
-          "account_type": "receivable", 
-          "name": "PST/QST receivable", 
-          "root_type": "Asset"
-         }, 
-         {
-          "account_type": "view", 
-          "children": [
-           {
-            "account_type": "receivable", 
-            "name": "HST receivable - 13%", 
-            "root_type": "Asset"
-           }, 
-           {
-            "account_type": "receivable", 
-            "name": "HST receivable - 14%", 
-            "root_type": "Asset"
-           }, 
-           {
-            "account_type": "receivable", 
-            "name": "HST receivable - 15%", 
-            "root_type": "Asset"
-           }
-          ], 
-          "name": "HST receivable"
+          "name": "ALLOWANCE FOR DOUBTFUL ACCOUNTS"
          }
         ], 
-        "name": "TAXES RECEIVABLES"
+        "name": "ACCOUNTS RECEIVABLES"
        }
       ], 
       "name": "CURRENT ASSETS"
      }, 
      {
-      "account_type": "view", 
       "children": [
        {
-        "account_type": "view", 
-        "name": "INVESTMENTS AVAILABLE FOR SALE"
-       }, 
-       {
-        "account_type": "view", 
         "children": [
          {
-          "account_type": "view", 
           "name": "ACCUMULATED DEPRECIATIONS"
          }
         ], 
         "name": "TANGIBLE ASSETS"
        }, 
        {
-        "account_type": "view", 
+        "name": "INVESTMENTS AVAILABLE FOR SALE"
+       }, 
+       {
         "children": [
          {
-          "account_type": "view", 
           "name": "PATENTS, TRADEMARKS AND COPYRIGHTS"
          }
         ], 
@@ -184,266 +153,119 @@
     "name": "ASSETS"
    }, 
    {
-    "account_type": "view", 
     "children": [
      {
-      "account_type": "view", 
-      "name": "TRANSLATION ADJUSTMENTS"
-     }, 
-     {
-      "account_type": "view", 
-      "name": "CONTRIBUTED SURPLUS"
-     }, 
-     {
-      "account_type": "view", 
-      "name": "RETAINED EARNINGS"
-     }, 
-     {
-      "account_type": "view", 
-      "name": "PREMIUMS"
-     }, 
-     {
-      "account_type": "view", 
-      "name": "SHARE CAPITAL"
-     }, 
-     {
-      "account_type": "view", 
-      "name": "DIVIDENDS"
-     }
-    ], 
-    "name": "EQUITY"
-   }, 
-   {
-    "account_type": "view", 
-    "children": [
-     {
-      "account_type": "view", 
       "children": [
        {
-        "account_type": "view", 
-        "name": "OTHER NON-OPERATING EXPENSES"
+        "name": "OTHER OPERATING EXPENSES"
        }, 
        {
-        "account_type": "view", 
-        "name": "INTERESTS EXPENSES"
-       }
-      ], 
-      "name": "NON-OPERATING EXPENSES"
-     }, 
-     {
-      "account_type": "view", 
-      "children": [
-       {
-        "account_type": "view", 
         "name": "RESEARCH AND DEVELOPMENT EXPENSES"
        }, 
        {
-        "account_type": "view", 
         "children": [
          {
-          "account_type": "expense", 
-          "name": "Holidays", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Salaries, wages and commissions", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Parental Insurance", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Labour Health and Safety", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Annuities", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Provincial Income Tax", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Federal Income Tax", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Employment Insurance", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Labour Standards", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
-          "name": "Health Services Fund", 
-          "root_type": "Expense"
-         }
-        ], 
-        "name": "LABOUR EXPENSES"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "SALES EXPENSES"
-       }, 
-       {
-        "account_type": "view", 
-        "children": [
-         {
-          "account_type": "expense", 
-          "name": "Purchases in non-harmonized provinces", 
-          "root_type": "Expense"
-         }, 
-         {
-          "account_type": "expense", 
           "name": "International Purchases", 
           "root_type": "Expense"
          }, 
          {
-          "account_type": "expense", 
-          "name": "Inside Purchases", 
+          "name": "Purchases in non-harmonized provinces", 
           "root_type": "Expense"
          }, 
          {
-          "account_type": "expense", 
           "name": "Purchases in harmonized provinces", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Inside Purchases", 
           "root_type": "Expense"
          }
         ], 
         "name": "COST OF GOODS SOLD"
        }, 
        {
-        "account_type": "view", 
-        "name": "OTHER OPERATING EXPENSES"
+        "name": "SALES EXPENSES"
        }, 
        {
-        "account_type": "view", 
         "name": "GENERAL EXPENSES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Parental Insurance", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Holidays", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Labour Health and Safety", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Employment Insurance", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Federal Income Tax", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Salaries, wages and commissions", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Annuities", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Provincial Income Tax", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Labour Standards", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Health Services Fund", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "LABOUR EXPENSES"
        }
       ], 
       "name": "OPERATING EXPENSES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INTERESTS EXPENSES"
+       }, 
+       {
+        "name": "OTHER NON-OPERATING EXPENSES"
+       }
+      ], 
+      "name": "NON-OPERATING EXPENSES"
      }
     ], 
     "name": "EXPENSES"
    }, 
    {
-    "account_type": "view", 
     "children": [
      {
-      "account_type": "view", 
       "children": [
        {
-        "account_type": "view", 
-        "name": "DEFERRED TAXES"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "NON-CURRENT FINANCIAL DEBTS"
-       }, 
-       {
-        "account_type": "view", 
-        "name": "OTHER NON-CURRENT LIABILITIES"
-       }
-      ], 
-      "name": "NON-CURRENT LIABILITIES"
-     }, 
-     {
-      "account_type": "view", 
-      "children": [
-       {
-        "account_type": "view", 
-        "name": "CURRENT FINANCIAL DEBTS"
-       }, 
-       {
-        "account_type": "view", 
         "children": [
          {
-          "account_type": "payable", 
-          "name": "Suppliers Account", 
-          "root_type": "Liability"
-         }
-        ], 
-        "name": "ACCOUNTS PAYABLES"
-       }, 
-       {
-        "account_type": "view", 
-        "children": [
-         {
-          "account_type": "liability", 
-          "name": "Stock Received But Not Billed", 
-          "root_type": "Liability"
-         }
-        ], 
-        "name": "LIABILITIES ASSETS HELD FOR TRANSFER"
-       }, 
-       {
-        "account_type": "view", 
-        "children": [
-         {
-          "account_type": "view", 
           "children": [
            {
-            "account_type": "view", 
             "children": [
              {
-              "account_type": "liability", 
-              "name": "EI - Employees Contribution", 
-              "root_type": "Liability"
-             }, 
-             {
-              "account_type": "liability", 
-              "name": "EI - Employer Contribution", 
-              "root_type": "Liability"
-             }
-            ], 
-            "name": "EMPLOYMENT INSURANCE TO PAY"
-           }, 
-           {
-            "account_type": "liability", 
-            "name": "Federal Income Tax", 
-            "root_type": "Liability"
-           }
-          ], 
-          "name": "CANADIAN REVENU AGENCY"
-         }, 
-         {
-          "account_type": "view", 
-          "children": [
-           {
-            "account_type": "liability", 
-            "name": "Labour Health and Safety to pay", 
-            "root_type": "Liability"
-           }, 
-           {
-            "account_type": "liability", 
-            "name": "Health Services Fund to pay", 
-            "root_type": "Liability"
-           }, 
-           {
-            "account_type": "view", 
-            "children": [
-             {
-              "account_type": "liability", 
               "name": "Annuities - Employees Contribution", 
               "root_type": "Liability"
              }, 
              {
-              "account_type": "liability", 
               "name": "Annuities - Employer Contribution", 
               "root_type": "Liability"
              }
@@ -451,68 +273,107 @@
             "name": "ANNUITIES TO PAY"
            }, 
            {
-            "account_type": "view", 
+            "name": "Health Services Fund to pay", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Labour Health and Safety to pay", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Provincial Income Tax", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Labour Standards to pay", 
+            "root_type": "Liability"
+           }, 
+           {
             "children": [
              {
-              "account_type": "liability", 
               "name": "PAP - Employer Contribution", 
               "root_type": "Liability"
              }, 
              {
-              "account_type": "liability", 
               "name": "PAP - Employee Contribution", 
               "root_type": "Liability"
              }
             ], 
             "name": "PARENTAL INSURANCE PLAN TO PAY"
-           }, 
-           {
-            "account_type": "liability", 
-            "name": "Labour Standards to pay", 
-            "root_type": "Liability"
-           }, 
-           {
-            "account_type": "liability", 
-            "name": "Provincial Income Tax", 
-            "root_type": "Liability"
            }
           ], 
           "name": "PROVINCIAL REVENU AGENCY"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "EI - Employees Contribution", 
+              "root_type": "Liability"
+             }, 
+             {
+              "name": "EI - Employer Contribution", 
+              "root_type": "Liability"
+             }
+            ], 
+            "name": "EMPLOYMENT INSURANCE TO PAY"
+           }, 
+           {
+            "name": "Federal Income Tax", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "CANADIAN REVENU AGENCY"
          }
         ], 
         "name": "LABOUR TAXES TO PAY"
        }, 
        {
-        "account_type": "view", 
+        "name": "STOCK LIABILITIES"
+       }, 
+       {
+        "name": "OTHER ACCOUNTS PAYABLES"
+       }, 
+       {
         "children": [
          {
-          "account_type": "view", 
+          "account_type": "Payable", 
+          "name": "Suppliers Account", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "ACCOUNTS PAYABLES"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "GST to pay", 
+          "root_type": "Liability"
+         }, 
+         {
           "children": [
            {
-            "account_type": "payable", 
+            "account_type": "Payable", 
+            "name": "HST to pay - 14%", 
+            "root_type": "Liability"
+           }, 
+           {
+            "account_type": "Payable", 
             "name": "HST to pay - 13%", 
             "root_type": "Liability"
            }, 
            {
-            "account_type": "payable", 
+            "account_type": "Payable", 
             "name": "HST to pay - 15%", 
-            "root_type": "Liability"
-           }, 
-           {
-            "account_type": "payable", 
-            "name": "HST to pay - 14%", 
             "root_type": "Liability"
            }
           ], 
           "name": "HST to pay"
          }, 
          {
-          "account_type": "payable", 
-          "name": "GST to pay", 
-          "root_type": "Liability"
-         }, 
-         {
-          "account_type": "payable", 
+          "account_type": "Payable", 
           "name": "PST/QST to pay", 
           "root_type": "Liability"
          }
@@ -520,18 +381,62 @@
         "name": "TAXES PAYABLES"
        }, 
        {
-        "account_type": "view", 
-        "name": "STOCK LIABILITIES"
+        "name": "CURRENT FINANCIAL DEBTS"
        }, 
        {
-        "account_type": "view", 
-        "name": "OTHER ACCOUNTS PAYABLES"
+        "children": [
+         {
+          "name": "Stock Received But Not Billed", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "LIABILITIES ASSETS HELD FOR TRANSFER"
        }
       ], 
       "name": "CURRENT LIABILITIES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "NON-CURRENT FINANCIAL DEBTS"
+       }, 
+       {
+        "name": "OTHER NON-CURRENT LIABILITIES"
+       }, 
+       {
+        "name": "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES"
+       }, 
+       {
+        "name": "DEFERRED TAXES"
+       }
+      ], 
+      "name": "NON-CURRENT LIABILITIES"
      }
     ], 
     "name": "LIABILITIES"
+   }, 
+   {
+    "children": [
+     {
+      "name": "DIVIDENDS"
+     }, 
+     {
+      "name": "TRANSLATION ADJUSTMENTS"
+     }, 
+     {
+      "name": "RETAINED EARNINGS"
+     }, 
+     {
+      "name": "SHARE CAPITAL"
+     }, 
+     {
+      "name": "PREMIUMS"
+     }, 
+     {
+      "name": "CONTRIBUTED SURPLUS"
+     }
+    ], 
+    "name": "EQUITY"
    }
   ], 
   "name": "Account Chart CA EN", 
