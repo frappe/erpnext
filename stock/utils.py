@@ -274,9 +274,8 @@ def reorder_item():
 				reorder_level, reorder_qty = webnotes.conn.get_value("Item", bin.item_code,
 					["re_order_level", "re_order_qty"])
 				material_request_type = "Purchase"
-			
+		
 			if flt(reorder_level) and flt(bin.projected_qty) < flt(reorder_level):
-				print bin.item_code
 				if flt(reorder_level) - flt(bin.projected_qty) > flt(reorder_qty):
 					reorder_qty = flt(reorder_level) - flt(bin.projected_qty)
 					
@@ -296,7 +295,6 @@ def reorder_item():
 
 def create_material_request(material_requests):
 	"""	Create indent on reaching reorder level	"""
-	print "create_material_request"
 	mr_list = []
 	defaults = webnotes.defaults.get_defaults()
 	exceptions_list = []
@@ -304,7 +302,6 @@ def create_material_request(material_requests):
 	current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
-			print company
 			try:
 				items = material_requests[request_type][company]
 				if not items:
@@ -319,8 +316,6 @@ def create_material_request(material_requests):
 				}]
 			
 				for d in items:
-					if d.item_code == "RMVACB0004":
-						print d
 					item = webnotes.doc("Item", d.item_code)
 					mr.append({
 						"doctype": "Material Request Item",
@@ -336,13 +331,13 @@ def create_material_request(material_requests):
 						"qty": d.reorder_qty,
 						"brand": item.brand,
 					})
+			
 				mr_bean = webnotes.bean(mr)
 				mr_bean.insert()
 				mr_bean.submit()
 				mr_list.append(mr_bean)
-				print mr_list
+
 			except:
-				print "exceptions", webnotes.local.message_log, webnotes.getTraceback()
 				if webnotes.local.message_log:
 					exceptions_list.append([] + webnotes.local.message_log)
 					webnotes.local.message_log = []
