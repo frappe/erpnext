@@ -172,12 +172,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), precision("write_off_amount"));
 		}
 		
-		this.frm.script_manager.trigger("write_off_amount");
+		this.calculate_outstanding_amount();
+		this.frm.refresh_fields();
 	},
 	
 	write_off_amount: function() {
-		this.calculate_outstanding_amount();
-		this.frm.refresh_fields();
+		this.write_off_outstanding_amount_automatically();
 	},
 	
 	paid_amount: function() {
