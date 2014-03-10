@@ -260,8 +260,7 @@ def reorder_item():
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
 			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
 			and exists (select name from `tabItem` 
-				where `tabItem`.name = `tabBin`.item_code and 
-				is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
+				where `tabItem`.name = `tabBin`.item_code and is_stock_item='Yes' and
 				(ifnull(end_of_life, '')='' or end_of_life > now()))""", as_dict=True)
 		for bin in bin_list:
 			#check if re-order is required
