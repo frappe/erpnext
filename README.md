@@ -1,4 +1,10 @@
-# ERPNext - Open Source ERP for small, medium sized businesses
+### Note: ERPNext is part of the Frappe Platform
+
+#### This repository is only for version 3.
+
+For latest version (4 onward) and updates: [https://github.com/frappe/erpnext](https://github.com/frappe/erpnext)
+
+---
 
 [https://erpnext.com](https://erpnext.com)
 
