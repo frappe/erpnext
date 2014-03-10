@@ -270,4 +270,5 @@ patch_list = [
 	"patches.1401.fix_serial_no_status_and_warehouse",
 	"patches.1401.fix_planned_qty",
 	"patches.1401.fix_invoice_outstanding",
+	"patches.1401.delete_duplicate_bins",
 ]
