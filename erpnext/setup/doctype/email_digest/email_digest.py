@@ -314,8 +314,10 @@ class DocType(DocListController):
 			return 0, "<p>Calendar Events</p>"
 	
 	def get_todo_list(self, user_id):
-		from frappe.core.page.todo.todo import get
-		todo_list = get()
+		todo_list = frappe.db.sql("""select *
+			from `tabToDo` where (owner=%s or assigned_by=%s)
+			order by field(priority, 'High', 'Medium', 'Low') asc, date asc""",
+			(user_id, user_id), as_dict=True)
 		
 		html = ""
 		if todo_list:

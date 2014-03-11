@@ -30,7 +30,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 									frappe.app.logout();
 								}, 2000);
 							} else {
-								window.location = "app.html";
+								window.location = "/desk";
 							}
 						}, 2000);
 					}

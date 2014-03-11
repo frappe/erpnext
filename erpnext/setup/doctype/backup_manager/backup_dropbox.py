@@ -21,7 +21,7 @@ def get_dropbox_authorize_url():
 	sess = get_dropbox_session()
 	request_token = sess.obtain_request_token()
 	return_address = get_request_site_address(True) \
-		+ "?cmd=setup.doctype.backup_manager.backup_dropbox.dropbox_callback"
+		+ "?cmd=erpnext.setup.doctype.backup_manager.backup_dropbox.dropbox_callback"
 
 	url = sess.build_authorize_url(request_token, return_address)
 
@@ -71,13 +71,12 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 
 def backup_to_dropbox():
 	from dropbox import client, session
-	from conf import dropbox_access_key, dropbox_secret_key
 	from frappe.utils.backups import new_backup
 	from frappe.utils import get_files_path, get_backups_path
 	if not frappe.db:
 		frappe.connect()
 
-	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
+	sess = session.DropboxSession(frappe.conf.dropbox_access_key, frappe.conf.dropbox_secret_key, "app_folder")
 
 	sess.set_token(frappe.db.get_value("Backup Manager", None, "dropbox_access_key"),
 		frappe.db.get_value("Backup Manager", None, "dropbox_access_secret"))
@@ -120,13 +119,11 @@ def get_dropbox_session():
 		from dropbox import session
 	except:
 		frappe.msgprint(_("Please install dropbox python module"), raise_exception=1)
-		
-	try:
-		from conf import dropbox_access_key, dropbox_secret_key
-	except ImportError:
-		frappe.msgprint(_("Please set Dropbox access keys in") + " conf.py", 
-		raise_exception=True)
-	sess = session.DropboxSession(dropbox_access_key, dropbox_secret_key, "app_folder")
+	
+	if not (frappe.conf.dropbox_access_key or frappe.conf.dropbox_secret_key):
+		frappe.throw(_("Please set Dropbox access keys in your site config"))
+
+	sess = session.DropboxSession(frappe.conf.dropbox_access_key, frappe.conf.dropbox_secret_key, "app_folder")
 	return sess
 
 def upload_file_to_dropbox(filename, folder, dropbox_client):
