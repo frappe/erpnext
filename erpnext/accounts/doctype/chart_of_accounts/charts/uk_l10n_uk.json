@@ -1,0 +1,488 @@
+{
+ "name": "UK Tax and Account Chart Template (by SmartMode)", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Sales Tax Control Account"
+         }, 
+         {
+          "name": "Purchase Tax Control Account"
+         }, 
+         {
+          "name": "HMRC - VAT Account"
+         }, 
+         {
+          "name": "Manual Adjustments \uff96 VAT"
+         }, 
+         {
+          "name": "P.A.Y.E. & NI"
+         }, 
+         {
+          "name": "Other Creditors"
+         }, 
+         {
+          "name": "Sundry Creditors"
+         }, 
+         {
+          "name": "Creditors Control Account"
+         }, 
+         {
+          "name": "Net Wages"
+         }, 
+         {
+          "name": "Pension Fund"
+         }
+        ], 
+        "name": "Creditors due within one year"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Corporation Tax"
+         }, 
+         {
+          "name": "Accruals"
+         }
+        ], 
+        "name": "Accruals and deferred income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bad debt provision"
+         }
+        ], 
+        "name": "Provisions for liabilities and charges"
+       }
+      ], 
+      "name": "Current Liabilities"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Company Credit Card"
+         }, 
+         {
+          "name": "Bank Accounts"
+         }
+        ], 
+        "name": "Cash at bank and in hand"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Debtors Control Account"
+         }, 
+         {
+          "name": "Other Debtors"
+         }, 
+         {
+          "name": "Sundry Debtors"
+         }
+        ], 
+        "name": "Trade Debtors"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Prepayments"
+         }
+        ], 
+        "name": "Prepayments and accrued income"
+       }, 
+       {
+        "name": "Investment current assets"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Finished Goods"
+         }, 
+         {
+          "name": "Work in Progress"
+         }, 
+         {
+          "name": "Stock"
+         }
+        ], 
+        "name": "Stocks & WIP"
+       }
+      ], 
+      "name": "Current assets"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Other reserves"
+       }, 
+       {
+        "name": "Revaluation reserve"
+       }, 
+       {
+        "name": "Share premium account"
+       }, 
+       {
+        "name": "Called up share capital"
+       }, 
+       {
+        "name": "Profit and loss account"
+       }
+      ], 
+      "name": "Capital & Reserves"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Hire Purchase"
+         }, 
+         {
+          "name": "Loans"
+         }, 
+         {
+          "name": "Mortgages"
+         }
+        ], 
+        "name": "Creditors due after one year"
+       }
+      ], 
+      "name": "Non Current Liabilities"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Investments"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Fixtures and fittings Depreciation"
+         }, 
+         {
+          "name": "Fixtures and fittings"
+         }, 
+         {
+          "name": "Land and buildings"
+         }, 
+         {
+          "name": "Land and buildings Depreciation"
+         }, 
+         {
+          "name": "Motor vehicles Depreciation"
+         }, 
+         {
+          "name": "Motor vehicles"
+         }, 
+         {
+          "name": "Office equipment (inc computer equipment)"
+         }, 
+         {
+          "name": "Office equipment (inc computer equipment) Depreciation"
+         }, 
+         {
+          "name": "Plant and machinery Depreciation"
+         }, 
+         {
+          "name": "Plant and machinery"
+         }
+        ], 
+        "name": "Tangible assets"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Software Depreciation"
+         }, 
+         {
+          "name": "Software"
+         }, 
+         {
+          "name": "Patents & Trademarks"
+         }, 
+         {
+          "name": "Patents & Trademarks Depreciation"
+         }
+        ], 
+        "name": "Intangible assets"
+       }
+      ], 
+      "name": "Fixed assets"
+     }
+    ], 
+    "name": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Light, heat and power"
+         }, 
+         {
+          "name": "Repairs, renewals and maintenance"
+         }, 
+         {
+          "name": "Rent and rates"
+         }
+        ], 
+        "name": "Property costs"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Auditing"
+         }, 
+         {
+          "name": "Accounting"
+         }
+        ], 
+        "name": "Accountancy and audit"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Consultancy"
+         }, 
+         {
+          "name": "Legal and professional charges"
+         }
+        ], 
+        "name": "Legal and professional costs"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Recruitment fees"
+         }, 
+         {
+          "name": "Software expenses"
+         }, 
+         {
+          "name": "Travel and subsistence"
+         }, 
+         {
+          "name": "Other admin expenses"
+         }, 
+         {
+          "name": "Other computer costs"
+         }, 
+         {
+          "name": "Internet & hosting"
+         }, 
+         {
+          "name": "Mobiles"
+         }, 
+         {
+          "name": "Stationery"
+         }, 
+         {
+          "name": "Office consumables"
+         }, 
+         {
+          "name": "Postage and Carriage"
+         }, 
+         {
+          "name": "Telephone"
+         }, 
+         {
+          "name": "Books"
+         }, 
+         {
+          "name": "Network costs"
+         }
+        ], 
+        "name": "Administration and office expenses"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Car maintenance"
+         }, 
+         {
+          "name": "Car hire"
+         }, 
+         {
+          "name": "Car fuel"
+         }
+        ], 
+        "name": "Vehicle expenses"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intangible assets depn"
+         }, 
+         {
+          "name": "Tangible assets depn"
+         }
+        ], 
+        "name": "Depreciation expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Entertaining"
+         }, 
+         {
+          "name": "Other sundry expenses"
+         }, 
+         {
+          "name": "Donations"
+         }, 
+         {
+          "name": "Exchange gains/losses"
+         }, 
+         {
+          "name": "Bad debts"
+         }, 
+         {
+          "name": "Bank, credit card and other financial charges"
+         }, 
+         {
+          "name": "Insurance"
+         }
+        ], 
+        "name": "Sundry expenses"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Subcontractors payments"
+         }, 
+         {
+          "name": "Employers NIC"
+         }, 
+         {
+          "name": "Admin gross salaries"
+         }, 
+         {
+          "name": "Management gross salaries"
+         }, 
+         {
+          "name": "Directors remuneration"
+         }, 
+         {
+          "name": "Directors pension"
+         }
+        ], 
+        "name": "Salaries & wages"
+       }
+      ], 
+      "name": "Administrative expenses"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Corporation tax expense"
+       }
+      ], 
+      "name": "Tax on profit or loss on ordinary activities"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Interest paid"
+       }
+      ], 
+      "name": "Interest payable and similar charges"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Bank Interest received"
+       }, 
+       {
+        "name": "Investment Interest received"
+       }
+      ], 
+      "name": "Interest receivable and similar income:"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Profits/Losses on disposals of assets"
+       }
+      ], 
+      "name": "Other operating income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sales category 1"
+       }, 
+       {
+        "name": "Sales category 2"
+       }, 
+       {
+        "name": "Sales category 3"
+       }, 
+       {
+        "name": "Sales category 4"
+       }
+      ], 
+      "name": "Turnover"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Distribution vehicles"
+       }, 
+       {
+        "name": "Distribution salaries and wages"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PR"
+         }, 
+         {
+          "name": "Marketing, POS"
+         }, 
+         {
+          "name": "Exhibitions and events"
+         }
+        ], 
+        "name": "Advertising and promotions"
+       }, 
+       {
+        "name": "Shipping"
+       }
+      ], 
+      "name": "Distribution costs"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Cost of sales 4"
+       }, 
+       {
+        "name": "Cost of sales 3"
+       }, 
+       {
+        "name": "Cost of sales 2"
+       }, 
+       {
+        "name": "Cost of sales 1"
+       }
+      ], 
+      "name": "Cost of sales"
+     }
+    ], 
+    "name": "Profit and Loss"
+   }
+  ], 
+  "name": "Company", 
+  "parent_id": null
+ }
+}

@@ -1,0 +1,1780 @@
+{
+ "name": "Venezuelan - Account", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INGRESOS POR SERVICIOS", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "INGRESOS POR SERVICIOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "VENTAS EXPORTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VENTAS NACIONALES AL DETAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VENTAS INMUEBLES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VENTAS NACIONALES AL MAYOR", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "VENTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "DEVOLUCIONES EN VENTAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "DESCUENTOS EN VENTAS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "DESCUENTOS Y DEVOLUCION EN VENTAS"
+         }
+        ], 
+        "name": "INGRESOS OPERACIONALES"
+       }
+      ], 
+      "name": "INGRESOS OPERACIONALES"
+     }
+    ], 
+    "name": "INGRESOS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "CAPITAL SUSCRITO POR COPBAR", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACTUALIZACION DEL VALOR", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CAPITAL SOCIAL PAGADO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CAPITAL SOCIAL PAGADO"
+         }
+        ], 
+        "name": "CAPITAL SOCIAL PAGADO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "ACCIONES EN TESORERIA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACTUALIZACION DE VALOR", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "ACCIONES EN TESORERIA"
+         }
+        ], 
+        "name": "ACCIONES EN TESORERIA"
+       }
+      ], 
+      "name": "CAPITAL SOCIAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "VALOR ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACTUALIZACION DEL VALOR", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTRAS RESERVAS"
+         }
+        ], 
+        "name": "OTRAS RESERVAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "VALOR ORIGINAL RESERVA LEGAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACTUALIZACION DE VALOR", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "RESERVA LEGAL"
+         }
+        ], 
+        "name": "RESERVA LEGAL"
+       }
+      ], 
+      "name": "RESERVA DE CAPITAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "REAJUSTE POR INFLACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "REI-EJERCICIO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "REI-ACUMULADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "EXCLUSIONES FISCALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACTUALIZACION DEL PATRIMONIO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "RESULTADO POR EXPOS. A LA INFLACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "UTILIDADES DEL EJERCICIO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "UTILIDADES NO DISTRIBUIDAS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "SUPERAVIT OPERATIVO"
+         }
+        ], 
+        "name": "SUPERAVIT GANADO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "RETAM-ACTIVOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RETAM-INVENTARIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RETAM INVERSIONES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "RESULT.POR TENDENCIA DE ACTIVO NO MONETARIOS"
+         }
+        ], 
+        "name": "RESULT.POR TENDENCIA DE ACTIVO NO MONETARIOS"
+       }
+      ], 
+      "name": "SUPERAVIT"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "REI EJERCICIO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "GANACIAS Y PERDIDAS"
+         }
+        ], 
+        "name": "GANACIAS Y PERDIDAS"
+       }
+      ], 
+      "name": "GANANCIAS Y PERDIDAS"
+     }
+    ], 
+    "name": "PATRIMONIO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASIVOS A  CORTO PLAZO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTROS PASIVOS A CORTO PLAZO"
+         }
+        ], 
+        "name": "OTROS PASIVOS A CORTO PLAZO"
+       }
+      ], 
+      "name": "OTROS PASIVOS A CORTO PLAZO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "DIVDENDO POR COBRAR NO COBRADOS"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "DIVIDENDO POR PAGAR VIGENTES"
+           }
+          ], 
+          "name": "DIVIDENDO POR PAGAR"
+         }
+        ], 
+        "name": "DIVIDENDO POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "I.N.C.E.S APORTES EMPLEADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "F.A.O.V APORTES EMPLEADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "FONDO FIDEICOMISO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.V.S.S APORTES EMPLEADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "FONDO DE AHORRO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "ACUMULACIONES LABORALES"
+         }
+        ], 
+        "name": "ACUMULACIONES LABORALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "I.V.S.S APORTE EMPRESA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "F.A.O.V APORTE EMPRESA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.N.C.E.S APORTE EMPRESA", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CONTRIBUCIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PRESTAMOS SOBRE FIDEICOMISO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "EMBARGO DE SUELDO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SINDICATOS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "RETENCIONES VARIAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "INTERESES S/PRESTACIONES SOCIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BONIFICACION ACCIDENTAL UNICA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "L.O.P.T.I.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VACACIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "UTILIDADES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PRESTACIONES SOCIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "POLIZA DE SEGURO POR PAGAR"
+           }, 
+           {
+            "name": "PUBLICIDAD Y PROPAGANDA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BONO VACACIONAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TARJETA CORPORATIVA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ALQUILERES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMISIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "NOMINA POR PAGAR"
+           }, 
+           {
+            "name": "CONVESION DE COMERCIALIZACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PROGRAMA DE ALIMENTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "IMPUESTOS POR PAGAR"
+           }, 
+           {
+            "name": "ADELANTO DE CLIENTES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTRAS ACUMULACIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "I.V.A.RETENIDO EN COMPRAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RETENCIONES I.S.L.R. EMPLEADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.V.A DEBITO FISCAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RETENCIONES I.S.L.R. PROVEEDORES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "RETENCIONES E IMPUESTOS POR PAGAR"
+         }
+        ], 
+        "name": "GASTOS ACUMULADOS Y RETENCIONES POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO MERCANTIL"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO BANESCO"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO EXTRANJERO"
+           }
+          ], 
+          "name": "PASIVOS FINANCIEROS A CORTO PLAZO"
+         }
+        ], 
+        "name": "PASIVOS FINACIEROS A CORTO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "CUENTAS POR PAGAR SOCIOS"
+           }
+          ], 
+          "name": "CUENTAS POR PAGAR ACCIONISTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "AMD COMPUTER SHOP, C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMERCIALIZADORA M321,C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACCESORIOS AMD COMPUTADORAS,C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMERCIALIZADORA JGV 3000, C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMERCIALIZADORA LVG ELECTRONIC, C.A.", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "COMPA\u00d1IAS AFILIADAS Y RELACIONADAS"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "CUENTAS POR PAGAR PROVEEDORES"
+           }
+          ], 
+          "name": "PROVEEDORES OCASIONALES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T.W.C. COMPUTER, INC.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MICRO INFORMATICA 11C", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "STARREC GROUP USA,INC", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "PROVEEDORES EXTRANJEROS"
+         }
+        ], 
+        "name": "DOCUMENTOS Y CUENTAS POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "RESERVAS FISCALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RESERVAS FINANCIERAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RESERVAS OPERATIVAS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "RESERVAS"
+         }
+        ], 
+        "name": "RESERVAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "DECLARACION ESTIMADAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RAR AJUSTE INICIAL POR INFLACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.S.L.R. ACUMULADOS GASTOS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "I.S.L.R. ACUMULADOS GASTOS"
+         }
+        ], 
+        "name": "IMPUESTOS SOBRE LA RENTA POR PAGAR"
+       }
+      ], 
+      "name": "PASIVOA CORTO PLAZO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASIVOS FINANCIEROS A LARGO PLAZO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "PASIVOS FINANCIEROS A LARGO PLAZO"
+         }
+        ], 
+        "name": "PASIVOS FINANCIEROS A LARGO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INDEMNIZACIONES SENCILLAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INDEMNIZACIONES DOBLES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "ACUMULACIONES PARA INDEMNIZ.LABORALES"
+         }
+        ], 
+        "name": "ACUMULACIONES PARA INDEMNIZ. LABORALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASIVOS INTERCOMPA\u00d1IAS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "PASIVOS INTERCOMPA\u00d1IAS"
+         }
+        ], 
+        "name": "PASIVOS INTERCOMPA\u00d1IAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "OTROS PASIVOS A LARGO PLAZO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTROS PASIVOS A LARGO PLAZO"
+         }
+        ], 
+        "name": "OTROS PASIVOS A LARGO PLAZO"
+       }
+      ], 
+      "name": "PASIVO A LARGO PLAZO"
+     }
+    ], 
+    "name": "PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "MERCANCIA EN CONSIGNACION P. COMPRA0", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CUENTAS DE ORDEN ACREEDORAS"
+         }
+        ], 
+        "name": "CUENTAS DE ORDEN ACREEDORAS"
+       }
+      ], 
+      "name": "CUENTAS DE ORDEN ACREEDORAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "CARTAS DE CREDITOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MERCANCIAS EN CONSIGNACION", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CUENTAS DE ORDEN DEUDORAS"
+         }
+        ], 
+        "name": "CUENTAS DE ORDEN DEUDORAS"
+       }
+      ], 
+      "name": "CUENTAS DE ORDEN"
+     }
+    ], 
+    "name": "CUENTAS DE ORDEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "DEPOSITOS GARANTIA ARRENDAMIENTO LOCAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "DEPOSITOS GARANTIA PROVEEDORES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "DEPOSITOS GARANTIA BANCOS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTROS ACTIVOS"
+         }
+        ], 
+        "name": "OTROS ACTIVOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "OTRAS CUENTAS POR COBRAR"
+           }, 
+           {
+            "name": "GASTOS DE CONSTITUCION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MARCA DE FABRICA", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CARGOS DIFERIDOS"
+         }
+        ], 
+        "name": "CARGOS DIFERIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "IMPUESTOS DIFERIDOS I.S.L.R", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "IMPUESTOS DIFERIDOS I.S.L.R"
+         }
+        ], 
+        "name": "IMPUESTOS DIFERIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INVERSIONES EN BONOS M.N.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BONOS TITULOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INVERSIONES PERMANENTES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "TITULOS DE VALORES"
+         }
+        ], 
+        "name": "INVERSIONES LARGO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INMUEBLES COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MAQUINARIAS Y EQUIPOS COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TERRENO COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VEHICULOS COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "LICENCIA & SOFWARE COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MUEBLES Y ENSERES COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "ACTIVO FIJO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "MUEBLES Y ENSERES COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MEJORAS A PROPIEDAD COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TERRENOS COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MAQUINARIAS Y EQUIPOS COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INMUEBLES COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VEHICULOS COSTO ORIGINAL", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "DEPRECIACION Y AMORTIZACION ACUMULADAS"
+         }
+        ], 
+        "name": "ACTIVO FIJO NETO"
+       }
+      ], 
+      "name": "ACTIVO LARGO PLAZO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PATENTE  MUNICIPAL ESTIMADA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.V.A. CREDITO FISCAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.V.A. CREDITO FISCAL IMPORTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.S.L.R. DECLARACION ESTIMADAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.V.A. RETENIDO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "I.S.L.R RETENIDO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "IMPUESTOS"
+         }
+        ], 
+        "name": "IMPUESTOS PAGADOS POR ANTICIPADOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PUBLICIDAD", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SEGURO PREPAGADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SEGURO H.C.M.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ALQUILERES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "GASTOS PREPAGADOS OPERATIVOS"
+         }
+        ], 
+        "name": "GASTOS OPERACIONALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "MERCANCIA EN TRANSITOS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "INVENTARIO EN TRANSITO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "INVENTARIOS DE MERCANCIA EXTERIOR", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INVENTARIOS DE MERCANCIA NACIONAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INVENTARIO FINAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INVENTARIO MERCANCIA ACTUALIZACION DEL VALOR", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "INVENTARIOS DE MERCANCIA"
+         }
+        ], 
+        "name": "INVENTARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "INTERESES POR COBRAR"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ACCESORIOS AMD COMPUTADORAS,C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AMD COMPUTER SHOP, C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMERCIALIZADORA JGV 3000, C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMERCIALIZADORA LVG ELECTRONIC, C.A.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMERCIALIZADORA M321,C.A.", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "COMPA\u00d1IAS AFILIADAS Y RELACIONADAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PROVISION INCOBRALES NACIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PROVINCION INCOBRABLES EXTERIOR", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "PROVINCION INCOBRABLES NACIONAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "VACACIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "UTILIDADES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VIATICOS VENDEDORES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PRESTAMOS PERSONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR SOCIOS"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR CLIENTES"
+           }, 
+           {
+            "name": "SEGURO DE VEHICULOS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CUENTAS POR COBRAR EMPLEADOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "COBRO ANTICIPO CLIENTES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR CLIENTES"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR DETALLISTA"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR MAYORISTA"
+           }
+          ], 
+          "name": "CUENTAS POR COBRAR NACIONALES"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR EXTERIOR"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "EFECTOS POR COBRAR NACIONALES"
+           }
+          ], 
+          "name": "EFECTOS POR COBRAR"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "CUENTAS POR PAGAR SOCIOS"
+           }
+          ], 
+          "name": "CUENTAS POR COBRAR ACCIONISTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ENTES GUBERNAMENTALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TRANSFERENCIAS BANCARIAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ADELANTO A PROVEEDORES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "DEPOSITOS VARIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RECLAMO AL SEGURO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "0TRAS CUENTAS X COBRAR OTROS DEUDORES"
+           }
+          ], 
+          "name": "0TRAS CUENTAS POR COBRAR"
+         }
+        ], 
+        "name": "DOCUMENTOS Y CUENTAS  POR COBRAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INVERSIONES EN BONOS M.E.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PAPELES COMERCIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INVERSIONES EN BONOS M.N.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INVERSIONES TEMPORALES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "INVERSIONES A CORTO PLAZO"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO MERCANTIL COMMERCEBANK"
+           }
+          ], 
+          "name": "BANCOS E INSTITUCIONES FINANCIERAS EXTERIOR"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO FONDO COMUN"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO BANPLUS"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO DE VENEZUELA"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO PROVINCIAL"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO BANESCO"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO MERCANTIL"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANESCO BANCO UNIVERSAL"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO BOLIVAR"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO CORP BANCA"
+           }, 
+           {
+            "account_type": "Bank or Cash", 
+            "name": "BANCO EXTERIOR"
+           }
+          ], 
+          "name": "BANCOS E INTITUCIONES FINANCIERAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "CAJA CHICA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "FONDO A DEPOSITAR", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CAJA PRINCIPAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CAJA GENERAL", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "CAJAS"
+         }
+        ], 
+        "name": "EFECTIVO Y VALORES NEGOCIABLES"
+       }
+      ], 
+      "name": "ACTIVO CIRCULANTE"
+     }
+    ], 
+    "name": "ACTIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASAJE EXTERIOR NO DEDUCIBLE", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VIATICOS DEDUCIBLES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ASEO URBANO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "FOTOCOPIADO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ASEO Y LIMPIEZA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ENERGIA ELECTRICA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TELEFONOS Y TELEGRAFOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AGUA POTABLE Y REFRIGERIO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SERVICIOS DE PUBLICIDAD", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BONIFICACION UNICA ESPECIAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SERVICIOS CONTRATADOS A TERCEROS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PARTIDAS NO DEDUCIBLES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SEGUROS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "REPAROS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GASTOS DE I.S.L.R.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "RELACIONES INDUSTRIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SERVICIOS PUBLICOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MANTENIMIENTOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "REPARACIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SUMINISTROS DE EQUIPOS DE OFICINA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "HONORARIOS PROFESIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "UTILES DE LIMPIEZA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ARTICULOS DE OFICINA", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMBUSTIBLES Y LUBRICANTES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "FLETES Y TRANSPORTES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ESTACIONAMINETO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TRAMITES DE SOLVENCIAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CONDOMINIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GASTOS DE SISTEMAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "DERECHO DE FRENTE", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TRAMITES LEGALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMIDAS, VIAJES Y TRASLADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GASTOS DE REPRESENTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VIATICOS NO DEDUCIBLES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "EQUIPOS Y EVENTOS DEPOSRTIVOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "HOSPEDAJE", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "OBSEQUIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CONVENSION  DE COMERCIALIZACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AVERIAS-PRODUCTOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ALQUILER DE LOCALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AJUSTE DE INVENTARIOS OBSOLETOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AJUSTE DE INVENTARIOS DONADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PASAJES LOCALES Y EXT.DEDUCIBLES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "GASTOS GENERALES"
+         }
+        ], 
+        "name": "GASTOS GENERALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INMUEBLES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MAQUINARIAS Y EQUIPOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VEHICULOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MUEBLES Y ENSERES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "LICENCIA & SOFTWARE", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MEJORAS A PROPIEDAD", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "DEPRECIACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "SEGUROS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "AMORTIZACION"
+         }
+        ], 
+        "name": "DEPRECIACION Y AMORTIZACION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "MEDIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PUBLICIDAD", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "MATERIALES PROMOCIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "EVENTOS ESPECIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "ACTIVIDADES REGIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PROMOCIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "DISTRIBUCION Y REPARTO LOCALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CUENTAS INCOBRABLES NACIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PRODUCCION MATERIAL P.O.P.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TRANSPORTE Y FLETES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PATENTE INDUSTRIA Y COMERCIO", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "GASTOS DE DISTRIBUCION"
+         }
+        ], 
+        "name": "GASTOS COMERCIALIZACION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "BENEFICIOS COMEDOR", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BENEFICIOS UNIFORMES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SUELDOS EMPLEADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "HORAS EXTRAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SUELDOS DIRECTIVOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMISION AL PERSONAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "HORAS EXTRAORDINARIAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PROGRAMA DE ALIMENTACION EMPLEADOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "TRANSPORTE Y ALIMENTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GASTOS PERSONAL CONTRATADO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GASTOS PERSONAL TRANSFERIDOSR", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VIATICOS Y GASTOS DE REPRESENTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PRIMA POR RENDIMIENTO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "SEGURO H.C.M.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CONTRIBUCIONES I.N.C.E.S.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CONTRIBUCIONES F.A.O.V.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "CONTRIBUCIONES I.V.S.S.", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BONO VACACIONAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "LOCTI", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "LOPCYMAT", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BONIFICACION UNICA ESPECIAL", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GASTOS PERSONAL PASANTE", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "UTILIDADES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "VACACIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BENEFICIOS ADIESTRAMIENTOS-CURSOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BENEFICIOS BECAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "BENEFICIOS SERVICIOS MEDICOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PRESTACIONES SOCIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INTERESES S/PRESTACIONES SOCIALES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "GASTOS PERSONAL"
+         }
+        ], 
+        "name": "GASTOS DE PERSONAL"
+       }
+      ], 
+      "name": "GASTOS OPERATIVOS"
+     }
+    ], 
+    "name": "GASTOS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "COSTO DE VENTAS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "COSTO DE VENTAS"
+         }
+        ], 
+        "name": "COSTO DE VENTAS"
+       }
+      ], 
+      "name": "COSTO DE VENTAS"
+     }
+    ], 
+    "name": "COSTO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "OTROS INGRESOS FINANCIEROS", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "INTERESES DE BANCOS NACIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INTERESES DE BANCOS EXTRANJEROS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "INGRESOS FINANCIEROS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "GANANCIAS EN VENTAS DE ACTIVOS FIJOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GANANCIAS EN DIFERENCIAL CAMBIARIO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "GANANCIAS EN VENTAS DE INVERSIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "OTROS INGRESOS", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "INTERESES VARIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AJUSTES A\u00d1OS ANTERIORES", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTROS INGRESOS"
+         }
+        ], 
+        "name": "OTROS INGRESOS"
+       }
+      ], 
+      "name": "OTROS INGRESOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PERDIDA POR ROBO DE INVENTARIO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "FLUCTUACION CAMBIARIA NO REALIZADAS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PERDIDAS EN VENTAS ACTIVOS FIJOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "INTERESES S/PRESTACIONES SOCIALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "AJUSTE DE A\u00d1OS ANTERIORES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PERDIDAS EN DIFERENCIAL CAMBIARIO", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PERDIDAS EN VENTAS DE INVERSIONES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "PERDIDAS EN INVERSIONES DE BONOS P.", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "OTROS EGRESOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "IMPUESTOS A LAS TRANSACIONES FINANCIERAS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "EGRESOS NO GRAVABLES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "INTERESES BANCOS NACIONALES", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMISIONES TICKET DE ALIMENTACION", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "COMSIONES Y GASTOS BANCARIOS", 
+            "root_type": "Asset"
+           }, 
+           {
+            "name": "OTROS EGRESOS", 
+            "root_type": "Asset"
+           }
+          ], 
+          "name": "GASTOS FINANCIEROS"
+         }
+        ], 
+        "name": "GASTOS FINANCIEROS"
+       }
+      ], 
+      "name": "EGRESOS"
+     }
+    ], 
+    "name": "OTROS INGRESOS (EGRESOS)"
+   }
+  ], 
+  "name": "Main Account Company"
+ }
+}
