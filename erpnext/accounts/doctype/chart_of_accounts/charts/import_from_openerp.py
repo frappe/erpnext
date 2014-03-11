@@ -7,6 +7,7 @@ Import chart of accounts from OpenERP sources
 from __future__ import unicode_literals
 
 import os, json
+import ast
 from xml.etree import ElementTree as ET
 from frappe.utils.datautils import read_csv_content
 from frappe.utils import cstr
@@ -21,37 +22,76 @@ all_account_types = []
 
 def go():
 	global accounts, charts
-	# get default account types
-	default_types_root = ET.parse(os.path.join(path, "account", "data", 
-			"data_account_type.xml")).getroot()
-	default_account_types = get_account_types([default_types_root], None, prefix="account")
+	default_account_types = get_default_account_types()
 	
+	country_dirs = []
 	for basepath, folders, files in os.walk(path):
 		basename = os.path.basename(basepath)
-		if basename.startswith("l10n"):
-			accounts, charts = {}, {}
-			xml_roots = get_xml_roots(basepath, files)
-			csv_content = get_csv_contents(basepath, files)
-			
-			prefix = basename if csv_content else None
-			account_types = get_account_types(xml_roots.get("account.account.type", []), 
-				csv_content.get("account.account.type", []), prefix)
-			account_types.update(default_account_types)
-			
-			if xml_roots:
-				make_maps_for_xml(xml_roots, account_types, basename)
-				make_account_trees()
-			
-			if csv_content:
-				make_maps_for_csv(csv_content, account_types)
-			
-			make_charts()
+		if basename.startswith("l10n_"):
+			country_dirs.append(basename)
+	
+	for country_dir in country_dirs:
+		accounts, charts = {}, {}
+		country_path = os.path.join(path, country_dir)
+		manifest = ast.literal_eval(open(os.path.join(country_path, "__openerp__.py")).read())
+		data_files = manifest.get("data", []) + manifest.get("init_xml", []) + \
+			manifest.get("update_xml", [])
+		files_path = [os.path.join(country_path, d) for d in data_files]
+		xml_roots = get_xml_roots(files_path)
+		csv_content = get_csv_contents(files_path)
+		prefix = country_dir if csv_content else None
+		account_types = get_account_types(xml_roots.get("account.account.type", []), 
+			csv_content.get("account.account.type", []), prefix)
+		account_types.update(default_account_types)
+		
+		if xml_roots:
+			make_maps_for_xml(xml_roots, account_types, country_dir)
+
+		if csv_content:
+			make_maps_for_csv(csv_content, account_types, country_dir)
+		make_account_trees()
+		make_charts()
+		
+def get_default_account_types():
+	default_types_root = []
+	for file in ["data_account_type.xml"]:
+		default_types_root.append(ET.parse(os.path.join(path, "account", "data", 
+			"data_account_type.xml")).getroot())
+	return get_account_types(default_types_root, None, prefix="account")
+
+# def go_test():
+# 	global accounts, charts
+# 	# get default account types
+# 	default_types_root = ET.parse(os.path.join(path, "account", "data", 
+# 			"data_account_type.xml")).getroot()
+# 	default_account_types = get_account_types([default_types_root], None, prefix="account")
+# 	
+# 	for basepath, folders, files in os.walk(path):
+# 		basename = os.path.basename(basepath)
+# 		if basename.startswith("l10n_it"):
+# 			print basepath, folders, files
+# 			accounts, charts = {}, {}
+# 			xml_roots = get_xml_roots(basepath, files)
+# 			csv_content = get_csv_contents(basepath, files)
+# 			
+# 			prefix = basename if csv_content else None
+# 			account_types = get_account_types(xml_roots.get("account.account.type", []), 
+# 				csv_content.get("account.account.type", []), prefix)
+# 			account_types.update(default_account_types)
+# 			
+# 			if xml_roots:
+# 				make_maps_for_xml(xml_roots, account_types, basename)
+# 			
+# 			if csv_content:
+# 				make_maps_for_csv(csv_content, account_types)
+# 			
+# 			make_account_trees()
+# 			make_charts()
 					
-def get_xml_roots(basepath, files):
+def get_xml_roots(files_path):
 	xml_roots = frappe._dict()
-	for fname in files:
-		fname = cstr(fname)
-		filepath = os.path.join(basepath, fname)
+	for filepath in files_path:
+		fname = os.path.basename(filepath)
 		if fname.endswith(".xml"):
 			tree = ET.parse(filepath)
 			root = tree.getroot()
@@ -62,12 +102,12 @@ def get_xml_roots(basepath, files):
 					break
 	return xml_roots
 	
-def get_csv_contents(basepath, files):
+def get_csv_contents(files_path):
 	csv_content = {}
-	for fname in files:
-		fname = cstr(fname)
-		filepath = os.path.join(basepath, fname)
-		for file_type in ["account.account.template", "account.account.type"]:
+	for filepath in files_path:
+		fname = os.path.basename(filepath)
+		for file_type in ["account.account.template", "account.account.type", 
+				"account.chart.template"]:
 			if fname.startswith(file_type) and fname.endswith(".csv"):
 				with open(filepath, "r") as csvfile:
 					try:
@@ -128,7 +168,7 @@ def get_account_types(root_list, csv_content, prefix=None):
 				types[node_id] = data
 	return types
 	
-def make_maps_for_xml(xml_roots, account_types, folder):
+def make_maps_for_xml(xml_roots, account_types, country_dir):
 	"""make maps for `charts` and `accounts`"""	
 	for model, root_list in xml_roots.iteritems():
 		for root in root_list:
@@ -139,15 +179,17 @@ def make_maps_for_xml(xml_roots, account_types, folder):
 						if field.get("name")=="name":
 							data["name"] = field.text
 						if field.get("name")=="parent_id":
-							data["parent_id"] = field.get("ref")
+							parent_id = field.get("ref") or field.get("eval")
+							data["parent_id"] = parent_id
+							
 						if field.get("name")=="user_type":
 							value = field.get("ref")
-
 							if account_types.get(value, {}).get("root_type"):
 								data["root_type"] = account_types[value]["root_type"]
 							else:
 								if "asset" in value: data["root_type"] = "Asset"
-								elif "liability" in value: data["root_type"] = "Liability"
+								elif ("liability" in value or "equity" in value): 
+									data["root_type"] = "Liability"
 								elif "income" in value: data["root_type"] = "Income"
 								elif "expense" in value: data["root_type"] = "Expense"
 								
@@ -155,7 +197,7 @@ def make_maps_for_xml(xml_roots, account_types, folder):
 								data["account_type"] = account_types[value]["account_type"]
 								if data["account_type"] not in all_account_types:
 									all_account_types.append(data["account_type"])
-									
+
 					data["children"] = []
 					accounts[node.get("id")] = data
 				
@@ -166,46 +208,60 @@ def make_maps_for_xml(xml_roots, account_types, folder):
 							data["name"] = field.text
 						if field.get("name")=="account_root_id":
 							data["account_root_id"] = field.get("ref")
-						data["id"] = folder
+						data["id"] = country_dir
 					charts.setdefault(node.get("id"), {}).update(data)
 
 def make_account_trees():
 	"""build tree hierarchy"""
 	for id in accounts.keys():
 		account = accounts[id]
-		if account.get("parent_id") and accounts[account["parent_id"]]:
-			accounts[account["parent_id"]]["children"].append(account)
-			del account["parent_id"]
+		if account.get("parent_id"):
+			if accounts.get(account["parent_id"]):
+				accounts[account["parent_id"]]["children"].append(account)
+				del account["parent_id"]
+			else:
+				print account.get("name")
+				del accounts[id]
 
 	# remove empty children
 	for id in accounts.keys():
 		if "children" in accounts[id] and not accounts[id].get("children"):
 			del accounts[id]["children"]
 	
-def make_maps_for_csv(csv_content, account_types):
-	for content in csv_content.get("account.account.template"):
-		if content[0][0]=="id":
-			for row in content[1:]:
-				data = dict(zip(content[0], row))
+def make_maps_for_csv(csv_content, account_types, country_dir):
+	for content in csv_content.get("account.account.template", []):
+		for row in content[1:]:
+			data = dict(zip(content[0], row))
+			account = {
+				"name": data.get("name"),
+				"parent_id": data.get("parent_id:id") or data.get("parent_id/id"),
+				"children": []
+			}
+			user_type = data.get("user_type/id") or data.get("user_type:id")
+			if account_types.get(user_type, {}).get("root_type"):
+				account["root_type"] = account_types[user_type]["root_type"]
 				
-				account = {
+			if account_types.get(user_type, {}).get("account_type"):
+				account["account_type"] = account_types[user_type]["account_type"]
+				if account["account_type"] not in all_account_types:
+					all_account_types.append(account["account_type"])
+				
+			accounts[data.get("id")] = account
+			if not account.get("parent_id") and data.get("chart_template_id:id"):
+				chart_id = data.get("chart_template_id:id")
+				charts.setdefault(chart_id, {}).update({"account_root_id": data.get("id")})
+					
+	for content in csv_content.get("account.chart.template", []):
+		for row in content[1:]:
+			if row:
+				data = dict(zip(content[0], row))
+				charts.setdefault(data.get("id"), {}).update({
+					"account_root_id": data.get("account_root_id:id") or \
+						data.get("account_root_id/id"),
 					"name": data.get("name"),
-					"parent_id": data.get("parent_id:id") or data.get("parent_id/id"),
-					"children": []
-				}
-				user_type = data.get("user_type/id") or data.get("user_type:id")
-				if account_types.get(user_type, {}).get("root_type"):
-					account["root_type"] = account_types[user_type]["root_type"]
-					
-				if account_types.get(user_type, {}).get("account_type"):
-					account["account_type"] = account_types[user_type]["account_type"]
-					if account["account_type"] not in all_account_types:
-						all_account_types.append(account["account_type"])
-					
-				accounts[data.get("id")] = account
-				if not account.get("parent_id") and data.get("chart_template_id:id"):
-					chart_id = data.get("chart_template_id:id")
-					charts.setdefault(chart_id, {}).update({"account_root_id": data.get("id")})
+					"id": country_dir
+				})
+		
 					
 def make_charts():
 	"""write chart files in app/setup/doctype/company/charts"""

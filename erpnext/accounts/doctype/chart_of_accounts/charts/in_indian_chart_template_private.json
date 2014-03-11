@@ -11,19 +11,15 @@
         "root_type": "Liability"
        }, 
        {
-        "name": "Owner's Equity Accounts", 
-        "root_type": "Liability"
-       }, 
-       {
-        "name": "Unearned Revenues", 
-        "root_type": "Liability"
-       }, 
-       {
         "name": "Interest Payable", 
         "root_type": "Liability"
        }, 
        {
         "name": "Wages Payable", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Owner's Equity Accounts", 
         "root_type": "Liability"
        }, 
        {
@@ -58,6 +54,10 @@
         "root_type": "Liability"
        }, 
        {
+        "name": "Unearned Revenues", 
+        "root_type": "Liability"
+       }, 
+       {
         "name": "Reserve and Surplus Account", 
         "root_type": "Liability"
        }
@@ -67,6 +67,10 @@
      }, 
      {
       "children": [
+       {
+        "name": "Buildings", 
+        "root_type": "Asset"
+       }, 
        {
         "name": "Supplies", 
         "root_type": "Asset"
@@ -99,10 +103,6 @@
        }, 
        {
         "name": "Prepaid Insurance", 
-        "root_type": "Asset"
-       }, 
-       {
-        "name": "Buildings", 
         "root_type": "Asset"
        }, 
        {

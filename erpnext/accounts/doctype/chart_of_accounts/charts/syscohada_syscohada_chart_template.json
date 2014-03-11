@@ -2726,42 +2726,54 @@
        {
         "children": [
          {
-          "name": "AUTRES SUBVENTIONS D'INVESTISSEMENT"
+          "name": "AUTRES SUBVENTIONS D'INVESTISSEMENT", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "Autres"
+            "name": "Autres", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "\u00c9tat"
+            "name": "\u00c9tat", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "D\u00e9partements"
+            "name": "D\u00e9partements", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "R\u00e9gions"
+            "name": "R\u00e9gions", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Entreprises publiques ou mixtes"
+            "name": "Entreprises publiques ou mixtes", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Communes et collectivit\u00e9s publiques d\u00e9centralis\u00e9es"
+            "name": "Communes et collectivit\u00e9s publiques d\u00e9centralis\u00e9es", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Organismes internationaux"
+            "name": "Organismes internationaux", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Entreprises et organismes priv\u00e9s"
+            "name": "Entreprises et organismes priv\u00e9s", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "SUBVENTIONS D'\u00c9QUIPEMENT A"
+          "name": "SUBVENTIONS D'\u00c9QUIPEMENT A", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "SUBVENTIONS D'\u00c9QUIPEMENT B"
+          "name": "SUBVENTIONS D'\u00c9QUIPEMENT B", 
+          "root_type": "Liability"
          }
         ], 
-        "name": "SUBVENTIONS D'INVESTISSEMENT"
+        "name": "SUBVENTIONS D'INVESTISSEMENT", 
+        "root_type": "Liability"
        }, 
        {
         "children": [
@@ -2952,204 +2964,262 @@
        {
         "children": [
          {
-          "name": "ACTIONNAIRES, CAPITAL SOUSCRIT, NON APPEL\u00c9"
+          "name": "ACTIONNAIRES, CAPITAL SOUSCRIT, NON APPEL\u00c9", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "Capital souscrit, appel\u00e9, vers\u00e9, amorti"
+            "name": "Capital souscrit, appel\u00e9, vers\u00e9, amorti", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Capital souscrit, non appel\u00e9"
+            "name": "Capital souscrit, non appel\u00e9", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Capital souscrit, appel\u00e9, vers\u00e9, non amorti"
+            "name": "Capital souscrit, appel\u00e9, vers\u00e9, non amorti", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Capital souscrit, appel\u00e9, non vers\u00e9"
+            "name": "Capital souscrit, appel\u00e9, non vers\u00e9", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Capital souscrit soumis \u00e0 des conditions particuli\u00e8res"
+            "name": "Capital souscrit soumis \u00e0 des conditions particuli\u00e8res", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "CAPITAL SOCIAL"
+          "name": "CAPITAL SOCIAL", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "CAPITAL PERSONNEL"
-         }, 
-         {
-          "children": [
-           {
-            "name": "Autres dotations"
-           }, 
-           {
-            "name": "Dotation initiale"
-           }, 
-           {
-            "name": "Dotations compl\u00e9mentaires"
-           }
-          ], 
-          "name": "CAPITAL PAR DOTATION"
+          "name": "CAPITAL PERSONNEL", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "Autres primes"
+            "name": "Autres dotations", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Primes d'\u00e9mission"
+            "name": "Dotation initiale", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Primes de fusion"
-           }, 
-           {
-            "name": "Primes d'apport"
-           }, 
-           {
-            "name": "Primes de conversion"
+            "name": "Dotations compl\u00e9mentaires", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "PRIMES LI\u00c9ES AUX CAPITAUX PROPRES"
+          "name": "CAPITAL PAR DOTATION", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "Pr\u00e9l\u00e8vements d\u2019autoconsommation"
+            "name": "Autres primes", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Op\u00e9rations courantes"
+            "name": "Primes d'\u00e9mission", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "R\u00e9mun\u00e9rations, imp\u00f4ts et autres charges personnelles"
+            "name": "Primes de fusion", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Apports temporaires"
+            "name": "Primes d'apport", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Autres pr\u00e9l\u00e8vements"
+            "name": "Primes de conversion", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "COMPTE DE L'EXPLOITANT"
+          "name": "PRIMES LI\u00c9ES AUX CAPITAUX PROPRES", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "\u00c9carts de r\u00e9\u00e9valuation l\u00e9gale"
+            "name": "Pr\u00e9l\u00e8vements d\u2019autoconsommation", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "\u00c9carts de r\u00e9\u00e9valuation libre"
+            "name": "Op\u00e9rations courantes", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "R\u00e9mun\u00e9rations, imp\u00f4ts et autres charges personnelles", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Apports temporaires", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Autres pr\u00e9l\u00e8vements", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "\u00c9CARTS DE R\u00c9\u00c9VALUATION"
+          "name": "COMPTE DE L'EXPLOITANT", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "name": "\u00c9carts de r\u00e9\u00e9valuation l\u00e9gale", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "\u00c9carts de r\u00e9\u00e9valuation libre", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "\u00c9CARTS DE R\u00c9\u00c9VALUATION", 
+          "root_type": "Liability"
          }
         ], 
-        "name": "CAPITAL"
+        "name": "CAPITAL", 
+        "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "name": "R\u00c9SERVES STATUTAIRES OU CONTRACTUELLES"
+          "name": "R\u00c9SERVES STATUTAIRES OU CONTRACTUELLES", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "R\u00c9SERVE L\u00c9GALE"
-         }, 
-         {
-          "children": [
-           {
-            "name": "R\u00e9serves facultatives"
-           }, 
-           {
-            "name": "R\u00e9serves diverses"
-           }
-          ], 
-          "name": "AUTRES R\u00c9SERVES"
+          "name": "R\u00c9SERVE L\u00c9GALE", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "Autres r\u00e9serves r\u00e9glement\u00e9es"
+            "name": "R\u00e9serves facultatives", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "R\u00e9serves cons\u00e9cutives \u00e0 l'octroi de subventions d'investissement"
-           }, 
-           {
-            "name": "R\u00e9serves de plus-values nettes \u00e0 long terme"
+            "name": "R\u00e9serves diverses", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "R\u00c9SERVES R\u00c9GLEMENT\u00c9ES"
+          "name": "AUTRES R\u00c9SERVES", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres r\u00e9serves r\u00e9glement\u00e9es", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "R\u00e9serves cons\u00e9cutives \u00e0 l'octroi de subventions d'investissement", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "R\u00e9serves de plus-values nettes \u00e0 long terme", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "R\u00c9SERVES R\u00c9GLEMENT\u00c9ES", 
+          "root_type": "Liability"
          }
         ], 
-        "name": "R\u00c9SERVES"
+        "name": "R\u00c9SERVES", 
+        "root_type": "Liability"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Perte - Amortissements r\u00e9put\u00e9s diff\u00e9r\u00e9s"
+            "name": "Perte - Amortissements r\u00e9put\u00e9s diff\u00e9r\u00e9s", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Perte nette \u00e0 reporter"
+            "name": "Perte nette \u00e0 reporter", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "REPORT \u00c0 NOUVEAU D\u00c9BITEUR"
+          "name": "REPORT \u00c0 NOUVEAU D\u00c9BITEUR", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "REPORT \u00c0 NOUVEAU CR\u00c9DITEUR"
+          "name": "REPORT \u00c0 NOUVEAU CR\u00c9DITEUR", 
+          "root_type": "Liability"
          }
         ], 
-        "name": "REPORT \u00c0 NOUVEAU"
+        "name": "REPORT \u00c0 NOUVEAU", 
+        "root_type": "Liability"
        }, 
        {
         "children": [
          {
-          "name": "R\u00c9SULTAT HORS ACTIVIT\u00c9S ORDINAIRES (R.H.A.O.)"
+          "name": "R\u00c9SULTAT HORS ACTIVIT\u00c9S ORDINAIRES (R.H.A.O.)", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "R\u00c9SULTAT NET : PERTE"
+          "name": "R\u00c9SULTAT NET : PERTE", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "EXC\u00c9DENT BRUT D'EXPLOITATION (E.B.E.)"
+          "name": "EXC\u00c9DENT BRUT D'EXPLOITATION (E.B.E.)", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "R\u00c9SULTAT D'EXPLOITATION (R.E.)"
+          "name": "R\u00c9SULTAT D'EXPLOITATION (R.E.)", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "R\u00c9SULTAT FINANCIER (R.F.)"
+          "name": "R\u00c9SULTAT FINANCIER (R.F.)", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "R\u00c9SULTAT DES ACTIVIT\u00c9S ORDINAIRES (R.A.O.)"
-         }, 
-         {
-          "children": [
-           {
-            "name": "R\u00e9sultat en instance d'affectation : Perte"
-           }, 
-           {
-            "name": "R\u00e9sultat en instance d'affectation : B\u00e9n\u00e9fice"
-           }
-          ], 
-          "name": "R\u00c9SULTAT EN INSANCE D\u2019AFFECTATION"
-         }, 
-         {
-          "name": "R\u00c9SULTAT NET : B\u00c9N\u00c9FICE"
+          "name": "R\u00c9SULTAT DES ACTIVIT\u00c9S ORDINAIRES (R.A.O.)", 
+          "root_type": "Liability"
          }, 
          {
           "children": [
            {
-            "name": "Marge brute sur marchandises"
+            "name": "R\u00e9sultat en instance d'affectation : Perte", 
+            "root_type": "Liability"
            }, 
            {
-            "name": "Marge brute sur mati\u00e8res"
+            "name": "R\u00e9sultat en instance d'affectation : B\u00e9n\u00e9fice", 
+            "root_type": "Liability"
            }
           ], 
-          "name": "MARGE BRUTE (M.B.)"
+          "name": "R\u00c9SULTAT EN INSANCE D\u2019AFFECTATION", 
+          "root_type": "Liability"
          }, 
          {
-          "name": "VALEUR AJOUT\u00c9E (V.A.)"
+          "name": "R\u00c9SULTAT NET : B\u00c9N\u00c9FICE", 
+          "root_type": "Liability"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Marge brute sur marchandises", 
+            "root_type": "Liability"
+           }, 
+           {
+            "name": "Marge brute sur mati\u00e8res", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "MARGE BRUTE (M.B.)", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "VALEUR AJOUT\u00c9E (V.A.)", 
+          "root_type": "Liability"
          }
         ], 
-        "name": "R\u00c9SULTAT NET DE L'EXERCICE"
+        "name": "R\u00c9SULTAT NET DE L'EXERCICE", 
+        "root_type": "Liability"
        }
       ], 
       "name": "Comptes de capitaux"

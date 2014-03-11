@@ -1,7 +1,542 @@
 {
  "name": "Basic Chart of Account", 
  "root": {
-  "children": [], 
+  "children": [
+   {
+    "children": [
+     {
+      "name": "Automobile Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Payroll Expenses", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Interest Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Continuing Education", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Meals and Entertainment", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Custom Hire and Contract Labor", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Repairs and Maintenance", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Postage and Delivery", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Small Tools and Equipment", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Chemicals Purchased", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Gasoline, Fuel and Oil", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Equipment Rental", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Taxes - Property", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Miscellaneous Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Uniforms", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Veterinary, Breeding, Medicine", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Professional Fees", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Janitorial Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "General Liability Insurance", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Life and Disability Insurance", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Health Insurance", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Professional Liability", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Worker's Compensation", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Insurance Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Travel Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Advertising and Promotion", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Office Supplies", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Dues and Subscriptions", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Feed Purchased", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Bank Service Charges", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Marketing Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Storage and Warehousing", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Computer and Internet Expenses", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Fertilizers and Lime", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Seeds and Plants Purchased", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Conservation Expenses", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Freight and Trucking", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Depreciation Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Printing and Reproduction", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Car and Truck Expenses", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Charitable Contributions", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Rent Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Utilities", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Telephone Expense", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Business Licenses and Permits", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Expenses", 
+    "root_type": "Expense"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Client Trust Account", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "Account Receivable", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Receivable", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Bank or Cash", 
+        "name": "Cash or Cash Equivalents", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Current Assets", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Security Deposits Asset", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Other Assets", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Court Costs", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Advanced Client Costs", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Filing Fees", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Expert Witness Fees", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Other Current Assets", 
+      "root_type": "Asset"
+     }, 
+     {
+      "account_type": "Fixed Asset", 
+      "children": [
+       {
+        "account_type": "Fixed Asset", 
+        "name": "Furniture and Equipment", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Accumulated Depreciation", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Fixed Assets", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "Assets", 
+    "root_type": "Asset"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Capital Stock", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Retained Earnings", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Dividends Paid", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Opening Balance Equity", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Equity", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Account Payable", 
+            "root_type": "Liability"
+           }
+          ], 
+          "name": "Payable", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Current Liabilities", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sales Tax Payable", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Customer Deposits Received", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Payroll Liabilities", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Use Tax Payable", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Other Current Liabilities", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Liabilities", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Liabilities and Equity", 
+    "root_type": "Liability"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Settlement Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Commodity Credit Loans", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Administrative Fees", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Shipping and Delivery Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Sales", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Commission income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Fuel Tax Credits and Other Inc.", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Livestock Sales", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Custom Hire Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Crop Insurance Proceeds", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Legal Fee Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Cooperative Distributions", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Job Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Crop Sales", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Sales Discounts", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Rental Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Farmers Market Sales", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Sales", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Sales Discounts", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Service Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Agricultural Program Payments", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Income", 
+    "root_type": "Income"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Proceeds from Sale of Assets", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Finance Charge Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Interest Income", 
+      "root_type": "Income"
+     }, 
+     {
+      "name": "Insurance Proceeds Received", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Other Income", 
+    "root_type": "Income"
+   }, 
+   {
+    "account_type": "Cost of Goods Sold", 
+    "children": [
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Other Job Related Costs", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Commissions Paid", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Tools and Small Equipment", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Merchant Account Fees", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Job Materials Purchased", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Subcontracted Services", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Equipment Rental for Jobs", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Purchases - Resale Items", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Commissions Paid", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Freight and Shipping Costs", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Merchant Account Fees", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Media Purchased for Clients", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Purchase Discounts", 
+      "root_type": "Expense"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Subcontractors Expense", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Cost of Goods Sold", 
+    "root_type": "Expense"
+   }
+  ], 
   "name": "Basic", 
   "parent_id": null
  }

@@ -3,9 +3,994 @@
  "root": {
   "children": [
    {
-    "name": "CUENTAS DE ORDEN"
+    "children": [
+     {
+      "children": [
+       {
+        "name": "canoni di leasing", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "fitti passivi", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "COSTI PER GODIMENTO BENI DI TERZI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "merci c/rimanenze finali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "materie di consumo c/rimanenze finali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "materie di consumo c/esistenze iniziali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "merci c/esistenze iniziali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "premi su acquisti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "resi su acquisti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ribassi e abbuoni attivi", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "merci c/acquisti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "materie di consumo c/acquisti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "merci c/apporti", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "COSTO DEL VENDUTO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "accantonamento per spese future", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "accantonamento per manutenzioni programmate", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "ALTRI ACCANTONAMENTI"
+       }, 
+       {
+        "children": [
+         {
+          "name": "accantonamento per responsabilit\u00e0 civile", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "ACCANTONAMENTI PER RISCHI"
+       }
+      ], 
+      "name": "ACCANTONAMENTI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "oneri fiscali diversi", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "oneri vari", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "arrotondamenti passivi", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "sopravvenienze passive ordinarie diverse", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "perdite su crediti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "minusvalenze ordinarie diverse", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "insussistenze passive ordinarie diverse", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "ONERI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ammortamento fabbricati", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento imballaggi durevoli", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento arredamento", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento automezzi", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento attrezzature commerciali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento macchine d'ufficio", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento impianti e macchinari", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "AMMORTAMENTI IMMOBILIZZAZIONI MATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "altri costi per il personale", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "oneri sociali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "salari e stipendi", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "TFRL", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "COSTI PER IL PERSONALE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ammortamento software", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento costi di impianto", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "ammortamento avviamento", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "AMMORTAMENTI IMMOBILIZZAZIONI IMMATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "costi di vigilanza", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi per i locali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi per energia", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi di pubblicit\u00e0", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi di trasporto", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi postali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "spese di incasso", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "provvigioni passive", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi di manutenzione e riparazione", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi di assicurazione", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi telefonici", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi di consulenze", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "costi di esercizio automezzi", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "COSTI PER SERVIZI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "svalutazioni immobilizzazioni materiali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "svalutazioni immobilizzazioni immateriali", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "svalutazione crediti", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "SVALUTAZIONI"
+     }
+    ], 
+    "name": "COSTI DELLA PRODUZIONE"
+   }, 
+   {
+    "children": [
+     {
+      "name": "imposte dell'esercizio", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "IMPOSTE DELL'ESERCIZIO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "banche c/sovvenzioni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "mutui passivi", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "debiti v/altri finanziatori", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banche c/c passivi", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banche c/RIBA all'incasso", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banche c/anticipi su fatture", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banche c/cambiali all'incasso", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "DEBITI FINANZIARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "debiti per imposte", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "erario c/IVA", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "IVA n/debito", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "debiti per ritenute da versare", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "debiti per cauzioni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "personale c/retribuzioni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "clienti c/cessione", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "debiti v/istituti previdenziali", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "personale c/liquidazioni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "creditori diversi", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "DEBITI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ratei passivi", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "risconti passivi", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "RATEI E RISCONTI PASSIVI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "perdita d'esercizio", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "utile d'esercizio", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "patrimonio netto", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "titolare c/ritenute subite", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "prelevamenti extra gestione", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "PATRIMONIO NETTO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "debiti per TFRL", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "TRATTAMENTO FINE RAPPORTO DI LAVORO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "banca ... c/c", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banca ... c/c", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banca ... c/c", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "bilancio di chiusura", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "bilancio di apertura", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "istituti previdenziali", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "IVA c/liquidazioni", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "CONTI TRANSITORI E DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "merci da ricevere", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "fornitori c/impegni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "impegni per beni in leasing", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "creditori c/leasing", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "clienti c/impegni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "merci da consegnare", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "creditori per fideiussioni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "depositanti beni", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "beni di terzi", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "creditori per avalli", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "rischi per avalli", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "rischi per effetti scontati", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "banche c/effetti scontati", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "rischi per fideiussioni", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "CONTI DEI SISTEMI SUPPLEMENTARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fatture da ricevere", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "debiti da liquidare", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "cambiali passive", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "debiti v/fornitori", 
+        "root_type": "Liability"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "clienti c/acconti", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "DEBITI COMMERCIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fondo per imposte", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "fondo responsabilit\u00e0 civile", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "fondo spese future", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "fondo manutenzioni programmate", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "FONDI PER RISCHI E ONERI"
+     }
+    ], 
+    "name": "PASSIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "arrotondamenti attivi", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "proventi vari", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "insussistenze attive ordinarie diverse", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "plusvalenze ordinarie diverse", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "fitti attivi", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "sopravvenienze attive ordinarie diverse", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "RICAVI E PROVENTI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ribassi e abbuoni passivi", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "merci c/vendite", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "rimborsi spese di vendita", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "premi su vendite", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "resi su vendite", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "VENDITE E PRESTAZIONI"
+     }
+    ], 
+    "name": "VALORE DELLA PRODUZIONE"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "sopravvenienze passive straordinarie", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "imposte esercizi precedenti", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "insussistenze passive straordinarie", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "minusvalenze straordinarie", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "ONERI STRAORDINARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "insussistenze attive straordinarie", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "sopravvenienze attive straordinarie", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "plusvalenze straordinarie", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "PROVENTI STRAORDINARI"
+     }
+    ], 
+    "name": "PROVENTI E ONERI STRAORDINARI"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "mutui attivi", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILIZZAZIONI FINANZIARIE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fornitori immobilizzazioni c/acconti", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento impianti e macchinari", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento fabbricati", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento arredamento", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento automezzi", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento attrezzature commerciali", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento macchine d'ufficio", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento imballaggi durevoli", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "imballaggi durevoli", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "macchine d'ufficio", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "attrezzature commerciali", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "automezzi", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "arredamento", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fabbricati", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "impianti e macchinari", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILIZZAZIONI MATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fondo ammortamento costi di impianto", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "avviamento", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "software", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "costi di impianto", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento software", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo ammortamento avviamento", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "IMMOBILIZZAZIONI IMMATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fondo svalutazione crediti", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fondo rischi su crediti", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti da liquidare", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti commerciali diversi", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "clienti c/spese anticipate", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "crediti v/clienti", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "cambiali allo sconto", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "cambiali all'incasso", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "cambiali attive", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "fatture da emettere", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "cambiali insolute", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti insoluti", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "CREDITI COMMERCIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fornitori c/acconti", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "materie di consumo", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "merci", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "RIMANENZE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "crediti v/istituti previdenziali", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "debitori diversi", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "personale c/acconti", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti per cauzioni", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti per ritenute subite", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti per imposte", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "IVA n/credito", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "IVA c/acconto", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "crediti per IVA", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "imposte c/acconto", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "CREDITI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "risconti attivi", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "ratei attivi", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "RATEI E RISCONTI ATTIVI"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Bank or Cash", 
+        "name": "assegni", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Bank or Cash", 
+        "name": "denaro in cassa", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Bank or Cash", 
+        "name": "valori bollati", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Bank or Cash", 
+        "name": "c/c postali", 
+        "root_type": "Asset"
+       }, 
+       {
+        "account_type": "Bank or Cash", 
+        "name": "banche c/c", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "DISPONIBILIT\u00c0 LIQUIDE"
+     }
+    ], 
+    "name": "ATTIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "proventi finanziari diversi", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "interessi attivi v/clienti", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "interessi attivi bancari", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "interessi attivi postali", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "PROVENTI FINANZIARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "oneri finanziari diversi", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "interessi passivi bancari", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "interessi passivi su mutui", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "interessi passivi v/fornitori", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "sconti passivi bancari", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "ONERI FINANZIARI"
+     }
+    ], 
+    "name": "PROVENTI E ONERI FINANZIARI"
+   }, 
+   {
+    "children": [
+     {
+      "name": "stato patrimoniale", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "conto di risultato economico", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "CONTI DI RISULTATO"
    }
   ], 
-  "name": "PLAN DE CTAS. ECUADOR"
+  "name": "Azienda", 
+  "parent_id": null
  }
 }

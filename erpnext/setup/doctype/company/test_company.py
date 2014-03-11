@@ -8,18 +8,25 @@ import unittest
 
 class TestCompany(unittest.TestCase):
 	def test_coa(self):
-		company_bean = frappe.bean({
-			"doctype": "Company",
-			"company_name": "_Test Company 2",
-			"abbr": "_TC2",
-			"default_currency": "INR",
-			"country": "India",
-			"chart_of_accounts": "India - Chart of Accounts for Public Ltd"
-		})
+		for country, chart_name in frappe.db.sql("""select country, chart_name 
+			from `tabChart of Accounts` order by country""", as_list=1):
+				print country
+				# print "Chart Name: ", chart_name
+				
+				company_bean = frappe.bean({
+					"doctype": "Company",
+					"company_name": "_Test Company 2",
+					"abbr": "_TC2",
+					"default_currency": "INR",
+					"country": country,
+					"chart_of_accounts": chart_name
+				})
 
-		company_bean.insert()
-		
-		self.assertTrue(frappe.db.get_value("Account", "Balance Sheet - _TC2"))
+				company_bean.insert()
+				self.assertTrue(frappe.db.sql("""select count(*) from tabAccount 
+					where company='_Test Company 2'""")[0][0] > 10)
+				
+				frappe.delete_doc("Company", "_Test Company 2")
 		
 
 test_records = [
