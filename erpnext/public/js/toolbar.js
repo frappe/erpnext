@@ -5,9 +5,9 @@
 frappe.provide('erpnext.toolbar');
 
 erpnext.toolbar.setup = function() {
-	// profile
+	// user
 	var $user = $('#toolbar-user');
-	$user.append('<li><a href="#Form/Profile/'+user+'"><i class="icon-fixed-width icon-user"></i> '
+	$user.append('<li><a href="#Form/User/'+user+'"><i class="icon-fixed-width icon-user"></i> '
 		+frappe._("My Settings")+'...</a></li>');
 	$user.append('<li class="divider"></li>');
 	$user.append('<li><a href="https://erpnext.com/manual" target="_blank">\

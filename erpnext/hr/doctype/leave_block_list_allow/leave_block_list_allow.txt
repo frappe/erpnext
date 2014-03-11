@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:47", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:23:19", 
+  "modified": "2013-12-20 19:23:18", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -19,7 +19,7 @@
   "in_list_view": 1, 
   "label": "Allow User", 
   "name": "__common__", 
-  "options": "Profile", 
+  "options": "User", 
   "parent": "Leave Block List Allow", 
   "parentfield": "fields", 
   "parenttype": "DocType", 

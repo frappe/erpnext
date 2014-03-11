@@ -45,8 +45,8 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 	setup_queries: function() {
 		var me = this;
 		
-		if(this.frm.fields_dict.contact_by.df.options.match(/^Profile/)) {
-			this.frm.set_query("contact_by", erpnext.queries.profile);
+		if(this.frm.fields_dict.contact_by.df.options.match(/^User/)) {
+			this.frm.set_query("contact_by", erpnext.queries.user);
 		}
 		
 		this.frm.set_query("customer_address", function() {

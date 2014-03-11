@@ -68,7 +68,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.show_general_ledger();
 		
 		if(this.frm.doc.docstatus === 1 && 
-				frappe.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
+				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
 				this.frm.add_custom_button(frappe._("Make Credit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();

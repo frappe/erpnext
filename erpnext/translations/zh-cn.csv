@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise推荐级别重新排序
 JV,合资公司
 Job Applicant,求职者
 Job Opening,招聘开幕
-Job Profile,工作简介
+Job User,工作简介
 Job Title,职位
-"Job profile, qualifications required etc.",所需的工作概况，学历等。
+"Job User, qualifications required etc.",所需的工作概况，学历等。
 Jobs Email Settings,乔布斯邮件设置
 Journal Entries,日记帐分录
 Journal Entry,日记帐分录
@@ -1678,7 +1678,7 @@ Ordered Quantity,订购数量
 Orders released for production.,发布生产订单。
 Organization,组织
 Organization Name,组织名称
-Organization Profile,组织简介
+Organization User,组织简介
 Other,其他
 Other Details,其他详细信息
 Out Qty,输出数量

@@ -5,7 +5,7 @@ frappe.provide("erpnext.hr");
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.user_id.get_query = function(doc, cdt, cdn) {
-			return { query:"frappe.core.doctype.profile.profile.profile_query"} }
+			return { query:"frappe.core.doctype.user.user.user_query"} }
 		this.frm.fields_dict.reports_to.get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.employee_query"} }
 	},
@@ -33,8 +33,8 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			callback: function(r) {
 				var df = frappe.meta.get_docfield("Employee Leave Approver", "leave_approver",
 					me.frm.doc.name);
-				df.options = $.map(r.message, function(profile) { 
-					return {value: profile, label: frappe.user_info(profile).fullname}; 
+				df.options = $.map(r.message, function(user) { 
+					return {value: user, label: frappe.user_info(user).fullname}; 
 				});
 				me.frm.fields_dict.employee_leave_approvers.refresh();
 			}

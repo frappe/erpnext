@@ -19,7 +19,7 @@ def setup_account(args=None):
 		args = json.loads(args)
 	args = frappe._dict(args)
 	
-	update_profile_name(args)
+	update_user_name(args)
 	create_fiscal_year_and_company(args)
 	set_defaults(args)
 	create_territories()
@@ -41,12 +41,12 @@ def setup_account(args=None):
 
 	return "okay"
 	
-def update_profile_name(args):
+def update_user_name(args):
 	if args.get("email"):
 		args['name'] = args.get("email")
 		frappe.flags.mute_emails = True
 		frappe.bean({
-			"doctype":"Profile",
+			"doctype":"User",
 			"email": args.get("email"),
 			"first_name": args.get("first_name"),
 			"last_name": args.get("last_name")
@@ -58,16 +58,16 @@ def update_profile_name(args):
 	else:
 		args['name'] = frappe.session.user
 
-		# Update Profile
+		# Update User
 		if not args.get('last_name') or args.get('last_name')=='None': 
 				args['last_name'] = None
-		frappe.db.sql("""update `tabProfile` SET first_name=%(first_name)s,
+		frappe.db.sql("""update `tabUser` SET first_name=%(first_name)s,
 			last_name=%(last_name)s WHERE name=%(name)s""", args)
 		
-	if args.get("attach_profile"):
-		filename, filetype, content = args.get("attach_profile").split(",")
-		fileurl = save_file(filename, content, "Profile", args.get("name"), decode=True).file_name
-		frappe.db.set_value("Profile", args.get("name"), "user_image", fileurl)
+	if args.get("attach_user"):
+		filename, filetype, content = args.get("attach_user").split(",")
+		fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_name
+		frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
 		
 	add_all_roles_to(args.get("name"))
 	
@@ -176,7 +176,7 @@ def create_feed_and_todo():
 		'ERNext Setup Complete!', '#6B24B3')
 
 def create_email_digest():
-	from frappe.profile import get_system_managers
+	from frappe.utils.user import get_system_managers
 	system_managers = get_system_managers(only_name=True)
 	if not system_managers: 
 		return
@@ -335,10 +335,10 @@ def create_letter_head(args):
 		
 				
 def add_all_roles_to(name):
-	profile = frappe.doc("Profile", name)
+	user = frappe.doc("User", name)
 	for role in frappe.db.sql("""select name from tabRole"""):
 		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
-			d = profile.addchild("user_roles", "UserRole")
+			d = user.addchild("user_roles", "UserRole")
 			d.role = role[0]
 			d.insert()
 			

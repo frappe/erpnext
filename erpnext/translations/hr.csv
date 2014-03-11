@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise Preporučio redoslijeda Level
 JV,JV
 Job Applicant,Posao podnositelj
 Job Opening,Posao Otvaranje
-Job Profile,Posao Profil
+Job User,Posao Profil
 Job Title,Titula
-"Job profile, qualifications required etc.","Posao profil, kvalifikacije potrebne, itd."
+"Job User, qualifications required etc.","Posao profil, kvalifikacije potrebne, itd."
 Jobs Email Settings,Poslovi Postavke e-pošte
 Journal Entries,Časopis upisi
 Journal Entry,Časopis Stupanje
@@ -1678,7 +1678,7 @@ Ordered Quantity,Količina Ž
 Orders released for production.,Narudžbe objavljen za proizvodnju.
 Organization,organizacija
 Organization Name,Naziv organizacije
-Organization Profile,Organizacija Profil
+Organization User,Organizacija Profil
 Other,Drugi
 Other Details,Ostali podaci
 Out Qty,Od kol

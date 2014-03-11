@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Препоручени ниво Итемви�
 JV,ЈВ
 Job Applicant,Посао захтева
 Job Opening,Посао Отварање
-Job Profile,Посао Профил
+Job User,Посао Профил
 Job Title,Звање
-"Job profile, qualifications required etc.","Посао профила, квалификације потребне итд"
+"Job User, qualifications required etc.","Посао профила, квалификације потребне итд"
 Jobs Email Settings,Послови Емаил подешавања
 Journal Entries,Часопис Ентриес
 Journal Entry,Јоурнал Ентри
@@ -1678,7 +1678,7 @@ Ordered Quantity,Наручено Количина
 Orders released for production.,Поруџбине пуштен за производњу.
 Organization,организација
 Organization Name,Име организације
-Organization Profile,Организација Профил
+Organization User,Организација Профил
 Other,Други
 Other Details,Остали детаљи
 Out Qty,Од Кол

@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,แนะนำ Itemwise Reorder ระดั
 JV,JV
 Job Applicant,ผู้สมัครงาน
 Job Opening,เปิดงาน
-Job Profile,รายละเอียดงาน
+Job User,รายละเอียดงาน
 Job Title,ตำแหน่งงาน
-"Job profile, qualifications required etc.",งานคุณสมบัติรายละเอียดที่จำเป็น ฯลฯ
+"Job User, qualifications required etc.",งานคุณสมบัติรายละเอียดที่จำเป็น ฯลฯ
 Jobs Email Settings,งานการตั้งค่าอีเมล
 Journal Entries,คอมเมนต์วารสาร
 Journal Entry,รายการวารสาร
@@ -1678,7 +1678,7 @@ Ordered Quantity,จำนวนสั่ง
 Orders released for production.,คำสั่งปล่อยให้การผลิต
 Organization,องค์กร
 Organization Name,ชื่อองค์กร
-Organization Profile,รายละเอียดองค์กร
+Organization User,รายละเอียดองค์กร
 Other,อื่น ๆ
 Other Details,รายละเอียดอื่น ๆ
 Out Qty,ออก จำนวน

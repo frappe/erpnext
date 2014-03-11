@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 11:45:37", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:53", 
+  "modified": "2014-01-20 17:48:54", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -171,7 +171,7 @@
   "label": "Lead Owner", 
   "oldfieldname": "lead_owner", 
   "oldfieldtype": "Link", 
-  "options": "Profile", 
+  "options": "User", 
   "search_index": 1
  }, 
  {
@@ -190,7 +190,7 @@
   "label": "Next Contact By", 
   "oldfieldname": "contact_by", 
   "oldfieldtype": "Link", 
-  "options": "Profile", 
+  "options": "User", 
   "print_hide": 0, 
   "reqd": 0, 
   "width": "100px"

@@ -47,7 +47,7 @@ class TransactionBase(StatusUpdater):
 				"ref_name": self.doc.name
 			}]
 			
-			if frappe.db.exists("Profile", self.doc.contact_by):
+			if frappe.db.exists("User", self.doc.contact_by):
 				event_doclist.append({
 					"doctype": "Event User",
 					"parentfield": "event_individuals",

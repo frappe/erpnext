@@ -15,7 +15,7 @@ cur_frm.cscript.onload = function(doc) {
 cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	if(!doc.__islocal && !cint(doc.email_sent) && !doc.__unsaved
-			&& inList(frappe.boot.profile.can_write, doc.doctype)) {
+			&& inList(frappe.boot.user.can_write, doc.doctype)) {
 		cur_frm.add_custom_button(frappe._('Send'), function() {
 			return $c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
 				cur_frm.refresh();

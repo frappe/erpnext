@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-20 11:18:11", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:55", 
+  "modified": "2014-01-20 17:48:56", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -55,7 +55,7 @@
   "fieldname": "leave_approver", 
   "fieldtype": "Select", 
   "label": "Leave Approver", 
-  "options": "link:Profile", 
+  "options": "link:User", 
   "permlevel": 0
  }, 
  {

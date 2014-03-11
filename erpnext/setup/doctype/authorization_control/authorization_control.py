@@ -184,7 +184,7 @@ class DocType(TransactionBase):
 						if m['approving_user']:
 							app_specific_user.append(m['approving_user'])
 						elif m['approving_role']:
-							user_lst = [z[0] for z in frappe.db.sql("select distinct t1.name from `tabProfile` t1, `tabUserRole` t2 where t2.role=%s and t2.parent=t1.name and t1.name !='Administrator' and t1.name != 'Guest' and t1.docstatus !=2",m['approving_role'])]
+							user_lst = [z[0] for z in frappe.db.sql("select distinct t1.name from `tabUser` t1, `tabUserRole` t2 where t2.role=%s and t2.parent=t1.name and t1.name !='Administrator' and t1.name != 'Guest' and t1.docstatus !=2",m['approving_role'])]
 							for x in user_lst:
 								if not x in app_user:
 									app_user.append(x)

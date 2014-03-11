@@ -42,7 +42,7 @@ class DocType(DocListController):
 		if self.doc.user_id:
 			self.restrict_user()
 			self.update_user_default()
-			self.update_profile()
+			self.update_user()
 		
 		self.update_dob_event()
 		self.restrict_leave_approver()
@@ -71,47 +71,47 @@ class DocType(DocListController):
 			
 			frappe.defaults.add_default("Employee", self.doc.name, user, "Restriction")
 	
-	def update_profile(self):
+	def update_user(self):
 		# add employee role if missing
 		if not "Employee" in frappe.db.sql_list("""select role from tabUserRole
 				where parent=%s""", self.doc.user_id):
-			from frappe.profile import add_role
+			from frappe.utils.user import add_role
 			add_role(self.doc.user_id, "Employee")
 			
-		profile_wrapper = frappe.bean("Profile", self.doc.user_id)
+		user_wrapper = frappe.bean("User", self.doc.user_id)
 		
-		# copy details like Fullname, DOB and Image to Profile
+		# copy details like Fullname, DOB and Image to User
 		if self.doc.employee_name:
 			employee_name = self.doc.employee_name.split(" ")
 			if len(employee_name) >= 3:
-				profile_wrapper.doc.last_name = " ".join(employee_name[2:])
-				profile_wrapper.doc.middle_name = employee_name[1]
+				user_wrapper.doc.last_name = " ".join(employee_name[2:])
+				user_wrapper.doc.middle_name = employee_name[1]
 			elif len(employee_name) == 2:
-				profile_wrapper.doc.last_name = employee_name[1]
+				user_wrapper.doc.last_name = employee_name[1]
 			
-			profile_wrapper.doc.first_name = employee_name[0]
+			user_wrapper.doc.first_name = employee_name[0]
 				
 		if self.doc.date_of_birth:
-			profile_wrapper.doc.birth_date = self.doc.date_of_birth
+			user_wrapper.doc.birth_date = self.doc.date_of_birth
 		
 		if self.doc.gender:
-			profile_wrapper.doc.gender = self.doc.gender
+			user_wrapper.doc.gender = self.doc.gender
 			
 		if self.doc.image:
-			if not profile_wrapper.doc.user_image == self.doc.image:
-				profile_wrapper.doc.user_image = self.doc.image
+			if not user_wrapper.doc.user_image == self.doc.image:
+				user_wrapper.doc.user_image = self.doc.image
 				try:
 					frappe.doc({
 						"doctype": "File Data",
 						"file_name": self.doc.image,
-						"attached_to_doctype": "Profile",
+						"attached_to_doctype": "User",
 						"attached_to_name": self.doc.user_id
 					}).insert()
 				except frappe.DuplicateEntryError, e:
 					# already exists
 					pass
-		profile_wrapper.ignore_permissions = True
-		profile_wrapper.save()
+		user_wrapper.ignore_permissions = True
+		user_wrapper.save()
 		
 	def validate_date(self):
 		if self.doc.date_of_birth and self.doc.date_of_joining and getdate(self.doc.date_of_birth) >= getdate(self.doc.date_of_joining):
@@ -143,7 +143,7 @@ class DocType(DocListController):
 			throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self):
-		enabled = frappe.db.sql("""select name from `tabProfile` where 
+		enabled = frappe.db.sql("""select name from `tabUser` where 
 			name=%s and enabled=1""", self.doc.user_id)
 		if not enabled:
 			throw("{id}: {user_id} {msg}".format(**{
@@ -164,11 +164,11 @@ class DocType(DocListController):
 			}))
 			
 	def validate_employee_leave_approver(self):
-		from frappe.profile import Profile
+		from frappe.utils.user import User
 		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 		
 		for l in self.doclist.get({"parentfield": "employee_leave_approvers"}):
-			if "Leave Approver" not in Profile(l.leave_approver).get_roles():
+			if "Leave Approver" not in User(l.leave_approver).get_roles():
 				throw(_("Invalid Leave Approver") + ": \"" + l.leave_approver + "\"",
 					exc=InvalidLeaveApproverError)
 

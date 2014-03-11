@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise recommandée SEUIL DE COMMANDE
 JV,JV
 Job Applicant,Demandeur d&#39;emploi
 Job Opening,Offre d&#39;emploi
-Job Profile,Profil d&#39;emploi
+Job User,Profil d&#39;emploi
 Job Title,Titre d&#39;emploi
-"Job profile, qualifications required etc.","Profil de poste, qualifications requises, etc"
+"Job User, qualifications required etc.","Profil de poste, qualifications requises, etc"
 Jobs Email Settings,Paramètres de messagerie Emploi
 Journal Entries,Journal Entries
 Journal Entry,Journal Entry
@@ -1678,7 +1678,7 @@ Ordered Quantity,Quantité commandée
 Orders released for production.,Commandes validé pour la production.
 Organization,organisation
 Organization Name,Nom de l'organisme
-Organization Profile,Profil de l&#39;organisation
+Organization User,Profil de l&#39;organisation
 Other,Autre
 Other Details,Autres détails
 Out Qty,out Quantité

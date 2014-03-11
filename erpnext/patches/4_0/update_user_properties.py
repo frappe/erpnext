@@ -42,10 +42,10 @@ def update_user_match():
 		meta = frappe.get_doctype(doctype)
 		
 		# for each user with roles of this doctype, check if match condition applies
-		for profile in frappe.db.sql_list("""select name from `tabProfile`
+		for user in frappe.db.sql_list("""select name from `tabUser`
 			where enabled=1 and user_type='System User'"""):
 			
-			user_roles = frappe.get_roles(profile)
+			user_roles = frappe.get_roles(user)
 			
 			perms = meta.get({"doctype": "DocPerm", "permlevel": 0, 
 				"role": ["in", [["All"] + user_roles]], "read": 1})
@@ -69,9 +69,9 @@ def update_user_match():
 			# add that doc's restriction to that user
 			for match in user_matches:
 				for name in frappe.db.sql_list("""select name from `tab{doctype}`
-					where `{field}`=%s""".format(doctype=doctype, field=match.split(":")[0]), profile):
+					where `{field}`=%s""".format(doctype=doctype, field=match.split(":")[0]), user):
 					
-					frappe.defaults.add_default(doctype, name, profile, "Restriction")
+					frappe.defaults.add_default(doctype, name, user, "Restriction")
 					
 def add_employee_restrictions_to_leave_approver():
 	from frappe.core.page.user_properties import user_properties

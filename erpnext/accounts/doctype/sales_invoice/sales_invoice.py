@@ -744,9 +744,9 @@ def send_notification(new_rv):
 		message = get_html(new_rv.doc, new_rv.doclist, "SalesInvoice"))
 		
 def notify_errors(inv, customer, owner):
-	from frappe.profile import get_system_managers
+	from frappe.utils.user import get_system_managers
 	
-	frappe.sendmail(recipients=get_system_managers() + [frappe.db.get_value("Profile", owner, "email")],
+	frappe.sendmail(recipients=get_system_managers() + [frappe.db.get_value("User", owner, "email")],
 		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
 		message = frappe.get_template("template/emails/recurring_invoice_failed.html").render({
 			"name": inv,

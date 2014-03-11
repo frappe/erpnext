@@ -1352,9 +1352,9 @@ Itemwise Recommended Reorder Level,Itemwise Empfohlene Meldebestand
 JV,JV
 Job Applicant,Job Applicant
 Job Opening,Stellenangebot
-Job Profile,Job Profil
+Job User,Job Profil
 Job Title,Berufsbezeichnung
-"Job profile, qualifications required etc.","Job-Profil, etc. erforderlichen Qualifikationen."
+"Job User, qualifications required etc.","Job-Profil, etc. erforderlichen Qualifikationen."
 Jobs Email Settings,Jobs per E-Mail Einstellungen
 Journal Entries,Journal Entries
 Journal Entry,Journal Entry
@@ -1752,7 +1752,7 @@ Ordered Quantity,Bestellte Menge
 Orders released for production.,Bestellungen für die Produktion freigegeben.
 Organization,Organisation
 Organization Name,Name der Organisation
-Organization Profile,Organisation Profil
+Organization User,Organisation Profil
 Other,Andere
 Other Details,Weitere Details
 Out Qty,out Menge

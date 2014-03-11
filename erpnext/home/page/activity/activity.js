@@ -23,7 +23,7 @@ frappe.pages['activity'].onload = function(wrapper) {
 	wrapper.appframe.set_title_right("Refresh", function() { list.run(); });
 	
 	// Build Report Button
-	if(frappe.boot.profile.can_get_report.indexOf("Feed")!=-1) {
+	if(frappe.boot.user.can_get_report.indexOf("Feed")!=-1) {
 		wrapper.appframe.add_primary_action(frappe._('Build Report'), function() {
 			frappe.set_route('Report', "Feed");
 		}, 'icon-th')

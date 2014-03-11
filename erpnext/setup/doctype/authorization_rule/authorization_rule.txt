@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:22", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:24", 
+  "modified": "2014-01-20 17:48:25", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -102,7 +102,7 @@
   "label": "Applicable To (User)", 
   "oldfieldname": "system_user", 
   "oldfieldtype": "Link", 
-  "options": "Profile"
+  "options": "User"
  }, 
  {
   "description": "This will be used for setting rule in HR module", 
@@ -142,7 +142,7 @@
   "label": "Approving User", 
   "oldfieldname": "approving_user", 
   "oldfieldtype": "Link", 
-  "options": "Profile"
+  "options": "User"
  }, 
  {
   "doctype": "DocField", 

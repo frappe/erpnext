@@ -20,7 +20,7 @@
   "in_list_view": 1, 
   "label": "User", 
   "name": "__common__", 
-  "options": "Profile", 
+  "options": "User", 
   "parent": "Warehouse User", 
   "parentfield": "fields", 
   "parenttype": "DocType", 
