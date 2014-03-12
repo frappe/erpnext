@@ -39,7 +39,7 @@ class DocType(DocListController):
 			self.validate_duplicate_user_id()
 		
 	def on_update(self):
-		if self.doc.user_id:
+		if self.doc.user_id and frappe.db.get_value("Profile", self.doc.user_id, 'docstatus') == 0:
 			self.restrict_user()
 			self.update_user_default()
 			self.update_user()
