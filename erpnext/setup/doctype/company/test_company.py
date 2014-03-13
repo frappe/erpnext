@@ -10,8 +10,8 @@ class TestCompany(unittest.TestCase):
 	def test_coa(self):
 		for country, chart_name in frappe.db.sql("""select country, chart_name 
 			from `tabChart of Accounts` order by country""", as_list=1):
-				print country
-				# print "Chart Name: ", chart_name
+				print "Country: ", country
+				print "Chart Name: ", chart_name
 				
 				company_bean = frappe.bean({
 					"doctype": "Company",

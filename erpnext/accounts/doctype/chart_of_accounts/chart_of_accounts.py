@@ -10,6 +10,7 @@ from unidecode import unidecode
 class DocType:
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
+		self.no_root_type = False
 		
 	def create_accounts(self, company):
 		chart = {}
@@ -35,22 +36,28 @@ class DocType:
 						"parent_account": parent,
 						"group_or_ledger": "Group" if child.get("children") else "Ledger",
 						"root_type": child.get("root_type"),
-						"is_pl_account": "Yes" if child.get("root_type") in ["Expense", "Income"] \
-							else "No",
 						"account_type": child.get("account_type")
 					}).insert()
 				
 					accounts.append(account_name_in_db)
-					# print account.doc.lft, account.doc.rgt, account.doc.root_type
-			
+					
+					# set root_type for all parents where blank
+					if not account.doc.root_type or account.doc.root_type == 'None':
+						self.no_root_type = True
+					elif self.no_root_type:
+						frappe.db.sql("""update tabAccount set root_type=%s 
+							where lft<=%s and rgt>=%s and ifnull(root_type, '')=''""", 
+							(account.doc.root_type, account.doc.lft, account.doc.rgt))
+					
 					if child.get("children"):
 						_import_accounts(child.get("children"), account.doc.name)
 			
 			_import_accounts(chart.get("root").get("children"), None)
-		
-			# set root_type from parent or child if not set
-			# root_types = frappe.db.sql("""select lft, rgt, distinct root_type from tabAccount 
-			# 	where ifnull(root_type, '') != '' order by lft desc""")
-			# print root_types
-		
-		
+			
+			# set root_type for root accounts
+			for acc in frappe.db.sql("""select name, lft, rgt from `tabAccount` 
+				where ifnull(parent_account, '')=''""", as_dict=1):
+					root_types = frappe.db.sql_list("""select distinct root_type from tabAccount 
+						where lft>%s and rgt<%s""", (acc.lft, acc.rgt))
+					if len(root_types) > 1:
+						frappe.db.set_value("Account", acc.name, "root_type", None)

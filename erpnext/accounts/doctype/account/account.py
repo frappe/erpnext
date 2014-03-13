@@ -48,17 +48,17 @@ class DocType:
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = frappe.db.sql("""select name, group_or_ledger, is_pl_account 
-				from tabAccount where name =%s""", self.doc.parent_account)
+			par = frappe.db.sql("""select name, group_or_ledger, root_type 
+				from tabAccount where name =%s""", self.doc.parent_account, as_dict=1)
 			if not par:
 				throw(_("Parent account does not exists"))
-			elif par[0][0] == self.doc.name:
+			elif par[0]["name"] == self.doc.name:
 				throw(_("You can not assign itself as parent account"))
-			elif par[0][1] != 'Group':
+			elif par[0]["group_or_ledger"] != 'Group':
 				throw(_("Parent account can not be a ledger"))
-			
-			if not self.doc.is_pl_account:
-				self.doc.is_pl_account = par[0][2]
+				
+			if par[0]["root_type"]:
+				self.doc.root_type = par[0]["root_type"]
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:

@@ -220,7 +220,7 @@ def make_account_trees():
 				accounts[account["parent_id"]]["children"].append(account)
 				del account["parent_id"]
 			else:
-				print account.get("name")
+				print account.get("name") + "  deleted, parent node not found"
 				del accounts[id]
 
 	# remove empty children
