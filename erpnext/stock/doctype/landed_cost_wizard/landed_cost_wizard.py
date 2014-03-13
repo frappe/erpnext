@@ -3,10 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, cstr, flt
+from frappe.utils import flt
 from frappe.model.doc import addchild
-from frappe.model.bean import getlist
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 class DocType:
@@ -39,7 +37,8 @@ class DocType:
 		
 		for pr in purchase_receipts:
 			pr_bean = frappe.bean('Purchase Receipt', pr)
-			idx = max([d.idx for d in pr_bean.doclist.get({"parentfield": "other_charges"})])
+			pr_items = pr_bean.doclist.get({"parentfield": "purchase_tax_details"})
+			idx = max([d.idx for d in pr_items]) if pr_items else 0
 			
 			for lc in self.doclist.get({"parentfield": "landed_cost_details"}):
 				amt = flt(lc.amount) * flt(pr_bean.doc.net_total)/ flt(total_amt)
@@ -63,7 +62,7 @@ class DocType:
 					ch.rate = amt
 					ch.tax_amount = amt
 					ch.docstatus = 1
-					ch.idx = idx
+					ch.idx = idx + 1
 					ch.save(1)
 					idx += 1
 				else:	# overwrite if exists
