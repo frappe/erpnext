@@ -10,6 +10,7 @@ from frappe.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from frappe.utils.email_lib import sendmail
+from frappe.core.doctype.user.user import STANDARD_USERS
 
 content_sequence = [
 	["Income / Expenses", ["income_year_to_date", "bank_balance",
@@ -56,9 +57,9 @@ class DocType(DocListController):
 		"""get list of users"""
 		user_list = frappe.db.sql("""
 			select name, enabled from tabUser
-			where docstatus=0 and name not in ('Administrator', 'Guest')
-			and user_type = "System User"
-			order by enabled desc, name asc""", as_dict=1)
+			where name not in ({})
+			and user_type != "Website User"
+			order by enabled desc, name asc""".format(", ".join(["%s"]*len(STANDARD_USERS))), STANDARD_USERS, as_dict=1)
 
 		if self.doc.recipient_list:
 			recipient_list = self.doc.recipient_list.split("\n")
