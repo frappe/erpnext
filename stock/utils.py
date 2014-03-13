@@ -196,7 +196,7 @@ def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	"""used in search queries"""
 	wlist = []
 	for w in webnotes.conn.sql_list("""select name from tabWarehouse 
-		where name like '%%%s%%'""" % txt):
+		where ifnull(disabled, 0)=0 and name like '%%%s%%'""" % txt):
 		if webnotes.session.user=="Administrator":
 			wlist.append([w])
 		else:
