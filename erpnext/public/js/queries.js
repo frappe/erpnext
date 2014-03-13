@@ -1,11 +1,11 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// searches for enabled profiles
+// searches for enabled users
 frappe.provide("erpnext.queries");
 $.extend(erpnext.queries, {
-	profile: function() {
-		return { query: "frappe.core.doctype.profile.profile.profile_query" };
+	user: function() {
+		return { query: "frappe.core.doctype.user.user.user_query" };
 	},
 
 	lead: function() {

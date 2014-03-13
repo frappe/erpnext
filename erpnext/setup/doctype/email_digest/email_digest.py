@@ -52,10 +52,10 @@ class DocType(DocListController):
 		self.currency = frappe.db.get_value("Company", self.doc.company,
 			"default_currency")
 
-	def get_profiles(self):
-		"""get list of profiles"""
-		profile_list = frappe.db.sql("""
-			select name, enabled from tabProfile
+	def get_users(self):
+		"""get list of users"""
+		user_list = frappe.db.sql("""
+			select name, enabled from tabUser
 			where docstatus=0 and name not in ('Administrator', 'Guest')
 			and user_type = "System User"
 			order by enabled desc, name asc""", as_dict=1)
@@ -64,14 +64,14 @@ class DocType(DocListController):
 			recipient_list = self.doc.recipient_list.split("\n")
 		else:
 			recipient_list = []
-		for p in profile_list:
+		for p in user_list:
 			p["checked"] = p["name"] in recipient_list and 1 or 0
 
-		frappe.response['profile_list'] = profile_list
+		frappe.response['user_list'] = user_list
 	
 	def send(self):
 		# send email only to enabled users
-		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabProfile`
+		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
 		recipients = filter(lambda r: r in valid_users,
 			self.doc.recipient_list.split("\n"))
@@ -314,8 +314,10 @@ class DocType(DocListController):
 			return 0, "<p>Calendar Events</p>"
 	
 	def get_todo_list(self, user_id):
-		from frappe.core.page.todo.todo import get
-		todo_list = get()
+		todo_list = frappe.db.sql("""select *
+			from `tabToDo` where (owner=%s or assigned_by=%s)
+			order by field(priority, 'High', 'Medium', 'Low') asc, date asc""",
+			(user_id, user_id), as_dict=True)
 		
 		html = ""
 		if todo_list:

@@ -42,7 +42,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		'</ol>'+
 		'<p>'+frappe._('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 	
-	if (frappe.boot.profile.can_create.indexOf("Company") !== -1) {
+	if (frappe.boot.user.can_create.indexOf("Company") !== -1) {
 		wrapper.appframe.add_button(frappe._('New Company'), function() { newdoc('Company'); },
 			'icon-plus');
 	}
@@ -137,7 +137,7 @@ erpnext.AccountsChart = Class.extend({
 				{
 					condition: function(node) {
 						return !node.root && me.ctype === 'Account' 
-							&& frappe.boot.profile.can_read.indexOf("GL Entry") !== -1
+							&& frappe.boot.user.can_read.indexOf("GL Entry") !== -1
 					},
 					label: __("View Ledger"),
 					click: function(node, btn) {

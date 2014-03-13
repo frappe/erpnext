@@ -22,6 +22,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 			"source": "Email"
 		})
 		lead.ignore_permissions = True
+		lead.ignore_mandatory = True
 		lead.insert()
 		lead_name = lead.doc.name
 

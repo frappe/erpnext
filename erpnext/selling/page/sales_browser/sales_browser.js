@@ -57,8 +57,8 @@ erpnext.SalesChart = Class.extend({
 		var me = this;
 		me.ctype = ctype;
 		me.can_read = frappe.model.can_read(this.ctype);
-		me.can_create = frappe.boot.profile.can_create.indexOf(this.ctype) !== -1 ||
-					frappe.boot.profile.in_create.indexOf(this.ctype) !== -1;
+		me.can_create = frappe.boot.user.can_create.indexOf(this.ctype) !== -1 ||
+					frappe.boot.user.in_create.indexOf(this.ctype) !== -1;
 		me.can_write = frappe.model.can_write(this.ctype);
 		me.can_delete = frappe.model.can_delete(this.ctype);
 		
@@ -144,9 +144,14 @@ erpnext.SalesChart = Class.extend({
 			return frappe.call({
 				method: 'erpnext.selling.page.sales_browser.sales_browser.add_node',
 				args: v,
-				callback: function() {
-					d.hide();
-					node.reload();
+				callback: function(r) {
+					if(!r.exc) {
+						d.hide();
+						node.reload();
+						if(!node.expanded) {
+							node.toggle_node();
+						}
+					}
 				}	
 			})			
 		});

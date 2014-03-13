@@ -6,8 +6,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import throw, _
+from frappe.model.controller import DocListController
 
-class DocType:
+class DocType(DocListController):
 	def __init__(self, d, dl):
 		self.doc, self.doclist = d, dl
 		
@@ -23,15 +24,15 @@ class DocType:
 					frappe.MandatoryError)
 		
 	def cleanup_fields_value(self):
-		fields = ["item_code", "item_group", "brand", "customer", "customer_group", 
-			"territory", "supplier", "supplier_type", "campaign", "sales_partner", 
-			"price", "discount_percentage"]
+		for logic_field in ["apply_on", "applicable_for", "price_or_discount"]:
+			fieldname = frappe.scrub(self.doc.fields.get(logic_field) or "")
 			
-		for field_with_value in ["apply_on", "applicable_for", "price_or_discount"]:
-			val = self.doc.fields.get(field_with_value)
-			if val:
-				fields.remove(frappe.scrub(val))
-			
-		for field in fields:
-			self.doc.fields[field] = None
+			# reset all values except for the logic field
+			options = (self.meta.get_options(logic_field) or "").split("\n")
+			for f in options:
+				if not f: continue
+				
+				f = frappe.scrub(f)
+				if f!=fieldname:
+					self.doc.fields[f] = None
 		

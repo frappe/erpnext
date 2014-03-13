@@ -2,13 +2,14 @@
  {
   "creation": "2013-06-04 12:56:17", 
   "docstatus": 0, 
-  "modified": "2013-06-04 12:56:46", 
+  "modified": "2014-03-07 15:30:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "Report", 
   "is_standard": "Yes", 
+  "module": "Accounts", 
   "name": "__common__", 
   "ref_doctype": "Account", 
   "report_name": "Supplier Account Head", 

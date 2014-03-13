@@ -40,7 +40,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		from frappe.widgets.reportview import get_match_cond
 		filters.update({
 			"txt": txt,
-			"mcond": get_match_cond(filters["from"], searchfield),
+			"mcond": get_match_cond(filters["from"]),
 			"start": start,
 			"page_len": page_len
 		})

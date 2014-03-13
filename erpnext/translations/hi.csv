@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise स्तर Reorder अनुशं
 JV,जेवी
 Job Applicant,नौकरी आवेदक
 Job Opening,नौकरी खोलने
-Job Profile,नौकरी प्रोफाइल
+Job User,नौकरी प्रोफाइल
 Job Title,कार्य शीर्षक
-"Job profile, qualifications required etc.","नौकरी प्रोफाइल योग्यता, आदि की आवश्यकता"
+"Job User, qualifications required etc.","नौकरी प्रोफाइल योग्यता, आदि की आवश्यकता"
 Jobs Email Settings,नौकरियां ईमेल सेटिंग
 Journal Entries,जर्नल प्रविष्टियां
 Journal Entry,जर्नल प्रविष्टि
@@ -1678,7 +1678,7 @@ Ordered Quantity,आदेशित मात्रा
 Orders released for production.,उत्पादन के लिए आदेश जारी किया.
 Organization,संगठन
 Organization Name,संगठन का नाम
-Organization Profile,संगठन प्रोफाइल
+Organization User,संगठन प्रोफाइल
 Other,अन्य
 Other Details,अन्य विवरण
 Out Qty,मात्रा बाहर

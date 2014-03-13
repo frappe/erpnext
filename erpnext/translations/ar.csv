@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,يوصى به Itemwise إعادة ترتيب 
 JV,JV
 Job Applicant,طالب العمل
 Job Opening,افتتاح العمل
-Job Profile,العمل الشخصي
+Job User,العمل الشخصي
 Job Title,المسمى الوظيفي
-"Job profile, qualifications required etc.",العمل الشخصي، المؤهلات المطلوبة الخ.
+"Job User, qualifications required etc.",العمل الشخصي، المؤهلات المطلوبة الخ.
 Jobs Email Settings,إعدادات البريد الإلكتروني وظائف
 Journal Entries,مجلة مقالات
 Journal Entry,إدخال دفتر اليومية
@@ -1678,7 +1678,7 @@ Ordered Quantity,أمرت الكمية
 Orders released for production.,أوامر الإفراج عن الإنتاج.
 Organization,منظمة
 Organization Name,اسم المنظمة
-Organization Profile,الملف الشخصي المنظمة
+Organization User,الملف الشخصي المنظمة
 Other,آخر
 Other Details,تفاصيل أخرى
 Out Qty,من الكمية

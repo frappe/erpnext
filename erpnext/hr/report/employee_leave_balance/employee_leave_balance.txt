@@ -2,13 +2,14 @@
  {
   "creation": "2013-02-22 15:29:34", 
   "docstatus": 0, 
-  "modified": "2013-02-22 15:53:01", 
+  "modified": "2014-03-07 15:30:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "Report", 
   "is_standard": "Yes", 
+  "module": "HR", 
   "name": "__common__", 
   "ref_doctype": "Employee", 
   "report_name": "Employee Leave Balance", 

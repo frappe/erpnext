@@ -281,10 +281,10 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_warehouse_user(self):
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
-		frappe.bean("Profile", "test@example.com").get_controller()\
+		frappe.bean("User", "test@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 			
-		frappe.bean("Profile", "test2@example.com").get_controller()\
+		frappe.bean("User", "test2@example.com").get_controller()\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		
 		frappe.set_user("test@example.com")

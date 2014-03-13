@@ -2,7 +2,7 @@
  {
   "creation": "2014-02-21 15:02:51", 
   "docstatus": 0, 
-  "modified": "2014-02-28 14:49:15", 
+  "modified": "2014-03-05 18:23:34", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -10,6 +10,7 @@
   "autoname": "PRULE.#####", 
   "doctype": "DocType", 
   "document_type": "Master", 
+  "icon": "icon-gift", 
   "istable": 0, 
   "module": "Accounts", 
   "name": "__common__"

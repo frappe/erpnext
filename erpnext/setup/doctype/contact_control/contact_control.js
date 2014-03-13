@@ -162,7 +162,7 @@ cur_frm.cscript.delete_doc = function(doctype, name) {
 // Render List
 cur_frm.cscript.render_list = function(doc, doctype, wrapper, ListView, make_new_doc) {
 	frappe.model.with_doctype(doctype, function(r) {
-		if((r && r['403']) || frappe.boot.profile.all_read.indexOf(doctype)===-1) {
+		if((r && r['403']) || frappe.boot.user.all_read.indexOf(doctype)===-1) {
 			return;
 		}
 		var RecordListView = frappe.views.RecordListView.extend({

@@ -87,6 +87,11 @@ data = [
 				"description": _("Multiple Item prices."),
 				"route": "Report/Item Price"
 			},
+			{
+				"type": "doctype",
+				"name": "Pricing Rule",
+				"description": _("Rules for applying pricing and discount.")
+			},
 		]
 	},
 	{

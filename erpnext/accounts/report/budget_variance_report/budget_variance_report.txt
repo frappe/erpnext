@@ -2,13 +2,14 @@
  {
   "creation": "2013-06-18 12:56:36", 
   "docstatus": 0, 
-  "modified": "2013-06-18 12:56:36", 
+  "modified": "2014-03-07 15:30:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
  {
   "doctype": "Report", 
   "is_standard": "Yes", 
+  "module": "Accounts", 
   "name": "__common__", 
   "ref_doctype": "Cost Center", 
   "report_name": "Budget Variance Report", 

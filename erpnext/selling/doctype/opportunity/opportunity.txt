@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:30", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:58", 
+  "modified": "2014-01-20 17:48:59", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -400,7 +400,7 @@
   "label": "Next Contact By", 
   "oldfieldname": "contact_by", 
   "oldfieldtype": "Link", 
-  "options": "Profile", 
+  "options": "User", 
   "read_only": 0, 
   "width": "75px"
  }, 

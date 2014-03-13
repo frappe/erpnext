@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise Συνιστάται Αναδιάτ�
 JV,JV
 Job Applicant,Αιτών εργασία
 Job Opening,Άνοιγμα θέσεων εργασίας
-Job Profile,Προφίλ Εργασίας
+Job User,Προφίλ Εργασίας
 Job Title,Τίτλος εργασίας
-"Job profile, qualifications required etc.","Προφίλ δουλειά, προσόντα που απαιτούνται κ.λπ."
+"Job User, qualifications required etc.","Προφίλ δουλειά, προσόντα που απαιτούνται κ.λπ."
 Jobs Email Settings,Εργασία Ρυθμίσεις Email
 Journal Entries,Εφημερίδα Καταχωρήσεις
 Journal Entry,Journal Entry
@@ -1678,7 +1678,7 @@ Ordered Quantity,Διέταξε ποσότητα
 Orders released for production.,Παραγγελίες κυκλοφόρησε για την παραγωγή.
 Organization,οργάνωση
 Organization Name,Όνομα Οργανισμού
-Organization Profile,Προφίλ Οργανισμού
+Organization User,Προφίλ Οργανισμού
 Other,Άλλος
 Other Details,Άλλες λεπτομέρειες
 Out Qty,out Ποσότητα

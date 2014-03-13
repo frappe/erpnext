@@ -30,7 +30,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 									frappe.app.logout();
 								}, 2000);
 							} else {
-								window.location = "app.html";
+								window.location = "/desk";
 							}
 						}, 2000);
 					}
@@ -67,16 +67,16 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						reqd:1, "description":"Your Login Id", "options":"Email"},
 					{"fieldname": "password", "label": frappe._("Password"), "fieldtype": "Password", 
 						reqd:1},
-					{fieldtype:"Attach Image", fieldname:"attach_profile", 
-						label:"Attach Your Profile..."},
+					{fieldtype:"Attach Image", fieldname:"attach_user", 
+						label:"Attach Your User..."},
 				],
 				help: frappe._('The first user will become the System Manager (you can change that later).'),
 				onload: function(slide) {
 					if(user!=="Administrator") {
 						slide.form.fields_dict.password.$wrapper.toggle(false);
 						slide.form.fields_dict.email.$wrapper.toggle(false);
-						slide.form.fields_dict.first_name.set_input(frappe.boot.profile.first_name);
-						slide.form.fields_dict.last_name.set_input(frappe.boot.profile.last_name);
+						slide.form.fields_dict.first_name.set_input(frappe.boot.user.first_name);
+						slide.form.fields_dict.last_name.set_input(frappe.boot.user.last_name);
 					
 						delete slide.form.fields_dict.email;
 						delete slide.form.fields_dict.password;

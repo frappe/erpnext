@@ -103,8 +103,13 @@ data = [
 			},
 			{
 				"type": "doctype",
-				"name": "Shipping Rules",
+				"name": "Shipping Rule",
 				"description": _("Rules for adding shipping costs.")
+			},
+			{
+				"type": "doctype",
+				"name": "Pricing Rule",
+				"description": _("Rules for applying pricing and discount.")
 			},
 			{
 				"type": "doctype",

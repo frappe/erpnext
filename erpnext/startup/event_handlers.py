@@ -14,9 +14,9 @@ def on_session_creation(login_manager):
 	if frappe.session['user'] not in ('Guest'):
 		# create feed
 		from frappe.utils import nowtime
-		from frappe.profile import get_user_fullname
+		from frappe.utils.user import get_user_fullname
 		frappe.db.begin()
-		make_feed('Login', 'Profile', login_manager.user, login_manager.user,
+		make_feed('Login', 'User', login_manager.user, login_manager.user,
 			'%s logged in at %s' % (get_user_fullname(login_manager.user), nowtime()), 
 			login_manager.user=='Administrator' and '#8CA2B3' or '#1B750D')
 		frappe.db.commit()

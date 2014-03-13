@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise consigliata riordino Livello
 JV,JV
 Job Applicant,Candidato di lavoro
 Job Opening,Apertura di lavoro
-Job Profile,Profilo di lavoro
+Job User,Profilo di lavoro
 Job Title,Professione
-"Job profile, qualifications required etc.","Profilo professionale, le qualifiche richieste, ecc"
+"Job User, qualifications required etc.","Profilo professionale, le qualifiche richieste, ecc"
 Jobs Email Settings,Impostazioni email Lavoro
 Journal Entries,Prime note
 Journal Entry,Journal Entry
@@ -1678,7 +1678,7 @@ Ordered Quantity,Ordinato Quantità
 Orders released for production.,Gli ordini rilasciati per la produzione.
 Organization,organizzazione
 Organization Name,Nome organizzazione
-Organization Profile,Profilo dell&#39;organizzazione
+Organization User,Profilo dell&#39;organizzazione
 Other,Altro
 Other Details,Altri dettagli
 Out Qty,out Quantità

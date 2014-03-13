@@ -39,5 +39,5 @@ def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 		where is_stock_item="No" and is_sales_item="Yes"
 		and name not in (select name from `tabSales BOM`) and %s like %s
 		%s limit %s, %s""" % (searchfield, "%s", 
-		get_match_cond(doctype, searchfield),"%s", "%s"), 
+		get_match_cond(doctype),"%s", "%s"), 
 		("%%%s%%" % txt, start, page_len))

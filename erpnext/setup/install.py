@@ -102,6 +102,7 @@ def import_defaults():
 		{'uom_name': 'Set', 'doctype': 'UOM', 'name': 'Set', "must_be_whole_number": 1}, 
 		{'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'},
 		{'uom_name': 'Minute', 'doctype': 'UOM', 'name': 'Minute'}, 
+
 	]
 	
 	from frappe.modules import scrub

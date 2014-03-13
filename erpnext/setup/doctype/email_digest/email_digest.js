@@ -48,8 +48,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
-	// Get profile list
-	return $c_obj(make_doclist(dt, dn), 'get_profiles', '', function(r, rt) {
+	// Get user list
+	return $c_obj(make_doclist(dt, dn), 'get_users', '', function(r, rt) {
 		if(r.exc) {
 			msgprint(r.exc);
 		} else {
@@ -60,10 +60,10 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 				width: 400
 			});
 			var dialog_div = $a(d.body, 'div', 'dialog-div', '', '');
-			var tab = make_table(dialog_div, r.profile_list.length+2, 2, '', ['15%', '85%']);
-			tab.className = 'profile-list';
+			var tab = make_table(dialog_div, r.user_list.length+2, 2, '', ['15%', '85%']);
+			tab.className = 'user-list';
 			var add_or_update = 'Add';
-			$.each(r.profile_list, function(i, v) {
+			$.each(r.user_list, function(i, v) {
 				var check = $a_input($td(tab, i+1, 0), 'checkbox');
 				check.value = v.name;
 				if(v.checked==1) {
@@ -75,18 +75,18 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 				if(v.enabled==0) {
 					v.name = repl("<span style='color: red'> %(name)s (disabled user)</span>", {name: v.name});
 				}
-				var profile = $a($td(tab, i+1, 1), 'span', '', '', v.name);
-				//profile.onclick = function() { check.checked = !check.checked; }
+				var user = $a($td(tab, i+1, 1), 'span', '', '', v.name);
+				//user.onclick = function() { check.checked = !check.checked; }
 			});
 
 			// Display add recipients button
-			if(r.profile_list.length>15) {
+			if(r.user_list.length>15) {
 				$btn($td(tab, 0, 1), add_or_update + ' Recipients', function() {
-					cur_frm.cscript.add_to_rec_list(doc, tab, r.profile_list.length);
+					cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
 				});
 			}
-			$btn($td(tab, r.profile_list.length+1, 1), add_or_update + ' Recipients', function() {
-				cur_frm.cscript.add_to_rec_list(doc, tab, r.profile_list.length);
+			$btn($td(tab, r.user_list.length+1, 1), add_or_update + ' Recipients', function() {
+				cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
 			});
 
 			cur_frm.rec_dialog = d;	
@@ -96,7 +96,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.add_to_rec_list = function(doc, tab, length) {
-	// add checked profiles to list of recipients
+	// add checked users to list of recipients
 	var rec_list = [];
 	for(var i = 1; i <= length; i++) {
 		var input = $($td(tab, i, 0)).find('input');

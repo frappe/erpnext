@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise Aanbevolen Reorder Niveau
 JV,JV
 Job Applicant,Sollicitant
 Job Opening,Vacature
-Job Profile,Functieprofiel
+Job User,Functieprofiel
 Job Title,Functie
-"Job profile, qualifications required etc.","Functieprofiel, kwalificaties, etc. nodig"
+"Job User, qualifications required etc.","Functieprofiel, kwalificaties, etc. nodig"
 Jobs Email Settings,Vacatures E-mailinstellingen
 Journal Entries,Journaalposten
 Journal Entry,Journal Entry
@@ -1678,7 +1678,7 @@ Ordered Quantity,Bestelde hoeveelheid
 Orders released for production.,Bestellingen vrijgegeven voor productie.
 Organization,organisatie
 Organization Name,Naam van de Organisatie
-Organization Profile,Organisatie Profiel
+Organization User,Organisatie Profiel
 Other,Ander
 Other Details,Andere Details
 Out Qty,out Aantal

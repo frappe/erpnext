@@ -1,3 +1,4 @@
+erpnext.patches.4_0.validate_v3_patch
 erpnext.patches.4_0.update_user_properties
 erpnext.patches.4_0.move_warehouse_user_to_restrictions
 erpnext.patches.4_0.new_permissions
@@ -26,3 +27,4 @@ erpnext.patches.4_0.customer_discount_to_pricing_rule
 execute:frappe.db.sql("""delete from `tabWebsite Item Group` where ifnull(item_group, '')=''""")
 erpnext.patches.4_0.remove_module_home_pages
 erpnext.patches.4_0.split_email_settings
+erpnext.patches.4_0.fix_employee_user_id

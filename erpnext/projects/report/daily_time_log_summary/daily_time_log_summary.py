@@ -15,7 +15,7 @@ def execute(filters=None):
 		"To Datetime::140", "Hours::70", "Activity Type::120", "Task:Link/Task:150", 
 		"Task Subject::180", "Project:Link/Project:120", "Status::70"]
 			
-	profile_map = get_profile_map()
+	user_map = get_user_map()
 	task_map = get_task_map()
 		
 	conditions = build_conditions(filters)
@@ -23,17 +23,17 @@ def execute(filters=None):
 		where docstatus < 2 %s order by owner asc""" % (conditions, ), filters, as_dict=1)
 
 	if time_logs:
-		profiles = [time_logs[0].owner]
+		users = [time_logs[0].owner]
 		
 	data = []	
 	total_hours = total_employee_hours = count = 0
 	for tl in time_logs:
-		if tl.owner not in profiles:
-			profiles.append(tl.owner)
+		if tl.owner not in users:
+			users.append(tl.owner)
 			data.append(["", "", "", "Total", total_employee_hours, "", "", "", "", ""])
 			total_employee_hours = 0
 			
-		data.append([tl.name, profile_map[tl.owner], tl.from_time, tl.to_time, tl.hours, 
+		data.append([tl.name, user_map[tl.owner], tl.from_time, tl.to_time, tl.hours, 
 				tl.activity_type, tl.task, task_map.get(tl.task), tl.project, tl.status])
 			
 		count += 1
@@ -48,15 +48,15 @@ def execute(filters=None):
 		
 	return columns, data
 	
-def get_profile_map():
-	profiles = frappe.db.sql("""select name, 
+def get_user_map():
+	users = frappe.db.sql("""select name, 
 		concat(first_name, if(last_name, (' ' + last_name), '')) as fullname 
-		from tabProfile""", as_dict=1)
-	profile_map = {}
-	for p in profiles:
-		profile_map.setdefault(p.name, []).append(p.fullname)
+		from tabUser""", as_dict=1)
+	user_map = {}
+	for p in users:
+		user_map.setdefault(p.name, []).append(p.fullname)
 		
-	return profile_map
+	return user_map
 	
 def get_task_map():
 	tasks = frappe.db.sql("""select name, subject from tabTask""", as_dict=1)

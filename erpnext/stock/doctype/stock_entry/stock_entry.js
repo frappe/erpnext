@@ -68,7 +68,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.show_general_ledger();
 		
 		if(this.frm.doc.docstatus === 1 && 
-				frappe.boot.profile.can_create.indexOf("Journal Voucher")!==-1) {
+				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
 				this.frm.add_custom_button(frappe._("Make Credit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
@@ -339,18 +339,21 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	args = {
-		'item_code'			: d.item_code,
-		'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-		'transfer_qty'		: d.transfer_qty,
-		'serial_no'			: d.serial_no,
-		'bom_no'			: d.bom_no,
-		'expense_account'	: d.expense_account,
-		'cost_center'		: d.cost_center,
-		'company'			: cur_frm.doc.company
-	};
-	return get_server_fields('get_item_details', JSON.stringify(args), 
-		'mtn_details', doc, cdt, cdn, 1);
+	if(d.item_code) {
+		args = {
+			'item_code'		: d.item_code,
+			'warehouse'		: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+			'transfer_qty'		: d.transfer_qty,
+			'serial_no'		: d.serial_no,
+			'bom_no'		: d.bom_no,
+			'expense_account'	: d.expense_account,
+			'cost_center'		: d.cost_center,
+			'company'		: cur_frm.doc.company
+		};
+		return get_server_fields('get_item_details', JSON.stringify(args), 
+			'mtn_details', doc, cdt, cdn, 1);
+	}
+	
 }
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {

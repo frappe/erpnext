@@ -121,7 +121,7 @@ data = [
 			},
 			{
 				"type": "doctype",
-				"name": "Shipping Rules",
+				"name": "Shipping Rule",
 				"description": _("Rules for adding shipping costs.")
 			},
 			{
@@ -134,6 +134,11 @@ data = [
 				"name": "Item Price",
 				"description": _("Multiple Item prices."),
 				"route": "Report/Item Price"
+			},
+			{
+				"type": "doctype",
+				"name": "Pricing Rule",
+				"description": _("Rules for applying pricing and discount.")
 			},
 			{
 				"type": "doctype",

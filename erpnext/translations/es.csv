@@ -1304,9 +1304,9 @@ Itemwise Recommended Reorder Level,Itemwise Recomendado Nivel de Reabastecimient
 JV,JV
 Job Applicant,Solicitante de empleo
 Job Opening,Job Opening
-Job Profile,Job perfil
+Job User,Job perfil
 Job Title,Título del trabajo
-"Job profile, qualifications required etc.","Perfil de trabajo, calificaciones requeridas, etc"
+"Job User, qualifications required etc.","Perfil de trabajo, calificaciones requeridas, etc"
 Jobs Email Settings,Trabajos Configuración del correo electrónico
 Journal Entries,Entradas de diario
 Journal Entry,Asientos de diario
@@ -1678,7 +1678,7 @@ Ordered Quantity,Cantidad ordenada
 Orders released for production.,Los pedidos a producción.
 Organization,organización
 Organization Name,Nombre de la organización
-Organization Profile,Perfil de la organización
+Organization User,Perfil de la organización
 Other,Otro
 Other Details,Otros detalles
 Out Qty,Salir Cant.

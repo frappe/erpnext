@@ -16,13 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# default settings that can be made for a profile.
+# default settings that can be made for a user.
 from __future__ import unicode_literals
 
 import frappe
 
 product_name = "ERPNext"
-profile_defaults = {
+user_defaults = {
 	"Company": "company",
 	"Territory": "territory"
 }

@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-10 16:34:30", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:34", 
+  "modified": "2014-01-20 17:48:35", 
   "modified_by": "Administrator", 
   "owner": "harshada@webnotestech.com"
  }, 
@@ -250,7 +250,7 @@
   "no_copy": 1, 
   "oldfieldname": "resolved_by", 
   "oldfieldtype": "Link", 
-  "options": "Profile", 
+  "options": "User", 
   "search_index": 1
  }, 
  {

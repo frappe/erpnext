@@ -631,7 +631,7 @@ def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 				or `customer` like %%(txt)s) %s %s
 		order by name, customer, customer_name
 		limit %s""" % (doctype, searchfield, conditions, 
-		get_match_cond(doctype, searchfield), "%(start)s, %(page_len)s"), 
+		get_match_cond(doctype), "%(start)s, %(page_len)s"), 
 		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len}, 
 		as_list=True)
 	
@@ -641,7 +641,7 @@ def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filter
 			and (`%s` like %%(txt)s 
 				or `supplier` like %%(txt)s) %s
 		order by name, supplier, supplier_name
-		limit %s""" % (doctype, searchfield, get_match_cond(doctype, searchfield), 
+		limit %s""" % (doctype, searchfield, get_match_cond(doctype), 
 		"%(start)s, %(page_len)s"),	{"txt": "%%%s%%" % txt, "start": 
 		start, "page_len": page_len}, as_list=True)
 		
@@ -679,7 +679,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		's_warehouse': filters['s_warehouse'], 
 		'posting_date': filters['posting_date'], 
 		'txt': "%%%s%%" % txt, 
-		'mcond':get_match_cond(doctype, searchfield), 
+		'mcond':get_match_cond(doctype), 
 		"start": start, 
 		"page_len": page_len
 	}

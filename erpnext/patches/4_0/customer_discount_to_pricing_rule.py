@@ -7,6 +7,8 @@ import frappe
 def execute():
 	frappe.reload_doc("accounts", "doctype", "pricing_rule")
 	
+	frappe.db.auto_commit_on_many_writes = True
+	
 	for d in frappe.db.sql("""select * from `tabCustomer Discount` 
 		where ifnull(parent, '') != '' and docstatus < 2""", as_dict=1):
 			if not d.item_group:
@@ -24,6 +26,7 @@ def execute():
 				"price_or_discount": "Discount",
 				"discount_percentage": d.discount
 			}]).insert()
-			
+	
+	frappe.db.auto_commit_on_many_writes = False		
 	
 	frappe.delete_doc("DocType", "Customer Discount")
