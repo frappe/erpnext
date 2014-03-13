@@ -365,17 +365,6 @@ if (sys_defaults.auto_accounting_for_stock) {
 	}
 }
 
-// warehouse in detail table
-//----------------------------
-cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return{
-		filters:[
-			['Bin', 'item_code', '=', d.item_code],
-			['Bin', 'actual_qty', '>', 0]
-		]
-	}	
-}
 
 // Cost Center in Details Table
 // -----------------------------
