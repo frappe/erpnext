@@ -40,7 +40,7 @@ def get_entries(filters):
 			jv.name, jv.posting_date, jv.clearance_date, jvd.against_account, jvd.debit, jvd.credit
 		from 
 			`tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv 
-		where jvd.parent = jv.name and jv.docstatus=1 and ifnull(jv.cheque_no, '')!= '' 
+		where jvd.parent = jv.name and jv.docstatus=1 
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s 
 			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
 		order by jv.name DESC""", filters, as_list=1)
