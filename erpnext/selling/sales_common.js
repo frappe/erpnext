@@ -407,6 +407,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				"paid_amount"]);
 			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount 
 				- this.frm.doc.total_advance;
+
 			this.frm.doc.paid_amount = (this.frm.doc.is_pos && !this.frm.doc.paid_amount) ? 
 				flt(total_amount_to_pay): 0.0;
 			this.frm.set_value("outstanding_amount", flt(total_amount_to_pay 
