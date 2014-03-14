@@ -39,7 +39,7 @@ wn.query_reports["Purchase Register"] = {
 			"label": wn._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": wn.defaults.get_default("company")
+			"default": wn.defaults.get_user_default("company")
 		}
 	]
 }

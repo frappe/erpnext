@@ -8,7 +8,7 @@ wn.query_reports["Accounts Payable"] = {
 			"label": wn._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": wn.defaults.get_default("company")
+			"default": wn.defaults.get_user_default("company")
 		},
 		{
 			"fieldname":"account",

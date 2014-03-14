@@ -18,7 +18,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				currency: currency,
 				price_list_currency: currency,
 				status: "Draft",
-				company: wn.defaults.get_default("company"),
+				company: wn.defaults.get_user_default("company"),
 				fiscal_year: wn.defaults.get_default("fiscal_year"),
 				is_subcontracted: "No",
 			}, function(fieldname, value) {

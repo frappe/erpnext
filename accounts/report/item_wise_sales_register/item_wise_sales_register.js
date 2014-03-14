@@ -39,7 +39,7 @@ wn.query_reports["Item-wise Sales Register"] = wn.query_reports["Sales Register"
 			"label": wn._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": wn.defaults.get_default("company")
+			"default": wn.defaults.get_user_default("company")
 		}
 	]
 }
