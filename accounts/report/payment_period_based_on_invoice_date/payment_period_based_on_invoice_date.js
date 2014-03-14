@@ -42,7 +42,7 @@ wn.query_reports["Payment Period Based On Invoice Date"] = {
 			label: wn._("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: wn.defaults.get_default("company")
+			default: wn.defaults.get_user_default("company")
 		},
 	]
 }

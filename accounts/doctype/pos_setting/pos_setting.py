@@ -51,14 +51,24 @@ class DocType:
 					webnotes.throw(link_dn +_(" does not belong to ") + self.doc.company)
 
 	def on_update(self):
-		webnotes.defaults.clear_default("is_pos")
+		self.set_defaults()
 
-		pos_view_users = webnotes.conn.sql_list("""select user from `tabPOS Setting`""")
+	def on_trash(self):
+		self.set_defaults(include_current_pos=False)
+
+	def set_defaults(self, include_current_pos=True):
+		webnotes.defaults.clear_default("is_pos")
+		
+		if not include_current_pos:
+			condition = " where name != '%s'" % self.doc.name.replace("'", "\'")
+		else:
+			condition = ""
+
+		pos_view_users = webnotes.conn.sql_list("""select user 
+			from `tabPOS Setting` {0}""".format(condition))
+		
 		for user in pos_view_users:
 			if user:
 				webnotes.defaults.set_user_default("is_pos", 1, user)
 			else:
 				webnotes.defaults.set_global_default("is_pos", 1)
-
-	def on_trash(self):
-		self.on_update()

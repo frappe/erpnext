@@ -33,7 +33,7 @@ wn.query_reports["Sales Person-wise Transaction Summary"] = {
 			label: wn._("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: wn.defaults.get_default("company")
+			default: wn.defaults.get_user_default("company")
 		},
 		{
 			fieldname:"item_group",
