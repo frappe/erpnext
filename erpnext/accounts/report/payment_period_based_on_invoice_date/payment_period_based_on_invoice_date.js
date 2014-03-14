@@ -42,7 +42,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 			label: frappe._("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: frappe.defaults.get_default("company")
+			default: frappe.defaults.get_user_default("company")
 		},
 	]
 }

@@ -8,7 +8,7 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": frappe._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_default("company")
+			"default": frappe.defaults.get_user_default("company")
 		},
 		{
 			"fieldname":"account",

@@ -9,7 +9,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var me = this;
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
-				currency = frappe.defaults.get_default("currency");
+				currency = frappe.defaults.get_user_default("currency");
 			
 			$.each({
 				posting_date: today,
@@ -18,8 +18,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				currency: currency,
 				price_list_currency: currency,
 				status: "Draft",
-				company: frappe.defaults.get_default("company"),
-				fiscal_year: frappe.defaults.get_default("fiscal_year"),
+				company: frappe.defaults.get_user_default("company"),
+				fiscal_year: frappe.defaults.get_user_default("fiscal_year"),
 				is_subcontracted: "No",
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])

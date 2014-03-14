@@ -22,8 +22,8 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 			set_multiple(cdt, cdn, { status:'Draft' });
 		if(!this.frm.doc.date) 
 			this.frm.doc.transaction_date = date.obj_to_str(new Date());
-		if(!this.frm.doc.company && frappe.defaults.get_default("company")) 
-			set_multiple(cdt, cdn, { company:frappe.defaults.get_default("company") });
+		if(!this.frm.doc.company && frappe.defaults.get_user_default("company")) 
+			set_multiple(cdt, cdn, { company:frappe.defaults.get_user_default("company") });
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year)
 			set_multiple(cdt, cdn, { fiscal_year:sys_defaults.fiscal_year });
 	
