@@ -477,11 +477,6 @@ def send():
 	from frappe.utils import getdate
 	now_date = now_datetime().date()
 	
-	from frappe import conf
-	if "expires_on" in conf and now_date > getdate(conf.expires_on):
-		# do not send email digests to expired accounts
-		return
-	
 	for ed in frappe.db.sql("""select name from `tabEmail Digest`
 			where enabled=1 and docstatus<2""", as_list=1):
 		ed_obj = get_obj('Email Digest', ed[0])

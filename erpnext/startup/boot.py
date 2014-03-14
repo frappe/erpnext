@@ -29,12 +29,6 @@ def boot_session(bootinfo):
 			bootinfo['setup_complete'] = frappe.db.sql("""select name from 
 				tabCompany limit 1""") and 'Yes' or 'No'
 		
-		
-		# load subscription info
-		from frappe import conf
-		for key in ['max_users', 'expires_on', 'max_space', 'status', 'commercial_support']:
-			if key in conf: bootinfo[key] = conf.get(key)
-
 		bootinfo['docs'] += frappe.db.sql("""select name, default_currency, cost_center
             from `tabCompany`""", as_dict=1, update={"doctype":":Company"})
 
