@@ -25,6 +25,6 @@ class TestLead(unittest.TestCase):
 		self.assertEquals(customer[0]["doctype"], "Customer")
 		self.assertEquals(customer[0]["lead_name"], "_T-Lead-00001")
 		
-		customer[0].customer_group = "_Test Customer Group"
+		customer[0]["customer_group"] = "_Test Customer Group"
 		frappe.bean(customer).insert()
 		

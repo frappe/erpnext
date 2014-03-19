@@ -32,6 +32,7 @@ def get_item_details(args):
 
 	if isinstance(args, basestring):
 		args = json.loads(args)
+	
 	args = frappe._dict(args)
 
 	if not args.get("transaction_type"):

@@ -37,7 +37,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(len(si), len(dn.doclist))
 		
 		# modify amount
-		si[1].rate = 200
+		si[1]["rate"] = 200
 		self.assertRaises(frappe.ValidationError, frappe.bean(si).insert)
 		
 	

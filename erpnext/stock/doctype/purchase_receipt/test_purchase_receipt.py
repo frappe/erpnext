@@ -27,7 +27,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(len(pi), len(pr.doclist))
 		
 		# modify rate
-		pi[1].rate = 200
+		pi[1]["rate"] = 200
 		self.assertRaises(frappe.ValidationError, frappe.bean(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):

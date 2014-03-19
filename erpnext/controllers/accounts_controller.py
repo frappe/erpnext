@@ -89,7 +89,8 @@ class AccountsController(TransactionBase):
 		from erpnext.stock.get_item_details import get_item_details
 		for item in self.doclist.get({"parentfield": self.fname}):
 			if item.fields.get("item_code"):
-				args = item.fields.copy().update(self.doc.fields)
+				args = item.fields.copy()
+				args.update(self.doc.fields)
 				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield=self.fname) and \

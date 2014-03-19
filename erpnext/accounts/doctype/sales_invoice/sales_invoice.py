@@ -196,7 +196,9 @@ class DocType(SellingController):
 			# set pos values in items
 			for item in self.doclist.get({"parentfield": "entries"}):
 				if item.fields.get('item_code'):
-					for fname, val in get_pos_settings_item_details(pos, item.fields, pos).items():
+					for fname, val in get_pos_settings_item_details(pos, 
+						frappe._dict(item.fields), pos).items():
+						
 						if (not for_validate) or (for_validate and not item.fields.get(fname)):
 							item.fields[fname] = val
 
