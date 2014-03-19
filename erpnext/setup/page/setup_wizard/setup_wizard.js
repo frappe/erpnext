@@ -110,8 +110,9 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 
 					slide.get_input("fy_start_date").on("change", function() {
 						var year_end_date = 
-							frappe.datetime.add_days(frappe.datetime.add_months(slide.get_input("fy_start_date").val(), 12), -1);
-						slide.get_input("fy_end_date").val(year_end_date);
+							frappe.datetime.add_days(frappe.datetime.add_months(
+								frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
+						slide.get_input("fy_end_date").val(frappe.datetime.obj_to_user(year_end_date));
 					});
 				}
 			},
