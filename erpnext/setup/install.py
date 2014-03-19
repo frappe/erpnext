@@ -133,12 +133,16 @@ def feature_setup():
 	bean.save()
 
 def set_single_defaults():
-	sql = "select dt.name, df.fieldname, df.default from `tabDocType` dt, `tabDocField` df where dt.issingle=1 and df.parent=dt.name and ifnull(df.default, '')!=''"
-	for doctype, field, value in frappe.db.sql(sql):
-		b = frappe.bean(doctype, doctype)
-		try:
-			setattr(b.doc.fields, field, value)
-			b.save()
-		except frappe.MandatoryError:
-			pass
+	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):
+		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
+			where parent=%s""", dt, as_dict=True)
+		if default_values:
+			try:
+				b = frappe.bean(dt, dt)
+				for fieldname, value in default_values:
+					b.doc.fields[fieldname] = value
+				b.save()
+			except frappe.MandatoryError:
+				pass
+
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
