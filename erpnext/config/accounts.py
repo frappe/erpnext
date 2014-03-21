@@ -162,11 +162,6 @@ data = [
 				"icon": "icon-table"
 			},
 			{
-				"type": "page",
-				"name":"Financial Statements",
-				"icon": "icon-table"
-			},
-			{
 				"type": "report",
 				"name": "Accounts Receivable",
 				"doctype": "Sales Invoice",

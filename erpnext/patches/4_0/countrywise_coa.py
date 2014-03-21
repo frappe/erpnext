@@ -8,8 +8,13 @@ def execute():
 	frappe.reload_doc("setup", 'doctype', "company")
 	frappe.reload_doc("accounts", 'doctype', "account")
 	
-	frappe.db.sql("""update tabAccount set account_type='Fixed Asset' 
-		where account_type='Fixed Asset Account'""")
+	frappe.db.sql("""update tabAccount set account_type='Cash' 
+		where account_type='Bank or Cash' and account_name in ('Cash', 'Cash In Hand')""")
+	
+	ac_types = {"Fixed Asset Account": "Fixed Asset", "Bank or Cash": "Bank"}
+	for old, new in ac_types.items:
+		frappe.db.sql("""update tabAccount set account_type=%s 
+			where account_type=%s""", (new, old))	
 
 	frappe.db.sql("""update `tabAccount` set report_type = 
 		if(is_pl_account=='Yes', 'Profit and Loss', 'Balance Sheet')""")
