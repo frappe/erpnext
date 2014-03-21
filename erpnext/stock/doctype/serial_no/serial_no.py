@@ -280,6 +280,7 @@ def make_serial_no(serial_no, sle):
 	sr = frappe.new_bean("Serial No")
 	sr.doc.serial_no = serial_no
 	sr.doc.item_code = sle.item_code
+	sr.doc.warehouse = None
 	sr.make_controller().via_stock_ledger = True
 	sr.insert()
 	sr.doc.warehouse = sle.warehouse
