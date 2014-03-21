@@ -48,34 +48,17 @@ class DocType:
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = frappe.db.sql("""select name, group_or_ledger, is_pl_account, debit_or_credit 
-				from tabAccount where name =%s""", self.doc.parent_account)
+			par = frappe.db.sql("""select name, group_or_ledger, report_type 
+				from tabAccount where name =%s""", self.doc.parent_account, as_dict=1)
 			if not par:
 				throw(_("Parent account does not exists"))
-			elif par[0][0] == self.doc.name:
+			elif par[0]["name"] == self.doc.name:
 				throw(_("You can not assign itself as parent account"))
-			elif par[0][1] != 'Group':
+			elif par[0]["group_or_ledger"] != 'Group':
 				throw(_("Parent account can not be a ledger"))
-			elif self.doc.debit_or_credit and par[0][3] != self.doc.debit_or_credit:
-				throw("{msg} {debit_or_credit} {under} {account} {acc}".format(**{
-					"msg": _("You cannot move a"),
-					"debit_or_credit": self.doc.debit_or_credit,
-					"under": _("account under"),
-					"account": par[0][3],
-					"acc": _("account")
-				}))
-			
-			if not self.doc.is_pl_account:
-				self.doc.is_pl_account = par[0][2]
-			if not self.doc.debit_or_credit:
-				self.doc.debit_or_credit = par[0][3]
-
-	def validate_max_root_accounts(self):
-		"""Raise exception if there are more than 4 root accounts"""
-		if frappe.db.sql("""select count(*) from tabAccount where
-			company=%s and ifnull(parent_account,'')='' and docstatus != 2""",
-			self.doc.company)[0][0] > 4:
-			throw(_("One company cannot have more than 4 root Accounts"))
+				
+			if par[0]["report_type"]:
+				self.doc.report_type = par[0]["report_type"]
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
@@ -138,10 +121,8 @@ class DocType:
 			and docstatus != 2""", self.doc.name)
 	
 	def validate_mandatory(self):
-		if not self.doc.debit_or_credit:
-			throw(_("Debit or Credit field is mandatory"))
-		if not self.doc.is_pl_account:
-			throw(_("Is PL Account field is mandatory"))
+		if not self.doc.report_type:
+			throw(_("Report Type is mandatory"))
 			
 	def validate_warehouse_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -169,7 +150,6 @@ class DocType:
 		frappe.utils.nestedset.update_nsm(self)
 			
 	def on_update(self):
-		self.validate_max_root_accounts()
 		self.update_nsm_model()		
 
 	def get_authorized_user(self):
@@ -223,12 +203,12 @@ class DocType:
 				throw(_("Account ") + new +_(" does not exists"))
 				
 			val = list(frappe.db.get_value("Account", new_account, 
-				["group_or_ledger", "debit_or_credit", "is_pl_account", "company"]))
+				["group_or_ledger", "report_type", "company"]))
 			
-			if val != [self.doc.group_or_ledger, self.doc.debit_or_credit, self.doc.is_pl_account, self.doc.company]:
+			if val != [self.doc.group_or_ledger, self.doc.report_type, self.doc.company]:
 				throw(_("""Merging is only possible if following \
 					properties are same in both records.
-					Group or Ledger, Debit or Credit, Is PL Account"""))
+					Group or Ledger, Report Type, Company"""))
 					
 		return new_account
 
@@ -241,7 +221,7 @@ class DocType:
 			rebuild_tree("Account", "parent_account")
 
 def get_master_name(doctype, txt, searchfield, start, page_len, filters):
-	conditions = (" and company='%s'"% filters["company"]) if doctype == "Warehouse" else ""
+	conditions = (" and company='%s'"% filters["company"].replace("'", "\'")) if doctype == "Warehouse" else ""
 		
 	return frappe.db.sql("""select name from `tab%s` where %s like %s %s
 		order by name limit %s, %s""" %

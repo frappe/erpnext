@@ -1,0 +1,2098 @@
+{
+ "name": "Romania - Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Decontari interne privind diferentele de pret"
+         }, 
+         {
+          "name": "Decontari interne privind productia obtinuta"
+         }, 
+         {
+          "name": "Decontari interne privind cheltuielile"
+         }
+        ], 
+        "name": "DECONTARI INTERNE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cheltuieli indirecte de productie"
+         }, 
+         {
+          "name": "Cheltuielile activitatilor auxiliare"
+         }, 
+         {
+          "name": "Cheltuielile activitatii de baza"
+         }, 
+         {
+          "name": "Cheltuieli de desfacere"
+         }, 
+         {
+          "name": "Cheltuieli generale de administratie"
+         }
+        ], 
+        "name": "CONTURI DE CALCULATIE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Costul productiei obtinute"
+         }, 
+         {
+          "name": "Costul productiei de executie"
+         }
+        ], 
+        "name": "COSTUL PRODUCTIEI"
+       }
+      ], 
+      "name": "CONTURI DE GESTIUNE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Datorii contingente"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Giruri si garantii acordate"
+           }, 
+           {
+            "name": "Alte angajamente acordate "
+           }
+          ], 
+          "name": "Angajamente acordate"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Bunuri publice primite in administrare, concesiune si cu chirie"
+           }, 
+           {
+            "name": "Alte valori in afara bilantului"
+           }, 
+           {
+            "name": "Debitori scosi din activ, urmariti in continuare"
+           }, 
+           {
+            "name": "Stocuri de natura obiectelor de inventar date in folosinta"
+           }, 
+           {
+            "name": "Redevente, locatii de gestiune, chirii si alte datorii asimilate"
+           }, 
+           {
+            "name": "Efecte scontate neajunse la scadenta"
+           }, 
+           {
+            "name": "Imobilizari corporale luate cu chirie"
+           }, 
+           {
+            "name": "Valori materiale primite spre prelucrare sau reparare"
+           }, 
+           {
+            "name": "Valori materiale primite in pastrare sau custodie"
+           }
+          ], 
+          "name": "Alte conturi in afara bilantului"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Amortizarea aferenta gradului de neutilizare a mijloacelor fixe "
+           }
+          ], 
+          "name": "Amortizarea aferenta gradului de neutilizare a mijloacelor fixe"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dobanzi de platit"
+           }, 
+           {
+            "name": "Dobanzi de incasat"
+           }
+          ], 
+          "name": "Dobanzi aferente contractelor de leasing si altor contracte asimilate, neajunse la scadenta"
+         }, 
+         {
+          "name": "Certificate de emisii de gaze cu efect de sera"
+         }, 
+         {
+          "name": "Active contingente"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Alte angajamente primite"
+           }, 
+           {
+            "name": "Giruri si garantii primite"
+           }
+          ], 
+          "name": "Angajamente primite"
+         }
+        ], 
+        "name": "CONTURI IN AFARA BILANTULUI"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bilant de deschidere"
+         }, 
+         {
+          "name": "Bilant de inchidere"
+         }
+        ], 
+        "name": "Bilant"
+       }
+      ], 
+      "name": "CONTURI SPECIALE"
+     }
+    ], 
+    "name": "Conturi in afara bilantului"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Venituri financiare din ajustari pentru pierderea de valoare a imobilizarilor financiare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri financiare din ajustari pentru pierderea de valoare a activelor circulante", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Venituri financiare din ajustari pentru pierdere de valoare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Venituri din ajustari pentru deprecierea imobilizarilor", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din provizioane", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din fondul comercial negativ", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din ajustari pentru deprecierea activelor circulante ", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Venituri din provizioane si ajustari pentru depreciere privind activitatea de exploatare"
+           }
+          ], 
+          "name": "VENITURI DIN PROVIZIOANE SI AJUSTARI PENTRU DEPRECIERE SAU PIERDERE DE VALOARE "
+         }, 
+         {
+          "children": [
+           {
+            "name": "Alte venituri financiare", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din creante imobilizate", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din diferente de curs valutar", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Castiguri din investitii pe termen scurt cedate", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din imobilizari financiare cedate", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Venituri din investitii financiare cedate"
+           }, 
+           {
+            "name": "Venituri din sconturi obtinute", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din dobanzi", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Venituri din actiuni detinute la entitatile afiliate", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din interese de participare", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Venituri din imobilizari financiare"
+           }, 
+           {
+            "name": "Venituri din investitii financiare pe termen scurt", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "VENITURI FINANCIARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Venituri din subventii pentru evenimente extraordinare si altele similare", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "VENITURI EXTRAORDINARE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Venituri din subventii de exploatare pentru dobanda datorata", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare aferente altor venituri", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare pentru alte cheltuieli de exploatare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare pentru asigurari si protectie sociala", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare pentru plata personalului", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare pentru alte cheltuieli externe", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare pentru materii prime si materiale consumabile ", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii de exploatare aferente cifrei de afaceri", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Venituri din subventii de exploatare"
+           }
+          ], 
+          "name": "VENITURI DIN SUBVENTII DE EXPLOATARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Venituri din creante reactivate si debitori diversi", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Venituri din despagubiri, amenzi si penalitati", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din vanzarea activelor si alte operatii de capital", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din donatii si subventii primite", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Alte venituri din exploatare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Venituri din subventii pentru investitii", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Alte venituri din exploatare"
+           }
+          ], 
+          "name": "ALTE VENITURI DIN EXPLOATARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Venituri din productia de imobilizari corporale", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din productia de imobilizari necorporale", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Venituri din productia de imobilizari"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Venituri din vanzarea marfurilor", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reduceri comerciale acordate", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din activitati diverse", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din redevente, locatii de gestiune si chirii", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din studii si cercetari", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din lucrari executate si servicii prestate", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din vanzarea produselor reziduale", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din vanzarea semifabricatelor", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri din vanzarea produselor finite", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CIFRA DE AFACERI NETA"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Venituri aferente costurilor stocurilor de produse", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Venituri aferente costurilor serviciilor in curs de executie", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Venituri aferente costului productiei in curs de executie"
+         }
+        ], 
+        "name": "CONTURI DE VENITURI"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Cheltuieli cu tichetele de masa acordate salariatilor", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu primele reprezentand participarea personalului la profit", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu salariile personalului", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu renumerarea in instrumente de capitaluri proprii", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Contributia unitatii la schemele de pensii facultative", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Contributia unitatii la asigurarile sociale", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Contributia unitatii la fondul de garantare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Contributia unitatii la fondul de concedii medicale", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Contributia unitatii la primele de asigurare voluntara de sanatate", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Contributia unitatii pentru ajutorul de somaj", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Contributia angajatorului pentru asigurarile sociale de sanatate", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Alte cheltuieli privind asigurarile si protectia sociala", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Cheltuieli privind asigurarile si protectia sociala"
+           }
+          ], 
+          "name": "CHELTUIELI CU PERSONALUL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Impozitul pe profit", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu impozitul pe venit si cu alte impozite care nu apar in elementele de mai sus", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CHELTUIELI CU IMPOZITUL PE PROFIT SI ALTE IMPOZITE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Cheltuieli financiare privind ajustarile pentru pierderea de valoare a activelor circulante", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli financiare privind ajustarile pentru pierderea de valoare a imobilizarilor financiare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli financiare privind amortizarea primelor de rambursare a obligatiunilor", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Cheltuieli financiare privind amortizarile si ajustarile pentru pierdere de valoare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cheltuieli de exploatare privind provizioanele", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli de exploatare privind amortizarea imobilizarilor", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli de exploatare privind ajustarile pentru deprecierea imobilizarilor", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli de exploatare privind ajustarile pentru deprecierea activelor circulante", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Cheltuieli de exploatare privind amortizarile, provizioanele si ajustarile pentru depreciere"
+           }
+          ], 
+          "name": "CHELTUIELI CU AMORTIZARILE, PROVIZIOANELE SI AJUSTARILE PENTRU DEPRECIERE SAU PIERDERE DE VALOARE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Alte cheltuieli de exploatare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Donatii si subventii acordate", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli privind activele cedate si alte operatii de capital", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Despagubiri, amenzi si penalitati", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Alte cheltuieli de exploatare"
+           }, 
+           {
+            "name": "Pierderi din creante si debitori diversi", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu protectia mediului inconjurator", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Alte cheltuieli de exploatare"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cheltuieli privind calamitatile si alte evenimente extraordinare", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CHELTUIELI EXTRAORDINARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Alte cheltuieli financiare", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Pierderi din creante legate de participatii", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cheltuieli privind imobilizarile financiare cedate", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pierderi din investitiile pe termen scurt cedate", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Cheltuieli privind investitiile financiare cedate"
+           }, 
+           {
+            "name": "Cheltuieli din diferente de curs valutar", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind dobanzile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind sconturile acordate", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CHELTUIELI FINANCIARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cheltuieli cu intretinerile si reparatiile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu redeventele, locatiile de gestiune si chiriile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu studiile si cercetarile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu primele de asigurare", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CHELTUIELI CU LUCRARIRE SI SERVICIILE EXECUTATE DE TERTI"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Reduceri comerciale primite", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind marfurile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind animalele si pasarile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind materialele nestocate", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind energia si apa", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cheltuieli privind materialele pentru ambalat", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli privind combustibilul", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli privind semintele si materialele de plantat", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli privind piesele de schimb", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli privind furajele", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli cu materiale auxiliare", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Cheltuieli privind alte materiale consumabile", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Cheltuieli cu materialele consumabile"
+           }, 
+           {
+            "name": "Cheltuieli privind materialele de natura obiectelor de inventar", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu materiile prime", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind ambalajele", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CHELTUIELI PRIVIND STOCURILE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cheltuieli cu alte impozite, taxe si varsaminte asimilate", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Cheltuieli cu alte impozite, taxe si varsaminte asimilate"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cheltuieli cu transportul de bunuri si personal", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu deplasari, detasari si transferari", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli postale si taxe de telecomunicatii", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu serviciile bancare si asimilate", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli cu colaboratorii", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli privind comisioanele si onorariile", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Cheltuieli de protocol, reclama si publicitate", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Alte cheltuieli cu serviciile executate de terti", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "CHELTUIELI CU ALTE SERVICII EXECUTATE DE TERTI"
+         }
+        ], 
+        "name": "CONTURI DE CHELTUIELI"
+       }
+      ], 
+      "name": "Conturile de venituri si cheltuieli"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Viramente interne"
+           }
+          ], 
+          "name": "VIRAMENTE INTERNE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ajustari pentru pierderea de valoare a actiunilor detinute la entitatile afiliate"
+           }, 
+           {
+            "name": "Ajustari pentru pierderea de valoare a obligatiunilor"
+           }, 
+           {
+            "name": "Ajustari pentru pierderea de valoare a obligatiunilor emise si recuperate"
+           }, 
+           {
+            "name": "Ajustari pentru pierderea de valoare a altor invesitii pe termen scurt si creante asimilate"
+           }
+          ], 
+          "name": "AJUSTARI PENTRU PIERDEREA DE VALOARE A CONTURILOR DE TREZORERIE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Varsaminte de efctuat pentru actiunile detinute la institutiile afiliate"
+             }, 
+             {
+              "name": "Varsaminte de efctuat pentru alte investitii pe termen scurt"
+             }
+            ], 
+            "name": "Varsaminte de efctuat pentru investitiile pe termen scurt"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Dobanzi la obligatiuni si alte titluri de plasament"
+             }, 
+             {
+              "name": "Alte titluri de plasament"
+             }
+            ], 
+            "name": "Alte investitii pe termen scurt si creante asimilate"
+           }, 
+           {
+            "name": "Obligatiuni emise si rascumparate"
+           }, 
+           {
+            "name": "Actiuni detinute la entitatile afiliate"
+           }, 
+           {
+            "name": "Obligatiuni"
+           }
+          ], 
+          "name": "INVESTITII PE TERMEN SCURT"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Dobanzi de incasat"
+             }, 
+             {
+              "name": "Dobanzi de platit"
+             }
+            ], 
+            "name": "Dobanzi"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Credite externe garantate de stat"
+             }, 
+             {
+              "name": "Credite externe garantate de banci"
+             }, 
+             {
+              "name": "Credite de la trezoreria statului"
+             }, 
+             {
+              "name": "Credite interne garantate de stat"
+             }, 
+             {
+              "name": "Credite bancare pe termen scurt"
+             }, 
+             {
+              "name": "Credite bancare pe termen scurt nerambursate la scadenta"
+             }, 
+             {
+              "name": "Credite externe guvernamentale"
+             }, 
+             {
+              "name": "Dobanzi aferente creditelor pe termen scurt"
+             }
+            ], 
+            "name": "Credite bancare pe termen scurt"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cecuri de incasat"
+             }, 
+             {
+              "name": "Efecte de incasat"
+             }, 
+             {
+              "name": "Efecte remise spre scontare"
+             }
+            ], 
+            "name": "Valori de incasat"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Sume in curs de decontare"
+             }, 
+             {
+              "name": "Conturi la banci in valuta"
+             }, 
+             {
+              "name": "Conturi la banci in lei"
+             }
+            ], 
+            "name": "Conturi curente la banci"
+           }
+          ], 
+          "name": "CONTURI LA BANCI"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Casa in valuta"
+             }, 
+             {
+              "name": "Casa in lei"
+             }
+            ], 
+            "name": "Casa"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Timbre fiscale si postale"
+             }, 
+             {
+              "name": "Alte valori"
+             }, 
+             {
+              "name": "Tichete si bilete de calatorie"
+             }, 
+             {
+              "name": "Bilete de tratament si odihna"
+             }
+            ], 
+            "name": "Alte valori"
+           }
+          ], 
+          "name": "CASA"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Acreditive in lei"
+             }, 
+             {
+              "name": "Acreditive in valuta"
+             }
+            ], 
+            "name": "Acreditive"
+           }, 
+           {
+            "name": "Avansuri de trezorerie"
+           }
+          ], 
+          "name": "ACREDITIVE"
+         }
+        ], 
+        "name": "CONTURI DE TREZORERIE"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Alte sume primite cu caracter de subventii pentru investitii"
+             }, 
+             {
+              "name": "Plusuri de inventar de natura imobilizarilor"
+             }, 
+             {
+              "name": "Subventii guvernamentale pentru investitii"
+             }, 
+             {
+              "name": "Donatii pentru investitii"
+             }, 
+             {
+              "name": "Imprumuturi nerambursabile cu caracter de subventii pentru investitii"
+             }
+            ], 
+            "name": "Subventii pentru investitii"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "Cheltuieli integistrate in avans", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Decontari din operatiuni in curs de clarificare"
+           }, 
+           {
+            "name": "Venituri inregistrate in avans"
+           }
+          ], 
+          "name": "CONTURI DE REGULARIZARE SI ASIMILATE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Creditori diversi"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "Debitori diversi", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "DEBITORI SI CREDITORI DIVERSI"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dividende de plata"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Receivable", 
+              "name": "Decontari din operatii in participare - activ", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Decontari din operatii in participare - pasiv", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Decontari din operatii in participare"
+           }, 
+           {
+            "name": "Decontari privind interesele de participare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Decontari privind interesele de participare"
+             }, 
+             {
+              "name": "Dobanzi aferente decontarilor privind interesele de participare"
+             }, 
+             {
+              "name": "Dobanzi aferente decontarilor intre entitatile afiliate"
+             }, 
+             {
+              "name": "Decontari intre entitatile afiliate"
+             }
+            ], 
+            "name": "Decontari intre entitatile afiliate"
+           }, 
+           {
+            "name": "Decontari cu actionarii/asociatii privind capitalul"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Receivable", 
+              "name": "Actionari/asociati dobanzi la conturi curente", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Actionari/asociati - conturi curente", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Sume datorate actionarilor/asociatilor"
+           }
+          ], 
+          "name": "GRUP SI ACTIONARI / ASOCIATI"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Contributia angajatorilor la fondul pentru concedii si indemnizatii"
+             }, 
+             {
+              "name": "Contributia angajatilor pentru asigurarile sociale de sanatate"
+             }, 
+             {
+              "name": "Contributia angajatorilor la fondul de asigurare pentru accidente de munca si boli profesionale"
+             }, 
+             {
+              "name": "Contributia unitatii la asigurarile sociale"
+             }, 
+             {
+              "name": "Contributia angajatorului pentru asigurarile sociale de sanatate"
+             }, 
+             {
+              "name": "Contributia personalului la asigurarile sociale"
+             }
+            ], 
+            "name": "Asigurari sociale"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Contributia unitatii la fondul de garantare pentru plata creantelor salariale"
+             }, 
+             {
+              "name": "Contributia personalului la fondul de somaj"
+             }, 
+             {
+              "name": "Contributia unitatii la fondul de somaj"
+             }
+            ], 
+            "name": "Ajutor de somaj"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Alte datorii sociale"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Alte creante sociale", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Alte datorii si creante sociale"
+           }
+          ], 
+          "name": "ASIGURARI SOCIALE, PROTECTIE SOCIALA SI CONTURI ASIMILATE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "account_type": "Receivable", 
+              "name": "Alte creante in legatura cu personalul", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Alte datorii in legatura cu personalul"
+             }
+            ], 
+            "name": "Alte datorii si creante in legatura cu personalul"
+           }, 
+           {
+            "name": "Drepturi de personal neridicate"
+           }, 
+           {
+            "name": "Retineri din salarii datorate tertilor"
+           }, 
+           {
+            "name": "Prime privind participarea personalului la profit"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "Avansuri acordate personalului", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Personal - ajutoare materiale datorate"
+           }, 
+           {
+            "name": "Personal - salarii datorate"
+           }
+          ], 
+          "name": "PERSONAL SI CONTURI ASIMILATE"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "Efecte de primit de la clienti", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Receivable", 
+              "name": "Clienti incerti sau in litigiu", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Clienti", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Clienti"
+           }, 
+           {
+            "name": "Clienti creditori"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "Clienti - facturi de intocmit", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "CLIENTI SI CONTURI ASIMILATE"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "Furnizori de imobilizari", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Efecte de platit pentru imobilizari", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Efecte de platit", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Furnizori - facturi nesosite", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Furnizori - debitori pentru prestari de servicii"
+             }, 
+             {
+              "name": "Furnizori - debitori pentru cumparari de bunuri de natura stocurilor"
+             }
+            ], 
+            "name": "Furnizori - debitori"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Furnizori", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "FURNIZORI SI CONTURI ASIMILATE"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "Ajustari pentru deprecierea creantelor - debitori diversi", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Ajustari pentru deprecierea creantelor - decontari in cadrul grupului si cu actionarii/asociatii"
+           }, 
+           {
+            "name": "Ajustari pentru deprecierea creantelor - clienti"
+           }
+          ], 
+          "name": "AJUSTARI PENTRU DEPRECIEREA CREANTELOR"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Decontari intre unitati si subunitati"
+           }, 
+           {
+            "name": "Decontari intre subunitati"
+           }
+          ], 
+          "name": "DECONTARI IN CADRUL UNITATII"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Alte datorii fata de bugetul statului"
+             }, 
+             {
+              "name": "Alte creante privind bugetul statului"
+             }
+            ], 
+            "name": "Alte datorii si creante cu bugetul statului"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Impozitul pe profit"
+             }, 
+             {
+              "name": "Impozitul pe venit"
+             }
+            ], 
+            "name": "Impozitul pe profit"
+           }, 
+           {
+            "children": [
+             {
+              "name": "TVA neexigibila"
+             }, 
+             {
+              "name": "TVA colectata"
+             }, 
+             {
+              "name": "TVA deductibila"
+             }, 
+             {
+              "name": "TVA de recuperat"
+             }, 
+             {
+              "name": "TVA de plata"
+             }
+            ], 
+            "name": "Taxa pe valoarea adaugata"
+           }, 
+           {
+            "name": "Impozitul pe venituri de natura salariilor"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Receivable", 
+              "name": "Imprumuturi nerambursabile cu caracter de subventii", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Subventii guvernamentale", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Alte sume primite cu caracter de subventii", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Subventii"
+           }, 
+           {
+            "name": "Alte impozite,taxe si varsaminte asimilate"
+           }, 
+           {
+            "name": "Fonduri speciale - taxe si varsaminte asimilate"
+           }
+          ], 
+          "name": "BUGETUL STATULUI, FONDURI SPECIALE sI CONTURI ASIMILATE"
+         }
+        ], 
+        "name": "CONTURI DE TERTI"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Marfuri in curs de aprovizionare"
+           }, 
+           {
+            "name": "Animale in curs de aprovizionare"
+           }, 
+           {
+            "name": "Materii prime in curs de aprovizionare"
+           }, 
+           {
+            "name": "Materiale de natura obiectelor de inventar in curs de aprovizionare"
+           }, 
+           {
+            "name": "Materiale consumabile in curs de aprovizionare"
+           }, 
+           {
+            "name": "Ambalaje in curs de aprovizionare"
+           }
+          ], 
+          "name": "STOCURI IN CURS DE APROVIZIONARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Servicii in curs de executie"
+           }, 
+           {
+            "name": "Produse in curs de executie"
+           }
+          ], 
+          "name": "PRODUCTIA IN CURS DE EXECUTIE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Diferente de pret la materii prime si materiale"
+           }, 
+           {
+            "name": "Materiale de natura obiectelor de inventar"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Combustibili"
+             }, 
+             {
+              "name": "Materiale pentru ambalat"
+             }, 
+             {
+              "name": "Materiale auxiliare"
+             }, 
+             {
+              "name": "Furaje"
+             }, 
+             {
+              "name": "Piese de schimb"
+             }, 
+             {
+              "name": "Seminte si materiale de plantat"
+             }, 
+             {
+              "name": "Alte materiale consumabile"
+             }
+            ], 
+            "name": "Materiale consumabile"
+           }, 
+           {
+            "name": "Materii prime"
+           }
+          ], 
+          "name": "STOCURI DE MATERII PRIME SI MATERIALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Animale si pasari"
+           }, 
+           {
+            "name": "Diferente de pret la animale si pasari"
+           }
+          ], 
+          "name": "ANIMALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Diferente de pret la marfuri"
+           }, 
+           {
+            "name": "Marfuri"
+           }
+          ], 
+          "name": "MARFURI"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produse reziduale"
+           }, 
+           {
+            "name": "Produse finite"
+           }, 
+           {
+            "name": "Semifabricate"
+           }, 
+           {
+            "name": "Diferente de pret la produse"
+           }
+          ], 
+          "name": "PRODUSE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produse aflate la terti"
+           }, 
+           {
+            "name": "Animale aflate la terti"
+           }, 
+           {
+            "name": "Materii si materiale aflate la terti"
+           }, 
+           {
+            "name": "Ambalaje aflate la terti"
+           }, 
+           {
+            "name": "Marfuri aflate la terti"
+           }
+          ], 
+          "name": "STOCURI AFLATE LA TERTI"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ambalaje"
+           }, 
+           {
+            "name": "Diferente de pret la ambalaje"
+           }
+          ], 
+          "name": "AMBALAJE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ajustari pentru deprecierea materiilor prime"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru deprecierea materialelor de natura obiectelor de inventar"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea materialelor consumabile"
+             }
+            ], 
+            "name": "Ajustari pentru deprecierea materialelor"
+           }, 
+           {
+            "name": "Ajustari pentru deprecierea productiei in curs de executie"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru deprecierea semifabricatelor"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea produselor finite"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea produselor reziduale"
+             }
+            ], 
+            "name": "Ajustari pentru deprecierea produselor"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru deprecierea ambalajelor aflate la terti"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea produselor reziduale aflate la terti"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea semifabricatelor aflate la terti"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea produselor finite aflate la terti"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea materiilor prime si materialelor aflate la terti"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea marfurilor aflate la terti"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea animalelor aflate la terti"
+             }
+            ], 
+            "name": "Ajustari pentru deprecierea stocurilor aflate la terti"
+           }, 
+           {
+            "name": "Ajustari pentru deprecierea animalelor"
+           }, 
+           {
+            "name": "Ajustari pentru deprecierea marfurilor"
+           }, 
+           {
+            "name": "Ajustari pentru deprecierea ambalajelor"
+           }
+          ], 
+          "name": "AJUSTARI PENTRU DEPRECIEREA STOCURILOR SI PRODUCTIEI IN CURS DE EXECUTIE"
+         }
+        ], 
+        "name": "CONTURI DE STOCURI SI PRODUCTIE IN CURS DE EXECUTIE"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Mobilier, aparatura birotica, echipamente de protectie a valorilor umane si materiale si alte active corporale"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Terenuri"
+             }, 
+             {
+              "name": "Amenajari de terenuri"
+             }
+            ], 
+            "name": "Terenuri si amenajari de terenuri"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Mijloace de transport"
+             }, 
+             {
+              "name": "Aparate si instalatii de masurare, control si reglare"
+             }, 
+             {
+              "name": "Echipamente tehnologice (masini, utilaje si instalatii de lucru)"
+             }, 
+             {
+              "name": "Animale si plantatii"
+             }
+            ], 
+            "name": "Instalatii tehnice, mijloace de transport, animale si plantatii"
+           }, 
+           {
+            "name": "Constructii"
+           }
+          ], 
+          "name": "IMOBILIZARI CORPORALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cheltuieli de dezvoltare"
+           }, 
+           {
+            "name": "Cheltuieli de constituire"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Fond comercial negativ"
+             }, 
+             {
+              "name": "Fond comercial pozitiv"
+             }
+            ], 
+            "name": "Fond comercial"
+           }, 
+           {
+            "name": "Concesiuni, brevete, licente, marci comerciale, drepturi si active similare"
+           }, 
+           {
+            "name": "Alte imobilizari necorporale"
+           }
+          ], 
+          "name": "IMOBILIZARI NECORPORALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Imobilizari necorporale in curs de executie"
+           }, 
+           {
+            "name": "Avansuri acordate pentru imobilizari corporale"
+           }, 
+           {
+            "name": "Imobilizari corporale in curs de executie"
+           }, 
+           {
+            "name": "Avansuri acordate pentru imobilizari necorporale"
+           }
+          ], 
+          "name": "IMOBILIZARI IN CURS SI AVANSURI PENTRU IMOBILIZARI"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Instalatii tehnice, mijloace de transport, animale si plantatii in curs de aprovizionare"
+           }, 
+           {
+            "name": "Mobilier, aparatura birotica, echipamente de protectie a valorilor umane si materiale si alte active corporale in curs de aprovizionare"
+           }
+          ], 
+          "name": "IMOBILIZARI CORPORALE IN CURS DE APROVIZIONARE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Titluri puse in echivalenta"
+           }, 
+           {
+            "name": "Alte titluri imobilizate"
+           }, 
+           {
+            "name": "Interse de participare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Dobanda aferenta creantelor legate de interesele de participare"
+             }, 
+             {
+              "name": "Imprumuturi acordate pe termen lung"
+             }, 
+             {
+              "name": "Dobanda aferenta imprumuturilor acordate pe termen lung"
+             }, 
+             {
+              "name": "Sume datorate de entitatile afiliate"
+             }, 
+             {
+              "name": "Dobanda aferenta sumelor datorate de entitatile afiliate"
+             }, 
+             {
+              "name": "Creante legate de interesele de participare"
+             }, 
+             {
+              "name": "Alte creante imobilizate"
+             }, 
+             {
+              "name": "Dob\u00e2nzi aferente altor creante imobilizate"
+             }
+            ], 
+            "name": "Creante imobilizate"
+           }, 
+           {
+            "name": "Actiuni detinute la entitatile afiliate"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Varsaminte de efectuat privind interesele de participare"
+             }, 
+             {
+              "name": "Varsaminte de efectuat pentru alte imobilizari financiare"
+             }, 
+             {
+              "name": "Varsaminte de efectuat privind actiunile detinute la entitatile afiliate"
+             }
+            ], 
+            "name": "Varsaminte de efectuat pentru imobilizari financiare"
+           }
+          ], 
+          "name": "IMOBILIZARI FINANCIARE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Amortizarea altor imobilizari necorporale"
+             }, 
+             {
+              "name": "Amortizarea fondului comercial"
+             }, 
+             {
+              "name": "Amortizarea concesiunilor, brevetelor, licentelor, marcilor comerciale, drepturilor si activelor similare"
+             }, 
+             {
+              "name": "Amortizarea cheltuielilor de dezvoltare"
+             }, 
+             {
+              "name": "Amortizarea cheltuielilor de constituire"
+             }
+            ], 
+            "name": "Amortizari privind amortizarile necorporale"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Amortizarea instalatiilor, mijloacelor de transport, animalelor si plantatiilor"
+             }, 
+             {
+              "name": "Amortizarea altor imobilizari corporale"
+             }, 
+             {
+              "name": "Amortizarea amenajarilor de terenuri"
+             }, 
+             {
+              "name": "Amortizarea constructiilor"
+             }
+            ], 
+            "name": "Amortizari privind imobilizarile corporale"
+           }
+          ], 
+          "name": "AMORTIZARI PRIVIND IMOBILIZARILE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru pierderea de valoare a altor creante imobilizate"
+             }, 
+             {
+              "name": "Ajustari pentru pierderea de valoare a sumelor datorate entitatilor afiliate"
+             }, 
+             {
+              "name": "Ajustari pentru pierderea de valoare a creantelor legate de interesele de participare"
+             }, 
+             {
+              "name": "Ajustari pentru pierderea de valoare a imprumuturilor pe termen lung"
+             }, 
+             {
+              "name": "Ajustari pentru pierderea de valoare a actiunilor detinute la entitatile afiliate"
+             }, 
+             {
+              "name": "Ajustari pentru pierderea de valoare a intereselor de participare"
+             }, 
+             {
+              "name": "Ajustari pentru pierderea de valoare a altor titluri imobilizate"
+             }
+            ], 
+            "name": "Ajustari pentru pierderea de valoare a imobilizarilor financiare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru deprecierea terenurilor si amenajarilor de terenuri"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea instalatiilor, mijloacelor de transport, animalelor si plantatiilor"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea constructiilor"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea altor imobilizari corporale"
+             }
+            ], 
+            "name": "Ajustari pentru deprecierea imobilizarilor corporale"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru deprecierea fondului comercial"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea concesiunilor, brevetelor, licentelor, marcilor comerciale, drepturilor si activelor similare"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea cheltuielilor de dezvoltare"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea altor imobilizari necorporale"
+             }
+            ], 
+            "name": "Ajustari pentru deprecierea imobilizarilor necorporale"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ajustari pentru deprecierea imobilizarilor necorporale in curs de executie"
+             }, 
+             {
+              "name": "Ajustari pentru deprecierea imobilizarilor corporale in curs de executie"
+             }
+            ], 
+            "name": "Ajustari pentru deprecierea imobilizarilor in curs de executie"
+           }
+          ], 
+          "name": "AJUSTARI PENTRU DEPRECIEREA SAU PIERDEREA DE VALOARE A IMOBILIZARILOR"
+         }
+        ], 
+        "name": "CONTURI DE IMOBILIZARI"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Pierderi legate de emiterea, rascumpararea, vanzarea, cedarea cu titlu gratuit sau anularea instrumentelor de capitaluri proprii."
+           }, 
+           {
+            "name": "Castiguri legate de vanzarea sau anularea instrumentelor de capitaluri proprii."
+           }
+          ], 
+          "name": "CASTIGURI SAU PIERDERI LEGATE DE EMITEREA,RASCUMPARAREA,VANZAREA,CEDAREA CU TITLU GRATUIT SAU ANULAREA INSTRUM.DE CAPITALURI PROPRII"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Alte provizioane"
+             }, 
+             {
+              "name": "Provizioane pentru restructurare"
+             }, 
+             {
+              "name": "Provizioane pentru pensii si obligatii similare"
+             }, 
+             {
+              "name": "Provizioane pentru impozite"
+             }, 
+             {
+              "name": "Provizioane pentru litigii"
+             }, 
+             {
+              "name": "Provizioane pentru garantii acordate clientilor"
+             }, 
+             {
+              "name": "Provizioane pentru dezafectare imobilizari corporale si alte actiuni legate de acestea"
+             }
+            ], 
+            "name": "Provizioane"
+           }
+          ], 
+          "name": "PROVIZIOANE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Credite bancare pe termen lung nerambursate la scadenta"
+             }, 
+             {
+              "name": "Credite externe guvernamentale"
+             }, 
+             {
+              "name": "Credite bancare pe termen lung"
+             }, 
+             {
+              "name": "Credite de la trezoreria statului"
+             }, 
+             {
+              "name": "Credite bancare interne garantate de stat"
+             }, 
+             {
+              "name": "Credite bancare externe garantate de stat"
+             }, 
+             {
+              "name": "Credite bancare externe garantate de banci"
+             }
+            ], 
+            "name": "Credite bancare pe termen lung"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Imprumuturi interne din emisiuni de obligatiuni garantate de stat"
+             }, 
+             {
+              "name": "Imprumuturi externe din emisiuni de obligatiuni garantate de banci"
+             }, 
+             {
+              "name": "Imprumuturi externe din emisiuni de obligatiuni garantate de stat"
+             }, 
+             {
+              "name": "Alte imprumuturi din emisiuni de obligatiuni"
+             }
+            ], 
+            "name": "Imprumuturi din emisiuni de obligatiuni"
+           }, 
+           {
+            "name": "Alte imprumuturi si datorii asimilate"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Datorii fata de entitatile de care compania este legata prin interese de participare"
+             }, 
+             {
+              "name": "Datorii fata de entitatile afiliate"
+             }
+            ], 
+            "name": "Datorii care privesc imobilizarile financiare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Dobanzi aferente datoriilor fata de entitatile afiliate"
+             }, 
+             {
+              "name": "Dobanzi aferente datoriilor fata de entitatile de care compania este legata prin interese de participare"
+             }, 
+             {
+              "name": "Dobanzi aferente altor imprumuturi si datorii asimilate"
+             }, 
+             {
+              "name": "Dobanzi aferente imprumuturilor din emisiunile de obligatiuni"
+             }, 
+             {
+              "name": "Dobanzi aferente creditelor bancare pe termen lung"
+             }
+            ], 
+            "name": "Dobanzi aferente imprumuturilor si datoriilor asimilate"
+           }, 
+           {
+            "name": "Prime privind rambursarea obligatiunilor"
+           }
+          ], 
+          "name": "IMPRUMUTURI SI DATORII ASIMILATE"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Actiuni proprii detinute pe termen scurt"
+             }, 
+             {
+              "name": "Actiuni proprii detinute pe termen lung"
+             }
+            ], 
+            "name": "Actiuni proprii"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Interese care nu controleaza - alte capitaluri proprii"
+             }, 
+             {
+              "name": "Interese care nu controleaza - rezultatul exercitiului financiar"
+             }
+            ], 
+            "name": "Interese care nu controleaza"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Patrimoniul public"
+             }, 
+             {
+              "name": "Patrimoniul regiei"
+             }, 
+             {
+              "name": "Capital subscris nevarsat"
+             }, 
+             {
+              "name": "Capital subscris varsat"
+             }
+            ], 
+            "name": "Capital"
+           }, 
+           {
+            "name": "Rezerve din reevaluare"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Prime de conversie a obligatiunilor in actiuni"
+             }, 
+             {
+              "name": "Prime de fuziune/divizare"
+             }, 
+             {
+              "name": "Prime de aport"
+             }, 
+             {
+              "name": "Prime de emisiune"
+             }
+            ], 
+            "name": "Prime de capital"
+           }, 
+           {
+            "name": "Rezerve din conversie"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Rezerve legale"
+             }, 
+             {
+              "name": "Rezerve statutare sau contractuale"
+             }, 
+             {
+              "name": "Rezerve de valoare justa"
+             }, 
+             {
+              "name": "Rezerve reprezentand surplusul realizat din rezerve din reevaluare"
+             }, 
+             {
+              "name": "Rezerve din diferente de curs valutar in relatie cu investitia neta intr-o entitate straina"
+             }, 
+             {
+              "name": "Alte rezerve"
+             }
+            ], 
+            "name": "Rezerve"
+           }
+          ], 
+          "name": "Capital si rezerve"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Rezultatul reportat reprezentand profitul nerepartizat sau pierderea neacoperita"
+             }, 
+             {
+              "name": "Rezultatul reportat provenit din trecerea la aplicarea Reglementarilor contabile conforme cu Directiva a patra a Comunitatilor Economice Europene"
+             }, 
+             {
+              "name": "Rezultatul reportat provenit din adoptarea pentru prima data a IAS, mai pu\u00fein IAS 29"
+             }, 
+             {
+              "name": "Rezultatul reportat provenit din corectarea erorilor contabile"
+             }
+            ], 
+            "name": "Rezultatul reportat"
+           }
+          ], 
+          "name": "REZULTATUL REPORTAT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Repartizarea profitului"
+           }, 
+           {
+            "name": "Profit sau pierdere"
+           }
+          ], 
+          "name": "REZULTATUL EXERCITIULUI FINANCIAR"
+         }
+        ], 
+        "name": "Conturi de capitaluri"
+       }
+      ], 
+      "name": "Conturi de bilant"
+     }
+    ], 
+    "name": "Conturi financiare"
+   }
+  ], 
+  "name": "Plan de conturi general"
+ }
+}

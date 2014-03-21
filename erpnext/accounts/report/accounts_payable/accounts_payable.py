@@ -93,7 +93,7 @@ def get_gl_entries(filters, before_report_date=True):
 def get_conditions(filters, before_report_date=True):
 	conditions = ""
 	if filters.get("company"):
-		conditions += " and company='%s'" % filters["company"]
+		conditions += " and company='%s'" % filters["company"].replace("'", "\'")
 	
 	supplier_accounts = []
 	if filters.get("account"):

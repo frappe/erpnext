@@ -1,0 +1,1265 @@
+{
+ "name": "Polska - Plan kont", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w"
+       }, 
+       {
+        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w produkt\u00f3w"
+       }
+      ], 
+      "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "name": "P\u00f3\u0142produkty"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Produkty gotowe w magazynie"
+         }, 
+         {
+          "name": "Produkty gotowe poza jednostk\u0105"
+         }
+        ], 
+        "name": "Produkty gotowe"
+       }
+      ], 
+      "name": "Produkty i p\u00f3\u0142produkty"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "Bierne rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Czynne rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
+       }
+      ], 
+      "name": "Rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Inne rozliczenia mi\u0119dzyokresowe"
+       }
+      ], 
+      "name": "Pozosta\u0142e rozliczenia mi\u0119dzyokresowe"
+     }
+    ], 
+    "name": "Produkty i rozliczenia mi\u0119dzyokresowe"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w hurcie"
+         }, 
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w detalu"
+         }, 
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w skupu"
+         }, 
+         {
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w zak\u0142adach gastronomicznych"
+         }
+        ], 
+        "name": "Odchylenia od cen ewidencyjnych towar\u00f3w"
+       }, 
+       {
+        "name": "Odchylenia od cen ewidencyjnych opakowa\u0144"
+       }, 
+       {
+        "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w"
+       }, 
+       {
+        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w materia\u0142\u00f3w i towar\u00f3w"
+       }
+      ], 
+      "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w i towar\u00f3w"
+     }, 
+     {
+      "name": "Zapasy obce"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Towary w zak\u0142adach gastronomicznych"
+       }, 
+       {
+        "name": "Nieruchomo\u015bci i prawa maj\u0105tkowe przeznaczone do obrotu"
+       }, 
+       {
+        "name": "Towary w detalu"
+       }, 
+       {
+        "name": "Towary w hurcie"
+       }, 
+       {
+        "name": "Towary skupu"
+       }, 
+       {
+        "name": "Towary poza jednostk\u0105"
+       }
+      ], 
+      "name": "Towary"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Rozliczenie zakupu us\u0142ug obcych"
+       }, 
+       {
+        "name": "Rozliczenie zakupu materia\u0142\u00f3w"
+       }, 
+       {
+        "name": "Reklamacje faktur dostawc\u00f3w"
+       }, 
+       {
+        "name": "Op\u0142aty manipulacyjne policzone przez Urz\u0105d Celny"
+       }, 
+       {
+        "name": "Rozliczenie zakupu sk\u0142adnik\u00f3w aktyw\u00f3w trwa\u0142ych"
+       }, 
+       {
+        "name": "Warto\u015bci dostaw niefakturowanych"
+       }, 
+       {
+        "name": "Rozliczenie zakupu towar\u00f3w"
+       }, 
+       {
+        "name": "Rozliczenie warto\u015bci materia\u0142\u00f3w i towar\u00f3w w drodze"
+       }, 
+       {
+        "name": "Niedobory, szkody i nadwy\u017cki w transporcie"
+       }
+      ], 
+      "name": "Rozliczenie zakupu"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Materia\u0142y w przerobie"
+       }, 
+       {
+        "name": "Materia\u0142y"
+       }, 
+       {
+        "name": "Opakowania"
+       }
+      ], 
+      "name": "Materia\u0142y i opakowania"
+     }
+    ], 
+    "name": "Materia\u0142y i towary"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Nieruchomo\u015bci"
+       }, 
+       {
+        "name": "Warto\u015bci niematerialne i prawne"
+       }
+      ], 
+      "name": "Inwestycje w nieruchomo\u015bci i prawa"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Odpisy umorzeniowe inwestycji w warto\u015bci niematerialne i prawne"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci"
+         }
+        ], 
+        "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci i prawa"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Odpisy umorzeniowe innych warto\u015bci niematerialnych i prawnych"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe zako\u0144czonych prac rozwojowych"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe warto\u015bci firmy"
+         }
+        ], 
+        "name": "Odpisy umorzeniowe warto\u015bci niematerialnych i prawnych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Odpisy umorzeniowe innych \u015brodk\u00f3w trwa\u0142ych"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe budynk\u00f3w, lokali i obiekt\u00f3w in\u017cynierii l\u0105dowej i wodnej"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe warto\u015bci grunt\u00f3w i prawa wieczystego u\u017cytkowania grunt\u00f3w"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe ulepsze\u0144 obcych \u015brodk\u00f3w trwa\u0142ych"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe \u015brodk\u00f3w transportu"
+         }, 
+         {
+          "name": "Odpisy umorzeniowe urz\u0105dze\u0144 technicznych i maszyn"
+         }
+        ], 
+        "name": "Odpisy umorzeniowe \u015brodk\u00f3w trwa\u0142ych"
+       }
+      ], 
+      "name": "Odpisy umorzeniowe \u015brodk\u00f3w trwa\u0142ych oraz warto\u015bci niematerialnych i prawnych"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszty zako\u0144czonych prac rozwojowych"
+       }, 
+       {
+        "name": "Zaliczki na warto\u015bci niematerialne i prawne"
+       }, 
+       {
+        "name": "Nabyta warto\u015b\u0107 firmy"
+       }, 
+       {
+        "name": "Inne warto\u015bci niematerialne i prawne"
+       }
+      ], 
+      "name": "Warto\u015bci niematerialne i prawne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego"
+       }, 
+       {
+        "name": "Inne rozliczenia mi\u0119dzyokresowe"
+       }
+      ], 
+      "name": "D\u0142ugoterminowe rozliczenia mi\u0119dzyokresowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inwestycje budowy \u015brodka trwa\u0142ego"
+       }, 
+       {
+        "name": "Zaliczki na \u015brodki trwa\u0142e w budowie"
+       }, 
+       {
+        "name": "Ulepszenia \u015brodka trwa\u0142ego"
+       }, 
+       {
+        "name": "Ulepszenia obcych \u015brodk\u00f3w trwa\u0142ych"
+       }, 
+       {
+        "name": "Nak\u0142ady na budow\u0119 \u015brodka trwa\u0142ego"
+       }
+      ], 
+      "name": "\u015arodki trwa\u0142e w budowie"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych"
+         }
+        ], 
+        "name": "Inne inwestycje d\u0142ugoterminowe"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Udzia\u0142y lub akcje"
+         }, 
+         {
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki"
+         }
+        ], 
+        "name": "W jednostkach powi\u0105zanych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Udzia\u0142y lub akcje"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe"
+         }, 
+         {
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki"
+         }
+        ], 
+        "name": "Odpisy aktualizuj\u0105ce d\u0142ugoterminowe aktywa finansowe"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Udzia\u0142y lub akcje"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki"
+         }, 
+         {
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe"
+         }
+        ], 
+        "name": "W pozosta\u0142ych jednostkach"
+       }
+      ], 
+      "name": "D\u0142ugoterminowe aktywa finansowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Od jednostek powi\u0105zanych"
+       }, 
+       {
+        "name": "Od pozosta\u0142ych jednostek"
+       }
+      ], 
+      "name": "Nale\u017cno\u015bci d\u0142ugoterminowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Urz\u0105dzenia techniczne i maszyny"
+       }, 
+       {
+        "name": "\u015arodki transportu"
+       }, 
+       {
+        "name": "Grunty w\u0142asne i prawa wieczystego u\u017cytkowania grunt\u00f3w"
+       }, 
+       {
+        "name": "Budynki, lokale i obiekty in\u017cynierii l\u0105dowej i wodnej"
+       }, 
+       {
+        "name": "Inne \u015brodki trwa\u0142e"
+       }
+      ], 
+      "name": "\u015arodki Trwa\u0142e"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Odpisy aktualizuj\u0105ce udzia\u0142y i akcje w obcych jednostkach"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce udzielone po\u017cyczki d\u0142ugoterminowe"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych"
+       }, 
+       {
+        "name": "Odpisy aktualizuj\u0105ce lokaty"
+       }
+      ], 
+      "name": "Odpisy aktualizuj\u0105ce d\u0142ugoterminowe aktywa finansowe"
+     }
+    ], 
+    "name": "Aktywa Trwa\u0142e"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Pozosta\u0142e koszty rodzajowe"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Sk\u0142adki na ubezpieczenia spo\u0142eczne, FP, FG\u015aP"
+         }, 
+         {
+          "name": "Odpisy na zak\u0142adowy fundusz \u015bwiadcze\u0144 socjalnych lub \u015bwiadczenia urlopowe"
+         }, 
+         {
+          "name": "Pozosta\u0142e \u015bwiadczenia"
+         }
+        ], 
+        "name": "Ubezpieczenia spo\u0142eczne i inne \u015bwiadczenia"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Podatek od \u015brodk\u00f3w transportowych"
+         }, 
+         {
+          "name": "Op\u0142aty skarbowe"
+         }, 
+         {
+          "name": "Pozosta\u0142e podatki i op\u0142aty"
+         }, 
+         {
+          "name": "VAT niepodlegaj\u0105cy odliczeniu"
+         }, 
+         {
+          "name": "Podatek akcyzowy"
+         }, 
+         {
+          "name": "Op\u0142aty i prowizje bankowe"
+         }, 
+         {
+          "name": "Podatek od nieruchomo\u015bci"
+         }, 
+         {
+          "name": "Op\u0142aty s\u0105dowe, prawnicze i notarialne"
+         }, 
+         {
+          "name": "Koncesje"
+         }
+        ], 
+        "name": "Podatki i op\u0142aty"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Zu\u017cycie energii"
+         }, 
+         {
+          "name": "Zu\u017cycie paliwa do \u015brodk\u00f3w transportu"
+         }, 
+         {
+          "name": "Zu\u017cycie innych materia\u0142\u00f3w"
+         }, 
+         {
+          "name": "Zu\u017cycie materia\u0142\u00f3w biurowych"
+         }, 
+         {
+          "name": "Zu\u017cycie surowc\u00f3w do wytwarzania produkt\u00f3w"
+         }
+        ], 
+        "name": "Zu\u017cycie materia\u0142\u00f3w i energii"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Wynagrodzenia os\u00f3b dora\u017anie zatrudnionych"
+         }, 
+         {
+          "name": "Wynagrodzenia pracownik\u00f3w"
+         }
+        ], 
+        "name": "Wynagrodzenia"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Us\u0142ugi remontowe"
+         }, 
+         {
+          "name": "Pozosta\u0142e us\u0142ugi"
+         }, 
+         {
+          "name": "Us\u0142ugi pocztowe"
+         }, 
+         {
+          "name": "Us\u0142ugi graficzne i drukarskie"
+         }, 
+         {
+          "name": "Analizy sanitarne"
+         }, 
+         {
+          "name": "Us\u0142ugi telekomunikacyjne"
+         }, 
+         {
+          "name": "Us\u0142ugi celne"
+         }, 
+         {
+          "name": "Us\u0142ugi kurierskie i transportowe"
+         }
+        ], 
+        "name": "Us\u0142ugi obce"
+       }
+      ], 
+      "name": "Koszty wed\u0142ug rodzaj\u00f3w"
+     }, 
+     {
+      "name": "Amortyzacja"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Nie podlegaj\u0105ce rozliczeniu w czasie"
+       }, 
+       {
+        "name": "Przypadaj\u0105ce na przysz\u0142e okresy"
+       }, 
+       {
+        "name": "Koszty zgromadzone"
+       }, 
+       {
+        "name": "Koszty nie wliczane do warto\u015bci sprzeda\u017cy"
+       }
+      ], 
+      "name": "Rozliczenie koszt\u00f3w"
+     }, 
+     {
+      "name": "\u015awiadczenia na rzecz pracownik\u00f3w"
+     }
+    ], 
+    "name": "Koszty wed\u0142ug rodzaj\u00f3w i ich rozliczenie"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "\u015awiadczenia na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie"
+       }, 
+       {
+        "name": "Koszt niedobor\u00f3w produkt\u00f3w"
+       }, 
+       {
+        "name": "Koszt wyrob\u00f3w w\u0142asnej produkcji wydanych do w\u0142asnych sklep\u00f3w"
+       }, 
+       {
+        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci"
+       }
+      ], 
+      "name": "Obroty wewn\u0119trzne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sprzeda\u017c produkt\u00f3w na kraj"
+       }, 
+       {
+        "name": "Sprzeda\u017c us\u0142ug na kraj"
+       }, 
+       {
+        "name": "Sprzeda\u017c produkt\u00f3w na eksport"
+       }, 
+       {
+        "name": "Sprzeda\u017c us\u0142ug na eksport"
+       }
+      ], 
+      "name": "Sprzeda\u017c produkt\u00f3w"
+     }, 
+     {
+      "name": "Straty nadzwyczajne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sprzeda\u017c wysy\u0142kowa towar\u00f3w"
+       }, 
+       {
+        "name": "Prowizja komisowa"
+       }, 
+       {
+        "name": "Sprzeda\u017c detaliczna towar\u00f3w"
+       }, 
+       {
+        "name": "Sprzeda\u017c hurtowa towar\u00f3w"
+       }
+      ], 
+      "name": "Sprzeda\u017c towar\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na eksport"
+       }, 
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na kraj"
+       }, 
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na kraj"
+       }, 
+       {
+        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na eksport"
+       }
+      ], 
+      "name": "Koszty sprzedanych produkt\u00f3w"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy hurtowej"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy detalicznej"
+       }, 
+       {
+        "name": "Prowizja komisowa"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy wysy\u0142kowej"
+       }
+      ], 
+      "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w cenach zakupu"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszt wytworzenia zako\u0144czonych prac rozwojowych"
+       }, 
+       {
+        "name": "Koszt wytworzenia produkt\u00f3w uznanych za niedobory"
+       }, 
+       {
+        "name": "Koszt wytworzenia wyrob\u00f3w gotowych wydanych do w\u0142asnych sklep\u00f3w"
+       }, 
+       {
+        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci"
+       }, 
+       {
+        "name": "Koszt wytworzenia \u015bwiadcze\u0144 na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie"
+       }
+      ], 
+      "name": "Koszt obrot\u00f3w wewn\u0119trznych"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Otrzymane dotacje"
+       }, 
+       {
+        "name": "Przychody z us\u0142ug socjalnych"
+       }, 
+       {
+        "name": "Inne pozosta\u0142e przychody operacyjne"
+       }, 
+       {
+        "name": "Przychody ze wzrostu warto\u015bci niefinansowych aktyw\u00f3w trwa\u0142ych"
+       }, 
+       {
+        "name": "Przychody ze zbycia niefinansowych aktyw\u00f3w trwa\u0142ych"
+       }
+      ], 
+      "name": "Pozosta\u0142e przychody operacyjne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych materia\u0142\u00f3w"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych odpad\u00f3w"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych opakowa\u0144"
+       }
+      ], 
+      "name": "Warto\u015b\u0107 sprzedanych materia\u0142\u00f3w i opakowa\u0144"
+     }, 
+     {
+      "name": "Zyski nadzwyczajne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sprzeda\u017c odpad\u00f3w"
+       }, 
+       {
+        "name": "Sprzeda\u017c materia\u0142\u00f3w"
+       }, 
+       {
+        "name": "Sprzeda\u017c opakowa\u0144"
+       }
+      ], 
+      "name": "Sprzeda\u017c materia\u0142\u00f3w i opakowa\u0144"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Aktualizacja warto\u015bci inwestycji-przychody"
+       }, 
+       {
+        "name": "Kwoty nale\u017cne ze sprzeda\u017cy aktyw\u00f3w finansowych"
+       }, 
+       {
+        "name": "Dodatnie r\u00f3\u017cnice kursu walut"
+       }, 
+       {
+        "name": "Otrzymane odsetki"
+       }, 
+       {
+        "name": "Przychody ze zbycia inwestycji"
+       }, 
+       {
+        "name": "Pozosta\u0142e przychody finansowe"
+       }, 
+       {
+        "name": "Kwoty nale\u017cne z tytu\u0142u dywidend"
+       }
+      ], 
+      "name": "Przychody finansowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Warto\u015b\u0107 sprzedanych inwestycji"
+       }, 
+       {
+        "name": "Pozosta\u0142e koszty finansowe"
+       }, 
+       {
+        "name": "Odpisy z tytu\u0142u utraty warto\u015bci inwestycji-koszty"
+       }, 
+       {
+        "name": "Odsetki zap\u0142acone"
+       }, 
+       {
+        "name": "Ujemne r\u00f3\u017cnice kursu walut"
+       }
+      ], 
+      "name": "Koszty finansowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Odpisy z tytu\u0142u utraty warto\u015bci aktyw\u00f3w niefinansowych"
+       }, 
+       {
+        "name": "Dotacje przekazane"
+       }, 
+       {
+        "name": "Inne pozosta\u0142e koszty operacyjne"
+       }, 
+       {
+        "name": "Warto\u015b\u0107 sprzedanych niefinansowych aktyw\u00f3w trwa\u0142ych"
+       }
+      ], 
+      "name": "Pozosta\u0142e koszty operacyjne"
+     }
+    ], 
+    "name": "Przychody i koszty zwi\u0105zane z ich osi\u0105gni\u0119ciem"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Koszty zarz\u0105dzania jednostk\u0105"
+       }, 
+       {
+        "name": "\u015awiadczenia us\u0142ug na potrzeby reprezentacji i reklamy"
+       }
+      ], 
+      "name": "Koszty zarz\u0105du"
+     }, 
+     {
+      "name": "Rozliczenie koszt\u00f3w dzia\u0142alno\u015bci"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Koszty utrzymania punkt\u00f3w sprzeda\u017cy detalicznej"
+       }, 
+       {
+        "name": "Koszty sprzeda\u017cy wyrob\u00f3w"
+       }
+      ], 
+      "name": "Koszty dzia\u0142alno\u015bci podstawowej-handlowej"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Pozosta\u0142e koszty"
+       }, 
+       {
+        "name": "\u015awiadczenia us\u0142ug transportowych"
+       }
+      ], 
+      "name": "Koszty dzia\u0142alno\u015bci pomocniczej"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Straty zwi\u0105zane z wykonaniem d\u0142ugotrwa\u0142ych us\u0142ug"
+       }, 
+       {
+        "name": "Rozliczone koszty dzia\u0142alno\u015bci"
+       }, 
+       {
+        "name": "Koszty utrzymania hurtowni"
+       }, 
+       {
+        "name": "Koszty nie zako\u0144czonych d\u0142ugotrwa\u0142ych us\u0142ug"
+       }
+      ], 
+      "name": "Koszty dzia\u0142alno\u015bci podstawowej-produkcyjnej"
+     }
+    ], 
+    "name": "Koszty wed\u0142ug typ\u00f3w dzia\u0142alno\u015bci i ich rozliczenie"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Inne inwestycje kr\u00f3tkoterminowe"
+     }, 
+     {
+      "name": "Kr\u00f3tkoterminowe rozliczenia mi\u0119dzyokresowe"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Odpisy aktualizuj\u0105ce kr\u00f3tkoterminowe aktywa finansowe"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inne papiery warto\u015bciowe"
+         }, 
+         {
+          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe"
+         }, 
+         {
+          "name": "Udzielone po\u017cyczki"
+         }, 
+         {
+          "name": "Udzia\u0142y lub akcje"
+         }
+        ], 
+        "name": "Kr\u00f3tkoterminowe aktywa finansowe w jednostkach powi\u0105zanych"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Udzia\u0142y lub akcje"
+         }, 
+         {
+          "name": "Inne papiery warto\u015bciowe"
+         }, 
+         {
+          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe"
+         }
+        ], 
+        "name": "Kr\u00f3tkoterminowe aktywa finansowe w pozosta\u0142ych jednostkach"
+       }
+      ], 
+      "name": "Kr\u00f3tkoterminowe aktywa finansowe"
+     }, 
+     {
+      "name": "Inne aktywa pieni\u0119\u017cne"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Rachunek bankowy akretytywy"
+         }, 
+         {
+          "name": "Rachunek bankowy lokat terminowych"
+         }, 
+         {
+          "name": "Rachunek bankowy wyodr\u0119bnionych \u015brodk\u00f3w pieni\u0119\u017cnych ZF\u015aS"
+         }
+        ], 
+        "name": "Inne rachunki bankowe"
+       }, 
+       {
+        "name": "Rachunek \u015brodk\u00f3w walutowych"
+       }, 
+       {
+        "name": "Rachunek bie\u017c\u0105cy"
+       }, 
+       {
+        "name": "Rachunek \u015brodk\u00f3w wyodr\u0119bnionych i zablokowanych"
+       }, 
+       {
+        "name": "\u015arodki pieni\u0119\u017cne w drodze"
+       }, 
+       {
+        "name": "Rachunki kredyt\u00f3w bankowych"
+       }
+      ], 
+      "name": "Rachunki i kredyty bankowe"
+     }, 
+     {
+      "name": "Inne \u015brodki pieni\u0119\u017cne"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kasa zagranicznych \u015brodk\u00f3w pieni\u0119\u017cnych"
+       }, 
+       {
+        "name": "Kasa krajowych \u015brodk\u00f3w pieni\u0119\u017cnych"
+       }
+      ], 
+      "name": "\u015arodki pieni\u0119\u017cne w kasie"
+     }
+    ], 
+    "name": "\u015arodki pieni\u0119\u017cne, rachunki bankowe oraz inne kr\u00f3tkoterminowe aktywa finansowe"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Receivable", 
+      "name": "Rozrachunki z odbiorcami"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki z tytu\u0142u po\u017cyczek udzielonych pracownikom"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Inne rozrachunki z pracownikami"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki z tytu\u0142u wynagrodze\u0144"
+       }
+      ], 
+      "name": "Rozrachunki z pracownikami"
+     }, 
+     {
+      "account_type": "Payable", 
+      "name": "Rozrachunki z dostawcami"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "Nale\u017cno\u015bci warunkowe"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Weksle obce dyskontowane lub indosowane"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Zobowi\u0105zania warunkowe"
+       }
+      ], 
+      "name": "Rozrachunki pozabilansowe"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki z tytu\u0142u dop\u0142at i zwrotu dop\u0142at"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki wewn\u0105trzzak\u0142adowe"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki z tytu\u0142u dywidend"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Pozosta\u0142e rozrachunki"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Po\u017cyczki otrzymane"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Po\u017cyczki udzielone"
+         }
+        ], 
+        "name": "Po\u017cyczki"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Rozrachunki z tytu\u0142u umorzenia udzia\u0142\u00f3w w\u0142asnych"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozrachunki z tytu\u0142u wk\u0142ad\u00f3w niepieni\u0119\u017cnych na kapita\u0142 zak\u0142adowy"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozrachunki z tytu\u0142u wp\u0142at na kapita\u0142 zak\u0142adowy"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozrachunki z tytu\u0142u podwy\u017cszenia kapita\u0142u ze \u015brodk\u00f3w w\u0142asnych sp\u00f3\u0142ki"
+         }
+        ], 
+        "name": "Rozrachunki zwi\u0105zane z kapita\u0142em zak\u0142adowym"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie nadwy\u017cek"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie niedobor\u00f3w"
+         }
+        ], 
+        "name": "Rozliczenie niedobor\u00f3w i nadwy\u017cek"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Nale\u017cno\u015bci dochodzone na drodze s\u0105dowej"
+       }
+      ], 
+      "name": "Pozosta\u0142e rozrachunki"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki publicznoprawne z urz\u0119dem celnym"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki publicznoprawne z PFRON"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki z urz\u0119dem skarbowym z tytu\u0142u VAT"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki publicznoprawne z urz\u0119dem miasta/gminy"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie naliczonego VAT-23%"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie naliczonego VAT-0%"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie naliczonego VAT-5%"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie naliczonego VAT-8%"
+         }
+        ], 
+        "name": "VAT naliczony i jego rozliczenie"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Pozosta\u0142e rozrachunki z urz\u0119dem skarbowym"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Rozrachunki publicznoprawne z ZUS"
+       }, 
+       {
+        "name": "Pozosta\u0142e rozrachunki publicznoprawne"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie nale\u017cnego VAT-23%"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie nale\u017cnego VAT-8%"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie nale\u017cnego VAT-0%"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Rozliczenie nale\u017cnego VAT-5%"
+         }
+        ], 
+        "name": "Rozrachunki z urz\u0119dem skarbowym z tytu\u0142u VAT nale\u017cnego"
+       }
+      ], 
+      "name": "Rozrachunki publicznoprawne"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Odpisy aktualizuj\u0105ce rozrachunki"
+     }
+    ], 
+    "name": "Rozrachunki i roszczenia"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "account_type": "Tax", 
+        "name": "Kapita\u0142y wydzielone w jednostce statutowej i zak\u0142adach (oddzia\u0142ach) samodzielnie sporz\u0105dzaj\u0105cych bilans"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Kapita\u0142 zapasowy"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Kapita\u0142 rezerwowy"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Kapita\u0142 z aktualizacji wyceny"
+       }
+      ], 
+      "name": "Pozosta\u0142e kapita\u0142y i fundusze"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Rozliczenia wyniku finansowego"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "account_type": "Tax", 
+          "name": "Zak\u0142adowy fundusz rehabilitacji os\u00f3b niepe\u0142nosprawnych"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Fundusz nagr\u00f3d"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Fundusz na remont zasob\u00f3w mieszkaniowych"
+         }
+        ], 
+        "name": "Inne fundusze specjalne"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Zak\u0142adowy fundusz \u015bwiadcze\u0144 socjalnych"
+       }
+      ], 
+      "name": "Fundusze specjalne"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Kapita\u0142 podstawowy"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Wynik finansowy"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Tax", 
+        "name": "Podatek dochodowy od os\u00f3b prawnych"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Inne obowi\u0105zkowe obci\u0105\u017cenia wyniku finansowego"
+       }
+      ], 
+      "name": "Podatek dochodowy i inne obowi\u0105zkowe obci\u0105\u017cenia wyniku finansowego"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Tax", 
+        "name": "Ujemna warto\u015b\u0107 firmy"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Tax", 
+          "name": "Inne rozliczenia mi\u0119dzyokresowe kr\u00f3tkoterminowe"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Inne rozliczenia mi\u0119dzyokresowe d\u0142ugoterminowe"
+         }
+        ], 
+        "name": "Inne rozliczenia mi\u0119dzyokresowe"
+       }
+      ], 
+      "name": "Rozliczenia mi\u0119dzyokresowe"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "account_type": "Tax", 
+          "name": "Rezerwa d\u0142ugoterminowa na \u015bwiadczenia emerytalne i podobne"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Rezerwa kr\u00f3tkoterminowa na \u015bwiadczenia emerytalne i podobne"
+         }
+        ], 
+        "name": "Rezerwa na \u015bwiadczenia"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Rezerwa z tytu\u0142u odroczonego podatku dochodowego"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Tax", 
+          "name": "Pozosta\u0142e rezerwy kr\u00f3tkoterminowe"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Pozosta\u0142e rezerwy d\u0142ugoterminowe"
+         }
+        ], 
+        "name": "Pozosta\u0142e rezerwy"
+       }
+      ], 
+      "name": "Rezerwy"
+     }
+    ], 
+    "name": "Kapita\u0142y w\u0142asne i wynik finansowy"
+   }
+  ], 
+  "name": "Plan kont"
+ }
+}

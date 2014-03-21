@@ -1,0 +1,219 @@
+{
+ "name": "India - Chart of Accounts for Private Ltd/Partnership", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Mortgage Loan Payable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Interest Payable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Wages Payable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Owner's Equity Accounts", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Notes Payable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Exice Duty Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Sales Tax Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Service Tax Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "VAT Payable", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Tax payable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Accounts Payable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Unearned Revenues", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Reserve and Surplus Account", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Liabilities", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Buildings", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Supplies", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Land", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "Accounts Receivable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Accumulated Depreciation - Equipment", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Tax Receivable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipment", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Cash", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Prepaid Insurance", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Accumulated Depreciation - Buildings", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Merchandise Inventory", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Assets", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Salaries Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Wages Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Supplies Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Rent Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Utilities Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Telephone Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Advertising Expense", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Depreciation Expense", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Operating Expense Accounts", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Interest Revenues", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Gain on Sale of Assets", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Non-Operating Revenue and Gains", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Product Sales", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Service Revenues", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Operating Revenue Accounts", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Loss on Sale of Assets", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Non-Operating Expenses and Losses", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Profit And Loss"
+   }
+  ], 
+  "name": "Partnership/Private Firm Chart of Account"
+ }
+}

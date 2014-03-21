@@ -1,0 +1,2092 @@
+{
+ "name": "Ecuador - Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Garant\u00edas en titularizaci\u00f3n", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Garant\u00edas", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ACREEDORAS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Garant\u00edas ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Garant\u00edas en titularizaci\u00f3n", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DEUDORAS"
+     }
+    ], 
+    "name": "CUENTAS CONTINGENTES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Acreedores por  contra", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ACREEDORES POR  CONTRA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Derechos sobre instrumentos financieros derivados", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OTRAS CUENTAS DE ORDEN DEUDORAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bienes en garant\u00eda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores en garant\u00eda", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VALORES Y BIENES PROPIOS EN PODER DE TERCEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Emisiones no colocadas ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "EMISIONES NO COLOCADAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Colaterales de las operaciones de reporto burs\u00e1til", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "COLATERALES DE LAS OPERACIONES DE REPORTO BURSATIL"
+       }
+      ], 
+      "name": "DEUDORAS"
+     }, 
+     {
+      "name": "DEUDORES POR  CONTRA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "T\u00edtulos de Renta Variable", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Depositos en efectivo", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "T\u00edtulos de Renta Fija", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "En Garant\u00eda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T\u00edtulos de Renta Fija", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Depositos en efectivo", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "T\u00edtulos de Renta Variable", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "En Custodia", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VALORES Y BIENES RECIBIDOS DE TERCEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intermediaci\u00f3n de valores"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Intereses", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Principal", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Fondos Colectivos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Principal", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Intereses", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Fondos Administrados", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Patrimonio de Fondos de Inversi\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Principal", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Intereses", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Administraci\u00f3n de portafolio "
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Garant\u00eda", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inmobiliario", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Titularizaci\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Fideicomisos mercantiles inscritos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Garant\u00eda", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inmobiliario", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Encargos fiduciarios inscritos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Garant\u00eda", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inmobiliario", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Fideicomisos mercantiles no inscritos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Inmobiliario", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Inversi\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Administraci\u00f3n", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Garant\u00eda", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Encargos fiduciarios no inscritos", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Patrimonio de Negocios Fiduciarios"
+         }
+        ], 
+        "name": "ADMINISTRACION DE RECURSOS DE TERCEROS"
+       }
+      ], 
+      "name": "ACREEDORAS"
+     }
+    ], 
+    "name": "CUENTAS DE ORDEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "OTROS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Participaciones de los trabajadores en utilidades", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Beneficios a empleados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Remuneraciones ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Provisi\u00f3n para jubilaci\u00f3n patronal", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aportes y descuentos al IESS", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Fondo reserva del IESS", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBLIGACIONES PATRONALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Proveedores", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Acreedores Varios", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Por administraci\u00f3n", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Otras comisiones", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Dividendos por pagar", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Intereses por pagar", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Comisiones por pagar ", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Por Operaciones Burs\u00e1tiles", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Por custodia", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Deuda Sector No Financiero"
+         }
+        ], 
+        "name": "PASIVO NO FINANCIERO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Valores", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Obligaciones por Arrendamiento Financiero ", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Otras En el exterior", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Obligaciones", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Papel Comercial", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Valores de Titularizaci\u00f3n", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "A valor razonable con cambios en resultados"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Pr\u00e9stamos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Anticipos recibidos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Otras cuentas y documentos por pagar", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Cuentas y documentos por pagar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Accionistas", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Compa\u00f1\u00edas relacionadas / vinculadas", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Administradores", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Relacionadas"
+         }, 
+         {
+          "name": "Pasivos por compra de activos no corrientes"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Intereses por pagar", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Pr\u00e9stamos", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sobregiros bancarios", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Obligaciones por contratos de underwriting", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Porci\u00f3n corriente de deuda a largo plazo", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Obligaciones financieras"
+         }, 
+         {
+          "name": "Otros pasivos financieros"
+         }
+        ], 
+        "name": "PASIVOS FINANCIEROS"
+       }, 
+       {
+        "name": "OTROS PASIVOS CORRIENTES"
+       }, 
+       {
+        "name": "ACREEDORES POR INTERMEDIACION            "
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Litigios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Indemnizaciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones Judiciales", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "SANCIONES Y MULTAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Impuestos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Retenciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Contribuciones", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBLIGACIONES TRIBUTARIAS"
+       }
+      ], 
+      "name": "PASIVO CORRIENTE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Intereses diferidos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Pasivos por impuestos diferidos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PASIVOS DIFERIDOS"
+       }
+      ], 
+      "name": "PASIVOS NO CORRIENTES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "DEUDA SECTOR FINANCIERO"
+       }
+      ], 
+      "name": "PASIVO LARGO PLAZO"
+     }
+    ], 
+    "name": "PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inversiones en el exterior", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores de  titularizaci\u00f3n de participaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Unidades de participaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cuotas de fondos colectivos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Acciones y participaciones", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Renta variable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "P\u00f3lizas de Acumulaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Papel Comercial", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones Convertibles en acciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Overnights", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Facturas Comerciales Negociables", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Letras de Cambio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Dep\u00f3sitos a Plazo", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores de Titularizaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "T\u00edtulos del Banco Central ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Pagar\u00e9s", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Notas de Cr\u00e9dito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Inversiones en el exterior", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Dep\u00f3sito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cupones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "C\u00e9dulas Hipotecarias", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados Financieros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Inversi\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Tesorer\u00eda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Avales", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonos del Estado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonos de Prenda", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Renta Fija"
+       }
+      ], 
+      "name": "DISPONIBLES PARA LA VENTA"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Inversiones mantenidas hasta el vencimiento ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Pr\u00e9stamos y partidas a cobrar", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PROVISI\u00d3N POR DETERIORO DE ACTIVOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Acciones y participaciones", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Acciones y participaciones"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inversiones en el exterior", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Otros"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Valores de Titularizaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "T\u00edtulos del Banco Central ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Pagar\u00e9s", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "P\u00f3lizas de Acumulaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones Convertibles en acciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Papel Comercial", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Facturas Comerciales Negociables", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Overnights", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Notas de Cr\u00e9dito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Dep\u00f3sitos a Plazo", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Letras de Cambio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Avales", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonos de Prenda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonos del Estado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados Financieros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "C\u00e9dulas Hipotecarias", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Tesorer\u00eda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Inversi\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cupones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Dep\u00f3sito", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Renta Fija"
+       }
+      ], 
+      "name": "INVERSIONES MANTENIDAS HASTA EL VENCIMIENTO "
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cuentas por cobrar a terceros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cuentas por cobrar accionistas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cuentas por cobrar al originador", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Cuentas y Documentos a cobrar a terceros"
+       }
+      ], 
+      "name": "PRESTAMOS Y PARTIDAS A COBRAR "
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cuotas de fondos colectivos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores de  titularizaci\u00f3n de participaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Acciones y participaciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Renta variable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Forward", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Futuros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Opciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Inversiones en el exterior", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Derivados"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores de Titularizaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "T\u00edtulos del Banco Central ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones Convertibles en acciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Papel Comercial", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Facturas Comerciales Negociables", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Overnights", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Notas de Cr\u00e9dito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Obligaciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Dep\u00f3sitos a Plazo", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Letras de Cambio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Pagar\u00e9s", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "P\u00f3lizas de Acumulaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonos de Prenda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Inversi\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cupones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Dep\u00f3sito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Avales", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonos del Estado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados Financieros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "C\u00e9dulas Hipotecarias", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Certificados de Tesorer\u00eda", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Renta Fija"
+       }
+      ], 
+      "name": "A VALOR RAZONABLE CON CAMBIOS EN RESULTADOS"
+     }
+    ], 
+    "name": "ACTIVOS FINANCIEROS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Fondos rotativos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otras monedas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Moneda de curso legal", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Caja"
+       }, 
+       {
+        "name": "Instituciones financieras"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cta. Cte. Otras monedas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cta. Cte. Moneda de curso legal", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Banco Central del Ecuador"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cta. Cte. Moneda de curso legal", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cta. Ahorros Moneda de curso legal", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cta. Cte. En el exterior", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cta Ahorros En el exterior", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Otras Instituciones Financieras"
+       }
+      ], 
+      "name": "ACTIVO DISPONIBLE"
+     }
+    ], 
+    "name": "ACTIVO CORRIENTE "
+   }, 
+   {
+    "name": "DEUDORES POR INTERMEDIACION"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Comisiones por cobrar ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Cuentas por cobrar a terceros ", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PROVISI\u00d3N POR DETERIORO DE CUENTAS POR COBRAR"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Dividendos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Intereses   ", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "RENDIMIENTOS POR COBRAR"
+     }, 
+     {
+      "name": "DERECHOS POR COMPROMISO DE RECOMPRA"
+     }, 
+     {
+      "name": "ANTICIPO A CONSTRUCTOR POR AVANCE DE OBRA"
+     }, 
+     {
+      "name": "ANTICIPO COMITENTES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Al Originador", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "A Terceros", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "CUENTAS POR COBRAR"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Otras comisiones"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Puestos inactivos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Operaciones", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Por servicios burs\u00e1tiles"
+       }, 
+       {
+        "name": "Asesor\u00eda"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Operaciones  Extraburs\u00e1tiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Operaciones  Burs\u00e1tiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Contrato de Underwriting", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Intermediaci\u00f3n de valores"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Por Manejo de Fondos Administrados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por  Manejo de Fideicomisos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por Manejo de Encargos Fiduciarios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por comisiones de administraci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por Contratos de Administraci\u00f3n Portafolio de Terceros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Por  administraci\u00f3n y manejo"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Valores Materializados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por Manejo de Libro de Acciones y Accionistas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Desmaterializados", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Por Custodia y Conservaci\u00f3n de Valores"
+       }
+      ], 
+      "name": "COMISIONES POR COBRAR"
+     }, 
+     {
+      "children": [
+       {
+        "name": "A Terceros", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Otros", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "A Personal", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOCUMENTOS POR COBRAR"
+     }, 
+     {
+      "name": "OTROS"
+     }, 
+     {
+      "name": "PROVISIONES PARA CUENTAS POR COBRAR"
+     }
+    ], 
+    "name": "CUENTAS Y DOCUMENTOS POR COBRAR"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "En desarrollo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "En producci\u00f3n", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Plantas en crecimiento", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "PROVISI\u00d3N POR DETERIORO DE ACTIVOS BIOL\u00d3GICOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "En producci\u00f3n", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "En desarrollo", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Animales vivos", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "ACTIVOS BIOLOGICOS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "PRODUCTOS TERMINADOS"
+     }, 
+     {
+      "name": "PRODUCTOS EN PROCESO"
+     }, 
+     {
+      "name": "MATERIA PRIMA"
+     }, 
+     {
+      "name": "PROVISI\u00d3N POR DETERIORO DE EXISTENCIAS"
+     }, 
+     {
+      "name": "MATERIALES Y SUMINISTROS"
+     }
+    ], 
+    "name": "EXISTENCIAS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "ACTIVOS ADQUIRIDOS EN ARRENDAMIENTO FINANCIERO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Edificios", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Maquinaria y Equipo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Muebles y enseres ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipo de Computaci\u00f3n ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Veh\u00edculos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Terrenos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PROPIEDADES"
+     }, 
+     {
+      "name": "CONSTRUCCIONES EN CURSO "
+     }, 
+     {
+      "name": "PROPIEDADES DE INVERSI\u00d3N"
+     }, 
+     {
+      "name": "PLUSVAL\u00cdA MERCANTIL (Goodwill)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Costos de exploraci\u00f3n y desarrollo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Reservas de recursos extra\u00edbles", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Concesiones", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Licencias", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Patentes y propiedad industrial", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Programas de computaci\u00f3n", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "INTANGIBLES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Intangibles", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Propiedades"
+       }, 
+       {
+        "name": "Plusval\u00eda mercantil (Goodwill) ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Propiedades de inversi\u00f3n ", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PROVISI\u00d3N POR DETERIORO DE ACTIVOS NO CORRIENTES"
+     }
+    ], 
+    "name": "ACTIVOS NO CORRIENTES"
+   }, 
+   {
+    "children": [
+     {
+      "name": "OTROS"
+     }, 
+     {
+      "name": "ACTIVO NO CORRIENTE DISPONIBLE PARA LA VENTA"
+     }, 
+     {
+      "name": "UNIDADES DE PARTICIPACION"
+     }, 
+     {
+      "name": "ACTIVO POR IMPUESTO CORRIENTE"
+     }
+    ], 
+    "name": "OTROS ACTIVOS CORRIENTES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Activo por impuesto diferido  ", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ACTIVO POR IMPUESTO DIFERIDO"
+     }, 
+     {
+      "name": "ACTIVOS DE EXPLORACION Y EVALUACION MINERA"
+     }, 
+     {
+      "name": "DERECHOS FIDUCIARIOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cuota patrimonial bolsa de valores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Acciones Dep\u00f3sito Centralizado de Valores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Acciones Dep\u00f3sito Centralizado de Valores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Cuota patrimonial bolsa de valores"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Dep\u00f3sitos en Garant\u00eda por reporto", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Dep\u00f3sitos en Garant\u00eda por operaciones burs\u00e1tiles", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Dep\u00f3sitos en Garant\u00eda"
+       }
+      ], 
+      "name": "OTROS ACTIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Concesiones", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Licencias", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Otros", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "AMORTIZACION ACUMULADA"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos adquiridos en arrendamiento financiero", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Propiedades de inversi\u00f3n", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipo de Computaci\u00f3n ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Veh\u00edculos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Maquinaria y Equipo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Muebles y enseres ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Edificios", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Activos de exploraci\u00f3n y evaluaci\u00f3n minera", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DEPRECIACION ACUMULADA"
+     }
+    ], 
+    "name": "OTROS ACTIVOS NO CORRIENTES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "ACUMULADOS"
+       }, 
+       {
+        "name": "UTILIDAD (PERDIDA) DEL EJERCICIO"
+       }, 
+       {
+        "name": "RESULTADOS ACUMULADOS POR APLICACI\u00d3N DE LAS NIIF POR PRIMERA VEZ"
+       }
+      ], 
+      "name": "RESULTADOS"
+     }, 
+     {
+      "name": "APORTES PARA FUTURAS CAPITALIZACIONES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "PATRIMONIO DE LOS NEGOCIOS FIDUCIARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Patrimonio del fondo colectivo", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Patrimonio del fondo administrado", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PATRIMONIO DE LOS FONDOS DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "PAGADO"
+       }, 
+       {
+        "name": "ACCIONES EN TESORER\u00cdA"
+       }, 
+       {
+        "name": "FONDO PATRIMONIAL"
+       }
+      ], 
+      "name": "CAPITAL"
+     }, 
+     {
+      "children": [
+       {
+        "name": "RESERVA LEGAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reserva por Valuaci\u00f3n Activos Financieros Disponibles para la Venta", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Reserva por valuaci\u00f3n Propiedades", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "RESERVA POR VALUACI\u00d3N"
+       }, 
+       {
+        "name": "RESERVA FACULTATIVA"
+       }, 
+       {
+        "name": "OTRAS RESERVAS"
+       }
+      ], 
+      "name": "RESERVAS "
+     }
+    ], 
+    "name": "PATRIMONIO NETO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "INGRESOS DE ACTIVOS POR IMPUESTOS DIFERIDOS"
+       }
+      ], 
+      "name": "INGRESOS DE ACTIVOS POR IMPUESTOS DIFERIDOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Negocios Fiduciarios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Oferta p\u00fablica de Valores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "INGRESOS POR ESTRUCTURACI\u00d3N"
+       }, 
+       {
+        "name": "INGRESOS POR ASESORIA"
+       }
+      ], 
+      "name": "INGRESOS POR ASESOR\u00cdA Y ESTRUCTURACI\u00d3N"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INTERESES Y RENDIMIENTOS"
+       }, 
+       {
+        "name": "UTILIDAD EN CAMBIO"
+       }, 
+       {
+        "name": "DIVIDENDOS"
+       }, 
+       {
+        "name": "UTILIDAD POR VALUACI\u00d3N DE ACTIVOS FINANCIEROS A VALOR RAZONABLE"
+       }
+      ], 
+      "name": "INGRESOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "UTILIDAD POR OPERACIONES DESCONTINUADAS"
+       }, 
+       {
+        "name": "OTRAS UTILIDADES EN VENTAS"
+       }, 
+       {
+        "name": "UTILIDAD EN VENTA DE VALORES"
+       }, 
+       {
+        "name": "UTILIDAD EN VENTA DE PROPIEDAD"
+       }
+      ], 
+      "name": "UTILIDADES EN VENTAS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "OBLIGACIONES FINANCIERAS"
+       }, 
+       {
+        "name": "ACTIVOS BIOL\u00d3GICOS"
+       }, 
+       {
+        "name": "CUENTAS POR COBRAR"
+       }, 
+       {
+        "name": "PROPIEDADES DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "ACTIVOS NO CORRIENTES"
+       }
+      ], 
+      "name": "UTILIDAD POR ACTIVOS NO FINANCIEROS AL VALOR RAZONABLE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inscripciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Mantenimiento de Inscripci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Comisiones en operaciones ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "SERVICIOS BURS\u00c1TILES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Fondos colectivos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Fondos administrados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Portafolio de terceros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por representaci\u00f3n de obligacionistas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Encargos Fiduciarios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Fideicomisos mercantiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Titularizaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POR PRESTACI\u00d3N DE SERVICIOS DE ADMINISTRACI\u00d3N Y MANEJO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Operaciones Burs\u00e1tiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Operaciones Extraburs\u00e1tiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por Contratos de Underwriting", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "INTERMEDIACI\u00d3N DE VALORES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores materializados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores desmaterializados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Compensaci\u00f3n y liquidaci\u00f3n de valores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "CUSTODIA  REGISTRO\n        COMPENSACI\u00d3N Y LIQUIDACI\u00d3N"
+       }, 
+       {
+        "name": "OTRAS COMISIONES GANADAS"
+       }
+      ], 
+      "name": "COMISIONES GANADAS"
+     }
+    ], 
+    "name": "CUENTAS DE RESULTADOS ACREEDORAS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "PRIMA POR OPERACIONES DE REPORTO"
+       }, 
+       {
+        "name": "OBLIGACIONES FINANCIERAS"
+       }, 
+       {
+        "name": "ACTIVOS BIOL\u00d3GICOS"
+       }, 
+       {
+        "name": "PROPIEDADES DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "ACTIVOS NO CORRIENTES "
+       }, 
+       {
+        "name": "CUENTAS POR COBRAR"
+       }, 
+       {
+        "name": "ORGANISMOS DE CONTROL"
+       }, 
+       {
+        "name": "COSTO DE VENTAS"
+       }, 
+       {
+        "name": "COSTO DE PRODUCCI\u00d3N "
+       }, 
+       {
+        "name": "COSTO "
+       }, 
+       {
+        "name": "OTROS GASTOS"
+       }, 
+       {
+        "name": "OTROS GASTOS"
+       }, 
+       {
+        "name": "PRIMA POR OPERACIONES DE REPORTO"
+       }, 
+       {
+        "name": "MUNICIPALES"
+       }, 
+       {
+        "name": "OTROS"
+       }, 
+       {
+        "name": "FISCALES"
+       }
+      ], 
+      "name": "P\u00c9RDIDA POR MEDICI\u00d3N DE ACTIVOS NO FINANCIEROS AL VALOR RAZONABLE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Valores Materializados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Desmaterializados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Compensaci\u00f3n y Liquidaci\u00f3n de Valores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "CUSTODIA  REGISTRO COMPENSACI\u00d3N Y LIQUIDACI\u00d3N \n      "
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otras Comisiones Pagadas", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OTRAS COMISIONES PAGADAS "
+       }, 
+       {
+        "children": [
+         {
+          "name": "P\u00e9rdida en Valuaci\u00f3n de activos financieros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "P\u00c9RDIDA EN VALUACI\u00d3N DE ACTIVOS FINANCIEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Deterioro de activos financieros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DETERIORO DE ACTIVOS FINANCIEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intereses por cr\u00e9ditos de bancos y otras Instituciones financieras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Intereses por otros pasivos no financieros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "INTERESES CAUSADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Intermediaci\u00f3n de Valores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Por Contratos de Underwriting", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Operaciones Burs\u00e1tiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Operaciones Extraburs\u00e1tlies", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "COMISIONES PAGADAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Encargos fiduciarios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Fideicomisos mercantiles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Fondos colectivos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Administraci\u00f3n de portafolio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Titularizaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Fondos administrados", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POR SERVICIOS DE ADMINISTRACI\u00d3N Y MANEJO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "P\u00e9rdida en cambio", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "P\u00c9RDIDA EN CAMBIO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Arrendamiento operativo", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ARRENDAMIENTO OPERATIVO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "P\u00e9rdida por operaciones descontinuadas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "P\u00e9rdida en venta de Propiedad ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "P\u00e9rdida en venta activos biol\u00f2gicos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "P\u00e9rdida en venta de Valores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "P\u00c9RDIDAS EN VENTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Negocios Fiduciarios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Oferta P\u00fablica de Valores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "GASTOS POR ESTRUCTURACI\u00d3N"
+       }
+      ], 
+      "name": "GASTOS FINANCIEROS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "POR PUBLICIDAD"
+       }, 
+       {
+        "name": "ARRENDAMIENTOS"
+       }, 
+       {
+        "name": "SEGUROS"
+       }, 
+       {
+        "name": "MATERIALES Y SUMINISTROS"
+       }, 
+       {
+        "name": "SERVICIOS Y MANTENIMIENTO"
+       }, 
+       {
+        "name": "DEPRECIACI\u00d3N"
+       }, 
+       {
+        "name": "AMORTIZACIONES"
+       }, 
+       {
+        "name": "PROVISIONES"
+       }, 
+       {
+        "name": "OTROS"
+       }
+      ], 
+      "name": "GASTOS GENERALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Honorarios", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "HONORARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Beneficios sociales de los trabajadores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Provisi\u00f3n para jubilaci\u00f3n patronal", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Remuneraciones", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "GASTOS DE PERSONAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Servicios de terceros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "SERVICIOS DE TERCEROS "
+       }
+      ], 
+      "name": "GASTOS ADMINISTRATIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ACTIVOS DE EXPLORACI\u00d3N Y EVALUACI\u00d3N MINERA"
+       }, 
+       {
+        "name": "PLUSVAL\u00cdA MERCANTIL (GOODWILL)"
+       }, 
+       {
+        "name": "ACTIVOS BIOL\u00d3GICOS"
+       }, 
+       {
+        "name": "PROPIEDADES DE INVERSI\u00d3N"
+       }, 
+       {
+        "name": "CUENTAS Y DOCUMENTOS POR COBRAR"
+       }, 
+       {
+        "name": "EXISTENCIAS"
+       }, 
+       {
+        "name": "PROPIEDADES  PLANTA Y EQUIPO"
+       }
+      ], 
+      "name": "GASTOS POR  DETERIORO"
+     }, 
+     {
+      "name": "IMPUESTOS  TASAS Y CONTRIBUCIONES"
+     }
+    ], 
+    "name": "CUENTAS DE RESULTADOS DEUDORAS"
+   }
+  ], 
+  "name": "PLAN DE CTAS. ECUADOR"
+ }
+}

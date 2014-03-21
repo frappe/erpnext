@@ -8,8 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	account_details = {}
-	for acc in frappe.db.sql("""select name, debit_or_credit, group_or_ledger 
-		from tabAccount""", as_dict=1):
+	for acc in frappe.db.sql("""select name, group_or_ledger from tabAccount""", as_dict=1):
 			account_details.setdefault(acc.name, acc)
 	
 	validate_filters(filters, account_details)
@@ -88,15 +87,13 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	
 	# Opening for filtered account
 	if filters.get("account"):
-		data += [get_balance_row("Opening", account_details[filters.account].debit_or_credit, 
-			opening), {}]
+		data += [get_balance_row("Opening", opening), {}]
 
 	for acc, acc_dict in gle_map.items():
 		if acc_dict.entries:
 			# Opening for individual ledger, if grouped by account
 			if filters.get("group_by_account"):
-				data.append(get_balance_row("Opening", account_details[acc].debit_or_credit, 
-					acc_dict.opening))
+				data.append(get_balance_row("Opening", acc_dict.opening))
 
 			data += acc_dict.entries
 			
@@ -105,8 +102,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 				data += [{"account": "Totals", "debit": acc_dict.total_debit, 
 					"credit": acc_dict.total_credit}, 
 					get_balance_row("Closing (Opening + Totals)", 
-						account_details[acc].debit_or_credit, (acc_dict.opening 
-						+ acc_dict.total_debit - acc_dict.total_credit)), {}]
+						(acc_dict.opening + acc_dict.total_debit - acc_dict.total_credit)), {}]
 						
 	# Total debit and credit between from and to date	
 	if total_debit or total_credit:
@@ -115,7 +111,6 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	# Closing for filtered account
 	if filters.get("account"):
 		data.append(get_balance_row("Closing (Opening + Totals)", 
-			account_details[filters.account].debit_or_credit, 
 			(opening + total_debit - total_credit)))
 	
 	return data
@@ -151,11 +146,11 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 			
 	return opening, total_debit, total_credit, gle_map
 
-def get_balance_row(label, debit_or_credit, balance):
+def get_balance_row(label, balance):
 	return {
 		"account": label,
-		"debit": balance if debit_or_credit=="Debit" else 0,
-		"credit": -1*balance if debit_or_credit=="Credit" else 0,
+		"debit": balance if balance > 0 else 0,
+		"credit": -1*balance if balance < 0 else 0,
 	}
 	
 def get_result_as_list(data):

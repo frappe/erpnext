@@ -1,0 +1,365 @@
+{
+ "name": "Plantilla de cuentas de Honduras (sencilla)", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Impuestos", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Impuestos"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ISV por Pagar", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "ISV por Pagar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cuentas y Documentos por Pagar", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Cuentas y Documentos por Pagar"
+         }
+        ], 
+        "name": "Pasivo Corto Plazo"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Anticipos", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Cr\u00e9ditos Diferidos"
+         }
+        ], 
+        "name": "Cr\u00e9ditos Diferidos"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Provisi\u00f3n para Indemnizaciones", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisi\u00f3n para Indemnizaciones"
+         }
+        ], 
+        "name": "Pasivo a Largo Plazo"
+       }
+      ], 
+      "name": "Pasivo"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Capital Autorizado, Suscr\u00edto y Pagado", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Perdidas y Ganancias", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Reservas", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Patrimonio de los Accionistas"
+         }
+        ], 
+        "name": "Patrimonio de los Accionistas"
+       }
+      ], 
+      "name": "Patrimonio"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Inventario"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Retenciones de ISV recibidas", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "ISV por Cobrar", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "ISV por Cobrar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Prestamos al Personal", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Cuentas por Cobrar Empresas Afilidas", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Cuentas por Cobrar Generales", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Otras Cuentas por Cobrar", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Cuentas y Documentos por Cobrar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caja Chica", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Caja y Bancos"
+         }
+        ], 
+        "name": "Activo Corriente"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Propiedad, Planta y Equipo", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Propiedad, Planta y Equipo"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Depreciaciones Acumuladas", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Depreciaciones Acumuladas"
+         }
+        ], 
+        "name": "No Corriente"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos de Organizaci\u00f3n", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Gastos de Organizaci\u00f3n"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Gastos por Amortizar", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Gastos por Amortizar"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Gastos Anticipados", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Gastos Anticipados"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Otros Activos", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Otros Activos"
+         }
+        ], 
+        "name": "Diferido"
+       }
+      ], 
+      "name": "Activo"
+     }
+    ], 
+    "name": "Balance General"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos no Deducibles", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Gastos no Deducibles"
+         }
+        ], 
+        "name": "Gastos no Deducibles"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Otros Gastos de Operaci\u00f3n", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Otros Gastos de Operaci\u00f3n"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Gastos de Administraci\u00f3n", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Gastos de Administraci\u00f3n"
+         }
+        ], 
+        "name": "Gastos de Operaci\u00f3n"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gastos de Ventas", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Gastos de Ventas"
+         }
+        ], 
+        "name": "Gastos de Ventas"
+       }
+      ], 
+      "name": "Gastos"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Otros Ingresos", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Otros Ingresos"
+         }
+        ], 
+        "name": "Otros Ingresos"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Descuentos Sobre Ventas", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ventas", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Ventas Netas"
+         }
+        ], 
+        "name": "Ventas"
+       }
+      ], 
+      "name": "Ingresos"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Intereses", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Otros Gastos Financieros", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Otros Gastos y Productos Financieros"
+         }
+        ], 
+        "name": "Otros Gastos y Productos Financieros"
+       }
+      ], 
+      "name": "Otros Gastos y Productos Financieros"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Costos de Ventas", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Costos de Ventas"
+         }
+        ], 
+        "name": "Costos"
+       }
+      ], 
+      "name": "Egresos"
+     }
+    ], 
+    "name": "Estado de Resultados"
+   }
+  ], 
+  "name": "Plan contable de Honduras (sencillo)"
+ }
+}

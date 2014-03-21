@@ -118,10 +118,11 @@ class StatusUpdater(DocListController):
 					args['name'] = d.fields[args['join_field']]
 
 					# get all qty where qty > target_field
-					item = frappe.db.sql("""select item_code, `%(target_ref_field)s`, 
-						`%(target_field)s`, parenttype, parent from `tab%(target_dt)s` 
-						where `%(target_ref_field)s` < `%(target_field)s` 
-						and name="%(name)s" and docstatus=1""" % args, as_dict=1)
+					item = frappe.db.sql("""select item_code, `{target_ref_field}`, 
+						`{target_field}`, parenttype, parent from `{target_dt}` 
+						where `{target_ref_field}` < `{target_field}` 
+						and name=%s and docstatus=1""".format(**args), 
+						args['name'], as_dict=1)
 					if item:
 						item = item[0]
 						item['idx'] = d.idx
@@ -181,9 +182,9 @@ class StatusUpdater(DocListController):
 		for args in self.status_updater:
 			# condition to include current record (if submit or no if cancel)
 			if self.doc.docstatus == 1:
-				args['cond'] = ' or parent="%s"' % self.doc.name
+				args['cond'] = ' or parent="%s"' % self.doc.name.replace('"', '\"')
 			else:
-				args['cond'] = ' and parent!="%s"' % self.doc.name
+				args['cond'] = ' and parent!="%s"' % self.doc.name.replace('"', '\"')
 			
 			args['modified_cond'] = ''
 			if change_modified:

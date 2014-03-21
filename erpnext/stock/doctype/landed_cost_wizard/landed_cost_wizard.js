@@ -25,8 +25,6 @@ erpnext.stock.LandedCostWizard = erpnext.stock.StockController.extend({
 					filters:[
 						['Account', 'group_or_ledger', '=', 'Ledger'],
 						['Account', 'account_type', 'in', 'Tax, Chargeable'],
-						['Account', 'is_pl_account', '=', 'Yes'],
-						['Account', 'debit_or_credit', '=', 'Debit'],
 						['Account', 'company', '=', me.frm.doc.company]
 					]
 				}

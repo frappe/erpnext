@@ -1,0 +1,323 @@
+{
+ "name": "India - Chart of Accounts for Public Ltd", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Sales - Division #1, Product Line 010", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sales - Division #3, Product Line 110", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sales - Division #1, Product Line 022", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sales - Division #2, Product Line 015", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Operating Revenues", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Gain on Sale of Assets", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Non-Operating Revenue and Gains", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Payroll Dept. Payroll Taxes", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Payroll Dept. Supplies", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Payroll Dept. Telephone", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Payroll Dept. Salaries", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Payroll Dept. Expenses", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Marketing Dept. Supplies", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Marketing Dept. Telephone", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Marketing Dept. Payroll Taxes", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Marketing Dept. Salaries", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Marketing Expenses", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "COGS - Division #1, Product Line 022", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "COGS - Division #2, Product Line 015", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "COGS - Division #3, Product Line 110", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "COGS - Division #1, Product Line 010", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Cost of Goods Sold", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Loss on Sale of Assets", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Non-Operating Expenses and Losses", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Expense", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Profit And Loss"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Cash - Payroll Checking", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Petty Cash Fund", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Accounts Receivable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Inventory", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Tax Receivable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Supplies", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Cash - Regular Checking", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Prepaid Insurance", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Allowance for Doubtful Accounts", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Current Assets", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Accumulated Depreciation - Vehicles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Vehicles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Accumulated Depreciation - Buildings", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Equipment", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Land", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Buildings", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Accumulated Depreciation - Equipment", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Property, Plant, and Equipment", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Assets", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Service Tax Payable", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Exice Duty Payable", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "VAT Payable", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sales Tax Payable", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Tax payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Interest Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Wages Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Reserve and Surplus Account", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Notes Payable - Credit Line #2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Unearned Revenues", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Accounts Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Notes Payable - Credit Line #1", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Current Liabilities", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Mortgage Loan Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bonds Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Discount on Bonds Payable", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Long-term Liabilities", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Treasury Stock", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Retained Earnings", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Common Stock, No Par", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Stockholders' Equity", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Liabilities", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Balance Sheet"
+   }
+  ], 
+  "name": "Public Firm Chart of Account"
+ }
+}

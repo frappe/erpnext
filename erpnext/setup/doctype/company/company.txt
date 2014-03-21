@@ -2,7 +2,7 @@
  {
   "creation": "2013-04-10 08:35:39", 
   "docstatus": 0, 
-  "modified": "2014-01-30 16:32:41", 
+  "modified": "2014-03-05 14:54:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -84,6 +84,28 @@
   "label": "Domain", 
   "options": "Distribution\nManufacturing\nRetail\nServices", 
   "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "charts_section", 
+  "fieldtype": "Section Break", 
+  "label": "Chart of Accounts"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "country", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Country", 
+  "options": "Country", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "chart_of_accounts", 
+  "fieldtype": "Link", 
+  "label": "Chart of Accounts", 
+  "options": "Chart of Accounts"
  }, 
  {
   "doctype": "DocField", 

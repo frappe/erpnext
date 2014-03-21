@@ -1,0 +1,437 @@
+{
+ "name": "Canada - Plan comptable pour les provinces francophones", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "AUTRES PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION"
+       }, 
+       {
+        "name": "INT\u00c9R\u00caTS"
+       }
+      ], 
+      "name": "PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ventes avec des provinces harmonis\u00e9es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ventes avec des provinces non-harmonis\u00e9es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "AUTRES PRODUITS D'EXPLOITATION"
+       }, 
+       {
+        "name": "Ventes", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ventes \u00e0 l'\u00e9tranger", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "PRODUITS D'EXPLOITATION"
+     }
+    ], 
+    "name": "PRODUITS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "AUTRES \u00c9L\u00c9MENTS DU R\u00c9SULTAT GLOBAL"
+     }, 
+     {
+      "name": "\u00c9CARTS DE CONVERSION"
+     }, 
+     {
+      "name": "SURPLUS D'APPORT"
+     }, 
+     {
+      "name": "PRIMES"
+     }, 
+     {
+      "name": "CAPITAL-ACTIONS"
+     }, 
+     {
+      "name": "B\u00c9N\u00c9FICES NON R\u00c9PARTIS"
+     }, 
+     {
+      "name": "DIVIDENDES"
+     }
+    ], 
+    "name": "CAPITAUX PROPRES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "PROVISIONS POUR RETRAITES ET AUTRES AVANTAGES POST\u00c9RIEURS \u00c0 L'EMPLOI"
+       }, 
+       {
+        "name": "IMP\u00d4TS DIFF\u00c9R\u00c9S"
+       }, 
+       {
+        "name": "AUTRES PASSIFS NON-COURANTS"
+       }, 
+       {
+        "name": "DETTES FINANCI\u00c8RES NON-COURANTES"
+       }
+      ], 
+      "name": "PASSIFS NON-COURANTS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "AUTRES COMPTES CR\u00c9DITEURS"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Comptes fournisseurs", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "FOURNISSEURS ET COMPTES RATTACH\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "TVH \u00e0 payer - 14%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "TVH \u00e0 payer - 15%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "TVH \u00e0 payer - 13%", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "TVH \u00e0 payer"
+         }, 
+         {
+          "name": "TVP/TVQ \u00e0 payer", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "TPS \u00e0 payer", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "IMP\u00d4TS \u00c0 PAYER"
+       }, 
+       {
+        "name": "DETTES FINANCI\u00c8RES COURANTES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Fond des Services de Sant\u00e9 \u00e0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "AP - Contribution de l'employeur", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "AP - Contribution des employ\u00e9s", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "ASSURANCE PARENTALE \u00c0 PAYER"
+           }, 
+           {
+            "name": "Imp\u00f4t provincial sur les revenus", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Rentes - Contribution des employ\u00e9s", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Rentes - Contribution de l'employeur", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "RENTES \u00c0 PAYER"
+           }, 
+           {
+            "name": "Sant\u00e9 et S\u00e9curit\u00e9 au Travail \u00e0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Normes du Travail \u00e0 payer", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "AGENCE DU REVENU PROVINCIAL"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "AE - Contribution des employ\u00e9s", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "AE - Contribution de l'employeur", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "ASSURANCE EMPLOI \u00c0 PAYER"
+           }, 
+           {
+            "name": "Imp\u00f4t f\u00e9d\u00e9ral sur les revenus", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "AGENCE DU REVENU DU CANADA"
+         }
+        ], 
+        "name": "IMP\u00d4TS LI\u00c9S AUX SALAIRES \u00c0 PAYER"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Stock re\u00e7u non factur\u00e9", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PASSIFS DE STOCK"
+       }, 
+       {
+        "name": "PASSIFS LI\u00c9S AUX ACTIFS D\u00c9TENUS EN VUE DE LEUR CESSION"
+       }
+      ], 
+      "name": "PASSIFS COURANTS"
+     }
+    ], 
+    "name": "PASSIF"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "FRAIS G\u00c9N\u00c9RAUX"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Imp\u00f4t f\u00e9d\u00e9ral", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Assurance parentale", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Imp\u00f4t provincial", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Rentes", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sant\u00e9 et s\u00e9curit\u00e9 au travail", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Fonds des services de sant\u00e9", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Normes du travail", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Assurance Emploi", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Salaires", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Vacances", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "SALAIRES ET CHARGES SOCIALES"
+       }, 
+       {
+        "name": "AUTRES FRAIS D'EXPLOITATION"
+       }, 
+       {
+        "name": "FRAIS SUR VENTE"
+       }, 
+       {
+        "name": "FRAIS DE RECHERCHE ET D\u00c9VELOPPEMENT"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Achats", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Achats dans des provinces harmonis\u00e9es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Achats dans des provinces non-harmonis\u00e9es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Achats \u00e0 l'\u00e9tranger", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "CO\u00dbT DES PRODUITS VENDUS"
+       }
+      ], 
+      "name": "CHARGES D'EXPLOITATION"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INT\u00c9R\u00caTS D\u00c9BITEURS"
+       }, 
+       {
+        "name": "AUTRES FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION"
+       }
+      ], 
+      "name": "FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION"
+     }
+    ], 
+    "name": "CHARGES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "PLACEMENTS DISPONIBLES \u00c0 LA VENTE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AMORTISSEMENTS CUMUL\u00c9S"
+         }
+        ], 
+        "name": "IMMOBILISATIONS CORPORELLES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BREVETS, MARQUES DE COMMERCE ET DROITS D'AUTEURS"
+         }
+        ], 
+        "name": "IMMOBILISATIONS INCORPORELLES"
+       }
+      ], 
+      "name": "ACTIFS NON-COURANTS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "FRAIS PAY\u00c9S D'AVANCE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TPS \u00e0 recevoir", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "children": [
+           {
+            "name": "TVH \u00e0 recevoir - 13%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "TVH \u00e0 recevoir - 14%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "TVH \u00e0 recevoir - 15%", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "TVH \u00e0 recevoir"
+         }, 
+         {
+          "name": "TVP/TVQ \u00e0 recevoir", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "IMP\u00d4TS \u00c0 RECEVOIR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PROVISION POUR CR\u00c9ANCES DOUTEUSES"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Comptes clients", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "COMPTES CLIENTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Stock exp\u00e9di\u00e9 non-factur\u00e9", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Stock", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "STOCKS"
+       }, 
+       {
+        "name": "ENCAISSE"
+       }, 
+       {
+        "name": "TR\u00c9SORERIE OU \u00c9QUIVALENTS DE TR\u00c9SORERIE"
+       }, 
+       {
+        "name": "CERTIFICATS DE D\u00c9P\u00d4TS"
+       }, 
+       {
+        "name": "PLACEMENTS D\u00c9TENUS \u00c0 DES FINS DE TRANSACTION"
+       }
+      ], 
+      "name": "ACTIFS COURANTS"
+     }
+    ], 
+    "name": "ACTIF"
+   }
+  ], 
+  "name": "Account Chart CA FR"
+ }
+}

@@ -1,0 +1,2058 @@
+{
+ "name": "Nederlands Grootboekschema", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "Verlies verkoop deelnem.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Reorganisatiekosten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Winst bij verkoop deelnem.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Vpb normaal resultaat", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Winst", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Memoriaal", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Opbrengsten deelnemingen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Vpb bijzonder resultaat", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Voorz. Verlies deelnem.", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "OVERIGE RESULTATEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Diensten handel laag tarief", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten handel 0% EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten handel hoog tarief", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen handel laag", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen handel 0% EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen handel overig", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten fabric. 0% niet-EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten handel 0% niet-EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen Fabric. 0% niet-EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen Handel 0% niet-EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verleende Kredietbep. handel", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen handel hoog", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verleende Kredietbep. fabricage", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten fabricage hoog", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten fabricage overig", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten fabricage 0% EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Diensten fabricage laag", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen fabricage hoog", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen fabricage overig", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen fabric. 0 % EU", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verkopen fabricage laag", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "VERKOOPRESULTATEN"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Inkopen hoog", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Invoerkosten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Tegenrekening inkoop", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Priv\u00e9-gebruik goederen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkoopbonussen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Betalingskort. crediteuren", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Voorz. Incourourant grondst.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Kostprijs omzet grondstoffen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Toev. Voorz. incour. grondst.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkoopprovisie", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Toevoeging garantieverpl.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Onttrekking uitgev.garantie", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Garantiekosten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen EU overig", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Kosten inkoopvereniging", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen nul", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkoopkosten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen overig", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen laag", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Hulpmaterialen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Uitbesteed werk", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Toevoeging voorz. incour. handelsgoed.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Kostprijs omzet handelsgoederen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Voorz.incour. handelsgoed.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkoop import buiten EU hoog", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkoop import buiten EU overig", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen BTW verlegd", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkomende vrachten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen EU laag tarief", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkopen EU hoog tarief", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Inkoop import buiten EU laag", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "VOORRAAD GEREED PRODUCT EN ONDERHANDEN WERK"
+   }, 
+   {
+    "name": "FABRIKAGEREKENINGEN"
+   }, 
+   {
+    "name": "INDIRECTE KOSTEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Wegenbelasting", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Onderhoud personenauto's", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Assuranties auto's", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Priv\u00e9-gebruik auto's", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige vervoerskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Brandstoffen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Onderhoud vrachtauto's", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Leasing auto's", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "VERVOERSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Veilingkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Provisie", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Afschrijving dubieuze deb.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Relatiegeschenken", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Verpakkingsmateriaal", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Etalagekosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Beurskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kascorrecties", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Uitgaande vrachten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Exportkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Reclame", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Advertenties", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Websitekosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige verkoopkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Reis en verblijfkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Representatiekosten", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "VERKOOPKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Accountantskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Advieskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Juridische kosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Assuranties", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Toev. Ass. eigen risico", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige algemene kosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Bankkosten", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "ALGEMENE KOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Rente huurkoopcontracten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rente lening o/g", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rente lening u/g", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rente leasecontracten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rente bankkrediet", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rente hypotheek", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige rentelasten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige rentebaten", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "FINANCIERINGSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Managementvergoedingen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Geschenken personeel", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Tanti\u00e8mes", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gratificaties", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Bijzondere beloningen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Belastingvrije uitkeringen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Bedrijfskleding", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kantinekosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gereedschapsgeld", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rijwielvergoeding", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Reiskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Autokostenvergoeding", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige kostenverg.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Congressen, seminars en symposia", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige personeelskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Uitkering ziekengeld", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige uitkeringen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Provisie", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Loonwerk", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Thuiswerkers", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Uitzendkrachten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Wervingskosten personeel", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Opleidingskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Vergoeding studiekosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Bedrijfskleding", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Oprenting stamrechtverpl.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Toevoeging pensioenverpl.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Toev. Backservice pens.verpl.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Inhouding pensioenpremies", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Pensioenpremies", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Inhouding sociale lasten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Sociale lasten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Vakantiebonnen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Vakantiegeld", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Lonen en salarissen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overhevelingstoeslag", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "PERSONEELSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Schoonmaakkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Energiekosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Toevoeging egalisatieres. Groot onderhoud", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Onderhoud onroerend goed", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Belastingen onr. Goed", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige huisvestingskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Groot onderhoud onr. Goed", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Pacht", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Huur", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Assurantie onroerend goed", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ontvangen huren", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Huurwaarde woongedeelte", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "HUISVESTINGSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Huur inventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Leasing invent.operational", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Huur machines", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Leasing mach. operational", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Onderhoud inventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Onderhoud machines", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Hulpmaterialen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gereedschappen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ophalen/vervoer afval", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Energie (krachtstroom)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Assuranties", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige bedrijfskosten", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "BEDRIJFSKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kantoorbenodigdh./drukw.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Contributies/abonnementen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige kantoorkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Administratiekosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Internetaansluiting", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Telefoon/telefax", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Onderhoud kantoorinvent.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Huur kantoorapparatuur", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Porti", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "KANTOORKOSTEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gebouwen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Bedrijfsgebouwen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Woon-winkelhuis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Winkels", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kantoorinventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kantoormachines", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kantine-inventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Bedrijfsinventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Magazijninventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Fabrieksinventaris", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gereedschappen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Personenauto's", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Vrachtauto's", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Pachtersinvestering", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Aankoopkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Parkeerplaats", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Grondverbetering", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Verbouwingen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Machines", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Voorraadverschillen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Heftrucks", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Aanhangwagens", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Rijwielen en bromfietsen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Tonnagevergunningen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Drankvergunningen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Octrooien", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Licenties", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Goodwill", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Aanloopkosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ontwikkelingskosten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Auteursrechten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Vergunningen", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "AFSCHRIJVINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kosten omzetbelasting", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Boekverlies vaste activa", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K.O. regeling OB", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Boekwinst van vaste activa", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kasverschillen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige baten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Betaalde schadevergoed.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Nadelige koersverschillen", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Overige lasten", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kosten loonbelasting", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Naheffing bedrijfsver.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ontvangen schadevergoed.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Voordelige koersverschil.", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "OVERIGE BATEN EN LASTEN"
+     }
+    ], 
+    "name": "KOSTENREKENINGEN"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Cash", 
+      "name": "Goederen 2", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Goederen 1", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Kantoorbenodigdheden", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Hulpstoffen 1", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Hulpstoffen 2", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Onderhanden werk", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Verpakkingsmateriaal", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Halffabrikaten 2", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Halffabrikaten 1", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Gereed product 1", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Gereed product 2", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Goederen onderweg", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Grondstoffen 1", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Grondstoffen 2", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Zegels", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Goederen in consignatie", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Emballage", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "VOORRAAD GRONDSTOFFEN, HULPMATERIALEN EN HANDELSGOEDEREN"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Cash", 
+      "name": "Betaalwijze contant", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrekening balans", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrekening correcties", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrekening pin", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Betaalwijze pin", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen binnen EU laag", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen binnen EU hoog", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen binnen EU overig", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Kassa 2", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Kassa 1", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Netto lonen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Betaalwijze chipknip", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrekening chipknip", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen buiten EU overig", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen buiten EU hoog", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen buiten EU laag", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrek. autom. loonbetalingen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen Nederland overig", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen Nederland onbelast", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen Nederland laag", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen Nederland hoog", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Inkopen Nederland verlegd", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Vraagposten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrek. autom. betalingen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tussenrek. cadeaubonbetalingen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Betaalwijze cadeaubonnen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Tegenrekening Inkopen", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "TUSSENREKENINGEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Dubieuze debiteuren", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Vooruitbetaalde kosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Te ontvangen ziekengeld", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Overige vorderingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "Debiteuren", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Voorziening dubieuze debiteuren", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Rekening-courant directie", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Voorschotten personeel", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "VORDERINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Effecten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "ABN-AMRO bank", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Kas  valuta", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Kruisposten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "RABO bank", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Postbank", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Kleine kas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "BIZNER bank", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Kas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Girobetaalkaarten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Bankbetaalkaarten", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "LIQUIDE MIDDELEN"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Crediteuren", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Vennootschapsbelasting", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Investeringsaftrek", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Dividendbelasting", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Premie WIR", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw te vorderen laag", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Overige te betalen posten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Vooruit ontvangen bedr.", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Sociale lasten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Pensioenpremies", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Vakantiegeld", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Vakantiedagen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Vakantiezegels", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Tanti\u00e8mes", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Rente", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Dividend", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw oude jaren", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw-afdracht", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw af te dragen hoog", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Loonheffing", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afdracht loonheffing", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Rekening-courant inkoopvereniging", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw te vorderen hoog", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Af te dragen Btw-verlegd", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Te vorderen Btw-verlegd", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Energiekosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Accountantskosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Telefoon/telefax", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Termijnen onderh. werk", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw te vorderen overig", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw af te dragen overig", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Btw af te dragen laag", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KORTLOPENDE SCHULDEN"
+     }
+    ], 
+    "name": "FINANCIELE REKENINGEN, KORTLOPENDE VORDERINGEN EN SCHULDEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Rekening-courant directie", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken o/g 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken o/g 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken o/g 4", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken o/g 3", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken o/g 5", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen o/g 5", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen o/g 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen o/g 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen o/g 4", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Lease-verplichtingen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Huurkoopverplichtingen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen o/g 3", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "LANGLOPENDE SCHULDEN"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Hypotheek o/g 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheek o/g 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheek o/g 3", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheek o/g 4", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheek o/g 5", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Lease-verplichtingen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Huurkoopverplichtingen", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "AFLOSSINGEN"
+       }
+      ], 
+      "name": "LANGLOPENDE SCHULDEN EN AFLOSSINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Afschrijving Aanloopkosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Octrooien", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Licenties", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Goodwill", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Tonnagevergunningen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Drankvergunningen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Auteursrechten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Vergunningen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Vergunningen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Auteursrechten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Drankvergunningen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Tonnagevergunningen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Goodwill", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Octrooien", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Ontwikkelingskosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Ontwikkelingskosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Aanloopkosten", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "IMMATERIELE ACTIVA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Aanschafwaarde Gereedschappen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Fabrieksinventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Magazijninventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Bedrijfsinventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Kantoorinventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Kantine-inventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Kantoorinventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Kantoormachines", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Kantine-inventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Bedrijfsinventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Fabrieksinventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Magazijninventaris", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Gereedschappen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Kantoormachines", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "INVENTARIS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Afschrijving Machines 5", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Machines 4", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Machines 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 5", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Machines 3", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Afschrijving Machines 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 4", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aanschafwaarde Machines 3", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "MACHINES"
+       }
+      ], 
+      "name": "MACHINES EN INVENTARIS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Aanschafwaarde Personenauto's", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Rijwielen en bromfietsen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Vrachtauto's", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Aanhangwagens", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Heftrucks", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Personenauto's", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Rijwielen en bromfietsen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Heftrucks", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Aanhangwagens", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Vrachtauto's", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "VERVOERMIDDELEN"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Financieringskosten huurkoop", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Financieringskosten", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Vorderingen op deelnemingen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Waarborgsommen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken u/g 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken u/g 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Hypotheken u/g 3", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen u/g 1", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen u/g 3", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen u/g 2", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen u/g 5", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Leningen u/g 4", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "LANGLOPENDE VORDERINGEN"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Minderheidsdeelnemingen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Meerderheidsdeelnemingen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aandeel inkoopcombinatie", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "FINANCIELE VASTE ACTIVA"
+       }
+      ], 
+      "name": "FINANCIELE VASTE ACTIVA EN LANGLOPENDE VORDERINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Premie lijfrenteverzekeringen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Premie volksverzekeringen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Assuranties", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Priv\u00e9-opnamen/stortingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Huishoudgeld", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Kapitaal", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "WAO en ziekengeldverzekeringen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Overige priv\u00e9-uitgaven", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Priv\u00e9-gebruik", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Overige persoonlijke verplichtingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Giften", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Buitengewone lasten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Inkomstenbelasting", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Vermogensbelasting", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Premie volksverzekeringen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Wettelijke reserves", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Overige reserves", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Aandelenkapitaal", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "EIGEN VERMOGEN"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Voorziening deelnemingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Egalisatierekening WIR", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Garantieverplichtingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Egalisatieres. grootonderh.", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Assurantie eigen risico", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Latente belastingverpl.", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Pens.voorz. eigen beheer", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Pensioenverplichtingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Stamrechtverplichtingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Backservice pensioenverpl.", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Vervangingsreserve", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "VOORZIENINGEN"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Aanschafwaarde Gebouwen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Ondergrond gebouwen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Landerijen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Woon-winkelhuis", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Bedrijfsgebouwen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Winkels", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Pachtersinvesteringen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Grondverbetering", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Parkeerplaats", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Verbouwingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Aanschafwaarde Aanloopkosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Pachtersinvesteringen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Parkeerplaats", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Grondverbetering", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Verbouwingen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Aanloopkosten", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Gebouwen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Bedrijfsgebouwen", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Woon-winkelhuis", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Afschrijving Winkels", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ONROERENDE GOEDEREN"
+     }
+    ], 
+    "name": "VASTE ACTIVA, EIGEN VERMOGEN, LANGLOPEND VREEMD VERMOGEN EN VOORZIENINGEN"
+   }
+  ], 
+  "name": "NEDERLANDS STANDAARD GROOTBOEKSCHEMA"
+ }
+}

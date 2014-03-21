@@ -79,11 +79,11 @@ cur_frm.cscript.abbr = function(doc){
 
 cur_frm.fields_dict.default_bank_account.get_query = function(doc) {    
 	return{
-		filters:{
-			'company': doc.name,
-			'group_or_ledger': "Ledger",
-			'account_type': "Bank or Cash"
-		}
+		filters: [
+			['Account', 'account_type', 'in', 'Bank, Cash'],
+			['Account', 'group_or_ledger', '=', 'Ledger'],
+			['Account', 'company', '=', doc.name]
+		]
 	}  
 }
 
@@ -98,15 +98,23 @@ cur_frm.fields_dict.receivables_group.get_query = function(doc) {
 	}  
 }
 
+cur_frm.get_field("chart_of_accounts").get_query = function(doc) {
+	return {
+		filters: {
+			"country": doc.country
+		}
+	}
+}
+
 cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
+
 
 cur_frm.fields_dict.default_expense_account.get_query = function(doc) {    
 	return{
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
-			'is_pl_account': "Yes",
-			'debit_or_credit': "Debit"
+			"report_type": "Profit and Loss"
 		}
 	}  
 }
@@ -116,8 +124,7 @@ cur_frm.fields_dict.default_income_account.get_query = function(doc) {
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
-			'is_pl_account': "Yes",
-			'debit_or_credit': "Credit"
+			"report_type": "Profit and Loss"
 		}
 	}  
 }
@@ -135,8 +142,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict["stock_adjustment_account"].get_query = function(doc) {
 		return {
 			"filters": {
-				"is_pl_account": "Yes",
-				"debit_or_credit": "Debit",
+				"report_type": "Profit and Loss",
 				"company": doc.name,
 				'group_or_ledger': "Ledger"
 			}
@@ -149,8 +155,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {
 		return {
 			"filters": {
-				"is_pl_account": "No",
-				"debit_or_credit": "Credit",
+				"report_type": "Balance Sheet",
 				"company": doc.name,
 				'group_or_ledger': "Ledger"
 			}

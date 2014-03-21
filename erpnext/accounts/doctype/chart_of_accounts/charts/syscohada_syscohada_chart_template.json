@@ -1,0 +1,4408 @@
+{
+ "name": "SYSCOHADA - Plan de compte", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "TRANSFERTS DE CHARGES FINANCIERES"
+         }, 
+         {
+          "name": "TRANSFERTS DE CHARGES D'EXPLOITATION"
+         }
+        ], 
+        "name": "TRANSFERTS DE CHARGES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "pour risques et charges"
+           }, 
+           {
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res"
+           }
+          ], 
+          "name": "REPRISES DE PROVISIONS FINANCI\u00c8RES"
+         }, 
+         {
+          "name": "REPRISES D'AMORTISSEMENTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "pour grosses r\u00e9parations"
+           }, 
+           {
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations incorporelles"
+           }, 
+           {
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations corporelles"
+           }, 
+           {
+            "name": "pour risques et charges"
+           }
+          ], 
+          "name": "REPRISES DE PROVISIONS D'EXPLOITATION"
+         }
+        ], 
+        "name": "REPRISES DE PROVISIONS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "sur instruments de tr\u00e9sorerie"
+           }, 
+           {
+            "name": "sur op\u00e9rations financi\u00e8res"
+           }, 
+           {
+            "name": "sur rentes viag\u00e8res"
+           }
+          ], 
+          "name": "GAINS SUR RISQUES FINANCIERS"
+         }, 
+         {
+          "name": "GAINS SUR CESSIONS DE TITRES DE PLACEMENT"
+         }, 
+         {
+          "name": "REVENUS DE PARTICIPATIONS"
+         }, 
+         {
+          "name": "ESCOMPTES OBTENUS"
+         }, 
+         {
+          "name": "GAINS DE CHANGE"
+         }, 
+         {
+          "name": "REVENUS DE TITRES DE PLACEMENT"
+         }, 
+         {
+          "name": "INT\u00c9R\u00caTS DE PR\u00caTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur risques financiers"
+           }, 
+           {
+            "name": "sur titres de placement"
+           }, 
+           {
+            "name": "autres charges provisionn\u00e9es financi\u00e8res"
+           }
+          ], 
+          "name": "REPRISES DE CHARGES PROVISIONN\u00c9ES FINANCI\u00c8RES"
+         }
+        ], 
+        "name": "REVENUS FINANCIERS ET PRODUITS ASSIMIL\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "B\u00e9n\u00e9fices attribu\u00e9s par transfert (comptabilit\u00e9 des associ\u00e9s non g\u00e9rants)"
+           }, 
+           {
+            "name": "Quote-part transf\u00e9r\u00e9e de pertes (comptabilit\u00e9 du g\u00e9rant)"
+           }
+          ], 
+          "name": "QUOTE-PART DE R\u00c9SULTAT SUR OP\u00c9RATIONS FAITES EN COMMUN"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Jetons de pr\u00e9sence et autres r\u00e9mun\u00e9rations d'administrateurs"
+           }, 
+           {
+            "name": "Indemnit\u00e9s d\u2019assurances re\u00e7ues"
+           }
+          ], 
+          "name": "PRODUITS DIVERS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur stocks"
+           }, 
+           {
+            "name": "sur risques \u00e0 court terme"
+           }, 
+           {
+            "name": "sur autres charges provisionn\u00e9es"
+           }, 
+           {
+            "name": "sur cr\u00e9ances"
+           }
+          ], 
+          "name": "REPRISES DE CHARGES PROVISIONN\u00c9ES D'EXPLOITATION"
+         }, 
+         {
+          "name": "PRODUITS DES CESSIONS COURANTES D'IMMOBILISATIONS"
+         }, 
+         {
+          "name": "QUOTE-PART DE R\u00c9SULTAT SUR EX\u00c9CUTION PARTIELLE DE CONTRATS PLURIEXERCICES"
+         }
+        ], 
+        "name": "AUTRES PRODUITS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }, 
+           {
+            "name": "dans la R\u00e9gion"
+           }
+          ], 
+          "name": "SERVICES VENDUS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "dans la R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }
+          ], 
+          "name": "TRAVAUX FACTUR\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres produits accessoires"
+           }, 
+           {
+            "name": "Ports, emballages perdus et autres frais factur\u00e9s"
+           }, 
+           {
+            "name": "Services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel"
+           }, 
+           {
+            "name": "Mise \u00e0 disposition de personnel"
+           }, 
+           {
+            "name": "Bonis sur reprises et cessions d'emballages"
+           }, 
+           {
+            "name": "Locations"
+           }, 
+           {
+            "name": "Commissions et courtages"
+           }, 
+           {
+            "name": "Redevances pour brevets, logiciels, marques et droits similaires"
+           }
+          ], 
+          "name": "PRODUITS ACCESSOIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "dans la R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }
+          ], 
+          "name": "VENTES DE PRODUITS R\u00c9SIDUELS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "dans la R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }
+          ], 
+          "name": "VENTES DE PRODUITS INTERM\u00c9DIAIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "dans la R\u00e9gion"
+           }
+          ], 
+          "name": "VENTES DE PRODUITS FINIS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "dans la R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }
+          ], 
+          "name": "VENTES DE MARCHANDISES"
+         }
+        ], 
+        "name": "VENTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SUR PRODUITS \u00c0 L'EXPORTATION"
+         }, 
+         {
+          "name": "SUR PRODUITS DE P\u00c9R\u00c9QUATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Vers\u00e9es par des tiers"
+           }, 
+           {
+            "name": "Vers\u00e9es par les organismes internationaux"
+           }, 
+           {
+            "name": "Vers\u00e9es par l'\u00c9tat et les collectivit\u00e9s publiques"
+           }
+          ], 
+          "name": "AUTRES SUBVENTIONS D'EXPLOITATION"
+         }, 
+         {
+          "name": "SUR PRODUITS \u00c0 L'IMPORTATION"
+         }
+        ], 
+        "name": "SUBVENTIONS D'EXPLOITATION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "IMMOBILISATIONS CORPORELLES"
+         }, 
+         {
+          "name": "IMMOBILISATIONS FINANCI\u00c8RES"
+         }, 
+         {
+          "name": "IMMOBILISATIONS INCORPORELLES"
+         }
+        ], 
+        "name": "PRODUCTION IMMOBILIS\u00c9E"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VARIATIONS DES STOCKS DE PRODUITS FINIS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits r\u00e9siduels"
+           }, 
+           {
+            "name": "Produits interm\u00e9diaires"
+           }
+          ], 
+          "name": "VARIATIONS DES STOCKS DE PRODUITS INTERM\u00c9DIAIRES ET R\u00c9SIDUELS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Travaux en cours"
+           }, 
+           {
+            "name": "Produits en cours"
+           }
+          ], 
+          "name": "VARIATIONS DES STOCKS DE PRODUITS EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Prestations de services en cours"
+           }, 
+           {
+            "name": "\u00c9tudes en cours"
+           }
+          ], 
+          "name": "VARIATIONS DES EN-COURS DE SERVICES"
+         }
+        ], 
+        "name": "VARIATIONS DES STOCKS DE BIENS ET DE SERVICES PRODUITS"
+       }
+      ], 
+      "name": "Comptes de produits"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Dotations aux amortissements des primes de remboursement des obligations"
+           }, 
+           {
+            "name": "Autres dotations aux amortissements \u00e0 caract\u00e8re financier"
+           }
+          ], 
+          "name": "DOTATIONS AUX AMORTISSEMENTS \u00c0 CARACT\u00c8RE FINANCIER"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dotations aux amortissements des charges immobilis\u00e9es"
+           }, 
+           {
+            "name": "Dotations aux amortissements des immobilisations corporelles"
+           }, 
+           {
+            "name": "Dotations aux amortissements des immobilisations incorporelles"
+           }
+          ], 
+          "name": "DOTATIONS AUX AMORTISSEMENTS D'EXPLOITATION"
+         }
+        ], 
+        "name": "DOTATIONS AUX AMORTISSEMENTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AUTRES IMP\u00d4TS ET TAXES"
+         }, 
+         {
+          "name": "IMP\u00d4TS ET TAXES INDIRECTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres imp\u00f4ts et taxes directs"
+           }, 
+           {
+            "name": "Taxes d'apprentissage"
+           }, 
+           {
+            "name": "Formation professionnelle continue"
+           }, 
+           {
+            "name": "Imp\u00f4ts fonciers et taxes annexes"
+           }, 
+           {
+            "name": "Patentes, licences et taxes annexes"
+           }, 
+           {
+            "name": "Taxes sur appointements et salaires"
+           }
+          ], 
+          "name": "IMP\u00d4TS ET TAXES DIRECTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres droits"
+           }, 
+           {
+            "name": "Droits de timbre"
+           }, 
+           {
+            "name": "Vignettes"
+           }, 
+           {
+            "name": "Taxes sur les v\u00e9hicules de soci\u00e9t\u00e9"
+           }, 
+           {
+            "name": "Droits de mutation"
+           }
+          ], 
+          "name": "DROITS D'ENREGISTREMENT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres amendes p\u00e9nales et fiscales"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s de recouvrement, imp\u00f4ts indirects"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s d'assiette, imp\u00f4ts indirects"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s de recouvrement, imp\u00f4ts directs"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s d'assiette, imp\u00f4ts directs"
+           }
+          ], 
+          "name": "P\u00c9NALIT\u00c9S ET AMENDES FISCALES"
+         }
+        ], 
+        "name": "IMP\u00d4TS ET TAXES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Concours divers"
+           }, 
+           {
+            "name": "Cotisations"
+           }
+          ], 
+          "name": "COTISATIONS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "R\u00e9ceptions"
+           }, 
+           {
+            "name": "Frais de recrutement du personnel"
+           }, 
+           {
+            "name": "Frais de d\u00e9m\u00e9nagement"
+           }, 
+           {
+            "name": "Missions"
+           }
+          ], 
+          "name": "AUTRES CHARGES EXTERNES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Frais d'actes et de contentieux"
+           }, 
+           {
+            "name": "Commissions et courtages sur achats"
+           }, 
+           {
+            "name": "R\u00e9mun\u00e9rations des transitaires"
+           }, 
+           {
+            "name": "Honoraires"
+           }, 
+           {
+            "name": "Commissions et courtages sur ventes"
+           }, 
+           {
+            "name": "Divers frais"
+           }
+          ], 
+          "name": "R\u00c9MUN\u00c9RATIONS D'INTERM\u00c9DIAIRES ET DE CONSEILS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Personnel int\u00e9rimaire"
+           }, 
+           {
+            "name": "Personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0 l'entreprise"
+           }
+          ], 
+          "name": "R\u00c9MUN\u00c9RATIONS DE PERSONNEL EXT\u00c9RIEUR \u00c0 L'ENTREPRISE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Redevances pour brevets, licences, concessions et droits similaires"
+           }, 
+           {
+            "name": "Redevances pour logiciels"
+           }, 
+           {
+            "name": "Redevances pour marques"
+           }
+          ], 
+          "name": "REDEVANCES POUR BREVETS, LICENCES, LOGICIELS ET DROITS SIMILAIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Commissions sur cartes de cr\u00e9dit"
+           }, 
+           {
+            "name": "Frais sur titres (achat, vente, garde)"
+           }, 
+           {
+            "name": "Location de coffres"
+           }, 
+           {
+            "name": "Frais sur effets"
+           }, 
+           {
+            "name": "Frais d'\u00e9mission d'emprunts"
+           }, 
+           {
+            "name": "Autres frais bancaires"
+           }
+          ], 
+          "name": "FRAIS BANCAIRES"
+         }, 
+         {
+          "name": "FRAIS DE FORMATION DU PERSONNEL"
+         }
+        ], 
+        "name": "SERVICES EXT\u00c9RIEURS B"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "pour risques et charges"
+           }, 
+           {
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations incorporelles"
+           }, 
+           {
+            "name": "pour grosses r\u00e9parations"
+           }, 
+           {
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations corporelles"
+           }
+          ], 
+          "name": "DOTATIONS AUX PROVISIONS D'EXPLOITATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res"
+           }, 
+           {
+            "name": "pour risques et charges"
+           }
+          ], 
+          "name": "DOTATIONS AUX PROVISIONS FINANCI\u00c8RES"
+         }
+        ], 
+        "name": "DOTATIONS AUX PROVISIONS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "QUOTE-PART DE R\u00c9SULTAT ANNUL\u00c9E SUR EX\u00c9CUTION PARTIELLE DE CONTRATS PLURI-EXERCICES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Quote-part transf\u00e9r\u00e9e de b\u00e9n\u00e9fices (comptabilit\u00e9 du g\u00e9rant)"
+           }, 
+           {
+            "name": "Pertes imput\u00e9es par transfert (comptabilit\u00e9 des associ\u00e9s non g\u00e9rants)"
+           }
+          ], 
+          "name": "QUOTE-PART DE R\u00c9SULTAT SUR OP\u00c9RATIONS FAITES EN COMMUN"
+         }, 
+         {
+          "name": "VALEUR COMPTABLE DES CESSIONS COURANTES D'IMMOBILISATIONS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Clients"
+           }, 
+           {
+            "name": "Autres d\u00e9biteurs"
+           }
+          ], 
+          "name": "PERTES SUR CR\u00c9ANCES CLIENTS ET AUTRES D\u00c9BITEURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dons"
+           }, 
+           {
+            "name": "Jetons de pr\u00e9sence et autres r\u00e9mun\u00e9rations d'administrateurs"
+           }, 
+           {
+            "name": "M\u00e9c\u00e9nat"
+           }
+          ], 
+          "name": "CHARGES DIVERSES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur risques \u00e0 court terme"
+           }, 
+           {
+            "name": "sur cr\u00e9ances"
+           }, 
+           {
+            "name": "sur stocks"
+           }, 
+           {
+            "name": "Autres charges provisionn\u00e9es"
+           }
+          ], 
+          "name": "CHARGES PROVISIONN\u00c9ES D'EXPLOITATION"
+         }
+        ], 
+        "name": "AUTRES CHARGES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Int\u00e9r\u00eats sur dettes diverses"
+           }, 
+           {
+            "name": "Avances re\u00e7ues et d\u00e9p\u00f4ts cr\u00e9diteurs"
+           }, 
+           {
+            "name": "Comptes courants bloqu\u00e9s"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats sur obligations cautionn\u00e9es"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats sur dettes commerciales"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats bancaires et sur op\u00e9rations de tr\u00e9sorerie et d\u2019escompte"
+           }
+          ], 
+          "name": "AUTRES INT\u00c9R\u00caTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dettes li\u00e9es \u00e0 des participations"
+           }, 
+           {
+            "name": "Emprunts aupr\u00e8s des \u00e9tablissements de cr\u00e9dit"
+           }, 
+           {
+            "name": "Emprunts obligataires"
+           }
+          ], 
+          "name": "INT\u00c9R\u00caTS DES EMPRUNTS"
+         }, 
+         {
+          "name": "ESCOMPTES ACCORD\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Int\u00e9r\u00eats dans loyers des autres contrats"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats dans loyers de cr\u00e9dit-bail mobilier"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats dans loyers de cr\u00e9dit-bail immobilier"
+           }
+          ], 
+          "name": "INT\u00c9R\u00caTS DANS LOYERS DE CR\u00c9DIT-BAIL ET CONTRATS ASSIMIL\u00c9S"
+         }, 
+         {
+          "name": "PERTES SUR CESSIONS DE TITRES DE PLACEMENT"
+         }, 
+         {
+          "name": "PERTES DE CHANGE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur risques financiers"
+           }, 
+           {
+            "name": "Autres charges provisionn\u00e9es financi\u00e8res"
+           }, 
+           {
+            "name": "sur titres de placement"
+           }
+          ], 
+          "name": "CHARGES PROVISIONN\u00c9ES FINANCI\u00c8RES"
+         }, 
+         {
+          "name": "ESCOMPTES DES EFFETS DE COMMERCE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur instruments de tr\u00e9sorerie"
+           }, 
+           {
+            "name": "sur rentes viag\u00e8res"
+           }, 
+           {
+            "name": "sur op\u00e9rations financi\u00e8res"
+           }
+          ], 
+          "name": "PERTES SUR RISQUES FINANCIERS"
+         }
+        ], 
+        "name": "FRAIS FINANCIERS ET CHARGES ASSIMIL\u00c9ES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Indemnit\u00e9s de maladie vers\u00e9es aux travailleurs"
+           }, 
+           {
+            "name": "Suppl\u00e9ment familial"
+           }, 
+           {
+            "name": "Autres r\u00e9mun\u00e9rations directes"
+           }, 
+           {
+            "name": "Appointements salaires et commissions"
+           }, 
+           {
+            "name": "Primes et gratifications"
+           }, 
+           {
+            "name": "Cong\u00e9s pay\u00e9s"
+           }, 
+           {
+            "name": "Avantages en nature"
+           }, 
+           {
+            "name": "Indemnit\u00e9s de pr\u00e9avis, de licenciement et de recherche d'embauche"
+           }
+          ], 
+          "name": "R\u00c9MUN\u00c9RATIONS DIRECTES VERS\u00c9ES AU PERSONNEL NATIONAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "R\u00e9mun\u00e9ration du travail de l'exploitant"
+           }, 
+           {
+            "name": "Charges sociales"
+           }
+          ], 
+          "name": "R\u00c9MUN\u00c9RATIONS ET CHARGES SOCIALES DE L'EXPLOITANT INDIVIDUEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "M\u00e9decine du travail et pharmacie"
+           }, 
+           {
+            "name": "Versements aux Syndicats et Comit\u00e9s d'entreprise, d'\u00e9tablissement"
+           }, 
+           {
+            "name": "Versements aux autres oeuvres sociales"
+           }, 
+           {
+            "name": "Versements aux Comit\u00e9s d'hygi\u00e8ne et de s\u00e9curit\u00e9"
+           }
+          ], 
+          "name": "AUTRES CHARGES SOCIALES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Suppl\u00e9ment familial"
+           }, 
+           {
+            "name": "Cong\u00e9s pay\u00e9s"
+           }, 
+           {
+            "name": "Appointements salaires et commissions"
+           }, 
+           {
+            "name": "Autres r\u00e9mun\u00e9rations directes"
+           }, 
+           {
+            "name": "Indemnit\u00e9s de maladie vers\u00e9es aux travailleurs"
+           }, 
+           {
+            "name": "Avantages en nature"
+           }, 
+           {
+            "name": "Indemnit\u00e9s de pr\u00e9avis, de licenciement et de recherche d'embauche"
+           }, 
+           {
+            "name": "Primes et gratifications"
+           }
+          ], 
+          "name": "R\u00c9MUN\u00c9RATIONS DIRECTES VERS\u00c9ES AU PERSONNEL NON NATIONAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Indemnit\u00e9s d'expatriation"
+           }, 
+           {
+            "name": "Indemnit\u00e9s de logement"
+           }, 
+           {
+            "name": "Autres indemnit\u00e9s et avantages divers"
+           }, 
+           {
+            "name": "Indemnit\u00e9s de repr\u00e9sentation"
+           }
+          ], 
+          "name": "INDEMNIT\u00c9S FORFAITAIRES VERS\u00c9ES AU PERSONNEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Charges sociales sur r\u00e9mun\u00e9ration du personnel national"
+           }, 
+           {
+            "name": "Charges sociales sur r\u00e9mun\u00e9ration du personnel non national"
+           }
+          ], 
+          "name": "CHARGES SOCIALES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Personnel int\u00e9rimaire"
+           }, 
+           {
+            "name": "Personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0 l\u2019entreprise"
+           }
+          ], 
+          "name": "R\u00c9MUN\u00c9RATION TRANSF\u00c9R\u00c9E DE PERSONNEL EXT\u00c9RIEUR"
+         }
+        ], 
+        "name": "CHARGES DE PERSONNEL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TRANSPORTS POUR LE COMPTE DE TIERS"
+         }, 
+         {
+          "name": "TRANSPORTS DU PERSONNEL"
+         }, 
+         {
+          "name": "TRANSPORTS DE PLIS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Transports administratifs"
+           }, 
+           {
+            "name": "Transports entre \u00e9tablissements ou chantiers"
+           }, 
+           {
+            "name": "Voyages et d\u00e9placements"
+           }
+          ], 
+          "name": "AUTRES FRAIS DE TRANSPORT"
+         }, 
+         {
+          "name": "TRANSPORTS SUR VENTES"
+         }, 
+         {
+          "name": "TRANSPORTS SUR ACHATS()"
+         }
+        ], 
+        "name": "TRANSPORTS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Fournitures de magasin"
+           }, 
+           {
+            "name": "Produits d'entretien"
+           }, 
+           {
+            "name": "Fournitures de bureau"
+           }, 
+           {
+            "name": "Mati\u00e8res combustibles"
+           }, 
+           {
+            "name": "Mati\u00e8res consommables"
+           }, 
+           {
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
+           }, 
+           {
+            "name": "Fournitures d'atelier et d'usine"
+           }
+          ], 
+          "name": "ACHATS STOCK\u00c9S DE MATI\u00c8RES ET FOURNITURES CONSOMMABLES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fournitures d'entretien non stockables"
+           }, 
+           {
+            "name": "Fournitures de bureau non stockables"
+           }, 
+           {
+            "name": "Achats de petit mat\u00e9riel et outillage"
+           }, 
+           {
+            "name": "Achats d'\u00e9tudes et prestations de services"
+           }, 
+           {
+            "name": "Fournitures non stockables -Eau"
+           }, 
+           {
+            "name": "Fournitures non stockables - Electricit\u00e9"
+           }, 
+           {
+            "name": "Fournitures non stockables \u2013 Autres \u00e9nergies"
+           }, 
+           {
+            "name": "Achats de travaux, mat\u00e9riels et \u00e9quipements"
+           }, 
+           {
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
+           }
+          ], 
+          "name": "AUTRES ACHATS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
+           }, 
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }, 
+           {
+            "name": "dans la R\u00e9gion"
+           }
+          ], 
+          "name": "ACHATS DE MATI\u00c8RES PREMI\u00c8RES ET FOURNITURES LI\u00c9ES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Variations des stocks d'autres approvisionnements"
+           }, 
+           {
+            "name": "Variations des stocks de marchandises"
+           }, 
+           {
+            "name": "Variations des stocks de mati\u00e8res premi\u00e8res et fournitures li\u00e9es"
+           }
+          ], 
+          "name": "VARIATIONS DES STOCKS DE BIENS ACHET\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
+           }, 
+           {
+            "name": "hors R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
+           }, 
+           {
+            "name": "aux entreprises du groupe hors R\u00e9gion"
+           }, 
+           {
+            "name": "dans la R\u00e9gion"
+           }
+          ], 
+          "name": "ACHATS DE MARCHANDISES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Emballages \u00e0 usage mixte"
+           }, 
+           {
+            "name": "Emballages perdus"
+           }, 
+           {
+            "name": "Emballages r\u00e9cup\u00e9rables non identifiables"
+           }, 
+           {
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
+           }
+          ], 
+          "name": "ACHATS D'EMBALLAGES"
+         }
+        ], 
+        "name": "ACHATS ET VARIATIONS DE STOCKS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Documentation technique"
+           }, 
+           {
+            "name": "Documentation g\u00e9n\u00e9rale"
+           }, 
+           {
+            "name": "\u00c9tudes et recherches"
+           }
+          ], 
+          "name": "\u00c9TUDES, RECHERCHES ET DOCUMENTATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Locations de terrains"
+           }, 
+           {
+            "name": "Malis sur emballages"
+           }, 
+           {
+            "name": "Locations et charges locatives diverses"
+           }, 
+           {
+            "name": "Locations de mat\u00e9riels et outillages"
+           }, 
+           {
+            "name": "Locations de b\u00e2timents"
+           }, 
+           {
+            "name": "Locations d'emballages"
+           }
+          ], 
+          "name": "LOCATIONS ET CHARGES LOCATIVES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Frais de t\u00e9l\u00e9phone"
+           }, 
+           {
+            "name": "Frais de t\u00e9l\u00e9copie"
+           }, 
+           {
+            "name": "Frais de t\u00e9lex"
+           }, 
+           {
+            "name": "Autres frais de t\u00e9l\u00e9communications"
+           }
+          ], 
+          "name": "FRAIS DE T\u00c9L\u00c9COMMUNICATIONS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Maintenance"
+           }, 
+           {
+            "name": "Autres entretiens et r\u00e9parations"
+           }, 
+           {
+            "name": "Entretien et r\u00e9parations des biens immobiliers"
+           }, 
+           {
+            "name": "Entretien et r\u00e9parations des biens mobiliers"
+           }
+          ], 
+          "name": "ENTRETIEN, R\u00c9PARATIONS ET MAINTENANCE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Assurances multirisques"
+           }, 
+           {
+            "name": "Assurances transport sur ventes"
+           }, 
+           {
+            "name": "Assurances mat\u00e9riel de transport"
+           }, 
+           {
+            "name": "Assurances risques d'exploitation"
+           }, 
+           {
+            "name": "Assurances transport sur achats"
+           }, 
+           {
+            "name": "Assurances responsabilit\u00e9 du producteur"
+           }, 
+           {
+            "name": "Assurances insolvabilit\u00e9 clients"
+           }, 
+           {
+            "name": "Autres primes d'assurances"
+           }
+          ], 
+          "name": "PRIMES D'ASSURANCE"
+         }, 
+         {
+          "name": "SOUS-TRAITANCE G\u00c9N\u00c9RALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Catalogues, imprim\u00e9s publicitaires"
+           }, 
+           {
+            "name": "Autres charges de publicit\u00e9 et relations publiques"
+           }, 
+           {
+            "name": "Foires et expositions"
+           }, 
+           {
+            "name": "Publications"
+           }, 
+           {
+            "name": "Cadeaux \u00e0 la client\u00e8le"
+           }, 
+           {
+            "name": "Frais de colloques, s\u00e9minaires, conf\u00e9rences"
+           }, 
+           {
+            "name": "Annonces, insertions"
+           }, 
+           {
+            "name": "\u00c9chantillons"
+           }
+          ], 
+          "name": "PUBLICIT\u00c9, PUBLICATIONS, RELATIONS PUBLIQUES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Contrats assimil\u00e9s"
+           }, 
+           {
+            "name": "Cr\u00e9dit-bail mobilier"
+           }, 
+           {
+            "name": "Cr\u00e9dit-bail immobilier"
+           }
+          ], 
+          "name": "REDEVANCES DE CR\u00c9DIT-BAIL ET CONTRATS ASSIMIL\u00c9S"
+         }
+        ], 
+        "name": "SERVICES EXT\u00c9RIEURS A"
+       }
+      ], 
+      "name": "Comptes de charges"
+     }
+    ], 
+    "name": "Comptes de gestion"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "VIREMENTS DE FONDS"
+         }, 
+         {
+          "name": "R\u00c9GIES D'AVANCE"
+         }, 
+         {
+          "name": "ACCR\u00c9DITIFS"
+         }, 
+         {
+          "name": "AUTRES VIREMENTS INTERNES"
+         }
+        ], 
+        "name": "R\u00c9GIES D'AVANCES, ACCR\u00c9DITIFS ET VIREMENTS INTERNES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES BANQUES"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES D\u2019INSTRUMENTS DE TR\u00c9SORERIE"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES \u00c9TABLISSEMENTS FINANCIERS ET ASSIMIL\u00c9S"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES TITRES DE PLACEMENT"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES TITRES ET VALEURS \u00c0 ENCAISSER"
+         }, 
+         {
+          "name": "RISQUES PROVISIONN\u00c9S \u00c0 CARACT\u00c8RE FINANCIER"
+         }
+        ], 
+        "name": "D\u00c9PR\u00c9CIATIONS ET RISQUES PROVISIONN\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Bons de souscription d'obligations"
+           }, 
+           {
+            "name": "Bons de souscription d'actions"
+           }
+          ], 
+          "name": "BONS DE SOUSCRIPTION"
+         }, 
+         {
+          "name": "AUTRES VALEURS ASSIMIL\u00c9ES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Bons de caisse \u00e0 court terme"
+           }, 
+           {
+            "name": "Titres d'organismes financiers"
+           }, 
+           {
+            "name": "Titres du Tr\u00e9sor \u00e0 court terme"
+           }
+          ], 
+          "name": "TITRES DU TR\u00c9SOR ET BONS DE CAISSE \u00c0 COURT TERME"
+         }, 
+         {
+          "name": "TITRES N\u00c9GOCIABLES HORS REGION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Actions"
+           }, 
+           {
+            "name": "Obligations"
+           }, 
+           {
+            "name": "Titres du Tr\u00e9sor et bons de caisse \u00e0 court terme"
+           }
+          ], 
+          "name": "INT\u00c9R\u00caTS COURUS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Obligations non cot\u00e9es"
+           }, 
+           {
+            "name": "Obligations cot\u00e9es"
+           }, 
+           {
+            "name": "Obligations \u00e9mises par la soci\u00e9t\u00e9 et rachet\u00e9es par elle"
+           }, 
+           {
+            "name": "Autres titres conf\u00e9rant un droit de cr\u00e9ance"
+           }
+          ], 
+          "name": "OBLIGATIONS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Actions propres"
+           }, 
+           {
+            "name": "Actions cot\u00e9es"
+           }, 
+           {
+            "name": "Actions non cot\u00e9es"
+           }, 
+           {
+            "name": "Actions d\u00e9membr\u00e9es (certificats d'investissement ; droits de vote)"
+           }, 
+           {
+            "name": "Autres titres conf\u00e9rant un droit de propri\u00e9t\u00e9"
+           }
+          ], 
+          "name": "ACTIONS"
+         }
+        ], 
+        "name": "TITRES DE PLACEMENT"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CARTES DE CR\u00c9DIT \u00c0 ENCAISSER"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Int\u00e9r\u00eats \u00e9chus des obligations"
+           }, 
+           {
+            "name": "Coupons \u00e9chus"
+           }, 
+           {
+            "name": "Ch\u00e8ques de voyage"
+           }, 
+           {
+            "name": "Billets de fonds"
+           }, 
+           {
+            "name": "Warrants"
+           }
+          ], 
+          "name": "AUTRES VALEURS \u00c0 L'ENCAISSEMENT"
+         }, 
+         {
+          "name": "EFFETS \u00c0 L'ENCAISSEMENT"
+         }, 
+         {
+          "name": "CH\u00c8QUES \u00c0 ENCAISSER"
+         }, 
+         {
+          "name": "EFFETS \u00c0 ENCAISSER"
+         }, 
+         {
+          "name": "CH\u00c8QUES \u00c0 L'ENCAISSEMENT"
+         }
+        ], 
+        "name": "VALEURS \u00c0 ENCAISSER"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BANQUES, INTERETS COURUS"
+         }, 
+         {
+          "name": "BANQUES AUTRES ETATS ZONE MONETAIRE"
+         }, 
+         {
+          "name": "BANQUES AUTRES \u00c9TATS REGION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "BANQUE Y"
+           }, 
+           {
+            "name": "BANQUES X"
+           }
+          ], 
+          "name": "BANQUES LOCALES"
+         }, 
+         {
+          "name": "BANQUES HORS ZONE MONETAIRE"
+         }
+        ], 
+        "name": "BANQUES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CH\u00c8QUES POSTAUX"
+         }, 
+         {
+          "name": "SOCI\u00c9T\u00c9S DE GESTION ET D'INTERM\u00c9DIATION (S.G.I.)"
+         }, 
+         {
+          "name": "AUTRES ORGANISMES FINANCIERS"
+         }, 
+         {
+          "name": "ETABLISSEMENTS FINANCIERS, INTERETS COURUS"
+         }, 
+         {
+          "name": "TR\u00c9SOR"
+         }
+        ], 
+        "name": "\u00c9TABLISSEMENTS FINANCIERS ET ASSIMIL\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OPTIONS DE TAUX D'INT\u00c9R\u00caT"
+         }, 
+         {
+          "name": "OPTIONS DE TAUX BOURSIERS"
+         }, 
+         {
+          "name": "OPTIONS DE TAUX DE CHANGE"
+         }, 
+         {
+          "name": "AVOIRS D'OR ET AUTRES M\u00c9TAUX PR\u00c9CIEUX ()"
+         }, 
+         {
+          "name": "INSTRUMENTS DE MARCH\u00c9S \u00c0 TERME"
+         }
+        ], 
+        "name": "INSTRUMENTS DE TR\u00c9SORERIE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BANQUES, CREDITS DE TRESORERIE, INTERETS COURUS"
+         }, 
+         {
+          "name": "ESCOMPTE DE CR\u00c9DITS ORDINAIRES"
+         }, 
+         {
+          "name": "ESCOMPTE DE CR\u00c9DITS DE CAMPAGNE"
+         }, 
+         {
+          "name": "CR\u00c9DITS DE TR\u00c9SORERIE"
+         }
+        ], 
+        "name": "BANQUES, CR\u00c9DITS DE TR\u00c9SORERIE ET D'ESCOMPTE"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "en unit\u00e9s mon\u00e9taires l\u00e9gales"
+           }, 
+           {
+            "name": "en devises"
+           }
+          ], 
+          "name": "CAISSE SI\u00c8GE SOCIAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "en devises"
+           }, 
+           {
+            "name": "en unit\u00e9s mon\u00e9taires l\u00e9gales"
+           }
+          ], 
+          "name": "CAISSE SUCCURSALE A"
+         }, 
+         {
+          "children": [
+           {
+            "name": "en unit\u00e9s mon\u00e9taires l\u00e9gales"
+           }, 
+           {
+            "name": "en devises"
+           }
+          ], 
+          "name": "CAISSE SUCCURSALE B"
+         }
+        ], 
+        "name": "CAISSE"
+       }
+      ], 
+      "name": "Comptes financiers"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "\u00c9tat, fonds de dotation \u00e0 recevoir"
+           }, 
+           {
+            "name": "\u00c9tat, obligations cautionn\u00e9es"
+           }, 
+           {
+            "name": "\u00c9tat, fonds r\u00e9glement\u00e9 provisionn\u00e9"
+           }, 
+           {
+            "name": "\u00c9tat, avances et acomptes vers\u00e9s sur imp\u00f4ts"
+           }, 
+           {
+            "name": "\u00c9tat, subventions d'\u00e9quilibre \u00e0 recevoir"
+           }, 
+           {
+            "name": "\u00c9tat, subventions d'\u00e9quipement \u00e0 recevoir"
+           }, 
+           {
+            "name": "\u00c9tat, subventions d'exploitation \u00e0 recevoir"
+           }
+          ], 
+          "name": "\u00c9TAT, CR\u00c9ANCES ET DETTES DIVERSES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "\u00c9tat, cr\u00e9dit de T.V.A. \u00e0 reporter"
+           }, 
+           {
+            "name": "\u00c9tat, T.V.A. due"
+           }
+          ], 
+          "name": "\u00c9TAT, T.V.A. DUE OU CR\u00c9DIT DE T.V.A."
+         }, 
+         {
+          "children": [
+           {
+            "name": "T.V.A. transf\u00e9r\u00e9e par d'autres entreprises"
+           }, 
+           {
+            "name": "T.V.A. r\u00e9cup\u00e9rable sur services ext\u00e9rieurs et autres charges"
+           }, 
+           {
+            "name": "T.V.A. r\u00e9cup\u00e9rable sur factures non parvenues"
+           }, 
+           {
+            "name": "T.V.A. r\u00e9cup\u00e9rable sur achats"
+           }, 
+           {
+            "name": "T.V.A. r\u00e9cup\u00e9rable sur transport"
+           }, 
+           {
+            "name": "T.V.A. r\u00e9cup\u00e9rable sur immobilisations"
+           }
+          ], 
+          "name": "\u00c9TAT, T.V.A. R\u00c9CUP\u00c9RABLE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits \u00e0 recevoir"
+           }, 
+           {
+            "name": "Charges \u00e0 payer"
+           }
+          ], 
+          "name": "\u00c9TAT, CHARGES \u00c0 PAYER ET PRODUITS \u00c0 RECEVOIR"
+         }, 
+         {
+          "name": "\u00c9TAT, IMP\u00d4T SUR LES B\u00c9N\u00c9FICES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres imp\u00f4ts et taxes"
+           }, 
+           {
+            "name": "Imp\u00f4ts et taxes recouvrables sur des associ\u00e9s"
+           }, 
+           {
+            "name": "Imp\u00f4ts et taxes recouvrables sur des obligataires"
+           }, 
+           {
+            "name": "Imp\u00f4ts et taxes pour les collectivit\u00e9s publiques"
+           }, 
+           {
+            "name": "Imp\u00f4ts et taxes d'Etat"
+           }, 
+           {
+            "name": "Droits de douane"
+           }
+          ], 
+          "name": "\u00c9TAT, AUTRES IMP\u00d4TS ET TAXES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T.V.A. factur\u00e9e sur ventes"
+           }, 
+           {
+            "name": "T.V.A. factur\u00e9e sur prestations de services"
+           }, 
+           {
+            "name": "T.V.A. factur\u00e9e sur travaux"
+           }
+          ], 
+          "name": "\u00c9TAT, T.V.A. FACTUR\u00c9E"
+         }, 
+         {
+          "name": "\u00c9TAT, AUTRES TAXES SUR LE CHIFFRE D'AFFAIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Imp\u00f4t G\u00e9n\u00e9ral sur le revenu"
+           }, 
+           {
+            "name": "Imp\u00f4ts sur salaires"
+           }, 
+           {
+            "name": "Contribution nationale"
+           }, 
+           {
+            "name": "Contribution nationale de solidarit\u00e9"
+           }, 
+           {
+            "name": "Autres imp\u00f4ts et contributions"
+           }
+          ], 
+          "name": "\u00c9TAT, IMP\u00d4TS RETENUS \u00c0 LA SOURCE"
+         }
+        ], 
+        "name": "\u00c9TAT ET COLLECTIVIT\u00c9S PUBLIQUES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CR\u00c9ANCES SUR TRAVAUX NON ENCORE FACTURABLES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits"
+           }, 
+           {
+            "name": "Charges"
+           }
+          ], 
+          "name": "R\u00c9PARTITION P\u00c9RIODIQUE DES CHARGES ET DES PRODUITS"
+         }, 
+         {
+          "name": "PRODUITS CONSTAT\u00c9S D'AVANCE"
+         }, 
+         {
+          "name": "CHARGES CONSTAT\u00c9ES D'AVANCE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "D\u00e9biteurs divers"
+           }, 
+           {
+            "name": "Cr\u00e9diteurs divers"
+           }
+          ], 
+          "name": "COMPTES D'ATTENTE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Titres de participation"
+           }, 
+           {
+            "name": "Titres de placement"
+           }, 
+           {
+            "name": "Titres immobilis\u00e9s"
+           }
+          ], 
+          "name": "VERSEMENTS RESTANT \u00c0 EFFECTUER SUR TITRES NON LIB\u00c9R\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Augmentation des cr\u00e9ances"
+           }, 
+           {
+            "name": "Diminution des dettes"
+           }, 
+           {
+            "name": "Diff\u00e9rences compens\u00e9es par couverture de change"
+           }
+          ], 
+          "name": "\u00c9CARTS DE CONVERSION - PASSIF"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Augmentation des dettes"
+           }, 
+           {
+            "name": "Diminution des cr\u00e9ances"
+           }, 
+           {
+            "name": "Diff\u00e9rences compens\u00e9es par couverture de change"
+           }
+          ], 
+          "name": "\u00c9CARTS DE CONVERSION - ACTIF"
+         }
+        ], 
+        "name": "D\u00c9BITEURS ET CR\u00c9DITEURS DIVERS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ASSOCI\u00c9S, OP\u00c9RATIONS FAITES EN COMMUN"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Associ\u00e9s, capital appel\u00e9 non vers\u00e9"
+           }, 
+           {
+            "name": "Associ\u00e9s, versements re\u00e7us sur augmentation de capital"
+           }, 
+           {
+            "name": "Associ\u00e9s, versements anticip\u00e9s"
+           }, 
+           {
+            "name": "Actionnaires d\u00e9faillants"
+           }, 
+           {
+            "name": "Associ\u00e9s apports en nature"
+           }, 
+           {
+            "name": "Associ\u00e9s apports en num\u00e9raire"
+           }, 
+           {
+            "name": "Actionnaires, capital souscrit appel\u00e9 non vers\u00e9"
+           }, 
+           {
+            "name": "Associ\u00e9s, autres apports"
+           }, 
+           {
+            "name": "Associ\u00e9s, capital \u00e0 rembourser"
+           }
+          ], 
+          "name": "ASSOCI\u00c9S, OP\u00c9RATIONS SUR LE CAPITAL"
+         }, 
+         {
+          "name": "GROUPE, COMPTES COURANTS"
+         }, 
+         {
+          "name": "ACTIONNAIRES, RESTANT D\u00db SUR CAPITAL APPEL\u00c9"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Int\u00e9r\u00eats courus"
+           }, 
+           {
+            "name": "Principal"
+           }
+          ], 
+          "name": "ASSOCI\u00c9S, COMPTES COURANTS"
+         }, 
+         {
+          "name": "ASSOCI\u00c9S, DIVIDENDES \u00c0 PAYER"
+         }
+        ], 
+        "name": "ASSOCI\u00c9S ET GROUPE"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Organismes internationaux, fonds de dotation \u00e0 recevoir"
+           }, 
+           {
+            "name": "Organismes internationaux, subventions \u00e0 recevoir"
+           }
+          ], 
+          "name": "ORGANISMES INTERNATIONAUX, FONDS DE DOTATION ET SUBVENTIONS \u00c0 RECEVOIR"
+         }, 
+         {
+          "name": "OP\u00c9RATIONS AVEC LES AUTRES ORGANISMES INTERNATIONAUX"
+         }, 
+         {
+          "name": "OP\u00c9RATIONS AVEC LES ORGANISMES AFRICAINS"
+         }
+        ], 
+        "name": "ORGANISMES INTERNATIONAUX"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres cotisations sociales"
+           }, 
+           {
+            "name": "Caisse de retraite obligatoire"
+           }, 
+           {
+            "name": "Caisse de retraite facultative"
+           }, 
+           {
+            "name": "Prestations familiales"
+           }, 
+           {
+            "name": "Accidents de travail"
+           }
+          ], 
+          "name": "S\u00c9CURIT\u00c9 SOCIALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T.V.A. sur factures \u00e0 \u00e9tablir"
+           }, 
+           {
+            "name": "T.V.A. factur\u00e9e sur production livr\u00e9e \u00e0 soi-m\u00eame"
+           }, 
+           {
+            "name": "Mutuelle"
+           }
+          ], 
+          "name": "AUTRES ORGANISMES SOCIAUX"
+         }, 
+         {
+          "name": "CAISSES DE RETRAITE COMPL\u00c9MENTAIRE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Charges sociales sur gratifications \u00e0 payer"
+           }, 
+           {
+            "name": "Autres charges \u00e0 payer"
+           }, 
+           {
+            "name": "Produits \u00e0 recevoir"
+           }, 
+           {
+            "name": "Charges sociales sur cong\u00e9s \u00e0 payer"
+           }
+          ], 
+          "name": "ORGANISMES SOCIAUX, CHARGES \u00c0 PAYER ET PRODUITS \u00c0 RECEVOIR"
+         }
+        ], 
+        "name": "ORGANISMES SOCIAUX"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PERSONNEL, PARTICIPATION AUX B\u00c9N\u00c9FICES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres repr\u00e9sentants du personnel"
+           }, 
+           {
+            "name": "D\u00e9l\u00e9gu\u00e9s du personnel"
+           }, 
+           {
+            "name": "Syndicats et Comit\u00e9s d'entreprises, d'\u00c9tablissement"
+           }
+          ], 
+          "name": "REPR\u00c9SENTANTS DU PERSONNEL"
+         }, 
+         {
+          "name": "PERSONNEL, R\u00c9MUN\u00c9RATIONS DUES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Personnel, saisies-arr\u00eats"
+           }, 
+           {
+            "name": "Personnel, avis \u00e0 tiers d\u00e9tenteur"
+           }, 
+           {
+            "name": "Personnel, oppositions"
+           }
+          ], 
+          "name": "PERSONNEL, OPPOSITIONS, SAISIES-ARR\u00caTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Personnel, avances"
+           }, 
+           {
+            "name": "Personnel, acomptes"
+           }, 
+           {
+            "name": "Frais avanc\u00e9s et fournitures au personnel"
+           }
+          ], 
+          "name": "PERSONNEL, AVANCES ET ACOMPTES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits \u00e0 recevoir"
+           }, 
+           {
+            "name": "Autres Charges \u00e0 payer"
+           }, 
+           {
+            "name": "Dettes provisionn\u00e9es pour cong\u00e9s \u00e0 payer"
+           }
+          ], 
+          "name": "PERSONNEL, CHARGES \u00c0 PAYER ET PRODUITS \u00c0 RECEVOIR"
+         }, 
+         {
+          "name": "PERSONNEL \u2013 D\u00c9P\u00d4TS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Organismes sociaux rattach\u00e9s \u00e0 l'entreprise"
+           }, 
+           {
+            "name": "Allocations familiales"
+           }, 
+           {
+            "name": "Assistance m\u00e9dicale"
+           }, 
+           {
+            "name": "Autres oeuvres sociales internes"
+           }
+          ], 
+          "name": "PERSONNEL, OEUVRES SOCIALES INTERNES"
+         }
+        ], 
+        "name": "PERSONNEL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CLIENTS, \u00c9FFETS ESCOMPT\u00c9S NON \u00c9CHUS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances en compte"
+           }, 
+           {
+            "name": "Effets \u00e0 recevoir"
+           }
+          ], 
+          "name": "CR\u00c9ANCES SUR CESSIONS D'IMMOBILISATIONS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "\u00c9tat et Collectivit\u00e9s publiques, Effets \u00e0 recevoir"
+           }, 
+           {
+            "name": "Organismes Internationaux, Effets \u00e0 recevoir"
+           }, 
+           {
+            "name": "Clients - Groupe, Effets \u00e0 recevoir"
+           }, 
+           {
+            "name": "Clients, Effets \u00e0 recevoir"
+           }
+          ], 
+          "name": "CLIENTS, \u00c9FFETS \u00c0 RECEVOIR EN PORTEFEUILLE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Clients - Groupe"
+           }, 
+           {
+            "name": "Clients"
+           }, 
+           {
+            "name": "Client, retenues de garantie"
+           }, 
+           {
+            "name": "Clients, organismes internationaux"
+           }, 
+           {
+            "name": "Clients, \u00c9tat et Collectivit\u00e9s publiques"
+           }, 
+           {
+            "name": "Clients, d\u00e9gr\u00e8vement de Taxes sur la Valeur Ajout\u00e9e (T.V.A.)"
+           }
+          ], 
+          "name": "CLIENTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Clients, dettes pour emballages et mat\u00e9riels consign\u00e9s"
+           }, 
+           {
+            "name": "Clients - Groupe, avances et acomptes re\u00e7us"
+           }, 
+           {
+            "name": "Clients, avances et acomptes re\u00e7us"
+           }, 
+           {
+            "name": "Rabais, Remises, Ristournes et autres avoirs \u00e0 accorder"
+           }
+          ], 
+          "name": "CLIENTS CR\u00c9DITEURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Clients, factures \u00e0 \u00e9tablir"
+           }, 
+           {
+            "name": "Clients, int\u00e9r\u00eats courus"
+           }
+          ], 
+          "name": "CLIENTS, PRODUITS \u00c0 RECEVOIR"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances douteuses"
+           }, 
+           {
+            "name": "Cr\u00e9ances litigieuses"
+           }
+          ], 
+          "name": "CR\u00c9ANCES CLIENTS LITIGIEUSES OU DOUTEUSES"
+         }
+        ], 
+        "name": "CLIENTS ET COMPTES RATTACH\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Fournisseurs cr\u00e9ances pour emballages et mat\u00e9riels \u00e0 rendre"
+           }, 
+           {
+            "name": "Fournisseurs - Groupe avances et acomptes vers\u00e9s"
+           }, 
+           {
+            "name": "Fournisseurs sous-traitants avances et acomptes vers\u00e9s"
+           }, 
+           {
+            "name": "Fournisseurs avances et acomptes vers\u00e9s"
+           }, 
+           {
+            "name": "Rabais, Remises, Ristournes et autres avoirs \u00e0 obtenir"
+           }
+          ], 
+          "name": "FOURNISSEURS D\u00c9BITEURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fournisseur, retenues de garantie"
+           }, 
+           {
+            "name": "Fournisseurs Groupe"
+           }, 
+           {
+            "name": "Fournisseurs sous-traitants"
+           }, 
+           {
+            "name": "Fournisseurs"
+           }
+          ], 
+          "name": "FOURNISSEURS, DETTES EN COMPTE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fournisseurs, Effets \u00e0 payer"
+           }, 
+           {
+            "name": "Fournisseurs sous-traitants, Effets \u00e0 payer"
+           }, 
+           {
+            "name": "Fournisseurs - Groupe, Effets \u00e0 payer"
+           }
+          ], 
+          "name": "FOURNISSEURS, EFFETS \u00c0 PAYER"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fournisseurs"
+           }, 
+           {
+            "name": "Fournisseurs sous-traitants"
+           }, 
+           {
+            "name": "Fournisseurs - Groupe"
+           }, 
+           {
+            "name": "Fournisseurs, int\u00e9r\u00eats courus"
+           }
+          ], 
+          "name": "FOURNISSEURS, FACTURES NON PARVENUES"
+         }
+        ], 
+        "name": "FOURNISSEURS ET COMPTES RATTACH\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES ORGANISMES INTERNATIONAUX"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Sur op\u00e9rations H.A.O."
+           }, 
+           {
+            "name": "Sur op\u00e9rations d'exploitation"
+           }
+          ], 
+          "name": "RISQUES PROVISIONN\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances sur cessions d'immobilisations"
+           }, 
+           {
+            "name": "Cr\u00e9ances sur cessions de titres de placement"
+           }, 
+           {
+            "name": "Autres cr\u00e9ances H.A.O."
+           }
+          ], 
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES DE CR\u00c9ANCES H.A.O."
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES D\u00c9BITEURS DIVERS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Associ\u00e9s, op\u00e9rations faites en commun"
+           }, 
+           {
+            "name": "Groupe, comptes courants"
+           }, 
+           {
+            "name": "Associ\u00e9s, comptes courants"
+           }
+          ], 
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES ASSOCI\u00c9S ET GROUPE"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES \u00c9TAT ET COLLECTIVIT\u00c9S PUBLIQUES"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES ORGANISMES SOCIAUX"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES PERSONNEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances douteuses"
+           }, 
+           {
+            "name": "Cr\u00e9ances litigieuses"
+           }
+          ], 
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES CLIENTS"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES COMPTES FOURNISSEURS"
+         }
+        ], 
+        "name": "D\u00c9PR\u00c9CIATIONS ET RISQUES PROVISIONN\u00c9S (TIERS)"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AUTRES CR\u00c9ANCES HORS ACTIVIT\u00c9S ORDINAIRES (H.A.O.)"
+         }, 
+         {
+          "name": "AUTRES DETTES HORS ACTIVITES ORDINAIRES (H.A.O.)"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Factures \u00e0 \u00e9tablir"
+           }, 
+           {
+            "name": "Effets \u00e0 recevoir"
+           }, 
+           {
+            "name": "En compte"
+           }, 
+           {
+            "name": "Retenues de garantie"
+           }
+          ], 
+          "name": "CR\u00c9ANCES SUR CESSIONS D'IMMOBILISATIONS"
+         }, 
+         {
+          "name": "CR\u00c9ANCES SUR CESSIONS DE TITRES DE PLACEMENT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Factures non parvenues"
+           }, 
+           {
+            "name": "Immobilisations incorporelles"
+           }, 
+           {
+            "name": "Retenues de garantie"
+           }, 
+           {
+            "name": "Immobilisations corporelles"
+           }
+          ], 
+          "name": "FOURNISSEURS D'INVESTISSEMENTS"
+         }, 
+         {
+          "name": "FOURNISSEURS D'INVESTISSEMENTS, EFFETS \u00c0 PAYER"
+         }, 
+         {
+          "name": "DETTES SUR ACQUISITION DE TITRES DE PLACEMENT"
+         }
+        ], 
+        "name": "CR\u00c9ANCES ET DETTES HORS ACTIVIT\u00c9S ORDINAIRES (HAO)"
+       }
+      ], 
+      "name": "Comptes de tiers"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "COMPTES DE LIAISON DES SOCI\u00c9T\u00c9S EN PARTICIPATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dettes li\u00e9es \u00e0 des participations (groupe)"
+           }, 
+           {
+            "name": "Dettes li\u00e9es \u00e0 des participations (hors groupe)"
+           }
+          ], 
+          "name": "DETTES LI\u00c9ES \u00c0 DES PARTICIPATIONS"
+         }, 
+         {
+          "name": "INT\u00c9R\u00caTS COURUS SUR DETTES LI\u00c9ES \u00c0 DES PARTICIPATIONS"
+         }, 
+         {
+          "name": "DETTES LI\u00c9ES \u00c0 DES SOCI\u00c9T\u00c9S EN PARTICIPATION"
+         }, 
+         {
+          "name": "COMPTES PERMANENTS NON BLOQU\u00c9S DES \u00c9TABLISSEMENTS ET SUCCURSALES"
+         }, 
+         {
+          "name": "COMPTES PERMANENTS BLOQU\u00c9S DES \u00c9TABLISSEMENTS ET SUCCURSALES"
+         }, 
+         {
+          "name": "COMPTES DE LIAISON PRODUITS"
+         }, 
+         {
+          "name": "COMPTES DE LIAISON CHARGES"
+         }
+        ], 
+        "name": "DETTES LI\u00c9ES \u00c0 DES PARTICIPATIONS ET COMPTES DE LIAISON DES ETABLISSEMENTS ET SOCI\u00c9T\u00c9S EN PARTICIPATION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres provisions financi\u00e8res pour risques et charges"
+           }, 
+           {
+            "name": "Provisions de propre assureur"
+           }, 
+           {
+            "name": "Provisions pour renouvellement des immobilisations (entreprises concessionnaires)"
+           }, 
+           {
+            "name": "Provisions pour amendes et p\u00e9nalit\u00e9s"
+           }
+          ], 
+          "name": "AUTRES PROVISIONS FINANCI\u00c8RES POUR RISQUES ET CHARGES"
+         }, 
+         {
+          "name": "PROVISIONS POUR PENSIONS ET OBLIGATIONS SIMILAIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour grosses r\u00e9parations"
+           }
+          ], 
+          "name": "PROVISIONS POUR CHARGES \u00c0 REPARTIR SUR PLUSIEURS EXERCICES"
+         }, 
+         {
+          "name": "PROVISIONS POUR PERTES DE CHANGE"
+         }, 
+         {
+          "name": "PROVISIONS POUR IMP\u00d4TS"
+         }, 
+         {
+          "name": "PROVISIONS POUR GARANTIES DONN\u00c9ES AUX CLIENTS"
+         }, 
+         {
+          "name": "PROVISIONS POUR PERTES SUR MARCH\u00c9S \u00c0 ACH\u00c8VEMENT FUTUR"
+         }, 
+         {
+          "name": "PROVISIONS POUR LITIGES"
+         }
+        ], 
+        "name": "PROVISIONS FINANCIERES POUR RISQUES ET CHARGES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AUTRES SUBVENTIONS D'INVESTISSEMENT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres"
+           }, 
+           {
+            "name": "\u00c9tat"
+           }, 
+           {
+            "name": "D\u00e9partements"
+           }, 
+           {
+            "name": "R\u00e9gions"
+           }, 
+           {
+            "name": "Entreprises publiques ou mixtes"
+           }, 
+           {
+            "name": "Communes et collectivit\u00e9s publiques d\u00e9centralis\u00e9es"
+           }, 
+           {
+            "name": "Organismes internationaux"
+           }, 
+           {
+            "name": "Entreprises et organismes priv\u00e9s"
+           }
+          ], 
+          "name": "SUBVENTIONS D'\u00c9QUIPEMENT A"
+         }, 
+         {
+          "name": "SUBVENTIONS D'\u00c9QUIPEMENT B"
+         }
+        ], 
+        "name": "SUBVENTIONS D'INVESTISSEMENT"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AUTRES PROVISIONS ET FONDS R\u00c9GLEMENTES"
+         }, 
+         {
+          "name": "PLUS-VALUES DE CESSION \u00c0 R\u00c9INVESTIR"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Pr\u00e9l\u00e8vement pour le Budget"
+           }, 
+           {
+            "name": "Fonds National"
+           }
+          ], 
+          "name": "FONDS R\u00c9GLEMENT\u00c9S"
+         }, 
+         {
+          "name": "AMORTISSEMENTS D\u00c9ROGATOIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Hausse de prix"
+           }, 
+           {
+            "name": "Fluctuation des cours"
+           }
+          ], 
+          "name": "PROVISIONS R\u00c9GLEMENT\u00c9ES RELATIVES AUX STOCKS"
+         }, 
+         {
+          "name": "PROVISIONS POUR INVESTISSEMENT"
+         }, 
+         {
+          "name": "PROVISION SP\u00c9CIALE DE R\u00c9\u00c9VALUATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Reconstitution des gisements miniers et p\u00e9troliers"
+           }
+          ], 
+          "name": "PROVISIONS R\u00c9GLEMENT\u00c9ES RELATIVES AUX IMMOBILISATIONS"
+         }
+        ], 
+        "name": "PROVISIONS R\u00c9GLEMENT\u00c9ES ET FONDS ASSIMIL\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AVANCES RE\u00c7UES DE L'\u00c9TAT"
+         }, 
+         {
+          "name": "EMPRUNTS ET DETTES AUPR\u00c8S DES \u00c9TABLISSEMENTS DE CR\u00c9DIT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Emprunts obligataires convertibles"
+           }, 
+           {
+            "name": "Emprunts obligataires ordinaires"
+           }, 
+           {
+            "name": "Autres emprunts obligataires"
+           }
+          ], 
+          "name": "EMPRUNTS OBLIGATAIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Avances bloqu\u00e9es pour augmentation du capital"
+           }, 
+           {
+            "name": "Avances conditionn\u00e9es par les autres organismes africains"
+           }, 
+           {
+            "name": "Avances conditionn\u00e9es par l'\u00c9tat"
+           }, 
+           {
+            "name": "Avances conditionn\u00e9es par les organismes internationaux"
+           }, 
+           {
+            "name": "Droits du conc\u00e9dant exigibles en nature"
+           }
+          ], 
+          "name": "AVANCES ASSORTIES DE CONDITIONS PARTICULI\u00c8RES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur autres emprunts et dettes"
+           }, 
+           {
+            "name": "sur avances assorties de conditions particuli\u00e8res"
+           }, 
+           {
+            "name": "sur avances re\u00e7ues et comptes courants bloqu\u00e9s"
+           }, 
+           {
+            "name": "sur d\u00e9p\u00f4ts et cautionnements re\u00e7us"
+           }, 
+           {
+            "name": "sur emprunts et dettes aupr\u00e8s des \u00e9tablissements de cr\u00e9dit"
+           }, 
+           {
+            "name": "sur avances re\u00e7ues de l'\u00c9tat"
+           }, 
+           {
+            "name": "sur emprunts obligataires"
+           }
+          ], 
+          "name": "INT\u00c9R\u00caTS COURUS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cautionnements"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts"
+           }
+          ], 
+          "name": "D\u00c9P\u00d4TS ET CAUTIONNEMENTS RECUS"
+         }, 
+         {
+          "name": "AVANCES RE\u00c7UES ET COMPTES COURANTS BLOQU\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Dettes du conc\u00e9dant exigibles en nature"
+           }, 
+           {
+            "name": "Emprunts participatifs"
+           }, 
+           {
+            "name": "Participation des travailleurs aux b\u00e9n\u00e9fices"
+           }, 
+           {
+            "name": "Rentes viag\u00e8res capitalis\u00e9es"
+           }, 
+           {
+            "name": "Billets de fonds"
+           }, 
+           {
+            "name": "Dettes cons\u00e9cutives \u00e0 des titres emprunt\u00e9s"
+           }
+          ], 
+          "name": "AUTRES EMPRUNTS ET DETTES"
+         }
+        ], 
+        "name": "EMPRUNTS ET DETTES ASSIMIL\u00c9ES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EMPRUNTS \u00c9QUIVALENTS DE CR\u00c9DIT - BAIL IMMOBILIER"
+         }, 
+         {
+          "name": "EMPRUNTS \u00c9QUIVALENTS DE CR\u00c9DIT - BAIL MOBILIER"
+         }, 
+         {
+          "children": [
+           {
+            "name": "sur emprunts \u00e9quivalents d\u2019autres contrats"
+           }, 
+           {
+            "name": "sur emprunts \u00e9quivalents de cr\u00e9dit \u2013 bail mobilier"
+           }, 
+           {
+            "name": "sur emprunts \u00e9quivalents de cr\u00e9dit \u2013 bail immobilier"
+           }
+          ], 
+          "name": "INT\u00c9R\u00caTS COURUS"
+         }, 
+         {
+          "name": "EMPRUNTS \u00c9QUIVALENTS D\u2019AUTRES CONTRATS"
+         }
+        ], 
+        "name": "DETTES DE CR\u00c9DIT - BAIL ET CONTRATS ASSIMIL\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIONNAIRES, CAPITAL SOUSCRIT, NON APPEL\u00c9"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Capital souscrit, appel\u00e9, vers\u00e9, amorti"
+           }, 
+           {
+            "name": "Capital souscrit, non appel\u00e9"
+           }, 
+           {
+            "name": "Capital souscrit, appel\u00e9, vers\u00e9, non amorti"
+           }, 
+           {
+            "name": "Capital souscrit, appel\u00e9, non vers\u00e9"
+           }, 
+           {
+            "name": "Capital souscrit soumis \u00e0 des conditions particuli\u00e8res"
+           }
+          ], 
+          "name": "CAPITAL SOCIAL"
+         }, 
+         {
+          "name": "CAPITAL PERSONNEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres dotations"
+           }, 
+           {
+            "name": "Dotation initiale"
+           }, 
+           {
+            "name": "Dotations compl\u00e9mentaires"
+           }
+          ], 
+          "name": "CAPITAL PAR DOTATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres primes"
+           }, 
+           {
+            "name": "Primes d'\u00e9mission"
+           }, 
+           {
+            "name": "Primes de fusion"
+           }, 
+           {
+            "name": "Primes d'apport"
+           }, 
+           {
+            "name": "Primes de conversion"
+           }
+          ], 
+          "name": "PRIMES LI\u00c9ES AUX CAPITAUX PROPRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Pr\u00e9l\u00e8vements d\u2019autoconsommation"
+           }, 
+           {
+            "name": "Op\u00e9rations courantes"
+           }, 
+           {
+            "name": "R\u00e9mun\u00e9rations, imp\u00f4ts et autres charges personnelles"
+           }, 
+           {
+            "name": "Apports temporaires"
+           }, 
+           {
+            "name": "Autres pr\u00e9l\u00e8vements"
+           }
+          ], 
+          "name": "COMPTE DE L'EXPLOITANT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "\u00c9carts de r\u00e9\u00e9valuation l\u00e9gale"
+           }, 
+           {
+            "name": "\u00c9carts de r\u00e9\u00e9valuation libre"
+           }
+          ], 
+          "name": "\u00c9CARTS DE R\u00c9\u00c9VALUATION"
+         }
+        ], 
+        "name": "CAPITAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "R\u00c9SERVES STATUTAIRES OU CONTRACTUELLES"
+         }, 
+         {
+          "name": "R\u00c9SERVE L\u00c9GALE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "R\u00e9serves facultatives"
+           }, 
+           {
+            "name": "R\u00e9serves diverses"
+           }
+          ], 
+          "name": "AUTRES R\u00c9SERVES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres r\u00e9serves r\u00e9glement\u00e9es"
+           }, 
+           {
+            "name": "R\u00e9serves cons\u00e9cutives \u00e0 l'octroi de subventions d'investissement"
+           }, 
+           {
+            "name": "R\u00e9serves de plus-values nettes \u00e0 long terme"
+           }
+          ], 
+          "name": "R\u00c9SERVES R\u00c9GLEMENT\u00c9ES"
+         }
+        ], 
+        "name": "R\u00c9SERVES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Perte - Amortissements r\u00e9put\u00e9s diff\u00e9r\u00e9s"
+           }, 
+           {
+            "name": "Perte nette \u00e0 reporter"
+           }
+          ], 
+          "name": "REPORT \u00c0 NOUVEAU D\u00c9BITEUR"
+         }, 
+         {
+          "name": "REPORT \u00c0 NOUVEAU CR\u00c9DITEUR"
+         }
+        ], 
+        "name": "REPORT \u00c0 NOUVEAU"
+       }, 
+       {
+        "children": [
+         {
+          "name": "R\u00c9SULTAT HORS ACTIVIT\u00c9S ORDINAIRES (R.H.A.O.)"
+         }, 
+         {
+          "name": "R\u00c9SULTAT NET : PERTE"
+         }, 
+         {
+          "name": "EXC\u00c9DENT BRUT D'EXPLOITATION (E.B.E.)"
+         }, 
+         {
+          "name": "R\u00c9SULTAT D'EXPLOITATION (R.E.)"
+         }, 
+         {
+          "name": "R\u00c9SULTAT FINANCIER (R.F.)"
+         }, 
+         {
+          "name": "R\u00c9SULTAT DES ACTIVIT\u00c9S ORDINAIRES (R.A.O.)"
+         }, 
+         {
+          "children": [
+           {
+            "name": "R\u00e9sultat en instance d'affectation : Perte"
+           }, 
+           {
+            "name": "R\u00e9sultat en instance d'affectation : B\u00e9n\u00e9fice"
+           }
+          ], 
+          "name": "R\u00c9SULTAT EN INSANCE D\u2019AFFECTATION"
+         }, 
+         {
+          "name": "R\u00c9SULTAT NET : B\u00c9N\u00c9FICE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Marge brute sur marchandises"
+           }, 
+           {
+            "name": "Marge brute sur mati\u00e8res"
+           }
+          ], 
+          "name": "MARGE BRUTE (M.B.)"
+         }, 
+         {
+          "name": "VALEUR AJOUT\u00c9E (V.A.)"
+         }
+        ], 
+        "name": "R\u00c9SULTAT NET DE L'EXERCICE"
+       }
+      ], 
+      "name": "Comptes de capitaux"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "MATI\u00c8RES A"
+         }, 
+         {
+          "name": "FOURNITURES (A,B)"
+         }, 
+         {
+          "name": "MATI\u00c8RES B"
+         }
+        ], 
+        "name": "MATI\u00c8RES PREMI\u00c8RES ET FOURNITURES LI\u00c9ES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FOURNITURES D'ATELIER ET D'USINE"
+         }, 
+         {
+          "name": "FOURNITURES DE MAGASIN"
+         }, 
+         {
+          "name": "MATI\u00c8RES CONSOMMABLES"
+         }, 
+         {
+          "name": "FOURNITURES DE BUREAU"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres emballages"
+           }, 
+           {
+            "name": "Emballages perdus"
+           }, 
+           {
+            "name": "Emballages r\u00e9cup\u00e9rables non identifiables"
+           }, 
+           {
+            "name": "Emballages \u00e0 usage mixte"
+           }
+          ], 
+          "name": "EMBALLAGES"
+         }, 
+         {
+          "name": "AUTRES MATI\u00c8RES"
+         }
+        ], 
+        "name": "AUTRES APPROVISIONNEMENTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MARCHANDISES HORS ACTIVIT\u00c9S ORDINAIRES (H.A.O.)"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Marchandises A2"
+           }, 
+           {
+            "name": "Marchandises A1"
+           }
+          ], 
+          "name": "MARCHANDISES A"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Marchandises B1"
+           }, 
+           {
+            "name": "Marchandises B2"
+           }
+          ], 
+          "name": "MARCHANDISES B"
+         }
+        ], 
+        "name": "MARCHANDISES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRODUITS FINIS A"
+         }, 
+         {
+          "name": "PRODUITS FINIS B"
+         }
+        ], 
+        "name": "PRODUITS FINIS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "D\u00e9chets"
+           }, 
+           {
+            "name": "Mati\u00e8res de R\u00e9cup\u00e9ration"
+           }, 
+           {
+            "name": "Rebuts"
+           }
+          ], 
+          "name": "PRODUITS R\u00c9SIDUELS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits interm\u00e9diaires A"
+           }, 
+           {
+            "name": "Produits interm\u00e9diaires B"
+           }
+          ], 
+          "name": "PRODUITS INTERM\u00c9DIAIRES"
+         }
+        ], 
+        "name": "PRODUITS INTERM\u00c9DIAIRES ET R\u00c9SIDUELS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Produits interm\u00e9diaires A"
+           }, 
+           {
+            "name": "Produits interm\u00e9diaires B"
+           }
+          ], 
+          "name": "PRODUITS INTERM\u00c9DIAIRES EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Travaux en cours T2"
+           }, 
+           {
+            "name": "Travaux en cours T1"
+           }
+          ], 
+          "name": "TRAVAUX EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits en cours P2"
+           }, 
+           {
+            "name": "Produits en cours P1"
+           }
+          ], 
+          "name": "PRODUITS EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Produits r\u00e9siduels A"
+           }, 
+           {
+            "name": "Produits r\u00e9siduels B"
+           }
+          ], 
+          "name": "PRODUITS R\u00c9SIDUELS EN COURS"
+         }
+        ], 
+        "name": "PRODUITS EN COURS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Prestations de services S2"
+           }, 
+           {
+            "name": "Prestations de services S1"
+           }
+          ], 
+          "name": "PRESTATIONS DE SERVICES EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "\u00c9tudes en cours E2"
+           }, 
+           {
+            "name": "\u00c9tudes en cours E1"
+           }
+          ], 
+          "name": "\u00c9TUDES EN COURS"
+         }
+        ], 
+        "name": "SERVICES EN COURS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MATI\u00c8RES PREMI\u00c8RES ET FOURNITURES LI\u00c9ES EN COURS DE ROUTE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Stock en consignation"
+           }, 
+           {
+            "name": "Stock en d\u00e9p\u00f4t"
+           }
+          ], 
+          "name": "STOCK EN CONSIGNATION OU EN D\u00c9P\u00d4T"
+         }, 
+         {
+          "name": "MARCHANDISES EN COURS DE ROUTE"
+         }, 
+         {
+          "name": "AUTRES APPROVISIONNEMENTS EN COURS DE ROUTE"
+         }, 
+         {
+          "name": "PRODUITS FINIS EN COURS DE ROUTE"
+         }, 
+         {
+          "name": "STOCK PROVENANT D'IMMOBILISATIONS MISES HORS SERVICE OU AU REBUT"
+         }
+        ], 
+        "name": "STOCKS EN COURS DE ROUTE, EN CONSIGNATION OU EN D\u00c9P\u00d4T"
+       }, 
+       {
+        "children": [
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS DE MARCHANDISES"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS DE PRODUITS INTERM\u00c9DIAIRES ET R\u00c9SIDUELS"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS DE MATI\u00c8RES PREMI\u00c8RES ET FOURNITURES LI\u00c9ES"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS D'AUTRES APPOVISIONNEMENTS"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES PRODUCTIONS EN COURS"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES SERVICES EN COURS"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS DE PRODUITS FINIS"
+         }, 
+         {
+          "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS EN COURS DE ROUTE, EN CONSIGNATION OU EN D\u00c9P\u00d4T"
+         }
+        ], 
+        "name": "D\u00c9PR\u00c9CIATIONS DES STOCKS"
+       }
+      ], 
+      "name": "Comptes de stocks et d'en-cours"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "FONDS COMMERCIAL"
+         }, 
+         {
+          "name": "MARQUES"
+         }, 
+         {
+          "name": "INVESTISSEMENTS DE CR\u00c9ATION"
+         }, 
+         {
+          "name": "DROIT AU BAIL"
+         }, 
+         {
+          "name": "FRAIS DE RECHERCHE ET DE D\u00c9VELOPPEMENT"
+         }, 
+         {
+          "name": "LOGICIELS"
+         }, 
+         {
+          "name": "BREVETS, LICENCES, CONCESSIONS ET DROITS SIMILAIRES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres droits et valeurs incorporels"
+           }, 
+           {
+            "name": "Frais de recherche et de d\u00e9veloppement"
+           }, 
+           {
+            "name": "Logiciels"
+           }
+          ], 
+          "name": "IMMOBILISATIONS INCORPORELLES EN COURS"
+         }, 
+         {
+          "name": "AUTRES DROITS ET VALEURS INCORPORELS"
+         }
+        ], 
+        "name": "IMMOBILISATIONS INCORPORELLES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Charges \u00e0 \u00e9taler"
+           }, 
+           {
+            "name": "Frais d'\u00e9mission des emprunts"
+           }, 
+           {
+            "name": "Charges diff\u00e9r\u00e9es"
+           }, 
+           {
+            "name": "Frais d'acquisition d'immobilisations"
+           }
+          ], 
+          "name": "CHARGES \u00c0 R\u00c9PARTIR SUR PLUSIEURS EXERCICES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Frais de fonctionnement ant\u00e9rieurs au d\u00e9marrage"
+           }, 
+           {
+            "name": "Frais de modification du capital (fusions, scissions, transformations)"
+           }, 
+           {
+            "name": "Frais d'entr\u00e9e \u00e0 la Bourse"
+           }, 
+           {
+            "name": "Frais de restructuration"
+           }, 
+           {
+            "name": "Frais de constitution"
+           }, 
+           {
+            "name": "Frais de prospection"
+           }, 
+           {
+            "name": "Frais de publicit\u00e9 et de lancement"
+           }, 
+           {
+            "name": "Frais divers d'\u00e9tablissement"
+           }
+          ], 
+          "name": "FRAIS D'\u00c9TABLISSEMENT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Obligations ordinaires"
+           }, 
+           {
+            "name": "Obligations convertibles"
+           }, 
+           {
+            "name": "Autres emprunts obligataires"
+           }
+          ], 
+          "name": "PRIMES DE REMBOURSEMENT DES OBLIGATIONS"
+         }
+        ], 
+        "name": "CHARGES IMMOBILIS\u00c9ES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres terrains"
+           }, 
+           {
+            "name": "Terrains nus"
+           }, 
+           {
+            "name": "Terrains agricoles et forestiers"
+           }, 
+           {
+            "name": "Terrains de gisement"
+           }
+          ], 
+          "name": "AM\u00c9NAGEMENTS DE TERRAINS EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres terrains nus"
+           }, 
+           {
+            "name": "Terrains \u00e0 b\u00e2tir"
+           }
+          ], 
+          "name": "TERRAINS NUS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Terrains d'exploitation foresti\u00e8re"
+           }, 
+           {
+            "name": "Terrains d'exploitation agricole"
+           }, 
+           {
+            "name": "Autres terrains"
+           }
+          ], 
+          "name": "TERRAINS AGRICOLES ET FORESTIERS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres terrains b\u00e2tis"
+           }, 
+           {
+            "name": "pour b\u00e2timents affect\u00e9s aux autres op\u00e9rations professionnelles"
+           }, 
+           {
+            "name": "pour b\u00e2timents affect\u00e9s aux autres op\u00e9rations non professionnelles"
+           }, 
+           {
+            "name": "pour b\u00e2timents industriels et agricoles"
+           }, 
+           {
+            "name": "pour b\u00e2timents administratifs et commerciaux"
+           }
+          ], 
+          "name": "TERRAINS B\u00c2TIS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Plantation d'arbres et d'arbustes"
+           }, 
+           {
+            "name": "Autres travaux"
+           }
+          ], 
+          "name": "TRAVAUX DE MISE EN VALEUR DES TERRAINS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Carri\u00e8res"
+           }
+          ], 
+          "name": "TERRAINS DE GISEMENT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Parkings"
+           }
+          ], 
+          "name": "TERRAINS AM\u00c9NAG\u00c9S"
+         }, 
+         {
+          "name": "TERRAINS MIS EN CONCESSION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres terrains"
+           }, 
+           {
+            "name": "Terrains des logements affect\u00e9s au personnel"
+           }, 
+           {
+            "name": "Terrains des immeubles de rapport"
+           }
+          ], 
+          "name": "AUTRES TERRAINS"
+         }
+        ], 
+        "name": "TERRAINS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Collections et oeuvres d\u2019art"
+           }
+          ], 
+          "name": "AUTRES MAT\u00c9RIELS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres mat\u00e9riels"
+           }, 
+           {
+            "name": "Mat\u00e9riel et outillage industriel et commercial"
+           }, 
+           {
+            "name": "Mat\u00e9riel et outillage agricole"
+           }, 
+           {
+            "name": "Mat\u00e9riel d\u2019emballage r\u00e9cup\u00e9rable et identifiable"
+           }, 
+           {
+            "name": "Mat\u00e9riel et mobilier de bureau"
+           }, 
+           {
+            "name": "Mat\u00e9riel de transport"
+           }, 
+           {
+            "name": "Immobilisations animales et agricoles"
+           }, 
+           {
+            "name": "Agencements et am\u00e9nagements du mat\u00e9riel"
+           }
+          ], 
+          "name": "MAT\u00c9RIEL EN COURS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Plantations agricoles"
+           }, 
+           {
+            "name": "Cheptel, animaux de trait"
+           }, 
+           {
+            "name": "Animaux de garde"
+           }, 
+           {
+            "name": "Cheptel, animaux reproducteurs"
+           }, 
+           {
+            "name": "Autres"
+           }
+          ], 
+          "name": "IMMOBILISATIONS ANIMALES ET AGRICOLES"
+         }, 
+         {
+          "name": "AGENCEMENTS ET AM\u00c9NAGEMENTS DU MAT\u00c9RIEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Mat\u00e9riel et mobilier des logements du personnel"
+           }, 
+           {
+            "name": "Mat\u00e9riel et mobilier des immeubles de rapport"
+           }, 
+           {
+            "name": "Mobilier de bureau"
+           }, 
+           {
+            "name": "Mat\u00e9riel bureautique"
+           }, 
+           {
+            "name": "Mat\u00e9riel informatique"
+           }, 
+           {
+            "name": "Mat\u00e9riel de bureau"
+           }
+          ], 
+          "name": "MAT\u00c9RIEL ET MOBILIER"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres (v\u00e9lo, mobylette, moto)"
+           }, 
+           {
+            "name": "Mat\u00e9riel naval"
+           }, 
+           {
+            "name": "Mat\u00e9riel a\u00e9rien"
+           }, 
+           {
+            "name": "Mat\u00e9riel hippomobile"
+           }, 
+           {
+            "name": "Mat\u00e9riel automobile"
+           }, 
+           {
+            "name": "Mat\u00e9riel ferroviaire"
+           }, 
+           {
+            "name": "Mat\u00e9riel fluvial, lagunaire"
+           }
+          ], 
+          "name": "MAT\u00c9RIEL DE TRANSPORT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Mat\u00e9riel agricole"
+           }, 
+           {
+            "name": "Outillage agricole"
+           }
+          ], 
+          "name": "MAT\u00c9RIEL ET OUTILLAGE AGRICOLE"
+         }, 
+         {
+          "name": "MAT\u00c9RIEL D\u2019EMBALLAGE R\u00c9CUP\u00c9RABLE ET IDENTIFIABLE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Mat\u00e9riel industriel"
+           }, 
+           {
+            "name": "Outillage industriel"
+           }, 
+           {
+            "name": "Mat\u00e9riel commercial"
+           }, 
+           {
+            "name": "Outillage commercial"
+           }
+          ], 
+          "name": "MAT\u00c9RIEL ET OUTILLAGE INDUSTRIEL ET COMMERCIAL"
+         }
+        ], 
+        "name": "MAT\u00c9RIEL"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Avances \u00e0 des Groupements d'int\u00e9r\u00eat \u00e9conomique (G.I.E.)"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es \u00e0 des participations (groupe)"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es \u00e0 des soci\u00e9t\u00e9s en participation"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es \u00e0 des participations (hors groupe)"
+           }
+          ], 
+          "name": "CR\u00c9ANCES RATTACH\u00c9ES \u00c0 DES PARTICIPATIONS ET AVANCES \u00c0 DES G.I.E."
+         }, 
+         {
+          "children": [
+           {
+            "name": "Immobilisations financi\u00e8res diverses"
+           }, 
+           {
+            "name": "Pr\u00eats au personnel"
+           }, 
+           {
+            "name": "Cr\u00e9ances sur l'Etat"
+           }, 
+           {
+            "name": "Pr\u00eats et cr\u00e9ances non commerciales"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es \u00e0 des participations"
+           }, 
+           {
+            "name": "Titres immobilis\u00e9s"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts et cautionnements vers\u00e9s"
+           }
+          ], 
+          "name": "INT\u00c9R\u00caTS COURUS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cautionnements sur autres op\u00e9rations"
+           }, 
+           {
+            "name": "Cautionnements sur march\u00e9s publics"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts pour le t\u00e9l\u00e9phone, le t\u00e9lex, la t\u00e9l\u00e9copie"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts pour le gaz"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts pour l\u2019eau"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts pour l\u2019\u00e9lectricit\u00e9"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts pour loyers d\u2019avance"
+           }, 
+           {
+            "name": "Autres d\u00e9p\u00f4ts et cautionnements"
+           }
+          ], 
+          "name": "D\u00c9P\u00d4TS ET CAUTIONNEMENTS VERS\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Parts de fonds commun de placement (F.C.P.)"
+           }, 
+           {
+            "name": "Titres immobilis\u00e9s de l\u2019activit\u00e9 de portefeuille (T.I.A.P.)"
+           }, 
+           {
+            "name": "Titres participatifs"
+           }, 
+           {
+            "name": "Certificats d\u2019investissement"
+           }, 
+           {
+            "name": "Autres titres immobilis\u00e9s"
+           }
+          ], 
+          "name": "TITRES IMMOBILIS\u00c9S"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Retenues de garantie"
+           }, 
+           {
+            "name": "Fonds r\u00e9glement\u00e9"
+           }, 
+           {
+            "name": "Autres"
+           }
+          ], 
+          "name": "CR\u00c9ANCES SUR L\u2019\u00c9TAT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres pr\u00eats (frais d\u2019\u00e9tudes\u2026)"
+           }, 
+           {
+            "name": "Pr\u00eats mobiliers et d\u2019installation"
+           }, 
+           {
+            "name": "Pr\u00eats immobiliers"
+           }
+          ], 
+          "name": "PR\u00caTS AU PERSONNEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Billets de fonds"
+           }, 
+           {
+            "name": "Pr\u00eats aux associ\u00e9s"
+           }, 
+           {
+            "name": "Pr\u00eats participatifs"
+           }, 
+           {
+            "name": "Titres pr\u00eat\u00e9s"
+           }
+          ], 
+          "name": "PR\u00caTS ET CR\u00c9ANCES NON COMMERCIALES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances diverses groupe"
+           }, 
+           {
+            "name": "Cr\u00e9ances divers hors groupe"
+           }, 
+           {
+            "name": "Or et m\u00e9taux pr\u00e9cieux ()"
+           }
+          ], 
+          "name": "IMMOBILISATIONS FINANCI\u00c8RES DIVERSES"
+         }
+        ], 
+        "name": "AUTRES IMMOBLISATIONS FINANCI\u00c8RES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PARTICIPATIONS DANS DES ORGANISMES PROFESSIONNELS"
+         }, 
+         {
+          "name": "PARTS DANS DES GROUPEMENTS D\u2019INT\u00c9R\u00caT \u00c9CONOMIQUE (G.I.E.)"
+         }, 
+         {
+          "name": "TITRES DE PARTICIPATION DANS DES SOCI\u00c9T\u00c9S SOUS CONTR\u00d4LE EXCLUSIF"
+         }, 
+         {
+          "name": "TITRES DE PARTICIPATION DANS DES SOCI\u00c9T\u00c9S SOUS CONTR\u00d4LE CONJOINT"
+         }, 
+         {
+          "name": "TITRES DE PARTICIPATION DANS DES SOCI\u00c9T\u00c9S CONF\u00c9RANT UNE INFLUENCE NOTABLE"
+         }, 
+         {
+          "name": "AUTRES TITRES DE PARTICIPATION"
+         }
+        ], 
+        "name": "TITRES DE PARTICIPATION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du mat\u00e9riel et outillage agricole"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres mat\u00e9riels"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation de mat\u00e9riel en cours"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du mat\u00e9riel d'emballage r\u00e9cup\u00e9rable et identifiable"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du mat\u00e9riel et outillage industriel et commercial"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations animales et agricoles"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des agencements et am\u00e9nagements du mat\u00e9riel"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du mat\u00e9riel et mobilier"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du mat\u00e9riel de transport"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DE MAT\u00c9RIEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des cr\u00e9ances rattach\u00e9es \u00e0 des participations et avances \u00e0 des GIE"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des d\u00e9p\u00f4ts et cautionnements vers\u00e9s"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des titres immobilis\u00e9s"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des cr\u00e9ances sur l'Etat"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des pr\u00eats au personnel"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des pr\u00eats et cr\u00e9ances non commerciales"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des cr\u00e9ances financi\u00e8res diverses"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES AUTRES IMMOBILISATIONS FINANCI\u00c8RES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres titres de participation"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des titres de participation dans des soci\u00e9t\u00e9s sous contr\u00f4le exclusif"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des titres de participation dans les soci\u00e9t\u00e9s conf\u00e9rant une influence notable"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des participations dans des organismes professionnels"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des parts dans des GIE"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des titres de participation dans les soci\u00e9t\u00e9s sous contr\u00f4le conjoint"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES TITRES DE PARTICIPATION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations incorporelles en cours"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres droits et valeurs incorporels"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des logiciels"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des brevets, licences, concessions et droits similaires"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du fonds commercial"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des marques"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des investissements de cr\u00e9ation"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du droit au bail"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES IMMOBILISATIONS INCORPORELLES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des avances et acomptes vers\u00e9s sur immobilisations corporelles"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des avances et acomptes vers\u00e9s sur immobilisations incorporelles"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES AVANCES ET ACOMPTES VERS\u00c9S SUR IMMOBILISATIONS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des b\u00e2timents industriels, agricoles, administratifs et commerciaux sur sol propre"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres installations et agencements"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des ouvrages d'infrastructures"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des b\u00e2timents industriels, agricoles, administratifs et commerciaux sur sol d'autrui"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des b\u00e2timents industriels, agricoles et commerciaux mis en concession"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des am\u00e9nagements de bureaux"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des installations techniques"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des b\u00e2timents et installations en cours"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES B\u00c2TIMENTS, INSTALLATIONS TECHNIQUES ET AGENCEMENTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des terrains agricoles et forestiers"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des terrains nus"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des terrains b\u00e2tis"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des travaux de mise en valeur des terrains"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des terrains de gisement"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des terrains am\u00e9nag\u00e9s"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des terrains mis en concession"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres terrains"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des am\u00e9nagements de terrains en cours"
+           }
+          ], 
+          "name": "PROVISIONS POUR D\u00c9PR\u00c9CIATION DES TERRAINS"
+         }
+        ], 
+        "name": "PROVISIONS POUR DEPRECIATION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Amortissements des terrains de gisement"
+           }, 
+           {
+            "name": "Amortissements des travaux de mise en valeur des terrains"
+           }, 
+           {
+            "name": "Amortissements des terrains agricoles et forestiers"
+           }
+          ], 
+          "name": "AMORTISSEMENTS DES TERRAINS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Amortissements des b\u00e2timents industriels, agricoles, administratifs et commerciaux sur sol d'autrui"
+           }, 
+           {
+            "name": "Amortissements des ouvrages d'infrastructure"
+           }, 
+           {
+            "name": "Amortissements des b\u00e2timents industriels, agricoles et commerciaux mis en concession"
+           }, 
+           {
+            "name": "Amortissements des installations techniques"
+           }, 
+           {
+            "name": "Amortissements des am\u00e9nagements de bureaux"
+           }, 
+           {
+            "name": "Amortissements des autres installations et agencements"
+           }, 
+           {
+            "name": "Amortissements des b\u00e2timents industriels, agricoles, administratifs et commerciaux sur sol propre"
+           }
+          ], 
+          "name": "AMORTISSEMENTS DES B\u00c2TIMENTS, INSTALLATIONS TECHNIQUES ET AGENCEMENTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Amortissements du mat\u00e9riel d'emballage r\u00e9cup\u00e9rable et identifiable"
+           }, 
+           {
+            "name": "Amortissements du mat\u00e9riel et outillage agricole"
+           }, 
+           {
+            "name": "Amortissements du mat\u00e9riel et outillage industriel et commercial"
+           }, 
+           {
+            "name": "Amortissements des agencements et am\u00e9nagements du mat\u00e9riel"
+           }, 
+           {
+            "name": "Amortissements des immobilisations animales et agricoles"
+           }, 
+           {
+            "name": "Amortissements du mat\u00e9riel de transport"
+           }, 
+           {
+            "name": "Amortissements du mat\u00e9riel et mobilier"
+           }, 
+           {
+            "name": "Amortissements des autres mat\u00e9riels"
+           }
+          ], 
+          "name": "AMORTISSEMENTS DU MAT\u00c9RIEL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Amortissements des marques"
+           }, 
+           {
+            "name": "Amortissements du fonds commercial"
+           }, 
+           {
+            "name": "Amortissements des autres droits et valeurs incorporels"
+           }, 
+           {
+            "name": "Amortissements des investissements de cr\u00e9ation"
+           }, 
+           {
+            "name": "Amortissements des frais de recherche et de d\u00e9veloppement"
+           }, 
+           {
+            "name": "Amortissements des brevets, licences, concessions et droits similaires"
+           }, 
+           {
+            "name": "Amortissements du droit au bail"
+           }, 
+           {
+            "name": "Amortissements des logiciels"
+           }
+          ], 
+          "name": "AMORTISSEMENTS DES IMMOBILISATIONS INCORPORELLES"
+         }
+        ], 
+        "name": "AMORTISSEMENTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "B\u00c2TIMENTS ET INSTALLATIONS EN COURS"
+         }, 
+         {
+          "name": "AUTRES INSTALLATIONS ET AGENCEMENTS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Voies de terre"
+           }, 
+           {
+            "name": "Autres"
+           }, 
+           {
+            "name": "Pistes d\u2019a\u00e9rodrome"
+           }, 
+           {
+            "name": "Barrages, Digues"
+           }, 
+           {
+            "name": "Voies d\u2019eau"
+           }, 
+           {
+            "name": "Voies de fer"
+           }
+          ], 
+          "name": "OUVRAGES D\u2019INFRASTRUCTURE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "B\u00e2timents agricoles"
+           }, 
+           {
+            "name": "B\u00e2timents administratifs et commerciaux"
+           }, 
+           {
+            "name": "B\u00e2timents industriels"
+           }, 
+           {
+            "name": "B\u00e2timents affect\u00e9s au logement du personnel"
+           }, 
+           {
+            "name": "Immeubles de rapport"
+           }
+          ], 
+          "name": "B\u00c2TIMENTS INDUSTRIELS, AGRICOLES, ADMINISTRATIFS ET COMMERCIAUX SUR SOL D\u2019AUTRUI"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Immeubles de rapport"
+           }, 
+           {
+            "name": "B\u00e2timents affect\u00e9s au logement du personnel"
+           }, 
+           {
+            "name": "B\u00e2timents administratifs et commerciaux"
+           }, 
+           {
+            "name": "B\u00e2timents agricoles"
+           }, 
+           {
+            "name": "B\u00e2timents industriels"
+           }
+          ], 
+          "name": "B\u00c2TIMENTS INDUSTRIELS, AGRICOLES, ADMINISTRATIFS ET COMMERCIAUX SUR SOL PROPRE"
+         }, 
+         {
+          "name": "B\u00c2TIMENTS INDUSTRIELS, AGRICOLES ET COMMERCIAUX MIS EN CONCESSION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Installations g\u00e9n\u00e9rales"
+           }, 
+           {
+            "name": "Autres"
+           }
+          ], 
+          "name": "AMENAGEMENTS DE BUREAUX"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Installations complexes sp\u00e9cialis\u00e9es sur sol propre"
+           }, 
+           {
+            "name": "Installations complexes sp\u00e9cialis\u00e9es sur sol d\u2019autrui"
+           }, 
+           {
+            "name": "Installations \u00e0 caract\u00e8re sp\u00e9cifique sur sol propre"
+           }, 
+           {
+            "name": "Installations \u00e0 caract\u00e8re sp\u00e9cifique sur sol d\u2019autrui"
+           }
+          ], 
+          "name": "INSTALLATIONS TECHNIQUES"
+         }
+        ], 
+        "name": "B\u00c2TIMENTS, INSTALLATIONS TECHNIQUES ET AGENCEMENTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AVANCES ET ACOMPTES VERS\u00c9S SUR IMMOBILISATIONS INCORPORELLES"
+         }, 
+         {
+          "name": "AVANCES ET ACOMPTES VERS\u00c9S SUR IMMOBILISATIONS CORPORELLES"
+         }
+        ], 
+        "name": "AVANCES ET ACOMPTES VERS\u00c9S SUR IMMOBILISATIONS"
+       }
+      ], 
+      "name": "Comptes d'immobilisations"
+     }
+    ], 
+    "name": "Comptes de bilan"
+   }, 
+   {
+    "children": [
+     {
+      "name": "COMPTES DE CO\u00dbTS"
+     }, 
+     {
+      "name": "COMPTES DE STOCKS"
+     }, 
+     {
+      "name": "COMPTES D'ECARTS SUR COUTS PREETABLIS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Cautions, garanties obtenues"
+         }, 
+         {
+          "name": "Hypoth\u00e8ques obtenues"
+         }, 
+         {
+          "name": "Autres garanties obtenues"
+         }, 
+         {
+          "name": "Effets endoss\u00e9s par des tiers"
+         }, 
+         {
+          "name": "Avals obtenus"
+         }
+        ], 
+        "name": "ENGAGEMENTS DE GARANTIE OBTENUS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Autres engagements r\u00e9ciproques"
+         }, 
+         {
+          "name": "Commandes fermes aux fournisseurs"
+         }, 
+         {
+          "name": "Ventes \u00e0 terme de devises"
+         }, 
+         {
+          "name": "Ventes de marchandises \u00e0 terme"
+         }
+        ], 
+        "name": "ENGAGEMENTS R\u00c9CIPROQUES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cautions, garanties accord\u00e9es"
+         }, 
+         {
+          "name": "Avals accord\u00e9s"
+         }, 
+         {
+          "name": "Hypoth\u00e8ques accord\u00e9es"
+         }, 
+         {
+          "name": "Effets endoss\u00e9s par l'entreprise"
+         }, 
+         {
+          "name": "Autres garanties accord\u00e9es"
+         }
+        ], 
+        "name": "ENGAGEMENTS DE GARANTIE ACCORD\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Divers engagements accord\u00e9s"
+         }, 
+         {
+          "name": "Annulations conditionnelles de dettes"
+         }, 
+         {
+          "name": "Engagements de retraite"
+         }, 
+         {
+          "name": "Achats avec clause de r\u00e9serve de propri\u00e9t\u00e9"
+         }
+        ], 
+        "name": "AUTRES ENGAGEMENTS ACCORD\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": " Facilit\u00e9s d'\u00e9mission"
+         }, 
+         {
+          "name": "Cr\u00e9dits confirm\u00e9s obtenus"
+         }, 
+         {
+          "name": "Emprunts restant \u00e0 encaisser"
+         }, 
+         {
+          "name": "Autres engagements de financement obtenus"
+         }, 
+         {
+          "name": "Facilit\u00e9s de financement renouvelables"
+         }
+        ], 
+        "name": "ENGAGEMENTS DE FINANCEMENT OBTENUS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Achats de marchandises \u00e0 terme"
+         }, 
+         {
+          "name": "Commandes fermes des clients"
+         }, 
+         {
+          "name": "Achats \u00e0 terme de devises"
+         }, 
+         {
+          "name": "Autres engagements r\u00e9ciproques"
+         }
+        ], 
+        "name": "ENGAGEMENTS R\u00c9CIPROQUES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cr\u00e9dits accord\u00e9s non d\u00e9caiss\u00e9s"
+         }, 
+         {
+          "name": "Autres engagements de financement accord\u00e9s"
+         }
+        ], 
+        "name": "ENGAGEMENTS DE FINANCEMENT ACCORD\u00c9S"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Divers engagements obtenus"
+         }, 
+         {
+          "name": "Abandons de cr\u00e9ances conditionnels"
+         }, 
+         {
+          "name": "Ventes avec clause de r\u00e9serve de propri\u00e9t\u00e9"
+         }
+        ], 
+        "name": "AUTRES ENGAGEMENTS OBTENUS"
+       }
+      ], 
+      "name": "ENGAGEMENTS OBTENUS ET ENGAGEMENTS ACCORD\u00c9S"
+     }, 
+     {
+      "children": [
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS OBTENUS, 901 \u00e0 904\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS ACCORD\u00c9S, 905 \u00e0 908\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS ACCORD\u00c9S, 905 \u00e0 908\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS OBTENUS, 901 \u00e0 904\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS ACCORD\u00c9S, 905 \u00e0 908\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS OBTENUS, 901 \u00e0 904\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS ACCORD\u00c9S, 905 \u00e0 908\n        "
+       }, 
+       {
+        "name": "CONTREPARTIE DES ENGAGEMENTS OBTENUS, 901 \u00e0 904\n        "
+       }
+      ], 
+      "name": "CONTREPARTIES DES ENGAGEMENTS"
+     }, 
+     {
+      "name": "COMPTES REFLECHIS"
+     }, 
+     {
+      "name": "COMPTES DE RECLASSEMENTS"
+     }, 
+     {
+      "name": "COMPTES DE RESULTATS"
+     }, 
+     {
+      "name": "COMPTES DE LIAISONS INTERNES"
+     }, 
+     {
+      "name": "COMPTES DE DIFFERENCES DE TRAITEMENT COMPTABLE\n        "
+     }
+    ], 
+    "name": "Comptes des engagements hors bilan et comptabilit\u00e9 analytique"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "DONS ET LIB\u00c9RALIT\u00c9S ACCORD\u00c9S"
+       }, 
+       {
+        "name": "PERTES SUR CR\u00c9ANCES H.A.O."
+       }, 
+       {
+        "name": "ABANDONS DE CR\u00c9ANCES CONSENTIS"
+       }, 
+       {
+        "name": "CHARGES H.A.O. CONSTAT\u00c9ES"
+       }, 
+       {
+        "name": "CHARGES PROVISIONN\u00c9ES H.A.O."
+       }
+      ], 
+      "name": "CHARGES HORS ACTIVIT\u00c9S ORDINAIRES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "DONS ET LIB\u00c9RALIT\u00c9S OBTENUS"
+       }, 
+       {
+        "name": "TRANSFERTS DE CHARGES H.A.O"
+       }, 
+       {
+        "name": "ABANDONS DE CR\u00c9ANCES OBTENUS"
+       }, 
+       {
+        "name": "PRODUITS H.A.O CONSTAT\u00c9S"
+       }, 
+       {
+        "name": "REPRISES DES CHARGES PROVISIONN\u00c9ES H.A.O."
+       }
+      ], 
+      "name": "PRODUITS HORS ACTIVIT\u00c9S ORDINAIRES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Annulations pour pertes r\u00e9troactives"
+         }, 
+         {
+          "name": "D\u00e9gr\u00e8vements"
+         }
+        ], 
+        "name": "D\u00c9GR\u00c8VEMENTS ET ANNULATIONS D\u2019IMP\u00d4TS SUR R\u00c9SULTATS ANT\u00c9RIEURS"
+       }, 
+       {
+        "name": "IMP\u00d4T MINIMUM FORFAITAIRE (I.M.F.)"
+       }, 
+       {
+        "name": "RAPPEL D'IMP\u00d4TS SUR R\u00c9SULTATS ANT\u00c9RIEURS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Activit\u00e9s exerc\u00e9es hors R\u00e9gion"
+         }, 
+         {
+          "name": "Activit\u00e9s exerc\u00e9es dans les autres \u00c9tats de la R\u00e9gion"
+         }, 
+         {
+          "name": "Activit\u00e9s exerc\u00e9es dans l'\u00c9tat"
+         }
+        ], 
+        "name": "IMP\u00d4TS SUR LES B\u00c9N\u00c9FICES DE L'EXERCICE"
+       }
+      ], 
+      "name": "IMP\u00d4TS SUR LE R\u00c9SULTAT"
+     }, 
+     {
+      "children": [
+       {
+        "name": "REPRISES DE SUBVENTIONS D\u2019INVESTISSEMENT"
+       }, 
+       {
+        "name": "REPRISES DE PROVISIONS POUR D\u00c9PR\u00c9CIATION H.A.O."
+       }, 
+       {
+        "name": "REPRISES DE PROVISIONS POUR RISQUES ET CHARGES H.A.O."
+       }, 
+       {
+        "name": "REPRISES D\u2019AMORTISSEMENTS"
+       }, 
+       {
+        "name": "AUTRES REPRISES H.A.O."
+       }, 
+       {
+        "name": "REPRISES DE PROVISIONS R\u00c9GLEMENT\u00c9ES"
+       }
+      ], 
+      "name": "REPRISES HORS ACTIVIT\u00c9S ORDINAIRES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "PARTICIPATION CONTRACTUELLE AUX B\u00c9N\u00c9FICES"
+       }, 
+       {
+        "name": "AUTRES PARTICIPATIONS"
+       }, 
+       {
+        "name": "PARTICIPATION L\u00c9GALE AUX B\u00c9N\u00c9FICES"
+       }
+      ], 
+      "name": "PARTICIPATION DES TRAVAILLEURS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00c9TAT"
+       }, 
+       {
+        "name": "COLLECTIVIT\u00c9S PUBLIQUES"
+       }, 
+       {
+        "name": "AUTRES"
+       }, 
+       {
+        "name": "GROUPE"
+       }
+      ], 
+      "name": "SUBVENTIONS D'\u00c9QUILIBRE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "IMMOBILISATIONS FINANCI\u00c8RES"
+       }, 
+       {
+        "name": "IMMOBILISATIONS CORPORELLES"
+       }, 
+       {
+        "name": "IMMOBILISATIONS INCORPORELLES"
+       }
+      ], 
+      "name": "VALEURS COMPTABLES DES CESSIONS D'IMMOBILISATIONS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "IMMOBILISATIONS INCORPORELLES"
+       }, 
+       {
+        "name": "IMMOBILISATIONS FINANCI\u00c8RES"
+       }, 
+       {
+        "name": "IMMOBILISATIONS CORPORELLES"
+       }
+      ], 
+      "name": "PRODUITS DES CESSIONS D'IMMOBILISATIONS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "DOTATIONS AUX PROVISIONS POUR D\u00c9PR\u00c9CIATION H.A.O."
+       }, 
+       {
+        "name": "DOTATIONS AUX AMORTISSEMENTS H.A.O."
+       }, 
+       {
+        "name": "DOTATIONS AUX PROVISIONS R\u00c9GLEMENT\u00c9ES"
+       }, 
+       {
+        "name": "AUTRES DOTATIONS H.A.O."
+       }, 
+       {
+        "name": "DOTATIONS AUX PROVISIONS POUR RISQUES ET CHARGES H.A.O."
+       }
+      ], 
+      "name": "DOTATIONS HORS ACTIVIT\u00c9S ORDINAIRES"
+     }
+    ], 
+    "name": "Comptes sp\u00e9ciaux"
+   }
+  ], 
+  "name": "Plan Comptable SYSCOA"
+ }
+}

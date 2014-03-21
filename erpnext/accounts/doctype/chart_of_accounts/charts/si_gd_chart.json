@@ -1,0 +1,4232 @@
+{
+ "name": "Kontni na\u010drt za gospodarske dru\u017ebe", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DAVEK OD DOHODKA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DAVEK OD DOHODKA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI (ODHODKI) IZ NASLOVA ODLO\u017dENEGA DAVKA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRIHODKI (ODHODKI) IZ NASLOVA ODLO\u017dENEGA DAVKA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGI DAVKI, KI NISO IZKAZANI V DRUGIH POSTAVKAH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGI DAVKI, KI NISO IZKAZANI V DRUGIH POSTAVKAH", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTI DOBI\u010cEK POSLOVNEGA LETA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTI DOBI\u010cEK POSLOVNEGA LETA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "RAZPOREDITEV DOBI\u010cKA", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DOBI\u010cEK ALI IZGUBA PRED OBDAV\u010cITVIJO", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOBI\u010cEK ALI IZGUBA PRED OBDAV\u010cITVIJO", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOBI\u010cEK ALI IZGUBA PRED OBDAV\u010cITVIJO", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PRENOS IZGUBE TEKO\u010cEGA LETA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRENOS IZGUBE TEKO\u010cEGA LETA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "IZGUBA TEKO\u010cEGA LETA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "IZGUBA TEKO\u010cEGA LETA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "IZGUBA IN PRENOS IZGUBE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PRENOS NEUPORABLJENEGA DELA \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRENOS NEUPORABLJENEGA DELA \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE REZERV ZA LASTNE DELNICE OZIROMA DELE\u017dE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE REZERV ZA LASTNE DELNICE OZIROMA DELE\u017dE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE STATUTARNIH REZERV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE STATUTARNIH REZERV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTI DOBI\u010cEK ZA KRITJE PRENESENIH IZGUB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTI DOBI\u010cEK ZA KRITJE PRENESENIH IZGUB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE ZAKONSKIH REZERV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE ZAKONSKIH REZERV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTI DOBI\u010cEK ZA DRUGE REZERVE IZ DOBI\u010cKA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTI DOBI\u010cEK ZA DRUGE REZERVE IZ DOBI\u010cKA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "RAZPOREDITEV \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "POSLOVNI IZID", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "SREDSTVA DELA DENAR USTVARJAJO\u010cE ENOTE, NAMENJENA PRODAJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "SREDSTVA DELA DENAR USTVARJAJO\u010cE ENOTE, NAMENJENA PRODAJI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SREDSTVA DENAR USTVARJAJO\u010cE ENOTE, NAMENJENA PRODAJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "SREDSTVA DENAR USTVARJAJO\u010cE ENOTE, NAMENJENA PRODAJI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGA NEKRATKORO\u010cNA SREDSTVA, NAMENJENA PRODAJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGA NEKRATKORO\u010cNA SREDSTVA, NAMENJENA PRODAJI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NALO\u017dBENE NEPREMI\u010cNINE, VREDNOTENE PO MODELU NABAVNE VREDNOSTI, NAMENJENE PRODAJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NALO\u017dBENE NEPREMI\u010cNINE, VREDNOTENE PO MODELU NABAVNE VREDNOSTI, NAMENJENE PRODAJI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OPREDMETENA OSNOVNA SREDSTVA, NAMENJENA PRODAJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OPREDMETENA OSNOVNA SREDSTVA, NAMENJENA PRODAJI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "NEKRATKORO\u010cNA SREDSTVA (SKUPINE ZA ODTUJITEV) ZA PRODAJO", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DDV, VRA\u010cUNAN V ZALOGAH BLAGA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DDV, VRA\u010cUNAN V ZALOGAH BLAGA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VRA\u010cUNANA RAZLIKA V CENAH ZALOG BLAGA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VRA\u010cUNANA RAZLIKA V CENAH ZALOG BLAGA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BLAGO V LASTNEM SKLADI\u0160\u010cU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "BLAGO V LASTNEM SKLADI\u0160\u010cU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BLAGO V TUJEM SKLADI\u0160\u010cU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "BLAGO V TUJEM SKLADI\u0160\u010cU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BLAGO NA POTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "BLAGO NA POTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BLAGO V LASTNI PRODAJALNI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "BLAGO V LASTNI PRODAJALNI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ZALOGE BLAGA", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "POLIZDELKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POLIZDELKI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NEDOKON\u010cANA PROIZVODNJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NEDOKON\u010cANA PROIZVODNJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NEDOKON\u010cANE STORITVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NEDOKON\u010cANE STORITVE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PROIZVODNJA V DODELAVI IN PREDELAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PROIZVODNJA V DODELAVI IN PREDELAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODMIKI OD CEN NEDOKON\u010cANIH PROIZVODNJE IN STORITEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODMIKI OD CEN NEDOKON\u010cANIH PROIZVODNJE IN STORITEV", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "NEDOKON\u010cANE PROIZVODNJA IN STORITVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PROIZVODI V LASTNI PRODAJALNI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PROIZVODI V LASTNI PRODAJALNI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODMIKI OD CEN PROIZVODOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODMIKI OD CEN PROIZVODOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PROIZVODI NA POTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PROIZVODI NA POTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PROIZVODI V TUJEM SKLADI\u0160\u010cU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PROIZVODI V TUJEM SKLADI\u0160\u010cU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PROIZVODI V LASTNEM SKLADI\u0160\u010cU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PROIZVODI V LASTNEM SKLADI\u0160\u010cU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PROIZVODI V DODELAVI IN PREDELAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PROIZVODI V DODELAVI IN PREDELAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VRA\u010cUNANI DDV OD PROIZVODOV V PRODAJALNI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VRA\u010cUNANI DDV OD PROIZVODOV V PRODAJALNI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PROIZVODI", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OBRA\u010cUN NABAVE BLAGA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBRA\u010cUN NABAVE BLAGA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VREDNOST BLAGA PO OBRA\u010cUNIH DOBAVITELJEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VREDNOST BLAGA PO OBRA\u010cUNIH DOBAVITELJEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODVISNI STRO\u0160KI NABAVE BLAGA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODVISNI STRO\u0160KI NABAVE BLAGA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "OBRA\u010cUN NABAVE BLAGA", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "ZALOGE PROIZVODOV, STORITEV, BLAGA IN NEKRATKORO\u010cNIH SREDSTEV (SKUPINE ZA ODTUJITEV) ZA PRODAJO", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DRUGI STRO\u0160KI, KI SE NE ZADR\u017dUJEJO V ZALOGAH", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "DRUGI STRO\u0160KI, KI SE NE ZADR\u017dUJEJO V ZALOGAH", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VREDNOST PRODANIH POSLOVNIH U\u010cINKOV", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "VREDNOST PRODANIH POSLOVNIH U\u010cINKOV", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NABAVNA VREDNOST PRODANIH MATERIALA IN BLAGA", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "NABAVNA VREDNOST PRODANIH MATERIALA IN BLAGA", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI PRODAJANJA", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "STRO\u0160KI PRODAJANJA", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI SPLO\u0160NIH DEJAVNOSTI (NABAVE IN UPRAVE)", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "STRO\u0160KI SPLO\u0160NIH DEJAVNOSTI (NABAVE IN UPRAVE)", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "POSLOVNI ODHODKI (II. RAZLI\u010cICA IZKAZA POSLOVNEGA IZIDA)", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ FINAN\u010cNIH SREDSTEV, RAZPOREJENIH PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ FINAN\u010cNIH SREDSTEV, RAZPOREJENIH PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ POSLOVNIH TERJATEV DO DRUGIH", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ POSLOVNIH TERJATEV DO DRUGIH", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ POSOJIL, DANIH DRUGIM (TUDI OD DEPOZITOV)", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ POSOJIL, DANIH DRUGIM (TUDI OD DEPOZITOV)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ DELE\u017dEV V PRIDRU\u017dENIH DRU\u017dBAH IN SKUPAJ OBVLADOVANIH DRU\u017dBAH", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ DELE\u017dEV V PRIDRU\u017dENIH DRU\u017dBAH IN SKUPAJ OBVLADOVANIH DRU\u017dBAH", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ POSLOVNIH TERJATEV DO DRU\u017dB V SKUPINI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ POSLOVNIH TERJATEV DO DRU\u017dB V SKUPINI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ POSOJIL, DANIH DRU\u017dBAM V SKUPINI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ POSOJIL, DANIH DRU\u017dBAM V SKUPINI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ DELE\u017dEV V DRUGIH DRU\u017dBAH", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ DELE\u017dEV V DRUGIH DRU\u017dBAH", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ DRUGIH NALO\u017dB", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ DRUGIH NALO\u017dB", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FINAN\u010cNI PRIHODKI IZ DELE\u017dEV V DRU\u017dBAH V SKUPINI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "FINAN\u010cNI PRIHODKI IZ DELE\u017dEV V DRU\u017dBAH V SKUPINI", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "FINAN\u010cNI PRIHODKI IZ FINAN\u010cNIH NALO\u017dB", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DRUGI PRIHODKI, POVEZANI S POSLOVNIMI U\u010cINKI (SUBVENCIJE, DOTACIJE, REGRESI, KOMPENZACIJE, PREMIJE ...)", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "DRUGI PRIHODKI, POVEZANI S POSLOVNIMI U\u010cINKI (SUBVENCIJE, DOTACIJE, REGRESI, KOMPENZACIJE, PREMIJE ...)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD NAJEMNIN", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD NAJEMNIN", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD POSLOVNIH ZDRU\u017dITEV (PRESE\u017dEK IZ PREVREDNOTENJA - SLABO IME)", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD POSLOVNIH ZDRU\u017dITEV (PRESE\u017dEK IZ PREVREDNOTENJA - SLABO IME)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD ODPRAVE REZERVACIJ", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD ODPRAVE REZERVACIJ", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD PRODAJE PROIZVODOV IN STORITEV NA TUJEM TRGU", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD PRODAJE PROIZVODOV IN STORITEV NA TUJEM TRGU", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD PRODAJE PROIZVODOV IN STORITEV NA DOMA\u010cEM TRGU", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD PRODAJE PROIZVODOV IN STORITEV NA DOMA\u010cEM TRGU", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD PRODAJE TRGOVSKEGA BLAGA IN MATERIALA NA TUJEM TRGU", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD PRODAJE TRGOVSKEGA BLAGA IN MATERIALA NA TUJEM TRGU", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI OD PRODAJE TRGOVSKEGA BLAGA IN MATERIALA NA DOMA\u010cEM TRGU", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI OD PRODAJE TRGOVSKEGA BLAGA IN MATERIALA NA DOMA\u010cEM TRGU", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREVREDNOTOVALNI POSLOVNI PRIHODKI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PREVREDNOTOVALNI POSLOVNI PRIHODKI", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "POSLOVNI PRIHODKI", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ SREDSTEV, RAZPOREJENIH PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ SREDSTEV, RAZPOREJENIH PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ DRUGIH POSLOVNIH OBVEZNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ DRUGIH POSLOVNIH OBVEZNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ OBVEZNOSTI DO DOBAVITELJEV IN MENI\u010cNIH OBVEZNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ OBVEZNOSTI DO DOBAVITELJEV IN MENI\u010cNIH OBVEZNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ POSLOVNIH OBVEZNOSTI DO DRU\u017dB V SKUPINI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ POSLOVNIH OBVEZNOSTI DO DRU\u017dB V SKUPINI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ DRUGIH FINAN\u010cNIH OBVEZNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ DRUGIH FINAN\u010cNIH OBVEZNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ IZDANIH OBVEZNIC", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ IZDANIH OBVEZNIC", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ POSOJIL, PREJETIH OD BANK", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ POSOJIL, PREJETIH OD BANK", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ ODPRAVE PRIPOZNANJA FINAN\u010cNIH NALO\u017dB", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ ODPRAVE PRIPOZNANJA FINAN\u010cNIH NALO\u017dB", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ POSOJIL, PREJETIH OD DRU\u017dB V SKUPINI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ POSOJIL, PREJETIH OD DRU\u017dB V SKUPINI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ OSLABITVE FINAN\u010cNIH NALO\u017dB", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ OSLABITVE FINAN\u010cNIH NALO\u017dB", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "FINAN\u010cNI ODHODKI IZ FINAN\u010cNIH NALO\u017dB", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ VREDNOTENJA NALO\u017dBENIH NEPREMI\u010cNIN PO MODELU PO\u0160TENE VREDNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ VREDNOTENJA NALO\u017dBENIH NEPREMI\u010cNIN PO MODELU PO\u0160TENE VREDNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODHODKI IZ ODTUJITVE NALO\u017dBENIH NEPREMI\u010cNIN, IZMERJENIH PO PO\u0160TENI VREDNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ODHODKI IZ ODTUJITVE NALO\u017dBENIH NEPREMI\u010cNIN, IZMERJENIH PO PO\u0160TENI VREDNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DENARNE KAZNI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "DENARNE KAZNI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OD\u0160KODNINE", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "OD\u0160KODNINE", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSTALI ODHODKI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "OSTALI ODHODKI", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "DRUGI FINAN\u010cNI ODHODKI IN OSTALI ODHODKI", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI S KRATKORO\u010cNIMI SREDSTVI, RAZEN S FINAN\u010cNIMI NALO\u017dBAMI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI S KRATKORO\u010cNIMI SREDSTVI, RAZEN S FINAN\u010cNIMI NALO\u017dBAMI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI S STRO\u0160KI DELA", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI S STRO\u0160KI DELA", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI Z NEOPREDMETENIMI SREDSTVI, OPREDMETENIMI OSNOVNIMI SREDSTVI IN NALO\u017dBENIMI NEPREMI\u010cNINAMI RAZPOREJENIMI IN IZMERJENIMI PO MODELU NABAVNE VREDNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI Z NEOPREDMETENIMI SREDSTVI, OPREDMETENIMI OSNOVNIMI SREDSTVI IN NALO\u017dBENIMI NEPREMI\u010cNINAMI RAZPOREJENIMI IN IZMERJENIMI PO MODELU NABAVNE VREDNOSTI", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "PREVREDNOTOVALNI POSLOVNI ODHODKI", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "VREDNOST PRODANIH POSLOVNIH U\u010cINKOV", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "VREDNOST PRODANIH POSLOVNIH U\u010cINKOV", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VREDNOST USREDSTVENIH LASTNIH PROIZVODOV IN STORITEV", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "VREDNOST USREDSTVENIH LASTNIH PROIZVODOV IN STORITEV", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NABAVNA VREDNOST PRODANIH MATERIALA IN BLAGA", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "NABAVNA VREDNOST PRODANIH MATERIALA IN BLAGA", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGI POSLOVNI ODHODKI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "DRUGI POSLOVNI ODHODKI", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "POSLOVNI ODHODKI (I. RAZLI\u010cICA IZKAZA POSLOVNEGA IZIDA)", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PRIHODKI IZ ODTUJITVE NALO\u017dBENIH NEPREMI\u010cNIN, IZMERJENIH PO PO\u0160TENI VREDNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI IZ ODTUJITVE NALO\u017dBENIH NEPREMI\u010cNIN, IZMERJENIH PO PO\u0160TENI VREDNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIHODKI IZ VREDNOTENJA NALO\u017dBENIH NEPREMI\u010cNIN PO PO\u0160TENI VREDNOSTI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PRIHODKI IZ VREDNOTENJA NALO\u017dBENIH NEPREMI\u010cNIN PO PO\u0160TENI VREDNOSTI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREJETE KAZNI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PREJETE KAZNI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SUBVENCIJE, DOTACIJE IN PODOBNI PRIHODKI, KI NISO POVEZANI S POSLOVNIMI U\u010cINKI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "SUBVENCIJE, DOTACIJE IN PODOBNI PRIHODKI, KI NISO POVEZANI S POSLOVNIMI U\u010cINKI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSTALI PRIHODKI", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "OSTALI PRIHODKI", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREJETE OD\u0160KODNINE", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "PREJETE OD\u0160KODNINE", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "DRUGI FINAN\u010cNI PRIHODKI IN OSTALI PRIHODKI", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "USREDSTVENI LASTNI PROIZVODI IN LASTNE STORITVE", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "ODHODKI IN PRIHODKI"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "NADOMESTILA PLA\u010c ZAPOSLENCEV"
+         }
+        ], 
+        "name": "NADOMESTILA PLA\u010c ZAPOSLENCEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PLA\u010cE ZAPOSLENCEV"
+         }
+        ], 
+        "name": "PLA\u010cE ZAPOSLENCEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REGRES ZA LETNI DOPUST, BONITETE, POVRA\u010cILA (ZA PREVOZ NA DELO IN Z NJEGA, ZA PREHRANO, ZA LO\u010cENO \u017dIVLJENJE) IN DRUGI PREJEMKI ZAPOSLENCEV"
+         }
+        ], 
+        "name": "REGRES ZA LETNI DOPUST, BONITETE, POVRA\u010cILA (ZA PREVOZ NA DELO IN Z NJEGA, ZA PREHRANO, ZA LO\u010cENO \u017dIVLJENJE) IN DRUGI PREJEMKI ZAPOSLENCEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI DODATNEGA POKOJNINSKEGA ZAVAROVANJA ZAPOSLENCEV"
+         }
+        ], 
+        "name": "STRO\u0160KI DODATNEGA POKOJNINSKEGA ZAVAROVANJA ZAPOSLENCEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE DELODAJAL\u010cEVE DAJATVE OD PLA\u010c, NADOMESTIL PLA\u010c, BONITET, POVRA\u010cIL IN DRUGIH PREJEMKOV ZAPOSLENCEV"
+         }
+        ], 
+        "name": "DRUGE DELODAJAL\u010cEVE DAJATVE OD PLA\u010c, NADOMESTIL PLA\u010c, BONITET, POVRA\u010cIL IN DRUGIH PREJEMKOV ZAPOSLENCEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DELODAJAL\u010cEVI PRISPEVKI OD PLA\u010c, NADOMESTIL PLA\u010c, BONITET, POVRA\u010cIL IN DRUGIH PREJEMKOV ZAPOSLENCEV"
+         }
+        ], 
+        "name": "DELODAJAL\u010cEVI PRISPEVKI OD PLA\u010c, NADOMESTIL PLA\u010c, BONITET, POVRA\u010cIL IN DRUGIH PREJEMKOV ZAPOSLENCEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NAGRADE VAJENCEM SKUPAJ Z DAJATVAMI, KI BREMENIJO PODJETJE"
+         }
+        ], 
+        "name": "NAGRADE VAJENCEM SKUPAJ Z DAJATVAMI, KI BREMENIJO PODJETJE"
+       }
+      ], 
+      "name": "STRO\u0160KI DELA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI OBRESTI"
+         }
+        ], 
+        "name": "STRO\u0160KI OBRESTI"
+       }
+      ], 
+      "name": "STRO\u0160KI OBRESTI"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA STRO\u0160KE REORGANIZACIJE PODJETJA"
+         }
+        ], 
+        "name": "REZERVACIJE ZA STRO\u0160KE REORGANIZACIJE PODJETJA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA DANA JAMSTVA"
+         }
+        ], 
+        "name": "REZERVACIJE ZA DANA JAMSTVA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA POKOJNINE, JUBILEJNE NAGRADE IN ODPRAVNINE OB UPOKOJITVI"
+         }
+        ], 
+        "name": "REZERVACIJE ZA POKOJNINE, JUBILEJNE NAGRADE IN ODPRAVNINE OB UPOKOJITVI"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA POKRIVANJE DRUGIH OBVEZNOSTI IZ PRETEKLEGA POSLOVANJA"
+         }
+        ], 
+        "name": "REZERVACIJE ZA POKRIVANJE DRUGIH OBVEZNOSTI IZ PRETEKLEGA POSLOVANJA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA KO\u010cLJIVE POGODBE"
+         }
+        ], 
+        "name": "REZERVACIJE ZA KO\u010cLJIVE POGODBE"
+       }
+      ], 
+      "name": "REZERVACIJE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AMORTIZACIJA NALO\u017dBENIH NEPREMI\u010cNIN"
+         }
+        ], 
+        "name": "AMORTIZACIJA NALO\u017dBENIH NEPREMI\u010cNIN"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AMORTIZACIJA DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV"
+         }
+        ], 
+        "name": "AMORTIZACIJA DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AMORTIZACIJA ZGRADB"
+         }
+        ], 
+        "name": "AMORTIZACIJA ZGRADB"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AMORTIZACIJA DROBNEGA INVENTARJA"
+         }
+        ], 
+        "name": "AMORTIZACIJA DROBNEGA INVENTARJA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AMORTIZACIJA NEOPREDMETENIH SREDSTEV"
+         }
+        ], 
+        "name": "AMORTIZACIJA NEOPREDMETENIH SREDSTEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AMORTIZACIJA OPREME IN NADOMESTNIH DELOV"
+         }
+        ], 
+        "name": "AMORTIZACIJA OPREME IN NADOMESTNIH DELOV"
+       }
+      ], 
+      "name": "AMORTIZACIJA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI SEJMOV, REKLAME IN REPREZENTANCE"
+         }
+        ], 
+        "name": "STRO\u0160KI SEJMOV, REKLAME IN REPREZENTANCE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI INTELEKTUALNIH IN OSEBNIH STORITEV"
+         }
+        ], 
+        "name": "STRO\u0160KI INTELEKTUALNIH IN OSEBNIH STORITEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI PLA\u010cILNEGA PROMETA, STRO\u0160KI BAN\u010cNIH STORITEV, STRO\u0160KI POSLOV IN ZAVAROVALNE PREMIJE"
+         }
+        ], 
+        "name": "STRO\u0160KI PLA\u010cILNEGA PROMETA, STRO\u0160KI BAN\u010cNIH STORITEV, STRO\u0160KI POSLOV IN ZAVAROVALNE PREMIJE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NAJEMNINE"
+         }
+        ], 
+        "name": "NAJEMNINE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI STORITEV V ZVEZI Z VZDR\u017dEVANJEM"
+         }
+        ], 
+        "name": "STRO\u0160KI STORITEV V ZVEZI Z VZDR\u017dEVANJEM"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI TRANSPORTNIH STORITEV"
+         }
+        ], 
+        "name": "STRO\u0160KI TRANSPORTNIH STORITEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI STORITEV PRI USTVARJANJU PROIZVODOV IN OPRAVLJANJU STORITEV"
+         }
+        ], 
+        "name": "STRO\u0160KI STORITEV PRI USTVARJANJU PROIZVODOV IN OPRAVLJANJU STORITEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI DRUGIH STORITEV"
+         }
+        ], 
+        "name": "STRO\u0160KI DRUGIH STORITEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI STORITEV FIZI\u010cNIH OSEB, KI NE OPRAVLJAJO DEJAVNOSTI, SKUPAJ Z DAJATVAMI, KI BREMENIJO PODJETJE (STRO\u0160KI PO POGODBAH O DELU, AVTORSKIH POGODBAH, SEJNINE ZAPOSLENCEM IN DRUGIM OSEBAM \u2026)"
+         }
+        ], 
+        "name": "STRO\u0160KI STORITEV FIZI\u010cNIH OSEB, KI NE OPRAVLJAJO DEJAVNOSTI, SKUPAJ Z DAJATVAMI, KI BREMENIJO PODJETJE (STRO\u0160KI PO POGODBAH O DELU, AVTORSKIH POGODBAH, SEJNINE ZAPOSLENCEM IN DRUGIM OSEBAM \u2026)"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POVRA\u010cILA STRO\u0160KOV ZAPOSLENCEM V ZVEZI Z DELOM"
+         }
+        ], 
+        "name": "POVRA\u010cILA STRO\u0160KOV ZAPOSLENCEM V ZVEZI Z DELOM"
+       }
+      ], 
+      "name": "STRO\u0160KI STORITEV"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI MATERIALA"
+         }
+        ], 
+        "name": "STRO\u0160KI MATERIALA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI POMO\u017dNEGA MATERIALA"
+         }
+        ], 
+        "name": "STRO\u0160KI POMO\u017dNEGA MATERIALA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI ENERGIJE"
+         }
+        ], 
+        "name": "STRO\u0160KI ENERGIJE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI NADOMESTNIH DELOV ZA OSNOVNA SREDSTVA IN MATERIALA ZA VZDR\u017dEVANJE OSNOVNIH SREDSTEV"
+         }
+        ], 
+        "name": "STRO\u0160KI NADOMESTNIH DELOV ZA OSNOVNA SREDSTVA IN MATERIALA ZA VZDR\u017dEVANJE OSNOVNIH SREDSTEV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODPIS DROBNEGA INVENTARJA IN EMBALA\u017dE"
+         }
+        ], 
+        "name": "ODPIS DROBNEGA INVENTARJA IN EMBALA\u017dE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "USKLADITEV STRO\u0160KOV MATERIALA IN DROBNEGA INVENTARJA ZARADI UGOTOVLJENIH POPISNIH RAZLIK"
+         }
+        ], 
+        "name": "USKLADITEV STRO\u0160KOV MATERIALA IN DROBNEGA INVENTARJA ZARADI UGOTOVLJENIH POPISNIH RAZLIK"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STRO\u0160KI PISARNI\u0160KEGA MATERIALA IN STROKOVNE LITERATURE"
+         }
+        ], 
+        "name": "STRO\u0160KI PISARNI\u0160KEGA MATERIALA IN STROKOVNE LITERATURE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGI STRO\u0160KI MATERIALA"
+         }
+        ], 
+        "name": "DRUGI STRO\u0160KI MATERIALA"
+       }
+      ], 
+      "name": "STRO\u0160KI MATERIALA"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PRENOS STRO\u0160KOV NEPOSREDNO V ODHODKE"
+         }
+        ], 
+        "name": "PRENOS STRO\u0160KOV NEPOSREDNO V ODHODKE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRENOS STRO\u0160KOV V ZALOGE"
+         }
+        ], 
+        "name": "PRENOS STRO\u0160KOV V ZALOGE"
+       }
+      ], 
+      "name": "PRENOS STRO\u0160KOV"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSTALI STRO\u0160KI"
+         }
+        ], 
+        "name": "OSTALI STRO\u0160KI"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DAJATVE, KI NISO ODVISNE OD STRO\u0160KOV DELA ALI DRUGIH VRST STRO\u0160KOV"
+         }
+        ], 
+        "name": "DAJATVE, KI NISO ODVISNE OD STRO\u0160KOV DELA ALI DRUGIH VRST STRO\u0160KOV"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NAGRADE DIJAKOM IN \u0160TUDENTOM NA DELOVNI PRAKSI SKUPAJ Z DAJATVAMI"
+         }
+        ], 
+        "name": "NAGRADE DIJAKOM IN \u0160TUDENTOM NA DELOVNI PRAKSI SKUPAJ Z DAJATVAMI"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u0160TIPENDIJE DIJAKOM IN \u0160TUDENTOM"
+         }
+        ], 
+        "name": "\u0160TIPENDIJE DIJAKOM IN \u0160TUDENTOM"
+       }, 
+       {
+        "children": [
+         {
+          "name": "IZDATKI ZA VARSTVO OKOLJA"
+         }
+        ], 
+        "name": "IZDATKI ZA VARSTVO OKOLJA"
+       }
+      ], 
+      "name": "DRUGI STRO\u0160KI"
+     }
+    ], 
+    "name": "STRO\u0160KI"
+   }, 
+   {
+    "name": "PROSTO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "VNAPREJ VRA\u010cUNANI STRO\u0160KI OZIROMA ODHODKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VNAPREJ VRA\u010cUNANI STRO\u0160KI OZIROMA ODHODKI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DDV OD DANIH PREDUJMOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DDV OD DANIH PREDUJMOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNO ODLO\u017dENI PRIHODKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNO ODLO\u017dENI PRIHODKI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE PASIVNE \u010cASOVNE RAZMEJITVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSTALE KRATKORO\u010cNE POSLOVNE OBVEZNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSTALE KRATKORO\u010cNE POSLOVNE OBVEZNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI V ZVEZI Z ODTEGLJAJI OD PLA\u010c IN NADOMESTIL PLA\u010c ZAPOSLENCEM", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI V ZVEZI Z ODTEGLJAJI OD PLA\u010c IN NADOMESTIL PLA\u010c ZAPOSLENCEM", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA OBRESTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA OBRESTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE MENI\u010cNE OBVEZNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE MENI\u010cNE OBVEZNOSTI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DRUGE KRATKORO\u010cNE OBVEZNOSTI", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA \u010cISTE PLA\u010cE IN NADOMESTILA PLA\u010c", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA \u010cISTE PLA\u010cE IN NADOMESTILA PLA\u010c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA VRA\u010cUNANE IN NEOBRA\u010cUNANE PLA\u010cE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA VRA\u010cUNANE IN NEOBRA\u010cUNANE PLA\u010cE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA PRISPEVKE IZ KOSMATIH PLA\u010c IN NADOMESTIL PLA\u010c", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA PRISPEVKE IZ KOSMATIH PLA\u010c IN NADOMESTIL PLA\u010c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA DRUGE PREJEMKE IZ DELOVNEGA RAZMERJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA DRUGE PREJEMKE IZ DELOVNEGA RAZMERJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA DAVKE IZ KOSMATIH PLA\u010c IN NADOMESTIL PLA\u010c", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA DAVKE IZ KOSMATIH PLA\u010c IN NADOMESTIL PLA\u010c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA DAVEK IZ DRUGIH PREJEMKOV IZ DELOVNEGA RAZMERJA, KI SE NE OBRA\u010cUNAVAJO SKUPAJ S PLA\u010cAMI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA DAVEK IZ DRUGIH PREJEMKOV IZ DELOVNEGA RAZMERJA, KI SE NE OBRA\u010cUNAVAJO SKUPAJ S PLA\u010cAMI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI ZA PRISPEVKE IZ DRUGIH PREJEMKOV IZ DELOVNEGA RAZMERJA, KI SE NE OBRA\u010cUNAVAJO SKUPAJ S PLA\u010cAMI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI ZA PRISPEVKE IZ DRUGIH PREJEMKOV IZ DELOVNEGA RAZMERJA, KI SE NE OBRA\u010cUNAVAJO SKUPAJ S PLA\u010cAMI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE OBVEZNOSTI DO ZAPOSLENCEV", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI IZ KOMISIJSKE IN KONSIGNACIJSKE PRODAJE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI IZ KOMISIJSKE IN KONSIGNACIJSKE PRODAJE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI IZ IZVOZA ZA TUJ RA\u010cUN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI IZ IZVOZA ZA TUJ RA\u010cUN", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI DO UVOZNIKOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI DO UVOZNIKOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE OBVEZNOSTI IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE OBVEZNOSTI IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE OBVEZNOSTI IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI PRIDRU\u017dENIH DRU\u017dBAH IN SKUPAJ OBVLADOVANIH DRU\u017dBAH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI PRIDRU\u017dENIH DRU\u017dBAH IN SKUPAJ OBVLADOVANIH DRU\u017dBAH", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI DRU\u017dBAH V SKUPINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DOBLJENA PRI DRU\u017dBAH V SKUPINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI DO FIZI\u010cNIH OSEB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI DO FIZI\u010cNIH OSEB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI V ZVEZI Z RAZDELITVIJO POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI V ZVEZI Z RAZDELITVIJO POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI IZ VPLA\u010cILA KAPITALA DO VPISA V SODNI REGISTER", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI IZ VPLA\u010cILA KAPITALA DO VPISA V SODNI REGISTER", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI V ZVEZI Z OBVEZNICAMI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI V ZVEZI Z OBVEZNICAMI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE FINAN\u010cNE OBVEZNOSTI", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA DAVEK OD DOHODKOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA DAVEK OD DOHODKOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA DAV\u010cNI ODTEGLJAJ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA DAV\u010cNI ODTEGLJAJ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE OBVEZNOSTI DO DR\u017dAVNIH IN DRUGIH IN\u0160TITUCIJ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE OBVEZNOSTI DO DR\u017dAVNIH IN DRUGIH IN\u0160TITUCIJ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA ZARA\u010cUNANI DDV 20%", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "OBVEZNOSTI ZA ZARA\u010cUNANI DDV 20% IZVEN EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "OBVEZNOSTI ZA ZARA\u010cUNANI DDV 8,5% IZVEN EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "OBVEZNOSTI ZA ZARA\u010cUNANI DDV 20% V EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "OBVEZNOSTI ZA ZARA\u010cUNANI DDV 8,5% V EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "OBVEZNOSTI ZA ZARA\u010cUNANI DDV 8,5%", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA OBRA\u010cUNANI DDV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA DDV, CARINO IN DRUGE DAJATVE OD UVO\u017dENEGA BLAGA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA DDV, CARINO IN DRUGE DAJATVE OD UVO\u017dENEGA BLAGA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA PRISPEVKE IZPLA\u010cEVALCA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA PRISPEVKE IZPLA\u010cEVALCA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA DAVEK OD IZPLA\u010cANIH PLA\u010c", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA DAVEK OD IZPLA\u010cANIH PLA\u010c", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "OBVEZNOSTI DO DR\u017dAVNIH IN DRUGIH IN\u0160TITUCIJ", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI, VKLJU\u010cENE V SKUPINE ZA ODTUJITEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI, VKLJU\u010cENE V SKUPINE ZA ODTUJITEV", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "OBVEZNOSTI, VKLJU\u010cENE V SKUPINE ZA ODTUJITEV", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PREJETE KRATKORO\u010cNE VAR\u0160\u010cINE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREJETE KRATKORO\u010cNE VAR\u0160\u010cINE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "PREJETI KRATKORO\u010cNI PREDUJMI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREJETI KRATKORO\u010cNI PREDUJMI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PREJETI KRATKORO\u010cNI PREDUJMI IN VAR\u0160\u010cINE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) DO DOBAVITELJEV V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) DO DOBAVITELJEV V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) DO DOBAVITELJEV V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) DO DOBAVITELJEV V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, PREJETI V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, PREJETI V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, PREJETI V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, PREJETI V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) ZA NEZARA\u010cUNANE BLAGO IN STORITVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) ZA NEZARA\u010cUNANE BLAGO IN STORITVE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) DO DOBAVITELJEV", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) IN KRATKORO\u010cNE PASIVNE \u010cASOVNE RAZMEJITVE", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ZALOGE DROBNEGA INVENTARJA IN EMBALA\u017dE, DANE V UPORABO", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZALOGE DROBNEGA INVENTARJA IN EMBALA\u017dE, DANE V UPORABO", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZALOGE DROBNEGA INVENTARJA IN EMBALA\u017dE V SKLADI\u0160\u010cU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZALOGE DROBNEGA INVENTARJA IN EMBALA\u017dE V SKLADI\u0160\u010cU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODMIKI OD CEN DROBNEGA INVENTARJA IN EMBALA\u017dE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODMIKI OD CEN DROBNEGA INVENTARJA IN EMBALA\u017dE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ZALOGE DROBNEGA INVENTARJA IN EMBALA\u017dE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OBRA\u010cUN NABAVE SUROVIN IN MATERIALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBRA\u010cUN NABAVE SUROVIN IN MATERIALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DDV IN DRUGE DAV\u0160\u010cINE OD SUROVIN IN MATERIALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DDV IN DRUGE DAV\u0160\u010cINE OD SUROVIN IN MATERIALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CARINA IN DRUGE UVOZNE DAV\u0160\u010cINE OD SUROVIN IN MATERIALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "CARINA IN DRUGE UVOZNE DAV\u0160\u010cINE OD SUROVIN IN MATERIALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODVISNI STRO\u0160KI NABAVE SUROVIN IN MATERIALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODVISNI STRO\u0160KI NABAVE SUROVIN IN MATERIALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VREDNOST SUROVIN IN MATERIALA PO OBRA\u010cUNIH DOBAVITELJEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VREDNOST SUROVIN IN MATERIALA PO OBRA\u010cUNIH DOBAVITELJEV", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "OBRA\u010cUN NABAVE SUROVIN IN MATERIALA (TUDI DROBNEGA INVENTARJA IN EMBALA\u017dE)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ODMIKI OD CEN ZALOG SUROVIN IN MATERIALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODMIKI OD CEN ZALOG SUROVIN IN MATERIALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZALOGE SUROVIN IN MATERIALA V SKLADI\u0160\u010cU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZALOGE SUROVIN IN MATERIALA V SKLADI\u0160\u010cU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZALOGE SUROVIN IN MATERIALA NA POTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZALOGE SUROVIN IN MATERIALA NA POTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZALOGE SUROVIN IN MATERIALA V DODELAVI IN PREDELAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZALOGE SUROVIN IN MATERIALA V DODELAVI IN PREDELAVI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ZALOGE SUROVIN IN MATERIALA", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "ZALOGE SUROVIN IN MATERIALA", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI ZEMLJI\u0160\u010c", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI ZEMLJI\u0160\u010c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI ZEMLJI\u0160\u010c ZARADI AMORTIZIRANJA (KAMNOLOMI, ODLAGALI\u0160\u010cA ODPADKOV)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI ZEMLJI\u0160\u010c ZARADI AMORTIZIRANJA (KAMNOLOMI, ODLAGALI\u0160\u010cA ODPADKOV)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI ZGRADB ZARADI AMORTIZIRANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI ZGRADB ZARADI AMORTIZIRANJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI ZGRADB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI ZGRADB", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "POPRAVEK IN OSLABITEV VREDNOSTI NEPREMI\u010cNIN", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ZEMLJI\u0160\u010cA, VREDNOTENA PO MODELU PREVREDNOTENJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZEMLJI\u0160\u010cA, VREDNOTENA PO MODELU PREVREDNOTENJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZGRADBE, VREDNOTENE PO MODELU PREVREDNOTENJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZGRADBE, VREDNOTENE PO MODELU PREVREDNOTENJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZEMLJI\u0160\u010cA, VREDNOTENA PO MODELU NABAVNE VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZEMLJI\u0160\u010cA, VREDNOTENA PO MODELU NABAVNE VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZGRADBE, VREDNOTENE PO MODELU NABAVNE VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZGRADBE, VREDNOTENE PO MODELU NABAVNE VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NEPREMI\u010cNINE V GRADNJI OZIROMA IZDELAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NEPREMI\u010cNINE V GRADNJI OZIROMA IZDELAVI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "NEPREMI\u010cNINE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI NALO\u017dBENIH NEPREMI\u010cNIN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI NALO\u017dBENIH NEPREMI\u010cNIN", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NALO\u017dBENE NEPREMI\u010cNINE, VREDNOTENE PO MODELU PO\u0160TENE VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NALO\u017dBENE NEPREMI\u010cNINE, VREDNOTENE PO MODELU PO\u0160TENE VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NALO\u017dBENE NEPREMI\u010cNINE, VREDNOTENE PO MODELU NABAVNE VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NALO\u017dBENE NEPREMI\u010cNINE, VREDNOTENE PO MODELU NABAVNE VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI NALO\u017dBENIH NEPREMI\u010cNIN ZARADI AMORTIZIRANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI NALO\u017dBENIH NEPREMI\u010cNIN ZARADI AMORTIZIRANJA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "NALO\u017dBENE NEPREMI\u010cNINE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DRUGA NEOPREDMETENA SREDSTVA (TUDI EMISIJSKI KUPONI)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGA NEOPREDMETENA SREDSTVA (TUDI EMISIJSKI KUPONI)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE AKTIVNE \u010cASOVNE RAZMEJITVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE AKTIVNE \u010cASOVNE RAZMEJITVE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOBRO IME", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOBRO IME", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ODLO\u017dENI STRO\u0160KI RAZVIJANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ODLO\u017dENI STRO\u0160KI RAZVIJANJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI NEOPREDMETENIH SREDSTEV ZARADI AMORTIZIRANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI NEOPREDMETENIH SREDSTEV ZARADI AMORTIZIRANJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREMO\u017dENJSKE PRAVICE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREMO\u017dENJSKE PRAVICE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI NEOPREDMETENIH SREDSTEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI NEOPREDMETENIH SREDSTEV", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "NEOPREDMETENA SREDSTVA IN DOLGORO\u010cNE AKTIVNE \u010cASOVNE RAZMEJITVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI DANIH DOLGORO\u010cNIH POSOJIL", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI DANIH DOLGORO\u010cNIH POSOJIL", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DANI DOLGORO\u010cNI DEPOZITI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DANI DOLGORO\u010cNI DEPOZITI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DANA Z ODKUPOM OBVEZNIC OD DRUGIH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DANA Z ODKUPOM OBVEZNIC OD DRUGIH", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DANA Z ODKUPOM OBVEZNIC OD PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DANA Z ODKUPOM OBVEZNIC OD PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGA DOLGORO\u010cNO VLO\u017dENA SREDSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGA DOLGORO\u010cNO VLO\u017dENA SREDSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE TERJATVE ZA NEVPLA\u010cANI VPOKLICANI KAPITAL", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE TERJATVE ZA NEVPLA\u010cANI VPOKLICANI KAPITAL", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB PRIDRU\u017dENIM DRU\u017dBAM IN SKUPAJ OBVLADOVANIM DRU\u017dBAM, VKLJU\u010cNO Z DOLGORO\u010cNIMI TERJATVAMI IZ FINAN\u010cNEGA NAJEMA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB PRIDRU\u017dENIM DRU\u017dBAM IN SKUPAJ OBVLADOVANIM DRU\u017dBAM, VKLJU\u010cNO Z DOLGORO\u010cNIMI TERJATVAMI IZ FINAN\u010cNEGA NAJEMA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB DRU\u017dBAM V SKUPINI, VKLJU\u010cNO Z DOLGORO\u010cNIMI TERJATVAMI IZ FINAN\u010cNEGA NAJEMA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB DRU\u017dBAM V SKUPINI, VKLJU\u010cNO Z DOLGORO\u010cNIMI TERJATVAMI IZ FINAN\u010cNEGA NAJEMA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DANA Z ODKUPOM OBVEZNIC OD DRU\u017dB V SKUPINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DANA Z ODKUPOM OBVEZNIC OD DRU\u017dB V SKUPINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DANA DRUGIM, VKLJU\u010cNO Z DOLGORO\u010cNIMI TERJATVAMI IZ FINAN\u010cNEGA NAJEMA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DANA DRUGIM, VKLJU\u010cNO Z DOLGORO\u010cNIMI TERJATVAMI IZ FINAN\u010cNEGA NAJEMA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DANA DOLGORO\u010cNA POSOJILA IN TERJATVE ZA NEVPLA\u010cANI VPOKLICANI KAPITAL", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI DOLGORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI DOLGORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOLGORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZEN POSOJIL", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI BIOLO\u0160KIH SREDSTEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI BIOLO\u0160KIH SREDSTEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI DROBNEGA INVENTARJA ZARADI AMORTIZIRANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI DROBNEGA INVENTARJA ZARADI AMORTIZIRANJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV ZARADI AMORTIZIRANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV ZARADI AMORTIZIRANJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI VLAGANJ V OPREDMETENA OSNOVNA SREDSTVA V TUJI LASTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI VLAGANJ V OPREDMETENA OSNOVNA SREDSTVA V TUJI LASTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI OPREME IN NADOMESTNIH DELOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI OPREME IN NADOMESTNIH DELOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI OPREME IN NADOMESTNIH DELOV ZARADI AMORTIZIRANJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI OPREME IN NADOMESTNIH DELOV ZARADI AMORTIZIRANJA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "POPRAVEK IN OSLABITEV VREDNOSTI OPREME IN DRUGIH OPREDMETENIH OSNOVNIH SREDSTEV", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OPREMA IN NADOMESTNI DELI, VREDNOTENI PO MODELU NABAVNE VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OPREMA IN NADOMESTNI DELI, VREDNOTENI PO MODELU NABAVNE VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DROBNI INVENTAR", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DROBNI INVENTAR", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BIOLO\u0160KA SREDSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "BIOLO\u0160KA SREDSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VLAGANJA V OPREDMETENA OSNOVNA SREDSTVA V TUJI LASTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VLAGANJA V OPREDMETENA OSNOVNA SREDSTVA V TUJI LASTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGA OPREDMETENA OSNOVNA SREDSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGA OPREDMETENA OSNOVNA SREDSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OPREMA IN DRUGA OPREDMETENA OSNOVNA SREDSTVA V GRADNJI OZIROMA IZDELAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OPREMA IN DRUGA OPREDMETENA OSNOVNA SREDSTVA V GRADNJI OZIROMA IZDELAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OPREMA IN NADOMESTNI DELI, VREDNOTENI PO MODELU PREVREDNOTENJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OPREMA IN NADOMESTNI DELI, VREDNOTENI PO MODELU PREVREDNOTENJA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "OPREMA IN DRUGA OPREDMETENA OSNOVNA SREDSTVA", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "TERJATVE ZA ODLO\u017dENI DAVEK IZ DAV\u010cNIH DOBROPISOV, PRENESENIH V NASLEDNJA DAV\u010cNA OBDOBJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "TERJATVE ZA ODLO\u017dENI DAVEK IZ DAV\u010cNIH DOBROPISOV, PRENESENIH V NASLEDNJA DAV\u010cNA OBDOBJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TERJATVE ZA ODLO\u017dENI DAVEK IZ NEIZRABLJENIH DAV\u010cNIH IZGUB, PRENESENIH V NASLEDNJA DAV\u010cNA OBDOBJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "TERJATVE ZA ODLO\u017dENI DAVEK IZ NEIZRABLJENIH DAV\u010cNIH IZGUB, PRENESENIH V NASLEDNJA DAV\u010cNA OBDOBJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TERJATVE ZA ODLO\u017dENI DAVEK IZ ODBITNIH ZA\u010cASNIH RAZLIK", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "TERJATVE ZA ODLO\u017dENI DAVEK IZ ODBITNIH ZA\u010cASNIH RAZLIK", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "TERJATVE ZA ODLO\u017dENI DAVEK", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI DOLGORO\u010cNIH POSLOVNIH TERJATEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI DOLGORO\u010cNIH POSLOVNIH TERJATEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DANE DOLGORO\u010cNE VAR\u0160\u010cINE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DANE DOLGORO\u010cNE VAR\u0160\u010cINE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE POSLOVNE TERJATVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE POSLOVNE TERJATVE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI BLAGOVNI KREDITI, DANI V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI BLAGOVNI KREDITI, DANI V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI BLAGOVNI KREDITI, DANI V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI BLAGOVNI KREDITI, DANI V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DANI DOLGORO\u010cNI POTRO\u0160NI\u0160KI KREDITI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DANI DOLGORO\u010cNI POTRO\u0160NI\u0160KI KREDITI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DANI DOLGORO\u010cNI PREDUJMI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DANI DOLGORO\u010cNI PREDUJMI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOLGORO\u010cNE POSLOVNE TERJATVE", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "DOLGORO\u010cNA SREDSTVA", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE IZ UVOZA ZA TUJ RA\u010cUN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE IZ UVOZA ZA TUJ RA\u010cUN", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE DO IZVOZNIKOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE DO IZVOZNIKOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE IZ KOMISIJSKE IN KONSIGNACIJSKE PRODAJE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE IZ KOMISIJSKE IN KONSIGNACIJSKE PRODAJE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE TERJATVE IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE TERJATVE IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE TERJATVE IZ POSLOVANJA ZA TUJ RA\u010cUN", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI DRUGIH KRATKORO\u010cNIH TERJATEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI DRUGIH KRATKORO\u010cNIH TERJATEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE TERJATVE DO DR\u017dAVNIH IN DRUGIH IN\u0160TITUCIJ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE TERJATVE DO DR\u017dAVNIH IN DRUGIH IN\u0160TITUCIJ", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA DAVEK OD DOHODKOV PRAVNIH OSEB, VKLJU\u010cNO Z DAVKOM, PLA\u010cANIM V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA DAVEK OD DOHODKOV PRAVNIH OSEB, VKLJU\u010cNO Z DAVKOM, PLA\u010cANIM V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 8,5% IZVEN EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 20% IZVEN EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 8,5% V EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 20% V EU", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 20%", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA NEODBITNI DDV", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 8,5% UVOZ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 20% UVOZ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV 8,5%", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA ODBITNI DDV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA DDV, PLA\u010cAN V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA DDV, PLA\u010cAN V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA DDV, VRNJEN TUJCEM", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA DDV, VRNJEN TUJCEM", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSTALE KRATKORO\u010cNE TERJATVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSTALE KRATKORO\u010cNE TERJATVE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DRUGE KRATKORO\u010cNE TERJATVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK POSLOVNEGA IZIDA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE DRU\u017dB V SKUPINI, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE V DELNICE IN DELE\u017dE PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB, RAZPOREJENE IN IZMERJENE PO NABAVNI VREDNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZPOREJENE IN IZMERJENE PO PO\u0160TENI VREDNOSTI PREK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE FINAN\u010cNE NALO\u017dBE, RAZEN POSOJIL", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DENAR NA POTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DENAR NA POTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NETVEGANI TAKOJ UDENARLJIVI DOL\u017dNI\u0160KI VREDNOSTNI PAPIRJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NETVEGANI TAKOJ UDENARLJIVI DOL\u017dNI\u0160KI VREDNOSTNI PAPIRJI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DEVIZNA SREDSTVA V BLAGAJNI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DEVIZNA SREDSTVA V BLAGAJNI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DENARNA SREDSTVA V BLAGAJNI, RAZEN DEVIZNIH SREDSTEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DENARNA SREDSTVA V BLAGAJNI, RAZEN DEVIZNIH SREDSTEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREJETI \u010cEKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREJETI \u010cEKI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "IZDANI \u010cEKI (ODBITNA POSTAVKA)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "IZDANI \u010cEKI (ODBITNA POSTAVKA)", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DENARNA SREDSTVA V BLAGAJNI IN TAKOJ UDENARLJIVI VREDNOSTNI PAPIRJI", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DENARNA SREDSTVA NA POSEBNIH RA\u010cUNIH OZIROMA ZA POSEBNE NAMENE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DENARNA SREDSTVA NA POSEBNIH RA\u010cUNIH OZIROMA ZA POSEBNE NAMENE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DEVIZNA SREDSTVA NA RA\u010cUNIH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DEVIZNA SREDSTVA NA RA\u010cUNIH", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI DEVIZNI DEPOZITI OZIROMA DEVIZNI DEPOZITI NA ODPOKLIC", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI DEVIZNI DEPOZITI OZIROMA DEVIZNI DEPOZITI NA ODPOKLIC", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DENARNA SREDSTVA NA RA\u010cUNIH, RAZEN DEVIZNIH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DENARNA SREDSTVA NA RA\u010cUNIH, RAZEN DEVIZNIH", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI DEPOZITI OZIROMA DEPOZITI NA ODPOKLIC, RAZEN DEVIZNIH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI DEPOZITI OZIROMA DEPOZITI NA ODPOKLIC, RAZEN DEVIZNIH", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOBROIMETJE PRI BANKAH IN DRUGIH FINAN\u010cNIH IN\u0160TITUCIJAH", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Receivable", 
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "KRATKORO\u010cNE TERJATVE DO KUPCEV V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE DO KUPCEV V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI POTRO\u0160NI\u0160KI KREDITI, DANI KUPCEM V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI POTRO\u0160NI\u0160KI KREDITI, DANI KUPCEM V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, DANI KUPCEM V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, DANI KUPCEM V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, DANI KUPCEM V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI BLAGOVNI KREDITI, DANI KUPCEM V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "KRATKORO\u010cNE TERJATVE DO KUPCEV V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE DO KUPCEV V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV DO KUPCEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV DO KUPCEV", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE TERJATVE DO KUPCEV", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI PREDUJMI, DANI ZA OPREDMETENA OSNOVNA SREDSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI PREDUJMI, DANI ZA OPREDMETENA OSNOVNA SREDSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI PREDUJMI, DANI ZA NEOPREDMETENA SREDSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI PREDUJMI, DANI ZA NEOPREDMETENA SREDSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI PREDUJMI, DANI ZA ZALOGE MATERIALA IN BLAGA TER \u0160E NE OPRAVLJENE STORITVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI PREDUJMI, DANI ZA ZALOGE MATERIALA IN BLAGA TER \u0160E NE OPRAVLJENE STORITVE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "DRUGI DANI KRATKORO\u010cNI PREDUJMI IN PREPLA\u010cILA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGI DANI KRATKORO\u010cNI PREDUJMI IN PREPLA\u010cILA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DANE KRATKORO\u010cNE VAR\u0160\u010cINE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DANE KRATKORO\u010cNE VAR\u0160\u010cINE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI DANIH KRATKORO\u010cNIH PREDUJMOV IN VAR\u0160\u010cIN", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI DANIH KRATKORO\u010cNIH PREDUJMOV IN VAR\u0160\u010cIN", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DANI KRATKORO\u010cNI PREDUJMI IN VAR\u0160\u010cINE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "PREJETE MENICE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREJETE MENICE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNO DANA POSOJILA Z ODKUPOM OBVEZNIC", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNO DANA POSOJILA Z ODKUPOM OBVEZNIC", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNO NEVPLA\u010cANI VPOKLICANI KAPITAL", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNO NEVPLA\u010cANI VPOKLICANI KAPITAL", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNO DANA POSOJILA Z ODKUPOM DRUGIH DOL\u017dNI\u0160KIH VREDNOSTNIH PAPIRJEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNO DANA POSOJILA Z ODKUPOM DRUGIH DOL\u017dNI\u0160KIH VREDNOSTNIH PAPIRJEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB PRIDRU\u017dENIM DRU\u017dBAM IN SKUPAJ OBVLADOVANIM DRU\u017dBAM", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB PRIDRU\u017dENIM DRU\u017dBAM IN SKUPAJ OBVLADOVANIM DRU\u017dBAM", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB DRU\u017dBAM V SKUPINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DANA NA PODLAGI POSOJILNIH POGODB DRU\u017dBAM V SKUPINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNI DEPOZITI V BANKAH IN DRUGIH FINAN\u010cNIH ORGANIZACIJAH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNI DEPOZITI V BANKAH IN DRUGIH FINAN\u010cNIH ORGANIZACIJAH", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNA POSOJILA, DANA DRUGIM", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNA POSOJILA, DANA DRUGIM", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH POSOJIL", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH POSOJIL", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNA POSOJILA IN KRATKORO\u010cNE TERJATVE ZA NEVPLA\u010cANI KAPITAL", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DDV OD PREJETIH PREDUJMOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DDV OD PREJETIH PREDUJMOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VREDNOTNICE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VREDNOTNICE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNO ODLO\u017dENI STRO\u0160KI OZIROMA ODHODKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNO ODLO\u017dENI STRO\u0160KI OZIROMA ODHODKI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNO NEZARA\u010cUNANI PRIHODKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNO NEZARA\u010cUNANI PRIHODKI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE AKTIVNE \u010cASOVNE RAZMEJITVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA DRUGE DELE\u017dE V DOBI\u010cKU", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA DRUGE DELE\u017dE V DOBI\u010cKU", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA OBRESTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA OBRESTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "KRATKORO\u010cNE TERJATVE ZA DIVIDENDE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "KRATKORO\u010cNE TERJATVE ZA DIVIDENDE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE KRATKORO\u010cNE TERJATVE, POVEZANE S FINAN\u010cNIMI PRIHODKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE KRATKORO\u010cNE TERJATVE, POVEZANE S FINAN\u010cNIMI PRIHODKI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV, POVEZANIH S FINAN\u010cNIMI PRIHODKI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV, POVEZANIH S FINAN\u010cNIMI PRIHODKI", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KRATKORO\u010cNE TERJATVE, POVEZANE S FINAN\u010cNIMI PRIHODKI", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "KRATKORO\u010cNA SREDSTVA, RAZEN ZALOG, IN KRATKORO\u010cNE AKTIVNE \u010cASOVNE RAZMEJITVE", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "NAJETA, IZPOSOJENA IN ZAKUPLJENA (TUJA) SREDSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NAJETA, IZPOSOJENA IN ZAKUPLJENA (TUJA) SREDSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MENICE IN DRUGI VREDNOSTNI PAPIRJI, PREJETI ZA ZAVAROVANJE PLA\u010cIL", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "MENICE IN DRUGI VREDNOSTNI PAPIRJI, PREJETI ZA ZAVAROVANJE PLA\u010cIL", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOL\u017dNIKI, KI SO ZAVAROVALI PLA\u010cILA Z MENICAMI IN DRUGIMI VREDNOSTNIMI PAPIRJI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOL\u017dNIKI, KI SO ZAVAROVALI PLA\u010cILA Z MENICAMI IN DRUGIMI VREDNOSTNIMI PAPIRJI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI IZ BLAGA, PREJETEGA V KOMISIJSKO IN KONSIGNACIJSKO PRODAJO", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI IZ BLAGA, PREJETEGA V KOMISIJSKO IN KONSIGNACIJSKO PRODAJO", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGI AKTIVNI ZUNAJBILAN\u010cNI KONTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGI AKTIVNI ZUNAJBILAN\u010cNI KONTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "LASTNIKI NAJETIH, IZPOSOJENIH IN ZAKUPLJENIH SREDSTEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "LASTNIKI NAJETIH, IZPOSOJENIH IN ZAKUPLJENIH SREDSTEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGI PASIVNI ZUNAJBILAN\u010cNI KONTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGI PASIVNI ZUNAJBILAN\u010cNI KONTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BLAGO, PREJETO V KOMISIJSKO IN KONSIGNACIJSKO PRODAJO", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "BLAGO, PREJETO V KOMISIJSKO IN KONSIGNACIJSKO PRODAJO", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VREDNOTNICE, IZDANE ZA OBRA\u010cUNAVANJE ZNOTRAJ PRAVNE OSEBE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VREDNOTNICE, IZDANE ZA OBRA\u010cUNAVANJE ZNOTRAJ PRAVNE OSEBE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NOMINALNA VREDNOST VREDNOTNIC, IZDANIH ZA OBRA\u010cUNAVANJE ZNOTRAJ PRAVNE OSEBE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NOMINALNA VREDNOST VREDNOTNIC, IZDANIH ZA OBRA\u010cUNAVANJE ZNOTRAJ PRAVNE OSEBE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "ZUNAJBILAN\u010cNI KONTI", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE MENI\u010cNE OBVEZNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE MENI\u010cNE OBVEZNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI KREDITI, DOBLJENI NA PODLAGI KREDITNIH POGODB OD PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI KREDITI, DOBLJENI NA PODLAGI KREDITNIH POGODB OD PRIDRU\u017dENIH DRU\u017dB IN SKUPAJ OBVLADOVANIH DRU\u017dB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE POSLOVNE OBVEZNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE POSLOVNE OBVEZNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OBVEZNOSTI ZA ODLO\u017dENI DAVEK", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OBVEZNOSTI ZA ODLO\u017dENI DAVEK", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI KREDITI, DOBLJENI NA PODLAGI KREDITNIH POGODB OD DRU\u017dB V SKUPINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI KREDITI, DOBLJENI NA PODLAGI KREDITNIH POGODB OD DRU\u017dB V SKUPINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI KREDITI, DOBLJENI OD DRUGIH TUJIH DOBAVITELJEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI KREDITI, DOBLJENI OD DRUGIH TUJIH DOBAVITELJEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI KREDITI, DOBLJENI OD DRUGIH DOMA\u010cIH DOBAVITELJEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI KREDITI, DOBLJENI OD DRUGIH DOMA\u010cIH DOBAVITELJEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI DOBLJENI PREDUJMI IN VAR\u0160\u010cINE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI DOBLJENI PREDUJMI IN VAR\u0160\u010cINE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOLGORO\u010cNE POSLOVNE OBVEZNOSTI", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "POPRAVEK VREDNOSTI PRESE\u017dKOV IZ PREVREDNOTENJA ZA ODLO\u017dENI DAVEK", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "POPRAVEK VREDNOSTI PRESE\u017dKOV IZ PREVREDNOTENJA ZA ODLO\u017dENI DAVEK", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESE\u017dEK IZ PREVREDNOTENJA OPREME", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRESE\u017dEK IZ PREVREDNOTENJA OPREME", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESE\u017dEK IZ PREVREDNOTENJA NEOPREDMETENIH SREDSTEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRESE\u017dEK IZ PREVREDNOTENJA NEOPREDMETENIH SREDSTEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESE\u017dEK IZ PREVREDNOTENJA ZEMLJI\u0160\u010c", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRESE\u017dEK IZ PREVREDNOTENJA ZEMLJI\u0160\u010c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESE\u017dEK IZ PREVREDNOTENJA ZGRADB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRESE\u017dEK IZ PREVREDNOTENJA ZGRADB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESE\u017dEK IZ PREVREDNOTENJA DOLGORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRESE\u017dEK IZ PREVREDNOTENJA DOLGORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESE\u017dEK IZ PREVREDNOTENJA KRATKORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRESE\u017dEK IZ PREVREDNOTENJA KRATKORO\u010cNIH FINAN\u010cNIH NALO\u017dB", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PRESE\u017dEK IZ PREVREDNOTENJA", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DRUGE REZERVE IZ DOBI\u010cKA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE REZERVE IZ DOBI\u010cKA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIDOBLJENE LASTNE DELNICE OZIROMA LASTNI POSLOVNI DELE\u017dI (ODBITNA POSTAVKA)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRIDOBLJENE LASTNE DELNICE OZIROMA LASTNI POSLOVNI DELE\u017dI (ODBITNA POSTAVKA)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "STATUTARNE REZERVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "STATUTARNE REZERVE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVE ZA LASTNE DELNICE OZIROMA LASTNE POSLOVNE DELE\u017dE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REZERVE ZA LASTNE DELNICE OZIROMA LASTNE POSLOVNE DELE\u017dE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZAKONSKE REZERVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZAKONSKE REZERVE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "REZERVE IZ DOBI\u010cKA", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OSNOVNI DELNI\u0160KI KAPITAL - PREDNOSTNE DELNICE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSNOVNI DELNI\u0160KI KAPITAL - PREDNOSTNE DELNICE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSNOVNI DELNI\u0160KI KAPITAL - NAVADNE DELNICE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSNOVNI DELNI\u0160KI KAPITAL - NAVADNE DELNICE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSNOVNI KAPITAL - KAPITALSKA VLOGA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSNOVNI KAPITAL - KAPITALSKA VLOGA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OSNOVNI KAPITAL - KAPITALSKI DELE\u017dI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "OSNOVNI KAPITAL - KAPITALSKI DELE\u017dI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NEVPOKLICANI KAPITAL (ODBITNA POSTAVKA)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NEVPOKLICANI KAPITAL (ODBITNA POSTAVKA)", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "VPOKLICANI KAPITAL", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "SPLO\u0160NI PREVREDNOTOVALNI POPRAVEK KAPITALA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "SPLO\u0160NI PREVREDNOTOVALNI POPRAVEK KAPITALA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZNESKI IZ POENOSTAVLJENEGA ZMANJ\u0160ANJA OSNOVNEGA KAPITALA IN ZNESKI ZMANJ\u0160ANJA OSNOVNEGA KAPITALA Z UMIKOM DELNIC OZIROMA DELE\u017dEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZNESKI IZ POENOSTAVLJENEGA ZMANJ\u0160ANJA OSNOVNEGA KAPITALA IN ZNESKI ZMANJ\u0160ANJA OSNOVNEGA KAPITALA Z UMIKOM DELNIC OZIROMA DELE\u017dEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VPLA\u010cILA NAD NAJMANJ\u0160IM EMISIJSKIM ZNESKOM KAPITALA, PRIDOBLJENA Z IZDAJO ZAMENLJIVIH OBVEZNIC IN OBVEZNIC Z DELNI\u0160KO NAKUPNO OPCIJO", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VPLA\u010cILA NAD NAJMANJ\u0160IM EMISIJSKIM ZNESKOM KAPITALA, PRIDOBLJENA Z IZDAJO ZAMENLJIVIH OBVEZNIC IN OBVEZNIC Z DELNI\u0160KO NAKUPNO OPCIJO", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VPLA\u010cILA NAD NAJMANJ\u0160IMI EMISIJSKIMI ZNESKI DELNIC OZIROMA DELE\u017dEV (VPLA\u010cANI PRESE\u017dEK KAPITALA)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VPLA\u010cILA NAD NAJMANJ\u0160IMI EMISIJSKIMI ZNESKI DELNIC OZIROMA DELE\u017dEV (VPLA\u010cANI PRESE\u017dEK KAPITALA)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VPLA\u010cILA NAD KNJIGOVODSKO VREDNOSTJO PRI ODTUJITVI ZA\u010cASNO ODKUPLJENIH LASTNIH DELNIC OZIROMA DELE\u017dEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VPLA\u010cILA NAD KNJIGOVODSKO VREDNOSTJO PRI ODTUJITVI ZA\u010cASNO ODKUPLJENIH LASTNIH DELNIC OZIROMA DELE\u017dEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VPLA\u010cILA ZA PRIDOBITEV DODATNIH PRAVIC IZ DELNIC OZIROMA DELE\u017dEV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "VPLA\u010cILA ZA PRIDOBITEV DODATNIH PRAVIC IZ DELNIC OZIROMA DELE\u017dEV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZNESKI IZ U\u010cINKOV POTRJENE PRISILNE PORAVNAVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ZNESKI IZ U\u010cINKOV POTRJENE PRISILNE PORAVNAVE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGA VPLA\u010cILA KAPITALA NA PODLAGI STATUTA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGA VPLA\u010cILA KAPITALA NA PODLAGI STATUTA", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "KAPITALSKE REZERVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "NEUPORABLJENI DEL \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "NEUPORABLJENI DEL \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRENESENI \u010cISTI DOBI\u010cEK IZ PREJ\u0160NJIH LET", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRENESENI \u010cISTI DOBI\u010cEK IZ PREJ\u0160NJIH LET", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u010cISTA IZGUBA POSLOVNEGA LETA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "\u010cISTA IZGUBA POSLOVNEGA LETA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRENOS IZ PRESE\u017dKA IZ PREVREDNOTENJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRENOS IZ PRESE\u017dKA IZ PREVREDNOTENJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRENESENA \u010cISTA IZGUBA IZ PREJ\u0160NJIH LET", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PRENESENA \u010cISTA IZGUBA IZ PREJ\u0160NJIH LET", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "\u010cISTI DOBI\u010cEK ALI \u010cISTA IZGUBA", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA DANA JAMSTVA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REZERVACIJE ZA DANA JAMSTVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA STRO\u0160KE REORGANIZACIJE PODJETJA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REZERVACIJE ZA STRO\u0160KE REORGANIZACIJE PODJETJA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE REZERVACIJE IZ NASLOVA DOLGORO\u010cNO VNAPREJ VRA\u010cUNANIH STRO\u0160KOV", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE REZERVACIJE IZ NASLOVA DOLGORO\u010cNO VNAPREJ VRA\u010cUNANIH STRO\u0160KOV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA POKOJNINE, JUBILEJNE NAGRADE IN ODPRAVNINE OB UPOKOJITVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REZERVACIJE ZA POKOJNINE, JUBILEJNE NAGRADE IN ODPRAVNINE OB UPOKOJITVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA KO\u010cLJIVE POGODBE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REZERVACIJE ZA KO\u010cLJIVE POGODBE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REZERVACIJE ZA POKRIVANJE PRIHODNJIH STRO\u0160KOV OZIROMA ODHODKOV ZARADI RAZGRADNJE IN PONOVNE VZPOSTAVITVE PRVOTNEGA STANJA TER DRUGE PODOBNE REZERVACIJE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REZERVACIJE ZA POKRIVANJE PRIHODNJIH STRO\u0160KOV OZIROMA ODHODKOV ZARADI RAZGRADNJE IN PONOVNE VZPOSTAVITVE PRVOTNEGA STANJA TER DRUGE PODOBNE REZERVACIJE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREJETE DONACIJE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREJETE DONACIJE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREJETE DR\u017dAVNE PODPORE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "PREJETE DR\u017dAVNE PODPORE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE PASIVNE \u010cASOVNE RAZMEJITVE", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE PASIVNE \u010cASOVNE RAZMEJITVE", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "REZERVACIJE IN DOLGORO\u010cNE PASIVNE \u010cASOVNE RAZMEJITVE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DRUGE DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNI DOLGOVI IZ FINAN\u010cNEGA NAJEMA", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNI DOLGOVI IZ FINAN\u010cNEGA NAJEMA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI DO FIZI\u010cNIH OSEB", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI DO FIZI\u010cNIH OSEB", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI DRU\u017dBAH V SKUPINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI DRU\u017dBAH V SKUPINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V DR\u017dAVI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V DR\u017dAVI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V TUJINI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI BANKAH IN DRU\u017dBAH V TUJINI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI V ZVEZI Z OBVEZNICAMI", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI V ZVEZI Z OBVEZNICAMI", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI PRIDRU\u017dENIH DRU\u017dBAH", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DOLGORO\u010cNA POSOJILA, DOBLJENA PRI PRIDRU\u017dENIH DRU\u017dBAH", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "KAPITAL, DOLGORO\u010cNE OBVEZNOSTI (DOLGOVI) IN DOLGORO\u010cNE REZERVACIJE", 
+    "report_type": "Balance Sheet"
+   }
+  ], 
+  "name": "KONTNI NA\u010cRT ZA GOSPODARSKE DRU\u017dBE", 
+  "parent_id": ""
+ }
+}

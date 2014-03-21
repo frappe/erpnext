@@ -138,7 +138,6 @@ cur_frm.set_query("account_head", "other_charges", function(doc) {
 		query: "erpnext.controllers.queries.tax_account_query",
 		filters: {
 			"account_type": ["Tax", "Chargeable", "Expense Account"],
-			"debit_or_credit": "Debit",
 			"company": doc.company
 		}
 	}

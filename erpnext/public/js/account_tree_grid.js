@@ -39,17 +39,17 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		this.columns = [
 			{id: "name", name: frappe._("Account"), field: "name", width: 300, cssClass: "cell-title", 
 				formatter: this.tree_formatter},
-			{id: "opening_debit", name: frappe._("Opening (Dr)"), field: "opening_debit", width: 100,
+			{id: "opening_dr", name: frappe._("Opening (Dr)"), field: "opening_dr", width: 100,
 				formatter: this.currency_formatter},
-			{id: "opening_credit", name: frappe._("Opening (Cr)"), field: "opening_credit", width: 100,
+			{id: "opening_cr", name: frappe._("Opening (Cr)"), field: "opening_cr", width: 100,
 				formatter: this.currency_formatter},
 			{id: "debit", name: frappe._("Debit"), field: "debit", width: 100,
 				formatter: this.currency_formatter},
 			{id: "credit", name: frappe._("Credit"), field: "credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_debit", name: frappe._("Closing (Dr)"), field: "closing_debit", width: 100,
+			{id: "closing_dr", name: frappe._("Closing (Dr)"), field: "closing_dr", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_credit", name: frappe._("Closing (Cr)"), field: "closing_credit", width: 100,
+			{id: "closing_cr", name: frappe._("Closing (Cr)"), field: "closing_cr", width: 100,
 				formatter: this.currency_formatter}
 		];
 
@@ -132,8 +132,8 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		if (!this.fiscal_year) return;
 
 		$.each(this.data, function(i, v) {
-			v.opening_debit = v.opening_credit = v.debit 
-				= v.credit = v.closing_debit = v.closing_credit = 0;
+			v.opening_dr = v.opening_cr = v.debit 
+				= v.credit = v.closing_dr = v.closing_cr = 0;
 		});
 
 		$.each(gl, function(i, v) {
@@ -145,29 +145,31 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		this.update_groups();
 	},
 	update_balances: function(account, posting_date, v) {
+		var bal = flt(account.opening_dr) - flt(account.opening_cr) + flt(v.debit) - flt(v.credit);
 		// opening
 		if (posting_date < this.opening_date || v.is_opening === "Yes") {
-			if (account.is_pl_account === "Yes" && 
+			if (account.report_type === "Profit and Loss" && 
 				posting_date <= dateutil.str_to_obj(this.fiscal_year[1])) {
 				// balance of previous fiscal_year should 
 				//	not be part of opening of pl account balance
 			} else {
-				if(account.debit_or_credit=='Debit') {
-					account.opening_debit += (v.debit - v.credit);
-				} else {
-					account.opening_credit += (v.credit - v.debit);
-				}
+				this.set_debit_or_credit(account, "opening", bal);
 			}
 		} else if (this.opening_date <= posting_date && posting_date <= this.closing_date) {
 			// in between
-			account.debit += v.debit;
-			account.credit += v.credit;
+			account.debit += flt(v.debit);
+			account.credit += flt(v.credit);
 		}
 		// closing
-		if(account.debit_or_credit=='Debit') {
-			account.closing_debit = account.opening_debit + account.debit - account.credit;
+		this.set_debit_or_credit(account, "closing", bal);
+	},
+	set_debit_or_credit: function(account, field, balance) {
+		if(balance > 0) {
+			account[field+"_dr"] = balance;
+			account[field+"_cr"] = 0;
 		} else {
-			account.closing_credit = account.opening_credit - account.debit + account.credit;
+			account[field+"_cr"] = Math.abs(balance);
+			account[field+"_dr"] = 0;
 		}
 	},
 	update_groups: function() {
@@ -181,9 +183,20 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 					var parent_account = me.item_by_name[parent];
 					$.each(me.columns, function(c, col) {
 						if (col.formatter == me.currency_formatter) {
-							parent_account[col.field] = 
-								flt(parent_account[col.field])
-								+ flt(account[col.field]);
+							if(col.field=="opening_dr") {
+								var bal = flt(parent_account.opening_dr) - 
+									flt(parent_account.opening_cr) + 
+									flt(account.opening_dr) - flt(account.opening_cr);
+								me.set_debit_or_credit(parent_account, "opening", bal);
+							} else if(col.field=="closing_dr") {
+								var bal = flt(parent_account.closing_dr) - 
+									flt(parent_account.closing_cr) + 
+									flt(account.closing_dr) - flt(account.closing_cr);
+								me.set_debit_or_credit(parent_account, "closing", bal);
+							} else if(in_list(["debit", "credit"], col.field)) {
+								parent_account[col.field] = flt(parent_account[col.field]) + 
+									flt(account[col.field]);
+							}
 						}
 					});
 					parent = me.parent_map[parent];

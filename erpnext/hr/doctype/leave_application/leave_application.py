@@ -141,11 +141,10 @@ class DocType(DocListController):
 			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
 
 	def validate_max_days(self):
-		max_days = frappe.db.sql("select max_days_allowed from `tabLeave Type` where name = '%s'" %(self.doc.leave_type))
-		max_days = max_days and flt(max_days[0][0]) or 0
+		max_days = frappe.db.get_value("Leave Type", self.doc.leave_type, "max_days_allowed")
 		if max_days and self.doc.total_leave_days > max_days:
-			msgprint("Sorry ! You cannot apply for %s for more than %s days" % (self.doc.leave_type, max_days))
-			raise Exception
+			frappe.throw("Sorry ! You cannot apply for %s for more than %s days" % 
+				(self.doc.leave_type, max_days))
 			
 	def validate_leave_approver(self):
 		employee = frappe.bean("Employee", self.doc.employee)
@@ -328,11 +327,12 @@ def query_for_permitted_employees(doctype, txt, searchfield, start, page_len, fi
 	txt = "%" + cstr(txt) + "%"
 	
 	if "Leave Approver" in frappe.user.get_roles():
+		user = frappe.session.user.replace('"', '\"')
 		condition = """and (exists(select ela.name from `tabEmployee Leave Approver` ela
 				where ela.parent=`tabEmployee`.name and ela.leave_approver= "%s") or 
 			not exists(select ela.name from `tabEmployee Leave Approver` ela 
 				where ela.parent=`tabEmployee`.name)
-			or user_id = "%s")""" % (frappe.session.user, frappe.session.user)
+			or user_id = "%s")""" % (user, user)
 	else:
 		from frappe.widgets.reportview import build_match_conditions
 		condition = build_match_conditions("Employee")

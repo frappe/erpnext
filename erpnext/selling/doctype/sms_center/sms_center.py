@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 
@@ -18,11 +16,16 @@ class DocType:
 	def create_receiver_list(self):
 		rec, where_clause = '', ''
 		if self.doc.send_to == 'All Customer Contact':
-			where_clause = self.doc.customer and " and customer = '%s'" % self.doc.customer or " and ifnull(customer, '') != ''"
+			where_clause = self.doc.customer and " and customer = '%s'" % \
+				self.doc.customer.replace("'", "\'") or " and ifnull(customer, '') != ''"
 		if self.doc.send_to == 'All Supplier Contact':
-			where_clause = self.doc.supplier and " and ifnull(is_supplier, 0) = 1 and supplier = '%s'" % self.doc.supplier or " and ifnull(supplier, '') != ''"
+			where_clause = self.doc.supplier and \
+				" and ifnull(is_supplier, 0) = 1 and supplier = '%s'" % \
+				self.doc.supplier.replace("'", "\'") or " and ifnull(supplier, '') != ''"
 		if self.doc.send_to == 'All Sales Partner Contact':
-			where_clause = self.doc.sales_partner and " and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % self.doc.sales_partner or " and ifnull(sales_partner, '') != ''"
+			where_clause = self.doc.sales_partner and \
+				" and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % \
+				self.doc.sales_partner.replace("'", "\'") or " and ifnull(sales_partner, '') != ''"
 
 		if self.doc.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
 			rec = frappe.db.sql("""select CONCAT(ifnull(first_name,''), '', ifnull(last_name,'')), 
@@ -34,8 +37,11 @@ class DocType:
 				ifnull(mobile_no,'')!='' and docstatus != 2 and status='Open'""")
 		
 		elif self.doc.send_to == 'All Employee (Active)':
-			where_clause = self.doc.department and " and department = '%s'" % self.doc.department or ""
-			where_clause += self.doc.branch and " and branch = '%s'" % self.doc.branch or ""
+			where_clause = self.doc.department and " and department = '%s'" % \
+				self.doc.department.replace("'", "\'") or ""
+			where_clause += self.doc.branch and " and branch = '%s'" % \
+				self.doc.branch.replace("'", "\'") or ""
+				
 			rec = frappe.db.sql("""select employee_name, cell_number from 
 				`tabEmployee` where status = 'Active' and docstatus < 2 and 
 				ifnull(cell_number,'')!='' %s""", where_clause)

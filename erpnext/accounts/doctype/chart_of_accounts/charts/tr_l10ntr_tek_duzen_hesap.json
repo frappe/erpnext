@@ -1,0 +1,1264 @@
+{
+ "name": "Tek D\u00fczen Hesap Plan\u0131", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Hizmet \u00dcretim Maliyeti"
+       }, 
+       {
+        "name": "Hizmet \u00dcretim Maliyeti Fark Hesaplar\u0131"
+       }, 
+       {
+        "name": "Hizmet \u00dcretim Maliyeti Yans\u0131tma Hesab\u0131"
+       }
+      ], 
+      "name": "Hizmet \u00dcretim Maliyeti"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri Fark Hesab\u0131"
+       }, 
+       {
+        "name": "Atra\u015ft\u0131rma Ve Geli\u015ftirme Giderleri"
+       }, 
+       {
+        "name": "Pazarlama Sat\u0131\u015f Ve Dag\u0131t\u0131m Giderleri Yans\u0131tma Hesab\u0131"
+       }
+      ], 
+      "name": "Pazarlama, Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Direkt \u0130\u015f\u00e7ilik \u00dccret Farklar\u0131"
+       }, 
+       {
+        "name": "Direkt \u0130\u015f\u00e7ilik S\u00fcre Farklar\u0131"
+       }, 
+       {
+        "name": "Direkt \u0130\u015f\u00e7ilik Giderleri"
+       }, 
+       {
+        "name": "Direkt \u0130\u015f\u00e7ilik Giderleri Yans\u0131tma Hesab\u0131"
+       }
+      ], 
+      "name": "Direkt \u0130\u015f\u00e7ilik Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Direk \u0130lk Madde Ve Malzeme Giderleri Hesab\u0131"
+       }, 
+       {
+        "name": "Direkt \u0130lk Madde Ve Malzeme Miktar Fark\u0131"
+       }, 
+       {
+        "name": "Direkt \u0130lk Madde Ve Malzeme Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Direkt \u0130lk Madde Ve Malzeme Fiyat Fark\u0131"
+       }
+      ], 
+      "name": "Direkt \u0130lk Madde Ve Malzeme Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Maliyet Muhasebesi Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Maliyet Muhasebesi Ba\u011flant\u0131 Hesab\u0131"
+       }
+      ], 
+      "name": "Maliyet Muhasebesi Ba\u011flant\u0131 Hesaplar\u0131"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Genel Y\u00f6netim Giderleri"
+       }, 
+       {
+        "name": "Genel Y\u00f6netim Giderleri Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Genel Y\u00f6netim Gider Farklar\u0131 Hesab\u0131"
+       }
+      ], 
+      "name": "Genel Y\u00f6netim Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Genel \u00dcretim Giderleri Kapasite Farklar\u0131"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri Verimlilik Giderleri"
+       }, 
+       {
+        "name": "Genel \u00dcretim Giderleri B\u00fct\u00e7e Farklar\u0131"
+       }
+      ], 
+      "name": "Genel \u00dcretim Giderleri"
+     }, 
+     {
+      "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Finansman Giderleri Yans\u0131tma Hesab\u0131"
+       }, 
+       {
+        "name": "Finansman Giderleri"
+       }, 
+       {
+        "name": "Finansman Giderleri Fark Hesab\u0131"
+       }
+      ], 
+      "name": "Finansman Giderleri"
+     }
+    ], 
+    "name": "Maliyet Hesaplar\u0131"
+   }, 
+   {
+    "name": "Serbest Hesaplar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Verilen Sipari\u015f Avanslar\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Yar\u0131 Mamuller", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "\u0130lk Madde Malzeme", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Ticari Mallar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Mamuller", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Stoklar", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Maliyetleri", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ta\u015feronlara Verilen Avanslar", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat ve Onar\u0131m Maliyetleri", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00d6zel Kesim Tahvil Senet Ve Bonolar\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Hisse Senetleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Kamu Kesimi Tahvil, Senet ve Bonolar\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Menkul K\u0131ymetler De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Di\u011fer Menkul K\u0131ymetler", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Menkul K\u0131ymetler", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Bank", 
+        "name": "Bankalar"
+       }, 
+       {
+        "name": "Verilen \u00c7ekler ve \u00d6deme Emirleri(-)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Kasa"
+       }, 
+       {
+        "name": "Al\u0131nan \u00c7ekler", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Di\u011fer Haz\u0131r De\u011ferler", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Haz\u0131r De\u011ferler", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ortaklardan Alacaklar"
+       }, 
+       {
+        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Alacaklar"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklerden Alacaklar"
+       }, 
+       {
+        "name": "Di\u011fer Alacak Senetleri Reeskontu(-)"
+       }, 
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli Alacaklar"
+       }, 
+       {
+        "name": "Personelden Alacaklar"
+       }, 
+       {
+        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }
+      ], 
+      "name": "Di\u011fer Alacaklar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u015e\u00fcpheli Ticari Alacaklar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Kazan\u0131lmam\u0131\u015f Finansal Kiralama Faiz Gelirleri(-)"
+       }, 
+       {
+        "name": "Verilen Depozito ve Teminatlar"
+       }, 
+       {
+        "name": "Di\u011fer Ticari Alacaklar"
+       }, 
+       {
+        "name": "Al\u0131c\u0131lar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Alacak Senetleri"
+       }, 
+       {
+        "name": "Alacak Senetleri Reeskontu(-)"
+       }
+      ], 
+      "name": "Ticari Alacaklar", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Di\u011fer D\u00f6nen Varl\u0131klar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli D\u00f6nen Varl\u0131klar"
+       }, 
+       {
+        "name": "\u0130\u015f Avanslar\u0131"
+       }, 
+       {
+        "name": "Say\u0131m Ve Tesell\u00fcm Noksanlar\u0131"
+       }, 
+       {
+        "name": "Personel Avanslar\u0131"
+       }, 
+       {
+        "name": "\u0130ndirilecek KDV"
+       }, 
+       {
+        "name": "Devreden KDV"
+       }, 
+       {
+        "name": "Pe\u015fin \u00d6denen Vergiler Ve Fonlar"
+       }, 
+       {
+        "name": "Di\u011fer KDV"
+       }
+      ], 
+      "name": "Di\u011fer D\u00f6nen Varl\u0131klar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gelecek Aylara Ait Giderler", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gelir Tahakkuklar\u0131"
+       }
+      ], 
+      "name": "Gelecek Aylara Ait Giderler ve Gelir Tahakkuklar\u0131", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "D\u00f6nen Varl\u0131klar", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "name": "Merkez Ve \u015eubeler Cari Hesab\u0131"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Di\u011fer KDV", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Hesaplanan KDV", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Say\u0131m Ve Tesell\u00fcm Fazlalar\u0131"
+       }, 
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli Yabanc\u0131 Kaynaklar"
+       }
+      ], 
+      "name": "Di\u011fer K\u0131sa Vadeli Yabanc\u0131 Kaynaklar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gelecek Aylara Ait Gelirler", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gider Tahakkuklar\u0131"
+       }
+      ], 
+      "name": "Gelecek Aylara Ait Gelirler Ve Gider Tahakkuklar\u0131", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Tax", 
+        "name": "D\u00f6nem K\u00e2r\u0131n\u0131n Pe\u015fin \u00d6denen Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler(-)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "D\u00f6nem K\u00e2r\u0131 Vergi Ve Di\u011fer Yasal Y\u00fck\u00fcml\u00fcl\u00fck Kar\u015f\u0131l\u0131klar\u0131", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Maliyet Giderleri Kar\u015f\u0131l\u0131\u011f\u0131", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
+       }
+      ], 
+      "name": "Bor\u00e7 ve Gider Kar\u015f\u0131l\u0131klar\u0131"
+     }, 
+     {
+      "account_type": "Tax", 
+      "children": [
+       {
+        "account_type": "Tax", 
+        "name": "Vadesi Ge\u00e7mi\u015f, Ertelenmi\u015f Veya Taksitlendirilmi\u015f Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "\u00d6denecek Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "\u00d6denecek Vergi Ve Fonlar", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "\u00d6denecek Sosyal G\u00fcvenl\u00fck Kesintileri", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "\u00d6denecek Vergi ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "350 Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Hakedi\u015fleri Bedelleri"
+       }
+      ], 
+      "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Hakedi\u015fleri"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Di\u011fer Avanslar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Sipari\u015f Avanslar\u0131"
+       }
+      ], 
+      "name": "Al\u0131nan Avanslar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klara Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Personele Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Senetleri Reeskontu(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer \u00c7e\u015fitli Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Ortaklara Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u0130\u015ftiraklere Bor\u00e7lar"
+       }
+      ], 
+      "name": "Di\u011fer Bor\u00e7lar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Ertelenmi\u015f Finansal Kiralama Bor\u00e7lanma Maliyetleri(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Menkul K\u0131ymetler \u0130hra\u00e7 Fark\u0131(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Mali Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Uzun Vadeli Kredilerin Anapara Taksitleri Ve Faizleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Tahvil Anapara Bor\u00e7, Taksit Ve Faizleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00c7\u0131kar\u0131lan Bonolar Ve Senetler"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Di\u011fer Menkul K\u0131ymetler"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Banka Kredileri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Finansal Kiralama \u0130\u015flemlerinden Bor\u00e7lar"
+       }
+      ], 
+      "name": "Mali Bor\u00e7lar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Ticari Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri Reeskontu(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Sat\u0131c\u0131lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Depozito Ve Teminatlar"
+       }
+      ], 
+      "name": "Ticari Bor\u00e7lar"
+     }
+    ], 
+    "name": "K\u0131sa Vadeli Yabanc\u0131 Kaynaklar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Gelir Tahakkuklar\u0131", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llara Ait Giderler", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Gelecek Y\u0131llara Ait Giderler ve Gelir Tahakkuklar\u0131", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ba\u011fl\u0131 Menkul K\u0131ymetler De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Menkul K\u0131ymetler"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklere Sermaye Taahh\u00fctleri(-)"
+       }, 
+       {
+        "name": "\u0130\u015ftirakler"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klar"
+       }, 
+       {
+        "name": "\u0130\u015ftirakler Sermaye Paylar\u0131 De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klar Sermaye Paylar\u0131 De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klara Sermaye Taahh\u00fctleri(-)"
+       }, 
+       {
+        "name": "Di\u011fer Mali Duran Varl\u0131klar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Di\u011fer Mali Duran Varl\u0131klar"
+       }
+      ], 
+      "name": "Mali Duran Varl\u0131klar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Binalar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Tesis, Makine Ve Cihazlar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Arazi Ve Arsalar"
+       }, 
+       {
+        "name": "Yer Alt\u0131 Ve Yer \u00dcst\u00fc D\u00fczenleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Di\u011fer Maddi Duran Varl\u0131klar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Birikmi\u015f Amortismanlar(-)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Ta\u015f\u0131tlar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Demirba\u015flar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Yap\u0131lmakta Olan Yat\u0131r\u0131mlar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Verilen Avanslar", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Maddi Duran Varl\u0131klar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Birikmi\u015f Amortismanlar(-)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "\u015eerefiye", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Verilen Avanslar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Di\u011fer Maddi Olmayan Duran Varl\u0131klar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "\u00d6zel Maliyetler", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Kurulu\u015f Ve \u00d6rg\u00fctlenme Giderleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Haklar", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Maddi Olmayan Duran Varl\u0131klar", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Birikmi\u015f T\u00fckenme Paylar\u0131(-)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Verilen Avanslar", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Arama Giderleri", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Haz\u0131rl\u0131k Ve Geli\u015ftirme Giderleri", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Di\u011fer \u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "\u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }, 
+       {
+        "name": "Alacak Senetleri Reeskontu(-)"
+       }, 
+       {
+        "name": "Alacak Senetleri"
+       }, 
+       {
+        "name": "Al\u0131c\u0131lar"
+       }, 
+       {
+        "name": "Verilen Depozito Ve Teminatlar"
+       }, 
+       {
+        "name": "Kazaqn\u0131lmam\u0131\u015f Finansal Kiralama Faiz Gelirleri(-)"
+       }
+      ], 
+      "name": "Ticari Alacaklar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Personelden Alacaklar"
+       }, 
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli Alacaklar"
+       }, 
+       {
+        "name": "Di\u011fer Alacak Senetleri Reeskontu(-)"
+       }, 
+       {
+        "name": "Ortaklardan Alacaklar"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklerden Alacaklar"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Alacaklar"
+       }, 
+       {
+        "name": "\u015e\u00fcpheli Di\u011fer Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)"
+       }
+      ], 
+      "name": "Di\u011fer Alacaklar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Di\u011fer \u00c7e\u015fitli Duran Varl\u0131klar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Elden \u00c7\u0131kar\u0131lacak Stoklar Ve Maddi Duran Varl\u0131klar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Pe\u015fin \u00d6denen Vergi Ve Fonlar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Di\u011fer KDV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llar \u0130htiyac\u0131 Stoklar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llarda \u0130ndirilecek KDV", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Birikmi\u015f Amortismanlar(-)", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Di\u011fer Duran Varl\u0131klar", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Duran Varl\u0131klar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "D\u00f6nem Net K\u00e2r\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "D\u00f6nem Net Zarar\u0131(-)", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "D\u00f6nem Net K\u00e2r\u0131 (Zarar\u0131)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ge\u00e7mi\u015f Y\u0131llar Zararlar\u0131(-)", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Ge\u00e7mi\u015f Y\u0131llar Zararlar\u0131(-)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sermaye", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00d6denmi\u015f Sermaye(-)"
+       }
+      ], 
+      "name": "\u00d6denmi\u015f Sermaye", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Di\u011fer Sermaye Yedekleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Maliyet Art\u0131\u015flar\u0131 Fonu", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Hisse Senetleri \u0130hra\u00e7 Primleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Hisse Senedi \u0130ptal K\u00e2rlar\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Maddi Duran Varl\u0131k Yeniden De\u011ferlenme Art\u0131\u015flar\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "\u0130\u015ftirakler Yeniden De\u011ferleme Art\u0131\u015flar\u0131", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Sermaye Yedekleri", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00d6zel Fonlar", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Stat\u00fc Yedekleri", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Ola\u011fan\u00fcst\u00fc Yedekler", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Yasal Yedekler", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Di\u011fer K\u00e2r Yedekleri", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "K\u00e2r Yedekleri", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ge\u00e7mi\u015f Y\u0131llar K\u00e2rlar\u0131", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Ge\u00e7mi\u015f Y\u0131llar K\u00e2rlar\u0131", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "\u00d6z Kaynaklar", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Gider Tahakkuklar\u0131"
+       }, 
+       {
+        "name": "Gelecek Y\u0131llara Ait Gelirler"
+       }
+      ], 
+      "name": "Gelecek Y\u0131llara Ait Gelirler Ve Gider Tahakkuklar\u0131"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer \u00c7e\u015fitli Uzun Vadeli Yabanc\u0131 Kaynaklar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Gelecek Y\u0131llara Ertelenmi\u015f Veya Terkin Edilecek KDV"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Tesise Kat\u0131lma Paylar\u0131"
+       }
+      ], 
+      "name": "Di\u011fer Uzun Vadeli Yabanc\u0131 Kaynaklar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
+       }
+      ], 
+      "name": "Bor\u00e7 Ve Gider Kar\u015f\u0131l\u0131klar\u0131"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Di\u011fer Avanslar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Sipari\u015f Avanslar\u0131"
+       }
+      ], 
+      "name": "Al\u0131nan Avanslar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Ticari Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Al\u0131nan Depozito Ve Teminatlar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Sat\u0131c\u0131lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Bor\u00e7 Senetleri Reeskontu(-)"
+       }
+      ], 
+      "name": "Ticari Bor\u00e7lar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Kamuya Olan Ertelenmi\u015f Veya Taksitlendirilmi\u015f Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u0130\u015ftiraklere Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klara Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Ortaklara Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Bor\u00e7 Senetleri Reeskontu(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer \u00c7e\u015fitli Bor\u00e7lar"
+       }
+      ], 
+      "name": "Di\u011fer Bor\u00e7lar"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Ertelenmi\u015f Finansal Kiralama Bor\u00e7lanma Maliyetleri(-)"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Finansal Kiralama \u0130\u015flemlerinden Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Banka Kredileri"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Di\u011fer Menkul K\u0131ymetler"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "\u00c7\u0131kar\u0131lm\u0131\u015f Tahviller"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Di\u011fer Mali Bor\u00e7lar"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Menkul K\u0131ymetler \u0130hra\u00e7 Fark\u0131(-)"
+       }
+      ], 
+      "name": "Mali Bor\u00e7lar"
+     }
+    ], 
+    "name": "Uzun Vadeli Yabanc\u0131 Kaynaklar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Di\u011fer Ola\u011fan Gider Ve Zararlar(-)"
+       }, 
+       {
+        "name": "Kar\u015f\u0131l\u0131k Giderleri(-)"
+       }, 
+       {
+        "name": "Menkul K\u0131ymet Sat\u0131\u015f Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "Kambiyo Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "Reeskont Faiz Giderleri(-)"
+       }, 
+       {
+        "name": "Komisyon Giderleri(-)"
+       }, 
+       {
+        "name": "Enflasyon D\u00fczeltmesi Zararlar\u0131(-)"
+       }
+      ], 
+      "name": "Di\u011fer Faaliyetlerden Olu\u015fan Gider ve Zararlar (-)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Kambiyo K\u00e2rlar\u0131"
+       }, 
+       {
+        "name": "Menkul K\u0131ymet Sat\u0131\u015f K\u00e2rlar\u0131"
+       }, 
+       {
+        "name": "Konusu Kalmayan Kar\u015f\u0131l\u0131klar"
+       }, 
+       {
+        "name": "Komisyon Gelirleri"
+       }, 
+       {
+        "name": "Faiz Gelirleri"
+       }, 
+       {
+        "name": "Reeskont Faiz Gelirleri"
+       }, 
+       {
+        "name": "Enflasyon D\u00fczeltme K\u00e2rlar\u0131"
+       }, 
+       {
+        "name": "Di\u011fer Ola\u011fan Gelir Ve K\u00e2rlar"
+       }, 
+       {
+        "name": "Ba\u011fl\u0131 Ortakl\u0131klardan Temett\u00fc Gelirleri"
+       }, 
+       {
+        "name": "\u0130\u015ftiraklerden Temett\u00fc Gelirleri"
+       }
+      ], 
+      "name": "Di\u011fer Faaliyetlerden Olu\u015fan Gelir ve K\u00e2rlar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Yurt D\u0131\u015f\u0131 Sat\u0131\u015flar"
+       }, 
+       {
+        "name": "Yurt \u0130\u00e7i Sat\u0131\u015flar"
+       }, 
+       {
+        "name": "Di\u011fer Gelirler"
+       }
+      ], 
+      "name": "Br\u00fct Sat\u0131\u015flar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Di\u011fer \u0130ndirimler"
+       }, 
+       {
+        "name": "Sat\u0131\u015f \u0130ndirimleri(-)"
+       }, 
+       {
+        "name": "Sat\u0131\u015ftan \u0130adeler(-)"
+       }
+      ], 
+      "name": "Sat\u0131\u015f \u0130ndirimleri (-)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sat\u0131lan Hizmet Maliyeti(-)"
+       }, 
+       {
+        "name": "Sat\u0131lan Ticari Mallar Maliyeti(-)"
+       }, 
+       {
+        "name": "Sat\u0131lan Mamuller Maliyeti(-)"
+       }, 
+       {
+        "name": "Di\u011fer Sat\u0131\u015flar\u0131n Maliyeti(-)"
+       }
+      ], 
+      "name": "Sat\u0131\u015flar\u0131n Maliyeti(-)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Uzun Vadeli Bor\u00e7lanma Giderleri(-)"
+       }, 
+       {
+        "name": "K\u0131sa Vadeli Bor\u00e7lanma Giderleri(-)"
+       }
+      ], 
+      "name": "Finansman Giderleri"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00d6nceki D\u00f6nem Gelir Ve K\u00e2rlar\u0131"
+       }, 
+       {
+        "name": "Di\u011fer Ola\u011fan D\u0131\u015f\u0131 Gelir Ve K\u00e2rlar"
+       }
+      ], 
+      "name": "Ola\u011fan D\u0131\u015f\u0131 Gelir Ve K\u00e2rlar"
+     }, 
+     {
+      "children": [
+       {
+        "name": "\u00c7al\u0131\u015fmayan K\u0131s\u0131m Gider Ve Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "\u00d6nceki D\u00f6nem Gider Ve Zararlar\u0131(-)"
+       }, 
+       {
+        "name": "Di\u011fer Ola\u011fan D\u0131\u015f\u0131 Gider Ve Zararlar(-)"
+       }
+      ], 
+      "name": "Ola\u011fan D\u0131\u015f\u0131 Gider Ve Zaralar(-)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "D\u00f6nem K\u00e2r\u0131 Vergi Ve Di\u011fer Yasal Y\u00fck\u00fcml\u00fcl\u00fck Kar\u015f\u0131l\u0131klar\u0131(-)"
+       }, 
+       {
+        "name": "D\u00f6nem Net K\u00e2r\u0131 Veya Zarar\u0131"
+       }, 
+       {
+        "name": "D\u00f6nem K\u00e2r\u0131 Veya Zarar\u0131"
+       }, 
+       {
+        "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Enflasyon D\u00fczeltme Hesab\u0131"
+       }, 
+       {
+        "name": "Enflasyon D\u00fczeltme Hesab\u0131"
+       }
+      ], 
+      "name": "D\u00f6nem Net K\u00e2r\u0131 Ve Zarar\u0131"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri(-)"
+       }, 
+       {
+        "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri(-)"
+       }, 
+       {
+        "name": "Genel Y\u00f6netim Giderleri(-)"
+       }
+      ], 
+      "name": "Faaliyet Giderleri(-)"
+     }
+    ], 
+    "name": "Gelir Tablosu Hesaplar\u0131"
+   }, 
+   {
+    "name": "Naz\u0131m Hesaplar"
+   }
+  ], 
+  "name": "Tek D\u00fczen Hesap Plan\u0131"
+ }
+}

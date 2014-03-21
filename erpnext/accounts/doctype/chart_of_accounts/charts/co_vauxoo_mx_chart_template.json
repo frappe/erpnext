@@ -1,0 +1,8595 @@
+{
+ "name": "Unique Account Chart - PUC", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "MANO DE OBRA DIRECTA"
+     }, 
+     {
+      "name": "MATERIA PRIMA"
+     }, 
+     {
+      "name": "CONTRATOS DE SERVICIOS"
+     }, 
+     {
+      "name": "COSTOS INDIRECTOS"
+     }
+    ], 
+    "name": "COSTOS DE PRODUCCION O DE OPERACION"
+   }, 
+   {
+    "children": [
+     {
+      "name": "DEUDORAS DE CONTROL POR CONTRA (CR)"
+     }, 
+     {
+      "name": "DEUDORAS FISCALES"
+     }, 
+     {
+      "name": "DEUDORAS FISCALES POR CONTRA (CR)"
+     }, 
+     {
+      "name": "DERECHOS CONTINGENTES POR CONTRA (CR)"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CERTIFICADOS DE DEPOSITO A TERMINO"
+         }, 
+         {
+          "name": "CHEQUES DEVUELTOS"
+         }, 
+         {
+          "name": "CHEQUES POSFECHADOS"
+         }, 
+         {
+          "name": "INTERESES SOBRE DEUDAS VENCIDAS"
+         }, 
+         {
+          "name": "DIVERSAS"
+         }, 
+         {
+          "name": "BIENES Y VALORES EN FIDEICOMISO"
+         }
+        ], 
+        "name": "OTRAS CUENTAS DEUDORAS DE CONTROL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "INTANGIBLES"
+         }, 
+         {
+          "name": "CARGOS DIFERIDOS"
+         }, 
+         {
+          "name": "OTROS ACTIVOS"
+         }, 
+         {
+          "name": "INVERSIONES"
+         }, 
+         {
+          "name": "PROPIEDADES, PLANTA Y EQUIPO"
+         }, 
+         {
+          "name": "INVENTARIOS"
+         }
+        ], 
+        "name": "AJUSTES POR INFLACION ACTIVOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "ACCIONES"
+         }, 
+         {
+          "name": "BONOS"
+         }
+        ], 
+        "name": "TITULOS DE INVERSION NO COLOCADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "MATERIALES PROYECTOS PETROLEROS"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "YACIMIENTOS"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }
+        ], 
+        "name": "PROPIEDADES, PLANTA Y EQUIPO TOTALMENTE DEPRECIADOS, AGOTADOS Y/O AMORTIZADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "BIENES MUEBLES"
+         }, 
+         {
+          "name": "BIENES INMUEBLES"
+         }
+        ], 
+        "name": "BIENES RECIBIDOS EN ARRENDAMIENTO FINANCIERO"
+       }, 
+       {
+        "name": "CAPITALIZACION POR REVALORIZACION DE PATRIMONIO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BONOS"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "TITULOS DE INVERSION AMORTIZADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PAIS"
+         }, 
+         {
+          "name": "EXTERIOR"
+         }
+        ], 
+        "name": "CREDITOS A FAVOR NO UTILIZADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DEUDORES"
+         }, 
+         {
+          "name": "INVERSIONES"
+         }, 
+         {
+          "name": "OTROS ACTIVOS"
+         }
+        ], 
+        "name": "ACTIVOS CASTIGADOS"
+       }
+      ], 
+      "name": "DEUDORAS DE CONTROL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "VALORES ADQUIRIDOS POR RECIBIR"
+         }, 
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DIVERSAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CONTRATOS DE GANADO EN PARTICIPACION"
+         }, 
+         {
+          "name": "VALORES MOBILIARIOS"
+         }, 
+         {
+          "name": "BIENES MUEBLES"
+         }, 
+         {
+          "name": "BIENES INMUEBLES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "BIENES Y VALORES ENTREGADOS EN GARANTIA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "INCUMPLIMIENTO DE CONTRATOS"
+         }, 
+         {
+          "name": "EJECUTIVOS"
+         }
+        ], 
+        "name": "LITIGIOS Y/O DEMANDAS"
+       }, 
+       {
+        "name": "PROMESAS DE COMPRAVENTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "EN PRESTAMO"
+         }, 
+         {
+          "name": "EN DEPOSITO"
+         }, 
+         {
+          "name": "EN ARRENDAMIENTO"
+         }, 
+         {
+          "name": "EN CONSIGNACION"
+         }
+        ], 
+        "name": "BIENES Y VALORES EN PODER DE TERCEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VALORES MOBILIARIOS"
+         }, 
+         {
+          "name": "BIENES MUEBLES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "BIENES Y VALORES ENTREGADOS EN CUSTODIA"
+       }
+      ], 
+      "name": "DERECHOS CONTINGENTES"
+     }
+    ], 
+    "name": "CUENTAS DE ORDEN DEUDORAS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "ACREEDORAS FISCALES POR CONTRA (DB)"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "CAPITAL SOCIAL"
+         }, 
+         {
+          "name": "DIVIDENDOS O PARTICIPACIONES DECRETADAS EN ACCIONES, CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "RESULTADOS DE EJERCICIOS ANTERIORES"
+         }, 
+         {
+          "name": "RESERVAS"
+         }, 
+         {
+          "name": "SUPERAVIT DE CAPITAL"
+         }
+        ], 
+        "name": "AJUSTES POR INFLACION PATRIMONIO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BIENES INMUEBLES"
+         }, 
+         {
+          "name": "BIENES MUEBLES"
+         }
+        ], 
+        "name": "CONTRATOS DE ARRENDAMIENTO FINANCIERO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "RESERVA ARTICULO 3\u00ba LEY 4\u00aa DE 1980"
+         }, 
+         {
+          "name": "CONVENIOS DE PAGO"
+         }, 
+         {
+          "name": "CONTRATOS DE CONSTRUCCIONES E INSTALACIONES POR EJECUTAR"
+         }, 
+         {
+          "name": "DOCUMENTOS POR COBRAR DESCONTADOS"
+         }, 
+         {
+          "name": "DIVERSAS"
+         }, 
+         {
+          "name": "RESERVA COSTO REPOSICION SEMOVIENTES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ADJUDICACIONES PENDIENTES DE LEGALIZAR"
+         }
+        ], 
+        "name": "OTRAS CUENTAS DE ORDEN ACREEDORAS DE CONTROL"
+       }
+      ], 
+      "name": "ACREEDORAS DE CONTROL"
+     }, 
+     {
+      "name": "RESPONSABILIDADES CONTINGENTES POR CONTRA (DB)"
+     }, 
+     {
+      "name": "ACREEDORAS DE CONTROL POR CONTRA (DB)"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "BIENES MUEBLES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "VALORES MOBILIARIOS"
+         }
+        ], 
+        "name": "BIENES Y VALORES RECIBIDOS EN CUSTODIA"
+       }, 
+       {
+        "name": "PROMESAS DE COMPRAVENTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TRIBUTARIOS"
+         }, 
+         {
+          "name": "ADMINISTRATIVOS O ARBITRALES"
+         }, 
+         {
+          "name": "LABORALES"
+         }, 
+         {
+          "name": "CIVILES"
+         }
+        ], 
+        "name": "LITIGIOS Y/O DEMANDAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EN ARRENDAMIENTO"
+         }, 
+         {
+          "name": "EN PRESTAMO"
+         }, 
+         {
+          "name": "EN DEPOSITO"
+         }, 
+         {
+          "name": "EN CONSIGNACION"
+         }, 
+         {
+          "name": "EN COMODATO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "BIENES Y VALORES RECIBIDOS DE TERCEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CONTRATOS DE GANADO EN PARTICIPACION"
+         }, 
+         {
+          "name": "BIENES MUEBLES"
+         }, 
+         {
+          "name": "BIENES INMUEBLES"
+         }, 
+         {
+          "name": "VALORES MOBILIARIOS"
+         }
+        ], 
+        "name": "BIENES Y VALORES RECIBIDOS EN GARANTIA"
+       }, 
+       {
+        "name": "CONTRATOS DE ADMINISTRACION DELEGADA"
+       }, 
+       {
+        "name": "CUENTAS EN PARTICIPACION"
+       }, 
+       {
+        "name": "OTRAS RESPONSABILIDADES CONTINGENTES"
+       }
+      ], 
+      "name": "RESPONSABILIDADES CONTINGENTES"
+     }, 
+     {
+      "name": "ACREEDORAS FISCALES"
+     }
+    ], 
+    "name": "CUENTAS DE ORDEN ACREEDORAS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DE MATERIAS PRIMAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DEVOLUCIONES EN COMPRAS (CR)"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "COMPRA DE ENERGIA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DE MATERIALES INDIRECTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DE MERCANCIAS"
+       }
+      ], 
+      "name": "COMPRAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ACTIVIDAD DE PESCA"
+         }, 
+         {
+          "name": "EXPLOTACION DE CRIADEROS DE PECES"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "PESCA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE SERVICIO DE BOLSA"
+         }, 
+         {
+          "name": "DE INVERSIONES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "ACTIVIDAD FINANCIERA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDAD DE CAZA"
+         }, 
+         {
+          "name": "CULTIVO DE ALGODON Y PLANTAS PARA MATERIAL TEXTIL"
+         }, 
+         {
+          "name": "CULTIVOS DE FRUTAS, NUECES Y PLANTAS AROMATICAS"
+         }, 
+         {
+          "name": "CULTIVOS DE HORTALIZAS, LEGUMBRES Y PLANTAS ORNAMENTALES"
+         }, 
+         {
+          "name": "CRIA DE OTROS ANIMALES"
+         }, 
+         {
+          "name": "CULTIVO DE CANA DE AZUCAR"
+         }, 
+         {
+          "name": "OTROS CULTIVOS AGRICOLAS"
+         }, 
+         {
+          "name": "CRIA DE GANADO CABALLAR Y VACUNO"
+         }, 
+         {
+          "name": "CRIA DE OVEJAS, CABRAS, ASNOS, MULAS Y BURDEGANOS"
+         }, 
+         {
+          "name": "CULTIVO DE BANANO"
+         }, 
+         {
+          "name": "SERVICIOS AGRICOLAS Y GANADEROS"
+         }, 
+         {
+          "name": "PRODUCCION AVICOLA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDAD DE SILVICULTURA"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "CULTIVO DE CEREALES"
+         }, 
+         {
+          "name": "CULTIVO DE CAFE"
+         }, 
+         {
+          "name": "CULTIVO DE FLORES"
+         }
+        ], 
+        "name": "AGRICULTURA, GANADERIA, CAZA Y SILVICULTURA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES DE SERVICIOS SOCIALES"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "ACTIVIDADES VETERINARIAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "SERVICIO MEDICO"
+         }, 
+         {
+          "name": "SERVICIO ODONTOLOGICO"
+         }, 
+         {
+          "name": "SERVICIO DE LABORATORIO"
+         }, 
+         {
+          "name": "SERVICIO HOSPITALARIO"
+         }
+        ], 
+        "name": "SERVICIOS SOCIALES Y DE SALUD"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES RELACIONADAS CON LA EDUCACION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }
+        ], 
+        "name": "ENSENANZA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VENTA DE ARTICULOS EN RELOJERIAS Y JOYERIAS"
+         }, 
+         {
+          "name": "VENTA DE LUBRICANTES, ADITIVOS, LLANTAS Y LUJOS PARA AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE OTROS INSUMOS Y MATERIAS PRIMAS NO AGROPECUARIAS"
+         }, 
+         {
+          "name": "VENTA DE ANIMALES VIVOS Y CUEROS"
+         }, 
+         {
+          "name": "VENTA A CAMBIO DE RETRIBUCION O POR CONTRATA"
+         }, 
+         {
+          "name": "VENTA DE INSUMOS, MATERIAS PRIMAS AGROPECUARIAS Y FLORES"
+         }, 
+         {
+          "name": "MANTENIMIENTO, REPARACION Y LAVADO DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE COMBUSTIBLES SOLIDOS, LIQUIDOS, GASEOSOS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS DE VIDRIOS Y MARQUETERIA"
+         }, 
+         {
+          "name": "VENTA DE ELECTRODOMESTICOS Y MUEBLES"
+         }, 
+         {
+          "name": "VENTA DE JUEGOS, JUGUETES Y ARTICULOS DEPORTIVOS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS DE ASEO, FARMACEUTICOS, MEDICINALES Y ARTICULOS DE TOCADOR"
+         }, 
+         {
+          "name": "VENTA DE LIBROS, REVISTAS, ELEMENTOS DE PAPELERIA, UTILES Y TEXTOS ESCOLARES"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS AGROPECUARIOS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS EN ALMACENES NO ESPECIALIZADOS"
+         }, 
+         {
+          "name": "VENTA DE PAPEL Y CARTON"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS TEXTILES, DE VESTIR, DE CUERO Y CALZADO"
+         }, 
+         {
+          "name": "VENTA DE INSTRUMENTOS MUSICALES"
+         }, 
+         {
+          "name": "VENTA DE MAQUINARIA, EQUIPO DE OFICINA Y PROGRAMAS DE COMPUTADOR"
+         }, 
+         {
+          "name": "VENTA DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE PARTES, PIEZAS Y ACCESORIOS DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE HERRAMIENTAS Y ARTICULOS DE FERRETERIA"
+         }, 
+         {
+          "name": "VENTA DE PINTURAS Y LACAS"
+         }, 
+         {
+          "name": "VENTA DE CUBIERTOS, VAJILLAS, CRISTALERIA, PORCELANAS, CERAMICAS Y OTROS ARTICULOS DE USO DOMESTICO"
+         }, 
+         {
+          "name": "VENTA DE MATERIALES DE CONSTRUCCION, FONTANERIA Y CALEFACCION"
+         }, 
+         {
+          "name": "REPARACION DE EFECTOS PERSONALES Y ELECTRODOMESTICOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "VENTA DE OTROS PRODUCTOS"
+         }, 
+         {
+          "name": "VENTA DE EMPAQUES"
+         }, 
+         {
+          "name": "VENTA DE EQUIPO OPTICO Y DE PRECISION"
+         }, 
+         {
+          "name": "VENTA DE EQUIPO FOTOGRAFICO"
+         }, 
+         {
+          "name": "VENTA DE ARTICULOS EN CASAS DE EMPENO Y PRENDERIAS"
+         }, 
+         {
+          "name": "VENTA DE EQUIPO PROFESIONAL Y CIENTIFICO"
+         }, 
+         {
+          "name": "VENTA DE LOTERIAS, RIFAS, CHANCE, APUESTAS Y SIMILARES"
+         }, 
+         {
+          "name": "VENTA DE ARTICULOS EN CACHARRERIAS Y MISCELANEAS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS INTERMEDIOS, DESPERDICIOS Y DESECHOS"
+         }, 
+         {
+          "name": "VENTA DE QUIMICOS"
+         }, 
+         {
+          "name": "VENTA DE INSTRUMENTOS QUIRURGICOS Y ORTOPEDICOS"
+         }
+        ], 
+        "name": "COMERCIO AL POR MAYOR Y AL POR MENOR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "TERMINACION DE EDIFICACIONES"
+         }, 
+         {
+          "name": "ALQUILER DE EQUIPO CON OPERARIO"
+         }, 
+         {
+          "name": "PREPARACION DE TERRENOS"
+         }, 
+         {
+          "name": "CONSTRUCCION DE EDIFICIOS Y OBRAS DE INGENIERIA CIVIL"
+         }, 
+         {
+          "name": "ACONDICIONAMIENTO DE EDIFICIOS"
+         }
+        ], 
+        "name": "CONSTRUCCION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "BARES Y CANTINAS"
+         }, 
+         {
+          "name": "HOTELERIA"
+         }, 
+         {
+          "name": "CAMPAMENTO Y OTROS TIPOS DE HOSPEDAJE"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "RESTAURANTES"
+         }
+        ], 
+        "name": "HOTELES Y RESTAURANTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SERVICIO DE TRANSMISION DE DATOS"
+         }, 
+         {
+          "name": "SERVICIO DE RADIO Y TELEVISION POR CABLE"
+         }, 
+         {
+          "name": "SERVICIO POSTAL Y DE CORREO"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR CARRETERA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR TUBERIAS"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR VIA AEREA"
+         }, 
+         {
+          "name": "AGENCIAS DE VIAJE"
+         }, 
+         {
+          "name": "SERVICIOS COMPLEMENTARIOS PARA EL TRANSPORTE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "SERVICIO DE TRANSPORTE POR VIA ACUATICA"
+           }
+          ], 
+          "name": "SERVICIO DE TRANSPORTE POR VIA ACUATICA"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR VIA FERREA"
+         }, 
+         {
+          "name": "ALMACENAMIENTO Y DEPOSITO"
+         }, 
+         {
+          "name": "MANIPULACION DE CARGA"
+         }, 
+         {
+          "name": "TRANSMISION DE SONIDO E IMAGENES POR CONTRATO"
+         }, 
+         {
+          "name": "OTRAS AGENCIAS DE TRANSPORTE"
+         }, 
+         {
+          "name": "SERVICIO TELEFONICO"
+         }, 
+         {
+          "name": "SERVICIO DE TELEGRAFO"
+         }
+        ], 
+        "name": "TRANSPORTE, ALMACENAMIENTO Y COMUNICACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CARBON"
+         }, 
+         {
+          "name": "PIEDRAS PRECIOSAS"
+         }, 
+         {
+          "name": "PRESTACION DE SERVICIOS SECTOR MINERO"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "GAS NATURAL"
+         }, 
+         {
+          "name": "ORO"
+         }, 
+         {
+          "name": "PIEDRA, ARENA Y ARCILLA"
+         }, 
+         {
+          "name": "MINERALES METALIFEROS NO FERROSOS"
+         }, 
+         {
+          "name": "PETROLEO CRUDO"
+         }, 
+         {
+          "name": "MINERALES DE HIERRO"
+         }, 
+         {
+          "name": "SERVICIOS RELACIONADOS CON EXTRACCION DE PETROLEO Y GAS"
+         }, 
+         {
+          "name": "OTRAS MINAS Y CANTERAS"
+         }
+        ], 
+        "name": "EXPLOTACION DE MINAS Y CANTERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES EMPRESARIALES DE CONSULTORIA"
+         }, 
+         {
+          "name": "PUBLICIDAD"
+         }, 
+         {
+          "name": "ALQUILER DE EFECTOS PERSONALES Y ENSERES DOMESTICOS"
+         }, 
+         {
+          "name": "INVESTIGACIONES CIENTIFICAS Y DE DESARROLLO"
+         }, 
+         {
+          "name": "ENVASE Y EMPAQUE"
+         }, 
+         {
+          "name": "FOTOCOPIADO"
+         }, 
+         {
+          "name": "LIMPIEZA DE INMUEBLES"
+         }, 
+         {
+          "name": "ALQUILER EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "INMOBILIARIAS POR RETRIBUCION O CONTRATA"
+         }, 
+         {
+          "name": "MANTENIMIENTO Y REPARACION DE MAQUINARIA DE OFICINA"
+         }, 
+         {
+          "name": "CONSULTORIA EN EQUIPO Y PROGRAMAS DE INFORMATICA"
+         }, 
+         {
+          "name": "PROCESAMIENTO DE DATOS"
+         }, 
+         {
+          "name": "ALQUILER MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "INVESTIGACION Y SEGURIDAD"
+         }, 
+         {
+          "name": "DOTACION DE PERSONAL"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "MANTENIMIENTO Y REPARACION DE MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "ARRENDAMIENTOS DE BIENES INMUEBLES"
+         }, 
+         {
+          "name": "FOTOGRAFIA"
+         }
+        ], 
+        "name": "ACTIVIDADES INMOBILIARIAS, EMPRESARIALES Y DE ALQUILER"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREPARACION E HILATURA DE FIBRAS TEXTILES Y TEJEDURIA"
+         }, 
+         {
+          "name": "ACABADO DE PRODUCTOS TEXTILES"
+         }, 
+         {
+          "name": "ELABORACION DE ARTICULOS DE MATERIALES TEXTILES"
+         }, 
+         {
+          "name": "ELABORACION DE CUERDAS, CORDELES, BRAMANTES Y REDES"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS TEXTILES"
+         }, 
+         {
+          "name": "ELABORACION DE PRENDAS DE VESTIR"
+         }, 
+         {
+          "name": "PREPARACION, ADOBO Y TENIDO DE PIELES"
+         }, 
+         {
+          "name": "PRODUCTOS DE PESCADO"
+         }, 
+         {
+          "name": "ELABORACION DE ALMIDONES Y DERIVADOS"
+         }, 
+         {
+          "name": "ELABORACION DE BEBIDAS ALCOHOLICAS Y ALCOHOL ETILICO"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS ALIMENTICIOS"
+         }, 
+         {
+          "name": "ELABORACION DE BEBIDAS MALTEADAS Y DE MALTA"
+         }, 
+         {
+          "name": "ELABORACION DE VINOS"
+         }, 
+         {
+          "name": "ELABORACION DE CACAO, CHOCOLATE Y CONFITERIA"
+         }, 
+         {
+          "name": "ELABORACION DE AZUCAR Y MELAZAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE CAFE"
+         }, 
+         {
+          "name": "ELABORACION DE PASTAS Y PRODUCTOS FARINACEOS"
+         }, 
+         {
+          "name": "ELABORACION DE BEBIDAS NO ALCOHOLICAS"
+         }, 
+         {
+          "name": "ELABORACION DE ALIMENTOS PARA ANIMALES"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS PARA PANADERIA"
+         }, 
+         {
+          "name": "PRODUCTOS DE FRUTAS, LEGUMBRES Y HORTALIZAS"
+         }, 
+         {
+          "name": "PRODUCCION Y PROCESAMIENTO DE CARNES Y PRODUCTOS CARNICOS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE MOLINERIA"
+         }, 
+         {
+          "name": "ELABORACION DE ACEITES Y GRASAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS LACTEOS"
+         }, 
+         {
+          "name": "FABRICACION DE JUEGOS Y JUGUETES"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE PLASTICO"
+         }, 
+         {
+          "name": "CORTE, TALLADO Y ACABADO DE LA PIEDRA"
+         }, 
+         {
+          "name": "CURTIDO, ADOBO O PREPARACION DE CUERO"
+         }, 
+         {
+          "name": "FABRICACION DE PARTES, PIEZAS Y ACCESORIOS PARA AUTOMOTORES"
+         }, 
+         {
+          "name": "FABRICACION DE RELOJES"
+         }, 
+         {
+          "name": "FABRICACION DE INSTRUMENTOS DE MEDICION Y CONTROL"
+         }, 
+         {
+          "name": "FABRICACION DE APARATOS E INSTRUMENTOS MEDICOS"
+         }, 
+         {
+          "name": "FABRICACION DE EQUIPOS DE RADIO, TELEVISION Y COMUNICACIONES"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS TIPOS DE EQUIPO ELECTRICO"
+         }, 
+         {
+          "name": "ELABORACION DE EQUIPO DE ILUMINACION"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS DE CAUCHO"
+         }, 
+         {
+          "name": "ELABORACION DE EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "ELABORACION DE PILAS Y BATERIAS PRIMARIAS"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS DE METAL"
+         }, 
+         {
+          "name": "FABRICACION DE MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "FABRICACION DE PRODUCTOS METALICOS PARA USO ESTRUCTURAL"
+         }, 
+         {
+          "name": "FORJA, PRENSADO, ESTAMPADO, LAMINADO DE METAL Y PULVIMETALURGIA"
+         }, 
+         {
+          "name": "FABRICACION DE ARTICULOS DE FERRETERIA"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE CERAMICA, LOZA, PIEDRA, ARCILLA Y PORCELANA"
+         }, 
+         {
+          "name": "ELABORACION DE APARATOS DE USO DOMESTICO"
+         }, 
+         {
+          "name": "PRODUCTOS PRIMARIOS DE METALES PRECIOSOS Y DE METALES NO FERROSOS"
+         }, 
+         {
+          "name": "ELABORACION DE VIDRIO Y PRODUCTOS DE VIDRIO"
+         }, 
+         {
+          "name": "ELABORACION DE CEMENTO, CAL Y YESO"
+         }, 
+         {
+          "name": "ELABORACION DE ARTICULOS DE HORMIGON, CEMENTO Y YESO"
+         }, 
+         {
+          "name": "INDUSTRIAS BASICAS Y FUNDICION DE HIERRO Y ACERO"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS MINERALES NO METALICOS"
+         }, 
+         {
+          "name": "FUNDICION DE METALES NO FERROSOS"
+         }, 
+         {
+          "name": "FABRICACION DE JOYAS Y ARTICULOS CONEXOS"
+         }, 
+         {
+          "name": "ELABORACION DE JABONES, DETERGENTES Y PREPARADOS DE TOCADOR"
+         }, 
+         {
+          "name": "ELABORACION DE PINTURAS, TINTAS Y MASILLAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS FARMACEUTICOS Y BOTANICOS"
+         }, 
+         {
+          "name": "ELABORACION DE PLASTICO Y CAUCHO SINTETICO"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS QUIMICOS DE USO AGROPECUARIO"
+         }, 
+         {
+          "name": "ELABORACION DE ABONOS Y COMPUESTOS DE NITROGENO"
+         }, 
+         {
+          "name": "ELABORACION DE FIBRAS"
+         }, 
+         {
+          "name": "FABRICACION DE CARROCERIAS PARA AUTOMOTORES"
+         }, 
+         {
+          "name": "FABRICACION DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "FABRICACION DE INSTRUMENTOS DE OPTICA Y EQUIPO FOTOGRAFICO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "PRODUCTOS DE OTRAS INDUSTRIAS MANUFACTURERAS"
+         }, 
+         {
+          "name": "RECICLAMIENTO DE DESPERDICIOS"
+         }, 
+         {
+          "name": "FABRICACION DE MOTOCICLETAS"
+         }, 
+         {
+          "name": "FABRICACION DE LOCOMOTORAS Y MATERIAL RODANTE PARA FERROCARRILES"
+         }, 
+         {
+          "name": "FABRICACION DE MUEBLES"
+         }, 
+         {
+          "name": "FABRICACION DE BICICLETAS Y SILLAS DE RUEDAS"
+         }, 
+         {
+          "name": "FABRICACION DE OTROS TIPOS DE TRANSPORTE"
+         }, 
+         {
+          "name": "FABRICACION DE INSTRUMENTOS DE MUSICA"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE TABACO"
+         }, 
+         {
+          "name": "FABRICACION DE AERONAVES"
+         }, 
+         {
+          "name": "FABRICACION Y REPARACION DE BUQUES Y OTRAS EMBARCACIONES"
+         }, 
+         {
+          "name": "PRODUCCION DE MADERA, ARTICULOS DE MADERA Y CORCHO"
+         }, 
+         {
+          "name": "FABRICACION DE ARTICULOS Y EQUIPO PARA DEPORTE"
+         }, 
+         {
+          "name": "REPRODUCCION DE GRABACIONES"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS QUIMICOS"
+         }, 
+         {
+          "name": "ELABORACION DE SUSTANCIAS QUIMICAS BASICAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE HORNO DE COQUE"
+         }, 
+         {
+          "name": "ELABORACION DE TAPICES Y ALFOMBRAS"
+         }, 
+         {
+          "name": "FABRICACION DE EQUIPOS DE ELEVACION Y MANIPULACION"
+         }, 
+         {
+          "name": "REVESTIMIENTO DE METALES Y OBRAS DE INGENIERIA MECANICA"
+         }, 
+         {
+          "name": "ELABORACION DE TEJIDOS"
+         }, 
+         {
+          "name": "ELABORACION DE PASTA Y PRODUCTOS DE MADERA, PAPEL Y CARTON"
+         }, 
+         {
+          "name": "ELABORACION DE CALZADO"
+         }, 
+         {
+          "name": "ELABORACION DE MALETAS, BOLSOS Y SIMILARES"
+         }, 
+         {
+          "name": "SERVICIOS RELACIONADOS CON LA EDICION Y LA IMPRESION"
+         }, 
+         {
+          "name": "IMPRESION"
+         }, 
+         {
+          "name": "EDICIONES Y PUBLICACIONES"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE LA REFINACION DE PETROLEO"
+         }
+        ], 
+        "name": "INDUSTRIAS MANUFACTURERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "GENERACION, CAPTACION Y DISTRIBUCION DE ENERGIA ELECTRICA"
+         }, 
+         {
+          "name": "CAPTACION, DEPURACION Y DISTRIBUCION DE AGUA"
+         }, 
+         {
+          "name": "FABRICACION DE GAS Y DISTRIBUCION DE COMBUSTIBLES GASEOSOS"
+         }
+        ], 
+        "name": "SUMINISTRO DE ELECTRICIDAD, GAS Y AGUA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ZONAS FRANCAS"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "SERVICIOS FUNERARIOS"
+         }, 
+         {
+          "name": "PRODUCCION Y DISTRIBUCION DE FILMES Y VIDEOCINTAS"
+         }, 
+         {
+          "name": "AGENCIAS DE NOTICIAS"
+         }, 
+         {
+          "name": "ENTRETENIMIENTO Y ESPARCIMIENTO"
+         }, 
+         {
+          "name": "LAVANDERIAS Y SIMILARES"
+         }, 
+         {
+          "name": "PELUQUERIAS Y SIMILARES"
+         }, 
+         {
+          "name": "EXHIBICION DE FILMES Y VIDEOCINTAS"
+         }, 
+         {
+          "name": "ACTIVIDAD DE RADIO Y TELEVISION"
+         }, 
+         {
+          "name": "GRABACION Y PRODUCCION DE DISCOS"
+         }, 
+         {
+          "name": "ACTIVIDAD TEATRAL, MUSICAL Y ARTISTICA"
+         }, 
+         {
+          "name": "ELIMINACION DE DESPERDICIOS Y AGUAS RESIDUALES"
+         }, 
+         {
+          "name": "ACTIVIDADES DE ASOCIACION"
+         }
+        ], 
+        "name": "OTRAS ACTIVIDADES DE SERVICIOS COMUNITARIOS, SOCIALES Y PERSONALES"
+       }
+      ], 
+      "name": "COSTO DE VENTAS Y DE PRESTACION DE SERVICIOS"
+     }
+    ], 
+    "name": "COSTOS DE VENTAS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "INGRESOS DE EJERCICIOS ANTERIORES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "PARTICIPACIONES EN CONCESIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DEVOLUCIONES EN OTRAS VENTAS (DB)"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DERECHOS FIDUCIARIOS"
+         }, 
+         {
+          "name": "OBLIGATORIAS"
+         }, 
+         {
+          "name": "CERTIFICADOS"
+         }, 
+         {
+          "name": "CEDULAS"
+         }, 
+         {
+          "name": "TITULOS"
+         }, 
+         {
+          "name": "PAPELES COMERCIALES"
+         }, 
+         {
+          "name": "ACCIONES"
+         }, 
+         {
+          "name": "BONOS"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }
+        ], 
+        "name": "UTILIDAD EN VENTA DE INVERSIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "MATERIALES INDUSTRIA PETROLERA"
+         }, 
+         {
+          "name": "CONSTRUCCIONES EN CURSO"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "YACIMIENTOS"
+         }, 
+         {
+          "name": "MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "MAQUINARIA EN MONTAJE"
+         }
+        ], 
+        "name": "UTILIDAD EN VENTA DE PROPIEDADES, PLANTA Y EQUIPO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "POR SINIESTRO"
+         }, 
+         {
+          "name": "POR SUMINISTROS"
+         }, 
+         {
+          "name": "LUCRO CESANTE COMPANIAS DE SEGUROS"
+         }, 
+         {
+          "name": "POR PERDIDA DE MERCANCIA"
+         }, 
+         {
+          "name": "DANO EMERGENTE COMPANIAS DE SEGUROS"
+         }, 
+         {
+          "name": "POR INCUMPLIMIENTO DE CONTRATOS"
+         }, 
+         {
+          "name": "DE TERCEROS"
+         }, 
+         {
+          "name": "POR INCAPACIDADES ISS"
+         }
+        ], 
+        "name": "INDEMNIZACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SEGUROS"
+         }, 
+         {
+          "name": "DEUDAS MALAS"
+         }, 
+         {
+          "name": "DE PROVISIONES"
+         }, 
+         {
+          "name": "DESCUENTOS CONCEDIDOS"
+         }, 
+         {
+          "name": "REINTEGRO DE OTROS COSTOS Y GASTOS"
+         }, 
+         {
+          "name": "RECLAMOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "GASTOS BANCARIOS"
+         }, 
+         {
+          "name": "DE DEPRECIACION"
+         }, 
+         {
+          "name": "REINTEGRO GARANTIAS"
+         }, 
+         {
+          "name": "REINTEGRO POR PERSONAL EN COMISION"
+         }
+        ], 
+        "name": "RECUPERACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CONSTRUCCIONES Y EDIFICIOS"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "AERODROMOS"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "TERRENOS"
+         }
+        ], 
+        "name": "ARRENDAMIENTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SUBVENCIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "APROVECHAMIENTOS"
+           }
+          ], 
+          "name": "APROVECHAMIENTOS"
+         }, 
+         {
+          "name": "CERT"
+         }, 
+         {
+          "name": "LLAMADAS TELEFONICAS"
+         }, 
+         {
+          "name": "AJUSTE AL PESO"
+         }, 
+         {
+          "name": "PREMIOS"
+         }, 
+         {
+          "name": "RECLAMOS"
+         }, 
+         {
+          "name": "RECOBRO DE DANOS"
+         }, 
+         {
+          "name": "PRODUCTOS DESCONTADOS"
+         }, 
+         {
+          "name": "BONIFICACIONES"
+         }, 
+         {
+          "name": "RECONOCIMIENTOS ISS"
+         }, 
+         {
+          "name": "DERIVADOS DE LAS EXPORTACIONES"
+         }, 
+         {
+          "name": "SOBRANTES DE CAJA"
+         }, 
+         {
+          "name": "SOBRANTES EN LIQUIDACION FLETES"
+         }, 
+         {
+          "name": "SUBSIDIOS ESTATALES"
+         }, 
+         {
+          "name": "CAPACITACION DISTRIBUIDORES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "UTILES, PAPELERIA Y FOTOCOPIAS"
+           }
+          ], 
+          "name": "UTILES, PAPELERIA Y FOTOCOPIAS"
+         }, 
+         {
+          "name": "DE ESCRITURACION"
+         }, 
+         {
+          "name": "REGISTRO PROMESAS DE VENTA"
+         }, 
+         {
+          "name": "MANEJO DE CARGA"
+         }, 
+         {
+          "name": "HISTORIA CLINICA"
+         }, 
+         {
+          "name": "DECORACIONES"
+         }, 
+         {
+          "name": "RESULTADOS, MATRICULAS Y TRASPASOS"
+         }, 
+         {
+          "name": "INGRESOS POR ELEMENTOS PERDIDOS"
+         }, 
+         {
+          "name": "AUXILIOS"
+         }, 
+         {
+          "name": "OTROS INGRESOS DE EXPLOTACION"
+         }, 
+         {
+          "name": "REGALIAS"
+         }, 
+         {
+          "name": "INGRESOS POR INVESTIGACION Y DESARROLLO"
+         }, 
+         {
+          "name": "DE LA ACTIVIDAD GANADERA"
+         }, 
+         {
+          "name": "POR TRABAJOS EJECUTADOS"
+         }, 
+         {
+          "name": "DERECHOS Y LICITACIONES"
+         }, 
+         {
+          "name": "PREAVISOS DESCONTADOS"
+         }, 
+         {
+          "name": "MULTAS Y RECARGOS"
+         }, 
+         {
+          "name": "EXCEDENTES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DIVERSOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DERECHOS DE AUTOR"
+         }, 
+         {
+          "name": "POR DISTRIBUCION DE PELICULAS"
+         }, 
+         {
+          "name": "POR INGRESOS PARA TERCEROS"
+         }, 
+         {
+          "name": "POR VENTA DE SEGUROS"
+         }, 
+         {
+          "name": "POR VENTA DE SERVICIOS DE TALLER"
+         }, 
+         {
+          "name": "DE CONCESIONARIOS"
+         }, 
+         {
+          "name": "DE ACTIVIDADES FINANCIERAS"
+         }, 
+         {
+          "name": "SOBRE INVERSIONES"
+         }, 
+         {
+          "name": "DERECHOS DE PROGRAMACION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "COMISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ASISTENCIA TECNICA"
+         }, 
+         {
+          "name": "ADMINISTRACION DE VINCULADAS"
+         }, 
+         {
+          "name": "ASESORIAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "HONORARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE CASINO"
+         }, 
+         {
+          "name": "AL PERSONAL"
+         }, 
+         {
+          "name": "TALLER DE VEHICULOS"
+         }, 
+         {
+          "name": "DE RECEPCION DE AERONAVES"
+         }, 
+         {
+          "name": "DE TRANSPORTE PROGRAMA GAS NATURAL"
+         }, 
+         {
+          "name": "POR CONTRATOS"
+         }, 
+         {
+          "name": "ENTRE COMPANIAS"
+         }, 
+         {
+          "name": "FLETES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "ADMINISTRATIVOS"
+         }, 
+         {
+          "name": "TECNICOS"
+         }, 
+         {
+          "name": "DE COMPUTACION"
+         }, 
+         {
+          "name": "DE TELEFAX"
+         }, 
+         {
+          "name": "DE BASCULA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DE TRANSPORTE"
+         }, 
+         {
+          "name": "DE PRENSA"
+         }, 
+         {
+          "name": "DE MANTENIMIENTO"
+         }, 
+         {
+          "name": "DE TRILLA"
+         }
+        ], 
+        "name": "SERVICIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRODUCTOS AGRICOLAS"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "PRODUCTOS DE DIVERSIFICACION"
+         }, 
+         {
+          "name": "EXCEDENTES DE EXPORTACION"
+         }, 
+         {
+          "name": "COMBUSTIBLES Y LUBRICANTES"
+         }, 
+         {
+          "name": "PRODUCTOS EN REMATE"
+         }, 
+         {
+          "name": "DE PROPAGANDA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "MATERIAL DE DESECHO"
+         }, 
+         {
+          "name": "MATERIALES VARIOS"
+         }, 
+         {
+          "name": "MATERIA PRIMA"
+         }
+        ], 
+        "name": "OTRAS VENTAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SANCIONES CHEQUES DEVUELTOS"
+         }, 
+         {
+          "name": "COMISIONES CHEQUES DE OTRAS PLAZAS"
+         }, 
+         {
+          "name": "MULTAS Y RECARGOS"
+         }, 
+         {
+          "name": "DESCUENTOS BANCARIOS"
+         }, 
+         {
+          "name": "DESCUENTOS COMERCIALES CONDICIONADOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "FINANCIACION SISTEMAS DE VIAJES"
+         }, 
+         {
+          "name": "ACEPTACIONES BANCARIAS"
+         }, 
+         {
+          "name": "DIFERENCIA EN CAMBIO"
+         }, 
+         {
+          "name": "FINANCIACION VEHICULOS"
+         }, 
+         {
+          "name": "DESCUENTOS AMORTIZADOS"
+         }, 
+         {
+          "name": "REAJUSTE MONETARIO-UPAC (HOY UVR)"
+         }, 
+         {
+          "name": "INTERESES"
+         }
+        ], 
+        "name": "FINANCIEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DE SOCIEDADES ANONIMAS Y/O ASIMILADAS"
+         }, 
+         {
+          "name": "DE SOCIEDADES LIMITADAS Y/O ASIMILADAS"
+         }
+        ], 
+        "name": "DIVIDENDOS Y PARTICIPACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE SOCIEDADES LIMITADAS Y/O ASIMILADAS"
+         }, 
+         {
+          "name": "DE SOCIEDADES ANONIMAS Y/O ASIMILADAS"
+         }
+        ], 
+        "name": "INGRESOS METODO DE PARTICIPACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "INTANGIBLES"
+         }, 
+         {
+          "name": "OTROS ACTIVOS"
+         }
+        ], 
+        "name": "UTILIDAD EN VENTA DE OTROS BIENES"
+       }
+      ], 
+      "name": "NO OPERACIONALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "VENTA DE LUBRICANTES, ADITIVOS, LLANTAS Y LUJOS PARA AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS DE ASEO, FARMACEUTICOS, MEDICINALES, Y ARTICULOS DE TOCADOR"
+         }, 
+         {
+          "name": "VENTA DE JUEGOS, JUGUETES Y ARTICULOS DEPORTIVOS"
+         }, 
+         {
+          "name": "VENTA DE ELECTRODOMESTICOS Y MUEBLES"
+         }, 
+         {
+          "name": "VENTA DE ARTICULOS EN RELOJERIAS Y JOYERIAS"
+         }, 
+         {
+          "name": "VENTA DE LIBROS, REVISTAS, ELEMENTOS DE PAPELERIA, UTILES Y TEXTOS ESCOLARES"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS EN ALMACENES NO ESPECIALIZADOS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS TEXTILES, DE VESTIR, DE CUERO Y CALZADO"
+         }, 
+         {
+          "name": "VENTA DE PAPEL Y CARTON"
+         }, 
+         {
+          "name": "VENTA DE ANIMALES VIVOS Y CUEROS"
+         }, 
+         {
+          "name": "VENTA DE INSUMOS, MATERIAS PRIMAS AGROPECUARIAS Y FLORES"
+         }, 
+         {
+          "name": "VENTA DE OTROS INSUMOS Y MATERIAS PRIMAS NO AGROPECUARIAS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS AGROPECUARIOS"
+         }, 
+         {
+          "name": "VENTA A CAMBIO DE RETRIBUCION O POR CONTRATA"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ingresos Generales"
+           }
+          ], 
+          "name": "VENTA DE OTROS PRODUCTOS"
+         }, 
+         {
+          "name": "VENTA DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE PARTES, PIEZAS Y ACCESORIOS DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "MANTENIMIENTO, REPARACION Y LAVADO DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "VENTA DE COMBUSTIBLES SOLIDOS, LIQUIDOS, GASEOSOS"
+         }, 
+         {
+          "name": "REPARACION DE EFECTOS PERSONALES Y ELECTRODOMESTICOS"
+         }, 
+         {
+          "name": "VENTA DE LOTERIAS, RIFAS, CHANCE, APUESTAS Y SIMILARES"
+         }, 
+         {
+          "name": "VENTA DE EQUIPO OPTICO Y DE PRECISION"
+         }, 
+         {
+          "name": "VENTA DE EMPAQUES"
+         }, 
+         {
+          "name": "VENTA DE ARTICULOS EN CASAS DE EMPENO Y PRENDERIAS"
+         }, 
+         {
+          "name": "VENTA DE EQUIPO FOTOGRAFICO"
+         }, 
+         {
+          "name": "VENTA DE INSTRUMENTOS MUSICALES"
+         }, 
+         {
+          "name": "VENTA DE QUIMICOS"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS INTERMEDIOS, DESPERDICIOS Y DESECHOS"
+         }, 
+         {
+          "name": "VENTA DE MAQUINARIA, EQUIPO DE OFICINA Y PROGRAMAS DE COMPUTADOR"
+         }, 
+         {
+          "name": "VENTA DE ARTICULOS EN CACHARRERIAS Y MISCELANEAS"
+         }, 
+         {
+          "name": "VENTA DE HERRAMIENTAS Y ARTICULOS DE FERRETERIA"
+         }, 
+         {
+          "name": "VENTA DE PRODUCTOS DE VIDRIOS Y MARQUETERIA"
+         }, 
+         {
+          "name": "VENTA DE PINTURAS Y LACAS"
+         }, 
+         {
+          "name": "VENTA DE MATERIALES DE CONSTRUCCION, FONTANERIA Y CALEFACCION"
+         }, 
+         {
+          "name": "VENTA DE CUBIERTOS, VAJILLAS, CRISTALERIA, PORCELANAS, CERAMICAS Y OTROS ARTICULOS DE USO DOMESTICO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "VENTA DE INSTRUMENTOS QUIRURGICOS Y ORTOPEDICOS"
+         }, 
+         {
+          "name": "VENTA DE EQUIPO PROFESIONAL Y CIENTIFICO"
+         }
+        ], 
+        "name": "COMERCIO AL POR MAYOR Y AL POR MENOR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PREPARACION DE TERRENOS"
+         }, 
+         {
+          "name": "ACONDICIONAMIENTO DE EDIFICIOS"
+         }, 
+         {
+          "name": "CONSTRUCCION DE EDIFICIOS Y OBRAS DE INGENIERIA CIVIL"
+         }, 
+         {
+          "name": "TERMINACION DE EDIFICACIONES"
+         }, 
+         {
+          "name": "ALQUILER DE EQUIPO CON OPERARIOS"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "CONSTRUCCION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "GENERACION, CAPTACION Y DISTRIBUCION DE ENERGIA ELECTRICA"
+         }, 
+         {
+          "name": "CAPTACION, DEPURACION Y DISTRIBUCION DE AGUA"
+         }, 
+         {
+          "name": "FABRICACION DE GAS Y DISTRIBUCION DE COMBUSTIBLES GASEOSOS"
+         }
+        ], 
+        "name": "SUMINISTRO DE ELECTRICIDAD, GAS Y AGUA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FABRICACION DE PARTES PIEZAS Y ACCESORIOS PARA AUTOMOTORES"
+         }, 
+         {
+          "name": "FABRICACION DE CARROCERIAS PARA AUTOMOTORES"
+         }, 
+         {
+          "name": "FABRICACION DE INSTRUMENTOS DE OPTICA Y EQUIPO FOTOGRAFICO"
+         }, 
+         {
+          "name": "FABRICACION DE INSTRUMENTOS DE MEDICION Y CONTROL"
+         }, 
+         {
+          "name": "FABRICACION DE VEHICULOS AUTOMOTORES"
+         }, 
+         {
+          "name": "FABRICACION DE RELOJES"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS TIPOS DE EQUIPO ELECTRICO"
+         }, 
+         {
+          "name": "ELABORACION DE EQUIPO DE ILUMINACION"
+         }, 
+         {
+          "name": "FABRICACION DE APARATOS E INSTRUMENTOS MEDICOS"
+         }, 
+         {
+          "name": "FABRICACION DE EQUIPOS DE RADIO, TELEVISION Y COMUNICACIONES"
+         }, 
+         {
+          "name": "FABRICACION DE ARTICULOS DE FERRETERIA"
+         }, 
+         {
+          "name": "FORJA, PRENSADO, ESTAMPADO, LAMINADO DE METAL Y PULVIMETALURGIA"
+         }, 
+         {
+          "name": "FABRICACION DE EQUIPOS DE ELEVACION Y MANIPULACION"
+         }, 
+         {
+          "name": "ELABORACION DE APARATOS DE USO DOMESTICO"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS DE METAL"
+         }, 
+         {
+          "name": "ELABORACION DE EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "ELABORACION DE PILAS Y BATERIAS PRIMARIAS"
+         }, 
+         {
+          "name": "ELABORACION DE BEBIDAS MALTEADAS Y DE MALTA"
+         }, 
+         {
+          "name": "ELABORACION DE VINOS"
+         }, 
+         {
+          "name": "ELABORACION DE BEBIDAS ALCOHOLICAS Y ALCOHOL ETILICO"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS ALIMENTICIOS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE CAFE"
+         }, 
+         {
+          "name": "ELABORACION DE PASTAS Y PRODUCTOS FARINACEOS"
+         }, 
+         {
+          "name": "ELABORACION DE CACAO, CHOCOLATE Y CONFITERIA"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE TABACO"
+         }, 
+         {
+          "name": "ELABORACION DE BEBIDAS NO ALCOHOLICAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE PLASTICO"
+         }, 
+         {
+          "name": "FABRICACION DE PRODUCTOS METALICOS PARA USO ESTRUCTURAL"
+         }, 
+         {
+          "name": "ELABORACION DE ACEITES Y GRASAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS LACTEOS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE MOLINERIA"
+         }, 
+         {
+          "name": "ELABORACION DE ALMIDONES Y DERIVADOS"
+         }, 
+         {
+          "name": "PRODUCCION Y PROCESAMIENTO DE CARNES Y PRODUCTOS CARNICOS"
+         }, 
+         {
+          "name": "PRODUCTOS DE PESCADO"
+         }, 
+         {
+          "name": "PRODUCTOS DE FRUTAS, LEGUMBRES Y HORTALIZAS"
+         }, 
+         {
+          "name": "ELABORACION DE ALIMENTOS PARA ANIMALES"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS PARA PANADERIA"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE LA REFINACION DE PETROLEO"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE HORNO DE COQUE"
+         }, 
+         {
+          "name": "ELABORACION DE CALZADO"
+         }, 
+         {
+          "name": "ELABORACION DE MALETAS, BOLSOS Y SIMILARES"
+         }, 
+         {
+          "name": "ELABORACION DE PASTA Y PRODUCTOS DE MADERA, PAPEL Y CARTON"
+         }, 
+         {
+          "name": "PRODUCCION DE MADERA, ARTICULOS DE MADERA Y CORCHO"
+         }, 
+         {
+          "name": "IMPRESION"
+         }, 
+         {
+          "name": "EDICIONES Y PUBLICACIONES"
+         }, 
+         {
+          "name": "REPRODUCCION DE GRABACIONES"
+         }, 
+         {
+          "name": "SERVICIOS RELACIONADOS CON LA EDICION Y LA IMPRESION"
+         }, 
+         {
+          "name": "PREPARACION, ADOBO Y TENIDO DE PIELES"
+         }, 
+         {
+          "name": "CURTIDO, ADOBO O PREPARACION DE CUERO"
+         }, 
+         {
+          "name": "ELABORACION DE TEJIDOS"
+         }, 
+         {
+          "name": "ELABORACION DE PRENDAS DE VESTIR"
+         }, 
+         {
+          "name": "ELABORACION DE CUERDAS, CORDELES, BRAMANTES Y REDES"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS TEXTILES"
+         }, 
+         {
+          "name": "ELABORACION DE ARTICULOS DE MATERIALES TEXTILES"
+         }, 
+         {
+          "name": "ELABORACION DE TAPICES Y ALFOMBRAS"
+         }, 
+         {
+          "name": "PREPARACION E HILATURA DE FIBRAS TEXTILES Y TEJEDURIA"
+         }, 
+         {
+          "name": "ACABADO DE PRODUCTOS TEXTILES"
+         }, 
+         {
+          "name": "ELABORACION DE CEMENTO, CAL Y YESO"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS DE CERAMICA, LOZA, PIEDRA, ARCILLA Y PORCELANA"
+         }, 
+         {
+          "name": "INDUSTRIAS BASICAS Y FUNDICION DE HIERRO Y ACERO"
+         }, 
+         {
+          "name": "REVESTIMIENTO DE METALES Y OBRAS DE INGENIERIA MECANICA"
+         }, 
+         {
+          "name": "FABRICACION DE MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "PRODUCTOS DE OTRAS INDUSTRIAS MANUFACTURERAS"
+         }, 
+         {
+          "name": "RECICLAMIENTO DE DESPERDICIOS"
+         }, 
+         {
+          "name": "FABRICACION DE JUEGOS Y JUGUETES"
+         }, 
+         {
+          "name": "FABRICACION DE INSTRUMENTOS DE MUSICA"
+         }, 
+         {
+          "name": "FABRICACION DE ARTICULOS Y EQUIPO PARA DEPORTE"
+         }, 
+         {
+          "name": "FABRICACION DE BICICLETAS Y SILLAS DE RUEDAS"
+         }, 
+         {
+          "name": "FABRICACION DE OTROS TIPOS DE TRANSPORTE"
+         }, 
+         {
+          "name": "FABRICACION DE MUEBLES"
+         }, 
+         {
+          "name": "FABRICACION DE JOYAS Y ARTICULOS CONEXOS"
+         }, 
+         {
+          "name": "FABRICACION Y REPARACION DE BUQUES Y OTRAS EMBARCACIONES"
+         }, 
+         {
+          "name": "FABRICACION DE LOCOMOTORAS Y MATERIAL RODANTE PARA FERROCARRILES"
+         }, 
+         {
+          "name": "FABRICACION DE AERONAVES"
+         }, 
+         {
+          "name": "FABRICACION DE MOTOCICLETAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS QUIMICOS DE USO AGROPECUARIO"
+         }, 
+         {
+          "name": "ELABORACION DE JABONES, DETERGENTES Y PREPARADOS DE TOCADOR"
+         }, 
+         {
+          "name": "FUNDICION DE METALES NO FERROSOS"
+         }, 
+         {
+          "name": "PRODUCTOS PRIMARIOS DE METALES PRECIOSOS Y DE METALES NO FERROSOS"
+         }, 
+         {
+          "name": "ELABORACION DE AZUCAR Y MELAZAS"
+         }, 
+         {
+          "name": "ELABORACION DE VIDRIO Y PRODUCTOS DE VIDRIO"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS MINERALES NO METALICOS"
+         }, 
+         {
+          "name": "CORTE, TALLADO Y ACABADO DE LA PIEDRA"
+         }, 
+         {
+          "name": "ELABORACION DE ARTICULOS DE HORMIGON, CEMENTO Y YESO"
+         }, 
+         {
+          "name": "ELABORACION DE FIBRAS"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS DE CAUCHO"
+         }, 
+         {
+          "name": "ELABORACION DE SUSTANCIAS QUIMICAS BASICAS"
+         }, 
+         {
+          "name": "ELABORACION DE ABONOS Y COMPUESTOS DE NITROGENO"
+         }, 
+         {
+          "name": "ELABORACION DE PLASTICO Y CAUCHO SINTETICO"
+         }, 
+         {
+          "name": "ELABORACION DE PINTURAS, TINTAS Y MASILLAS"
+         }, 
+         {
+          "name": "ELABORACION DE PRODUCTOS FARMACEUTICOS Y BOTANICOS"
+         }, 
+         {
+          "name": "ELABORACION DE OTROS PRODUCTOS QUIMICOS"
+         }
+        ], 
+        "name": "INDUSTRIAS MANUFACTURERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "ACTIVIDAD DE PESCA"
+         }, 
+         {
+          "name": "EXPLOTACION DE CRIADEROS DE PECES"
+         }
+        ], 
+        "name": "PESCA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CARBON"
+         }, 
+         {
+          "name": "OTRAS MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "PRESTACION DE SERVICIOS SECTOR MINERO"
+         }, 
+         {
+          "name": "PIEDRAS PRECIOSAS"
+         }, 
+         {
+          "name": "PIEDRA, ARENA Y ARCILLA"
+         }, 
+         {
+          "name": "MINERALES METALIFEROS NO FERROSOS"
+         }, 
+         {
+          "name": "ORO"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "MINERALES DE HIERRO"
+         }, 
+         {
+          "name": "SERVICIOS RELACIONADOS CON EXTRACCION DE PETROLEO Y GAS"
+         }, 
+         {
+          "name": "GAS NATURAL"
+         }, 
+         {
+          "name": "PETROLEO CRUDO"
+         }
+        ], 
+        "name": "EXPLOTACION DE MINAS Y CANTERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CULTIVO DE CEREALES"
+         }, 
+         {
+          "name": "CULTIVOS DE HORTALIZAS, LEGUMBRES Y PLANTAS ORNAMENTALES"
+         }, 
+         {
+          "name": "CULTIVOS DE FRUTAS, NUECES Y PLANTAS AROMATICAS"
+         }, 
+         {
+          "name": "CULTIVO DE FLORES"
+         }, 
+         {
+          "name": "CULTIVO DE CAFE"
+         }, 
+         {
+          "name": "CULTIVO DE CANA DE AZUCAR"
+         }, 
+         {
+          "name": "CULTIVO DE ALGODON Y PLANTAS PARA MATERIAL TEXTIL"
+         }, 
+         {
+          "name": "OTROS CULTIVOS AGRICOLAS"
+         }, 
+         {
+          "name": "CULTIVO DE BANANO"
+         }, 
+         {
+          "name": "CRIA DE GANADO CABALLAR Y VACUNO"
+         }, 
+         {
+          "name": "CRIA DE OVEJAS, CABRAS, ASNOS, MULAS Y BURDEGANOS"
+         }, 
+         {
+          "name": "PRODUCCION AVICOLA"
+         }, 
+         {
+          "name": "CRIA DE OTROS ANIMALES"
+         }, 
+         {
+          "name": "ACTIVIDAD DE SILVICULTURA"
+         }, 
+         {
+          "name": "ACTIVIDAD DE CAZA"
+         }, 
+         {
+          "name": "SERVICIOS AGRICOLAS Y GANADEROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }
+        ], 
+        "name": "AGRICULTURA, GANADERIA, CAZA Y SILVICULTURA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDAD DE RADIO Y TELEVISION"
+         }, 
+         {
+          "name": "GRABACION Y PRODUCCION DE DISCOS"
+         }, 
+         {
+          "name": "AGENCIAS DE NOTICIAS"
+         }, 
+         {
+          "name": "ENTRETENIMIENTO Y ESPARCIMIENTO"
+         }, 
+         {
+          "name": "PELUQUERIAS Y SIMILARES"
+         }, 
+         {
+          "name": "LAVANDERIAS Y SIMILARES"
+         }, 
+         {
+          "name": "ZONAS FRANCAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "ELIMINACION DE DESPERDICIOS Y AGUAS RESIDUALES"
+         }, 
+         {
+          "name": "EXHIBICION DE FILMES Y VIDEOCINTAS"
+         }, 
+         {
+          "name": "ACTIVIDADES DE ASOCIACION"
+         }, 
+         {
+          "name": "SERVICIOS FUNERARIOS"
+         }, 
+         {
+          "name": "ACTIVIDAD TEATRAL, MUSICAL Y ARTISTICA"
+         }, 
+         {
+          "name": "PRODUCCION Y DISTRIBUCION DE FILMES Y VIDEOCINTAS"
+         }
+        ], 
+        "name": "OTRAS ACTIVIDADES DE SERVICIOS COMUNITARIOS, SOCIALES Y PERSONALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DEVOLUCIONES EN VENTAS (DB)"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES RELACIONADAS CON LA EDUCACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "ENSENANZA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES DE SERVICIOS SOCIALES"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "SERVICIO DE LABORATORIO"
+         }, 
+         {
+          "name": "ACTIVIDADES VETERINARIAS"
+         }, 
+         {
+          "name": "SERVICIO HOSPITALARIO"
+         }, 
+         {
+          "name": "SERVICIO MEDICO"
+         }, 
+         {
+          "name": "SERVICIO ODONTOLOGICO"
+         }
+        ], 
+        "name": "SERVICIOS SOCIALES Y DE SALUD"
+       }, 
+       {
+        "children": [
+         {
+          "name": "LIMPIEZA DE INMUEBLES"
+         }, 
+         {
+          "name": "FOTOGRAFIA"
+         }, 
+         {
+          "name": "INVESTIGACION Y SEGURIDAD"
+         }, 
+         {
+          "name": "DOTACION DE PERSONAL"
+         }, 
+         {
+          "name": "MANTENIMIENTO Y REPARACION DE MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "FOTOCOPIADO"
+         }, 
+         {
+          "name": "INMOBILIARIAS POR RETRIBUCION O CONTRATA"
+         }, 
+         {
+          "name": "ALQUILER EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "ARRENDAMIENTOS DE BIENES INMUEBLES"
+         }, 
+         {
+          "name": "PROCESAMIENTO DE DATOS"
+         }, 
+         {
+          "name": "CONSULTORIA EN EQUIPO Y PROGRAMAS DE INFORMATICA"
+         }, 
+         {
+          "name": "ALQUILER MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "ALQUILER DE EFECTOS PERSONALES Y ENSERES DOMESTICOS"
+         }, 
+         {
+          "name": "ENVASE Y EMPAQUE"
+         }, 
+         {
+          "name": "PUBLICIDAD"
+         }, 
+         {
+          "name": "ACTIVIDADES EMPRESARIALES DE CONSULTORIA"
+         }, 
+         {
+          "name": "INVESTIGACIONES CIENTIFICAS Y DE DESARROLLO"
+         }, 
+         {
+          "name": "MANTENIMIENTO Y REPARACION DE MAQUINARIA DE OFICINA"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }
+        ], 
+        "name": "ACTIVIDADES INMOBILIARIAS, EMPRESARIALES Y DE ALQUILER"
+       }, 
+       {
+        "children": [
+         {
+          "name": "RECUPERACION DE GARANTIAS"
+         }, 
+         {
+          "name": "INTERESES"
+         }, 
+         {
+          "name": "REAJUSTE MONETARIO-UPAC (HOY UVR)"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "OPERACIONES DE DESCUENTO"
+         }, 
+         {
+          "name": "VENTA DE INVERSIONES"
+         }, 
+         {
+          "name": "DIVIDENDOS DE SOCIEDADES ANONIMAS Y/O ASIMILADAS"
+         }, 
+         {
+          "name": "SERVICIOS A COMISIONISTAS"
+         }, 
+         {
+          "name": "CUOTAS DE INGRESO O RETIRO-SOCIEDAD ADMINISTRADORA"
+         }, 
+         {
+          "name": "INSCRIPCIONES Y CUOTAS"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "CUOTAS DE INSCRIPCION-CONSORCIOS"
+         }, 
+         {
+          "name": "CUOTAS DE ADMINISTRACION-CONSORCIOS"
+         }, 
+         {
+          "name": "ELIMINACION DE SUSCRIPTORES-CONSORCIOS"
+         }, 
+         {
+          "name": "REAJUSTE DEL SISTEMA-CONSORCIOS"
+         }, 
+         {
+          "name": "PARTICIPACIONES DE SOCIEDADES LIMITADAS Y/O ASIMILADAS"
+         }, 
+         {
+          "name": "INGRESOS METODO DE PARTICIPACION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "ACTIVIDAD FINANCIERA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "BARES Y CANTINAS"
+         }, 
+         {
+          "name": "RESTAURANTES"
+         }, 
+         {
+          "name": "CAMPAMENTO Y OTROS TIPOS DE HOSPEDAJE"
+         }, 
+         {
+          "name": "HOTELERIA"
+         }
+        ], 
+        "name": "HOTELES Y RESTAURANTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SERVICIOS COMPLEMENTARIOS PARA EL TRANSPORTE"
+         }, 
+         {
+          "name": "AGENCIAS DE VIAJE"
+         }, 
+         {
+          "name": "OTRAS AGENCIAS DE TRANSPORTE"
+         }, 
+         {
+          "name": "SERVICIO DE TELEGRAFO"
+         }, 
+         {
+          "name": "SERVICIO TELEFONICO"
+         }, 
+         {
+          "name": "SERVICIO DE RADIO Y TELEVISION POR CABLE"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR CARRETERA"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR VIA ACUATICA"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR VIA FERREA"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSMISION DE DATOS"
+         }, 
+         {
+          "name": "SERVICIO POSTAL Y DE CORREO"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR VIA AEREA"
+         }, 
+         {
+          "name": "SERVICIO DE TRANSPORTE POR TUBERIAS"
+         }, 
+         {
+          "name": "ALMACENAMIENTO Y DEPOSITO"
+         }, 
+         {
+          "name": "MANIPULACION DE CARGA"
+         }, 
+         {
+          "name": "TRANSMISION DE SONIDO E IMAGENES POR CONTRATO"
+         }, 
+         {
+          "name": "ACTIVIDADES CONEXAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "TRANSPORTE, ALMACENAMIENTO Y COMUNICACIONES"
+       }
+      ], 
+      "name": "OPERACIONALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "INVERSIONES (CR)"
+         }, 
+         {
+          "name": "INVENTARIOS (CR)"
+         }, 
+         {
+          "name": "PROPIEDADES, PLANTA Y EQUIPO (CR)"
+         }, 
+         {
+          "name": "DEVOLUCIONES EN VENTAS (CR)"
+         }, 
+         {
+          "name": "AMORTIZACION ACUMULADA (DB)"
+         }, 
+         {
+          "name": "PATRIMONIO"
+         }, 
+         {
+          "name": "DEPRECIACION ACUMULADA (DB)"
+         }, 
+         {
+          "name": "AGOTAMIENTO ACUMULADO (DB)"
+         }, 
+         {
+          "name": "DEPRECIACION DIFERIDA (CR)"
+         }, 
+         {
+          "name": "INGRESOS NO OPERACIONALES (DB)"
+         }, 
+         {
+          "name": "GASTOS NO OPERACIONALES (CR)"
+         }, 
+         {
+          "name": "GASTOS OPERACIONALES DE VENTAS (CR)"
+         }, 
+         {
+          "name": "GASTOS OPERACIONALES DE ADMINISTRACION (CR)"
+         }, 
+         {
+          "name": "COSTO DE VENTAS (CR)"
+         }, 
+         {
+          "name": "COMPRAS (CR)"
+         }, 
+         {
+          "name": "DEVOLUCIONES EN COMPRAS (DB)"
+         }, 
+         {
+          "name": "COSTOS DE PRODUCCION O DE OPERACION (CR)"
+         }, 
+         {
+          "name": "INGRESOS OPERACIONALES (DB)"
+         }, 
+         {
+          "name": "ACTIVOS DIFERIDOS"
+         }, 
+         {
+          "name": "INTANGIBLES (CR)"
+         }, 
+         {
+          "name": "OTROS ACTIVOS (CR)"
+         }, 
+         {
+          "name": "PASIVOS SUJETOS DE AJUSTE"
+         }
+        ], 
+        "name": "CORRECCION MONETARIA"
+       }
+      ], 
+      "name": "AJUSTES POR INFLACION"
+     }
+    ], 
+    "name": "INGRESOS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DEUDORES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS ACTIVOS"
+         }, 
+         {
+          "name": "INVERSIONES"
+         }, 
+         {
+          "name": "PROPIEDADES, PLANTA Y EQUIPO"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "GASTOS DE REPRESENTACION Y RELACIONES PUBLICAS"
+         }, 
+         {
+          "name": "TAXIS Y BUSES"
+         }, 
+         {
+          "name": "MICROFILMACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTROS"
+           }
+          ], 
+          "name": "OTROS"
+         }, 
+         {
+          "name": "PARQUEADEROS"
+         }, 
+         {
+          "name": "CASINO Y RESTAURANTE"
+         }, 
+         {
+          "name": "INDEMNIZACION POR DANOS A TERCEROS"
+         }, 
+         {
+          "name": "POLVORA Y SIMILARES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "COMISIONES"
+           }
+          ], 
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "MUSICA AMBIENTAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "LIBROS, SUSCRIPCIONES, PERIODICOS Y REVISTAS"
+           }
+          ], 
+          "name": "LIBROS, SUSCRIPCIONES, PERIODICOS Y REVISTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ELEMENTOS DE ASEO Y CAFETERIA"
+           }
+          ], 
+          "name": "ELEMENTOS DE ASEO Y CAFETERIA"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "COMBUSTIBLES Y LUBRICANTES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "UTILES, PAPELERIA Y FOTOCOPIAS"
+           }
+          ], 
+          "name": "UTILES, PAPELERIA Y FOTOCOPIAS"
+         }, 
+         {
+          "name": "ESTAMPILLAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DIVERSOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "AERODROMOS"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "CONSTRUCCIONES Y EDIFICACIONES"
+           }
+          ], 
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }
+        ], 
+        "name": "ARRENDAMIENTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CONTRIBUCIONES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "AFILIACIONES Y SOSTENIMIENTO"
+         }
+        ], 
+        "name": "CONTRIBUCIONES Y AFILIACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MANEJO"
+         }, 
+         {
+          "name": "SUSTRACCION Y HURTO"
+         }, 
+         {
+          "name": "TERREMOTO"
+         }, 
+         {
+          "name": "VIDA COLECTIVA"
+         }, 
+         {
+          "name": "INCENDIO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "ROTURA DE MAQUINARIA"
+         }, 
+         {
+          "name": "OBLIGATORIO ACCIDENTE DE TRANSITO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "RESPONSABILIDAD CIVIL Y EXTRACONTRACTUAL"
+         }, 
+         {
+          "name": "LUCRO CESANTE"
+         }, 
+         {
+          "name": "TRANSPORTE DE MERCANCIA"
+         }, 
+         {
+          "name": "VUELO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "CUMPLIMIENTO"
+         }, 
+         {
+          "name": "CORRIENTE DEBIL"
+         }
+        ], 
+        "name": "SEGUROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTROS"
+           }
+          ], 
+          "name": "OTROS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PROCESAMIENTO ELECTRONICO DE DATOS"
+           }
+          ], 
+          "name": "PROCESAMIENTO ELECTRONICO DE DATOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ACUEDUCTO Y ALCANTARILLADO"
+           }
+          ], 
+          "name": "ACUEDUCTO Y ALCANTARILLADO"
+         }, 
+         {
+          "name": "GAS"
+         }, 
+         {
+          "name": "ENERGIA ELECTRICA"
+         }, 
+         {
+          "children": [
+           {
+            "name": "TELEFONO"
+           }
+          ], 
+          "name": "TELEFONO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ASEO Y VIGILANCIA"
+           }
+          ], 
+          "name": "ASEO Y VIGILANCIA"
+         }, 
+         {
+          "children": [
+           {
+            "name": "TEMPORALES"
+           }
+          ], 
+          "name": "TEMPORALES"
+         }, 
+         {
+          "name": "ASISTENCIA TECNICA"
+         }, 
+         {
+          "name": "CORREO, PORTES Y TELEGRAMAS"
+         }, 
+         {
+          "name": "FAX Y TELEX"
+         }, 
+         {
+          "name": "TRANSPORTE, FLETES Y ACARREOS"
+         }
+        ], 
+        "name": "SERVICIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "APORTES A FONDOS DE PENSIONES Y/O CESANTIAS"
+         }, 
+         {
+          "name": "APORTES CAJAS DE COMPENSACION FAMILIAR"
+         }, 
+         {
+          "name": "APORTES ICBF"
+         }, 
+         {
+          "name": "SENA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "GASTOS DEPORTIVOS Y DE RECREACION"
+         }, 
+         {
+          "name": "AMORTIZACION TITULOS PENSIONALES"
+         }, 
+         {
+          "name": "CAPACITACION AL PERSONAL"
+         }, 
+         {
+          "name": "INDEMNIZACIONES LABORALES"
+         }, 
+         {
+          "name": "AMORTIZACION BONOS PENSIONALES"
+         }, 
+         {
+          "name": "APORTES A ADMINISTRADORAS DE RIESGOS PROFESIONALES, ARP"
+         }, 
+         {
+          "name": "APORTES A ENTIDADES PROMOTORAS DE SALUD, EPS"
+         }, 
+         {
+          "name": "APORTES SINDICALES"
+         }, 
+         {
+          "name": "GASTOS MEDICOS Y DROGAS"
+         }, 
+         {
+          "name": "HORAS EXTRAS Y RECARGOS"
+         }, 
+         {
+          "name": "JORNALES"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "PRIMAS EXTRALEGALES"
+         }, 
+         {
+          "name": "SALARIO INTEGRAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EMPLEADOS"
+           }
+          ], 
+          "name": "SUELDOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EMPLEADOS"
+           }
+          ], 
+          "name": "PRIMA DE SERVICIOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EMPLEADOS"
+           }
+          ], 
+          "name": "CESANTIAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EMPLEADOS"
+           }
+          ], 
+          "name": "INTERESES SOBRE CESANTIAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EMPLEADOS"
+           }
+          ], 
+          "name": "VACACIONES"
+         }, 
+         {
+          "name": "VIATICOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EMPLEADOS"
+           }
+          ], 
+          "name": "AUXILIO DE TRANSPORTE"
+         }, 
+         {
+          "name": "INCAPACIDADES"
+         }, 
+         {
+          "name": "PENSIONES DE JUBILACION"
+         }, 
+         {
+          "name": "AMORTIZACION CALCULO ACTUARIAL PENSIONES DE JUBILACION"
+         }, 
+         {
+          "name": "CUOTAS PARTES PENSIONES DE JUBILACION"
+         }, 
+         {
+          "name": "SEGUROS"
+         }, 
+         {
+          "name": "DOTACION Y SUMINISTRO A TRABAJADORES"
+         }, 
+         {
+          "name": "BONIFICACIONES"
+         }, 
+         {
+          "name": "AUXILIOS"
+         }
+        ], 
+        "name": "GASTOS DE PERSONAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ASESORIA TECNICA"
+         }, 
+         {
+          "name": "ASESORIA FINANCIERA"
+         }, 
+         {
+          "name": "AVALUOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ASESORIA JURIDICA"
+           }
+          ], 
+          "name": "ASESORIA JURIDICA"
+         }, 
+         {
+          "name": "AUDITORIA EXTERNA"
+         }, 
+         {
+          "name": "REVISORIA FISCAL"
+         }, 
+         {
+          "name": "JUNTA DIRECTIVA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "HONORARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "IVA DESCONTABLE"
+         }, 
+         {
+          "name": "INDUSTRIA Y COMERCIO"
+         }, 
+         {
+          "name": "A LA PROPIEDAD RAIZ"
+         }, 
+         {
+          "name": "DE TIMBRES"
+         }, 
+         {
+          "name": "DERECHOS SOBRE INSTRUMENTOS PUBLICOS"
+         }, 
+         {
+          "name": "DE VALORIZACION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DE TURISMO"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "DE VEHICULOS"
+         }, 
+         {
+          "name": "DE ESPECTACULOS PUBLICOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "GRAVAMEN MOVIMIENTOS FINANCIEROS"
+           }
+          ], 
+          "name": "CUOTAS DE FOMENTO"
+         }, 
+         {
+          "name": "TASA POR UTILIZACION DE PUERTOS"
+         }
+        ], 
+        "name": "IMPUESTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CARGOS DIFERIDOS"
+         }, 
+         {
+          "name": "INTANGIBLES"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTRAS"
+         }
+        ], 
+        "name": "AMORTIZACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }
+        ], 
+        "name": "DEPRECIACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CONSULARES"
+         }, 
+         {
+          "name": "ADUANEROS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "NOTARIALES"
+           }
+          ], 
+          "name": "NOTARIALES"
+         }, 
+         {
+          "name": "TRAMITES Y LICENCIAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "REGISTRO MERCANTIL"
+           }
+          ], 
+          "name": "REGISTRO MERCANTIL"
+         }
+        ], 
+        "name": "GASTOS LEGALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "CONSTRUCCIONES Y EDIFICACIONES"
+           }
+          ], 
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }
+        ], 
+        "name": "MANTENIMIENTO Y REPARACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ALOJAMIENTO Y MANUTENCION"
+         }, 
+         {
+          "name": "PASAJES AEREOS"
+         }, 
+         {
+          "name": "PASAJES FERREOS"
+         }, 
+         {
+          "name": "PASAJES TERRESTRES"
+         }, 
+         {
+          "name": "PASAJES FLUVIALES Y/O MARITIMOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "GASTOS DE VIAJE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ARREGLOS ORNAMENTALES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "REPARACIONES LOCATIVAS"
+           }
+          ], 
+          "name": "REPARACIONES LOCATIVAS"
+         }, 
+         {
+          "name": "INSTALACIONES ELECTRICAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTROS"
+           }
+          ], 
+          "name": "OTROS"
+         }
+        ], 
+        "name": "ADECUACION E INSTALACION"
+       }
+      ], 
+      "name": "OPERACIONALES DE ADMINISTRACION"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "DONACIONES"
+         }, 
+         {
+          "name": "AMORTIZACION DE BIENES ENTREGADOS EN COMODATO"
+         }, 
+         {
+          "name": "CONSTITUCION DE GARANTIAS"
+         }, 
+         {
+          "name": "DEMANDAS LABORALES"
+         }, 
+         {
+          "name": "INDEMNIZACIONES"
+         }, 
+         {
+          "name": "DEMANDAS POR INCUMPLIMIENTO DE CONTRATOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTROS"
+           }
+          ], 
+          "name": "OTROS"
+         }, 
+         {
+          "name": "MULTAS, SANCIONES Y LITIGIOS"
+         }
+        ], 
+        "name": "GASTOS DIVERSOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "INTERESES"
+         }, 
+         {
+          "name": "DIFERENCIA EN CAMBIO"
+         }, 
+         {
+          "name": "GASTOS BANCARIOS"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "DESCUENTOS COMERCIALES CONDICIONADOS"
+         }, 
+         {
+          "name": "REAJUSTE MONETARIO-UPAC (HOY UVR)"
+         }, 
+         {
+          "name": "GASTOS EN NEGOCIACION CERTIFICADOS DE CAMBIO"
+         }, 
+         {
+          "name": "GASTOS MANEJO Y EMISION DE BONOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "PRIMA AMORTIZADA"
+         }
+        ], 
+        "name": "FINANCIEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "COSTAS Y PROCESOS JUDICIALES"
+         }, 
+         {
+          "name": "IMPUESTOS ASUMIDOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "COSTOS Y GASTOS DE EJERCICIOS ANTERIORES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ACTIVIDADES CULTURALES Y CIVICAS"
+         }
+        ], 
+        "name": "GASTOS EXTRAORDINARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE SOCIEDADES ANONIMAS Y/O ASIMILADAS"
+         }, 
+         {
+          "name": "DE SOCIEDADES LIMITADAS Y/O ASIMILADAS"
+         }
+        ], 
+        "name": "PERDIDAS METODO DE PARTICIPACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VENTA DE OTROS ACTIVOS"
+         }, 
+         {
+          "name": "VENTA DE INTANGIBLES"
+         }, 
+         {
+          "name": "PERDIDAS POR SINIESTROS"
+         }, 
+         {
+          "name": "VENTA DE PROPIEDADES, PLANTA Y EQUIPO"
+         }, 
+         {
+          "name": "VENTA DE CARTERA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "VENTA DE INVERSIONES"
+         }, 
+         {
+          "name": "RETIRO DE PROPIEDADES, PLANTA Y EQUIPO"
+         }, 
+         {
+          "name": "RETIRO DE OTROS ACTIVOS"
+         }
+        ], 
+        "name": "PERDIDA EN VENTA Y RETIRO DE BIENES"
+       }
+      ], 
+      "name": "NO OPERACIONALES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "IMPUESTO DE RENTA Y COMPLEMENTARIOS"
+         }
+        ], 
+        "name": "IMPUESTO DE RENTA Y COMPLEMENTARIOS"
+       }
+      ], 
+      "name": "IMPUESTO DE RENTA Y COMPLEMENTARIOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "GANANCIAS Y PERDIDAS"
+         }
+        ], 
+        "name": "GANANCIAS Y PERDIDAS"
+       }
+      ], 
+      "name": "GANANCIAS Y PERDIDAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AMORTIZACION CALCULO ACTUARIAL PENSIONES DE JUBILACION"
+         }, 
+         {
+          "name": "CESANTIAS"
+         }, 
+         {
+          "name": "JORNALES"
+         }, 
+         {
+          "name": "INCAPACIDADES"
+         }, 
+         {
+          "name": "AUXILIO DE TRANSPORTE"
+         }, 
+         {
+          "name": "VIATICOS"
+         }, 
+         {
+          "name": "HORAS EXTRAS Y RECARGOS"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "VACACIONES"
+         }, 
+         {
+          "name": "INTERESES SOBRE CESANTIAS"
+         }, 
+         {
+          "name": "PRIMA DE SERVICIOS"
+         }, 
+         {
+          "name": "AUXILIOS"
+         }, 
+         {
+          "name": "PRIMAS EXTRALEGALES"
+         }, 
+         {
+          "name": "AMORTIZACION TITULOS PENSIONALES"
+         }, 
+         {
+          "name": "PENSIONES DE JUBILACION"
+         }, 
+         {
+          "name": "SEGUROS"
+         }, 
+         {
+          "name": "CUOTAS PARTES PENSIONES DE JUBILACION"
+         }, 
+         {
+          "name": "DOTACION Y SUMINISTRO A TRABAJADORES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "AMORTIZACION BONOS PENSIONALES"
+         }, 
+         {
+          "name": "INDEMNIZACIONES LABORALES"
+         }, 
+         {
+          "name": "CAPACITACION AL PERSONAL"
+         }, 
+         {
+          "name": "GASTOS DEPORTIVOS Y DE RECREACION"
+         }, 
+         {
+          "name": "APORTES A ENTIDADES PROMOTORAS DE SALUD, EPS"
+         }, 
+         {
+          "name": "APORTES A ADMINISTRADORAS DE RIESGOS PROFESIONALES, ARP"
+         }, 
+         {
+          "name": "APORTES SINDICALES"
+         }, 
+         {
+          "name": "GASTOS MEDICOS Y DROGAS"
+         }, 
+         {
+          "name": "BONIFICACIONES"
+         }, 
+         {
+          "name": "APORTES ICBF"
+         }, 
+         {
+          "name": "APORTES CAJAS DE COMPENSACION FAMILIAR"
+         }, 
+         {
+          "name": "SENA"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "APORTES A FONDOS DE PENSIONES Y/O CESANTIAS"
+         }, 
+         {
+          "name": "SALARIO INTEGRAL"
+         }, 
+         {
+          "name": "SUELDOS"
+         }
+        ], 
+        "name": "GASTOS DE PERSONAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DEUDORES"
+         }, 
+         {
+          "name": "INVENTARIOS"
+         }, 
+         {
+          "name": "INVERSIONES"
+         }, 
+         {
+          "name": "OTROS ACTIVOS"
+         }, 
+         {
+          "name": "PROPIEDADES, PLANTA Y EQUIPO"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ESTAMPILLAS"
+         }, 
+         {
+          "name": "MICROFILMACION"
+         }, 
+         {
+          "name": "LIBROS, SUSCRIPCIONES, PERIODICOS Y REVISTAS"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "TAXIS Y BUSES"
+         }, 
+         {
+          "name": "POLVORA Y SIMILARES"
+         }, 
+         {
+          "name": "INDEMNIZACION POR DANOS A TERCEROS"
+         }, 
+         {
+          "name": "CASINO Y RESTAURANTE"
+         }, 
+         {
+          "name": "PARQUEADEROS"
+         }, 
+         {
+          "name": "MUSICA AMBIENTAL"
+         }, 
+         {
+          "name": "COMBUSTIBLES Y LUBRICANTES"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Otros Gastos"
+           }
+          ], 
+          "name": "OTROS"
+         }, 
+         {
+          "name": "ELEMENTOS DE ASEO Y CAFETERIA"
+         }, 
+         {
+          "name": "GASTOS DE REPRESENTACION Y RELACIONES PUBLICAS"
+         }, 
+         {
+          "name": "UTILES, PAPELERIA Y FOTOCOPIAS"
+         }
+        ], 
+        "name": "DIVERSOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "FINANCIEROS-REAJUSTE DEL SISTEMA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE SOCIEDADES LIMITADAS Y/O ASIMILADAS"
+         }, 
+         {
+          "name": "DE SOCIEDADES ANONIMAS Y/O ASIMILADAS"
+         }
+        ], 
+        "name": "PERDIDAS METODO DE PARTICIPACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }
+        ], 
+        "name": "DEPRECIACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SUSTRACCION Y HURTO"
+         }, 
+         {
+          "name": "CUMPLIMIENTO"
+         }, 
+         {
+          "name": "VUELO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "TERREMOTO"
+         }, 
+         {
+          "name": "LUCRO CESANTE"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "ROTURA DE MAQUINARIA"
+         }, 
+         {
+          "name": "CORRIENTE DEBIL"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "RESPONSABILIDAD CIVIL Y EXTRACONTRACTUAL"
+         }, 
+         {
+          "name": "OBLIGATORIO ACCIDENTE DE TRANSITO"
+         }, 
+         {
+          "name": "VIDA COLECTIVA"
+         }, 
+         {
+          "name": "INCENDIO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "MANEJO"
+         }
+        ], 
+        "name": "SEGUROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "INTANGIBLES"
+         }, 
+         {
+          "name": "CARGOS DIFERIDOS"
+         }
+        ], 
+        "name": "AMORTIZACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "NOTARIALES"
+         }, 
+         {
+          "name": "REGISTRO MERCANTIL"
+         }, 
+         {
+          "name": "TRAMITES Y LICENCIAS"
+         }, 
+         {
+          "name": "ADUANEROS"
+         }, 
+         {
+          "name": "CONSULARES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "GASTOS LEGALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }
+        ], 
+        "name": "MANTENIMIENTO Y REPARACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PUBLICIDAD, PROPAGANDA Y PROMOCION"
+         }, 
+         {
+          "name": "GAS"
+         }, 
+         {
+          "name": "TRANSPORTE, FLETES Y ACARREOS"
+         }, 
+         {
+          "name": "ASEO Y VIGILANCIA"
+         }, 
+         {
+          "name": "FAX Y TELEX"
+         }, 
+         {
+          "name": "CORREO, PORTES Y TELEGRAMAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ENERGIA ELECTRICA"
+         }, 
+         {
+          "name": "TELEFONO"
+         }, 
+         {
+          "name": "PROCESAMIENTO ELECTRONICO DE DATOS"
+         }, 
+         {
+          "name": "ACUEDUCTO Y ALCANTARILLADO"
+         }, 
+         {
+          "name": "ASISTENCIA TECNICA"
+         }, 
+         {
+          "name": "TEMPORALES"
+         }
+        ], 
+        "name": "SERVICIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CONTRIBUCIONES"
+         }, 
+         {
+          "name": "AFILIACIONES Y SOSTENIMIENTO"
+         }
+        ], 
+        "name": "CONTRIBUCIONES Y AFILIACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "AERODROMOS"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }
+        ], 
+        "name": "ARRENDAMIENTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ASESORIA JURIDICA"
+         }, 
+         {
+          "name": "AVALUOS"
+         }, 
+         {
+          "name": "ASESORIA TECNICA"
+         }, 
+         {
+          "name": "ASESORIA FINANCIERA"
+         }, 
+         {
+          "name": "JUNTA DIRECTIVA"
+         }, 
+         {
+          "name": "AUDITORIA EXTERNA"
+         }, 
+         {
+          "name": "REVISORIA FISCAL"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "HONORARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "IVA DESCONTABLE"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CUOTAS DE FOMENTO"
+         }, 
+         {
+          "name": "DE TIMBRES"
+         }, 
+         {
+          "name": "LICORES"
+         }, 
+         {
+          "name": "DE VEHICULOS"
+         }, 
+         {
+          "name": "DE ESPECTACULOS PUBLICOS"
+         }, 
+         {
+          "name": "CERVEZAS"
+         }, 
+         {
+          "name": "CIGARRILLOS"
+         }, 
+         {
+          "name": "A LA PROPIEDAD RAIZ"
+         }, 
+         {
+          "name": "INDUSTRIA Y COMERCIO"
+         }, 
+         {
+          "name": "DE TURISMO"
+         }, 
+         {
+          "name": "TASA POR UTILIZACION DE PUERTOS"
+         }, 
+         {
+          "name": "DE VALORIZACION"
+         }, 
+         {
+          "name": "DERECHOS SOBRE INSTRUMENTOS PUBLICOS"
+         }
+        ], 
+        "name": "IMPUESTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PASAJES TERRESTRES"
+         }, 
+         {
+          "name": "PASAJES FERREOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ALOJAMIENTO Y MANUTENCION"
+         }, 
+         {
+          "name": "PASAJES FLUVIALES Y/O MARITIMOS"
+         }, 
+         {
+          "name": "PASAJES AEREOS"
+         }
+        ], 
+        "name": "GASTOS DE VIAJE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ARREGLOS ORNAMENTALES"
+         }, 
+         {
+          "name": "REPARACIONES LOCATIVAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "INSTALACIONES ELECTRICAS"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "ADECUACION E INSTALACION"
+       }
+      ], 
+      "name": "OPERACIONALES DE VENTAS"
+     }
+    ], 
+    "name": "GASTOS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "VALOR TITULOS PENSIONALES"
+         }, 
+         {
+          "name": "TITULOS PENSIONALES POR AMORTIZAR (DB)"
+         }, 
+         {
+          "name": "INTERESES CAUSADOS SOBRE TITULOS PENSIONALES"
+         }
+        ], 
+        "name": "TITULOS PENSIONALES"
+       }, 
+       {
+        "name": "PAPELES COMERCIALES"
+       }, 
+       {
+        "name": "BONOS OBLIGATORIAMENTE CONVERTIBLES EN ACCIONES"
+       }, 
+       {
+        "name": "BONOS EN CIRCULACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BONOS PENSIONALES POR AMORTIZAR (DB)"
+         }, 
+         {
+          "name": "INTERESES CAUSADOS SOBRE BONOS PENSIONALES"
+         }, 
+         {
+          "name": "VALOR BONOS PENSIONALES"
+         }
+        ], 
+        "name": "BONOS PENSIONALES"
+       }
+      ], 
+      "name": "BONOS Y PAPELES COMERCIALES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "CUENTAS DE OPERACION CONJUNTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PARA ESTABILIDAD DE OBRA"
+         }, 
+         {
+          "name": "GARANTIA CUMPLIMIENTO DE CONTRATOS"
+         }, 
+         {
+          "name": "CUMPLIMIENTO OBLIGACIONES LABORALES"
+         }
+        ], 
+        "name": "RETENCIONES A TERCEROS SOBRE CONTRATOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DEPOSITOS JUDICIALES"
+         }, 
+         {
+          "name": "INDEMNIZACIONES"
+         }
+        ], 
+        "name": "EMBARGOS JUDICIALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CUOTAS NETAS"
+         }, 
+         {
+          "name": "GRUPOS EN FORMACION"
+         }
+        ], 
+        "name": "ACREEDORES DEL SISTEMA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SOBRE CONTRATOS"
+         }, 
+         {
+          "name": "PARA OBRAS EN PROCESO"
+         }, 
+         {
+          "name": "DE CLIENTES"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "ANTICIPOS Y AVANCES RECIBIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FONDO DE RESERVA"
+         }, 
+         {
+          "name": "PARA GARANTIA DE CONTRATOS"
+         }, 
+         {
+          "name": "DE LICITACIONES"
+         }, 
+         {
+          "name": "PARA GARANTIA EN LA PRESTACION DE SERVICIOS"
+         }, 
+         {
+          "name": "PARA FUTURO PAGO DE CUOTAS O DERECHOS SOCIALES"
+         }, 
+         {
+          "name": "PARA FUTURA SUSCRIPCION DE ACCIONES"
+         }, 
+         {
+          "name": "DE MANEJO DE BIENES"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "DEPOSITOS RECIBIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VENTA POR CUENTA DE TERCEROS"
+         }, 
+         {
+          "name": "VALORES RECIBIDOS PARA TERCEROS"
+         }
+        ], 
+        "name": "INGRESOS RECIBIDOS PARA TERCEROS"
+       }, 
+       {
+        "name": "CUENTAS EN PARTICIPACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESTAMOS DE PRODUCTOS"
+         }, 
+         {
+          "name": "PROGRAMA DE EXTENSION AGROPECUARIA"
+         }, 
+         {
+          "name": "REEMBOLSO DE COSTOS EXPLORATORIOS"
+         }
+        ], 
+        "name": "DIVERSOS"
+       }
+      ], 
+      "name": "OTROS PASIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "COMPROMISOS DE RECOMPRA DE CARTERA NEGOCIADA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "GOBIERNO NACIONAL"
+         }, 
+         {
+          "name": "ENTIDADES OFICIALES"
+         }
+        ], 
+        "name": "OBLIGACIONES GUBERNAMENTALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CONTRATOS DE ARRENDAMIENTO FINANCIERO (LEASING)"
+         }, 
+         {
+          "name": "CARTAS DE CREDITO"
+         }, 
+         {
+          "name": "ACEPTACIONES FINANCIERAS"
+         }, 
+         {
+          "name": "PAGARES"
+         }
+        ], 
+        "name": "CORPORACIONES FINANCIERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SOBREGIROS"
+         }, 
+         {
+          "name": "CARTAS DE CREDITO"
+         }, 
+         {
+          "name": "PAGARES"
+         }, 
+         {
+          "name": "ACEPTACIONES BANCARIAS"
+         }
+        ], 
+        "name": "BANCOS DEL EXTERIOR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CARTAS DE CREDITO"
+         }, 
+         {
+          "name": "SOBREGIROS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "BANCOLOMBIA MORATO"
+           }
+          ], 
+          "name": "PAGARES"
+         }, 
+         {
+          "name": "ACEPTACIONES BANCARIAS"
+         }
+        ], 
+        "name": "BANCOS NACIONALES"
+       }, 
+       {
+        "name": "ENTIDADES FINANCIERAS DEL EXTERIOR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BONOS"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "ACCIONES"
+         }, 
+         {
+          "name": "CERTIFICADOS"
+         }, 
+         {
+          "name": "CEDULAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "PAPELES COMERCIALES"
+         }, 
+         {
+          "name": "TITULOS"
+         }, 
+         {
+          "name": "ACEPTACIONES BANCARIAS O FINANCIERAS"
+         }
+        ], 
+        "name": "COMPROMISOS DE RECOMPRA DE INVERSIONES NEGOCIADAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SOBREGIROS"
+         }, 
+         {
+          "name": "PAGARES"
+         }, 
+         {
+          "name": "HIPOTECARIAS"
+         }
+        ], 
+        "name": "CORPORACIONES DE AHORRO Y VIVIENDA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PAGARES"
+         }, 
+         {
+          "name": "ACEPTACIONES FINANCIERAS"
+         }, 
+         {
+          "name": "CONTRATOS DE ARRENDAMIENTO FINANCIERO (LEASING)"
+         }
+        ], 
+        "name": "COMPANIAS DE FINANCIAMIENTO COMERCIAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DIRECTORES"
+         }, 
+         {
+          "name": "SOCIOS O ACCIONISTAS"
+         }, 
+         {
+          "name": "FONDOS Y COOPERATIVAS"
+         }, 
+         {
+          "name": "CASA MATRIZ"
+         }, 
+         {
+          "name": "COMPANIAS VINCULADAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PARTICULARES"
+           }
+          ], 
+          "name": "PARTICULARES"
+         }, 
+         {
+          "name": "OTRAS"
+         }
+        ], 
+        "name": "OTRAS OBLIGACIONES"
+       }
+      ], 
+      "name": "OBLIGACIONES FINANCIERAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "APORTES A ADMINISTRADORAS DE RIESGOS PROFESIONALES, ARP"
+         }, 
+         {
+          "name": "SINDICATOS"
+         }, 
+         {
+          "name": "APORTES AL ICBF, SENA Y CAJAS DE COMPENSACION"
+         }, 
+         {
+          "name": "EMBARGOS JUDICIALES"
+         }, 
+         {
+          "name": "APORTES AL FIC"
+         }, 
+         {
+          "name": "LIBRANZAS"
+         }, 
+         {
+          "name": "FONDOS"
+         }, 
+         {
+          "name": "COOPERATIVAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "APORTES A ENTIDADES PROMOTORAS DE SALUD, EPS"
+         }
+        ], 
+        "name": "RETENCIONES Y APORTES DE NOMINA"
+       }, 
+       {
+        "name": "CUOTAS POR DEVOLVER"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "IMPUESTO DE INDUSTRIA Y COMERCIO RETENIDO"
+           }
+          ], 
+          "name": "IMPUESTO DE INDUSTRIA Y COMERCIO RETENIDO"
+         }
+        ], 
+        "name": "IMPUESTO DE INDUSTRIA Y COMERCIO RETENIDO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "LIGINA MARINA CANELON CASTELLANOS"
+           }
+          ], 
+          "name": "DIVIDENDOS"
+         }, 
+         {
+          "name": "PARTICIPACIONES"
+         }
+        ], 
+        "name": "DIVIDENDOS O PARTICIPACIONES POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "IMPUESTO A LAS VENTAS RETENIDO"
+           }
+          ], 
+          "name": "IMPUESTO A LAS VENTAS RETENIDO"
+         }
+        ], 
+        "name": "IMPUESTO A LAS VENTAS RETENIDO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "SALARIOS Y PAGOS LABORALES"
+           }
+          ], 
+          "name": "SALARIOS Y PAGOS LABORALES"
+         }, 
+         {
+          "name": "DIVIDENDOS Y/O PARTICIPACIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "RETEFTE HONORARIOS 10%"
+           }, 
+           {
+            "name": "RETEFTE HONORARIOS 11%"
+           }
+          ], 
+          "name": "HONORARIOS"
+         }, 
+         {
+          "name": "POR IMPUESTO DE TIMBRE"
+         }, 
+         {
+          "name": "ENAJENACION PROPIEDADES PLANTA Y EQUIPO, PERSONAS NATURALES"
+         }, 
+         {
+          "name": "AUTORRETENCIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTRAS RETENCIONES Y PATRIMONIO"
+           }
+          ], 
+          "name": "OTRAS RETENCIONES Y PATRIMONIO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "COMPRAS GRAL"
+           }
+          ], 
+          "name": "COMPRAS"
+         }, 
+         {
+          "name": "LOTERIAS, RIFAS, APUESTAS Y SIMILARES"
+         }, 
+         {
+          "name": "POR INGRESOS OBTENIDOS EN EL EXTERIOR"
+         }, 
+         {
+          "name": "POR PAGOS AL EXTERIOR"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PAGO DIAN RETENCIONES"
+           }
+          ], 
+          "name": "PAGO DIAN RETENCIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "COMISIONES"
+           }
+          ], 
+          "name": "COMISIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "DE HOTEL, RESTAURANTE Y HOSPEDAJE"
+           }, 
+           {
+            "name": "TRANSPORTE DE PASAJEROS TERRESTRE"
+           }, 
+           {
+            "name": "ASEO Y/O VIGILANCIA"
+           }, 
+           {
+            "name": "SERVICIOS TEMPORALES"
+           }, 
+           {
+            "name": "TRANSPORTE DE CARGA"
+           }, 
+           {
+            "name": "SERVICIOS GRAL DECLARANTES"
+           }, 
+           {
+            "name": "SERVICIOS GRAL NO DECLARANTES"
+           }
+          ], 
+          "name": "SERVICIOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ARRENDAMIENTOS BIENES INMUEBLES"
+           }
+          ], 
+          "name": "ARRENDAMIENTOS"
+         }, 
+         {
+          "name": "RENDIMIENTOS FINANCIEROS"
+         }
+        ], 
+        "name": "RETENCION EN LA FUENTE"
+       }, 
+       {
+        "name": "DEUDAS CON DIRECTORES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SOCIOS"
+         }, 
+         {
+          "name": "ACCIONISTAS"
+         }
+        ], 
+        "name": "DEUDAS CON ACCIONISTAS O SOCIOS"
+       }, 
+       {
+        "name": "REGALIAS POR PAGAR"
+       }, 
+       {
+        "name": "INSTALAMENTOS POR PAGAR"
+       }, 
+       {
+        "name": "ACREEDORES OFICIALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TRANSPORTES, FLETES Y ACARREOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "SERVICIOS TECNICOS"
+         }, 
+         {
+          "name": "SERVICIOS DE MANTENIMIENTO"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "HONORARIOS"
+         }, 
+         {
+          "name": "LIBROS, SUSCRIPCIONES, PERIODICOS Y REVISTAS"
+         }, 
+         {
+          "name": "GASTOS LEGALES"
+         }, 
+         {
+          "name": "GASTOS FINANCIEROS"
+         }, 
+         {
+          "name": "SERVICIOS ADUANEROS"
+         }, 
+         {
+          "name": "GASTOS DE REPRESENTACION Y RELACIONES PUBLICAS"
+         }, 
+         {
+          "name": "GASTOS DE VIAJE"
+         }, 
+         {
+          "name": "SERVICIOS PUBLICOS"
+         }, 
+         {
+          "name": "SEGUROS"
+         }, 
+         {
+          "name": "ARRENDAMIENTOS"
+         }
+        ], 
+        "name": "COSTOS Y GASTOS POR PAGAR"
+       }, 
+       {
+        "name": "ORDENES DE COMPRA POR UTILIZAR"
+       }, 
+       {
+        "name": "A CONTRATISTAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DONACIONES ASIGNADAS POR PAGAR"
+         }, 
+         {
+          "name": "FONDO DE PERSEVERANCIA"
+         }, 
+         {
+          "name": "REINTEGROS POR PAGAR"
+         }, 
+         {
+          "name": "COMISIONISTAS DE BOLSAS"
+         }, 
+         {
+          "name": "SOCIEDAD ADMINISTRADORA-FONDOS DE INVERSION"
+         }, 
+         {
+          "name": "FONDOS DE CESANTIAS Y/O PENSIONES"
+         }, 
+         {
+          "name": "DEPOSITARIOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Generica a Pagarr"
+           }
+          ], 
+          "name": "OTROS"
+         }
+        ], 
+        "name": "ACREEDORES VARIOS"
+       }, 
+       {
+        "name": "A CASA MATRIZ"
+       }, 
+       {
+        "name": "A COMPANIAS VINCULADAS"
+       }, 
+       {
+        "name": "CUENTAS CORRIENTES COMERCIALES"
+       }
+      ], 
+      "name": "CUENTAS POR PAGAR"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PROVEEDORES NACIONALES CXP"
+           }
+          ], 
+          "name": "PROVEEDORES NACIONALES CXP"
+         }
+        ], 
+        "name": "NACIONALES"
+       }, 
+       {
+        "name": "CUENTAS CORRIENTES COMERCIALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PROVEEDORES EXTRANJEROS CXP"
+           }
+          ], 
+          "name": "PROVEEDORES EXTRANJEROS CXP"
+         }
+        ], 
+        "name": "DEL EXTERIOR"
+       }, 
+       {
+        "name": "CASA MATRIZ"
+       }, 
+       {
+        "name": "COMPANIAS VINCULADAS"
+       }
+      ], 
+      "name": "PROVEEDORES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INDEMNIZACIONES LABORALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "LEY LABORAL ANTERIOR"
+         }, 
+         {
+          "name": "LEY 50 DE 1990 Y NORMAS POSTERIORES"
+         }
+        ], 
+        "name": "CESANTIAS CONSOLIDADAS"
+       }, 
+       {
+        "name": "INTERESES SOBRE CESANTIAS"
+       }, 
+       {
+        "name": "SALARIOS POR PAGAR"
+       }, 
+       {
+        "name": "CUOTAS PARTES PENSIONES DE JUBILACION"
+       }, 
+       {
+        "name": "PENSIONES POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "BONIFICACIONES"
+         }, 
+         {
+          "name": "SEGUROS"
+         }, 
+         {
+          "name": "PRIMAS"
+         }, 
+         {
+          "name": "AUXILIOS"
+         }, 
+         {
+          "name": "DOTACION Y SUMINISTRO A TRABAJADORES"
+         }
+        ], 
+        "name": "PRESTACIONES EXTRALEGALES"
+       }, 
+       {
+        "name": "PRIMA DE SERVICIOS"
+       }, 
+       {
+        "name": "VACACIONES CONSOLIDADAS"
+       }
+      ], 
+      "name": "OBLIGACIONES LABORALES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "DE TURISMO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VIGENCIA FISCAL CORRIENTE"
+         }, 
+         {
+          "name": "VIGENCIAS FISCALES ANTERIORES"
+         }
+        ], 
+        "name": "DE VALORIZACION"
+       }, 
+       {
+        "name": "DERECHOS SOBRE INSTRUMENTOS PUBLICOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VIGENCIAS FISCALES ANTERIORES"
+         }, 
+         {
+          "name": "VIGENCIA FISCAL CORRIENTE"
+         }
+        ], 
+        "name": "DE VEHICULOS"
+       }, 
+       {
+        "name": "TASA POR UTILIZACION DE PUERTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VIGENCIA FISCAL CORRIENTE"
+         }, 
+         {
+          "name": "VIGENCIAS FISCALES ANTERIORES"
+         }
+        ], 
+        "name": "DE RENTA Y COMPLEMENTARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "IVA RETENIDO"
+           }
+          ], 
+          "name": "IVA RETENIDO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "IVA DESCONTABLE"
+           }
+          ], 
+          "name": "IVA DESCONTABLE"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PAGOS DIAN"
+           }
+          ], 
+          "name": "PAGOS DIAN"
+         }, 
+         {
+          "children": [
+           {
+            "name": "IVA GENERADO"
+           }
+          ], 
+          "name": "IVA GENERADO"
+         }
+        ], 
+        "name": "IMPUESTO SOBRE LAS VENTAS POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VIGENCIAS FISCALES ANTERIORES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PAGOS SECRETARIA DE HACIENDA DISTRITAL"
+           }, 
+           {
+            "name": "IMPUESTO GENERADO"
+           }, 
+           {
+            "name": "IMPUESTOS DESCOTABLES"
+           }, 
+           {
+            "name": "IMPUESTOS RETENIDOS"
+           }
+          ], 
+          "name": "VIGENCIA FISCAL CORRIENTE"
+         }
+        ], 
+        "name": "DE INDUSTRIA Y COMERCIO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE LICORES"
+         }, 
+         {
+          "name": "DE CIGARRILLOS"
+         }, 
+         {
+          "name": "DE CERVEZAS"
+         }
+        ], 
+        "name": "DE LICORES, CERVEZAS Y CIGARRILLOS"
+       }, 
+       {
+        "name": "AL SACRIFICIO DE GANADO"
+       }, 
+       {
+        "name": "A LA PROPIEDAD RAIZ"
+       }, 
+       {
+        "name": "OTROS"
+       }, 
+       {
+        "name": "CUOTAS DE FOMENTO"
+       }, 
+       {
+        "name": "AL AZAR Y JUEGOS"
+       }, 
+       {
+        "name": "GRAVAMENES Y REGALIAS POR UTILIZACION DEL SUELO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE HIDROCARBUROS"
+         }, 
+         {
+          "name": "DE MINAS"
+         }
+        ], 
+        "name": "DE HIDROCARBUROS Y MINAS"
+       }, 
+       {
+        "name": "DE ESPECTACULOS PUBLICOS"
+       }, 
+       {
+        "name": "REGALIAS E IMPUESTOS A LA PEQUENA Y MEDIANA MINERIA"
+       }, 
+       {
+        "name": "A LAS EXPORTACIONES CAFETERAS"
+       }, 
+       {
+        "name": "A LAS IMPORTACIONES"
+       }
+      ], 
+      "name": "IMPUESTOS, GRAVAMENES Y TASAS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "CREDITO POR CORRECCION MONETARIA DIFERIDA"
+       }, 
+       {
+        "name": "UTILIDAD DIFERIDA EN VENTAS A PLAZOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "REAJUSTE DEL SISTEMA"
+         }
+        ], 
+        "name": "ABONOS DIFERIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "MERCANCIA EN TRANSITO YA VENDIDA"
+         }, 
+         {
+          "name": "MATRICULAS Y PENSIONES"
+         }, 
+         {
+          "name": "CUOTAS DE ADMINISTRACION"
+         }, 
+         {
+          "name": "INTERESES"
+         }, 
+         {
+          "name": "ARRENDAMIENTOS"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "HONORARIOS"
+         }, 
+         {
+          "name": "SERVICIOS TECNICOS"
+         }, 
+         {
+          "name": "TRANSPORTES, FLETES Y ACARREOS"
+         }, 
+         {
+          "name": "DE SUSCRIPTORES"
+         }
+        ], 
+        "name": "INGRESOS RECIBIDOS POR ANTICIPADO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DIVERSOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "POR DEPRECIACION FLEXIBLE"
+         }
+        ], 
+        "name": "IMPUESTOS DIFERIDOS"
+       }
+      ], 
+      "name": "DIFERIDOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "MATERIALES Y REPUESTOS"
+         }, 
+         {
+          "name": "REGALIAS"
+         }, 
+         {
+          "name": "GARANTIAS"
+         }, 
+         {
+          "name": "SERVICIOS PUBLICOS"
+         }, 
+         {
+          "name": "GASTOS DE VIAJE"
+         }, 
+         {
+          "name": "TRANSPORTES, FLETES Y ACARREOS"
+         }, 
+         {
+          "name": "SERVICIOS TECNICOS"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "HONORARIOS"
+         }, 
+         {
+          "name": "INTERESES"
+         }
+        ], 
+        "name": "PARA COSTOS Y GASTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "INTERESES SOBRE CESANTIAS"
+         }, 
+         {
+          "name": "VACACIONES"
+         }, 
+         {
+          "name": "CESANTIAS"
+         }, 
+         {
+          "name": "VIATICOS"
+         }, 
+         {
+          "name": "PRIMA DE SERVICIOS"
+         }, 
+         {
+          "name": "PRESTACIONES EXTRALEGALES"
+         }
+        ], 
+        "name": "PARA OBLIGACIONES LABORALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE VEHICULOS"
+         }, 
+         {
+          "name": "DE HIDROCARBUROS Y MINAS"
+         }, 
+         {
+          "name": "DE INDUSTRIA Y COMERCIO"
+         }, 
+         {
+          "name": "TASA POR UTILIZACION DE PUERTOS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "DE RENTA Y COMPLEMENTARIOS"
+         }
+        ], 
+        "name": "PARA OBLIGACIONES FISCALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ENERGIA ELECTRICA"
+         }, 
+         {
+          "name": "TELEFONOS"
+         }, 
+         {
+          "name": "ACUEDUCTO Y ALCANTARILLADO"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "PARA OBRAS DE URBANISMO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PENSIONES DE JUBILACION POR AMORTIZAR (DB)"
+         }, 
+         {
+          "name": "CALCULO ACTUARIAL PENSIONES DE JUBILACION"
+         }
+        ], 
+        "name": "PENSIONES DE JUBILACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }
+        ], 
+        "name": "PARA MANTENIMIENTO Y REPARACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ADMINISTRATIVOS"
+         }, 
+         {
+          "name": "MULTAS Y SANCIONES AUTORIDADES ADMINISTRATIVAS"
+         }, 
+         {
+          "name": "RECLAMOS"
+         }, 
+         {
+          "name": "INTERESES POR MULTAS Y SANCIONES"
+         }, 
+         {
+          "name": "LABORALES"
+         }, 
+         {
+          "name": "PENALES"
+         }, 
+         {
+          "name": "CIVILES"
+         }, 
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "COMERCIALES"
+         }
+        ], 
+        "name": "PARA CONTINGENCIAS"
+       }, 
+       {
+        "name": "PARA OBLIGACIONES DE GARANTIAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PARA OPERACION"
+         }, 
+         {
+          "name": "PARA PROTECCION DE BIENES AGOTABLES"
+         }, 
+         {
+          "name": "PARA COMUNICACIONES"
+         }, 
+         {
+          "name": "PARA AJUSTES EN REDENCION DE UNIDADES"
+         }, 
+         {
+          "name": "AUTOSEGURO"
+         }, 
+         {
+          "name": "PARA PERDIDA EN TRANSPORTE"
+         }, 
+         {
+          "name": "PLANES Y PROGRAMAS DE REFORESTACION Y ELECTRIFICACION"
+         }, 
+         {
+          "name": "PARA BENEFICENCIA"
+         }, 
+         {
+          "name": "OTRAS"
+         }
+        ], 
+        "name": "PROVISIONES DIVERSAS"
+       }
+      ], 
+      "name": "PASIVOS ESTIMADOS Y PROVISIONES"
+     }
+    ], 
+    "name": "PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "PERDIDA DEL EJERCICIO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "UTILIDAD DEL EJERCICIO"
+           }
+          ], 
+          "name": "UTILIDAD DEL EJERCICIO"
+         }
+        ], 
+        "name": "UTILIDAD DEL EJERCICIO"
+       }
+      ], 
+      "name": "RESULTADOS DEL EJERCICIO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "UTILIDADES ACUMULADAS"
+       }, 
+       {
+        "name": "PERDIDAS ACUMULADAS"
+       }
+      ], 
+      "name": "RESULTADOS DE EJERCICIOS ANTERIORES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "AJUSTES POR INFLACION DECRETO 3019 DE 1989"
+       }, 
+       {
+        "name": "SANEAMIENTO FISCAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SUPERAVIT METODO DE PARTICIPACION"
+         }, 
+         {
+          "name": "DE DIVIDENDOS Y PARTICIPACIONES DECRETADAS EN ACCIONES, CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "DE CAPITAL SOCIAL"
+         }, 
+         {
+          "name": "DE SUPERAVIT DE CAPITAL"
+         }, 
+         {
+          "name": "DE RESERVAS"
+         }, 
+         {
+          "name": "DE ACTIVOS EN PERIODO IMPRODUCTIVO"
+         }, 
+         {
+          "name": "DE RESULTADOS DE EJERCICIOS ANTERIORES"
+         }, 
+         {
+          "name": "DE SANEAMIENTO FISCAL"
+         }, 
+         {
+          "name": "DE AJUSTES DECRETO 3019 DE 1989"
+         }
+        ], 
+        "name": "AJUSTES POR INFLACION"
+       }
+      ], 
+      "name": "REVALORIZACION DEL PATRIMONIO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "DIVIDENDOS DECRETADOS EN ACCIONES"
+       }, 
+       {
+        "name": "PARTICIPACIONES DECRETADAS EN CUOTAS O PARTES DE INTERES SOCIAL"
+       }
+      ], 
+      "name": "DIVIDENDOS O PARTICIPACIONES DECRETADOS EN ACCIONES, CUOTAS O PARTES DE INTERES SOCIAL"
+     }, 
+     {
+      "children": [
+       {
+        "name": "CREDITO MERCANTIL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRIMA EN COLOCACION DE ACCIONES"
+         }, 
+         {
+          "name": "PRIMA EN COLOCACION DE ACCIONES POR COBRAR (DB)"
+         }, 
+         {
+          "name": "PRIMA EN COLOCACION DE CUOTAS O PARTES DE INTERES SOCIAL"
+         }
+        ], 
+        "name": "PRIMA EN COLOCACION DE ACCIONES, CUOTAS O PARTES DE INTERES SOCIAL"
+       }, 
+       {
+        "name": "KNOW HOW"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE ACCIONES"
+         }, 
+         {
+          "name": "DE CUOTAS O PARTES DE INTERES SOCIAL"
+         }
+        ], 
+        "name": "SUPERAVIT METODO DE PARTICIPACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EN INTANGIBLES"
+         }, 
+         {
+          "name": "EN DINERO"
+         }, 
+         {
+          "name": "EN VALORES MOBILIARIOS"
+         }, 
+         {
+          "name": "EN BIENES MUEBLES"
+         }, 
+         {
+          "name": "EN BIENES INMUEBLES"
+         }
+        ], 
+        "name": "DONACIONES"
+       }
+      ], 
+      "name": "SUPERAVIT DE CAPITAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "RESERVA PARA READQUISICION DE CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "ACCIONES PROPIAS READQUIRIDAS (DB)"
+         }, 
+         {
+          "name": "RESERVA PARA READQUISICION DE ACCIONES"
+         }, 
+         {
+          "name": "RESERVAS POR DISPOSICIONES FISCALES"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL PROPIAS READQUIRIDAS (DB)"
+         }, 
+         {
+          "name": "RESERVA PARA REPOSICION DE SEMOVIENTES"
+         }, 
+         {
+          "name": "RESERVA LEY 4\u00aa DE 1980"
+         }, 
+         {
+          "name": "RESERVA LEY 7\u00aa DE 1990"
+         }, 
+         {
+          "name": "RESERVA PARA EXTENSION AGROPECUARIA"
+         }, 
+         {
+          "name": "RESERVA LEGAL"
+         }
+        ], 
+        "name": "RESERVAS OBLIGATORIAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PARA BENEFICENCIA Y CIVISMO"
+         }, 
+         {
+          "name": "PARA FUTURAS CAPITALIZACIONES"
+         }, 
+         {
+          "name": "PARA FUTUROS ENSANCHES"
+         }, 
+         {
+          "name": "PARA INVESTIGACIONES Y DESARROLLO"
+         }, 
+         {
+          "name": "PARA ADQUISICION O REPOSICION DE PROPIEDADES, PLANTA Y EQUIPO"
+         }, 
+         {
+          "name": "PARA FOMENTO ECONOMICO"
+         }, 
+         {
+          "name": "PARA CAPITAL DE TRABAJO"
+         }, 
+         {
+          "name": "A DISPOSICION DEL MAXIMO ORGANO SOCIAL"
+         }, 
+         {
+          "name": "PARA ESTABILIZACION DE RENDIMIENTOS"
+         }, 
+         {
+          "name": "OTRAS"
+         }
+        ], 
+        "name": "RESERVAS OCASIONALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "PARA REPOSICION DE ACTIVOS"
+         }, 
+         {
+          "name": "PARA FUTUROS ENSANCHES"
+         }, 
+         {
+          "name": "PARA FUTURAS CAPITALIZACIONES"
+         }
+        ], 
+        "name": "RESERVAS ESTATUTARIAS"
+       }
+      ], 
+      "name": "RESERVAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "APORTES DE SOCIOS-FONDO MUTUO DE INVERSION"
+         }, 
+         {
+          "name": "CONTRIBUCION DE LA EMPRESA-FONDO MUTUO DE INVERSION"
+         }, 
+         {
+          "name": "SUSCRIPCIONES DEL PUBLICO"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }
+        ], 
+        "name": "APORTES SOCIALES"
+       }, 
+       {
+        "name": "INVERSION SUPLEMENTARIA AL CAPITAL ASIGNADO"
+       }, 
+       {
+        "name": "CAPITAL ASIGNADO"
+       }, 
+       {
+        "name": "CAPITAL DE PERSONAS NATURALES"
+       }, 
+       {
+        "name": "APORTES DEL ESTADO"
+       }, 
+       {
+        "name": "FONDO SOCIAL"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "CAPITAL SUSCRITO Y PAGADO"
+           }
+          ], 
+          "name": "CAPITAL SUSCRITO Y PAGADO"
+         }, 
+         {
+          "name": "CAPITAL POR SUSCRIBIR (DB)"
+         }, 
+         {
+          "name": "CAPITAL SUSCRITO POR COBRAR (DB)"
+         }, 
+         {
+          "name": "CAPITAL AUTORIZADO"
+         }
+        ], 
+        "name": "CAPITAL SUSCRITO Y PAGADO"
+       }
+      ], 
+      "name": "CAPITAL SOCIAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ACCIONES"
+         }, 
+         {
+          "name": "DERECHOS FIDUCIARIOS"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }
+        ], 
+        "name": "DE INVERSIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BIENES ENTREGADOS EN COMODATO"
+         }, 
+         {
+          "name": "BIENES RECIBIDOS EN PAGO"
+         }, 
+         {
+          "name": "BIENES DE ARTE Y CULTURA"
+         }, 
+         {
+          "name": "INVENTARIO DE SEMOVIENTES"
+         }
+        ], 
+        "name": "DE OTROS ACTIVOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "YACIMIENTOS"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "MATERIALES PROYECTOS PETROLEROS"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }
+        ], 
+        "name": "DE PROPIEDADES, PLANTA Y EQUIPO"
+       }
+      ], 
+      "name": "SUPERAVIT POR VALORIZACIONES"
+     }
+    ], 
+    "name": "PATRIMONIO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "BIBLIOTECAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OBRAS DE ARTE"
+         }
+        ], 
+        "name": "BIENES DE ARTE Y CULTURA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DIVERSOS"
+         }, 
+         {
+          "name": "BIENES DE ARTE Y CULTURA"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "ESTAMPILLAS"
+         }, 
+         {
+          "name": "DERECHOS SUCESORALES"
+         }, 
+         {
+          "name": "BIENES RECIBIDOS EN PAGO"
+         }, 
+         {
+          "name": "BIENES ENTREGADOS EN COMODATO"
+         }, 
+         {
+          "name": "AMORTIZACION ACUMULADA DE BIENES ENTREGADOS EN COMODATO (CR)"
+         }, 
+         {
+          "name": "MAQUINAS PORTEADORAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTROS"
+           }
+          ], 
+          "name": "OTROS"
+         }
+        ], 
+        "name": "DIVERSOS"
+       }
+      ], 
+      "name": "OTROS ACTIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "BIENES DE ARTE Y CULTURA"
+         }, 
+         {
+          "name": "BIENES ENTREGADOS EN COMODATO"
+         }, 
+         {
+          "name": "BIENES RECIBIDOS EN PAGO"
+         }, 
+         {
+          "name": "INVENTARIO DE SEMOVIENTES"
+         }
+        ], 
+        "name": "DE OTROS ACTIVOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DERECHOS FIDUCIARIOS"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "ACCIONES"
+         }
+        ], 
+        "name": "DE INVERSIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "MATERIALES PROYECTOS PETROLEROS"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "YACIMIENTOS"
+         }
+        ], 
+        "name": "DE PROPIEDADES, PLANTA Y EQUIPO"
+       }
+      ], 
+      "name": "VALORIZACIONES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "CULTIVOS EN DESARROLLO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "CONTRATOS EN EJECUCION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "PLANTACIONES AGRICOLAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "LIFO"
+         }, 
+         {
+          "name": "PARA DIFERENCIA DE INVENTARIO FISICO"
+         }, 
+         {
+          "name": "PARA PERDIDAS DE INVENTARIOS"
+         }, 
+         {
+          "name": "PARA OBSOLESCENCIA"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "POR URBANIZAR"
+         }, 
+         {
+          "name": "URBANIZADOS POR CONSTRUIR"
+         }
+        ], 
+        "name": "TERRENOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "MATERIALES, REPUESTOS Y ACCESORIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "BIENES RAICES PARA LA VENTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "SEMOVIENTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "ENVASES Y EMPAQUES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "INVENTARIOS EN TRANSITO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "OBRAS DE CONSTRUCCION EN CURSO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "OBRAS DE URBANISMO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "PRODUCTOS EN PROCESO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "MATERIAS PRIMAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRODUCTOS DE PESCA"
+         }, 
+         {
+          "name": "SUBPRODUCTOS"
+         }, 
+         {
+          "name": "PRODUCTOS MANUFACTURADOS"
+         }, 
+         {
+          "name": "PRODUCTOS EXTRAIDOS Y/O PROCESADOS"
+         }, 
+         {
+          "name": "PRODUCTOS AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "PRODUCTOS TERMINADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "MERCANCIAS NO FABRICADAS POR LA EMPRESA"
+       }
+      ], 
+      "name": "INVENTARIOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "PLANTAS Y REDES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }
+        ], 
+        "name": "MAQUINARIA Y EQUIPOS EN MONTAJE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ALMACENES"
+         }, 
+         {
+          "name": "OFICINAS"
+         }, 
+         {
+          "name": "EDIFICIOS"
+         }, 
+         {
+          "name": "CAFETERIA Y CASINOS"
+         }, 
+         {
+          "name": "SILOS"
+         }, 
+         {
+          "name": "SALAS DE EXHIBICION Y VENTAS"
+         }, 
+         {
+          "name": "FABRICAS Y PLANTAS INDUSTRIALES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "BODEGAS"
+         }, 
+         {
+          "name": "INSTALACIONES AGROPECUARIAS"
+         }, 
+         {
+          "name": "VIVIENDAS PARA EMPLEADOS Y OBREROS"
+         }, 
+         {
+          "name": "INVERNADEROS"
+         }, 
+         {
+          "name": "CASETAS Y CAMPAMENTOS"
+         }, 
+         {
+          "name": "HANGARES"
+         }, 
+         {
+          "name": "PARQUEADEROS, GARAJES Y DEPOSITOS"
+         }, 
+         {
+          "name": "TERMINAL MARITIMO"
+         }, 
+         {
+          "name": "TERMINAL DE BUSES Y TAXIS"
+         }, 
+         {
+          "name": "TERMINAL FERREO"
+         }
+        ], 
+        "name": "CONSTRUCCIONES Y EDIFICACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PAVIMENTACION Y PATIOS"
+         }, 
+         {
+          "name": "PUENTES"
+         }, 
+         {
+          "name": "VIAS"
+         }, 
+         {
+          "name": "CALLES"
+         }, 
+         {
+          "name": "AERODROMOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "VIAS DE COMUNICACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CULTIVOS EN DESARROLLO"
+         }, 
+         {
+          "name": "CULTIVOS AMORTIZABLES"
+         }
+        ], 
+        "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "ARMAMENTO DE VIGILANCIA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "ENVASES Y EMPAQUES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "POZOS ARTESIANOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CANTERAS"
+         }, 
+         {
+          "name": "MINAS"
+         }
+        ], 
+        "name": "MINAS Y CANTERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "BANDAS TRANSPORTADORAS"
+         }, 
+         {
+          "name": "ESTIBAS Y CARRETAS"
+         }, 
+         {
+          "name": "PALAS Y GRUAS"
+         }, 
+         {
+          "name": "MONTACARGAS"
+         }, 
+         {
+          "name": "BICICLETAS"
+         }, 
+         {
+          "name": "MOTOCICLETAS"
+         }, 
+         {
+          "name": "AUTOS, CAMIONETAS Y CAMPEROS"
+         }, 
+         {
+          "name": "CAMIONES, VOLQUETAS Y FURGONES"
+         }, 
+         {
+          "name": "RECOLECTORES Y CONTENEDORES"
+         }, 
+         {
+          "name": "BUSES Y BUSETAS"
+         }, 
+         {
+          "name": "TRACTOMULAS Y REMOLQUES"
+         }
+        ], 
+        "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACUEDUCTO, ACEQUIAS Y CANALIZACIONES"
+         }, 
+         {
+          "name": "PLANTAS DE GENERACION HIDRAULICA"
+         }, 
+         {
+          "name": "INSTALACIONES PARA AGUA Y ENERGIA"
+         }, 
+         {
+          "name": "PLANTAS DE TRANSMISION Y SUBESTACIONES"
+         }, 
+         {
+          "name": "PLANTAS DE DISTRIBUCION"
+         }, 
+         {
+          "name": "PLANTAS DE GENERACION TERMICA"
+         }, 
+         {
+          "name": "PLANTAS DE GENERACION A GAS"
+         }, 
+         {
+          "name": "PLANTAS DE GENERACION DIESEL, GASOLINA Y PETROLEO"
+         }, 
+         {
+          "name": "PLANTAS DE TRATAMIENTO"
+         }, 
+         {
+          "name": "REDES DE DISTRIBUCION"
+         }, 
+         {
+          "name": "GASODUCTOS"
+         }, 
+         {
+          "name": "POLIDUCTOS"
+         }, 
+         {
+          "name": "OLEODUCTOS"
+         }, 
+         {
+          "name": "REDES DE DISTRIBUCION DE VAPOR"
+         }, 
+         {
+          "name": "REDES DE AIRE"
+         }, 
+         {
+          "name": "INSTALACIONES Y EQUIPO DE BOMBEO"
+         }, 
+         {
+          "name": "REDES DE RECOLECCION DE AGUAS NEGRAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "REDES ALIMENTACION DE GAS"
+         }, 
+         {
+          "name": "REDES EXTERNAS DE TELEFONIA"
+         }, 
+         {
+          "name": "PLANTAS DESHIDRATADORAS"
+         }
+        ], 
+        "name": "ACUEDUCTOS, PLANTAS Y REDES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "REDES FERREAS"
+         }, 
+         {
+          "name": "VAGONES"
+         }, 
+         {
+          "name": "LOCOMOTORAS"
+         }
+        ], 
+        "name": "FLOTA Y EQUIPO FERREO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "PLANTAS Y REDES"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }
+        ], 
+        "name": "PROPIEDADES, PLANTA Y EQUIPO EN TRANSITO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "SEMOVIENTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "YACIMIENTOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }
+        ], 
+        "name": "DEPRECIACION ACUMULADA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DEFECTO FISCAL SOBRE LA CONTABLE (CR)"
+         }, 
+         {
+          "name": "EXCESO FISCAL SOBRE LA CONTABLE"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DEPRECIACION DIFERIDA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }
+        ], 
+        "name": "AMORTIZACION ACUMULADA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "YACIMIENTOS"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "MINAS Y CANTERAS"
+         }
+        ], 
+        "name": "AGOTAMIENTO ACUMULADO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "ARMAMENTO DE VIGILANCIA"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }, 
+         {
+          "name": "ENVASES Y EMPAQUES"
+         }, 
+         {
+          "name": "PLANTACIONES AGRICOLAS Y FORESTALES"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "YACIMIENTOS"
+         }, 
+         {
+          "name": "SEMOVIENTES"
+         }, 
+         {
+          "name": "PROPIEDADES, PLANTA Y EQUIPO EN TRANSITO"
+         }, 
+         {
+          "name": "MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "CONSTRUCCIONES EN CURSO"
+         }, 
+         {
+          "name": "MATERIALES PROYECTOS PETROLEROS"
+         }, 
+         {
+          "name": "TERRENOS"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+         }, 
+         {
+          "name": "EQUIPO DE OFICINA"
+         }, 
+         {
+          "name": "MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "MAQUINARIA EN MONTAJE"
+         }, 
+         {
+          "name": "EQUIPO MEDICO-CIENTIFICO"
+         }, 
+         {
+          "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BOTES"
+         }, 
+         {
+          "name": "BOYAS"
+         }, 
+         {
+          "name": "AMARRES"
+         }, 
+         {
+          "name": "CONTENEDORES Y CHASISES"
+         }, 
+         {
+          "name": "BUQUES"
+         }, 
+         {
+          "name": "LANCHAS"
+         }, 
+         {
+          "name": "REMOLCADORAS"
+         }, 
+         {
+          "name": "GABARRAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "MANUALES DE ENTRENAMIENTO PERSONAL TECNICO"
+         }, 
+         {
+          "name": "TURBINAS Y MOTORES"
+         }, 
+         {
+          "name": "EQUIPOS DE VUELO"
+         }, 
+         {
+          "name": "AVIONES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "HELICOPTEROS"
+         }, 
+         {
+          "name": "AVIONETAS"
+         }
+        ], 
+        "name": "FLOTA Y EQUIPO AEREO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "MAQUINARIA Y EQUIPO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "MUEBLES Y ENSERES"
+           }
+          ], 
+          "name": "MUEBLES Y ENSERES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EQUIPOS"
+           }
+          ], 
+          "name": "EQUIPOS"
+         }
+        ], 
+        "name": "EQUIPO DE OFICINA"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "EQUIPOS DE PROCESAMIENTO DE DATOS"
+           }
+          ], 
+          "name": "EQUIPOS DE PROCESAMIENTO DE DATOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "EQUIPOS DE TELECOMUNICACIONES"
+           }
+          ], 
+          "name": "EQUIPOS DE TELECOMUNICACIONES"
+         }, 
+         {
+          "name": "EQUIPOS DE RADIO"
+         }, 
+         {
+          "name": "LINEAS TELEFONICAS"
+         }, 
+         {
+          "name": "SATELITES Y ANTENAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "EQUIPO DE COMPUTACION Y COMUNICACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "INSTRUMENTAL"
+         }, 
+         {
+          "name": "LABORATORIO"
+         }, 
+         {
+          "name": "ODONTOLOGICO"
+         }, 
+         {
+          "name": "MEDICO"
+         }
+        ], 
+        "name": "EQUIPO MEDICO-CIENTIFICO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE HABITACIONES"
+         }, 
+         {
+          "name": "DE COMESTIBLES Y BEBIDAS"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "EQUIPO DE HOTELES Y RESTAURANTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "TUBERIAS Y EQUIPO"
+         }, 
+         {
+          "name": "COSTOS DE IMPORTACION MATERIALES"
+         }, 
+         {
+          "name": "PROYECTOS DE CONSTRUCCION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "MATERIALES PROYECTOS PETROLEROS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "URBANOS"
+         }, 
+         {
+          "name": "RURALES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "TERRENOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "POZOS ARTESIANOS"
+         }, 
+         {
+          "name": "PROYECTOS DE EXPLORACION"
+         }, 
+         {
+          "name": "PROYECTOS DE DESARROLLO"
+         }, 
+         {
+          "name": "CONSTRUCCIONES Y EDIFICACIONES"
+         }, 
+         {
+          "name": "ACUEDUCTOS, PLANTAS Y REDES"
+         }, 
+         {
+          "name": "VIAS DE COMUNICACION"
+         }
+        ], 
+        "name": "CONSTRUCCIONES EN CURSO"
+       }
+      ], 
+      "name": "PROPIEDADES, PLANTA Y EQUIPO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ADQUIRIDO O COMPRADO"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "FORMADO O ESTIMADO"
+         }
+        ], 
+        "name": "CREDITO MERCANTIL"
+       }, 
+       {
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CONCESIONES Y FRANQUICIAS"
+         }, 
+         {
+          "name": "KNOW HOW"
+         }, 
+         {
+          "name": "DERECHOS"
+         }, 
+         {
+          "name": "CREDITO MERCANTIL"
+         }, 
+         {
+          "name": "PATENTES"
+         }, 
+         {
+          "name": "MARCAS"
+         }, 
+         {
+          "name": "LICENCIAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "DEPRECIACION Y/O AMORTIZACION ACUMULADA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "LICENCIAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "KNOW HOW"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "EN FIDEICOMISOS DE ADMINISTRACION"
+         }, 
+         {
+          "name": "EN BIENES RECIBIDOS EN ARRENDAMIENTO FINANCIERO (LEASING)"
+         }, 
+         {
+          "name": "DE EXHIBICION - PELICULAS"
+         }, 
+         {
+          "name": "DERECHOS DE AUTOR"
+         }, 
+         {
+          "name": "EN FIDEICOMISOS INMOBILIARIOS"
+         }, 
+         {
+          "name": "PUESTO DE BOLSA"
+         }, 
+         {
+          "name": "EN FIDEICOMISOS DE GARANTIA"
+         }
+        ], 
+        "name": "DERECHOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "FRANQUICIAS"
+         }, 
+         {
+          "name": "CONCESIONES"
+         }
+        ], 
+        "name": "CONCESIONES Y FRANQUICIAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ADQUIRIDAS"
+         }, 
+         {
+          "name": "FORMADAS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "MARCAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "FORMADAS"
+         }, 
+         {
+          "name": "ADQUIRIDAS"
+         }
+        ], 
+        "name": "PATENTES"
+       }
+      ], 
+      "name": "INTANGIBLES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "HONORARIOS"
+         }, 
+         {
+          "name": "BODEGAJES"
+         }, 
+         {
+          "name": "MANTENIMIENTO EQUIPOS"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "INTERESES"
+         }, 
+         {
+          "name": "SEGUROS Y FIANZAS"
+         }, 
+         {
+          "name": "ARRENDAMIENTOS"
+         }, 
+         {
+          "name": "SUSCRIPCIONES"
+         }, 
+         {
+          "name": "SERVICIOS"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "GASTOS PAGADOS POR ANTICIPADO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "POZOS SECOS"
+         }, 
+         {
+          "name": "OTROS COSTOS DE EXPLORACION"
+         }, 
+         {
+          "name": "POZOS NO COMERCIALES"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "COSTOS DE EXPLORACION POR AMORTIZAR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MOLDES Y TROQUELES"
+         }, 
+         {
+          "name": "INSTRUMENTAL QUIRURGICO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "LICENCIAS"
+           }
+          ], 
+          "name": "LICENCIAS"
+         }, 
+         {
+          "name": "PUBLICIDAD, PROPAGANDA Y PROMOCION"
+         }, 
+         {
+          "name": "ELEMENTOS DE ASEO Y CAFETERIA"
+         }, 
+         {
+          "name": "IMPUESTO DE RENTA DIFERIDO ?DEBITOS? POR DIFERENCIAS TEMPORALES"
+         }, 
+         {
+          "name": "CUBIERTERIA"
+         }, 
+         {
+          "name": "LOZA Y CRISTALERIA"
+         }, 
+         {
+          "name": "ELEMENTOS DE ROPERIA Y LENCERIA"
+         }, 
+         {
+          "name": "DOTACION Y SUMINISTRO A TRABAJADORES"
+         }, 
+         {
+          "name": "PROGRAMAS PARA COMPUTADOR (SOFTWARE)"
+         }, 
+         {
+          "name": "REMODELACIONES"
+         }, 
+         {
+          "name": "ORGANIZACION Y PREOPERATIVOS"
+         }, 
+         {
+          "name": "FERIAS Y EXPOSICIONES"
+         }, 
+         {
+          "name": "ENTRENAMIENTO DE PERSONAL"
+         }, 
+         {
+          "name": "MEJORAS A PROPIEDADES AJENAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "UTILES Y PAPELERIA"
+           }
+          ], 
+          "name": "UTILES Y PAPELERIA"
+         }, 
+         {
+          "name": "CONTRIBUCIONES Y AFILIACIONES"
+         }, 
+         {
+          "name": "PLATERIA"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "CONCURSOS Y LICITACIONES"
+         }, 
+         {
+          "name": "ESTUDIOS, INVESTIGACIONES Y PROYECTOS"
+         }
+        ], 
+        "name": "CARGOS DIFERIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "SERVICIO A POZOS"
+         }, 
+         {
+          "name": "PERFORACION Y EXPLOTACION"
+         }, 
+         {
+          "name": "FACILIDADES DE PRODUCCION"
+         }, 
+         {
+          "name": "PERFORACIONES CAMPOS EN DESARROLLO"
+         }
+        ], 
+        "name": "COSTOS DE EXPLOTACION Y DESARROLLO"
+       }, 
+       {
+        "name": "CARGOS POR CORRECCION MONETARIA DIFERIDA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "COSTOS DE EXPLOTACION Y DESARROLLO"
+         }, 
+         {
+          "name": "COSTOS DE EXPLORACION POR AMORTIZAR"
+         }
+        ], 
+        "name": "AMORTIZACION ACUMULADA"
+       }
+      ], 
+      "name": "DIFERIDOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ESPECIALES MONEDA NACIONAL"
+         }, 
+         {
+          "name": "ROTATORIOS MONEDA EXTRANJERA"
+         }, 
+         {
+          "name": "ROTATORIOS MONEDA NACIONAL"
+         }, 
+         {
+          "name": "DE AMORTIZACION MONEDA EXTRANJERA"
+         }, 
+         {
+          "name": "ESPECIALES MONEDA EXTRANJERA"
+         }, 
+         {
+          "name": "DE AMORTIZACION MONEDA NACIONAL"
+         }
+        ], 
+        "name": "FONDOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BANCOS"
+         }, 
+         {
+          "name": "ORGANISMOS COOPERATIVOS FINANCIEROS"
+         }, 
+         {
+          "name": "CORPORACIONES DE AHORRO Y VIVIENDA"
+         }
+        ], 
+        "name": "CUENTAS DE AHORRO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MONEDA EXTRANJERA"
+         }, 
+         {
+          "children": [
+           {
+            "name": "CAJAS MENORES"
+           }
+          ], 
+          "name": "CAJAS MENORES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "CAJA GENERAL"
+           }
+          ], 
+          "name": "CAJA GENERAL"
+         }
+        ], 
+        "name": "CAJA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MONEDA NACIONAL"
+         }, 
+         {
+          "name": "MONEDA EXTRANJERA"
+         }
+        ], 
+        "name": "REMESAS EN TRANSITO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "MONEDA EXTRANJERA"
+         }, 
+         {
+          "name": "MONEDA NACIONAL"
+         }
+        ], 
+        "name": "BANCOS"
+       }
+      ], 
+      "name": "DISPONIBLE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "EMPRESAS COMERCIALES"
+         }, 
+         {
+          "name": "EMPRESAS DE SERVICIOS"
+         }, 
+         {
+          "name": "EMPRESAS INDUSTRIALES"
+         }
+        ], 
+        "name": "PAPELES COMERCIALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "TITULOS INMOBILIARIOS"
+         }, 
+         {
+          "name": "TESOROS"
+         }, 
+         {
+          "name": "TITULOS DE DEVOLUCION DE IMPUESTOS NACIONALES (TIDIS)"
+         }, 
+         {
+          "name": "TITULOS FINANCIEROS INDUSTRIALES Y COMERCIALES"
+         }, 
+         {
+          "name": "TITULOS DE AHORRO EDUCATIVO (TAE)"
+         }, 
+         {
+          "name": "TITULOS DE AHORRO NACIONAL (TAN)"
+         }, 
+         {
+          "name": "TITULOS ENERGETICOS DE RENTABILIDAD CRECIENTE (TER)"
+         }, 
+         {
+          "name": "TITULOS DE AHORRO CAFETERO (TAC)"
+         }, 
+         {
+          "name": "TITULOS FINANCIEROS AGROINDUSTRIALES (TFA)"
+         }, 
+         {
+          "name": "TITULOS DE CREDITO DE FOMENTO"
+         }, 
+         {
+          "name": "TITULOS DE PARTICIPACION"
+         }, 
+         {
+          "name": "TITULOS CANJEABLES POR CERTIFICADOS DE CAMBIO"
+         }, 
+         {
+          "name": "TITULOS DE TESORERIA (TES)"
+         }, 
+         {
+          "name": "TITULOS DE DESARROLLO AGROPECUARIO"
+         }
+        ], 
+        "name": "TITULOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BONOS PUBLICOS MONEDA NACIONAL"
+         }, 
+         {
+          "name": "BONOS CONVERTIBLES EN ACCIONES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "BONOS PUBLICOS MONEDA EXTRANJERA"
+         }, 
+         {
+          "name": "BONOS ORDINARIOS"
+         }
+        ], 
+        "name": "BONOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "TRANSPORTE, ALMACENAMIENTO Y COMUNICACIONES"
+         }, 
+         {
+          "name": "ACTIVIDAD FINANCIERA"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "COMERCIO AL POR MAYOR Y AL POR MENOR"
+         }, 
+         {
+          "name": "PESCA"
+         }, 
+         {
+          "name": "EXPLOTACION DE MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "INDUSTRIA MANUFACTURERA"
+         }, 
+         {
+          "name": "SUMINISTRO DE ELECTRICIDAD, GAS Y AGUA"
+         }, 
+         {
+          "name": "CONSTRUCCION"
+         }, 
+         {
+          "name": "AGRICULTURA, GANADERIA, CAZA Y SILVICULTURA"
+         }, 
+         {
+          "name": "ACTIVIDADES INMOBILIARIAS, EMPRESARIALES Y DE ALQUILER"
+         }, 
+         {
+          "name": "SERVICIOS SOCIALES Y DE SALUD"
+         }, 
+         {
+          "name": "ENSENANZA"
+         }, 
+         {
+          "name": "OTRAS ACTIVIDADES DE SERVICIOS COMUNITARIOS, SOCIALES Y PERSONALES"
+         }
+        ], 
+        "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "COMERCIO AL POR MAYOR Y AL POR MENOR"
+         }, 
+         {
+          "name": "CONSTRUCCION"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "HOTELES Y RESTAURANTES"
+         }, 
+         {
+          "name": "TRANSPORTE, ALMACENAMIENTO Y COMUNICACIONES"
+         }, 
+         {
+          "name": "ACTIVIDAD FINANCIERA"
+         }, 
+         {
+          "name": "ACTIVIDADES INMOBILIARIAS, EMPRESARIALES Y DE ALQUILER"
+         }, 
+         {
+          "name": "SERVICIOS SOCIALES Y DE SALUD"
+         }, 
+         {
+          "name": "ENSENANZA"
+         }, 
+         {
+          "name": "OTRAS ACTIVIDADES DE SERVICIOS COMUNITARIOS, SOCIALES Y PERSONALES"
+         }, 
+         {
+          "name": "AGRICULTURA, GANADERIA, CAZA Y SILVICULTURA"
+         }, 
+         {
+          "name": "EXPLOTACION DE MINAS Y CANTERAS"
+         }, 
+         {
+          "name": "PESCA"
+         }, 
+         {
+          "name": "INDUSTRIA MANUFACTURERA"
+         }, 
+         {
+          "name": "SUMINISTRO DE ELECTRICIDAD, GAS Y AGUA"
+         }
+        ], 
+        "name": "ACCIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }
+        ], 
+        "name": "CUENTAS EN PARTICIPACION"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BONOS"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "CERTIFICADOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "ACEPTACIONES BANCARIAS O FINANCIERAS"
+         }, 
+         {
+          "name": "CEDULAS"
+         }, 
+         {
+          "name": "TITULOS"
+         }, 
+         {
+          "name": "PAPELES COMERCIALES"
+         }, 
+         {
+          "name": "ACCIONES"
+         }
+        ], 
+        "name": "DERECHOS DE RECOMPRA DE INVERSIONES NEGOCIADAS (REPOS)"
+       }, 
+       {
+        "children": [
+         {
+          "name": "BONOS PARA DESARROLLO SOCIAL Y SEGURIDAD INTERNA (BDSI)"
+         }, 
+         {
+          "name": "BONOS DE FINANCIAMIENTO PRESUPUESTAL"
+         }, 
+         {
+          "name": "BONOS DE FINANCIAMIENTO ESPECIAL"
+         }, 
+         {
+          "name": "OTRAS"
+         }
+        ], 
+        "name": "OBLIGATORIAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "COMPANIAS DE FINANCIAMIENTO COMERCIAL"
+         }, 
+         {
+          "name": "CORPORACIONES FINANCIERAS"
+         }, 
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "BANCOS COMERCIALES"
+         }
+        ], 
+        "name": "ACEPTACIONES BANCARIAS O FINANCIERAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FIDEICOMISOS DE INVERSION MONEDA NACIONAL"
+         }, 
+         {
+          "name": "FIDEICOMISOS DE INVERSION MONEDA EXTRANJERA"
+         }
+        ], 
+        "name": "DERECHOS FIDUCIARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CEDULAS DE CAPITALIZACION"
+         }, 
+         {
+          "name": "CEDULAS HIPOTECARIAS"
+         }, 
+         {
+          "name": "CEDULAS DE INVERSION"
+         }, 
+         {
+          "name": "OTRAS"
+         }
+        ], 
+        "name": "CEDULAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CERTIFICADOS DE CAMBIO"
+         }, 
+         {
+          "name": "CERTIFICADOS CAFETEROS VALORIZABLES"
+         }, 
+         {
+          "name": "CERTIFICADOS ELECTRICOS VALORIZABLES (CEV)"
+         }, 
+         {
+          "name": "CERTIFICADOS DE REEMBOLSO TRIBUTARIO (CERT)"
+         }, 
+         {
+          "name": "CERTIFICADOS DE DEPOSITO A TERMINO (CDT)"
+         }, 
+         {
+          "name": "CERTIFICADOS DE AHORRO DE VALOR CONSTANTE (CAVC)"
+         }, 
+         {
+          "name": "CERTIFICADOS DE DESARROLLO TURISTICO"
+         }, 
+         {
+          "name": "CERTIFICADOS DE INVERSION FORESTAL (CIF)"
+         }, 
+         {
+          "name": "CERTIFICADOS DE DEPOSITO DE AHORRO"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "CERTIFICADOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS INVERSIONES"
+         }, 
+         {
+          "name": "DERECHOS DE RECOMPRA DE INVERSIONES NEGOCIADAS"
+         }, 
+         {
+          "name": "OBLIGATORIAS"
+         }, 
+         {
+          "name": "ACEPTACIONES BANCARIAS O FINANCIERAS"
+         }, 
+         {
+          "name": "DERECHOS FIDUCIARIOS"
+         }, 
+         {
+          "name": "CUENTAS EN PARTICIPACION"
+         }, 
+         {
+          "name": "BONOS"
+         }, 
+         {
+          "name": "CUOTAS O PARTES DE INTERES SOCIAL"
+         }, 
+         {
+          "name": "ACCIONES"
+         }, 
+         {
+          "name": "PAPELES COMERCIALES"
+         }, 
+         {
+          "name": "TITULOS"
+         }, 
+         {
+          "name": "CERTIFICADOS"
+         }, 
+         {
+          "name": "CEDULAS"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ACCIONES O DERECHOS EN CLUBES DEPORTIVOS"
+         }, 
+         {
+          "name": "DERECHOS EN CLUBES SOCIALES"
+         }, 
+         {
+          "name": "APORTES EN COOPERATIVAS"
+         }, 
+         {
+          "name": "BONOS EN COLEGIOS"
+         }, 
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DIVERSAS"
+         }
+        ], 
+        "name": "OTRAS INVERSIONES"
+       }
+      ], 
+      "name": "INVERSIONES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ANTICIPO DE IMPUESTOS DE INDUSTRIA Y COMERCIO"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "CONTRIBUCIONES"
+         }, 
+         {
+          "name": "SOBRANTES EN LIQUIDACION PRIVADA DE IMPUESTOS"
+         }, 
+         {
+          "name": "IMPUESTOS DESCONTABLES"
+         }, 
+         {
+          "name": "ANTICIPO DE IMPUESTOS DE RENTA Y COMPLEMENTARIOS"
+         }, 
+         {
+          "name": "IMPUESTO DE INDUSTRIA Y COMERCIO RETENIDO"
+         }, 
+         {
+          "children": [
+           {
+            "name": " IMPUESTO A LAS VENTAS RETENIDO"
+           }
+          ], 
+          "name": "IMPUESTO A LAS VENTAS RETENIDO"
+         }, 
+         {
+          "name": "RETENCION EN LA FUENTE"
+         }
+        ], 
+        "name": "ANTICIPO DE IMPUESTOS Y CONTRIBUCIONES O SALDOS A FAVOR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "IMPUESTO A LAS VENTAS RETENIDO"
+           }
+          ], 
+          "name": "IMPUESTO A LAS VENTAS RETENIDO"
+         }, 
+         {
+          "name": "DE PRESTACION DE SERVICIOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "IMPUESTO DE INDUSTRIA Y COMERCIO RETENIDO"
+           }
+          ], 
+          "name": "IMPUESTO DE INDUSTRIA Y COMERCIO RETENIDO"
+         }, 
+         {
+          "name": "DE CONSTRUCCION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "RETEFTE SOBRE COMPRA DE LUBRICANTES"
+           }
+          ], 
+          "name": "RETEFTE SOBRE COMPRA DE LUBRICANTES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "OTROS"
+           }
+          ], 
+          "name": "OTROS"
+         }
+        ], 
+        "name": "RETENCION SOBRE CONTRATOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "A COMPANIAS ASEGURADORAS"
+         }, 
+         {
+          "name": "POR TIQUETES AEREOS"
+         }, 
+         {
+          "name": "A TRANSPORTADORES"
+         }
+        ], 
+        "name": "RECLAMACIONES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "RESPONSABILIDADES"
+         }, 
+         {
+          "name": "MEDICOS, ODONTOLOGICOS Y SIMILARES"
+         }, 
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "CALAMIDAD DOMESTICA"
+         }, 
+         {
+          "name": "EDUCACION"
+         }, 
+         {
+          "name": "VEHICULOS"
+         }, 
+         {
+          "name": "VIVIENDA"
+         }
+        ], 
+        "name": "CUENTAS POR COBRAR A TRABAJADORES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "OTROS"
+         }, 
+         {
+          "name": "DEPOSITARIOS"
+         }, 
+         {
+          "name": "COMISIONISTAS DE BOLSAS"
+         }, 
+         {
+          "name": "FONDO DE INVERSION"
+         }, 
+         {
+          "name": "PAGOS POR CUENTA DE TERCEROS"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR DE TERCEROS"
+         }, 
+         {
+          "name": "FONDOS DE INVERSION SOCIAL"
+         }
+        ], 
+        "name": "DEUDORES VARIOS"
+       }, 
+       {
+        "name": "DERECHOS DE RECOMPRA DE CARTERA NEGOCIADA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "CON GARANTIA PERSONAL"
+         }, 
+         {
+          "name": "CON GARANTIA REAL"
+         }
+        ], 
+        "name": "PRESTAMOS A PARTICULARES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "INGRESOS POR COBRAR"
+         }, 
+         {
+          "name": "PROMESAS DE COMPRAVENTA"
+         }, 
+         {
+          "name": "RETENCION SOBRE CONTRATOS"
+         }, 
+         {
+          "name": "RECLAMACIONES"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR A SOCIOS Y ACCIONISTAS"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR A VINCULADOS ECONOMICOS"
+         }, 
+         {
+          "name": "ANTICIPOS Y AVANCES"
+         }, 
+         {
+          "name": "CUENTAS DE OPERACION CONJUNTA"
+         }, 
+         {
+          "name": "DEPOSITOS"
+         }, 
+         {
+          "name": "CLIENTES"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR A CASA MATRIZ"
+         }, 
+         {
+          "name": "CUENTAS CORRIENTES COMERCIALES"
+         }, 
+         {
+          "name": "DERECHOS DE RECOMPRA DE CARTERA NEGOCIADA"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR A TRABAJADORES"
+         }, 
+         {
+          "name": "PRESTAMOS A PARTICULARES"
+         }, 
+         {
+          "name": "DEUDORES VARIOS"
+         }
+        ], 
+        "name": "PROVISIONES"
+       }, 
+       {
+        "name": "DEUDAS DE DIFICIL COBRO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "DEUDORES CLIENTES NACIONALES"
+           }
+          ], 
+          "name": "NACIONALES"
+         }, 
+         {
+          "name": "DEL EXTERIOR"
+         }, 
+         {
+          "name": "DEUDORES DEL SISTEMA"
+         }
+        ], 
+        "name": "CLIENTES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "COMPANIAS VINCULADAS"
+         }, 
+         {
+          "name": "OTRAS"
+         }, 
+         {
+          "name": "PARTICULARES"
+         }, 
+         {
+          "name": "ACCIONISTAS O SOCIOS"
+         }, 
+         {
+          "name": "CASA MATRIZ"
+         }
+        ], 
+        "name": "CUENTAS CORRIENTES COMERCIALES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PRESTAMOS"
+         }, 
+         {
+          "name": "VENTAS"
+         }, 
+         {
+          "name": "PAGOS A NOMBRE DE CASA MATRIZ"
+         }, 
+         {
+          "name": "VALORES RECIBIDOS POR CASA MATRIZ"
+         }
+        ], 
+        "name": "CUENTAS POR COBRAR A CASA MATRIZ"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "DOUGLAS CANELON"
+           }, 
+           {
+            "name": "LIGIA MARINA CANELON CASTELLANOS"
+           }, 
+           {
+            "name": "ALFONSO SOTO"
+           }
+          ], 
+          "name": "A ACCIONISTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "A SOCIOS"
+           }
+          ], 
+          "name": "A SOCIOS"
+         }
+        ], 
+        "name": "CUENTAS POR COBRAR A SOCIOS Y ACCIONISTAS"
+       }, 
+       {
+        "name": "CUENTAS POR COBRAR A DIRECTORES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "FILIALES"
+         }, 
+         {
+          "name": "SUBSIDIARIAS"
+         }, 
+         {
+          "name": "SUCURSALES"
+         }
+        ], 
+        "name": "CUENTAS POR COBRAR A VINCULADOS ECONOMICOS"
+       }, 
+       {
+        "name": "APORTES POR COBRAR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "AJUSTES POR INFLACION"
+         }, 
+         {
+          "name": "DE ADJUDICACIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "A AGENTES"
+           }
+          ], 
+          "name": "A AGENTES"
+         }, 
+         {
+          "name": "A CONCESIONARIOS"
+         }, 
+         {
+          "name": "A TRABAJADORES"
+         }, 
+         {
+          "name": "A CONTRATISTAS"
+         }, 
+         {
+          "name": "A PROVEEDORES"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "ANTICIPOS Y AVANCES"
+       }, 
+       {
+        "name": "CUENTAS DE OPERACION CONJUNTA"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PARA IMPORTACIONES"
+         }, 
+         {
+          "name": "PARA CONTRATOS"
+         }, 
+         {
+          "name": "PARA SERVICIOS"
+         }, 
+         {
+          "name": "PARA RESPONSABILIDADES"
+         }, 
+         {
+          "name": "PARA JUICIOS EJECUTIVOS"
+         }, 
+         {
+          "name": "EN GARANTIA"
+         }, 
+         {
+          "name": "PARA ADQUISICION DE ACCIONES, CUOTAS O DERECHOS SOCIALES"
+         }, 
+         {
+          "name": "OTROS"
+         }
+        ], 
+        "name": "DEPOSITOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "ARRENDAMIENTOS"
+         }, 
+         {
+          "name": "CERT POR COBRAR"
+         }, 
+         {
+          "name": "HONORARIOS"
+         }, 
+         {
+          "name": "INTERESES"
+         }, 
+         {
+          "name": "COMISIONES"
+         }, 
+         {
+          "name": "DIVIDENDOS Y/O PARTICIPACIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Generica a Cobrar"
+           }
+          ], 
+          "name": "OTROS"
+         }, 
+         {
+          "name": "SERVICIOS"
+         }
+        ], 
+        "name": "INGRESOS POR COBRAR"
+       }, 
+       {
+        "children": [
+         {
+          "name": "DE BIENES RAICES"
+         }, 
+         {
+          "name": "DE FLOTA Y EQUIPO DE TRANSPORTE"
+         }, 
+         {
+          "name": "DE MAQUINARIA Y EQUIPO"
+         }, 
+         {
+          "name": "DE FLOTA Y EQUIPO AEREO"
+         }, 
+         {
+          "name": "DE FLOTA Y EQUIPO FERREO"
+         }, 
+         {
+          "name": "DE SEMOVIENTES"
+         }, 
+         {
+          "name": "DE FLOTA Y EQUIPO FLUVIAL Y/O MARITIMO"
+         }, 
+         {
+          "name": "DE OTROS BIENES"
+         }
+        ], 
+        "name": "PROMESAS DE COMPRA VENTA"
+       }
+      ], 
+      "name": "DEUDORES"
+     }
+    ], 
+    "name": "ACTIVO"
+   }
+  ], 
+  "name": "PLAN DE CUENTAS VAUXOO"
+ }
+}

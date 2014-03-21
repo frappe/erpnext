@@ -31,7 +31,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 				return {
 					query: "accounts.utils.get_account_list", 
 					filters: {
-						is_pl_account: "No",
+						"report_type": "Balance Sheet",
 						company: frappe.query_report.filters_by_name.company.get_value()
 					}
 				}
@@ -42,7 +42,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 			label: frappe._("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: frappe.defaults.get_default("company")
+			default: frappe.defaults.get_user_default("company")
 		},
 	]
 }

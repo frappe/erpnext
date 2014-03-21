@@ -1,0 +1,3930 @@
+{
+ "name": "compta Kazacube", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "RESULTAT FINANCIER"
+     }, 
+     {
+      "name": "RESULTAT NON COURANT"
+     }, 
+     {
+      "name": "RESULTAT AVANT IMPOTS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Marge brute"
+       }, 
+       {
+        "name": "R\u00e9sultat d'exploitation"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Insuffisance brute d'exploitation (d\u00e9biteur)"
+         }, 
+         {
+          "name": "Exc\u00e9dent brut d'exploitation (cr\u00e9diteur)"
+         }
+        ], 
+        "name": "Exc\u00e9dent brut d'exploitation"
+       }, 
+       {
+        "name": "Valeur ajout\u00e9e"
+       }
+      ], 
+      "name": "RESULTAT D'EXPLOITATION"
+     }, 
+     {
+      "name": "RESULTAT COURANT"
+     }, 
+     {
+      "name": "RESULTAT APRES IMPOTS"
+     }
+    ], 
+    "name": "COMPTES DE RESULTATS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Frais de constitution", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais d'augmentation du capital", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais pr\u00e9alables au d\u00e9marrage", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais sur op\u00e9rations de fusions, scissions et transformations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais de publicit\u00e9", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais de prospection", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres frais pr\u00e9liminaires", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Frais pr\u00e9liminaires"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Primes de remboursement des obligations", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Primes de remboursement des obligations"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres charges \u00e0\u00a0 r\u00e9partir", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais d acquisition des immobilisations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Frais d'\u00e9mission des emprunts", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Charges \u00e0\u00a0 r\u00e9partir sur plusieurs exercices"
+         }
+        ], 
+        "name": "IMMOBILISATIONS EN NON-VALEURS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Avances et acomptes vers\u00e9s sur commandes d'immobilisations corporelles", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Immobilisations corporelles en cours de mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Immobilisations corporelles en cours de mat\u00e9riel de transport", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Immobilisations corporelles en cours des installations techniques, mat\u00e9riel et outillage", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Immobilisations corporelles en cours des terrains et constructions", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres immobilisations corporelles en cours", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Immobilisations corporelles en cours"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres immobilisations corporelles", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres immobilisations corporelles"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Installations techniques", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Emballages r\u00e9cup\u00e9rables identifiables", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Outillage", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Mat\u00e9riel", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Mat\u00e9riel et outillage"
+           }, 
+           {
+            "name": "Autres installations techniques, mat\u00e9riel et outillage", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Installations techniques, mat\u00e9riel et outillage"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Constructions sur terrains d'autrui", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Autres b\u00e2timents", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "B\u00e2timents industriels (A,B,,,)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "B\u00e2timents Administratifs et commerciaux", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "B\u00e2timents"
+           }, 
+           {
+            "name": "Agencements et am\u00e9nagements des constructions", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Ouvrages d'infrastructure", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres constructions", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Constructions"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Agencements et am\u00e9nagements de terrains", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Terrains b\u00e2tis", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres terrains", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Terrains de gisement", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Terrains am\u00e9nag\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Terrains nus", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Terrains"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Mat\u00e9riel de bureau", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Mobilier de bureau", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Agencements, installations et am\u00e9nagements divers (biens n'appartenant pas \u00e0\u00a0 l'entreprise)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Mat\u00e9riel informatique", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Mat\u00e9riel de transport", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Mat\u00e9riel de transport"
+         }
+        ], 
+        "name": "IMMOBILISATIONS CORPORELLES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres immobilisations incorporelles", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres immobilisations incorporelles"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Immobilisation en recherche et d\u00e9veloppement", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Immobilisation en recherche et d\u00e9veloppement"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Brevets, marques, droits et valeurs similaires", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Brevets, marques, droits et valeurs similaires"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fonds commercial", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Fonds commercial"
+         }
+        ], 
+        "name": "IMMOBILISATIONS INCORPORELLES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Titres de participation", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Titres de participation"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Actions", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Titres divers", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres titres immobilis\u00e9s"
+         }
+        ], 
+        "name": "IMMOBILISATIONS FINANCIERES 2"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances financi\u00e8res diverses", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es \u00e0\u00a0 des participations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Bons divers", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Bons d'\u00e9quipement", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Obligations", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Titres immobilis\u00e9s (droits de cr\u00e9ance)"
+           }, 
+           {
+            "name": "Cr\u00e9ances immobilis\u00e9es", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cautionnements", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "D\u00e9p\u00f4ts", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "D\u00e9p\u00f4ts et cautionnements vers\u00e9s"
+           }
+          ], 
+          "name": "Autres cr\u00e9ances financi\u00e8res"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Pr\u00eats au personnel", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Pr\u00eats aux associ\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Billets de fonds", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres pr\u00eats", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Pr\u00eats immobilis\u00e9s"
+         }
+        ], 
+        "name": "IMMOBILISATIONS FINANCIERES 1"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Augmentation des dettes de financement", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Augmentation des dettes de financement"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Diminution des cr\u00e9ances immobilis\u00e9es", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Diminution des cr\u00e9ances immobilis\u00e9es"
+         }
+        ], 
+        "name": "ECARTS DE CONVERSION - ACTIF"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des titres de participation", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres titres immobilis\u00e9s", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res-titres"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des pr\u00eats immobilis\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres cr\u00e9ances financi\u00e8res", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res-pr\u00eats"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations corporelles", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations corporelles"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations incorporelles", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des immobilisations incorporelles"
+         }
+        ], 
+        "name": "PROVISIONS POUR DEPRECIATION DES IMMOBILISATIONS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Amortissements des autres immobilisations incorporelles", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Amortissements de l'immobilisation en recherche et d\u00e9veloppement", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Amortissements du fonds commercial", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Amortissements des brevets, marques, droits et valeurs similaires", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Amortissements des immobilisations incorporelles"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Amortissements des b\u00e2timents", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des constructions sur terrains d'autrui", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des ouvrages d'infrastructure", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des installations, agencements et am\u00e9nagements des constructions", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des autres constructions", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Amortissements des constructions"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Amortissements du mat\u00e9riel et outillage", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des emballages r\u00e9cup\u00e9rables identifiables", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des installations techniques", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des autres installations techniques, mat\u00e9riel et outillage", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Amortissements des installations techniques, mat\u00e9riel et outillage"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Amortissements des autres terrains", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des terrains nus", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des terrains am\u00e9nag\u00e9s", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des terrains b\u00e2tis", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des terrains de gisement", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des agencements et am\u00e9nagements de terrains", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Amortissements des terrains"
+           }, 
+           {
+            "name": "Amortissements du mat\u00e9riel de transport", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Amortissements des agencements, installations et am\u00e9nagements divers", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements du mobilier de bureau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements du mat\u00e9riel de bureau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des autres mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements du mat\u00e9riel informatique", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Amortissements du mobilier, mat\u00e9riel de bureau et am\u00e9nagements divers"
+           }, 
+           {
+            "name": "Amortissements des autres immobilisations corporelles", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Amortissements des immobilisations corporelles"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Amortissements des autres charges \u00e0\u00a0 r\u00e9partir", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais d'acquisition des immobilisations", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais d'\u00e9mission des emprunts", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Amortissements des charges \u00e0\u00a0 r\u00e9partir"
+           }, 
+           {
+            "name": "Amortissements des primes de remboursement des obligations"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Amortissements des frais de prospection", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais de publicit\u00e9", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais sur op\u00e9rations de fusions, scissions, et transformations", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais pr\u00e9liminaires au d\u00e9marrage", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais d'augmentation du capital", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des frais de constitution", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Amortissements des autres frais pr\u00e9liminaires", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Amortissements des frais pr\u00e9liminaires"
+           }
+          ], 
+          "name": "Amortissements des non-valeurs"
+         }
+        ], 
+        "name": "AMORTISSEMENTS DES IMMOBILISATIONS"
+       }
+      ], 
+      "name": "COMPTES D'ACTIF IMMOBILISE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Stock", 
+            "name": "Marchandises (groupe A)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Autres marchandises", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Marchandises (groupe B)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Marchandises en cours de route", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Marchandises"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Stock", 
+            "name": "Mati\u00e8res et fournitures consommables en cours de route", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "Emballages perdus", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Emballages \u00e0\u00a0 usage mixte", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Emballages r\u00e9cup\u00e9rables non identifiables", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Emballages"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "Fournitures de magasin", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Fournitures de bureau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Produits d'entretien", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Fournitures d'atelier et d'usine", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Mati\u00e8res consommables (groupe B)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Combustibles", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Mati\u00e8res consommables (groupe A)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Mati\u00e8res et fournitures consommables"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "Mati\u00e8res premi\u00e8res (groupe B)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Mati\u00e8res premi\u00e8res (groupe A)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Mati\u00e8res premi\u00e8res"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Autres mati\u00e8res et fournitures consommables", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Mati\u00e8res et fournitures consommables"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Stock", 
+            "name": "Autres produits en cours", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "Travaux en cours", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Prestations en cours", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "\u00c9tudes en cours", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Services en cours"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "Biens r\u00e9siduels en cours", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Biens interm\u00e9diaires en cours", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Biens produits en cours", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Biens en cours"
+           }
+          ], 
+          "name": "Produits en cours"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Stock", 
+            "name": "Autres produits interm\u00e9diaires et produits r\u00e9siduels", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "Produits interm\u00e9diaires (groupe A)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Produits interm\u00e9diaires (groupe B)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Produits interm\u00e9diaires"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Stock", 
+              "name": "D\u00e9chets", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Mati\u00e8res de r\u00e9cup\u00e9ration", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Stock", 
+              "name": "Rebuts", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Produits r\u00e9siduels (ou mati\u00e8res de r\u00e9cup\u00e9ration)"
+           }
+          ], 
+          "name": "Produits interm\u00e9diaires et produits r\u00e9siduels"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Stock", 
+            "name": "Produits finis en cours de route", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Produits finis (groupe B)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Produits finis (groupe A)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Stock", 
+            "name": "Autres produits finis", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Produits finis"
+         }
+        ], 
+        "name": "STOCKS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Augmentation des dettes circulantes", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Diminution des cr\u00e9ances circulantes", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "\u00c9cart de conversion - Actif (\u00e9l\u00e9ments circulant)"
+         }
+        ], 
+        "name": "ECART DE CONVERSION - ACTIF (\u00c9l\u00e9ments circulants)"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres comptes d'associ\u00e9s d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Actionnaires - capital souscrit et appel\u00e9 non vers\u00e9", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Comptes courants des associ\u00e9s d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Associ\u00e9s - comptes d'apport en soci\u00e9t\u00e9", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es aux comptes d'associ\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Associ\u00e9s - op\u00e9rations faites en commun", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Comptes d'associ\u00e9s - d\u00e9biteurs"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Tax", 
+            "name": "Etat - cr\u00e9dit de TVA (suivant d\u00e9claration)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "children": [
+               {
+                "account_type": "Tax", 
+                "name": "Etat - TVA r\u00e9cup\u00e9rable sur charges 20%", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "account_type": "Tax", 
+                "name": "Etat - TVA r\u00e9cup\u00e9rable sur charges 7%", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "account_type": "Tax", 
+                "name": "Etat - TVA r\u00e9cup\u00e9rable sur charges 14%", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "account_type": "Tax", 
+                "name": "Etat - TVA r\u00e9cup\u00e9rable sur charges 10%", 
+                "report_type": "Balance Sheet"
+               }
+              ], 
+              "name": "Etat - TVA r\u00e9cup\u00e9rable sur charges"
+             }, 
+             {
+              "account_type": "Tax", 
+              "name": "Etat - TVA r\u00e9cup\u00e9rable sur immobilisations", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Etat - TVA r\u00e9cup\u00e9rable"
+           }, 
+           {
+            "name": "Acomptes sur imp\u00f4ts sur les r\u00e9sultats", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Subventions d'\u00e9quilibre \u00e0\u00a0 recevoir", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Subventions d'exploitation \u00e0\u00a0 recevoir", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Subventions d'investissement \u00e0\u00a0 recevoir", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Subventions \u00e0\u00a0 recevoir"
+           }, 
+           {
+            "account_type": "Tax", 
+            "name": "Etat - autres comptes d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Etat ? d\u00e9biteur"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Avances et acomptes au personnel", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Personnel - autres d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Personnel - d\u00e9biteur"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres clients et comptes rattach\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Clients - effets \u00e0\u00a0 recevoir", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cr\u00e9ances sur travaux non encore factur\u00e9s", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Clients - factures \u00e0\u00a0 \u00e9tablir", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Clients - factures \u00e0\u00a0 \u00e9tablir et cr\u00e9ances sur travaux non encore factur\u00e9s"
+           }, 
+           {
+            "name": "Clients douteux ou litigieux", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Clients - retenues de garantie", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Clients - cat\u00e9gorie A", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Clients - cat\u00e9gorie B", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Clients"
+           }
+          ], 
+          "name": "Clients et comptes rattach\u00e9s"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Fournisseurs - cr\u00e9ances pour emballages et mat\u00e9riel \u00e0\u00a0 rendre", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Fournisseurs - avances et acomptes vers\u00e9s sur commandes d'exploitation", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Rabais, remises et ristournes \u00e0\u00a0 obtenir - avoirs non encore re\u00e7us", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres fournisseurs d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Fournisseurs d\u00e9biteurs, avances et acomptes"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Int\u00e9r\u00eats courus et non \u00e9chus \u00e0\u00a0 percevoir", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Charges constat\u00e9es d'avance", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Comptes transitoires ou d'attente - d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Comptes de r\u00e9partition p\u00e9riodique des charges", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Comptes de r\u00e9gularisation - actif"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances sur cessions d'immobilisations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Cr\u00e9ances sur cessions d'\u00e9l\u00e9ments d'actif circulant", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Divers d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Cr\u00e9ances rattach\u00e9es aux autres d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres d\u00e9biteurs"
+         }
+        ], 
+        "name": "CREANCES DE L'ACTIF CIRCULANT"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Actions, partie lib\u00e9r\u00e9e", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Actions, partie non lib\u00e9r\u00e9e", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Obligations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Bons de caisse", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Bons de tr\u00e9sor", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Bons de caisse et bons de tr\u00e9sor"
+           }, 
+           {
+            "name": "Autres titres et valeurs de placement similaires", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Titres et valeurs de placement"
+         }
+        ], 
+        "name": "TITRES ET VALEURS DE PLACEMENT"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des mati\u00e8res et fournitures", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des produits en cours", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des marchandises", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des produits interm\u00e9diaires", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des produits finis", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des stocks"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation - fournisseurs d\u00e9biteurs, avances et acomptes", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation du personnel - d\u00e9biteur", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des clients et comptes rattach\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des comptes d'associ\u00e9s d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des autres d\u00e9biteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des cr\u00e9ances de l'actif circulant"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement"
+         }
+        ], 
+        "name": "PROVISIONS POUR DEPRECIATION DES COMPTES DE L'ACTIF CIRCULANT"
+       }
+      ], 
+      "name": "COMPTES D'ACTIF CIRCULANT (HORS TRESORERIE)"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Dettes rattach\u00e9es \u00e0\u00a0 des participations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Avances re\u00e7ues et comptes courants bloqu\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Dettes de financement diverses", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Fournisseurs d'immobilisation", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "D\u00e9p\u00f4ts et cautionnements re\u00e7ues", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Billets de fonds", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Avances de l'Etat", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Emprunts aupr\u00e8s des \u00e9tablissements de cr\u00e9dit", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres dettes de financement"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Emprunts obligataires", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Emprunts obligataires"
+         }
+        ], 
+        "name": "DETTES DE FINANCEMENT"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres provisions pour risques", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provision pour pertes sur march\u00e9s \u00e0\u00a0 terme", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour amendes, double droits, p\u00e9nalit\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour pertes de change", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour litiges", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour garanties donn\u00e9es aux clients", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour propre assureur", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour risques"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Provisions pour imp\u00f4ts", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour pensions de retraite et obligations similaires", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour charges \u00e0\u00a0 r\u00e9partir sur plusieurs exercices", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Autres provisions pour charges", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour charges"
+         }
+        ], 
+        "name": "Provisions durables pour risques et charges"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Comptes de liaison des \u00e9tablissements", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Comptes de liaison du si\u00e8ge", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Comptes de liaison des \u00e9tablissements et succursales"
+         }
+        ], 
+        "name": "COMPTES DE LIAISON DES ETABLISSEMENTS ET SUCCURSALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Augmentation des cr\u00e9ances immobilis\u00e9es", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Augmentation des cr\u00e9ances immobilis\u00e9es"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Diminution des dettes de financement", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Diminution des dettes de financement"
+         }
+        ], 
+        "name": "\u00c9carts de conversion - Passif"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "Report \u00e0\u00a0 nouveau (solde d\u00e9biteur)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Report \u00e0\u00a0 nouveau (solde cr\u00e9diteur)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Report \u00e0\u00a0 nouveau"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9serve l\u00e9gale", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "R\u00e9serve l\u00e9gale"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9serves r\u00e9glement\u00e9es", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9serves statutaires ou contractuelles", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9serves facultatives", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres r\u00e9serves"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "Primes d'apport", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Primes d'\u00e9mission", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Primes de fusion", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Primes d'\u00e9mission, de fusion et d'apport"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "\u00c9carts de r\u00e9\u00e9valuation", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "\u00c9carts de r\u00e9\u00e9valuation"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "Actionnaires, capital souscrit-non appel\u00e9", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Capital social", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Fonds de dotation", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Equity", 
+              "name": "Compte de l'exploitant", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Equity", 
+              "name": "Capital individuel", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Capital personnel"
+           }
+          ], 
+          "name": "Capital social ou personnel"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9sultats nets en instance d'affectation (solde cr\u00e9diteur)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9sultats nets en instance d'affectation (solde d\u00e9biteur)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "R\u00e9sultats nets en instance d'affectation"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9sultat net de l'exercice (solde cr\u00e9diteur)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "R\u00e9sultat net de l'exercice (solde d\u00e9biteur)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "R\u00e9sultat net de l'exercice"
+         }
+        ], 
+        "name": "CAPITAUX PROPRES"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "Provisions pour plus-values en instance d'imposition", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Provisions pour amortissements d\u00e9rogatoires", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Provisions pour acquisition et construction de logements", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Provisions pour investissements", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Provisions pour reconstitution des gisements", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Autres provisions r\u00e9glement\u00e9es", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions r\u00e9glement\u00e9es"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Equity", 
+            "name": "Subventions d'investissement inscrites au CPC", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Equity", 
+            "name": "Subventions d'investissement re\u00e7ues", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Subventions d'investissement"
+         }
+        ], 
+        "name": "CAPITAUX PROPRES ASSIMILES", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "COMPTES DE FINANCEMENT PERMANENT"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Autres charges financi\u00e8res des exercices ant\u00e9rieurs", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Pertes sur cr\u00e9ances li\u00e9es \u00e0\u00a0 des participations", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Escomptes accord\u00e9s", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Charges nettes sur cession de titres et valeurs de placement", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "Provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie"
+         }
+        ], 
+        "name": "PROVISIONS POUR DEPRECIATION DES COMPTES DE TRESORERIE"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "Autres valeurs \u00e0\u00a0 encaisser", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "Virement de fonds", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Cash", 
+              "name": "Ch\u00e8ques \u00e0\u00a0 l'encaissement", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Cash", 
+              "name": "Ch\u00e8ques en portefeuille", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Ch\u00e8ques \u00e0\u00a0 encaisser ou \u00e0\u00a0 l'encaissement"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Cash", 
+              "name": "Effets \u00e9chus \u00e0\u00a0 encaisser", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Cash", 
+              "name": "Effets \u00e0\u00a0 l'encaissement", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Effets \u00e0\u00a0 encaisser ou \u00e0\u00a0 l'encaissement"
+           }
+          ], 
+          "name": "Ch\u00e8ques et valeurs \u00e0\u00a0 encaisser"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "account_type": "Cash", 
+              "name": "Caisse Centrale", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Cash", 
+              "name": "Caisse (succursale ou agence A)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Cash", 
+              "name": "Caisse (succursale ou agence B)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Caisses"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "R\u00e9gies d'avances et accr\u00e9ditifs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Caisses, r\u00e9gies d'avances et accr\u00e9ditifs"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "Tr\u00e9sorerie G\u00e9n\u00e9rale", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "Banques (solde d\u00e9biteur)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "Ch\u00e8ques postaux", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "Autres \u00e9tablissements financiers et assimil\u00e9s (soldes d\u00e9biteurs)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Banques, Tr\u00e9sorerie G\u00e9n\u00e9rale et ch\u00e8ques postaux d\u00e9biteurs"
+         }
+        ], 
+        "name": "TRESORERIE - ACTIF"
+       }, 
+       {
+        "account_type": "Cash", 
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "Banques (solde cr\u00e9diteur)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "Autres \u00e9tablissements financiers et assimil\u00e9s (soldes cr\u00e9diteurs)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Banques (solde cr\u00e9diteur)"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "Cr\u00e9dits d'escompte", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Cr\u00e9dits d'escompte"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "Cr\u00e9dits de tr\u00e9sorerie", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Cr\u00e9dits de tr\u00e9sorerie"
+         }
+        ], 
+        "name": "TRESORERIE - PASSIF", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "COMPTES DE TRESORERIE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Autres provisions pour risques et charges", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour amendes, doubles droits et p\u00e9nalit\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour pertes de change", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour litiges", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour garanties donn\u00e9es aux clients", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provisions pour imp\u00f4ts", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres provisions pour risques et charges"
+         }
+        ], 
+        "name": "AUTRES PROVISIONS POUR RISQUES ET CHARGES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Diminution des dettes circulantes", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Augmentation des cr\u00e9ances circulantes", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Ecarts de conversion - passif (El\u00e9ments circulants)"
+         }
+        ], 
+        "name": "Ecarts de conversion - passif (El\u00e9ments circulants)"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "Divers cr\u00e9anciers", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Obligations, coupons \u00e0\u00a0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Obligations \u00e9chues \u00e0\u00a0 rembourser", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Dettes rattach\u00e9es aux autres cr\u00e9anciers", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Dettes sur acquisitions d'immobilisations", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Dettes sur acquisitions de titres et valeurs de placement", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Autres cr\u00e9anciers"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Comptes transitoires ou d'attente - cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats courus et non \u00e9chus \u00e0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Produits constat\u00e9s d'avance", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Comptes de r\u00e9partition p\u00e9riodique des produits", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Comptes de r\u00e9gularisation - passif"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "Fournisseurs - retenues de garantie", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Fournisseurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Fournisseurs - factures non parvenues", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Fournisseurs - effets \u00e0\u00a0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Autres fournisseurs et comptes rattach\u00e9s", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Fournisseurs et comptes rattach\u00e9s"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "Autres clients cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Rabais, remises et ristournes \u00e0\u00a0 accorder - avoirs \u00e0\u00a0 \u00e9tablir", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Clients - dettes pour emballages et mat\u00e9riel consign\u00e9s", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Clients - avances et acomptes re\u00e7us sur commandes en cours", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Clients cr\u00e9diteurs, avances et acomptes"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "Personnel - autres cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Oppositions sur salaires", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Charges du personnel \u00e0\u00a0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "R\u00e9mun\u00e9rations dues au personnel", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "D\u00e9p\u00f4ts du personnel cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Personnel - cr\u00e9diteur"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "account_type": "Payable", 
+              "name": "ALLOCATION FAMILIALES", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Caisse Nationale de la S\u00e9curit\u00e9 Sociale"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Caisses de retraite", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Mutuelles", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Charges sociales \u00e0\u00a0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Autres organismes sociaux", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Organismes sociaux"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Tax", 
+            "name": "Etat, TVA due (suivant d\u00e9clarations)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Tax", 
+            "name": "Etat, imp\u00f4ts et taxes \u00e0\u00a0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Tax", 
+              "name": "Etat, TVA factur\u00e9e 7%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Tax", 
+              "name": "Etat, TVA factur\u00e9e 20%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Tax", 
+              "name": "Etat, TVA factur\u00e9e 10%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Tax", 
+              "name": "Etat, TVA factur\u00e9e 14%", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Etat, TVA factur\u00e9e"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Tax", 
+              "name": "Etat, IR", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Tax", 
+              "name": "Etat, taxe urbaine et taxe d'\u00e9dilit\u00e9", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Tax", 
+              "name": "Etat, Taxe professionnelle (ex patente)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Etat Imp\u00f4ts, taxes et assimil\u00e9s"
+           }, 
+           {
+            "account_type": "Tax", 
+            "name": "Etat, imp\u00f4ts sur les r\u00e9sultats", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Tax", 
+            "name": "Etat - autres comptes cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Etat - cr\u00e9diteur"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "Comptes courants des associ\u00e9s cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Associ\u00e9s - capital \u00e0\u00a0 rembourser", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Associ\u00e9s - dividendes \u00e0\u00a0 payer", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Autres comptes d'associ\u00e9s - cr\u00e9diteurs", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Associ\u00e9s - versements re\u00e7us sur augmentation de capital", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "Associ\u00e9s - op\u00e9rations faites en commun", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Comptes d'associ\u00e9s - cr\u00e9diteurs"
+         }
+        ], 
+        "name": "DETTES DU PASSIF CIRCULANT"
+       }
+      ], 
+      "name": "COMPTES DU PASSIF CIRCULANT (HORS TRESORERIE)"
+     }
+    ], 
+    "name": "COMPTES DE BILAN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Subventions accord\u00e9es des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Subventions accord\u00e9es de l'exercice", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Subventions accord\u00e9es"
+         }, 
+         {
+          "children": [
+           {
+            "name": "VNA des immobilisations c\u00e9d\u00e9es des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "VNA des immobilisations corporelles c\u00e9d\u00e9es", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "VNA des immobilisations incorporelles c\u00e9d\u00e9es", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "VNA provisions des immobilisations financi\u00e8res c\u00e9d\u00e9es (droits de propri\u00e9t\u00e9)", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Valeurs nettes d'amortissements des immobilisations c\u00e9d\u00e9es ( V.N.A )"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "D.A.E. de l'immobilisation en non-valeurs", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.A.E. des immobilisations corporelles", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.A.E. des immobilisations incorporelles", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations aux amortissements exceptionnels des immobilisations"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.N.C. aux provisions pour risques et charges durables", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.N.C. aux provisions pour risques et charges momentan\u00e9s", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations non courantes aux provisions pour risques et charges"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.N.C. pour reconstitution de gisements", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.N.C. pour amortissements d\u00e9rogatoires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.N.C. pour acquisition et construction de logements", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.N.C. pour investissements", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.N.C. pour plus-values en instance d'imposition", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations non courantes aux provisions r\u00e9glement\u00e9es"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.N.C. aux provisions pour d\u00e9pr\u00e9ciation de l'actif immobilis\u00e9", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.N.C. aux provisions pour d\u00e9pr\u00e9ciation de l'actif circulant", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations non courantes aux provisions pour d\u00e9pr\u00e9ciation"
+           }, 
+           {
+            "name": "Dotations non courantes des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Dotations non courantes"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Cr\u00e9ances devenues irr\u00e9couvrables", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Autres charges non courantes des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Lib\u00e9ralit\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Dons", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Lots", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dons, lib\u00e9ralit\u00e9s et lots"
+           }, 
+           {
+            "name": "Rappels d'imp\u00f4ts (autres que l'imp\u00f4t sur les r\u00e9sultats)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "P\u00e9nalit\u00e9s et amendes p\u00e9nales", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "P\u00e9nalit\u00e9s et amendes fiscales", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "P\u00e9nalit\u00e9s et amendes fiscales ou p\u00e9nales"
+           }, 
+           {
+            "children": [
+             {
+              "name": "P\u00e9nalit\u00e9s sur march\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D\u00e9dits", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "P\u00e9nalit\u00e9s sur march\u00e9s et d\u00e9dits"
+           }
+          ], 
+          "name": "Autres charges non courantes"
+         }
+        ], 
+        "name": "CHARGES NON COURANTES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Imposition minimale annuelle des soci\u00e9t\u00e9s", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Rappels et d\u00e9gr\u00e8vements d'imp\u00f4ts sur les r\u00e9sultats", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Imp\u00f4ts sur les b\u00e9n\u00e9fices", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Imp\u00f4ts sur les r\u00e9sultats"
+         }
+        ], 
+        "name": "IMPOTS SUR LES RESULTATS", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Autres redevances", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Redevances pour brevets", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Redevances pour brevets, marques, droits et valeurs similaires"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Commissions et courtages", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Frais d'actes et de contentieux", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Honoraires", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "R\u00e9mun\u00e9rations d'interm\u00e9diaires et honoraires"
+           }, 
+           {
+            "children": [
+             {
+              "name": "R\u00e9mun\u00e9rations du personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0\u00a0 l'entreprise", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R\u00e9mun\u00e9rations du personnel int\u00e9rimaire", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R\u00e9mun\u00e9rations du personnel occasionnel", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "R\u00e9mun\u00e9rations du personnel ext\u00e9rieur \u00e0\u00a0 l'entreprise"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Autres assurances"
+             }, 
+             {
+              "name": "Assurances - risques d'exploitation", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Assurances - Mat\u00e9riel de transport", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Assurances multirisque (vol, incendie,R,C,)", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Primes d'assurances"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Entretien et r\u00e9parations des biens immobiliers", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Maintenance", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Entretien et r\u00e9parations des biens mobiliers", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Entretien et r\u00e9parations"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Redevances de cr\u00e9dit-bail - mobilier et mat\u00e9riel", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Redevances de cr\u00e9dit-bail"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Locations et charges locatives diverses", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations de mat\u00e9riel et d'outillage", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations de constructions", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations de terrains", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Malis sur emballages rendus", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations de mat\u00e9riel informatique", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations de mobilier et de mat\u00e9riel de bureau", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations de mat\u00e9riel de transport", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Locations et charges locatives"
+           }
+          ], 
+          "name": "Autres charges externes 1"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Documentation g\u00e9n\u00e9rale", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Recherches", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Documentation technique", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "\u00c9tudes g\u00e9n\u00e9rales", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "\u00c9tudes, recherches et documentation"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cotisations", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Dons", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Cotisations et dons"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Frais postaux", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Frais de t\u00e9l\u00e9phone"
+             }, 
+             {
+              "name": "Frais de t\u00e9lex et de t\u00e9l\u00e9grammes", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Frais postaux et frais de t\u00e9l\u00e9communication"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Transports sur achats", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Transports sur ventes", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Transports du personnel", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Autres transports", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Transports"
+           }, 
+           {
+            "children": [
+             {
+              "name": "R\u00e9ceptions", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Missions", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Frais de d\u00e9m\u00e9nagement", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Voyages et d\u00e9placements", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "D\u00e9placements, missions et r\u00e9ceptions"
+           }, 
+           {
+            "name": "Rabais, remises et ristournes obtenus sur autres charges externes", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Frais sur effets de commerce", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Frais et commissions sur services bancaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Frais d'achat et de vente des titres", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Services bancaires"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Cadeaux \u00e0\u00a0 la client\u00e8le", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Publications", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Foires et expositions", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "\u00c9chantillons, catalogues et imprim\u00e9s publicitaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Annonces et insertions", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Primes de publicit\u00e9", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Autres charges de publicit\u00e9 et relations publiques", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Publicit\u00e9, publications et relations publiques"
+           }, 
+           {
+            "name": "Autres charges externes des exercices ant\u00e9rieurs"
+           }
+          ], 
+          "name": "Autres charges externes 2"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "account_type": "Chargeable", 
+              "name": "Primes de repr\u00e9sentation", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "R\u00e9mun\u00e9rations des administrateurs, g\u00e9rants et associ\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Commissions au personnel", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Primes et gratifications"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Appointements et salaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Indemnit\u00e9s de d\u00e9placement", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Indemnit\u00e9s et avantages divers"
+             }
+            ], 
+            "name": "R\u00e9mun\u00e9rations du personnel"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Chargeable", 
+              "name": "Appointements et salaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Charges sociales sur appointements et salaires de l'exploitant", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "R\u00e9mun\u00e9ration de l'exploitant"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Chargeable", 
+              "name": "Autres charges sociales diverses", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "M\u00e9decine de travail, pharmacie", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Habillement et v\u00eatements de travail", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Indemnit\u00e9s de pr\u00e9avis et de licenciement", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Prestations de retraites", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Allocations aux oeuvres sociales", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Assurances groupe", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Charges sociales diverses"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Chargeable", 
+              "name": "Cotisations de s\u00e9curit\u00e9 sociale", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Prestations familiales", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Assurances accidents de travail", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Cotisations aux caisses de retraite", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "account_type": "Chargeable", 
+              "name": "Cotisations aux mutuelles", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Charges sociales"
+           }, 
+           {
+            "account_type": "Chargeable", 
+            "name": "Charges du personnel des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Charges de personnel"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Patente", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Taxes locales", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Taxe urbaine et taxe d'\u00e9dilit\u00e9", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Imp\u00f4ts et taxes directs"
+           }, 
+           {
+            "name": "Imp\u00f4ts et taxes directs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "La vignette", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Droits d'enregistrement et de timbre", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Taxes sur les v\u00e9hicules"
+             }, 
+             {
+              "name": "Autres imp\u00f4ts, taxes et droits assimil\u00e9s", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Imp\u00f4ts, taxes et droits assimil\u00e9s"
+           }, 
+           {
+            "name": "Imp\u00f4ts et taxes des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Imp\u00f4ts et taxes"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres charges d'exploitation des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Pertes sur cr\u00e9ances irr\u00e9couvrables", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Jetons de pr\u00e9sence", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Transfert de profits sur op\u00e9rations faites en commun", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Pertes sur op\u00e9rations faites en commun", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Autres charges d'exploitation"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "D.E. aux amortissements des exercices ant\u00e9rieurs", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E. aux provisions des exercices ant\u00e9rieurs", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation des exercices ant\u00e9rieurs"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.E.P. pour risques et charges durables", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.P. pour risques et charges momentan\u00e9s", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation aux provisions pour risques et charges"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.E.P. pour d\u00e9pr\u00e9ciation des immobilisations incorporelles", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.P. pour d\u00e9pr\u00e9ciation des immobilisations corporelles", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation aux provisions pour d\u00e9pr\u00e9ciation des immobilisations"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.E.P. pour d\u00e9pr\u00e9ciation des stocks", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.P. pour d\u00e9pr\u00e9ciation des cr\u00e9ances de l'actif circulant", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation aux provisions pour d\u00e9pr\u00e9ciations de l'actif circulant"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.E.A. des charges \u00e0\u00a0 r\u00e9partir", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. des frais pr\u00e9liminaires", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation aux amortissements de l'immobilisation en non valeur"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.E.A. des installations techniques, mat\u00e9riel et outillage", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. des autres immobilisations corporelles", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. des constructions", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. des mobiliers, mat\u00e9riels de bureau et am\u00e9nagements divers", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. du mat\u00e9riel de transport", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. des terrains", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation aux amortissements des immobilisations corporelles"
+           }, 
+           {
+            "children": [
+             {
+              "name": "D.E.A. des brevets, marques, droits et valeurs similaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. du fonds commercial", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. des autres immobilisations incorporelles", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D.E.A. de l'immobilisation en recherche et d\u00e9veloppement", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dotations d'exploitation aux amortissements des immobilisations incorporelles"
+           }
+          ], 
+          "name": "Dotations d'exploitation"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Variation de stocks de marchandises", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Achats de marchandises \"groupe B\"", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Rabais, remises et ristournes obtenus sur achats de marchandises", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Achats revendus de marchandises des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Achats de marchandises \"groupe A\"", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Achats revendus de marchandises"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Achats de mati\u00e8res et de fournitures des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Rabais, remises et ristournes obtenus sur achats de travaux, \u00e9tudes et prestations de service", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Rabais, remises et ristournes obtenus sur achats non stock\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Rabais, remises et ristournes obtenus sur achats de mati\u00e8res et fournitures consommables", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Rabais, remises et ristournes obtenus sur achats de mati\u00e8res premi\u00e8res", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Rabais, remises et ristournes obtenus sur achats des emballages", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Rabais, remises et ristournes obtenus sur achats de mati\u00e8res et fournitures des exercices ant\u00e9rieurs", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Rabais, remises et ristournes obtenus sur achats consomm\u00e9s de mati\u00e8res et fournitures"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Variation des stocks de mati\u00e8res premi\u00e8res", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks des emballages", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks de mati\u00e8res et fournitures consommables", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Variation des stocks de mati\u00e8res et fournitures"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Achats de fournitures d'entretien", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de petit outillage et petit \u00e9quipement", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de fournitures non stockables (eau, \u00e9lectricit\u00e9,,)", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de fournitures de bureau", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Achats non stock\u00e9s de mati\u00e8res et fournitures"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Achats des travaux", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats des prestations de service"
+             }, 
+             {
+              "name": "Achats des \u00e9tudes", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Achats de travaux, \u00e9tudes et prestations de service"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Achats de mati\u00e8res premi\u00e8res B", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de mati\u00e8res premi\u00e8res A", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Achats de mati\u00e8res premi\u00e8res"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Achats de combustibles", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de mati\u00e8res et fournitures B", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de mati\u00e8res et fournitures A", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de fournitures de bureau", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de fournitures d'atelier et d'usine", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de produits d'entretien", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats de fournitures de magasin", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Achats de mati\u00e8res et fournitures consommables"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Achats d'emballages \u00e0\u00a0 usage mixte", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats d'emballages perdus", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Achats d'emballages r\u00e9cup\u00e9rables non identifiables", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Achats d'emballages"
+           }
+          ], 
+          "name": "Achats consomm\u00e9s de mati\u00e8res et fournitures"
+         }
+        ], 
+        "name": "CHARGES D'EXPLOITATION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Dotations financi\u00e8res des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Dotations aux provisions pour risques et charges financi\u00e8res", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Dotations aux provisions pour d\u00e9pr\u00e9ciations des immobilisations financi\u00e8res", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Dotations aux amortissements des primes de remboursement des obligations", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Dotations aux provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Dotation aux provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Dotations financi\u00e8res"
+         }, 
+         {
+          "name": "Autres charges financi\u00e8res"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Pertes de change propres \u00e0\u00a0 l'exercice", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Pertes de change des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Pertes de change"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Int\u00e9r\u00eats bancaires et sur op\u00e9rations de financement", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Int\u00e9r\u00eats des comptes courants et d\u00e9p\u00f4ts cr\u00e9diteurs", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Int\u00e9r\u00eats des emprunts", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Autres int\u00e9r\u00eats des emprunts et dettes", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Int\u00e9r\u00eats des dettes rattach\u00e9es \u00e0\u00a0 des participations", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Int\u00e9r\u00eats des emprunts et dettes"
+           }, 
+           {
+            "name": "Charges d'int\u00e9r\u00eats des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Charges d'int\u00e9r\u00eats"
+         }
+        ], 
+        "name": "CHARGES FINANCIERES"
+       }
+      ], 
+      "name": "COMPTES DE CHARGES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Produits des cessions des immobilisations incorporelles", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Produits des cessions des immobilisations des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Produits des cessions des immobilisations corporelles", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Produits des cessions des immobilisations financi\u00e8res (droits de propri\u00e9t\u00e9)", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Produits des cessions d'immobilisations"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Subventions d'\u00e9quilibre re\u00e7ues des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Subventions d'\u00e9quilibre re\u00e7ues de l'exercice", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Subventions d'\u00e9quilibre"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Reprises sur subventions d'investissement des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur subventions d'investissement de l'exercice", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Reprise sur subventions d'investissements"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Rentr\u00e9es sur cr\u00e9ances sold\u00e9es", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Lib\u00e9ralit\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Dons", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Lots", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Dons, lib\u00e9ralit\u00e9s et lots re\u00e7us"
+           }, 
+           {
+            "children": [
+             {
+              "name": "P\u00e9nalit\u00e9s re\u00e7ues sur march\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "D\u00e9dits re\u00e7us", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "P\u00e9nalit\u00e9s et d\u00e9dits re\u00e7us"
+           }, 
+           {
+            "name": "D\u00e9gr\u00e8vement d'imp\u00f4ts (autres que l'imp\u00f4t sur les r\u00e9sultats)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Autres produits non courants des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Autres produits non courants"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "R,A,E des immobilisations en non valeur", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R,A,E des immobilisations incorporelles", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R,A,E des immobilisations corporelles", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Reprises non courantes sur amortissements exceptionnels des immobilisations"
+           }, 
+           {
+            "children": [
+             {
+              "name": "R,N,C sur provisions pour d\u00e9pr\u00e9ciation de l'actif circulant", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R,N,C sur provisions pour d\u00e9pr\u00e9ciation de l'actif immobilis\u00e9", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Reprises non courantes sur provisions pour d\u00e9pr\u00e9ciation"
+           }, 
+           {
+            "name": "Transferts de charges non courantes", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Reprises sur amortissements d\u00e9rogatoires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reprises sur provisions pour reconstitution de gisements", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reprises sur plus-values en instance d'imposition", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reprises sur provisions pour acquisition et construction de logements", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reprises sur provisions pour investissements", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Reprises non courantes sur provisions r\u00e9glement\u00e9es"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Reprises sur provisions pour risques et charges durables", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reprises sur provisions pour risques et charges momentan\u00e9s", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Reprises non courantes sur provisions pour risques et charges"
+           }, 
+           {
+            "name": "Reprises non courantes des exercices ant\u00e9rieurs.", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Reprises non courantes"
+         }
+        ], 
+        "name": "PRODUITS NON COURANTS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Escomptes obtenus", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Revenus des titres et valeurs de placement", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Int\u00e9r\u00eats et autres produits financiers des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Revenus des cr\u00e9ances rattach\u00e9es \u00e0\u00a0 des participations", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Int\u00e9r\u00eats des pr\u00eats", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Revenus des autres cr\u00e9ances financi\u00e8res", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Int\u00e9r\u00eats et produits assimil\u00e9s"
+           }, 
+           {
+            "name": "Produits nets sur cessions de titres et valeurs de placement", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Int\u00e9r\u00eats et autres produits financiers"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Revenus des titres de participation", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Revenus des titres immobilis\u00e9s", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Produits des titres de participation et des autres titres immobilis\u00e9s des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Produits des titres de participation et des autres titres immobilis\u00e9s"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Gains de change des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Gains de change propres \u00e0\u00a0 l'exercice", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Gains de change"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Reprises sur amortissements des primes de remboursement des obligations", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur provisions pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur provisions pour risques et charges financi\u00e8res", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur provisions pour d\u00e9pr\u00e9ciation des comptes de tr\u00e9sorerie", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Transfert - Charges d'int\u00e9r\u00eats", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Transfert - Pertes de change", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Transfert - Autres charges financi\u00e8res", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Transfert de charges financi\u00e8res"
+           }, 
+           {
+            "name": "Reprises sur dotations financi\u00e8res des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprise sur provisions pour d\u00e9pr\u00e9ciation des titres et valeurs de placement", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Reprises financi\u00e8res, transferts de charges"
+         }
+        ], 
+        "name": "PRODUITS FINANCIERS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Ventes de produits interm\u00e9diaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ventes de produits finis", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Ventes de biens produits \u00e0\u00a0 l'\u00e9tranger"
+           }, 
+           {
+            "name": "Redevances pour brevets, marques, droits et valeurs similaires", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Autres ventes et produits accessoires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Bonis sur reprises d'emballages consign\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ports et frais accessoires factur\u00e9s", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Locations divers es re\u00e7ues", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Produits de services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Commissions et courtages re\u00e7us", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Ventes de produits accessoires"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Travaux", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Etudes", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Prestations de services", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Ventes de services produits au Maroc"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ventes de produits interm\u00e9diaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ventes de produits r\u00e9siduels", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ventes de produits finis", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Ventes de biens produits au Maroc"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Prestations de services", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Etudes", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Travaux", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Ventes de services produits \u00e0\u00a0 l'\u00e9tranger"
+           }, 
+           {
+            "children": [
+             {
+              "name": "R,R,R accord\u00e9es sur ventes \u00e0\u00a0 l'\u00e9tranger des services produits", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R,R,R accord\u00e9es sur ventes au Maroc des services produits", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R,R,R accord\u00e9es sur ventes au Maroc des biens produits", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "R,R,R accord\u00e9es sur ventes \u00e0\u00a0 l'\u00e9tranger des biens produits", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Rabais, remises et ristournes accord\u00e9s sur ventes de B et S produits des exercices ant\u00e9rieurs", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Rabais, remises et ristournes accord\u00e9s par l'entreprise"
+           }, 
+           {
+            "name": "Ventes de biens et services produits des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Ventes de biens et services produits"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Subventions d'exploitations re\u00e7ues de l'exercice", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Subventions d'exploitation re\u00e7ues des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Subventions d'exploitation"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Variation des stocks de produits interm\u00e9diaires", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks de produits finis", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks de produits r\u00e9siduels", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Variation des stocks de biens produits"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Variation des stocks de travaux en cours", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks de prestations en cours", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks d'\u00e9tudes en cours", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Variation des stocks de services en cours"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Variation des stocks de produits interm\u00e9diaires en cours", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks de biens produits en cours", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Variation des stocks de produits r\u00e9siduels en cours", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Variation des stocks de produits en cours"
+           }
+          ], 
+          "name": "Variation des stocks de produits"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Jetons de pr\u00e9sence re\u00e7us", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Revenus des immeubles non affect\u00e9s \u00e0\u00a0 l'exploitation", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Profits sur op\u00e9rations faites en commun", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Transfert de pertes sur op\u00e9rations faites en commun", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Autres produits d'exploitation des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Autres produits d'exploitation"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Reprises sur amortissements des immobilisations incorporelles", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "T,C,E - Autres charges d'exploitation", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "T,C,E - Achats consomm\u00e9s de mati\u00e8res et fournitures", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "T,C,E - Achats de marchandises", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "T,C,E - Charges de personnel", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "T,C,E-Autres charges externes", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "T,C,E - Imp\u00f4ts et taxes", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Transferts des charges d'exploitation"
+           }, 
+           {
+            "name": "Reprises sur provisions pour risques et charges", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Reprises sur provisions des exercices ant\u00e9rieurs", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reprises sur amortissements des exercices ant\u00e9rieurs", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Reprises sur amortissements et provisions des exercices ant\u00e9rieurs"
+           }, 
+           {
+            "name": "Reprises sur provisions pour d\u00e9pr\u00e9ciation de l'actif circulant", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur provisions pour d\u00e9pr\u00e9ciation des immobilisations", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur amortissements des immobilisations corporelles", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Reprises sur amortissements de l'immobilisation en non valeurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Reprise d'exploitation, transferts de charges"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Immobilisation en non valeurs produite", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Immobilisations corporelles produites", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Immobilisations incorporelles produites", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Immobilisations produites des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Immobilisations produites par l'entreprise pour elle m\u00eame"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ventes de marchandises \u00e0\u00a0 l'\u00e9tranger", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ventes de marchandises au Maroc", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ventes de marchandises des exercices ant\u00e9rieurs", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Rabais, remises et ristournes accord\u00e9s par l'entreprise", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Ventes de marchandises"
+         }
+        ], 
+        "name": "PRODUITS D'EXPLOITATION"
+       }
+      ], 
+      "name": "COMPTES DE PRODUITS"
+     }
+    ], 
+    "name": "COMPTES DE GESTION"
+   }
+  ], 
+  "name": "Plan_Comptable_Maroc", 
+  "parent_id": null
+ }
+}

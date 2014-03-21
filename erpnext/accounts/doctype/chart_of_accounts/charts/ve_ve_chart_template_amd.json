@@ -1,0 +1,1526 @@
+{
+ "name": "Venezuelan - Account", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INGRESOS POR SERVICIOS"
+           }
+          ], 
+          "name": "INGRESOS POR SERVICIOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "VENTAS EXPORTACION"
+           }, 
+           {
+            "name": "VENTAS NACIONALES AL DETAL"
+           }, 
+           {
+            "name": "VENTAS INMUEBLES"
+           }, 
+           {
+            "name": "VENTAS NACIONALES AL MAYOR"
+           }
+          ], 
+          "name": "VENTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "DEVOLUCIONES EN VENTAS"
+           }, 
+           {
+            "name": "DESCUENTOS EN VENTAS"
+           }
+          ], 
+          "name": "DESCUENTOS Y DEVOLUCION EN VENTAS"
+         }
+        ], 
+        "name": "INGRESOS OPERACIONALES"
+       }
+      ], 
+      "name": "INGRESOS OPERACIONALES"
+     }
+    ], 
+    "name": "INGRESOS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "CAPITAL SUSCRITO POR COPBAR"
+           }, 
+           {
+            "name": "ACTUALIZACION DEL VALOR"
+           }, 
+           {
+            "name": "CAPITAL SOCIAL PAGADO"
+           }
+          ], 
+          "name": "CAPITAL SOCIAL PAGADO"
+         }
+        ], 
+        "name": "CAPITAL SOCIAL PAGADO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "ACCIONES EN TESORERIA"
+           }, 
+           {
+            "name": "ACTUALIZACION DE VALOR"
+           }
+          ], 
+          "name": "ACCIONES EN TESORERIA"
+         }
+        ], 
+        "name": "ACCIONES EN TESORERIA"
+       }
+      ], 
+      "name": "CAPITAL SOCIAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "VALOR ORIGINAL"
+           }, 
+           {
+            "name": "ACTUALIZACION DEL VALOR"
+           }
+          ], 
+          "name": "OTRAS RESERVAS"
+         }
+        ], 
+        "name": "OTRAS RESERVAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "VALOR ORIGINAL RESERVA LEGAL"
+           }, 
+           {
+            "name": "ACTUALIZACION DE VALOR"
+           }
+          ], 
+          "name": "RESERVA LEGAL"
+         }
+        ], 
+        "name": "RESERVA LEGAL"
+       }
+      ], 
+      "name": "RESERVA DE CAPITAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "REAJUSTE POR INFLACION"
+           }, 
+           {
+            "name": "REI-EJERCICIO"
+           }, 
+           {
+            "name": "REI-ACUMULADOS"
+           }, 
+           {
+            "name": "EXCLUSIONES FISCALES"
+           }, 
+           {
+            "name": "ACTUALIZACION DEL PATRIMONIO"
+           }
+          ], 
+          "name": "RESULTADO POR EXPOS. A LA INFLACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "UTILIDADES DEL EJERCICIO"
+           }, 
+           {
+            "name": "UTILIDADES NO DISTRIBUIDAS"
+           }
+          ], 
+          "name": "SUPERAVIT OPERATIVO"
+         }
+        ], 
+        "name": "SUPERAVIT GANADO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "RETAM-ACTIVOS"
+           }, 
+           {
+            "name": "RETAM-INVENTARIOS"
+           }, 
+           {
+            "name": "RETAM INVERSIONES"
+           }
+          ], 
+          "name": "RESULT.POR TENDENCIA DE ACTIVO NO MONETARIOS"
+         }
+        ], 
+        "name": "RESULT.POR TENDENCIA DE ACTIVO NO MONETARIOS"
+       }
+      ], 
+      "name": "SUPERAVIT"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "REI EJERCICIO"
+           }
+          ], 
+          "name": "GANACIAS Y PERDIDAS"
+         }
+        ], 
+        "name": "GANACIAS Y PERDIDAS"
+       }
+      ], 
+      "name": "GANANCIAS Y PERDIDAS"
+     }
+    ], 
+    "name": "PATRIMONIO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASIVOS A  CORTO PLAZO"
+           }
+          ], 
+          "name": "OTROS PASIVOS A CORTO PLAZO"
+         }
+        ], 
+        "name": "OTROS PASIVOS A CORTO PLAZO"
+       }
+      ], 
+      "name": "OTROS PASIVOS A CORTO PLAZO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "DIVDENDO POR COBRAR NO COBRADOS"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "DIVIDENDO POR PAGAR VIGENTES"
+           }
+          ], 
+          "name": "DIVIDENDO POR PAGAR"
+         }
+        ], 
+        "name": "DIVIDENDO POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "I.N.C.E.S APORTES EMPLEADOS"
+           }, 
+           {
+            "name": "F.A.O.V APORTES EMPLEADOS"
+           }, 
+           {
+            "name": "FONDO FIDEICOMISO"
+           }, 
+           {
+            "name": "I.V.S.S APORTES EMPLEADOS"
+           }, 
+           {
+            "name": "FONDO DE AHORRO"
+           }
+          ], 
+          "name": "ACUMULACIONES LABORALES"
+         }
+        ], 
+        "name": "ACUMULACIONES LABORALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "I.V.S.S APORTE EMPRESA"
+           }, 
+           {
+            "name": "F.A.O.V APORTE EMPRESA"
+           }, 
+           {
+            "name": "I.N.C.E.S APORTE EMPRESA"
+           }
+          ], 
+          "name": "CONTRIBUCIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PRESTAMOS SOBRE FIDEICOMISO"
+           }, 
+           {
+            "name": "EMBARGO DE SUELDO"
+           }, 
+           {
+            "name": "SINDICATOS"
+           }
+          ], 
+          "name": "RETENCIONES VARIAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "INTERESES S/PRESTACIONES SOCIALES"
+           }, 
+           {
+            "name": "BONIFICACION ACCIDENTAL UNICA"
+           }, 
+           {
+            "name": "L.O.P.T.I."
+           }, 
+           {
+            "name": "VACACIONES"
+           }, 
+           {
+            "name": "UTILIDADES"
+           }, 
+           {
+            "name": "PRESTACIONES SOCIALES"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "POLIZA DE SEGURO POR PAGAR"
+           }, 
+           {
+            "name": "PUBLICIDAD Y PROPAGANDA"
+           }, 
+           {
+            "name": "BONO VACACIONAL"
+           }, 
+           {
+            "name": "TARJETA CORPORATIVA"
+           }, 
+           {
+            "name": "ALQUILERES"
+           }, 
+           {
+            "name": "COMISIONES"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "NOMINA POR PAGAR"
+           }, 
+           {
+            "name": "CONVESION DE COMERCIALIZACION"
+           }, 
+           {
+            "name": "PROGRAMA DE ALIMENTACION"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "IMPUESTOS POR PAGAR"
+           }, 
+           {
+            "name": "ADELANTO DE CLIENTES"
+           }
+          ], 
+          "name": "OTRAS ACUMULACIONES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "I.V.A.RETENIDO EN COMPRAS"
+           }, 
+           {
+            "name": "RETENCIONES I.S.L.R. EMPLEADOS"
+           }, 
+           {
+            "name": "I.V.A DEBITO FISCAL"
+           }, 
+           {
+            "name": "RETENCIONES I.S.L.R. PROVEEDORES"
+           }
+          ], 
+          "name": "RETENCIONES E IMPUESTOS POR PAGAR"
+         }
+        ], 
+        "name": "GASTOS ACUMULADOS Y RETENCIONES POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "BANCO MERCANTIL"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO BANESCO"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO EXTRANJERO"
+           }
+          ], 
+          "name": "PASIVOS FINANCIEROS A CORTO PLAZO"
+         }
+        ], 
+        "name": "PASIVOS FINACIEROS A CORTO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "CUENTAS POR PAGAR SOCIOS"
+           }
+          ], 
+          "name": "CUENTAS POR PAGAR ACCIONISTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "AMD COMPUTER SHOP, C.A."
+           }, 
+           {
+            "name": "COMERCIALIZADORA M321,C.A."
+           }, 
+           {
+            "name": "ACCESORIOS AMD COMPUTADORAS,C.A."
+           }, 
+           {
+            "name": "COMERCIALIZADORA JGV 3000, C.A."
+           }, 
+           {
+            "name": "COMERCIALIZADORA LVG ELECTRONIC, C.A."
+           }
+          ], 
+          "name": "COMPA\u00d1IAS AFILIADAS Y RELACIONADAS"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "CUENTAS POR PAGAR PROVEEDORES"
+           }
+          ], 
+          "name": "PROVEEDORES OCASIONALES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "T.W.C. COMPUTER, INC."
+           }, 
+           {
+            "name": "MICRO INFORMATICA 11C"
+           }, 
+           {
+            "name": "STARREC GROUP USA,INC"
+           }
+          ], 
+          "name": "PROVEEDORES EXTRANJEROS"
+         }
+        ], 
+        "name": "DOCUMENTOS Y CUENTAS POR PAGAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "RESERVAS FISCALES"
+           }, 
+           {
+            "name": "RESERVAS FINANCIERAS"
+           }, 
+           {
+            "name": "RESERVAS OPERATIVAS"
+           }
+          ], 
+          "name": "RESERVAS"
+         }
+        ], 
+        "name": "RESERVAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "DECLARACION ESTIMADAS"
+           }, 
+           {
+            "name": "RAR AJUSTE INICIAL POR INFLACION"
+           }, 
+           {
+            "name": "I.S.L.R. ACUMULADOS GASTOS"
+           }
+          ], 
+          "name": "I.S.L.R. ACUMULADOS GASTOS"
+         }
+        ], 
+        "name": "IMPUESTOS SOBRE LA RENTA POR PAGAR"
+       }
+      ], 
+      "name": "PASIVOA CORTO PLAZO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASIVOS FINANCIEROS A LARGO PLAZO"
+           }
+          ], 
+          "name": "PASIVOS FINANCIEROS A LARGO PLAZO"
+         }
+        ], 
+        "name": "PASIVOS FINANCIEROS A LARGO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INDEMNIZACIONES SENCILLAS"
+           }, 
+           {
+            "name": "INDEMNIZACIONES DOBLES"
+           }
+          ], 
+          "name": "ACUMULACIONES PARA INDEMNIZ.LABORALES"
+         }
+        ], 
+        "name": "ACUMULACIONES PARA INDEMNIZ. LABORALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASIVOS INTERCOMPA\u00d1IAS"
+           }
+          ], 
+          "name": "PASIVOS INTERCOMPA\u00d1IAS"
+         }
+        ], 
+        "name": "PASIVOS INTERCOMPA\u00d1IAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "OTROS PASIVOS A LARGO PLAZO"
+           }
+          ], 
+          "name": "OTROS PASIVOS A LARGO PLAZO"
+         }
+        ], 
+        "name": "OTROS PASIVOS A LARGO PLAZO"
+       }
+      ], 
+      "name": "PASIVO A LARGO PLAZO"
+     }
+    ], 
+    "name": "PASIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "MERCANCIA EN CONSIGNACION P. COMPRA0"
+           }
+          ], 
+          "name": "CUENTAS DE ORDEN ACREEDORAS"
+         }
+        ], 
+        "name": "CUENTAS DE ORDEN ACREEDORAS"
+       }
+      ], 
+      "name": "CUENTAS DE ORDEN ACREEDORAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "CARTAS DE CREDITOS"
+           }, 
+           {
+            "name": "MERCANCIAS EN CONSIGNACION"
+           }
+          ], 
+          "name": "CUENTAS DE ORDEN DEUDORAS"
+         }
+        ], 
+        "name": "CUENTAS DE ORDEN DEUDORAS"
+       }
+      ], 
+      "name": "CUENTAS DE ORDEN"
+     }
+    ], 
+    "name": "CUENTAS DE ORDEN"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "DEPOSITOS GARANTIA ARRENDAMIENTO LOCAL"
+           }, 
+           {
+            "name": "DEPOSITOS GARANTIA PROVEEDORES"
+           }, 
+           {
+            "name": "DEPOSITOS GARANTIA BANCOS"
+           }
+          ], 
+          "name": "OTROS ACTIVOS"
+         }
+        ], 
+        "name": "OTROS ACTIVOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "OTRAS CUENTAS POR COBRAR"
+           }, 
+           {
+            "name": "GASTOS DE CONSTITUCION"
+           }, 
+           {
+            "name": "MARCA DE FABRICA"
+           }
+          ], 
+          "name": "CARGOS DIFERIDOS"
+         }
+        ], 
+        "name": "CARGOS DIFERIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "IMPUESTOS DIFERIDOS I.S.L.R"
+           }
+          ], 
+          "name": "IMPUESTOS DIFERIDOS I.S.L.R"
+         }
+        ], 
+        "name": "IMPUESTOS DIFERIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INVERSIONES EN BONOS M.N."
+           }, 
+           {
+            "name": "BONOS TITULOS"
+           }, 
+           {
+            "name": "INVERSIONES PERMANENTES"
+           }
+          ], 
+          "name": "TITULOS DE VALORES"
+         }
+        ], 
+        "name": "INVERSIONES LARGO PLAZO"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INMUEBLES COSTO ORIGINAL"
+           }, 
+           {
+            "name": "MAQUINARIAS Y EQUIPOS COSTO ORIGINAL"
+           }, 
+           {
+            "name": "TERRENO COSTO ORIGINAL"
+           }, 
+           {
+            "name": "VEHICULOS COSTO ORIGINAL"
+           }, 
+           {
+            "name": "LICENCIA & SOFWARE COSTO ORIGINAL"
+           }, 
+           {
+            "name": "MUEBLES Y ENSERES COSTO ORIGINAL"
+           }
+          ], 
+          "name": "ACTIVO FIJO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "MUEBLES Y ENSERES COSTO ORIGINAL"
+           }, 
+           {
+            "name": "MEJORAS A PROPIEDAD COSTO ORIGINAL"
+           }, 
+           {
+            "name": "TERRENOS COSTO ORIGINAL"
+           }, 
+           {
+            "name": "MAQUINARIAS Y EQUIPOS COSTO ORIGINAL"
+           }, 
+           {
+            "name": "INMUEBLES COSTO ORIGINAL"
+           }, 
+           {
+            "name": "VEHICULOS COSTO ORIGINAL"
+           }
+          ], 
+          "name": "DEPRECIACION Y AMORTIZACION ACUMULADAS"
+         }
+        ], 
+        "name": "ACTIVO FIJO NETO"
+       }
+      ], 
+      "name": "ACTIVO LARGO PLAZO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PATENTE  MUNICIPAL ESTIMADA"
+           }, 
+           {
+            "name": "I.V.A. CREDITO FISCAL"
+           }, 
+           {
+            "name": "I.V.A. CREDITO FISCAL IMPORTACION"
+           }, 
+           {
+            "name": "I.S.L.R. DECLARACION ESTIMADAS"
+           }, 
+           {
+            "name": "I.V.A. RETENIDO"
+           }, 
+           {
+            "name": "I.S.L.R RETENIDO"
+           }
+          ], 
+          "name": "IMPUESTOS"
+         }
+        ], 
+        "name": "IMPUESTOS PAGADOS POR ANTICIPADOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PUBLICIDAD"
+           }, 
+           {
+            "name": "SEGURO PREPAGADOS"
+           }, 
+           {
+            "name": "SEGURO H.C.M."
+           }, 
+           {
+            "name": "ALQUILERES"
+           }
+          ], 
+          "name": "GASTOS PREPAGADOS OPERATIVOS"
+         }
+        ], 
+        "name": "GASTOS OPERACIONALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "MERCANCIA EN TRANSITOS"
+           }
+          ], 
+          "name": "INVENTARIO EN TRANSITO"
+         }, 
+         {
+          "children": [
+           {
+            "name": "INVENTARIOS DE MERCANCIA EXTERIOR"
+           }, 
+           {
+            "name": "INVENTARIOS DE MERCANCIA NACIONAL"
+           }, 
+           {
+            "name": "INVENTARIO FINAL"
+           }, 
+           {
+            "name": "INVENTARIO MERCANCIA ACTUALIZACION DEL VALOR"
+           }
+          ], 
+          "name": "INVENTARIOS DE MERCANCIA"
+         }
+        ], 
+        "name": "INVENTARIOS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "INTERESES POR COBRAR"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ACCESORIOS AMD COMPUTADORAS,C.A."
+           }, 
+           {
+            "name": "AMD COMPUTER SHOP, C.A."
+           }, 
+           {
+            "name": "COMERCIALIZADORA JGV 3000, C.A."
+           }, 
+           {
+            "name": "COMERCIALIZADORA LVG ELECTRONIC, C.A."
+           }, 
+           {
+            "name": "COMERCIALIZADORA M321,C.A."
+           }
+          ], 
+          "name": "COMPA\u00d1IAS AFILIADAS Y RELACIONADAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "PROVISION INCOBRALES NACIONALES"
+           }, 
+           {
+            "name": "PROVINCION INCOBRABLES EXTERIOR"
+           }
+          ], 
+          "name": "PROVINCION INCOBRABLES NACIONAL"
+         }, 
+         {
+          "children": [
+           {
+            "name": "VACACIONES"
+           }, 
+           {
+            "name": "UTILIDADES"
+           }, 
+           {
+            "name": "VIATICOS VENDEDORES"
+           }, 
+           {
+            "name": "PRESTAMOS PERSONALES"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR SOCIOS"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR CLIENTES"
+           }, 
+           {
+            "name": "SEGURO DE VEHICULOS"
+           }
+          ], 
+          "name": "CUENTAS POR COBRAR EMPLEADOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "COBRO ANTICIPO CLIENTES"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR CLIENTES"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR DETALLISTA"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "CUENTAS POR COBRAR MAYORISTA"
+           }
+          ], 
+          "name": "CUENTAS POR COBRAR NACIONALES"
+         }, 
+         {
+          "name": "CUENTAS POR COBRAR EXTERIOR"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "EFECTOS POR COBRAR NACIONALES"
+           }
+          ], 
+          "name": "EFECTOS POR COBRAR"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "CUENTAS POR PAGAR SOCIOS"
+           }
+          ], 
+          "name": "CUENTAS POR COBRAR ACCIONISTAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "ENTES GUBERNAMENTALES"
+           }, 
+           {
+            "name": "TRANSFERENCIAS BANCARIAS"
+           }, 
+           {
+            "name": "ADELANTO A PROVEEDORES"
+           }, 
+           {
+            "name": "DEPOSITOS VARIOS"
+           }, 
+           {
+            "name": "RECLAMO AL SEGURO"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "0TRAS CUENTAS X COBRAR OTROS DEUDORES"
+           }
+          ], 
+          "name": "0TRAS CUENTAS POR COBRAR"
+         }
+        ], 
+        "name": "DOCUMENTOS Y CUENTAS  POR COBRAR"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INVERSIONES EN BONOS M.E."
+           }, 
+           {
+            "name": "PAPELES COMERCIALES"
+           }, 
+           {
+            "name": "INVERSIONES EN BONOS M.N."
+           }, 
+           {
+            "name": "INVERSIONES TEMPORALES"
+           }
+          ], 
+          "name": "INVERSIONES A CORTO PLAZO"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "BANCO MERCANTIL COMMERCEBANK"
+           }
+          ], 
+          "name": "BANCOS E INSTITUCIONES FINANCIERAS EXTERIOR"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Cash", 
+            "name": "BANCO FONDO COMUN"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO BANPLUS"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO DE VENEZUELA"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO PROVINCIAL"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO BANESCO"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO MERCANTIL"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANESCO BANCO UNIVERSAL"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO BOLIVAR"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO CORP BANCA"
+           }, 
+           {
+            "account_type": "Cash", 
+            "name": "BANCO EXTERIOR"
+           }
+          ], 
+          "name": "BANCOS E INTITUCIONES FINANCIERAS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "CAJA CHICA"
+           }, 
+           {
+            "name": "FONDO A DEPOSITAR"
+           }, 
+           {
+            "name": "CAJA PRINCIPAL"
+           }, 
+           {
+            "name": "CAJA GENERAL"
+           }
+          ], 
+          "name": "CAJAS"
+         }
+        ], 
+        "name": "EFECTIVO Y VALORES NEGOCIABLES"
+       }
+      ], 
+      "name": "ACTIVO CIRCULANTE"
+     }
+    ], 
+    "name": "ACTIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PASAJE EXTERIOR NO DEDUCIBLE"
+           }, 
+           {
+            "name": "VIATICOS DEDUCIBLES"
+           }, 
+           {
+            "name": "ASEO URBANO"
+           }, 
+           {
+            "name": "FOTOCOPIADO"
+           }, 
+           {
+            "name": "ASEO Y LIMPIEZA"
+           }, 
+           {
+            "name": "ENERGIA ELECTRICA"
+           }, 
+           {
+            "name": "TELEFONOS Y TELEGRAFOS"
+           }, 
+           {
+            "name": "AGUA POTABLE Y REFRIGERIO"
+           }, 
+           {
+            "name": "SERVICIOS DE PUBLICIDAD"
+           }, 
+           {
+            "name": "BONIFICACION UNICA ESPECIAL"
+           }, 
+           {
+            "name": "SERVICIOS CONTRATADOS A TERCEROS"
+           }, 
+           {
+            "name": "PARTIDAS NO DEDUCIBLES"
+           }, 
+           {
+            "name": "SEGUROS"
+           }, 
+           {
+            "name": "REPAROS"
+           }, 
+           {
+            "name": "GASTOS DE I.S.L.R."
+           }, 
+           {
+            "name": "RELACIONES INDUSTRIALES"
+           }, 
+           {
+            "name": "SERVICIOS PUBLICOS"
+           }, 
+           {
+            "name": "MANTENIMIENTOS"
+           }, 
+           {
+            "name": "REPARACIONES"
+           }, 
+           {
+            "name": "SUMINISTROS DE EQUIPOS DE OFICINA"
+           }, 
+           {
+            "name": "HONORARIOS PROFESIONALES"
+           }, 
+           {
+            "name": "UTILES DE LIMPIEZA"
+           }, 
+           {
+            "name": "ARTICULOS DE OFICINA"
+           }, 
+           {
+            "name": "COMBUSTIBLES Y LUBRICANTES"
+           }, 
+           {
+            "name": "FLETES Y TRANSPORTES"
+           }, 
+           {
+            "name": "ESTACIONAMINETO"
+           }, 
+           {
+            "name": "TRAMITES DE SOLVENCIAS"
+           }, 
+           {
+            "name": "CONDOMINIOS"
+           }, 
+           {
+            "name": "GASTOS DE SISTEMAS"
+           }, 
+           {
+            "name": "DERECHO DE FRENTE"
+           }, 
+           {
+            "name": "TRAMITES LEGALES"
+           }, 
+           {
+            "name": "COMIDAS, VIAJES Y TRASLADOS"
+           }, 
+           {
+            "name": "GASTOS DE REPRESENTACION"
+           }, 
+           {
+            "name": "VIATICOS NO DEDUCIBLES"
+           }, 
+           {
+            "name": "EQUIPOS Y EVENTOS DEPOSRTIVOS"
+           }, 
+           {
+            "name": "HOSPEDAJE"
+           }, 
+           {
+            "name": "OBSEQUIOS"
+           }, 
+           {
+            "name": "CONVENSION  DE COMERCIALIZACION"
+           }, 
+           {
+            "name": "AVERIAS-PRODUCTOS"
+           }, 
+           {
+            "name": "ALQUILER DE LOCALES"
+           }, 
+           {
+            "name": "AJUSTE DE INVENTARIOS OBSOLETOS"
+           }, 
+           {
+            "name": "AJUSTE DE INVENTARIOS DONADOS"
+           }, 
+           {
+            "name": "PASAJES LOCALES Y EXT.DEDUCIBLES"
+           }
+          ], 
+          "name": "GASTOS GENERALES"
+         }
+        ], 
+        "name": "GASTOS GENERALES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "INMUEBLES"
+           }, 
+           {
+            "name": "MAQUINARIAS Y EQUIPOS"
+           }, 
+           {
+            "name": "VEHICULOS"
+           }, 
+           {
+            "name": "MUEBLES Y ENSERES"
+           }, 
+           {
+            "name": "LICENCIA & SOFTWARE"
+           }, 
+           {
+            "name": "MEJORAS A PROPIEDAD"
+           }
+          ], 
+          "name": "DEPRECIACION"
+         }, 
+         {
+          "children": [
+           {
+            "name": "SEGUROS"
+           }
+          ], 
+          "name": "AMORTIZACION"
+         }
+        ], 
+        "name": "DEPRECIACION Y AMORTIZACION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "MEDIOS"
+           }, 
+           {
+            "name": "PUBLICIDAD"
+           }, 
+           {
+            "name": "MATERIALES PROMOCIONALES"
+           }, 
+           {
+            "name": "EVENTOS ESPECIALES"
+           }, 
+           {
+            "name": "ACTIVIDADES REGIONALES"
+           }, 
+           {
+            "name": "PROMOCIONES"
+           }, 
+           {
+            "name": "DISTRIBUCION Y REPARTO LOCALES"
+           }, 
+           {
+            "name": "CUENTAS INCOBRABLES NACIONALES"
+           }, 
+           {
+            "name": "PRODUCCION MATERIAL P.O.P."
+           }, 
+           {
+            "name": "TRANSPORTE Y FLETES"
+           }, 
+           {
+            "name": "PATENTE INDUSTRIA Y COMERCIO"
+           }
+          ], 
+          "name": "GASTOS DE DISTRIBUCION"
+         }
+        ], 
+        "name": "GASTOS COMERCIALIZACION"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "BENEFICIOS COMEDOR"
+           }, 
+           {
+            "name": "BENEFICIOS UNIFORMES"
+           }, 
+           {
+            "name": "SUELDOS EMPLEADOS"
+           }, 
+           {
+            "name": "HORAS EXTRAS"
+           }, 
+           {
+            "name": "SUELDOS DIRECTIVOS"
+           }, 
+           {
+            "name": "COMISION AL PERSONAL"
+           }, 
+           {
+            "name": "HORAS EXTRAORDINARIAS"
+           }, 
+           {
+            "name": "PROGRAMA DE ALIMENTACION EMPLEADOS"
+           }, 
+           {
+            "name": "TRANSPORTE Y ALIMENTACION"
+           }, 
+           {
+            "name": "GASTOS PERSONAL CONTRATADO"
+           }, 
+           {
+            "name": "GASTOS PERSONAL TRANSFERIDOSR"
+           }, 
+           {
+            "name": "VIATICOS Y GASTOS DE REPRESENTACION"
+           }, 
+           {
+            "name": "PRIMA POR RENDIMIENTO"
+           }, 
+           {
+            "name": "SEGURO H.C.M."
+           }, 
+           {
+            "name": "CONTRIBUCIONES I.N.C.E.S."
+           }, 
+           {
+            "name": "CONTRIBUCIONES F.A.O.V."
+           }, 
+           {
+            "name": "CONTRIBUCIONES I.V.S.S."
+           }, 
+           {
+            "name": "BONO VACACIONAL"
+           }, 
+           {
+            "name": "LOCTI"
+           }, 
+           {
+            "name": "LOPCYMAT"
+           }, 
+           {
+            "name": "BONIFICACION UNICA ESPECIAL"
+           }, 
+           {
+            "name": "GASTOS PERSONAL PASANTE"
+           }, 
+           {
+            "name": "UTILIDADES"
+           }, 
+           {
+            "name": "VACACIONES"
+           }, 
+           {
+            "name": "BENEFICIOS ADIESTRAMIENTOS-CURSOS"
+           }, 
+           {
+            "name": "BENEFICIOS BECAS"
+           }, 
+           {
+            "name": "BENEFICIOS SERVICIOS MEDICOS"
+           }, 
+           {
+            "name": "PRESTACIONES SOCIALES"
+           }, 
+           {
+            "name": "INTERESES S/PRESTACIONES SOCIALES"
+           }
+          ], 
+          "name": "GASTOS PERSONAL"
+         }
+        ], 
+        "name": "GASTOS DE PERSONAL"
+       }
+      ], 
+      "name": "GASTOS OPERATIVOS"
+     }
+    ], 
+    "name": "GASTOS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "COSTO DE VENTAS"
+           }
+          ], 
+          "name": "COSTO DE VENTAS"
+         }
+        ], 
+        "name": "COSTO DE VENTAS"
+       }
+      ], 
+      "name": "COSTO DE VENTAS"
+     }
+    ], 
+    "name": "COSTO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "OTROS INGRESOS FINANCIEROS"
+           }, 
+           {
+            "name": "INTERESES DE BANCOS NACIONALES"
+           }, 
+           {
+            "name": "INTERESES DE BANCOS EXTRANJEROS"
+           }
+          ], 
+          "name": "INGRESOS FINANCIEROS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "GANANCIAS EN VENTAS DE ACTIVOS FIJOS"
+           }, 
+           {
+            "name": "GANANCIAS EN DIFERENCIAL CAMBIARIO"
+           }, 
+           {
+            "name": "GANANCIAS EN VENTAS DE INVERSIONES"
+           }, 
+           {
+            "name": "OTROS INGRESOS"
+           }, 
+           {
+            "name": "INTERESES VARIOS"
+           }, 
+           {
+            "name": "AJUSTES A\u00d1OS ANTERIORES"
+           }
+          ], 
+          "name": "OTROS INGRESOS"
+         }
+        ], 
+        "name": "OTROS INGRESOS"
+       }
+      ], 
+      "name": "OTROS INGRESOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "PERDIDA POR ROBO DE INVENTARIO"
+           }, 
+           {
+            "name": "FLUCTUACION CAMBIARIA NO REALIZADAS"
+           }, 
+           {
+            "name": "PERDIDAS EN VENTAS ACTIVOS FIJOS"
+           }, 
+           {
+            "name": "INTERESES S/PRESTACIONES SOCIALES"
+           }, 
+           {
+            "name": "AJUSTE DE A\u00d1OS ANTERIORES"
+           }, 
+           {
+            "name": "PERDIDAS EN DIFERENCIAL CAMBIARIO"
+           }, 
+           {
+            "name": "PERDIDAS EN VENTAS DE INVERSIONES"
+           }, 
+           {
+            "name": "PERDIDAS EN INVERSIONES DE BONOS P."
+           }
+          ], 
+          "name": "OTROS EGRESOS"
+         }, 
+         {
+          "children": [
+           {
+            "name": "IMPUESTOS A LAS TRANSACIONES FINANCIERAS"
+           }
+          ], 
+          "name": "EGRESOS NO GRAVABLES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "INTERESES BANCOS NACIONALES"
+           }, 
+           {
+            "name": "COMISIONES TICKET DE ALIMENTACION"
+           }, 
+           {
+            "name": "COMSIONES Y GASTOS BANCARIOS"
+           }, 
+           {
+            "name": "OTROS EGRESOS"
+           }
+          ], 
+          "name": "GASTOS FINANCIEROS"
+         }
+        ], 
+        "name": "GASTOS FINANCIEROS"
+       }
+      ], 
+      "name": "EGRESOS"
+     }
+    ], 
+    "name": "OTROS INGRESOS (EGRESOS)"
+   }
+  ], 
+  "name": "Main Account Company"
+ }
+}

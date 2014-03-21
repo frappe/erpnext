@@ -1,0 +1,2409 @@
+{
+ "name": "Planilha de Contas Brasileira", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 Previd\u00eancia Social", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Remunera\u00e7\u00e3o a Dirigentes de Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Consumo de Insumos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Alimenta\u00e7\u00e3o do Trabalhador", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Arrendamento Mercantil", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 FGTS", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 Outros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Constitui\u00e7\u00e3o de Provis\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros Custos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados Pessoa Jur\u00eddica", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS DA ATIVIDADE RURAL", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros Custos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Constitui\u00e7\u00e3o de Provis\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 Previd\u00eancia Social", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Consumo de Insumos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Remunera\u00e7\u00e3o a Dirigentes de Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 FGTS", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Arrendamento Mercantil", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados Pessoa Jur\u00eddica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Alimenta\u00e7\u00e3o do Trabalhador", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 Outros", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Constitui\u00e7\u00e3o de Provis\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 Outros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Alimenta\u00e7\u00e3o do Trabalhador", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros Custos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados Pessoa Jur\u00eddica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Material Aplicado na Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 Previd\u00eancia Social", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Arrendamento Mercantil", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Remunera\u00e7\u00e3o a Dirigentes ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Encargos Sociais \u2013 FGTS", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "CUSTO DOS SERVI\u00c7OS PRODUZIDOS", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "CUSTO DOS BENS E SERVI\u00c7OS PRODUZIDOS", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "CUSTOS DE PRODU\u00c7\u00c3O", 
+    "report_type": "Profit and Loss"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Outras Despesas N\u00e3o Operacionais"
+             }, 
+             {
+              "name": "(-) Valor Cont\u00e1bil dos Bens e Direitos Alienados"
+             }
+            ], 
+            "name": "DESPESAS N\u00c3O OPERACIONAIS"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Receitas de Aliena\u00e7\u00f5es de Bens e Direitos do Ativo Permanente."
+             }, 
+             {
+              "name": "Outras Receitas N\u00e3o Operacionais"
+             }
+            ], 
+            "name": "RECEITAS N\u00c3O OPERACIONAIS"
+           }
+          ], 
+          "name": "RECEITAS E DESPESAS N\u00c3O OPERACIONAIS"
+         }
+        ], 
+        "name": "RECEITAS E DESPESAS N\u00c3O OPERACIONAIS"
+       }
+      ], 
+      "name": "OUTRAS RECEITAS E DESPESAS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Outras"
+             }, 
+             {
+              "name": "Revers\u00e3o dos Saldos das Provis\u00f5es Operacionais"
+             }, 
+             {
+              "name": "Varia\u00e7\u00f5es Cambiais Ativas"
+             }, 
+             {
+              "name": "Ganhos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente"
+             }, 
+             {
+              "name": "Ganhos Auferidos no Mercado de Renda Vari\u00e1vel, exceto Day-Trade"
+             }, 
+             {
+              "name": "Resultados Positivos em Participa\u00e7\u00f5es Societ\u00e1rias"
+             }, 
+             {
+              "name": "Ganhos em Opera\u00e7\u00f5es Day-Trade"
+             }, 
+             {
+              "name": "Outras Receitas de Aplica\u00e7\u00f5es Financeiras"
+             }, 
+             {
+              "name": "Outras Receitas Operacionais"
+             }, 
+             {
+              "name": "Rendimentos e Ganhos de Capital Auferidos no Exterior"
+             }
+            ], 
+            "name": "OUTRAS RECEITAS OPERACIONAIS"
+           }
+          ], 
+          "name": "OUTRAS RECEITAS OPERACIONAIS"
+         }
+        ], 
+        "name": "OUTRAS RECEITAS OPERACIONAIS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Presta\u00e7\u00e3o de Servi\u00e7o por Pessoa Jur\u00eddica"
+             }, 
+             {
+              "name": "Multas"
+             }, 
+             {
+              "name": "Contribui\u00e7\u00f5es Previdenci\u00e1rias Patronais"
+             }, 
+             {
+              "name": "Repasses para Outras Entidades (Sindicatos/Federa\u00e7\u00f5es/Confedera\u00e7\u00f5es)"
+             }, 
+             {
+              "name": "Outras Despesas Operacionais"
+             }, 
+             {
+              "name": "Provis\u00f5es para F\u00e9rias e 13o Sal\u00e1rio de Empregados"
+             }, 
+             {
+              "name": "Outras Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es a Institui\u00e7\u00f5es de Ensino e Pesquisa (Lei no 9.249/1995, art.13, \u00a7 2o)"
+             }, 
+             {
+              "name": "Indeniza\u00e7\u00f5es Trabalhistas"
+             }, 
+             {
+              "name": "CSLL"
+             }, 
+             {
+              "name": "Remunera\u00e7\u00e3o a Dirigentes e a Conselho de Administra\u00e7\u00e3o/Fiscal"
+             }, 
+             {
+              "name": "Encargos de Deprecia\u00e7\u00e3o e Amortiza\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Alugu\u00e9is"
+             }, 
+             {
+              "name": "Demais Impostos, Taxas e Contribui\u00e7\u00f5es, exceto as citadas acima."
+             }, 
+             {
+              "name": "Despesas com Ve\u00edculos e de Conserva\u00e7\u00e3o de Bens e Instala\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Demais Provis\u00f5es"
+             }, 
+             {
+              "name": "CPMF"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es a Entidades Civis"
+             }, 
+             {
+              "name": "FGTS (sem indeniza\u00e7\u00e3o 40%)"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es e Patroc\u00ednios de Car\u00e1ter Cultural e Art\u00edstico (Lei no 8.313/1991)"
+             }, 
+             {
+              "name": "Remunera\u00e7\u00f5es a Empregados"
+             }, 
+             {
+              "name": "COFINS"
+             }, 
+             {
+              "name": "Propaganda e Publicidade"
+             }, 
+             {
+              "name": "PIS/PASEP"
+             }, 
+             {
+              "name": "Arrendamento Mercantil"
+             }, 
+             {
+              "name": "Assist\u00eancia M\u00e9dica, Odontol\u00f3gica, Medicamentos, Aparelhos Ortop\u00e9dicos e Similares"
+             }
+            ], 
+            "name": "DESPESAS OPERACIONAIS"
+           }
+          ], 
+          "name": "DESPESAS OPERACIONAIS"
+         }
+        ], 
+        "name": "DESPESAS OPERACIONAIS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Servi\u00e7os Educacionais"
+             }, 
+             {
+              "name": "Contribui\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas"
+             }, 
+             {
+              "name": "Outras"
+             }
+            ], 
+            "name": "RECEITA DE PRESTA\u00c7\u00c3O DOS SERVI\u00c7OS"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Conv\u00eanios \u2013 SUS"
+             }, 
+             {
+              "name": "Outras"
+             }, 
+             {
+              "name": "Conv\u00eanios \u2013 Outros"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Contribui\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Pacientes Particulares"
+             }
+            ], 
+            "name": "RECEITA DE SERVI\u00c7OS DE SA\u00daDE"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Pacientes Particulares"
+             }, 
+             {
+              "name": "Conv\u00eanios - Outros"
+             }, 
+             {
+              "name": "Contribui\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas"
+             }, 
+             {
+              "name": "Outras"
+             }
+            ], 
+            "name": "RECEITAS DE SERVI\u00c7OS DE ASSIST\u00caNCIA SOCIAL"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Outras Contribui\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Contribui\u00e7\u00f5es Confederativas/Associativas"
+             }, 
+             {
+              "name": "Outras"
+             }, 
+             {
+              "name": "Mensalidades"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es/Subven\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Contribui\u00e7\u00f5es Sindicais"
+             }
+            ], 
+            "name": "RECEITAS DE OUTRAS ATIVIDADES"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Da atividade de Assist\u00eancia Social"
+             }, 
+             {
+              "name": "Da atividade de Educa\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Da atividade de Sa\u00fade"
+             }, 
+             {
+              "name": "Outras"
+             }
+            ], 
+            "name": "RECEITA DE VENDA DE PRODUTOS"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Outras"
+             }, 
+             {
+              "name": "(-) Vendas Canceladas"
+             }, 
+             {
+              "name": "(-) Devolu\u00e7\u00f5es e Descontos Incondicionais"
+             }
+            ], 
+            "name": "DEDU\u00c7\u00d5ES DA RECEITA BRUTA"
+           }
+          ], 
+          "name": "RECEITA BRUTA"
+         }
+        ], 
+        "name": "RECEITA OPERACIONAL L\u00cdQUIDA"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Custo dos Servi\u00e7os Prestados em Geral"
+             }, 
+             {
+              "name": "Outros Custos"
+             }
+            ], 
+            "name": "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA AS DEMAIS ATIVIDADES"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias (Exceto PROUNI)"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Alunos N\u00e3o Bolsistas"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Outros Custos"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Gratuidade"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados ao PROUNI"
+             }
+            ], 
+            "name": "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA EDUCA\u00c7\u00c3O"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Gratuidade"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Pacientes Particulares"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas"
+             }, 
+             {
+              "name": "Outros Custos"
+             }
+            ], 
+            "name": "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA ASSIST\u00caNCIA SOCIAL"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Gratuidade"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Pacientes Particulares"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Conv\u00eanios SUS"
+             }, 
+             {
+              "name": "Outros Custos"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias"
+             }, 
+             {
+              "name": "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas"
+             }
+            ], 
+            "name": "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA SA\u00daDE"
+           }
+          ], 
+          "name": "CUSTO DOS SERVI\u00c7OS PRESTADOS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Custos dos Produtos para Educa\u00e7\u00e3o - Vendidos"
+             }, 
+             {
+              "name": "Custos dos Produtos para Educa\u00e7\u00e3o - Gratuidades"
+             }, 
+             {
+              "name": "Outros Custos"
+             }
+            ], 
+            "name": "CUSTO DOS PRODUTOS VENDIDOS PARA EDUCA\u00c7\u00c3O"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Outros Custos"
+             }, 
+             {
+              "name": "Custos dos Produtos para Sa\u00fade - Gratuidades"
+             }, 
+             {
+              "name": "Custos dos Produtos para Sa\u00fade \u2013 Vendidos"
+             }
+            ], 
+            "name": "CUSTO DOS PRODUTOS VENDIDOS PARA SA\u00daDE"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Outras"
+             }, 
+             {
+              "name": "Custos dos Produtos para Assist\u00eancia Social - Vendidos"
+             }, 
+             {
+              "name": "Custos dos Produtos para Assist\u00eancia Social - Gratuidades"
+             }
+            ], 
+            "name": "CUSTO DOS PRODUTOS VENDIDOS PARA ASSIST\u00caNCIA SOCIAL"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Custos dos Produtos Vendidos em Geral"
+             }, 
+             {
+              "name": "Outros Custos"
+             }
+            ], 
+            "name": "CUSTO DOS PRODUTOS VENDIDOS PARA AS DEMAIS ATIVIDADES"
+           }
+          ], 
+          "name": "CUSTO DOS PRODUTOS VENDIDOS"
+         }
+        ], 
+        "name": "CUSTO DOS PRODUTOS E SERVI\u00c7OS VENDIDOS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Perdas em Opera\u00e7\u00f5es Day-Trade"
+             }, 
+             {
+              "name": "(-) Varia\u00e7\u00f5es Cambiais Passivas"
+             }, 
+             {
+              "name": "Outras Despesas Operacionais"
+             }, 
+             {
+              "name": "(-) Perdas Incorridas no Mercado de Renda Vari\u00e1vel, exceto Day-Trade"
+             }, 
+             {
+              "name": "(-) Perdas em Opera\u00e7\u00f5es Realizadas no Exterior"
+             }, 
+             {
+              "name": "(-) Resultados Negativos em Participa\u00e7\u00f5es Societ\u00e1rias"
+             }, 
+             {
+              "name": "(-) Preju\u00edzos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente"
+             }, 
+             {
+              "name": "(-) Outras Despesas de Aplica\u00e7\u00f5es"
+             }
+            ], 
+            "name": "OUTRAS DESPESAS OPERACIONAIS"
+           }
+          ], 
+          "name": "OUTRAS DESPESAS OPERACIONAIS"
+         }
+        ], 
+        "name": "OUTRAS DESPESAS OPERACIONAIS"
+       }
+      ], 
+      "name": "RESULTADO OPERACIONAL"
+     }
+    ], 
+    "name": "SUPER\u00c1VIT/D\u00c9FICIT L\u00cdQUIDO DO PER\u00cdODO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Contas Banc\u00e1rias \u2013 Subven\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Mobili\u00e1rios - Mercado de Capitais Interno", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Recursos no Exterior Decorrentes de Exporta\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Mobili\u00e1rios \u2013 Aplica\u00e7\u00f5es de Subven\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Mobili\u00e1rios - Mercado de Capitais Externo", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Mobili\u00e1rios \u2013 Aplica\u00e7\u00f5es de Outros Recursos Sujeitos a Restri\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Bancos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Bank", 
+          "name": "Caixa", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Contas Banc\u00e1rias \u2013 Outros Recursos Sujeitos a Restri\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Contas Banc\u00e1rias \u2013 Doa\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Mobili\u00e1rios \u2013 Aplica\u00e7\u00f5es de Doa\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DISPONIBILIDADES", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Im\u00f3veis Destinados \u00e0 Venda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Constru\u00e7\u00f5es em Andamento de Im\u00f3veis Destinados \u00e0 Venda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Produtos Agropecu\u00e1rios em Forma\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Insumos Agropecu\u00e1rios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Servi\u00e7os em andamento", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Produtos Acabados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Produtos em Elabora\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Insumos (materiais diretos)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Mercadorias para Revenda", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Produtos Agropecu\u00e1rios Acabados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Estoques Destinados \u00e0 Doa\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outras", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ESTOQUES", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Adiantamentos a Fornecedores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias e Preju\u00edzos Fiscais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias e Base de C\u00e1lculo Negativa", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos por Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "ICMS e Contribui\u00e7\u00f5es a Recuperar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "CSLL a Recuperar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Tributos Municipais a Recuperar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Imposto de Renda a Recuperar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "PIS e COFINS a Recuperar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "IPI a Recuperar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outros Impostos e Contribui\u00e7\u00f5es a Recuperar", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "CR\u00c9DITOS", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outras Contas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Despesas do Exerc\u00edcio Seguinte", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DESPESAS DO EXERC\u00cdCIO SEGUINTE", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "(-) Outras Contas Retificadoras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Provis\u00e3o para Ajuste do Estoque ao Valor de Mercado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Provis\u00f5es para Ajuste ao Valor Prov\u00e1vel de Realiza\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Duplicatas Descontadas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Provis\u00f5es para Cr\u00e9ditos de Liquida\u00e7\u00e3o Duvidosa", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "CONTAS RETIFICADORAS", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "CIRCULANTE", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Despesas Pr\u00e9-Operacionais ou Pr\u00e9-Industriais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Amortiza\u00e7\u00e3o do Diferido", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Demais Aplica\u00e7\u00f5es em Despesas Amortiz\u00e1veis", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Despesas com Pesquisas Cient\u00edficas ou Tecnol\u00f3gicas", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "DIFERIDO", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Florestamento e Reflorestamento", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Terrenos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aeronaves", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Embarca\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Ve\u00edculos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Constru\u00e7\u00f5es em Andamento", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Edif\u00edcios e Constru\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Direitos Contratuais de Explora\u00e7\u00e3o de Florestas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "M\u00f3veis, Utens\u00edlios e Instala\u00e7\u00f5es Comerciais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Recursos Minerais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Outras Contas Redutoras do Imobilizado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Equipamentos, M\u00e1quinas e Instala\u00e7\u00f5es Industriais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Deprecia\u00e7\u00f5es, Amortiza\u00e7\u00f5es e Quotas de Exaust\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outras Imobiliza\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "IMOBILIZADO", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "\u00c1gios em Investimentos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Des\u00e1gios e Provis\u00e3o para Perdas Prov\u00e1veis em Investimentos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Outras Contas Retificadoras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outros Investimentos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outras Contas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Investimentos Decorrentes de Incentivos Fiscais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es Permanentes em Coligadas ou Controladas", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "INVESTIMENTOS", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Fundo de Com\u00e9rcio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Desenvolvimento de Produtos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Concess\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Franquias", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Direitos Autorais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Marcas e Patentes", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Amortiza\u00e7\u00e3o do Intang\u00edvel", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Outras Contas Redutoras do Intang\u00edvel", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Outras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Software ou Programas de Computador", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "INTANG\u00cdVEL", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outras Contas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Provis\u00f5es para Cr\u00e9ditos de Liquida\u00e7\u00e3o Duvidosa", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos com Pessoas Ligadas (F\u00edsicas/Jur\u00eddicas)", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos por Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Valores Mobili\u00e1rios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Outras Contas Retificadoras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Dep\u00f3sitos Judiciais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Provis\u00f5es para Ajuste ao Valor Prov\u00e1vel de Realiza\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Duplicatas Descontadas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias e Base de C\u00e1lculo Negativa", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias e Preju\u00edzos Fiscais", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "REALIZ\u00c1VEL A LONGO PRAZO", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "N\u00c3O CIRCULANTE", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "ATIVO", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Contribui\u00e7\u00e3o Social sobre o Lucro L\u00edquido"
+             }, 
+             {
+              "name": "(-) Provis\u00e3o para Imposto de Renda - Pessoa Jur\u00eddica"
+             }
+            ], 
+            "name": "PROVIS\u00c3O PARA CSLL E IRPJ"
+           }
+          ], 
+          "name": "PROVIS\u00c3O PARA CSLL E IRPJ"
+         }
+        ], 
+        "name": "PROVIS\u00c3O PARA CSLL E IRPJ"
+       }
+      ], 
+      "name": "PROVIS\u00c3O PARA CSLL E IRPJ (ATIVIDADES EM GERAL)"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Outras"
+             }, 
+             {
+              "name": "(-) Participa\u00e7\u00f5es de Deb\u00eantures"
+             }, 
+             {
+              "name": "(-) Participa\u00e7\u00f5es de Administradores e Partes Benefici\u00e1rias"
+             }
+            ], 
+            "name": "OUTRAS PARTICIPA\u00c7\u00d5ES"
+           }, 
+           {
+            "children": [
+             {
+              "name": "(-) Contribui\u00e7\u00f5es para Assist\u00eancia ou Previd\u00eancia de Empregados"
+             }, 
+             {
+              "name": "(-) Outras Participa\u00e7\u00f5es de Empregados"
+             }, 
+             {
+              "name": "(-) Participa\u00e7\u00f5es de Empregados"
+             }
+            ], 
+            "name": "PARTICIPA\u00c7\u00d5ES DE EMPREGADOS"
+           }
+          ], 
+          "name": "PARTICIPA\u00c7\u00d5ES NOS LUCROS"
+         }
+        ], 
+        "name": "PARTICIPA\u00c7\u00d5ES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Ganhos de Capital por Varia\u00e7\u00e3o Percentual em Participa\u00e7\u00e3o Societ\u00e1ria Avaliada pelo Patrim\u00f4nio L\u00edquido"
+             }, 
+             {
+              "name": "Outras Receitas N\u00e3o Operacionais"
+             }, 
+             {
+              "name": "Receitas de Aliena\u00e7\u00f5es de Bens e Direitos do Ativo Permanente"
+             }
+            ], 
+            "name": "RECEITAS N\u00c3O OPERACIONAIS"
+           }, 
+           {
+            "children": [
+             {
+              "name": "(-) Perdas de Capital por Varia\u00e7\u00e3o Percentual em Participa\u00e7\u00e3o Societ\u00e1ria Avaliada pelo Patrim\u00f4nio L\u00edquido"
+             }, 
+             {
+              "name": "(-) Outras Despesas N\u00e3o Operacionais"
+             }, 
+             {
+              "name": "(-) Valor Cont\u00e1bil dos Bens e Direitos Alienados"
+             }
+            ], 
+            "name": "DESPESAS N\u00c3O OPERACIONAIS"
+           }
+          ], 
+          "name": "RECEITAS E DESPESAS N\u00c3O OPERACIONAIS"
+         }
+        ], 
+        "name": "OUTRAS RECEITAS E OUTRAS DESPESAS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Amortiza\u00e7\u00e3o de \u00c1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido"
+             }, 
+             {
+              "name": "(-) Perdas em Opera\u00e7\u00f5es Realizadas no Exterior"
+             }, 
+             {
+              "name": "(-) Contrapartida dos Ajustes de Valor do Imobilizado e Intang\u00edvel"
+             }, 
+             {
+              "name": "(-) Juros sobre o Capital Pr\u00f3prio"
+             }, 
+             {
+              "name": "(-) Resultados Negativos em Participa\u00e7\u00f5es Societ\u00e1rias"
+             }, 
+             {
+              "name": "(-) Perdas em Opera\u00e7\u00f5es Day-Trade"
+             }, 
+             {
+              "name": "(-) Perdas Incorridas no Mercado de Renda Vari\u00e1vel, exceto Day-Trade"
+             }, 
+             {
+              "name": "(-) Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade"
+             }, 
+             {
+              "name": "(-) Resultados Negativos em SCP"
+             }, 
+             {
+              "name": "(-) Contrapartida dos Ajustes ao Valor Presente"
+             }, 
+             {
+              "name": "(-) Preju\u00edzos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente"
+             }, 
+             {
+              "name": "(-) Varia\u00e7\u00f5es Cambiais Passivas"
+             }, 
+             {
+              "name": "(-) Outras Despesas Financeiras"
+             }
+            ], 
+            "name": "OUTRAS DESPESAS OPERACIONAIS"
+           }
+          ], 
+          "name": "OUTRAS DESPESAS OPERACIONAIS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Pr\u00eamios Recebidos na Emiss\u00e3o de Deb\u00eantures"
+             }, 
+             {
+              "name": "Ganhos Auferidos no Mercado de Renda Vari\u00e1vel, exceto Day-Trade"
+             }, 
+             {
+              "name": "Outras Receitas Financeiras"
+             }, 
+             {
+              "name": "Amortiza\u00e7\u00e3o de Des\u00e1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido"
+             }, 
+             {
+              "name": "Resultados Positivos em SCP"
+             }, 
+             {
+              "name": "Revers\u00e3o dos Saldos das Provis\u00f5es Operacionais"
+             }, 
+             {
+              "name": "Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade"
+             }, 
+             {
+              "name": "Varia\u00e7\u00f5es Cambiais Ativas"
+             }, 
+             {
+              "name": "Resultados Positivos em Participa\u00e7\u00f5es Societ\u00e1rias"
+             }, 
+             {
+              "name": "Contrapartida dos Ajustes ao Valor Presente"
+             }, 
+             {
+              "name": "Outras Receitas Operacionais"
+             }, 
+             {
+              "name": "Receitas de Juros sobre o Capital Pr\u00f3prio"
+             }, 
+             {
+              "name": "Ganhos em Opera\u00e7\u00f5es Day-Trade"
+             }, 
+             {
+              "name": "Ganhos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos"
+             }, 
+             {
+              "name": "Rendimentos e Ganhos de Capital Auferidos no Exterior"
+             }
+            ], 
+            "name": "OUTRAS RECEITAS OPERACIONAIS"
+           }
+          ], 
+          "name": "OUTRAS RECEITAS OPERACIONAIS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Encargos Sociais \u2013 FGTS"
+             }, 
+             {
+              "name": "Multas"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es e Patroc\u00ednios de Car\u00e1ter Cultural e Art\u00edstico (Lei no 8.313/1991)"
+             }, 
+             {
+              "name": "Assist\u00eancia M\u00e9dica, Odontol\u00f3gica e Farmac\u00eautica a Empregados"
+             }, 
+             {
+              "name": "Encargos Sociais \u2013 Previd\u00eancia Social"
+             }, 
+             {
+              "name": "Arrendamento Mercantil"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es a Entidades Civis"
+             }, 
+             {
+              "name": "Provis\u00e3o para Perda de Estoque"
+             }, 
+             {
+              "name": "Fundo de Aposentadoria Programada Individual de Empregados"
+             }, 
+             {
+              "name": "Planos de Poupan\u00e7a e Investimentos de Empregados"
+             }, 
+             {
+              "name": "Ordenados, Sal\u00e1rios Gratifica\u00e7\u00f5es e Outras Remunera\u00e7\u00f5es a Empregados"
+             }, 
+             {
+              "name": "Outros Gastos com Pessoal"
+             }, 
+             {
+              "name": "Propaganda, Publicidade e Patroc\u00ednio"
+             }, 
+             {
+              "name": "Remunera\u00e7\u00e3o a Dirigentes e a Conselho de Administra\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica"
+             }, 
+             {
+              "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho"
+             }, 
+             {
+              "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra"
+             }, 
+             {
+              "name": "Pesquisas Cient\u00edficas e Tecnol\u00f3gicas"
+             }, 
+             {
+              "name": "Cofins"
+             }, 
+             {
+              "name": "Outras Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Bens de Natureza Permanente Deduzidos como Despesa"
+             }, 
+             {
+              "name": "Perdas em Opera\u00e7\u00f5es de Cr\u00e9dito"
+             }, 
+             {
+              "name": "Provis\u00f5es para F\u00e9rias e 13o Sal\u00e1rio de Empregados"
+             }, 
+             {
+              "name": "Alugu\u00e9is"
+             }, 
+             {
+              "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR"
+             }, 
+             {
+              "name": "Alimenta\u00e7\u00e3o do Trabalhador"
+             }, 
+             {
+              "name": "Gratifica\u00e7\u00f5es a Administradores"
+             }, 
+             {
+              "name": "Plano de Previd\u00eancia Privada de Empregados"
+             }, 
+             {
+              "name": "Encargos Sociais \u2013 Outros"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es a Institui\u00e7\u00f5es de Ensino e Pesquisa (Lei n\u00ba 9.249/1995, art.13, \u00a7 2\u00ba)"
+             }, 
+             {
+              "name": "CPMF"
+             }, 
+             {
+              "name": "Despesas com viagens, di\u00e1rias e ajusta de custo"
+             }, 
+             {
+              "name": "Demais Impostos, Taxas e Contribui\u00e7\u00f5es, exceto IR e CSLL"
+             }, 
+             {
+              "name": "Encargos de Deprecia\u00e7\u00e3o e Amortiza\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Outras Despesas Operacionais"
+             }, 
+             {
+              "name": "Propaganda, Publicidade e Patroc\u00ednio (Associa\u00e7\u00f5es Desportivas que Mantenham Equipe de Futebol Profissional)"
+             }, 
+             {
+              "name": "Despesas com Ve\u00edculos e de Conserva\u00e7\u00e3o de Bens e Instala\u00e7\u00f5es"
+             }, 
+             {
+              "name": "PIS/Pasep"
+             }, 
+             {
+              "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS"
+             }, 
+             {
+              "name": "Demais Provis\u00f5es"
+             }, 
+             {
+              "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio"
+             }
+            ], 
+            "name": "DESPESAS OPERACIONAIS DAS ATIVIDADES EM GERAL"
+           }
+          ], 
+          "name": "DESPESAS OPERACIONAIS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Cofins"
+             }, 
+             {
+              "name": "(-) ICMS"
+             }, 
+             {
+              "name": "(-) Vendas Canceladas, Devolu\u00e7\u00f5es e Descontos Incondicionais"
+             }, 
+             {
+              "name": "(-) Demais Impostos e Contribui\u00e7\u00f5es Incidentes sobre Vendas e Servi\u00e7os"
+             }, 
+             {
+              "name": "(-) ISS"
+             }, 
+             {
+              "name": "(-) PIS/Pasep"
+             }
+            ], 
+            "name": "DEDU\u00c7\u00d5ES DA RECEITA BRUTA"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Receita das Unidades Imobili\u00e1rias Vendidas"
+             }, 
+             {
+              "name": "Receita da Revenda de Mercadorias no Mercado Interno"
+             }, 
+             {
+              "name": "Receita da Presta\u00e7\u00e3o de Servi\u00e7os \u2013 Mercado Interno"
+             }, 
+             {
+              "name": "Outras"
+             }, 
+             {
+              "name": "Receita da Venda no Mercado Interno de Produtos de Fabrica\u00e7\u00e3o Pr\u00f3pria"
+             }, 
+             {
+              "name": "Receita de Loca\u00e7\u00e3o de Bens M\u00f3veis e Im\u00f3veis"
+             }, 
+             {
+              "name": "Receita de Exporta\u00e7\u00e3o de Servi\u00e7os"
+             }, 
+             {
+              "name": "Receita de Vendas de Mercadorias e Produtos a Comercial Exportadora com Fim Espec\u00edfico de Exporta\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Receita de Exporta\u00e7\u00e3o Direta de Mercadorias e Produtos"
+             }
+            ], 
+            "name": "RECEITA BRUTA"
+           }
+          ], 
+          "name": "RECEITA LIQUIDA"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Custo das Unidades Imobili\u00e1rias Vendidas"
+             }
+            ], 
+            "name": "CUSTO DAS UNIDADES IMOBILI\u00c1RIAS VENDIDAS"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Custo dos Produtos de Fabrica\u00e7\u00e3o Pr\u00f3pria Vendidos"
+             }
+            ], 
+            "name": "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA VENDIDOS"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Custo dos Servi\u00e7os Vendidos"
+             }, 
+             {
+              "name": "Custo das Mercadorias Revendidas"
+             }
+            ], 
+            "name": "CUSTO DAS MERCADORIAS REVENDIDAS"
+           }, 
+           {
+            "name": "AJUSTES DE ESTOQUES DECORRENTES DE ARBITRAMENTO"
+           }
+          ], 
+          "name": "CUSTO DOS BENS E SERVI\u00c7OS VENDIDOS"
+         }
+        ], 
+        "name": "RESULTADO OPERACIONAL"
+       }
+      ], 
+      "name": "RESULTADO L\u00cdQUIDO DO PER\u00cdODO ANTES DO IRPJ E DA CSLL - ATIVIDADE GERAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Participa\u00e7\u00f5es de Deb\u00eantures"
+             }, 
+             {
+              "name": "(-) Outras"
+             }, 
+             {
+              "name": "(-) Participa\u00e7\u00f5es de Administradores e Partes Benefici\u00e1rias"
+             }
+            ], 
+            "name": "OUTRAS PARTICIPA\u00c7\u00d5ES"
+           }, 
+           {
+            "children": [
+             {
+              "name": "(-) Participa\u00e7\u00f5es de Empregados"
+             }, 
+             {
+              "name": "(-) Outras Participa\u00e7\u00f5es de Empregados"
+             }, 
+             {
+              "name": "(-) Contribui\u00e7\u00f5es para Assist\u00eancia ou Previd\u00eancia de Empregados"
+             }
+            ], 
+            "name": "PARTICIPA\u00c7\u00d5ES DE EMPREGADOS"
+           }
+          ], 
+          "name": "PARTICIPA\u00c7\u00d5ES NOS LUCROS"
+         }
+        ], 
+        "name": "PARTICIPA\u00c7\u00d5ES"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Amortiza\u00e7\u00e3o de \u00c1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido"
+             }, 
+             {
+              "name": "(-) Perdas em Opera\u00e7\u00f5es Day-Trade"
+             }, 
+             {
+              "name": "(-) Preju\u00edzos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente"
+             }, 
+             {
+              "name": "(-) Contrapartida dos ajustes de valor do imobilizado e intang\u00edvel"
+             }, 
+             {
+              "name": "(-) Varia\u00e7\u00f5es Cambiais Passivas"
+             }, 
+             {
+              "name": "(-) Perdas Incorridas no Mercado de Renda Vari\u00e1vel, exceto Day-Trade"
+             }, 
+             {
+              "name": "(-) Outras Despesas Financeiras"
+             }, 
+             {
+              "name": "(-) Resultados Negativos em SCP"
+             }, 
+             {
+              "name": "(-) Contrapartida dos Ajustes ao Valor Presente"
+             }, 
+             {
+              "name": "(-) Perdas em Opera\u00e7\u00f5es Realizadas no Exterior"
+             }, 
+             {
+              "name": "(-) Juros sobre o Capital Pr\u00f3prio"
+             }, 
+             {
+              "name": "(-) Resultados Negativos em Participa\u00e7\u00f5es Societ\u00e1rias"
+             }, 
+             {
+              "name": "(-) Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade"
+             }
+            ], 
+            "name": "OUTRAS DESPESAS OPERACIONAIS"
+           }
+          ], 
+          "name": "OUTRAS DESPESAS OPERACIONAIS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Demais Impostos e Contribui\u00e7\u00f5es Incidentes sobre Vendas e Servi\u00e7os"
+             }, 
+             {
+              "name": "(-) Cofins"
+             }, 
+             {
+              "name": "(-) ISS"
+             }, 
+             {
+              "name": "(-) PIS/Pasep"
+             }, 
+             {
+              "name": "(-) ICMS"
+             }, 
+             {
+              "name": "(-) Vendas Canceladas, Devolu\u00e7\u00f5es e Descontos Incondicionais"
+             }
+            ], 
+            "name": "DEDU\u00c7\u00d5ES DA RECEITA BRUTA"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Receita da Atividade Rural"
+             }
+            ], 
+            "name": "RECEITA BRUTA DA ATIVIDADE RURAL"
+           }
+          ], 
+          "name": "RECEITA OPERACIONAL L\u00cdQUIDA DA ATIVIDADE RURAL"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Revers\u00e3o dos Saldos das Provis\u00f5es Operacionais"
+             }, 
+             {
+              "name": "Contrapartida dos Ajustes ao Valor Presente"
+             }, 
+             {
+              "name": "Outras Receitas Operacionais"
+             }, 
+             {
+              "name": "Outras Receitas Financeiras"
+             }, 
+             {
+              "name": "Amortiza\u00e7\u00e3o de Des\u00e1gio nas Aquisi\u00e7\u00f5es de Investimentos Avaliados pelo Patrim\u00f4nio L\u00edquido"
+             }, 
+             {
+              "name": "Ganhos em Opera\u00e7\u00f5es Day-Trade"
+             }, 
+             {
+              "name": "Contrapartida de outros Ajustes \u00e0s Normas Internacionais de Contabilidade"
+             }, 
+             {
+              "name": "Pr\u00eamios Recebidos na Emiss\u00e3o de Deb\u00eantures"
+             }, 
+             {
+              "name": "Rendimentos e Ganhos de Capital Auferidos no Exterior"
+             }, 
+             {
+              "name": "Receitas de Juros sobre o Capital Pr\u00f3prio"
+             }, 
+             {
+              "name": "Resultados Positivos em Participa\u00e7\u00f5es Societ\u00e1rias"
+             }, 
+             {
+              "name": "Ganhos Auferidos no Mercado de Renda Vari\u00e1vel, exceto Day-Trade"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos"
+             }, 
+             {
+              "name": "Varia\u00e7\u00f5es Cambiais Ativas"
+             }, 
+             {
+              "name": "Resultados Positivos em SCP"
+             }, 
+             {
+              "name": "Ganhos na Aliena\u00e7\u00e3o de Participa\u00e7\u00f5es N\u00e3o Integrantes do Ativo Permanente"
+             }
+            ], 
+            "name": "OUTRAS RECEITAS OPERACIONAIS"
+           }
+          ], 
+          "name": "OUTRAS RECEITAS OPERACIONAIS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Planos de Poupan\u00e7a e Investimentos de Empregados"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es a Institui\u00e7\u00f5es de Ensino e Pesquisa (Lei no 9.249/1995, art.13, \u00a7 2o)"
+             }, 
+             {
+              "name": "PIS/Pasep"
+             }, 
+             {
+              "name": "Encargos de Deprecia\u00e7\u00e3o e Amortiza\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Provis\u00e3o para Perda de Estoque"
+             }, 
+             {
+              "name": "Cofins"
+             }, 
+             {
+              "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica"
+             }, 
+             {
+              "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho"
+             }, 
+             {
+              "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra"
+             }, 
+             {
+              "name": "Despesas com Ve\u00edculos e de Conserva\u00e7\u00e3o de Bens e Instala\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio"
+             }, 
+             {
+              "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS"
+             }, 
+             {
+              "name": "Outras Despesas Operacionais"
+             }, 
+             {
+              "name": "Despesas com viagens, di\u00e1rias e ajusta de custo"
+             }, 
+             {
+              "name": "Assist\u00eancia M\u00e9dica, Odontol\u00f3gica e Farmac\u00eautica a Empregados"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es a Entidades Civis"
+             }, 
+             {
+              "name": "Doa\u00e7\u00f5es e Patroc\u00ednios de Car\u00e1ter Cultural e Art\u00edstico (Lei no 8.313/1991)"
+             }, 
+             {
+              "name": "Multas"
+             }, 
+             {
+              "name": "Provis\u00f5es para F\u00e9rias e 13o Sal\u00e1rio de Empregados"
+             }, 
+             {
+              "name": "CPMF"
+             }, 
+             {
+              "name": "Encargos Sociais \u2013 Outros"
+             }, 
+             {
+              "name": "Gratifica\u00e7\u00f5es a Administradores"
+             }, 
+             {
+              "name": "Ordenados, Sal\u00e1rios Gratifica\u00e7\u00f5es e Outras Remunera\u00e7\u00f5es a Empregados"
+             }, 
+             {
+              "name": "Plano de Previd\u00eancia Privada de Empregados"
+             }, 
+             {
+              "name": "Fundo de Aposentadoria Programada Individual de Empregados"
+             }, 
+             {
+              "name": "Outros Gastos com Pessoal"
+             }, 
+             {
+              "name": "Remunera\u00e7\u00e3o a Dirigentes e a Conselho de Administra\u00e7\u00e3o"
+             }, 
+             {
+              "name": "Propaganda, Publicidade e Patroc\u00ednio"
+             }, 
+             {
+              "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR"
+             }, 
+             {
+              "name": "Pesquisas Cient\u00edficas e Tecnol\u00f3gicas"
+             }, 
+             {
+              "name": "Outras Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es"
+             }, 
+             {
+              "name": "Propaganda, Publicidade e Patroc\u00ednio (Associa\u00e7\u00f5es Desportivas que Mantenham Equipe de Futebol Profissional)"
+             }, 
+             {
+              "name": "Perdas em Opera\u00e7\u00f5es de Cr\u00e9dito"
+             }, 
+             {
+              "name": "Alimenta\u00e7\u00e3o do Trabalhador"
+             }, 
+             {
+              "name": "Encargos Sociais \u2013 FGTS"
+             }, 
+             {
+              "name": "Arrendamento Mercantil"
+             }, 
+             {
+              "name": "Encargos Sociais - Previd\u00eancia Social"
+             }, 
+             {
+              "name": "Demais Provis\u00f5es"
+             }, 
+             {
+              "name": "Demais Impostos, Taxas e Contribui\u00e7\u00f5es, exceto IR e CSLL"
+             }, 
+             {
+              "name": "Alugu\u00e9is"
+             }, 
+             {
+              "name": "Bens de Natureza Permanente Deduzidos como Despesa"
+             }
+            ], 
+            "name": "DESPESAS OPERACIONAIS DA ATIVIDADE RURAL"
+           }
+          ], 
+          "name": "DESPESAS OPERACIONAIS"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "AJUSTES DE ESTOQUES DECORRENTES DE ARBITRAMENTO"
+             }, 
+             {
+              "name": "Custo dos Produtos Vendidos da Atividade Rural"
+             }
+            ], 
+            "name": "CUSTO DOS PRODUTOS DA ATIVIDADE RURAL VENDIDOS"
+           }
+          ], 
+          "name": "CUSTO DOS BENS E SERVI\u00c7OS VENDIDOS"
+         }
+        ], 
+        "name": "RESULTADO OPERACIONAL DA ATIVIDADE RURAL"
+       }
+      ], 
+      "name": "RESULTADO ANTES DO IRPJ E DA CSLL - ATIVIDADE RURAL"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "(-) Contribui\u00e7\u00e3o Social sobre o Lucro L\u00edquido"
+             }, 
+             {
+              "name": "(-) Provis\u00e3o para Imposto de Renda - Pessoa Jur\u00eddica"
+             }
+            ], 
+            "name": "PROVIS\u00c3O PARA CSLL E IRPJ"
+           }
+          ], 
+          "name": "PROVIS\u00c3O PARA CSLL E IRPJ"
+         }
+        ], 
+        "name": "PROVIS\u00c3O PARA CSLL E IRPJ"
+       }
+      ], 
+      "name": "PROVIS\u00c3O PARA CSLL E IRPJ (ATIVIDADE RURAL)"
+     }
+    ], 
+    "name": "RESULTADO L\u00cdQUIDO DO PER\u00cdODO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "(-) Contas Retificadoras"
+         }, 
+         {
+          "name": "Provis\u00e3o para a Contribui\u00e7\u00e3o Social sobre o Lucro L\u00edquido"
+         }, 
+         {
+          "name": "IPI a Recolher"
+         }, 
+         {
+          "name": "ICMS e Contribui\u00e7\u00f5es a Recolher"
+         }, 
+         {
+          "name": "Tributos Municipais a Recolher"
+         }, 
+         {
+          "name": "Outras Contas"
+         }, 
+         {
+          "name": "Provis\u00f5es de Natureza Fiscal"
+         }, 
+         {
+          "name": "Provis\u00f5es de Natureza C\u00edvel"
+         }, 
+         {
+          "name": "Sal\u00e1rios a Pagar"
+         }, 
+         {
+          "name": "D\u00e9bitos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias"
+         }, 
+         {
+          "name": "D\u00e9bitos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias"
+         }, 
+         {
+          "name": "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos"
+         }, 
+         {
+          "name": "Arrendamento Mercantil (Financeiro) a Curto Prazo - Exterior"
+         }, 
+         {
+          "name": "PIS e COFINS a Recolher"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Adiantamentos de Clientes"
+         }, 
+         {
+          "name": "Dividendos Propostos ou Lucros Creditados"
+         }, 
+         {
+          "name": "Financiamentos a Curto Prazo - Exterior"
+         }, 
+         {
+          "name": "Financiamentos a Curto Prazo - Sistema Financeiro Nacional"
+         }, 
+         {
+          "name": "Financiamentos a Curto Prazo - Outros"
+         }, 
+         {
+          "name": "Arrendamento Mercantil (Financeiro) a Curto Prazo - Sistema Financeiro Nacional"
+         }, 
+         {
+          "name": "Provis\u00e3o para o Imposto de Renda"
+         }, 
+         {
+          "name": "FGTS a Recolher"
+         }, 
+         {
+          "name": "Outros tributos a recolher"
+         }, 
+         {
+          "name": "Provis\u00f5es de Natureza Trabalhista"
+         }, 
+         {
+          "name": "Contribui\u00e7\u00f5es Previdenci\u00e1rias a Recolher"
+         }
+        ], 
+        "name": "OBRIGA\u00c7\u00d5ES DE CURTO PRAZO"
+       }
+      ], 
+      "name": "CIRCULANTE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "(-) Contas Retificadoras"
+         }, 
+         {
+          "name": "Outras Provis\u00f5es de Natureza C\u00edvel"
+         }, 
+         {
+          "name": "D\u00e9bitos Fiscais IRPJ - Diferen\u00e7as Tempor\u00e1rias"
+         }, 
+         {
+          "name": "Cr\u00e9ditos de Pessoas Ligadas (F\u00edsicas/Jur\u00eddicas)"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos"
+         }, 
+         {
+          "name": "Outras Contas"
+         }, 
+         {
+          "name": "Outras Provis\u00f5es de Natureza Fiscal"
+         }, 
+         {
+          "name": "Provis\u00e3o para o Imposto de Renda sobre Lucros Diferidos"
+         }, 
+         {
+          "name": "Arrendamento Mercantil (Financeiro) a Longo Prazo \u2013 Exterior"
+         }, 
+         {
+          "name": "Financiamentos a Longo Prazo \u2013 Exterior"
+         }, 
+         {
+          "name": "Financiamentos a Longo Prazo \u2013 Brasil - Outros"
+         }, 
+         {
+          "name": "Arrendamento Mercantil (Financeiro) a Longo Prazo - Sistema Financeiro Nacional"
+         }, 
+         {
+          "name": "Financiamentos a Longo Prazo - Sistema Financeiro Nacional"
+         }, 
+         {
+          "name": "Outras Provis\u00f5es de Natureza Trabalhista"
+         }, 
+         {
+          "name": "D\u00e9bitos Fiscais CSLL - Diferen\u00e7as Tempor\u00e1rias"
+         }, 
+         {
+          "name": "Empr\u00e9stimos de S\u00f3cios/Acionistas N\u00e3o Administradores"
+         }
+        ], 
+        "name": "OBRIGA\u00c7\u00d5ES A LONGO PRAZO"
+       }, 
+       {
+        "children": [
+         {
+          "name": "(-) Custos Correspondentes \u00e0s Receitas Diferidas"
+         }, 
+         {
+          "name": "Receitas Diferidas"
+         }
+        ], 
+        "name": "RECEITAS DIFERIDAS"
+       }
+      ], 
+      "name": "N\u00c3O-CIRCULANTE"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Outras Reservas"
+         }, 
+         {
+          "name": "Reservas de Reavalia\u00e7\u00e3o"
+         }, 
+         {
+          "name": "Reserva para Aumento de Capital (Lei no 9.249/1995, art. 9o, \u00a7 9o)"
+         }, 
+         {
+          "name": "Reservas de Lucros - Pr\u00eamio na Emiss\u00e3o de Deb\u00eantures"
+         }, 
+         {
+          "name": "Reservas de Lucros - Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos"
+         }, 
+         {
+          "name": "Reservas de Lucros"
+         }, 
+         {
+          "name": "Reservas de Capital"
+         }
+        ], 
+        "name": "RESERVAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ajustes \u00e0s Normas Internacionais de Contabilidade"
+         }, 
+         {
+          "name": "(-) Ajustes \u00e0s Normas Internacionais de Contabilidade"
+         }
+        ], 
+        "name": "AJUSTES DE AVALIA\u00c7\u00c3O PATRIMONIAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outras"
+         }, 
+         {
+          "name": "Lucros Acumulados e/ou Saldo \u00e0 Disposi\u00e7\u00e3o da Assembl\u00e9ia"
+         }, 
+         {
+          "name": "(-) Preju\u00edzos Acumulados"
+         }, 
+         {
+          "name": "(-) A\u00e7\u00f5es em Tesouraria"
+         }
+        ], 
+        "name": "OUTRAS CONTAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "(-) Capital a Integralizar de Domiciliados e Residentes no Pa\u00eds"
+         }, 
+         {
+          "name": "(-) Capital a Integralizar de Domiciliados e Residentes no Exterior"
+         }, 
+         {
+          "name": "Capital Subscrito de Domiciliados e Residentes no Exterior"
+         }, 
+         {
+          "name": "Capital Subscrito de Domiciliados e Residentes no Pa\u00eds"
+         }
+        ], 
+        "name": "CAPITAL REALIZADO"
+       }
+      ], 
+      "name": "PATRIM\u00d4NIO L\u00cdQUIDO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Fundo Patrimonial"
+         }
+        ], 
+        "name": "FUNDO PATRIMONIAL"
+       }, 
+       {
+        "children": [
+         {
+          "name": "D\u00e9ficits Acumulados"
+         }, 
+         {
+          "name": "Super\u00e1vits Acumulados"
+         }
+        ], 
+        "name": "OUTRAS CONTAS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reservas Patrimoniais"
+         }, 
+         {
+          "name": "Reservas Estatut\u00e1rias"
+         }
+        ], 
+        "name": "RESERVAS"
+       }
+      ], 
+      "name": "PATRIM\u00d4NIO SOCIAL"
+     }
+    ], 
+    "name": "PASSIVO"
+   }
+  ], 
+  "name": "Plano de Contas", 
+  "parent_id": null
+ }
+}

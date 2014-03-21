@@ -32,7 +32,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			'<li>'+
 			     '<b>'+frappe._('To create a Bank Account:')+'</b>'+ 
 			      frappe._('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts)')+
-			      frappe._('and create a new Account Ledger (by clicking on Add Child) of type "Bank or Cash"')+
+			      frappe._('and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
 			'</li>'+
 			'<li>'+
 			      '<b>'+frappe._('To create a Tax Account:')+'</b>'+
@@ -68,7 +68,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
 			});
-			wrapper.$company_select.val(frappe.defaults.get_default("company") || r[0]).change();
+			wrapper.$company_select.val(frappe.defaults.get_user_default("company") || r[0]).change();
 		}
 	});
 }
@@ -193,8 +193,9 @@ erpnext.AccountsChart = Class.extend({
 					options:'Group\nLedger', description: frappe._('Further accounts can be made under Groups,')+
 					 	frappe._('but entries can be made against Ledger')},
 				{fieldtype:'Select', fieldname:'account_type', label:frappe._('Account Type'),
-					options: ['', 'Fixed Asset Account', 'Bank or Cash', 'Expense Account', 'Tax',
-						'Income Account', 'Chargeable'].join('\n'),
+					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable', 
+						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account', 
+						'Income Account', 'Tax', 'Chargeable'].join('\n'),
 					description: frappe._("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:frappe._('Tax Rate')},
 				{fieldtype:'Button', fieldname:'create_new', label:frappe._('Create New') }

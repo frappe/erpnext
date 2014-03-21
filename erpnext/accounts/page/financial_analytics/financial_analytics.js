@@ -16,20 +16,27 @@ frappe.pages['financial-analytics'].onload = function(wrapper) {
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
-		{fieldtype:"Select", label: frappe._("PL or BS"), options:["Profit and Loss", "Balance Sheet"],
+		{
+			fieldtype:"Select", label: frappe._("PL or BS"), 
+			options:["Profit and Loss", "Balance Sheet"],
 			filter: function(val, item, opts, me) {
 				if(item._show) return true;
 				
 				// pl or bs
-				var out = (val!='Balance Sheet') ? item.is_pl_account=='Yes' : item.is_pl_account!='Yes';
+				var out = (val=='Balance Sheet') ? 
+					item.report_type=='Balance Sheet' : item.report_type=='Profit and Loss';
 				if(!out) return false;
 				
 				return me.apply_zero_filter(val, item, opts, me);
-			}},
-		{fieldtype:"Select", label: frappe._("Company"), link:"Company", default_value: "Select Company...",
+			}
+		},
+		{
+			fieldtype:"Select", label: frappe._("Company"), 
+			link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value || item._show;
-			}},
+			}
+		},
 		{fieldtype:"Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
 		{fieldtype:"Date", label: frappe._("From Date")},
@@ -46,12 +53,92 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				formatter: this.check_formatter},
 			{id: "name", name: frappe._("Account"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "opening", name: frappe._("Opening"), field: "opening", hidden: true,
-				formatter: this.currency_formatter}
+			{id: "opening_dr", name: frappe._("Opening (Dr)"), field: "opening_dr", 
+				hidden: true, formatter: this.currency_formatter, balance_type: "Dr"},
+			{id: "opening_cr", name: frappe._("Opening (Cr)"), field: "opening_cr", 
+				hidden: true, formatter: this.currency_formatter, balance_type: "Cr"},
 		];
 		
-		this.make_date_range_columns();		
+		this.make_date_range_columns(true);		
 		this.columns = std_columns.concat(this.columns);
+	},
+	make_date_range_columns: function() {
+		this.columns = [];
+		
+		var me = this;
+		var range = this.filter_inputs.range.val();
+		this.from_date = dateutil.user_to_str(this.filter_inputs.from_date.val());
+		this.to_date = dateutil.user_to_str(this.filter_inputs.to_date.val());
+		var date_diff = dateutil.get_diff(this.to_date, this.from_date);
+			
+		me.column_map = {};
+		me.last_date = null;
+		
+		var add_column = function(date, balance_type) {
+			me.columns.push({
+				id: date + "_" + balance_type.toLowerCase(),
+				name: dateutil.str_to_user(date),
+				field: date + "_" + balance_type.toLowerCase(),
+				date: date,
+				balance_type: balance_type,
+				formatter: me.currency_formatter,
+				width: 100
+			});
+		}
+		
+		var build_columns = function(condition) {
+			// add column for each date range
+			for(var i=0; i <= date_diff; i++) {
+				var date = dateutil.add_days(me.from_date, i);
+				if(!condition) condition = function() { return true; }
+				
+				if(condition(date)) {
+					$.each(["Dr", "Cr"], function(i, v) {
+						add_column(date, v)
+					});
+				}
+				me.last_date = date;
+				
+				if(me.columns.length) {
+					me.column_map[date] = me.columns[me.columns.length-1];
+				}
+			}
+		}
+		
+		// make columns for all date ranges
+		if(range=='Daily') {
+			build_columns();
+		} else if(range=='Weekly') {
+			build_columns(function(date) {
+				if(!me.last_date) return true;
+				return !(dateutil.get_diff(date, me.from_date) % 7)
+			});		
+		} else if(range=='Monthly') {
+			build_columns(function(date) {
+				if(!me.last_date) return true;
+				return dateutil.str_to_obj(me.last_date).getMonth() != dateutil.str_to_obj(date).getMonth()
+			});
+		} else if(range=='Quarterly') {
+			build_columns(function(date) {
+				if(!me.last_date) return true;
+				return dateutil.str_to_obj(date).getDate()==1 && in_list([0,3,6,9], dateutil.str_to_obj(date).getMonth())
+			});			
+		} else if(range=='Yearly') {
+			build_columns(function(date) {
+				if(!me.last_date) return true;
+				return $.map(frappe.report_dump.data['Fiscal Year'], function(v) {
+						return date==v.year_start_date ? true : null;
+					}).length;
+			});
+			
+		}
+		
+		// set label as last date of period
+		$.each(this.columns, function(i, col) {
+			col.name = me.columns[i+2]
+				? dateutil.str_to_user(dateutil.add_days(me.columns[i+2].date, -1)) + " (" + me.columns[i].balance_type + ")"
+				: dateutil.str_to_user(me.to_date) + " (" + me.columns[i].balance_type + ")";
+		});		
 	},
 	setup_filters: function() {
 		var me = this;
@@ -69,7 +156,6 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	},
 	prepare_balances: function() {
 		var me = this;
-		
 		// setup cost center map
 		if(!this.cost_center_by_name) {
 			this.cost_center_by_name = this.make_name_map(frappe.report_dump.data["Cost Center"]);
@@ -100,29 +186,32 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 					if(gl.voucher_type=='Period Closing Voucher') {
 						// period closing voucher not to be added
 						// to profit and loss accounts (else will become zero!!)
-						if(account.is_pl_account!='Yes')
-							me.add_balance(col.field, account, gl);
+						if(account.report_type=='Balance Sheet')
+							me.add_balance(col.date, account, gl);
 					} else {
-						me.add_balance(col.field, account, gl);
+						me.add_balance(col.date, account, gl);
 					}
 
-				} else if(account.is_pl_account!='Yes' 
+				} else if(account.report_type=='Balance Sheet' 
 					&& (posting_date < dateutil.str_to_obj(me.from_date))) {
-					me.add_balance('opening', account, gl);
+						me.add_balance('opening', account, gl);
 				}
 			}
 		});
-
+		
 		// make balances as cumulative
 		if(me.pl_or_bs=='Balance Sheet') {
 			$.each(me.data, function(i, ac) {
-				if((ac.rgt - ac.lft)==1 && ac.is_pl_account!='Yes') {
+				if((ac.rgt - ac.lft)==1 && ac.report_type=='Balance Sheet') {
 					var opening = 0;
 					//if(opening) throw opening;
 					$.each(me.columns, function(i, col) {
 						if(col.formatter==me.currency_formatter) {
-							ac[col.field] = opening + flt(ac[col.field]);
-							opening = ac[col.field];
+							if(col.balance_type=="Dr") {
+								opening = opening + flt(ac[col.date + "_dr"]) - 
+									flt(ac[col.date + "_cr"]);
+								me.set_debit_or_credit(ac, col.date, opening);
+							}
 						}
 					});					
 				}
@@ -140,40 +229,62 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				indent: 0,
 				opening: 0,
 				checked: false,
-				is_pl_account: me.pl_or_bs=="Balance Sheet" ? "No" : "Yes",
+				report_type: me.pl_or_bs,
 			};
 			me.item_by_name[net_profit.name] = net_profit;
-
-			$.each(me.data, function(i, ac) {
-				if(!ac.parent_account && me.apply_filter(ac, "company")) {
-					if(me.pl_or_bs == "Balance Sheet") {
-						var valid_account = ac.is_pl_account!="Yes";
-						var do_addition_for = "Debit";
-					} else {
-						var valid_account = ac.is_pl_account=="Yes";
-						var do_addition_for = "Credit";
-					}
-					if(valid_account) {
-						$.each(me.columns, function(i, col) {
-							if(col.formatter==me.currency_formatter) {
-								if(!net_profit[col.field]) net_profit[col.field] = 0;
-								if(ac.debit_or_credit==do_addition_for) {
-									net_profit[col.field] += ac[col.field];
-								} else {
-									net_profit[col.field] -= ac[col.field];
-								}
-							}
-						});
-					}
+			
+			$.each(me.columns, function(i, col) {
+				if(col.formatter==me.currency_formatter) {
+					if(!net_profit[col.id]) net_profit[col.id] = 0;
 				}
 			});
 
+			$.each(me.data, function(i, ac) {
+				if(!ac.parent_account && me.apply_filter(ac, "company") && 
+						ac.report_type==me.pl_or_bs) {
+					$.each(me.columns, function(i, col) {
+						if(col.formatter==me.currency_formatter && col.balance_type=="Dr") {
+							var bal = net_profit[col.date+"_dr"] - 
+								net_profit[col.date+"_cr"] + 
+								ac[col.date+"_dr"] - ac[col.date+"_cr"];
+							me.set_debit_or_credit(net_profit, col.date, bal);
+						}
+					});
+				}
+			});
 			this.data.push(net_profit);
+			// $.each(me.data, function(i, v) {
+			// 	if(v.report_type=="Profit and Loss") console.log(v)
+			// })
 		}
 	},
 	add_balance: function(field, account, gl) {
-		account[field] = flt(account[field]) + 
-			((account.debit_or_credit == "Debit" ? 1 : -1) * (flt(gl.debit) - flt(gl.credit)))
+		var bal = flt(account[field+"_dr"]) - flt(account[field+"_cr"]) + 
+			flt(gl.debit) - flt(gl.credit);
+		this.set_debit_or_credit(account, field, bal);
+	},
+	update_groups: function() {
+		// update groups
+		var me= this;
+		$.each(this.data, function(i, account) {
+			// update groups
+			if((account.group_or_ledger == "Ledger") || (account.rgt - account.lft == 1)) {
+				var parent = me.parent_map[account.name];
+				while(parent) {
+					var parent_account = me.item_by_name[parent];
+					$.each(me.columns, function(c, col) {
+						if (col.formatter == me.currency_formatter && col.balance_type=="Dr") {
+							var bal = flt(parent_account[col.date+"_dr"]) - 
+								flt(parent_account[col.date+"_cr"]) + 
+								flt(account[col.date+"_dr"]) - 
+								flt(account[col.date+"_cr"]);
+							me.set_debit_or_credit(parent_account, col.date, bal);
+						}
+					});
+					parent = me.parent_map[parent];
+				}				
+			}
+		});		
 	},
 	init_account: function(d) {
 		// set 0 values for all columns
@@ -191,18 +302,21 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		var pl_or_bs = this.pl_or_bs;
 		$.each(this.data, function(i, account) {
 			
-			var show = pl_or_bs != "Balance Sheet" ? account.is_pl_account=="Yes" : account.is_pl_account!="Yes";
+			var show = pl_or_bs == "Balance Sheet" ? 
+				account.report_type=="Balance Sheet" : account.report_type=="Profit and Loss";
 			if (show && account.checked && me.apply_filter(account, "company")) {
 				data.push({
 					label: account.name,
 					data: $.map(me.columns, function(col, idx) {
-						if(col.formatter==me.currency_formatter && !col.hidden) {
-							if (pl_or_bs != "Balance Sheet") {
-								return [[dateutil.str_to_obj(col.id).getTime(), account[col.field]], 
-									[dateutil.user_to_obj(col.name).getTime(), account[col.field]]];
-							} else {
-								return [[dateutil.user_to_obj(col.name).getTime(), account[col.field]]];
-							}							
+						if(col.formatter==me.currency_formatter && !col.hidden && 
+							col.balance_type=="Dr") {
+								var bal = account[col.date+"_dr"]||account[col.date+"_cr"];
+								if (pl_or_bs != "Balance Sheet") {
+									return [[dateutil.str_to_obj(col.date).getTime(), bal], 
+										[dateutil.user_to_obj(col.date).getTime(), bal]];
+								} else {
+									return [[dateutil.user_to_obj(col.date).getTime(), bal]];
+								}							
 						}
 					}),
 					points: {show: true},

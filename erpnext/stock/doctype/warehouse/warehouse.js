@@ -9,7 +9,6 @@ cur_frm.set_query("create_account_under", function() {
 	return {
 		filters: {
 			"company": cur_frm.doc.company,
-			"debit_or_credit": "Debit",
 			'group_or_ledger': "Group"
 		}
 	}

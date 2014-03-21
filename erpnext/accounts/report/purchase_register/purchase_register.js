@@ -26,8 +26,7 @@ frappe.query_reports["Purchase Register"] = {
 				return {
 					"query": "accounts.utils.get_account_list", 
 					"filters": {
-						"is_pl_account": "No",
-						"debit_or_credit": "Credit",
+						"report_type": "Balance Sheet",
 						"company": company,
 						"master_type": "Supplier"
 					}
@@ -39,7 +38,7 @@ frappe.query_reports["Purchase Register"] = {
 			"label": frappe._("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_default("company")
+			"default": frappe.defaults.get_user_default("company")
 		}
 	]
 }

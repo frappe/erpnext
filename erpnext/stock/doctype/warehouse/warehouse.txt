@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-07 18:50:32", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:49:34", 
+  "modified": "2014-03-13 16:26:29", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -79,6 +79,12 @@
   "fieldtype": "Link", 
   "label": "Parent Account", 
   "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "disabled", 
+  "fieldtype": "Check", 
+  "label": "Disabled"
  }, 
  {
   "description": "For Reference Only.", 

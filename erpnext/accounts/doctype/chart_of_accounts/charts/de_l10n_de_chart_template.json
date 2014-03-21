@@ -1,0 +1,5645 @@
+{
+ "name": "Deutscher Kontenplan SKR03", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Aufwendungen f\u00fcr die W\u00e4hrungsumstellung auf den Euro"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aufwand Umsatzsteuer auf Anzahlungen", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aufwand Z\u00f6lle und Verbrauchsteuern", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Damnum/Disagio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aktive Rechnungsabgrenzung", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Rechnungsabgrenzungsposten"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ingangsetzungs- und Erweiterungsaufwand", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Aufwendungen f\u00fcr die Ingangsetzung und Erweiterung des Gesch\u00e4ftsbetriebs"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Gesch\u00e4fts- oder Firmenwert", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verschmelzungsmehrwert", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Gesch\u00e4fts- oder Firmenwert"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Konzessionen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Konzessionen und gewerbl.Schutzrechte", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gewerbliche Schutzrechte", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "EDV-Software", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "\u00c4hnliche Rechte und Werte", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Lizenzen an gewerblichen Schutzrechten", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Konzessionen, gewerbliche Schutzrechte und \u00e4hnliche Rechte und Werte sowie Lizenzen an solchen Rechten und Werten"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Anzahlungen immaterielle VermG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlungen auf Gesch\u00e4fts-, Firmenwert", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "geleistete Anzahlungen"
+           }
+          ], 
+          "name": "Immaterielle Verm\u00f6gensgegenst\u00e4nde"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Ausleihungen an verbundene Unternehmen", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Ausleihungen an verbundene Unternehmen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ausleihungen an nahe stehende Personen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Ausleihungen an Gesellschafter", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Ausleihungen", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "sonstige Ausleihungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Wertpapiere mit Gewinnbeteil.anspr\u00fcch.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Festverzinsliche Wertpapiere", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wertpapiere des Anlageverm\u00f6gens", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Wertpapiere des Anlageverm\u00f6gens"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Genossenschaftsanteile z.lfr.Verbleib", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Genossenschaftsanteile"
+           }, 
+           {
+            "children": [
+             {
+              "name": "LV-R\u00fcckdeckungsanspr\u00fcche z.lfr.Verbl.", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "R\u00fcckdeckungsanspr\u00fcche aus Lebensversicherungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Ausleih. an UN mit Beteiligungsverh.", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Ausleihungen an Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Atypische stille Beteiligungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Andere Beteiligungen an Kapitalges.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Typisch stille Beteiligungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Beteiligungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Andere Beteiligungen an Personenges.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Beteiligung GmbH Co.an Komplement\u00e4r GmbH", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Beteiligungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Anteile an verbundenen Unternehmen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anteile a.herrschender Gesellschaft", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Anteile an verbundenen Unternehmen"
+           }
+          ], 
+          "name": "Finanzanlagen"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Anzahlg. auf Wohnbauten a.eig.Grundst", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wohnbauten im Bau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlung Betriebs- u. Gesch.ausstattung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Betriebs- u. Gesch.ausstattung im Bau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wohnbauten im Bau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlungen a. Wohnbauten a. fremd. Gr.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Technische Anlagen und Maschinen im Bau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlungen auf technische Anlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlg. auf Bauten fremd. Grundst\u00fccken", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gesch\u00e4fts-,Fabrik-u.and. Bauten im Bau", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlungen a.Grundst\u00fccke ohne Bauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anzahlg. auf Bauten eigen. Grundst\u00fccken", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gesch\u00e4fts-,Fabrik-u.and. Bauten im Bau", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "geleistete Anzahlungen und Anlagen im Bau"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Hof- und Wegebefestigungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Einrichtung Fabrik- und Gesch\u00e4ftsbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Garagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Au\u00dfenanlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Andere Bauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Fabrikbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Fabrikbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Garagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Au\u00dfenanlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Hof- und Wegebefestigungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Einrichtung Fabrik- und Gesch\u00e4ftsbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Andere Bauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Bauten auf fremden Grundst\u00fccken", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gesch\u00e4ftsbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geb\u00e4udeteil h\u00e4usliches Arbeitszimmer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Einrichtungen f\u00fcr Wohnbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wohnbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Garagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Hof- und Wegebefestigungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Au\u00dfenanlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Grundst\u00fccke,grndst.Rechte und Bauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Grundst\u00fccksanteil h\u00e4usl. Arbeitszimmer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Au\u00dfenanlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Hof- und Wegebefestigungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wohnbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Garagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Einrichtungen f\u00fcr Wohnbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Unbebaute Grundst\u00fccke", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Grundst\u00fccke, grundst\u00fccksgl. Rechte", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Grundst\u00fccksgleiche Rechte", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Grundst\u00fccke mit Substanzverzehr", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Grundst\u00fcckswert bebauter Grundst\u00fccke", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Bauten auf eigenen Grundst\u00fccken", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gesch\u00e4ftsbauten", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Grundst\u00fccke, grundst\u00fccksgleiche Rechte und Bauten einschlie\u00dflich der Bauten auf fremden Grundst\u00fccken"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Technische Anlagen und Maschinen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Maschinen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Betriebsvorrichtungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Transportanlagen und \u00c4hnliches", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Maschinelle Anlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Maschinengebundene Werkzeuge", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "technische Anlagen und Maschinen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "B\u00fcroeinrichtung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Ladeneinrichtung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "PKW", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "LKW", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geringwertige Wirtschaftsg\u00fcter", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geringwertige WG Sammelposten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Betriebs-u.Gesch.ausstattung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Transportmittel", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Werkzeuge", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Einbauten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Ger\u00fcst- und Schalungsmaterial", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Betriebsausstattung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Andere Anlagen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gesch\u00e4ftsausstattung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Betriebs- und Gesch\u00e4ftsausstattung", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "andere Anlagen, Betriebs- und Gesch\u00e4ftsausstattung"
+           }
+          ], 
+          "name": "Sachanlagen"
+         }
+        ], 
+        "name": "Anlageverm\u00f6gen"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Bank 4", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Schecks", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Finanzmittelanlagen kurzfr. Disposition", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "LZB-Guthaben", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Bundesbankguthaben", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Nebenkasse 1", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Postbank 2", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Bank 3", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeiten gg. Kreditinstituten", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Kasse", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Bank 2", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Postbank", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Bank 1", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Postbank 3", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Nebenkasse 2", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Postbank 1", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Bank", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Bank 5", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Kassenbestand, Bundesbankguthaben, Guthaben bei Kreditinstituten und Schecks"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "children": [
+               {
+                "name": "Kautionen (g. 1 J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "K\u00f6rperschaftsteuerguthaben \u00a737 (g.1 J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderungen gegen Personal (g. 1Jahr)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderungen gg. Gesellschafter (g.1J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Sonstige Verm\u00f6gensgegenst\u00e4nde (g.1 J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderungen gg. Aufsichtsratsm. (g.1 J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderungen gg. Gesch\u00e4ftsf.(g.1J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Darlehen g. 1 Jahr", 
+                "report_type": "Balance Sheet"
+               }
+              ], 
+              "name": "davon mit einer Restlaufzeit von mehr als einem Jahr"
+             }, 
+             {
+              "name": "Nachtr\u00e4gl. abz. Vorsteuer \u00a7 15a Abs. 2", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Zur\u00fcckzuzahlende Vorsteuer \u00a715a Abs.2", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Kautionen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Kautionen (bis 1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Agenturwarenabrechnung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "K\u00f6rperschaftsteuerguthaben \u00a737 (b.1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen gegen Personal (bis 1Jahr)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderg. gg. Personal Lohn- u. Gehalt", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Nachtr\u00e4gl. abz. Vorsteuer, bewegl. WG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen gg. Gesch\u00e4ftsf.(b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Verm\u00f6gensgegenst\u00e4nde", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Verm\u00f6gensgegenst\u00e4nde (b.1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen gg. Gesellschafter (b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen gg. Aufsichtsratsm. (b.1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Genossenschaftsanteile z.kfr.Verbleib", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "GmbH-Anteile z.kurzfristigen Verbleib", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anspr\u00fcche a. R\u00fcckdeckungsversicherung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verrechnung geleistete Anzahlungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geldtransit", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteilende Vorsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteilende Vorsteuer 7%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteilende Vorsteuer aus EG-Erwerb", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteil. Vorsteuer aus EG-Erwerb 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteilende Vorsteuer 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteilende Vorsteuer 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteil. Vorsteuer \u00a7\u00a7 13a/13b UStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteil. Vorsteuer \u00a7\u00a713a/13b USt 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufzuteil. Vorsteuer \u00a7\u00a713a/13b USt 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gewinnermittlung \u00a74/3 nicht ergebnisw.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gewinnermittlung \u00a74/3 ergebniswirksam", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wirtschaftsg\u00fcter Umlaufverm. \u00a7 4/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer aus EG-Erwerb 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer aus EG-Erwerb", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer 7%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer \u00a7 13b UStG 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer aus EG-Erwerb 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer \u00a7 13b UStG 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer \u00a7 13b UStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "\u00dcberleitung Kostenstellen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Vorsteuer im Folgejahr abziehbar", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "K\u00f6rperschaftsteuerr\u00fcckforderung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen aus Verbrauchsteuern", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "USt-Forderungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Steuererst.anspruch gegen ander. EG-Land", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderg. an FA aus abgef\u00fchrtem Bauabzug", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Steuer\u00fcberzahlungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verrechnung Ist-Versteuerung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Zur\u00fcckzuzahl. Vorsteuer, unbewegl. WG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Nachtr\u00e4gl. abz. Vorsteuer, unbewegl. WG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen bis 1 Jahr", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Zur\u00fcckzuzahlende Vorsteuer, bewegl.WG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Vorsteuer aus Investitionen \u00a7 4/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkto. Vorsteuer Durchschnittss\u00e4tze", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkonto Vorsteuer \u00a7 4/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufl\u00f6sung Vorsteuer Vorjahr \u00a7 4/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Vorsteuer allgem. Durchschnittss\u00e4tze", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Vorsteuer EG-Erwerb neue Kfz ohne UStID", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Abziehbare Vorsteuer \u00a7 13a UStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Einfuhr-Umsatzsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Durchlaufende Posten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Fremdgeld", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "sonstige Verm\u00f6gensgegenst\u00e4nde"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen aus Lieferungen u.Leistung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen aus Lieferungen u.Leistung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderg. aus L+L gg.Gesellschafter b.1 J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen aus Lieferungen u.Leistung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkonto sonst.VG bei Buchung Debitor", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkonto bei Aufteilung Debitoren", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen aus L+L gg. Gesellschafter", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "children": [
+               {
+                "name": "Forderg. aus L+L gg.Gesellschafter g.1 J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Einzelwertberichtigung Forderung(g.1J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Pauschalwertberichtigung Forderg./g.1J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderg.a. Lieferungen/Leistungen g.1 J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Wechsel a. Lieferungen/Leistungen g.1 J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Zweifelhafte Forderungen (g. 1 Jahr)", 
+                "report_type": "Balance Sheet"
+               }
+              ], 
+              "name": "davon mit einer Restlaufzeit von mehr als einem Jahr"
+             }, 
+             {
+              "name": "Einzelwertberichtigung Forderung(b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Pauschalwertberichtigung Forderg./b.1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen nach \u00a7 11 EStG f\u00fcr \u00a7 4/3", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderg.a. Lieferungen/Leistungen b.1 J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkto Aufteilung der Forderungen L+L", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen aus L+L gem\u00e4\u00df \u00a7 24 UStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderg. aus stfr., n. steuerbaren L+L", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen aus L+L erm\u00e4\u00dfigt. Steuersatz", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen aus L+L allgem. Steuersatz", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wechsel a. Lieferungen/Leistungen bbf.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wechsel aus Lieferung und Leistung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wechsel a. Lieferungen/Leistungen b.1 J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Zweifelhafte Forderungen (bis 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Zweifelhafte Forderungen", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Forderungen aus Lieferungen und Leistungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "WB Forderg.gg.UN m.Beteiligg.verh. b.1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderg. L+L gg.UN m.Beteiligg.verh.b1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderg. L+L gg.UN m. Beteiligungsverh.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderg. gg. UN mit Beteiligg.verh. b.1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen gg. UN m. Beteiligungsverh.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "children": [
+               {
+                "name": "WB Forderg.gg.UN m.Beteiligg.verh. g.1J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderg. L+L gg.UN m.Beteiligg.verh.g1J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderg. gg. UN mit Beteiligg.verh. g.1J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Besitzwechsel gg.UN m.Beteiligg.verh.g1J", 
+                "report_type": "Balance Sheet"
+               }
+              ], 
+              "name": "davon mit einer Restlaufzeit von mehr als einem Jahr"
+             }, 
+             {
+              "name": "Besitzwechsel gg.UN m. Beteiligungsverh.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Besitzwechsel gg.UN m.Beteiligg.verh.b1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Besitzwechsel gg.UN m.Beteiligg.verh.bbf", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Forderungen gegen Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Forderungen gg. verbundene UN(b. 1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen gegen verbund.Unternehmen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "children": [
+               {
+                "name": "Forderungen gg. verbundene UN(g. 1 J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "WB Forderungen gg. verbundene UN (g.1J)", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Forderungen aus L+L gg. verbund. UN g.1J", 
+                "report_type": "Balance Sheet"
+               }, 
+               {
+                "name": "Besitzwechsel gegen verbundene UN (g.1J)", 
+                "report_type": "Balance Sheet"
+               }
+              ], 
+              "name": "davon mit einer Restlaufzeit von mehr als einem Jahr"
+             }, 
+             {
+              "name": "WB Forderungen gg. verbundene UN (b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Receivable", 
+              "name": "Forderungen aus L+L gg. verbundenen UN", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Forderungen aus L+L gg. verbund. UN b.1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Besitzwechs.gg.verb.UN, bundesbankf\u00e4hig", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Besitzwechsel gegen verbundene UN (b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Besitzwechsel gegen verbund. Unternehmen", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Forderungen gegen verbundene Unternehmen"
+           }
+          ], 
+          "name": "Forderungen und sonstige Verm\u00f6gensgegenst\u00e4nde"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Geleistete Anzahlungen 16% Vorsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geleistete Anzahlungen 15% Vorsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geleistete Anzahlungen 7% Vorsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geleistete Anzahlungen auf Vorr\u00e4te", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Geleistete Anzahlungen 19% Vorsteuer", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "geleistete Anzahlungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Unfertige Erzeugnisse und Leistungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Unfertige Leistungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Unfertige Erzeugnisse", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "unfertige Erzeugnisse, unfertige Leistungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "In Ausf\u00fchrung befindl. Bauauftr\u00e4ge", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "in Ausf\u00fchrung befindliche Bauauftr\u00e4ge"
+           }, 
+           {
+            "children": [
+             {
+              "name": "In Arbeit befindliche Auftr\u00e4ge", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "in Arbeit befindliche Auftr\u00e4ge"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Erhaltene Anzahlungen", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "erhaltene Anzahlungen auf Bestellungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Waren", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Fertige Erzeugnisse und Waren", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Fertige Erzeugnisse", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Bestand Waren", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "fertige Erzeugnisse und Waren"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Bestand Roh-,Hilfs- und Betriebsstoffe", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Roh-, Hilfs- und Betriebsstoffe"
+           }
+          ], 
+          "name": "Vorr\u00e4te"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Eigene Anteile", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "eigene Anteile"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Sonstige Wertpapiere", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wertpapieranlagen kurzfr. Disposition", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Wertpap. mit geringen Wertschwankungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Finanzwechsel", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "sonstige Wertpapiere"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Anteile an verbundenen Unternehmen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anteile a.herrschender Gesellschaft", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "Anteile an verbundenen Unternehmen"
+           }
+          ], 
+          "name": "Wertpapiere"
+         }
+        ], 
+        "name": "Umlaufverm\u00f6gen"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Abgrenzung aktive latente Steuern", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Abgrenzung latenter Steuern"
+       }, 
+       {
+        "children": [
+         {
+          "name": "davon eingefordert"
+         }
+        ], 
+        "name": "Ausstehende Einlagen"
+       }
+      ], 
+      "name": "Aktiva"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gegenkonto bei Aufteilung Kto 0690-98", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "TZ-Verbindlichkeit. gg. Kreditinstituten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "TZ-Verbindlichkeit. Kreditinstitut,b.1 J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeiten Kreditinstitut(b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeiten gg. Kreditinstituten", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }, 
+           {
+            "name": "TZ-Verbindlichkeit. Kreditinstitut,g.5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "TZ-Verbindlichkeit. Kreditinstitut,1-5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeiten Kreditinstitut(1-5J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeiten Kreditinstitut(g.5J)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Verbindlichkeiten gegen\u00fcber Kreditinstituten"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Verbindl.aus L+L gg.UN m. Bet.verh. g.5J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindl.aus L+L gg.UN m. Bet.verh. 1-5J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Verbindl.aus L+L gg.UN m. Bet.verh. b.1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. gg.UN mit Beteiligungsverh.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. gg.UN mit Beteiligg.verh. b.1J", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }, 
+           {
+            "name": "Verbindl. gg.UN mit Beteiligg.verh. 1-5J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindl. gg.UN mit Beteiligg.verh. g.5J", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Verbindlichkeiten gegen\u00fcber Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Partiarische Darlehen(g. 5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Partiarische Darlehen(1-5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeit.gg. Gesellschaftern g.5J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeit.gg. Gesellschaftern 1-5J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Darlehen atyp. stiller Gesellsch.(g.5J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Darlehen atyp. stiller Gesellsch.(1-5J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Darlehen typ. stiller Gesellsch.(1-5J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Darlehen typ. stiller Gesellsch.(g.5J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Verbindl. soziale Sicherheit \u00a74/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. soziale Sicherheit(1-5J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. soziale Sicherheit(g.5J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeiten soziale Sicherheit", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. soziale Sicherheit(b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. Verm\u00f6gensbildung(g.5J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. Verm\u00f6gensbildung(1-5J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeiten a. Verm\u00f6gensbildung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Voraus.Beitrag ggb. Sozialversich.tr\u00e4ger", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. Verm\u00f6gensbildung(b.1J)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon im Rahmen der sozialen Sicherheit"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Umsatzsteuer fr\u00fchere Jahre", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer Vorjahr", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "USt EG-Erwerb Neufahrzeuge ohne UStID", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. a.Einbehaltung (KapESt)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeiten f\u00fcr Verbrauchsteuern", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. Lohn- und Kirchensteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. an FA abzuf\u00fchrender Bauabzug", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Steuerzahlungen an andere EG-L\u00e4nder", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "USt im anderen EG-Land s.Leist./Werkl.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer nach \u00a7 13a UStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "USt im anderen EG-Land stpfl.Lieferung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "USt aus EG-Erwerb ohne Vorsteuerabzug", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer EG-Lieferungen 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer aus EG-Erwerb 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer EG-Lieferungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer 7%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer aus EG-Erwerb 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer aus EG-Erwerb", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. Steuern und Abgaben (b. 1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. Steuern und Abgaben", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. Steuern und Abgaben (g. 5 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. Steuern und Abgaben (1-5 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuervorauszahlungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuervorauszahlungen 1/11", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Nachsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Unrichtig oder unberechtigt ausgew. USt", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer nach \u00a7 13b UStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer nach \u00a7 13b UStG 16%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer nach \u00a7 13b UStG 19%", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Aufgeschobene Einfuhr-Umsatzsteuer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Umsatzsteuer laufendes Jahr", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon aus Steuern"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Partiarische Darlehen(bis 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Partiarische Darlehen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Verrechnung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verb.gg.Gesellschaftern off.Aussch\u00fcttg.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen atyp. stiller Gesellschafter", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeiten aus Lohn und Gehalt", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. Einbehaltung Arbeitnehmer", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen typ. stiller Gesellsch.(b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen typ. stiller Gesellschafter", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Lohn/Gehaltsverrechnung \u00a711 f. 4/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Lohn- und Gehaltsverrechnungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen atyp. stiller Gesellsch.(b.1J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeit.gg. Gesellschaftern", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeit.gg. Gesellschaftern b.1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gewinnverf\u00fcgung stille Gesellschaft.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Verbindlichkeiten", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Sonstige Verbindlichkeiten (bis 1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Darlehen bis 1 Jahr", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Agenturwarenabrechnung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Kreditkartenabrechnung", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Kautionen (bis 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Kautionen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verrechnung erhaltene Anzahlungen", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }, 
+           {
+            "name": "Darlehen g. 5 Jahre", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonstige Verbindlichkeiten (1-5 J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonstige Verbindlichkeiten (g. 5 J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonst. Verbindlichkeiten nach \u00a711 EStG", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Darlehen 1-5 Jahre", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Erhaltene Kautionen (gr\u00f6\u00dfer 5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Erhaltene Kautionen (1-5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Gegenkonto bei Aufteilung Kto 0790-98", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "sonstige Verbindlichkeiten"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Schuldwechsel (bis 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Schuldwechsel", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }, 
+           {
+            "name": "Schuldwechsel (gr\u00f6\u00dfer 5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Schuldwechsel (1-5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Verbindlichkeiten aus der Annahme gezogener Wechsel und der Ausstellung eigener Wechsel"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Verbindl.aus L+L gg.verbundenen UN g.5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindl.aus L+L gg.verbundenen UN 1-5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeit. gg.verbundene UN(g.5 J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindlichkeit. gg.verbundene UN(1-5 J)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Verbindl.aus L+L gg.verbundenen UN b. 1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichkeit. gg.verbundene UN(b.1 J)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk.gegen\u00fcber verbundenen UN", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }
+          ], 
+          "name": "Verbindlichkeiten gegen\u00fcber verbundenen Unternehmen"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Anleihen, nicht konvertibel (1-5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Anleihen konvertibel(gr\u00f6\u00dfer 5 Jahre)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anleihen konvertibel(1-5 Jahre)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anleihen konvertibel", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anleihen konvertibel(bis 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon konvertibel"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Anleihen, nicht konvertibel", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Anleihen, nicht konvertibel (b. 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }, 
+           {
+            "name": "Anleihen, nicht konvertibel (g.5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Anleihen"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Verbindl. aus L+L gg. Gesellsch. 1-5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindl. aus L+L gg. Gesellsch. g. 5J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindl.a.Lieferungen/Leistungen g.5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verbindl.a.Lieferungen/Leistungen 1-5 J", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus L+L gg. Gesellschaftern", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl. aus L+L gg. Gesellsch. b. 1J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkonto bei Aufteilung Kreditoren", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl.aus L+L gg.UN m.Beteiligg.verh.", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus L+L gg. verbundenen UN", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindl.a.Lieferungen/Leistungen b.1 J", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Verbindlichk. Investitionen \u00a7 4/3 EStG", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus Lieferungen u. Leistungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus Lieferungen u. Leistungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus Lieferungen u. Leistungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus L+L allgem. Steuersatz", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus L+L ohne Vorsteuerabzug", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Gegenkto Aufteilung Verbindlichk. L+L", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "account_type": "Payable", 
+              "name": "Verbindl. aus L+L erm\u00e4\u00dfigt. Steuersatz", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }
+          ], 
+          "name": "Verbindlichkeiten aus Lieferungen und Leistungen"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Erhaltene Anzahlungen (1-5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Erhaltene Anzahlungen (g. 5 Jahre)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Erhaltene Anzahlungen (bis 1 Jahr)", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Anzahlungen 19% USt", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Anzahlungen 7% USt", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Anzahlungen", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Anzahlungen 16% USt", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Erhaltene Anzahlungen 15% USt", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "davon mit einer Restlaufzeit bis zu einem Jahr"
+           }
+          ], 
+          "name": "erhaltene Anzahlungen auf Bestellungen"
+         }
+        ], 
+        "name": "Verbindlichkeiten"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Gesellschafter-Darlehen (FK)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Verlustausgleich (EK)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Kommandit-Kapital (EK)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Variables Kapital (EK)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Festkapital (EK)", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Gesellschafter-Darlehen (FK)", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Anfangskapital"
+         }, 
+         {
+          "name": "Einlagen"
+         }, 
+         {
+          "name": "Jahres\u00fcberschuss Jahresfehlbetrag"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Privateinlagen", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Unentgeltliche Wertabgaben", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Unentgeltliche Wertabgaben TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Privateinlagen TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Au\u00dfergew\u00f6hnliche Belastungen", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Grundst\u00fccksaufwand TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Grundst\u00fccksertrag TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Privatentnahmen allgemein", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Zuwendungen, Spenden TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonderausgaben unbeschr\u00e4nkt abzugsf\u00e4hig", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Au\u00dfergew\u00f6hnliche Belastungen TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonderausgaben beschr\u00e4nkt abzugsf\u00e4hig", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Privatsteuern", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonderausgaben beschr\u00e4nkt abzugsf. TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonderausgaben unbeschr\u00e4nkt abzugsf. TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Zuwendungen, Spenden", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Privatentnahmen allgemein TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Grundst\u00fccksertrag", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Grundst\u00fccksertrag", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Privatsteuern TH", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Grundst\u00fccksaufwand", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Grundst\u00fccksaufwand", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Entnahmen"
+         }
+        ], 
+        "name": "Kapital"
+       }, 
+       {
+        "name": "Einlagen stiller Gesellschafter"
+       }, 
+       {
+        "children": [
+         {
+          "name": "SoPo mit R\u00fccklageanteil, stfr. R\u00fccklage", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil \u00a7 6b EStG", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil \u00a752 Abs.16 EStG", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil, Sonder-AfA", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil EStR R 6.6", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil \u00a7 7g Abs.2 n.F.", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil Sonder-AfA \u00a7 7g", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "SoPo mit R\u00fccklageanteil \u00a7 7g /3, 7 a.F.", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Sonderposten mit R\u00fccklageanteil"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sonderposten f\u00fcr Zusch\u00fcsse u. Zulagen", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Sonderposten f\u00fcr Zusch\u00fcsse und Zulagen"
+       }, 
+       {
+        "name": "Sonderposten aus der W\u00e4hrungsumstellung auf den Euro"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Verbindlichkeiten aus der Begebung und \u00dcbertragung von Wechseln, aus B\u00fcrgschaften, Wechsel- und Scheckb\u00fcrgschaften und aus Gew\u00e4hrleistungsvertr\u00e4gen sowie Haftung aus Bestellung von Sicherheiten f\u00fcr fremde Verbindlichkeiten"
+         }, 
+         {
+          "name": "Passive Rechnungsabgrenzung", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Rechnungsabgrenzungsposten"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Pensions-und \u00e4hnliche R\u00fcckstellungen", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "R\u00fcckstellungen f\u00fcr Pensionen und \u00e4hnliche Verpflichtungen"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Aufwandsr\u00fcckstellungen \u00a7 249 II HGB", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f\u00fcr Umweltschutz", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Sonstige R\u00fcckstellungen", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen Instandhaltung bis 3 Mon.", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen Instandhaltung 4-12 Mon.", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen Abraum-/Abfallbeseit.", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f. Gew\u00e4hrleistungen", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f. drohende Verluste", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f\u00fcr Abschluss u. Pr\u00fcfung", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f\u00fcr Aufbewahrungspflicht", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f\u00fcr Personalkosten", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "sonstige R\u00fcckstellungen"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Umsatzsteuer nicht f\u00e4llig 19%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "USt nicht f\u00e4llig, EG-Lieferungen", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "USt nicht f\u00e4llig, EG-Lieferungen 16%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Umsatzsteuer nicht f\u00e4llig", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Umsatzsteuer nicht f\u00e4llig 7%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "USt nicht f\u00e4llig, EG-Lieferungen 19%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Umsatzsteuer nicht f\u00e4llig 16%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "R\u00fcckstellungen f\u00fcr latente Steuern", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "K\u00f6rperschaftsteuerr\u00fcckstellung", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Gewerbesteuerr\u00fcckstellung \u00a7 4 Abs. 5b", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Gewerbesteuerr\u00fcckstellung", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Steuerr\u00fcckstellungen", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Steuerr\u00fcckstellungen"
+         }
+        ], 
+        "name": "R\u00fcckstellungen"
+       }
+      ], 
+      "name": "Passiva"
+     }
+    ], 
+    "name": "Bilanzkonten"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Kontenkl. unbesetzt"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Zinsaufwendungen \u00a7\u00a7 233a bis 237 AO", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zins\u00e4hnliche Aufwendungen an verb.UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zins\u00e4hnliche Aufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufwendungen f.kfr.Verbindlichkeit.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Nicht abzugsf. Schuldzinsen \u00a7 4/4a", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen und \u00e4hnliche Aufw. z.T. nicht abz.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen, Aufwendg. verb. UN z.T. n.abz.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen auf Kontokorrentkonten", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufwend. f.kfr. Verb.an verbund. UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Nicht abzugsf\u00e4h.and.Nebenleist.z.Steuern", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufwendungen an verb.Unternehmen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abzugsf\u00e4h. and. Nebenleist. zu Steuern", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen und \u00e4hnliche Aufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufw. \u00a7 233a AO betriebliche Steuern", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abzinsung KSt-Erh\u00f6hungsbetrag \u00a7 38", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufw. \u00a7 233a AO,\u00a7 4 Abs. 5b EStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Diskontaufwendungen an verbundene UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Diskontaufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufw. f\u00fcr lfr. Verbindlichk.verb.UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen an Mitunternehmer \u00a7 15 EStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsaufwendungen f.lfr.Verbindlichkeit.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen f\u00fcr Geb\u00e4ude im Betriebsverm\u00f6gen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Renten und dauernde Lasten", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsen zur Finanzierung Anlageverm\u00f6gen", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Zinsaufwand"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Abg\u00e4nge Finanzanlagen Restbuchwert (Verlust)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgang Finanzanlagen z.T. n.abz., RBW (Verlust)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abg\u00e4nge Sachanlagen Restbuchwert", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abg\u00e4nge immat. Verm\u00f6gensgegenst. RBW (Verlust)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige Aufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonst.Aufwendungen, betriebsfr.u.regelm.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige Aufwendungen unregelm\u00e4\u00dfig", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Einstellung in die EWB zu Forderungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Einstellung in die PWB zu Forderungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendg. an Stiftg. wiss./mildt./kultur.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Nicht abziehbare Vorsteuer", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Nicht abziehbare Vorsteuer 7%", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Nicht abziehbare Vorsteuer 19%", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendg. an Stiftg. kirchl./rel./gemein.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendg. an Stiftg. gem. \u00a7 52/2/4 AO", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendg.Spenden wissensch./kult. Zweck", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendungen,Spenden steuerl. n. abziehb.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendungen,Spenden kirchl./rel./gemein.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendungen,Spenden mildt\u00e4tige Zwecke", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Nicht abziehbare AR-Verg\u00fctungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendungen,Spenden an politische Partei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zuwendg. an Stiftg. gem. \u00a7 52/2/1-3 AO", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abziehbare Aufsichtsratsverg\u00fctung", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Periodenfremde Aufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgef. Gewinne / Gewinn-/Teilgewinnabf.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Grundst\u00fccksaufwendungen, neutral", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Au\u00dferordentliche Aufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ao. Aufwendungen finanzwirksam", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ao. Aufwendungen nicht finanzwirksam", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Aufwend. Zuschreibung R\u00fcckstellungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Aufwend. Zuschreibung Verbindlichk.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Einstellungen SoPo mit R\u00fccklage-Anteil", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Einstellungen SoPo \u00a7 7g Abs.2 EStG n.F.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Einstellungen SoPo mit R\u00fccklage-Anteil", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Betriebsfremde Aufwendungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgang WG des UV \u00a7 4/3 z.T. nicht abz", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verlust Ver\u00e4u\u00df.Ant. KapGes z.T. n. abz.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verluste aus Anlagenabgang", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgang WG des UV \u00a7 4 Abs. 3 EStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verluste aus Abgang UV z.T. n. abziehbar", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verluste aus Abgang von Umlaufverm\u00f6gen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Aufwendungen aus Verlust\u00fcbernahme", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgef. Gewinne stille Gesellschafter \u00a78", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgef. Gewinne / Gewinngemeinschaft", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Sonst. neutr. Aufw"
+         }
+        ], 
+        "name": "Neutraler Aufwand"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Verrechneter kalk. Lohn, unentgeltl. AN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verrechnete kalkulatorische Wagnisse", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verrechnete kalkul. Miete und Pacht", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verrechneter kalkul.Unternehmerlohn", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verrechnete kalkul. Abschreibungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verrechnete kalkulatorische Zinsen", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Verr. kalk. Kosten"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Erl\u00f6se Zinsen und Diskontspesen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zins\u00e4hnliche Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsertr\u00e4ge R\u00fcckzahlung KSt-Erh\u00f6hg. \u00a738", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zins\u00e4hnliche Ertr\u00e4ge verbundene UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Beteiligungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge a.Beteilig. an verbundenen UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Gewinnant. aus Mituntern.sch.\u00a79 GewStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonst.GewStfreie Gewinne Anteile KapGes", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge a.Beteilig. verb. UN z.T. stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Beteiligungen z.T. steuerfr", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Wertpapiere/Ausleihungen FAV", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge a.Beteilig. verb.UN z.T. stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge a.Beteilig. FAV z.T. steuerfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Wertpapiere/FAV-Ausl.verb.UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl.Zinsen /Diskontspesen aus verb.UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsertr\u00e4ge \u00a7 233a AO, \u00a7 4 Abs. 5b EStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Stfr. Aufzinsung K\u00f6rperschaftsteuerguth.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsertr\u00e4ge \u00a7 233a AO", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge a.Beteilig. verb. UN z.T. stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge a.Beteilig. UV z.T. steuerfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Wertpapiere/Ausleihungen UV", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonst. Zinsen u.\u00e4. Ertr\u00e4ge aus verb.UN", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Zinsertr\u00e4ge \u00a7 233a AO, Anlage A KSt", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Diskontertr\u00e4ge verbundene Unternehmen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Diskontertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Zinsertr\u00e4ge"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ertr\u00e4ge Zuschreibung Umlaufverm\u00f6gen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abg\u00e4nge immat. Verm\u00f6gensgegenst. RBW (Gewinn)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abg\u00e4nge Finanzanlagen Restbuchwert (Gewinn)", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abg\u00e4nge Sachanlagen Restbuchwert", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Abgang Finanzanlagen z.T. stfrei, RBW", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Betriebsfremde Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr. Aufl. SoPo m. R\u00fcckl.ant.\u00a752/16EStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Aufl. SoPo \u00a7 7g/3 a.F, 7g/2 n.F", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Bewertung Verbindlichkeiten", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Aufl\u00f6sung von R\u00fcckstellungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge steuerl. Bewertung R\u00fcckstellung", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Herabsetzung PWB zu Ford.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Herabsetzung EWB zu Ford.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus abgeschriebenen Forderg.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Aufl. SoPo Existenzgr\u00fcnderr\u00fcckl", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Aufw./Ertr\u00e4ge aus Umrechnungsdifferenz", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ao. Ertr\u00e4ge nicht finanzwirksam", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ao. Ertr\u00e4ge finanzwirksam", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Au\u00dferordentliche Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Abgang UV z.T. steuerfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Abgang von UV-Gegenst\u00e4nden", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Ver\u00e4u\u00df.Ant. KapGes z.T. stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Abgang von AV-Gegenst\u00e4nden", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe \u00a7 4 Nr. 1b", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe \u00a7 4 Nr. 1a", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe 19% USt", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Zuschreibg. Finanzanlageverm\u00f6gen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Zuschreibg. FAV z.T. steuerfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Zuschreibg. Sachanlageverm\u00f6gen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Zuschreibg. immat. Anlageverm\u00f6g.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Zuschreibg. UV z.T. steuerfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Zuschreibg. anderes AV z.T. stfr", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verkauf Finanzanl. z.T. n.abz.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se a. Verk\u00e4ufen Finanzanlagen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verk\u00e4ufe immat.Verm\u00f6gensgegenst", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Periodenfremde Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige betriebl. regelm. Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige betriebsfr.regelm. Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige Ertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige Ertr\u00e4ge unregelm\u00e4\u00dfig", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe \u00a7 4 Nr. 1b", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe 19% USt", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verk\u00e4ufe immat.Verm\u00f6gensgegenst", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verkauf Finanzanl. z.T. stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se a. Verk\u00e4ufen Finanzanlagen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Sachanlageverk\u00e4ufe \u00a7 4 Nr. 1a", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verkauf WG des UV \u00a7 4/3 EStG", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Verkauf WG UV \u00a7 4/3 ustfrei, z.T. stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verkauf WG des UV \u00a74/3, stfrei", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Erl\u00f6se Verkauf WG des UV \u00a74/3, 19% USt", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge Aufl\u00f6sung SoPo m. R\u00fccklageant.", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Investitionszusch\u00fcsse", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Versicherungsentsch\u00e4digungen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Investitionszulage", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Sonstige steuerfr. Betriebseinnahmen", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Steuerfreie Ertr\u00e4ge aus Aufl\u00f6sung SoPo", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Grundst\u00fccksertr\u00e4ge", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Gewinne auf Grund Gewinngemeinschaft", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Ertr\u00e4ge aus Verlust\u00fcbernahme", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Gewinne auf Grund Gewinn/Teilgewinnabf", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Sonst. neutr. Ertr"
+         }
+        ], 
+        "name": "Neutraler Ertrag"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Rechts- und Beratungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschluss- und Pr\u00fcfungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ausgleichsabgabe SchwerbehindertenG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Haftungsverg\u00fctung an Mitunternehmer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verg\u00fctungen an Mitunternehmer \u00a715 EStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fortbildungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Freiwillige Sozialleistungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Zeitschriften, B\u00fccher", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nicht abziehbare Vorsteuer 7%", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nicht abziehbare Vorsteuer 19%", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "B\u00fcrobedarf", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Telefon", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Telefax und Internetkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Porto", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Vertriebskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonstige betriebliche Aufwendungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonstige betriebl.u.regelm.Aufwendungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fremdleistungen und Fremdarbeiten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendungen aus Kursdifferenzen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Mietleasing bewegliche Wirtschaftsg\u00fcter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendg. Bewertung Finanzmittelfonds", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nicht abziehbare Vorsteuer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Gegenkonto zu 4996 bis 4998", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Herstellungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwaltungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kalkulatorische Wagnisse", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kalkulatorische Zinsen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Betriebsbedarf", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Werkzeuge und Kleinger\u00e4te", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendg. Anteile KapGes z.T. n. abz.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufw. Ver\u00e4u\u00df. Ant. KapG z.T. nicht abz.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nebenkosten des Geldverkehrs", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Mietleasing bewegliche Wirtschaftsg\u00fcter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendungen f\u00fcr Lizenzen, Konzessionen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pacht (bewegliche Wirtschaftsg\u00fcter)", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Mieten f\u00fcr Einrichtungen bewegliche WG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwand Abraum-/Abfallbeseitigung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Buchf\u00fchrungskosten", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Sonstige Kosten"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Grundsteuer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Steuernachzahlg. VJ sonstige Steuern", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Erstattung VJ f\u00fcr sonstige Steuern", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufl\u00f6sung R\u00fcckstellung s. Steuern", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "\u00d6kosteuer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verbrauchsteuer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kfz-Steuern", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonstige Betriebssteuern", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Betriebl. Steuern"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Beitr\u00e4ge", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pr\u00e4mie R\u00fcckdeckung f. Versorgungsleistg", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonstige Abgaben", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abzugsf.Versp\u00e4tungszuschlag/Zwangsgeld", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nicht abzf.Versp\u00e4t.zuschlag/Zwangsgeld", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Versicherungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Versicherung f\u00fcr Geb\u00e4ude", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Versich./Beitr\u00e4ge"
+           }, 
+           {
+            "name": "Besondere Kosten"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Garagenmieten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kfz-Reparaturen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kfz-Kosten betriebl.Nutzung Kfz im PV", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fremdfahrzeugkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonstige Kfz-Kosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Laufende Kfz-Betriebskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kfz-Versicherungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fahrzeugkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Mietleasing Kfz", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Mautgeb\u00fchren", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Kfz-Kosten (o. St.)"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Fahrten Wohnung/Betriebsst\u00e4tte (Haben)", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten AN Verpfleg.mehraufwand", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten AN \u00dcbernachtungsaufwand", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten Arbeitnehmer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten Arbeitnehmer, n.abz.Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten Arbeitnehmer, Fahrtkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kilometergelderstattung Arbeitnehmer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten UN \u00dcbernachtungsaufwand", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten UN Verpfleg.mehraufwand", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten Unternehmer, Fahrtkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten Unternehmer, n.abz.Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reisekosten Unternehmer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fahrten Wohnung/Betrieb, n.abz. Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fahrten Wohnung/Betrieb, abz. Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Repr\u00e4sentationskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nicht abzugsf\u00e4hige Betriebsausgaben", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Nicht abzugsf\u00e4hige Bewirtungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Eingeschr. abziehb.BA, abz. Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Bewirtungskosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufmerksamkeiten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Eingeschr. abziehb.BA, n. abz. Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Geschenke ausschl.betrieblich genutzt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pausch. Abgaben f\u00fcr Zuwendungen abzugsf.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Zuwendungen an Dritte abzugsf\u00e4hig", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Geschenke abzugsf\u00e4hig", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pausch. Abgaben f\u00fcr Zuwendungen n. abz.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Zuwendungen an Dritte nicht abzugsf", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Geschenke nicht abzugsf\u00e4hig", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Werbekosten", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Werbe-/Reisekosten"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Verpackungsmaterial", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kosten Warenabgabe", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ausgangsfrachten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Transportversicherungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verkaufsprovisionen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwand f\u00fcr Gew\u00e4hrleistungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fremdarbeiten (Vertrieb)", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Kosten Warenabgabe"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Sonst. Reparaturen und Instandhaltungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reparatur/Instandh. Anlagen u. Maschinen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reparatur/Instandh. Betriebs- u. Gesch.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Wartungskosten f\u00fcr Hard- und Software", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Reparatur/Instandh."
+           }, 
+           {
+            "children": [
+             {
+              "name": "Bedienungsgelder", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Gesetzliche Sozialaufwendungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ges. soz. Aufwendg. Mituntern. \u00a715 EStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Beitr\u00e4ge zur Berufsgenossenschaft", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Geh\u00e4lter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Gesch\u00e4ftsf\u00fchrergeh\u00e4lter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Tantiemen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ehegattengehalt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Gesch\u00e4ftsf\u00fchrergeh\u00e4lter GmbH-Gesells.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verg\u00fctg. angestellte Mituntern. \u00a715 EStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "L\u00f6hne", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "L\u00f6hne und Geh\u00e4lter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kalkulatorischer Lohn, unentgeltl. AN", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kalkulatorischer Unternehmerlohn", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aushilfsl\u00f6hne", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pausch. Abgaben f\u00fcr Zuwendungen an AN", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pauschale Steuer f\u00fcr Aushilfen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Fahrtkostenerstatt. Whg./Arbeitsst\u00e4tte", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verm\u00f6genswirksame Leistungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendungen f\u00fcr Unterst\u00fctzung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufw. Altersversorg. Mituntern. \u00a715 EStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pauschale Steuer f\u00fcr Versicherungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendungen f\u00fcr Altersversorgung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Versorgungskassen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sachzuwendungen und Dienstleistg. an AN", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Krankengeldzusch\u00fcsse", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Zusch\u00fcsse Agenturen f\u00fcr Arbeit", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Freiwillige soziale Aufwendung. LSt-pfl.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Freiwillige soziale Aufwendung. LSt-frei", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pauschale Steuer f\u00fcr Zusch\u00fcsse", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Personalkosten"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Apl. Abschreibungen auf Sachanlagen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Au\u00dfergew\u00f6hnliche Abschreibung Geb\u00e4ude", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Au\u00dfergew\u00f6hnliche Abschreibung auf Kfz", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Au\u00dfergew\u00f6hnliche Abschreibung so. WG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreib.Finanzanlagen/stl.So-Vorsch.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschr.Verl.Ant.Mituntern.sch.\u00a78 GewStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sofortabschreibung GWG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "K\u00fcrzung AHK f\u00fcr Kfz \u00a7 7g Abs. 2 n.F.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "K\u00fcrzung AHK \u00a7 7g Abs. 2 EStG n.F.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonder-AfA Kfz \u00a7 7g/1,2 a.F., \u00a77g/5 n.F.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonder-AfA \u00a7 7g/1, 2 a.F., \u00a7 7g/5 n.F.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreib.Sachanlagen/stl. So-Vorschr.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibung Sammelposten GWG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf aktivierte GWG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Apl. Abschreibungen auf aktivierte GWG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste EG-Lieferung 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste 15% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverlust EG-Lieferung 16% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste 16% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forder.verlust aus stfr. EG-Lieferungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste EG-Lieferungen 7%", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Vorwegn.k\u00fcnft.Wertschwankg. b.Wertp.UV", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen Wertpapiere des UV", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen Wertpap. UV z.T. n.abz.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen Finanzanl. z.T. n.abz.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf Finanzanlagen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen Finanzanl. z.T. n.abz.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschr. Gesch\u00e4fts- oder Firmenwert", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kaufleasing", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Apl. Abschreibungen immaterielle VermG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibung immaterielle VermG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibung Ingangsetzung, Erweiterung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf Geb\u00e4ude", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf Sachanlagen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibung Arbeitszimmer", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf Kfz", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kalkulatorische Abschreibungen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf Umlaufverm\u00f6gen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf UV, steuerr. bedingt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Vorwegnahme k\u00fcnftiger UV-Wertschwankg.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf Umlaufverm\u00f6gen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abschreibungen auf UV, steuerr. bedingt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Vorwegnahme k\u00fcnftiger UV-Wertschwankg.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste EG-Lieferung 15% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Forderungsverluste", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Abschreibungen"
+           }, 
+           {
+            "children": [
+             {
+              "name": "Instandhaltung betrieblicher R\u00e4ume", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Pacht, unbewegliche Wirtschaftsg\u00fcter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Miet- und Pachtnebenkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verg\u00fctung Mituntern. Pacht WG \u00a7 15 EStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Heizung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Grundst\u00fccksaufwendungen, betrieblich", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Raumkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Leasing, unbewegliche Wirtschaftsg\u00fcter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Miete, unbewegliche Wirtschaftsg\u00fcter", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Abgaben betrieblich genutzt. Grundbesitz", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Gas, Strom, Wasser", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Reinigung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verg\u00fctung Mituntern. Miete WG \u00a7 15 EStG", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendung. Arbeitszimmer, abz. Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Aufwendung. Arbeitszimmer n.abz. Anteil", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonstige Raumkosten", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Kalkulatorische Miete und Pacht", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "Raumkosten"
+           }
+          ], 
+          "name": "Gesamtkosten"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Unentgeltl. Zuwend. Gegenst\u00e4nde 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst\u00e4nden 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst\u00e4nden 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Unentgeltl. Erbringung Leist. 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Unentgeltl. Erbringung Leist. 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Unentgeltl. Zuwend. Gegenst\u00e4nde ohne USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Unentgeltl. Erbringung Leist. ohne USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Unentgeltl. Erbringung Leist. 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst.(Kfz) ohne USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst. (Tel) 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst. (Kfz) 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst\u00e4nden 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst.(Tel) ohne USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verwendung von Gegenst\u00e4nden ohne USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sachbez\u00fcge 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verrechnete sonstige Sachbez\u00fcge", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sachbez\u00fcge 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Provision, sonstige Ertr\u00e4ge 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Provision, sonst.Ertr\u00e4ge stfrei \u00a74Nr8ff", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Provision, sonst.Ertr\u00e4ge stfrei \u00a74 Nr.5", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Provision, sonstige Ertr\u00e4ge 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Provision, sonstige Ertr\u00e4ge", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Gegenkto Aufteilung Erl\u00f6se Steuersatz", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Erl\u00f6se Leergut", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Erl\u00f6se betr. u. regelm\u00e4\u00dfig stfr.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verrechn. sonstige Sachbez\u00fcge ohne USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Erl\u00f6se Abfallverwertung", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Erl\u00f6se betr. und regelm\u00e4\u00dfig 7%", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Erl\u00f6se betr. u. regelm\u00e4\u00dfig", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Ertr\u00e4ge betriebl. und regelm.", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Erl\u00f6se betr. u. regelm\u00e4\u00dfig stfrei", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Erl\u00f6se Geldspielautomaten 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verrechn. sonstige Sachbez\u00fcge 19% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Verrechnete sonstige Sachbez\u00fcge", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ertr\u00e4ge Bewertung Finanzmittelfonds", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Ertr\u00e4ge aus Kursdifferenzen", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Erl\u00f6se 7% USt", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Erl\u00f6se betr. und regelm\u00e4\u00dfig 19%", 
+              "report_type": "Profit and Loss"
+             }, 
+             {
+              "name": "Sonst. Erl\u00f6se betr. und regelm\u00e4\u00dfig 16%", 
+              "report_type": "Profit and Loss"
+             }
+            ], 
+            "name": "So. betr. Erl\u00f6se"
+           }, 
+           {
+            "children": [
+             {
+              "children": [
+               {
+                "name": "Bezugsnebenkosten", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Rabatte 16% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Rabatte 19% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nicht abziehbare Vorsteuer 19%", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang 7% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Roh-, Hilfs- und Betriebsstoffe", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Boni 19% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Fremdleistungen", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Leistungen ausl. UN 7% Vorsteuer, 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "EG-Erw. Nfz o.UStID 19% Vorsteuer/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Bauleistungen \u00a7 13b 7% Vorsteuer, 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse EG-Erwerb 7% Vorsteuer/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse EG-Erwerb 19% Vorsteuer/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse EG-Erwerb 16% Vorsteuer/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse EG-Erwerb 15% Vorsteuer/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse 19% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse 16% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse 15% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nicht abziehbare Vorsteuer 7%", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "EG-Erwerb ohne Vorsteuer und 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Bauleistungen \u00a7 13b 19% Vorst., 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "EG-Erwerb ohne Vorsteuer und 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Leistungen ausl. UN 19% Vorst., 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang 10,7% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Skonti 19% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Skonti 16% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Skonti 7% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Skonti", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nicht abziehbare Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Leistungen ausl. UN ohne Vorst., 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Bauleistungen \u00a7 13b ohne Vorst., 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "EG-Erwerb 7% Vorsteuer und 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Z\u00f6lle und Einfuhrabgaben", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "EG-Erwerb 19% Vorsteuer und 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Steuerfreie Einfuhren", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang, im anderen EG-Land stb.", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erwerb 1. Abnehmer im Dreiecksgesch\u00e4ft", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang, im Drittland steuerbar", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Steuerfreier EG-Erwerb", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Bestandsver\u00e4nd.RHB-Stoffe/bezogene Ware", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Bauleistungen \u00a7 13b ohne Vorst., 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Leistungen ausl. UN ohne Vorst., 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Waren aus USt-Lager 7% Vorsteuer, 7% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Waren aus USt-Lager 19% Vorst., 19% USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Energiestoffe", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erh. Skonti Leistg. \u00a7 13b o.Vorst/m.USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang 19% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erh. Skonti Leistg. \u00a7 13b 19% Vorst/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Skonti Leistungen \u00a713b UStG", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erh. Skonti Leistg. \u00a7 13b o.Vorst/16%USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erh. Skonti Leistg. \u00a7 13b o.Vorst/19%USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Nachl\u00e4sse 7% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Boni", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Boni 16% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang 5,5% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erh. Skonti Leistg. \u00a7 13b 16% Vorst/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Rabatte", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Wareneingang", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Leergut", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhalt. Skonti EG-Erwerb 7% Vorst/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Skonti EG-Erwerb", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhalt. Skonti EG-Erwerb 19% Vorst/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhalt. Skonti EG-Erwerb 16% Vorst/USt", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Boni 7% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }, 
+               {
+                "name": "Erhaltene Rabatte 7% Vorsteuer", 
+                "report_type": "Profit and Loss"
+               }
+              ], 
+              "name": "Mat./Wareneinkauf"
+             }, 
+             {
+              "children": [
+               {
+                "children": [
+                 {
+                  "name": "Andere aktivierte Eigenleistungen", 
+                  "report_type": "Profit and Loss"
+                 }
+                ], 
+                "name": "Akt.Eigenleistungen"
+               }, 
+               {
+                "children": [
+                 {
+                  "name": "Bestandsver\u00e4nderung unfertige Leistung", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Bestandsver\u00e4nderung Bauauftr\u00e4ge", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Bestandsver\u00e4nderung Auftr\u00e4ge in Arbeit", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Bestandsver\u00e4nd.unfertige Erzeugnisse", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Bestandsver\u00e4nderung fertige Erzeugnisse", 
+                  "report_type": "Profit and Loss"
+                 }
+                ], 
+                "name": "Best.Verdg. FE/UE"
+               }, 
+               {
+                "children": [
+                 {
+                  "name": "Gew\u00e4hrte Skonti EG-Lieferung 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Rabatte 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Im anderen EG-Land stpfl. Lieferungen", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfr. EG-Lief.v.Neufahrzg.ohne UStID", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Innergemeinschaftl. Dreiecksgesch\u00e4ft", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Entnahme Unternehmer (Waren) ohne USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Entnahme Unternehmer (Waren) 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Entnahme Unternehmer (Waren) 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Entnahme Unternehmer (Waren) 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfreie EG-Lieferungen \u00a74, 1b UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfreie Ums\u00e4tze \u00a7 4 Nr. 1a UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Provisionsums\u00e4tze, steuerfrei \u00a74 Nr.8ff", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Entnahme von Gegenst\u00e4nden ohne USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Unentgeltliche Wertabgaben", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Sonstige steuerfr. Ums\u00e4tze Inland", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Boni 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfreie Ums\u00e4tze \u00a7 4 Nr. 2-7 UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti EG-Lieferung 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti stpfl. EG-Lieferung", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti stfr. EG-Lieferung", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti Leistungen \u00a713b UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti EG-Lieferung 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Stfr. Ums\u00e4tze aus V. \u00a7 4 Nr. 12 UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfreie Ums\u00e4tze \u00a74 Nr. 8 ff UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Umsatzsteuer-Verg\u00fctungen", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Nicht steuerbare Ums\u00e4tze", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Rabatte", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Boni", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Boni 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Boni 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Unentgeltl. Zuwend. von Waren ohne USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Unentgeltl. Zuwend. von Waren 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Unentgeltl. Zuwend. von Waren 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerungen 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerungen 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerungen", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerungen steuerfrei \u00a74 Nr. 1a", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfreie Ums\u00e4tze Offshore usw.", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Skonti 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Unentgeltl. Zuwend. von Waren 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se gem\u00e4\u00df \u00a7 24 UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se Kleinunternehmer \u00a7 19 UStG", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Provisionsums\u00e4tze 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Provisionsums\u00e4tze 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Provisionsums\u00e4tze 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Provisionsums\u00e4tze, steuerfrei \u00a7 4 Nr.5", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Provisionsums\u00e4tze", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerungen 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerung EG-Lieferung 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerung EG-Lieferung steuerfrei", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4l.i.and. EG-Land stpfl. Lief.", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerung EG-Lieferung 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6sschm\u00e4lerung EG-Lieferung 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se EG-Lieferungen 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se EG-Lieferungen 7% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Steuerfreie Ums\u00e4tze ohne Vorsteuerabzug", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Rabatte 19% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Gew\u00e4hrte Rabatte 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Nicht steuerbare Ums\u00e4tze Drittland", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Nicht steuerbare Ums\u00e4tze EG-Land", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se EG-Lieferungen 16% USt", 
+                  "report_type": "Profit and Loss"
+                 }, 
+                 {
+                  "name": "Erl\u00f6se aus Leistungen nach \u00a7 13b UStG", 
+                  "report_type": "Profit and Loss"
+                 }
+                ], 
+                "name": "Umsatzerl\u00f6se"
+               }
+              ], 
+              "name": "Gesamtleistung"
+             }
+            ], 
+            "name": "Rohertrag"
+           }
+          ], 
+          "name": "Betriebl. Rohertrag"
+         }
+        ], 
+        "name": "Betriebsergebnis"
+       }
+      ], 
+      "name": "Ergebnis vor Steuern"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Solidarit\u00e4tszuschlag", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Solidarit\u00e4tszuschlag f\u00fcr Vorjahre", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K\u00f6rperschaftsteuer", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K\u00f6rperschaftsteuer f\u00fcr Vorjahre", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K\u00f6rperschaftsteuererstattung Vorjahre", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K\u00f6rperschaftsteuererstattung VJ \u00a7 37", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "K\u00f6rperschaftsteuer-Erh\u00f6hung \u00a7 38 Abs. 5", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Anzurechn. ausl\u00e4ndische Quellensteuer", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Solidarit\u00e4tszuschl. auf Zinsabschlagst.", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kapitalertragsteuer 25%", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Kapitalertragsteuer 20%", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Solidarit\u00e4tszuschl.-Erstattung Vorjahre", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Zinsabschlagsteuer", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Gewerbesteuer", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Sol.z. auf Kapitalertragsteuer 25%", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Sol. auf Kapitalertragsteuer 20%", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "GewSt-Nachzahlung Vorjahre", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "GewSt-Nachzahlung/-Erstattung VJ \u00a74/5b", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "GewSt-Erstattung Vorjahre", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Aufl\u00f6sung GewSt-R\u00fcckstellg. \u00a7 4/5b", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Aufl\u00f6sung Gewerbesteuerr\u00fcckstellung", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Ertr\u00e4ge Zuf\u00fchrg/Aufl\u00f6sg latente Steuern", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Aufw. Zuf\u00fchrg/Aufl\u00f6sung latente Steuern", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Steuern Eink.u.Ertr"
+     }
+    ], 
+    "name": "Gewinn u. Verlust"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Haftung aus der Bestellung von Sicherheiten f\u00fcr fremde Verbindlichkeiten gegen\u00fcber verbundenen Unternehmen"
+       }, 
+       {
+        "name": "Gegenkonto zu 9271 - 9279 (Soll-Buchung)"
+       }, 
+       {
+        "name": "Verbindlichkeiten aus der Begebung und \u00fcbertragung von Wechseln"
+       }, 
+       {
+        "name": "Verbindlichkeiten aus der Begebung und \u00fcbertragung von Wechseln gegen\u00fcber verbundenen Unternehmen"
+       }, 
+       {
+        "name": "Verbindlichkeiten aus B\u00fcrgschaften- Wechsel- und Scheckb\u00fcrgschaften"
+       }, 
+       {
+        "name": "Verbindlichkeiten aus B\u00fcrgschaften- Wechsel- und Scheckb\u00fcrgschaften gegen\u00fcber verbundenen Unternehmen"
+       }, 
+       {
+        "name": "Verbindlichkeiten aus Gew\u00e4hrleistungsvertr\u00e4gen"
+       }, 
+       {
+        "name": "Verbindlichkeiten aus Gew\u00e4hrleistungsvertr\u00e4gen gegen\u00fcber verbundenen Unternehmen"
+       }, 
+       {
+        "name": "Haftung aus der Bestellung von Sicherheiten f\u00fcr fremde Verbindlichkeiten"
+       }, 
+       {
+        "name": "Verpflichtungen aus Treuhandverm\u00f6gen"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr in der Bilanz auszuweisende Haftungsverh\u00e4ltnisse"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Andere Verpflichtungen gem\u00e4\u00df \u00a7 285 Nr. 3 HGB"
+       }, 
+       {
+        "name": "Andere Verpflichtungen gem\u00e4\u00df \u00a7 285 Nr. 3 HGB gegen\u00fcber verbundenen Unternehmen"
+       }, 
+       {
+        "name": "Verpflichtungen aus Miet- und Leasingsvertr\u00e4gen"
+       }, 
+       {
+        "name": "Gegenkonto zu 9281-9284"
+       }, 
+       {
+        "name": "Verpflichtungen aus Miet- und Leasingsvertr\u00e4gen gegen\u00fcber verbundenen Unternehmen"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr die im Anhang anzugebenden sonstigen finanziellen Verpflichtungen"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Eigenkapitalersetzende Gesellschafterdarlehen "
+       }, 
+       {
+        "name": "Ungesicherte Gesellschafterdarlehen mit Restlaufzeit gr\u00f6\u00dfer 5 Jahre"
+       }, 
+       {
+        "name": "Gegenkonto zu 9250 und 9255"
+       }
+      ], 
+      "name": "Eigenkapitalersetzende Gesellschafterdarlehen "
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gegenkonto zu Konto 9260 - 9268"
+       }, 
+       {
+        "name": "Mittelfristige R\u00fcckstellungen"
+       }, 
+       {
+        "name": "Langfristige R\u00fcckstellungen- au\u00dfer Pensionen"
+       }, 
+       {
+        "name": "Kurzfristige R\u00fcckstellungen"
+       }
+      ], 
+      "name": "Aufgliederung der R\u00fcckstellungen"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Gezeichnetes Kapital in Euro (Art. 42 Abs. 3 S. 2 EGHGB)"
+         }, 
+         {
+          "name": "Gegenkonto zu 9220-9221"
+         }
+        ], 
+        "name": "Gezeichnetes Kapital in Euro"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Gezeichnetes Kapital in DM (Art. 42 Abs. 3 S. 1 EGHGB)"
+         }
+        ], 
+        "name": "Gezeichnetes Kapital in DM"
+       }
+      ], 
+      "name": "Statistische Konten zur informativen Angabe des gezeichneten Kapitals in anderer W\u00e4hrung"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Investitionsverbindlichkeiten aus K\u00e4ufen von immateriellen Verm\u00f6gensgegenst\u00e4nden bei Leistungsverbindlichkeiten"
+       }, 
+       {
+        "name": "Investitionsverbindlichkeiten aus K\u00e4ufen von Finanzanlagen bei Leistungsverbindlichkeiten"
+       }, 
+       {
+        "name": "Forderungen aus Sachanlagenverk\u00e4ufen bei sonstigen Verm\u00f6gensgegenst\u00e4nden"
+       }, 
+       {
+        "name": "Gegenkonto zu Konto 9240-43"
+       }, 
+       {
+        "name": "Forderungen aus Verk\u00e4ufen von Finanzanlagen bei sonstigen Verm\u00f6gensgegenst\u00e4nden"
+       }, 
+       {
+        "name": "Forderungen aus Verk\u00e4ufen immaterielle Verm\u00f6gensgegenst\u00e4nde bei sonstigen Verm\u00f6gensgegenst\u00e4nden"
+       }, 
+       {
+        "name": "Gegenkonto zu Konto 9245-47"
+       }, 
+       {
+        "name": "Baukostenzusch\u00fcsse"
+       }, 
+       {
+        "name": "Investitionszulagen "
+       }, 
+       {
+        "name": "Investitionsverbindlichkeiten aus Sachanlagenk\u00e4ufen bei Leistungsverbindlichkeiten"
+       }, 
+       {
+        "name": "Investitionsverbindlichkeiten bei den Leistungsverbindlichkeiten"
+       }, 
+       {
+        "name": "Investitionszusch\u00fcsse "
+       }, 
+       {
+        "name": "Gegenkonto zu Konten 9230- 9238"
+       }
+      ], 
+      "name": "Passive Rechnungsabgrenzung"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Anzahl der Barkunden"
+       }, 
+       {
+        "name": "Gegenkonto zu Konten 9120- 9135-9140"
+       }, 
+       {
+        "name": "Gegenkonto f\u00fcr statistische Mengeneinheiten Konten 9101-9107 und Konten 9116-9118"
+       }, 
+       {
+        "name": "Auftragsbestand"
+       }, 
+       {
+        "name": "Erweiterungsinvestitionen"
+       }, 
+       {
+        "name": "Anzahl Rechnungen"
+       }, 
+       {
+        "name": "Auftragseingang im Gesch\u00e4ftsjahr"
+       }, 
+       {
+        "name": "Gesch\u00e4ftsraum m2"
+       }, 
+       {
+        "name": "Verkaufsraum m2"
+       }, 
+       {
+        "name": "Unbezahlte Personen"
+       }, 
+       {
+        "name": "Verkaufskr\u00e4fte"
+       }, 
+       {
+        "name": "Besch\u00e4ftigte Personen"
+       }, 
+       {
+        "name": "Verkaufstage"
+       }, 
+       {
+        "name": "Anzahl Kreditkunden monatlich"
+       }, 
+       {
+        "name": "Anzahl Kreditkunden aufgelaufen"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr Betriebswirtschaftliche Auswertungen (BWA)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Offene Posten aus 1994"
+       }, 
+       {
+        "name": "Offene Posten aus 1995"
+       }, 
+       {
+        "name": "Offene Posten aus 1996"
+       }, 
+       {
+        "name": "Offene Posten aus 1997"
+       }, 
+       {
+        "name": "Summenvortragskonto"
+       }, 
+       {
+        "name": "Offene Posten aus 1991"
+       }, 
+       {
+        "name": "Offene Posten aus 1992"
+       }, 
+       {
+        "name": "Offene Posten aus 1993"
+       }, 
+       {
+        "name": "Offene Posten aus 1998"
+       }, 
+       {
+        "name": "Saldenvortr\u00e4ge Kreditoren"
+       }, 
+       {
+        "name": "Saldenvortr\u00e4ge Debitoren"
+       }, 
+       {
+        "name": "Saldenvortr\u00e4ge"
+       }, 
+       {
+        "name": "Saldenvortr\u00e4ge- Sachkonten"
+       }, 
+       {
+        "name": "Offene Posten aus 2008"
+       }, 
+       {
+        "name": "Offene Posten aus 2009"
+       }, 
+       {
+        "name": "Offene Posten aus 2006"
+       }, 
+       {
+        "name": "Offene Posten aus 2007"
+       }, 
+       {
+        "name": "Offene Posten aus 2004"
+       }, 
+       {
+        "name": "Offene Posten aus 2005"
+       }, 
+       {
+        "name": "Offene Posten aus 2002"
+       }, 
+       {
+        "name": "Offene Posten aus 2003"
+       }, 
+       {
+        "name": "Offene Posten aus 2000"
+       }, 
+       {
+        "name": "Offene Posten aus 2001"
+       }, 
+       {
+        "name": "Offene Posten aus 1999"
+       }, 
+       {
+        "name": "Offene Posten aus 1990"
+       }
+      ], 
+      "name": "Vortragskonten"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gegenkonto zu 9918 (Haben)"
+       }, 
+       {
+        "name": "Kinderbetreuungskosten (wie Betriebsausgaben steuerlich anzusetzender Betrag)"
+       }
+      ], 
+      "name": "Statistische konten f\u00fcr Kinderbetreuungskosten"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Anteil f\u00fcr Verbindlichkeitskonten"
+       }, 
+       {
+        "name": "Verrechnungskonto f\u00fcr Anteil Verbindlichkeitskonten"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr den GuV-Ausweis in \"Gutschrift bzw. Belastung auf Verbindlichkeitskonten\" bei den Zuordnungstabellen f\u00fcr PersHG nach KapCoRiLiG"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gegenkonto 9896-9897 f\u00fcr die Aufteilung der Vorsteuer (E\u00fcR)"
+       }, 
+       {
+        "name": "Umsatzsteuer in den Forderungen zum erm\u00e4\u00dfigten Umsatzsteuersatz (E\u00fcR)"
+       }, 
+       {
+        "name": "Gegenkonto 9893-9894 f\u00fcr die Aufteilung der Umsatzsteuersatz (E\u00fcR)"
+       }, 
+       {
+        "name": "Vorsteuer in den Verbindlichkeiten zum allgemeinen Umsatzsteuersatz (E\u00fcR)"
+       }, 
+       {
+        "name": "Vorsteuer in den Verbindlichkeiten zum erm\u00e4\u00dfigten Umsatzsteuersatz (E\u00fcR)"
+       }, 
+       {
+        "name": "SO Commitment"
+       }, 
+       {
+        "name": "Umsatzsteuer in den Forderungen zum allgemeinen Umsatzsteuersatz (E\u00fcR)"
+       }
+      ], 
+      "name": "Vorsteuer-/Umsatzsteuerkonten zur Korrektur der Forderungen/ Verbindlichkeiten (E\u00fcR)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Minderung der Entnahmen \u00a74 (4a) EStG (Haben)"
+       }, 
+       {
+        "name": "Gegenkonto zur Erh\u00f6hung der Entnahmen \u00a74 (4a) EStG (Haben)"
+       }, 
+       {
+        "name": "Gegenkonto zur Minderung der Entnahmen \u00a74 (4a) EStG"
+       }, 
+       {
+        "name": "Erh\u00f6hung der Entnahmen \u00a74 (4a) EStG"
+       }
+      ], 
+      "name": "Statistische Konten zu \u00a7 4 (4a) EStG"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gegenkonto zu 9887"
+       }, 
+       {
+        "name": "Steueraufwand der Gesellschafter "
+       }
+      ], 
+      "name": "Steueraufwand der Gesellschafter"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Statistische Konten f\u00fcr den Gewinnzuschlag nach \u00a7\u00a7 6b- 6c und 7g EStG (Haben-Buchung)"
+       }, 
+       {
+        "name": "Statistische Konten f\u00fcr den Gewinnzuschlag- Gegenkonto zu 9890"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr Gewinnzuschlag"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Nicht durch Verm\u00f6genseinlagen gedeckte Entnahmen Kommanditisten"
+       }, 
+       {
+        "name": "Nicht durch Verm\u00f6genseinlagen gedeckte Entnahmen pers\u00f6nlich haftender Gesellschafter"
+       }
+      ], 
+      "name": "Nicht durch Verm\u00f6genseinlagen gedeckte Entnahmen"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Verrechnungskonto f\u00fcr nicht durch Verm\u00f6genseinlagen gedeckte Entnahmen pers\u00f6nlich haftender Gesellschafter"
+       }, 
+       {
+        "name": "Verrechnungskonto f\u00fcr nicht durch Verm\u00f6genseinlagen gedeckte Entnahmen Kommanditisten"
+       }
+      ], 
+      "name": "Verrechnungskonto f\u00fcr nicht durch Verm\u00f6genseinlagen gedeckte Entnahmen"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Einzahlungsverpflichtungen Kommanditisten"
+       }, 
+       {
+        "name": "Einzahlungsverpflichtungen pers\u00f6nlich haftender Gesellschafter"
+       }
+      ], 
+      "name": "Einzahlungsverpflichtungen im Bereich der Forderungen"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ausgleichsposten f\u00fcr aktivierte Bilanzierungshilfen"
+       }, 
+       {
+        "name": "Ausgleichsposten f\u00fcr aktivierte eigene Anteile "
+       }
+      ], 
+      "name": "Ausgleichsposten f\u00fcr aktivierte eigene Anteile und Bilanzierungshilfen"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Verrechnungskonto f\u00fcr Einzahlungsverpflichtungen"
+       }, 
+       {
+        "name": "Gesellschafter-Darlehen"
+       }, 
+       {
+        "name": "Verlust-/ Vortragskonto"
+       }
+      ], 
+      "name": "Kapital Personenhandelsgesellschaft Vollhafter"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Verrechnungskonto f\u00fcr Einzahlungsverpflichtungen"
+       }, 
+       {
+        "name": "Gesellschafter-Darlehen"
+       }
+      ], 
+      "name": "Kapital Personenhandelsgesellschaft Teilhafter"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Grundst\u00fccksertrag"
+       }, 
+       {
+        "name": "Grundst\u00fccksaufwand"
+       }, 
+       {
+        "name": "Privatsteuern"
+       }, 
+       {
+        "name": "Privatentnahmen allgemein"
+       }, 
+       {
+        "name": "Sonderausgaben unbeschr\u00e4nkt abzugsf\u00e4hig"
+       }, 
+       {
+        "name": "Sonderausgaben beschr\u00e4nkt abzugsf\u00e4hig"
+       }, 
+       {
+        "name": "Privateinlagen"
+       }, 
+       {
+        "name": "Unentgeltliche Wertabgaben"
+       }, 
+       {
+        "name": "Au\u00dfergew\u00f6hnliche Belastungen"
+       }, 
+       {
+        "name": "Zuwendungen- Spenden"
+       }
+      ], 
+      "name": "Privat Teilhafter (f\u00fcr Verrechnung Gesellschafterdarlehen mit Eigenkapitalcharakter- Konto 9840-9849)"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Statistisches Konto Fremdgeld"
+       }, 
+       {
+        "name": "Gegenkonto zu 9292"
+       }, 
+       {
+        "name": "Statistisches Konto steuerfreie Auslagen"
+       }, 
+       {
+        "name": "Gegenkonto zu 9290"
+       }, 
+       {
+        "name": "Zinsen bei Buchungen \u00fcber Debitoren bei \u00a7 4 Abs. 3 EStG"
+       }, 
+       {
+        "name": "Gegenkonto zu 9287 und 9288"
+       }, 
+       {
+        "name": "Mahngeb\u00fchren bei Buchungen \u00fcber Debitoren bei \u00a7 4 Abs. 3 EStG"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Einlagen stiller Gesellschafter"
+         }
+        ], 
+        "name": "Einlagen stiller Gesellschafter"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Steuerrechtlicher Ausgleichsposten"
+         }
+        ], 
+        "name": "Steuerrechtlicher Ausgleichsposten"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr 4 Abs. 3 EStG"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Produktive L\u00f6hne"
+       }, 
+       {
+        "name": "Gegenkonto zu 9210"
+       }, 
+       {
+        "name": "Gegenkonto zu 9200"
+       }, 
+       {
+        "name": "Besch\u00e4ftigte Personen"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr den Kennziffernteil der Bilanz"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Sonstige Verg\u00fctungen Vollhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto 9840-49 Teilhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2055"
+       }, 
+       {
+        "name": "Gebrauchs\u00fcberlassung Vollhafter"
+       }, 
+       {
+        "name": "Restanteil Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2027"
+       }, 
+       {
+        "name": "L\u00f6sch- und Korrekturschl\u00fcssel"
+       }, 
+       {
+        "name": "Darlehensverzinsung Vollhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2024"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2025"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2026"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2020"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2021"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2022"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2023"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2028"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2029"
+       }, 
+       {
+        "name": "Gebrauchs\u00fcberlassung Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2070 "
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2076"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2075"
+       }, 
+       {
+        "name": "Tantieme Vollhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9817"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9819"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9818"
+       }, 
+       {
+        "name": "Sonstige Verg\u00fctungen Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2002"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2003"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2000"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2001"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2006"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2007"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2004"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2005"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2008"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2009"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2018"
+       }, 
+       {
+        "name": "Restanteil Vollhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2019"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2015"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2014"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2017"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2016"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2011"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2010"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2013"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 2012"
+       }, 
+       {
+        "name": "Name des Gesellschafters Vollhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2068"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2069"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2060"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2061"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2062"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2063"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2064"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2065"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2066"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2067"
+       }, 
+       {
+        "name": "Name des Gesellschafters Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9827"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2079"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2078"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2073"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2072"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2071"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2077"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9815"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2074"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9814"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9813"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9812"
+       }, 
+       {
+        "name": "T\u00e4tigkeitsverg\u00fctung Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9811"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9810"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0067"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0064"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0062"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0060"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0061"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0068"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0069"
+       }, 
+       {
+        "name": "Tantieme Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0066"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0065"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 0063"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2051"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2050"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2053"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2052"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2054"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2057"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2056"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2059"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 2058"
+       }, 
+       {
+        "name": "L\u00f6sch- und Korrekturschl\u00fcssel"
+       }, 
+       {
+        "name": "Darlehensverzinsung Teillhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9828"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9829"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9822"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9823"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9820 "
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9821"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9826"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9824"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9825"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Vollhafter 9816"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0085"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0084"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0087"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0086"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0081"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0080 "
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0089"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0088"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0082"
+       }, 
+       {
+        "name": "T\u00e4tigkeitsverg\u00fctung Vollhafter"
+       }, 
+       {
+        "name": "Anteil f\u00fcr Konto Teilhafter 0083"
+       }
+      ], 
+      "name": "Statistische Konten f\u00fcr die Kapitalkontenentwicklung"
+     }
+    ], 
+    "name": "Vortrags- Kapital- und Statistische Konten"
+   }
+  ], 
+  "name": "Deutscher Kontenplan SKR03"
+ }
+}

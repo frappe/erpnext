@@ -15,7 +15,7 @@ def get_items(price_list, sales_or_purchase, item=None, item_group=None):
 		condition = "i.is_purchase_item='Yes'"
 	
 	if item_group and item_group != "All Item Groups":
-		condition += " and i.item_group='%s'" % item_group
+		condition += " and i.item_group='%s'" % item_group.replace("'", "\'")
 
 	if item:
 		condition += " and CONCAT(i.name, i.item_name) like %(name)s"

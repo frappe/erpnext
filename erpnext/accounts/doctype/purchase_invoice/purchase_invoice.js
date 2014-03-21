@@ -158,8 +158,7 @@ cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 	return{
 		filters:{
-			'debit_or_credit': 'Credit',
-			'is_pl_account': 'No',
+			'report_type': 'Balance Sheet',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
 		}

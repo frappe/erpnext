@@ -1,0 +1,996 @@
+{
+ "name": "Italy - Generic Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "canoni di leasing", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "fitti passivi", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "COSTI PER GODIMENTO BENI DI TERZI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "merci c/rimanenze finali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "materie di consumo c/rimanenze finali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "materie di consumo c/esistenze iniziali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "merci c/esistenze iniziali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "premi su acquisti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "resi su acquisti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ribassi e abbuoni attivi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "merci c/acquisti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "materie di consumo c/acquisti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "merci c/apporti", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "COSTO DEL VENDUTO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "accantonamento per spese future", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "accantonamento per manutenzioni programmate", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ALTRI ACCANTONAMENTI"
+       }, 
+       {
+        "children": [
+         {
+          "name": "accantonamento per responsabilit\u00e0 civile", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "ACCANTONAMENTI PER RISCHI"
+       }
+      ], 
+      "name": "ACCANTONAMENTI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "oneri fiscali diversi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "oneri vari", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "arrotondamenti passivi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "sopravvenienze passive ordinarie diverse", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "perdite su crediti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "minusvalenze ordinarie diverse", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "insussistenze passive ordinarie diverse", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "ONERI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ammortamento fabbricati", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento imballaggi durevoli", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento arredamento", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento automezzi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento attrezzature commerciali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento macchine d'ufficio", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento impianti e macchinari", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "AMMORTAMENTI IMMOBILIZZAZIONI MATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "altri costi per il personale", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "oneri sociali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "salari e stipendi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "TFRL", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "COSTI PER IL PERSONALE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ammortamento software", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento costi di impianto", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "ammortamento avviamento", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "AMMORTAMENTI IMMOBILIZZAZIONI IMMATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "costi di vigilanza", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi per i locali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi per energia", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi di pubblicit\u00e0", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi di trasporto", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi postali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "spese di incasso", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "provvigioni passive", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi di manutenzione e riparazione", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi di assicurazione", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi telefonici", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi di consulenze", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "costi di esercizio automezzi", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "COSTI PER SERVIZI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "svalutazioni immobilizzazioni materiali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "svalutazioni immobilizzazioni immateriali", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "svalutazione crediti", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "SVALUTAZIONI"
+     }
+    ], 
+    "name": "COSTI DELLA PRODUZIONE"
+   }, 
+   {
+    "children": [
+     {
+      "name": "imposte dell'esercizio", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "IMPOSTE DELL'ESERCIZIO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "banche c/sovvenzioni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "mutui passivi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "debiti v/altri finanziatori", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banche c/c passivi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banche c/RIBA all'incasso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banche c/anticipi su fatture", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banche c/cambiali all'incasso", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DEBITI FINANZIARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "debiti per imposte", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "erario c/IVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "IVA n/debito", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "debiti per ritenute da versare", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "debiti per cauzioni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "personale c/retribuzioni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "clienti c/cessione", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "debiti v/istituti previdenziali", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "personale c/liquidazioni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "creditori diversi", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DEBITI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ratei passivi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "risconti passivi", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "RATEI E RISCONTI PASSIVI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "perdita d'esercizio", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "utile d'esercizio", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "patrimonio netto", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "titolare c/ritenute subite", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "prelevamenti extra gestione", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "PATRIMONIO NETTO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "debiti per TFRL", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "TRATTAMENTO FINE RAPPORTO DI LAVORO"
+     }, 
+     {
+      "children": [
+       {
+        "name": "banca ... c/c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banca ... c/c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banca ... c/c", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "bilancio di chiusura", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "bilancio di apertura", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "istituti previdenziali", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "IVA c/liquidazioni", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "CONTI TRANSITORI E DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "merci da ricevere", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fornitori c/impegni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "impegni per beni in leasing", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "creditori c/leasing", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "clienti c/impegni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "merci da consegnare", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "creditori per fideiussioni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "depositanti beni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "beni di terzi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "creditori per avalli", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "rischi per avalli", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "rischi per effetti scontati", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "banche c/effetti scontati", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "rischi per fideiussioni", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "CONTI DEI SISTEMI SUPPLEMENTARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fatture da ricevere", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "debiti da liquidare", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "cambiali passive", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "debiti v/fornitori", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "clienti c/acconti", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DEBITI COMMERCIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fondo per imposte", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo responsabilit\u00e0 civile", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo spese future", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo manutenzioni programmate", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "FONDI PER RISCHI E ONERI"
+     }
+    ], 
+    "name": "PASSIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "arrotondamenti attivi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "proventi vari", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "insussistenze attive ordinarie diverse", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "plusvalenze ordinarie diverse", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "fitti attivi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "sopravvenienze attive ordinarie diverse", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "RICAVI E PROVENTI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "ribassi e abbuoni passivi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "merci c/vendite", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "rimborsi spese di vendita", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "premi su vendite", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "resi su vendite", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "VENDITE E PRESTAZIONI"
+     }
+    ], 
+    "name": "VALORE DELLA PRODUZIONE"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "sopravvenienze passive straordinarie", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "imposte esercizi precedenti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "insussistenze passive straordinarie", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "minusvalenze straordinarie", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "ONERI STRAORDINARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "insussistenze attive straordinarie", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "sopravvenienze attive straordinarie", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "plusvalenze straordinarie", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "PROVENTI STRAORDINARI"
+     }
+    ], 
+    "name": "PROVENTI E ONERI STRAORDINARI"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "mutui attivi", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "IMMOBILIZZAZIONI FINANZIARIE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fornitori immobilizzazioni c/acconti", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento impianti e macchinari", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento fabbricati", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento arredamento", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento automezzi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento attrezzature commerciali", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento macchine d'ufficio", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento imballaggi durevoli", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "imballaggi durevoli", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "macchine d'ufficio", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "attrezzature commerciali", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "automezzi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "arredamento", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fabbricati", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "impianti e macchinari", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "IMMOBILIZZAZIONI MATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fondo ammortamento costi di impianto", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "avviamento", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "software", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "costi di impianto", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento software", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo ammortamento avviamento", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "IMMOBILIZZAZIONI IMMATERIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fondo svalutazione crediti", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fondo rischi su crediti", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti da liquidare", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti commerciali diversi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "clienti c/spese anticipate", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "crediti v/clienti", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "cambiali allo sconto", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "cambiali all'incasso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "cambiali attive", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "fatture da emettere", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "cambiali insolute", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti insoluti", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "CREDITI COMMERCIALI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "fornitori c/acconti", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "materie di consumo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "merci", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "RIMANENZE"
+     }, 
+     {
+      "children": [
+       {
+        "name": "crediti v/istituti previdenziali", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "debitori diversi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "personale c/acconti", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti per cauzioni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti per ritenute subite", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti per imposte", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "IVA n/credito", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "IVA c/acconto", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "crediti per IVA", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "imposte c/acconto", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "CREDITI DIVERSI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "risconti attivi", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "ratei attivi", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "RATEI E RISCONTI ATTIVI"
+     }, 
+     {
+      "children": [
+       {
+        "account_type": "Cash", 
+        "name": "assegni", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "denaro in cassa", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "valori bollati", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Bank", 
+        "name": "c/c postali", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Bank", 
+        "name": "banche c/c", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "DISPONIBILIT\u00c0 LIQUIDE"
+     }
+    ], 
+    "name": "ATTIVO"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "proventi finanziari diversi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "interessi attivi v/clienti", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "interessi attivi bancari", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "interessi attivi postali", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "PROVENTI FINANZIARI"
+     }, 
+     {
+      "children": [
+       {
+        "name": "oneri finanziari diversi", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "interessi passivi bancari", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "interessi passivi su mutui", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "interessi passivi v/fornitori", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "sconti passivi bancari", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "ONERI FINANZIARI"
+     }
+    ], 
+    "name": "PROVENTI E ONERI FINANZIARI"
+   }, 
+   {
+    "children": [
+     {
+      "name": "stato patrimoniale", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "conto di risultato economico", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "CONTI DI RISULTATO"
+   }
+  ], 
+  "name": "Azienda", 
+  "parent_id": null
+ }
+}

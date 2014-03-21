@@ -22,7 +22,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = ""
 	if fiscal_year:
-		cond = "name = '%s'" % fiscal_year
+		cond = "name = '%s'" % fiscal_year.replace("'", "\'")
 	else:
 		cond = "'%s' >= year_start_date and '%s' <= year_end_date" % \
 			(date, date)
@@ -74,7 +74,7 @@ def get_balance_on(account=None, date=None):
 			return 0.0
 		
 	acc = frappe.db.get_value('Account', account, \
-		['lft', 'rgt', 'debit_or_credit', 'is_pl_account', 'group_or_ledger'], as_dict=1)
+		['lft', 'rgt', 'is_pl_account', 'group_or_ledger'], as_dict=1)
 	
 	# for pl accounts, get balance within a fiscal year
 	if acc.is_pl_account == 'Yes':
@@ -88,16 +88,12 @@ def get_balance_on(account=None, date=None):
 			and ac.lft >= %s and ac.rgt <= %s
 		)""" % (acc.lft, acc.rgt))
 	else:
-		cond.append("""gle.account = "%s" """ % (account, ))
+		cond.append("""gle.account = "%s" """ % (account.replace('"', '\"'), ))
 	
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 		FROM `tabGL Entry` gle
 		WHERE %s""" % " and ".join(cond))[0][0]
-
-	# if credit account, it should calculate credit - debit
-	if bal and acc.debit_or_credit == 'Credit':
-		bal = -bal
 
 	# if bal is None, return 0
 	return flt(bal)
@@ -289,8 +285,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
-	if frappe.db.get_value("Account", {"name": args.account, "is_pl_account": "Yes", 
-		"debit_or_credit": "Debit"}):
+	if frappe.db.get_value("Account", {"name": args.account, "report_type": "Profit and Loss"}):
 			budget = frappe.db.sql("""
 				select bd.budget_allocated, cc.distribution_id 
 				from `tabCost Center` cc, `tabBudget Detail` bd

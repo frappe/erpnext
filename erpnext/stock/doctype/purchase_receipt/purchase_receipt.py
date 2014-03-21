@@ -248,7 +248,10 @@ class DocType(BuyingController):
 		self.make_gl_entries()
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % (self.doc.name))
+		submit_rv = frappe.db.sql("""select t1.name 
+			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 
+			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""", 
+			(self.doc.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -259,13 +262,13 @@ class DocType(BuyingController):
 
 		self.check_for_stopped_status(pc_obj)
 		# Check if Purchase Invoice has been submitted against current Purchase Order
-		# pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Invoice', docname = self.doc.name, detail_doctype = 'Purchase Invoice Item')
-
-		submitted = frappe.db.sql("select t1.name from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 where t1.name = t2.parent and t2.purchase_receipt = '%s' and t1.docstatus = 1" % self.doc.name)
+		submitted = frappe.db.sql("""select t1.name 
+			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 
+			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""", 
+			self.doc.name)
 		if submitted:
-			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
-			raise Exception
-
+			frappe.throw("Purchase Invoice : " + cstr(submitted[0][0]) + 
+				" has already been submitted !")
 		
 		frappe.db.set(self.doc,'status','Cancelled')
 

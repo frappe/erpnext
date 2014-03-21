@@ -1,0 +1,726 @@
+{
+ "name": "Costa Rica - Company 0", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Veh\u00edculos"
+           }, 
+           {
+            "name": "0-Equipo de c\u00f3mputo"
+           }, 
+           {
+            "name": "0-Moibliario y equipo de oficina"
+           }, 
+           {
+            "name": "0-Herramientas mayores"
+           }, 
+           {
+            "name": "0-Maquinaria y equipo de edificios"
+           }
+          ], 
+          "name": "0-Activos depreciables m\u00f3viles"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Edificio 1"
+             }
+            ], 
+            "name": "0-Edificios \u2013 Revaluaciones"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Edificio 1"
+             }
+            ], 
+            "name": "0-Edificios \u2013 Valores originales"
+           }
+          ], 
+          "name": "0-Edificios"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Edificio 1"
+             }
+            ], 
+            "name": "0-Mejoras a edificios \u2013 Revaluaciones"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Edificio 1"
+             }
+            ], 
+            "name": "0-Mejoras a edificios \u2013 Valores originales"
+           }
+          ], 
+          "name": "0-Mejoras a edificios"
+         }
+        ], 
+        "name": "0-Activo fijo depreciable"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Terreno 1"
+             }
+            ], 
+            "name": "0-Valores originales"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Terreno 1"
+             }
+            ], 
+            "name": "0-Revaluaciones"
+           }
+          ], 
+          "name": "0-Terrenos"
+         }
+        ], 
+        "name": "0-Activo fijo no depreciable"
+       }
+      ], 
+      "name": "0-Activo fijo"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Cuenta PayPal 1"
+           }
+          ], 
+          "name": "0-PayPal"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Fondos en tr\u00e1nsito en bancos"
+           }, 
+           {
+            "name": "0-Fondos en tr\u00e1nsito de PayPal a Bancos"
+           }, 
+           {
+            "name": "0-Fondos en tr\u00e1nsito en tesorer\u00eda"
+           }
+          ], 
+          "name": "0-Fondos en tr\u00e1nsito"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Fondo de caja oficinas centrales USD"
+             }
+            ], 
+            "name": "0-Fondos de caja USD"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Fondo de caja oficinas centrales CRC"
+             }
+            ], 
+            "name": "0-Fondos de caja CRC"
+           }
+          ], 
+          "name": "0-Fondos de caja"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Inversi\u00f3n 1"
+           }
+          ], 
+          "name": "0-Inversiones a la vista"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Cuenta en USD 1"
+             }
+            ], 
+            "name": "0-Cuentas corrientes USD"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Cuenta en CRC 1"
+             }
+            ], 
+            "name": "0-Cuentas corrientes CRC"
+           }
+          ], 
+          "name": "0-Bancos"
+         }
+        ], 
+        "name": "0-Activo circulante disponible"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Inventario de producto para la venta"
+           }, 
+           {
+            "name": "0-Inventario de consumibles"
+           }
+          ], 
+          "name": "0-Inventarios"
+         }
+        ], 
+        "name": "0-Activo circulante realizable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "0-Cuentas por cobrar a empleados"
+         }, 
+         {
+          "name": "0-Cuentas por cobrar a compa\u00f1\u00edas relacionadas"
+         }, 
+         {
+          "name": "0-Cuentas por cobrar comerciales"
+         }, 
+         {
+          "name": "0-Inversiones de corto plazo"
+         }, 
+         {
+          "name": "0-Otras cuentas por cobrar"
+         }
+        ], 
+        "name": "0-Activo circulante exigible"
+       }
+      ], 
+      "name": "0-Activo circulante"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "0-P\u00f3lizas de seguros prepagadas"
+         }
+        ], 
+        "name": "0-Gastos pagados por anticipado"
+       }, 
+       {
+        "children": [
+         {
+          "name": "0-Dep\u00f3sitos sobre conexiones de Internet"
+         }, 
+         {
+          "name": "0-Dep\u00f3sitos sobre locales en alquiler"
+         }, 
+         {
+          "name": "0-Dep\u00f3sitos sobre derechos telef\u00f3nicos"
+         }
+        ], 
+        "name": "0-Dep\u00f3sitos de garant\u00eda"
+       }
+      ], 
+      "name": "0-Otros activos"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "0-Dep. ac. de herramientas mayores"
+         }, 
+         {
+          "name": "0-Dep. ac. de mobiliario y equipo de oficina"
+         }, 
+         {
+          "name": "0-Dep. ac. de maquinaria y equipo de edificios"
+         }, 
+         {
+          "name": "0-Dep. ac. de equipo de c\u00f3mputo"
+         }, 
+         {
+          "name": "0-Dep. ac. de veh\u00edculos"
+         }
+        ], 
+        "name": "0-Dep. ac. de activos depreciables m\u00f3viles"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Edificio 1"
+           }
+          ], 
+          "name": "0-Dep. ac. de edificios \u2013 Valores originales"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Edificio 1"
+           }
+          ], 
+          "name": "0-Dep. ac. de edificios \u2013 Revaluaciones"
+         }
+        ], 
+        "name": "0-Dep. ac. de edificios"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Edificio 1"
+           }
+          ], 
+          "name": "0-Dep. ac. de mejoras a edificios \u2013 Revaluaciones"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Edificio 1"
+           }
+          ], 
+          "name": "0-Dep. ac. de mejoras a edificios \u2013 Valores originales"
+         }
+        ], 
+        "name": "0-Dep. ac. de mejoras a edificios"
+       }
+      ], 
+      "name": "0-Depreciaciones acumuladas sobre activo fijo depreciable"
+     }
+    ], 
+    "name": "0-Activo"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "0-Gastos Financieros"
+       }, 
+       {
+        "name": "0-Depreciaci\u00f3n de activo fijo"
+       }, 
+       {
+        "name": "0-Ajustes"
+       }, 
+       {
+        "name": "0-Perdida por robo"
+       }, 
+       {
+        "name": "0-Donaciones deducibles"
+       }
+      ], 
+      "name": "0-Otros gastos"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Donaciones no deducibles"
+       }, 
+       {
+        "name": "0-Multas"
+       }, 
+       {
+        "name": "0-Gastos de presidencia"
+       }, 
+       {
+        "name": "0-Diferencial cambiario"
+       }
+      ], 
+      "name": "0-Gastos no deducibles"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Cesant\u00eda"
+             }, 
+             {
+              "name": "0-Comisiones"
+             }, 
+             {
+              "name": "0-Cargas patronales"
+             }, 
+             {
+              "name": "0-Aguinaldo"
+             }, 
+             {
+              "name": "0-Preaviso"
+             }, 
+             {
+              "name": "0-Salarios"
+             }, 
+             {
+              "name": "0-Extras"
+             }, 
+             {
+              "name": "0-Bonificaciones"
+             }
+            ], 
+            "name": "0-Salarios y deducciones"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Transporte"
+             }, 
+             {
+              "name": "0-Hospedaje"
+             }, 
+             {
+              "name": "0-Alimentaci\u00f3n"
+             }
+            ], 
+            "name": "0-Vi\u00e1ticos"
+           }
+          ], 
+          "name": "0-Gastos de personal"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Categor\u00eda 1"
+           }
+          ], 
+          "name": "0-Servicios profesionales"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Campa\u00f1as publicitarias"
+           }, 
+           {
+            "name": "0-Dise\u00f1o de imagen"
+           }
+          ], 
+          "name": "0-Gastos de mercadeo"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Costo de producto"
+           }, 
+           {
+            "name": "0-Costo de producci\u00f3n"
+           }, 
+           {
+            "name": "0-Costo de materia prima"
+           }, 
+           {
+            "name": "0-Costo de distribuci\u00f3n"
+           }, 
+           {
+            "name": "0-Costo de almacenamiento"
+           }
+          ], 
+          "name": "0-Costo de venta de producto"
+         }
+        ], 
+        "name": "0-Gastos operativos"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Departamento 1"
+           }
+          ], 
+          "name": "0-Equipo de c\u00f3mputo y comunicaci\u00f3n"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Departamento 1"
+           }
+          ], 
+          "name": "0-Suministros de oficina"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "0-Medidor 1"
+             }
+            ], 
+            "name": "0-Luz"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Medidor 1"
+             }
+            ], 
+            "name": "0-Agua"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Contrato 1"
+             }
+            ], 
+            "name": "0-Internet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "0-Tel\u00e9fono 1"
+             }
+            ], 
+            "name": "0-Tel\u00e9fono"
+           }
+          ], 
+          "name": "0-Servicios p\u00fablicos"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Compa\u00f1\u00eda administradora 1"
+           }
+          ], 
+          "name": "0-Cuota por administraci\u00f3n"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Oficina 1"
+           }
+          ], 
+          "name": "0-Alquiler"
+         }
+        ], 
+        "name": "0-Gastos administrativos"
+       }
+      ], 
+      "name": "0-Gastos principales"
+     }
+    ], 
+    "name": "0-Gastos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "0-Socio 1", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Aportes de capital"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Socio 1", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Capital social"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Balance inicial", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Balance inicial"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Superavit ganado", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "0-Superavit por revaluaci\u00f3n de activos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "0-Super\u00e1vit de capital", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Cuentas de super\u00e1vit"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Reserva para mejoras", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "0-Reserva para proyectos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Otras reservas"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Reserva legal", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Reserva legal"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Periodo 1", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Utilidad o p\u00e9rdida acumulada de periodos anteriores"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Utilidad o p\u00e9rdida del per\u00edodo actual", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "0-Utilidad o p\u00e9rdida del per\u00edodo actual"
+     }
+    ], 
+    "name": "0-Patrimonio"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "0-Donaciones"
+       }, 
+       {
+        "name": "0-Ajustes"
+       }
+      ], 
+      "name": "0-Otros ingresos"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Intereses ganados sobre cuentas corrientes"
+       }
+      ], 
+      "name": "0-Ingresos financieros"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Diferencial cambiario"
+       }
+      ], 
+      "name": "0-Ingresos no gravables"
+     }, 
+     {
+      "name": "0-Ingresos por ventas"
+     }, 
+     {
+      "children": [
+       {
+        "name": "0-Cuota por administraci\u00f3n"
+       }
+      ], 
+      "name": "0-Ingresos por administraci\u00f3n"
+     }
+    ], 
+    "name": "0-Ingresos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "0-Cuentas por pagar de provisiones"
+         }, 
+         {
+          "name": "0-Cuentas por pagar a empleados"
+         }, 
+         {
+          "name": "0-Cuentas por pagar a proveedores"
+         }, 
+         {
+          "name": "0-Cuentas por pagar a compa\u00f1\u00edas relacionadas"
+         }
+        ], 
+        "name": "0-Cuentas por pagar"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "0-Impuesto de ventas pagado"
+           }, 
+           {
+            "name": "0-Impuesto de ventas por pagar"
+           }
+          ], 
+          "name": "0-Impuesto de ventas"
+         }, 
+         {
+          "children": [
+           {
+            "name": "0-Adelantos de impuesto de renta"
+           }, 
+           {
+            "name": "0-Retenciones de impuesto de renta"
+           }, 
+           {
+            "name": "0-Impuesto de renta por pagar"
+           }
+          ], 
+          "name": "0-Impuesto de renta"
+         }
+        ], 
+        "name": "0-Impuestos"
+       }
+      ], 
+      "name": "0-Pasivo circulante"
+     }
+    ], 
+    "name": "0-Pasivo"
+   }
+  ], 
+  "name": "0-Plan Contable", 
+  "parent_id": null
+ }
+}

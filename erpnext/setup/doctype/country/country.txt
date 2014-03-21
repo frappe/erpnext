@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-19 10:23:30", 
   "docstatus": 0, 
-  "modified": "2013-12-20 19:24:00", 
+  "modified": "2014-03-05 14:36:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -61,6 +61,12 @@
   "fieldname": "time_zones", 
   "fieldtype": "Text", 
   "label": "Time Zones"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "code", 
+  "fieldtype": "Data", 
+  "label": "Code"
  }, 
  {
   "amend": 0, 

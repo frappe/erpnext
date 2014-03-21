@@ -1,14 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-// Onload
-// -----------------------------------------
-cur_frm.cscript.onload = function(doc, cdt, cdn) {
-}
-
-// Refresh
-// -----------------------------------------
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
 		msgprint(frappe._("Please create new account from Chart of Accounts."));
@@ -22,8 +14,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
 		
 	// disable fields
-	cur_frm.toggle_enable(['account_name', 'debit_or_credit', 'group_or_ledger', 
-		'is_pl_account', 'company'], false);
+	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
 	
 	if(doc.group_or_ledger=='Ledger') {
 		frappe.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
@@ -61,14 +52,8 @@ cur_frm.cscript.master_type = function(doc, cdt, cdn) {
 		in_list(['Customer', 'Supplier'], doc.master_type));
 }
 
+cur_frm.add_fetch('parent_account', 'report_type', 'report_type');
 
-// Fetch parent details
-// -----------------------------------------
-cur_frm.add_fetch('parent_account', 'debit_or_credit', 'debit_or_credit');
-cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
-
-// Hide tax rate based on account type
-// -----------------------------------------
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
@@ -78,8 +63,6 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	}
 }
 
-// Hide/unhide group or ledger
-// -----------------------------------------
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.appframe.add_button(frappe._('Chart of Accounts'), 
 		function() { frappe.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
@@ -102,8 +85,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 		}, "icon-table");
 	}
 }
-// Convert group to ledger
-// -----------------------------------------
+
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
   return $c_obj(cur_frm.get_doclist(),'convert_group_to_ledger','',function(r,rt) {
     if(r.message == 1) {  
@@ -112,8 +94,6 @@ cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
   });
 }
 
-// Convert ledger to group
-// -----------------------------------------
 cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
   return $c_obj(cur_frm.get_doclist(),'convert_ledger_to_group','',function(r,rt) {
     if(r.message == 1) {

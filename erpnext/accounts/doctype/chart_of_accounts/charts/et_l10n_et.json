@@ -1,0 +1,489 @@
+{
+ "name": "Ethiopia Tax and Account Chart Template", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "Other"
+     }, 
+     {
+      "name": "Purchase Returns and Allowances"
+     }, 
+     {
+      "name": "Cost of Goods and Services"
+     }, 
+     {
+      "name": "Inventory Adjustments"
+     }
+    ], 
+    "name": "COST OF GOODS SOLD"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Commercial Loan"
+         }
+        ], 
+        "name": "Foreign Loans"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Commercial Loan"
+         }
+        ], 
+        "name": "Local Loans"
+       }
+      ], 
+      "name": "Long-Term Debt"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Retention on contract"
+         }
+        ], 
+        "name": "Retentions"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Pension contribution payable"
+         }, 
+         {
+          "name": "Trade Creditors"
+         }, 
+         {
+          "name": "Grace period payables"
+         }, 
+         {
+          "name": "VAT Payable"
+         }, 
+         {
+          "name": "Witholding Payable"
+         }, 
+         {
+          "name": "Salary payable"
+         }, 
+         {
+          "name": "Federal Income Tax"
+         }
+        ], 
+        "name": "Accounts Payable"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Other deposits"
+         }
+        ], 
+        "name": "Deposits"
+       }
+      ], 
+      "name": "Payables"
+     }
+    ], 
+    "name": "LIABILITIES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Allowances to contract staff"
+         }, 
+         {
+          "name": "Allowances to permanent staff"
+         }, 
+         {
+          "name": "Allowances to external contract staff"
+         }
+        ], 
+        "name": "Allowances/benefits"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Contribution to permanent staff pensions"
+         }
+        ], 
+        "name": "Pension Contributions"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Wages to contract staff"
+         }, 
+         {
+          "name": "Salaries to permanent staff"
+         }, 
+         {
+          "name": "Miscellaneous payments to staff"
+         }, 
+         {
+          "name": "Wages to casual staff"
+         }, 
+         {
+          "name": "Wages to external contract staff"
+         }
+        ], 
+        "name": "Compensation"
+       }
+      ], 
+      "name": "PERSONNEL SERVICES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Official entertainment"
+         }, 
+         {
+          "name": "Transport fees"
+         }, 
+         {
+          "name": "Per diem"
+         }
+        ], 
+        "name": "Travelling and Official Entertainment Services"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Maintenance and repair of plant, machinery, and equipment"
+         }, 
+         {
+          "name": "Maintenance and repair of vehicles and other transport"
+         }, 
+         {
+          "name": "Maintenance and repair of buildings, furnishings and fixtures"
+         }, 
+         {
+          "name": "Maintenance and repair of infrastructure"
+         }
+        ], 
+        "name": "Maintenance and Repair Services"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Agriculture, forestry and marine inputs"
+         }, 
+         {
+          "name": "Veterinary supplies and drugs"
+         }, 
+         {
+          "name": "Research and development supplies"
+         }, 
+         {
+          "name": "Miscellaneous equipment"
+         }, 
+         {
+          "name": "Other material and supplies"
+         }, 
+         {
+          "name": "Uniforms, clothing, bedding"
+         }, 
+         {
+          "name": "Printing"
+         }, 
+         {
+          "name": "Office supplies"
+         }, 
+         {
+          "name": "Educational supplies"
+         }, 
+         {
+          "name": "Medical supplies"
+         }, 
+         {
+          "name": "Fuel and lubricants"
+         }, 
+         {
+          "name": "Food"
+         }
+        ], 
+        "name": "Goods and Supplies"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Local training"
+         }, 
+         {
+          "name": "External training"
+         }
+        ], 
+        "name": "Training Services"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Water and other utilities"
+         }, 
+         {
+          "name": "Telecommunication charges"
+         }, 
+         {
+          "name": "Freight"
+         }, 
+         {
+          "name": "Insurance"
+         }, 
+         {
+          "name": "Electricity charges"
+         }, 
+         {
+          "name": "Fees and charges"
+         }, 
+         {
+          "name": "Contracted professional services"
+         }, 
+         {
+          "name": "Advertising"
+         }, 
+         {
+          "name": "Rent"
+         }
+        ], 
+        "name": "Contracted Services"
+       }
+      ], 
+      "name": "GOODS AND SERVICES"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Pre-construction activities"
+         }, 
+         {
+          "name": "Construction of buildings"
+         }, 
+         {
+          "name": "Construction of infrastructure"
+         }
+        ], 
+        "name": "Construction"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Depreciation of vehicles and other vehicular transport"
+         }, 
+         {
+          "name": "Depreciation of plant, machinery and equipment"
+         }, 
+         {
+          "name": "Depreciation of buildings, furnishings and fixtures"
+         }, 
+         {
+          "name": "Depreciation of livestock and transport animals"
+         }
+        ], 
+        "name": "Fixed Assets"
+       }
+      ], 
+      "name": "FIXED ASSETS AND CONSTRUCTION"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Payments of interest and bank charges on local debt"
+         }, 
+         {
+          "name": "Payments on the principal of foreign debt"
+         }, 
+         {
+          "name": "Payments on the principal of local debt"
+         }, 
+         {
+          "name": "Payments of interest and bank charges on foreign debt"
+         }
+        ], 
+        "name": "Debt Payments"
+       }
+      ], 
+      "name": "OTHER PAYMENTS"
+     }
+    ], 
+    "name": "EXPENSES"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Stock"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Other Debtors"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Advance to supplier"
+         }, 
+         {
+          "name": "Advance to contractors"
+         }, 
+         {
+          "name": "Advance to consultant"
+         }
+        ], 
+        "name": "Prepayments"
+       }, 
+       {
+        "children": [
+         {
+          "name": "VAT Withholding Receivable on Sales"
+         }, 
+         {
+          "name": "Trade Debtors"
+         }, 
+         {
+          "name": "Withholding Receivable on Sales"
+         }, 
+         {
+          "name": "VAT Receivable on Purchases"
+         }, 
+         {
+          "name": "Cash shortage"
+         }, 
+         {
+          "name": "Advance to staff"
+         }, 
+         {
+          "name": "Suspense"
+         }, 
+         {
+          "name": "Cash Registers"
+         }
+        ], 
+        "name": "Accounts Receivable"
+       }
+      ], 
+      "name": "Receivables"
+     }, 
+     {
+      "name": "Investments"
+     }, 
+     {
+      "name": "Long Term Loans"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Finished Goods"
+       }, 
+       {
+        "name": "Work in Progress"
+       }
+      ], 
+      "name": "Production Stock"
+     }, 
+     {
+      "name": "Goods in Transit"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Construction of buildings"
+         }, 
+         {
+          "name": "Construction of infrastructure"
+         }
+        ], 
+        "name": "Construction in Progress"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Plant machinery and equipment"
+         }, 
+         {
+          "name": "Furnishings and fixtures"
+         }, 
+         {
+          "name": "Aircraft, boats, etc"
+         }, 
+         {
+          "name": "Vehicles and other vehicular transport"
+         }, 
+         {
+          "name": "Infrastructure"
+         }, 
+         {
+          "name": "Buildings"
+         }, 
+         {
+          "name": "Livestock and tansport animals"
+         }
+        ], 
+        "name": "Property and Equipment"
+       }
+      ], 
+      "name": "Fixed Assets"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Investments current assets"
+       }, 
+       {
+        "name": "Cash on hand and at bank"
+       }, 
+       {
+        "name": "Letter of Credit restricted account"
+       }, 
+       {
+        "name": "Cash at bank in foreigh currency"
+       }
+      ], 
+      "name": "Cash and Cash Equivalents"
+     }
+    ], 
+    "name": "ASSETS"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Profit and loss account"
+     }, 
+     {
+      "name": "Reserves"
+     }, 
+     {
+      "name": "Share capital / equity"
+     }
+    ], 
+    "name": "NET ASSETS/EQUITY"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Sales of Goods and Services"
+     }
+    ], 
+    "name": "REVENUE"
+   }
+  ], 
+  "name": "Ethiopia", 
+  "parent_id": null
+ }
+}

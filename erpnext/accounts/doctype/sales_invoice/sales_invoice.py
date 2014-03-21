@@ -257,27 +257,21 @@ class DocType(SellingController):
 
 
 	def validate_debit_acc(self):
-		acc = frappe.db.sql("select debit_or_credit, is_pl_account from tabAccount where name = '%s' and docstatus != 2" % self.doc.debit_to)
-		if not acc:
-			msgprint("Account: "+ self.doc.debit_to + " does not exist")
-			raise Exception
-		elif acc[0][0] and acc[0][0] != 'Debit':
-			msgprint("Account: "+ self.doc.debit_to + " is not a debit account")
-			raise Exception
-		elif acc[0][1] and acc[0][1] != 'No':
-			msgprint("Account: "+ self.doc.debit_to + " is a pl account")
-			raise Exception
-
-
+		if frappe.db.get_value("Account", self.doc.debit_to, "report_type") != "Balance Sheet":
+			frappe.throw(_("Account must be a balance sheet account"))
+			
 	def validate_fixed_asset_account(self):
-		"""Validate Fixed Asset Account and whether Income Account Entered Exists"""
+		"""Validate Fixed Asset and whether Income Account Entered Exists"""
 		for d in getlist(self.doclist,'entries'):
-			item = frappe.db.sql("select name,is_asset_item,is_sales_item from `tabItem` where name = '%s' and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' or end_of_life >	now())"% d.item_code)
-			acc =	frappe.db.sql("select account_type from `tabAccount` where name = '%s' and docstatus != 2" % d.income_account)
+			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem` 
+				where name = %s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' 
+					or end_of_life > now())""", d.item_code)
+			acc =	frappe.db.sql("""select account_type from `tabAccount` 
+				where name = %s and docstatus != 2""", d.income_account)
 			if not acc:
 				msgprint("Account: "+d.income_account+" does not exist in the system", raise_exception=True)
-			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset Account':
-				msgprint("Please select income head with account type 'Fixed Asset Account' as Item %s is an asset item" % d.item_code, raise_exception=True)				
+			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset':
+				msgprint("Please select income head with account type 'Fixed Asset' as Item %s is an asset item" % d.item_code, raise_exception=True)				
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -344,7 +338,9 @@ class DocType(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.doc.project_name and self.doc.customer:
-			res = frappe.db.sql("select name from `tabProject` where name = '%s' and (customer = '%s' or ifnull(customer,'')='')"%(self.doc.project_name, self.doc.customer))
+			res = frappe.db.sql("""select name from `tabProject` 
+				where name = %s and (customer = %s or 
+					ifnull(customer,'')='')""", (self.doc.project_name, self.doc.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project."%(self.doc.customer,self.doc.project_name))
 				raise Exception
@@ -397,10 +393,13 @@ class DocType(SellingController):
 	 
 	
 	def get_warehouse(self):
-		w = frappe.db.sql("select warehouse from `tabPOS Setting` where ifnull(user,'') = '%s' and company = '%s'" % (frappe.session['user'], self.doc.company))
+		w = frappe.db.sql("""select warehouse from `tabPOS Setting` 
+			where ifnull(user,'') = %s and company = %s""", 
+			(frappe.session['user'], self.doc.company))
 		w = w and w[0][0] or ''
 		if not w:
-			ps = frappe.db.sql("select name, warehouse from `tabPOS Setting` where ifnull(user,'') = '' and company = '%s'" % self.doc.company)
+			ps = frappe.db.sql("""select name, warehouse from `tabPOS Setting` 
+				where ifnull(user,'') = '' and company = %s""", self.doc.company)
 			if not ps:
 				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
 			elif not ps[0][1]:
@@ -439,13 +438,15 @@ class DocType(SellingController):
 	def check_prev_docstatus(self):
 		for d in getlist(self.doclist,'entries'):
 			if d.sales_order:
-				submitted = frappe.db.sql("select name from `tabSales Order` where docstatus = 1 and name = '%s'" % d.sales_order)
+				submitted = frappe.db.sql("""select name from `tabSales Order` 
+					where docstatus = 1 and name = %s""", d.sales_order)
 				if not submitted:
 					msgprint("Sales Order : "+ cstr(d.sales_order) +" is not submitted")
 					raise Exception , "Validation Error."
 
 			if d.delivery_note:
-				submitted = frappe.db.sql("select name from `tabDelivery Note` where docstatus = 1 and name = '%s'" % d.delivery_note)
+				submitted = frappe.db.sql("""select name from `tabDelivery Note` 
+					where docstatus = 1 and name = %s""", d.delivery_note)
 				if not submitted:
 					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
 					raise Exception , "Validation Error."
@@ -786,7 +787,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount` 
-			where (tabAccount.debit_or_credit="Credit" 
+			where (tabAccount.report_type = "Profit and Loss"
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2

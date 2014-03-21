@@ -1,0 +1,444 @@
+{
+ "name": "Canada - Chart of Accounts for english-speaking provinces", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "International Sales", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Inside Sales", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Non-Harmonized Provinces Sales", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "OTHER OPERATING INCOMES"
+       }, 
+       {
+        "name": "Harmonized Provinces Sales", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "OPERATING INCOMES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "OTHER NON-OPERATING INCOMES"
+       }, 
+       {
+        "name": "INTERESTS"
+       }
+      ], 
+      "name": "NON-OPERATING INCOMES"
+     }
+    ], 
+    "name": "INCOMES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "TREASURY OR TREASURY EQUIVALENTS"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "account_type": "Receivable", 
+            "name": "HST receivable - 13%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "HST receivable - 15%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Receivable", 
+            "name": "HST receivable - 14%", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "HST receivable"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "PST/QST receivable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "GST receivable", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "TAXES RECEIVABLES"
+       }, 
+       {
+        "name": "INVESTMENTS HELD FOR TRADING"
+       }, 
+       {
+        "name": "CERTIFICATES OF DEPOSITS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Stock In Hand", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Stock Delivered But Not Billed", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "STOCKS"
+       }, 
+       {
+        "name": "CASH"
+       }, 
+       {
+        "name": "PREPAID EXPENSES"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "Customers Account", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "ALLOWANCE FOR DOUBTFUL ACCOUNTS"
+         }
+        ], 
+        "name": "ACCOUNTS RECEIVABLES"
+       }
+      ], 
+      "name": "CURRENT ASSETS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "ACCUMULATED DEPRECIATIONS"
+         }
+        ], 
+        "name": "TANGIBLE ASSETS"
+       }, 
+       {
+        "name": "INVESTMENTS AVAILABLE FOR SALE"
+       }, 
+       {
+        "children": [
+         {
+          "name": "PATENTS, TRADEMARKS AND COPYRIGHTS"
+         }
+        ], 
+        "name": "INTANGIBLE ASSETS"
+       }
+      ], 
+      "name": "NON-CURRENT ASSETS"
+     }
+    ], 
+    "name": "ASSETS"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "OTHER OPERATING EXPENSES"
+       }, 
+       {
+        "name": "RESEARCH AND DEVELOPMENT EXPENSES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "International Purchases", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Purchases in non-harmonized provinces", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Purchases in harmonized provinces", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Inside Purchases", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "COST OF GOODS SOLD"
+       }, 
+       {
+        "name": "SALES EXPENSES"
+       }, 
+       {
+        "name": "GENERAL EXPENSES"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Parental Insurance", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Holidays", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Labour Health and Safety", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Employment Insurance", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Federal Income Tax", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Salaries, wages and commissions", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Annuities", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Provincial Income Tax", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Labour Standards", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Health Services Fund", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "LABOUR EXPENSES"
+       }
+      ], 
+      "name": "OPERATING EXPENSES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "INTERESTS EXPENSES"
+       }, 
+       {
+        "name": "OTHER NON-OPERATING EXPENSES"
+       }
+      ], 
+      "name": "NON-OPERATING EXPENSES"
+     }
+    ], 
+    "name": "EXPENSES"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "Annuities - Employees Contribution", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "Annuities - Employer Contribution", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "ANNUITIES TO PAY"
+           }, 
+           {
+            "name": "Health Services Fund to pay", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Labour Health and Safety to pay", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Provincial Income Tax", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "name": "Labour Standards to pay", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "children": [
+             {
+              "name": "PAP - Employer Contribution", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "PAP - Employee Contribution", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "PARENTAL INSURANCE PLAN TO PAY"
+           }
+          ], 
+          "name": "PROVINCIAL REVENU AGENCY"
+         }, 
+         {
+          "children": [
+           {
+            "children": [
+             {
+              "name": "EI - Employees Contribution", 
+              "report_type": "Balance Sheet"
+             }, 
+             {
+              "name": "EI - Employer Contribution", 
+              "report_type": "Balance Sheet"
+             }
+            ], 
+            "name": "EMPLOYMENT INSURANCE TO PAY"
+           }, 
+           {
+            "name": "Federal Income Tax", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "CANADIAN REVENU AGENCY"
+         }
+        ], 
+        "name": "LABOUR TAXES TO PAY"
+       }, 
+       {
+        "name": "STOCK LIABILITIES"
+       }, 
+       {
+        "name": "OTHER ACCOUNTS PAYABLES"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Suppliers Account", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "ACCOUNTS PAYABLES"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "GST to pay", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "children": [
+           {
+            "account_type": "Payable", 
+            "name": "HST to pay - 14%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "HST to pay - 13%", 
+            "report_type": "Balance Sheet"
+           }, 
+           {
+            "account_type": "Payable", 
+            "name": "HST to pay - 15%", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "HST to pay"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "PST/QST to pay", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "TAXES PAYABLES"
+       }, 
+       {
+        "name": "CURRENT FINANCIAL DEBTS"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Stock Received But Not Billed", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "LIABILITIES ASSETS HELD FOR TRANSFER"
+       }
+      ], 
+      "name": "CURRENT LIABILITIES"
+     }, 
+     {
+      "children": [
+       {
+        "name": "NON-CURRENT FINANCIAL DEBTS"
+       }, 
+       {
+        "name": "OTHER NON-CURRENT LIABILITIES"
+       }, 
+       {
+        "name": "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES"
+       }, 
+       {
+        "name": "DEFERRED TAXES"
+       }
+      ], 
+      "name": "NON-CURRENT LIABILITIES"
+     }
+    ], 
+    "name": "LIABILITIES"
+   }, 
+   {
+    "children": [
+     {
+      "name": "DIVIDENDS"
+     }, 
+     {
+      "name": "TRANSLATION ADJUSTMENTS"
+     }, 
+     {
+      "name": "RETAINED EARNINGS"
+     }, 
+     {
+      "name": "SHARE CAPITAL"
+     }, 
+     {
+      "name": "PREMIUMS"
+     }, 
+     {
+      "name": "CONTRIBUTED SURPLUS"
+     }
+    ], 
+    "name": "EQUITY"
+   }
+  ], 
+  "name": "Account Chart CA EN"
+ }
+}

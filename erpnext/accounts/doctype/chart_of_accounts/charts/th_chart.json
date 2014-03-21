@@ -1,0 +1,126 @@
+{
+ "name": "Thailand - Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Accumulated Depreciation - Equipment"
+       }
+      ], 
+      "name": "Equipment"
+     }, 
+     {
+      "name": "Outstanding Cheques"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Accumulated Depreciation - Building"
+       }
+      ], 
+      "name": "Building"
+     }, 
+     {
+      "name": "Inventory"
+     }, 
+     {
+      "name": "Input VAT"
+     }, 
+     {
+      "name": "Account Receivable"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Petty Cash"
+       }, 
+       {
+        "name": "Cash at Bank"
+       }
+      ], 
+      "name": "Cash"
+     }, 
+     {
+      "name": "Withholding Income Tax"
+     }
+    ], 
+    "name": "Assets"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Income"
+     }
+    ], 
+    "name": "Income"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Accrued Expenses"
+     }, 
+     {
+      "name": "Withholding Tax"
+     }, 
+     {
+      "name": "Uninvoiced Receipts"
+     }, 
+     {
+      "name": "Output VAT"
+     }, 
+     {
+      "name": "Account Payable"
+     }, 
+     {
+      "name": "Loans"
+     }
+    ], 
+    "name": "Liabilities"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Retained Earnings"
+     }, 
+     {
+      "name": "Capital Stock"
+     }, 
+     {
+      "name": "Dividends"
+     }, 
+     {
+      "name": "Income Summary"
+     }
+    ], 
+    "name": "Equity"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Cost of goods sold"
+     }, 
+     {
+      "name": "Income tax expenses"
+     }, 
+     {
+      "name": "Office Expenses"
+     }, 
+     {
+      "name": "Rent"
+     }, 
+     {
+      "name": "Interest expenses"
+     }, 
+     {
+      "name": "Salary"
+     }
+    ], 
+    "name": "Expenses"
+   }
+  ], 
+  "name": "Simple chart of accounts"
+ }
+}

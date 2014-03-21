@@ -1,0 +1,2324 @@
+{
+ "name": "Portugal - Template do Plano de Contas SNC", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "Dividendos antecipados", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Resultado l\u00edquido", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Imposto estimado para o per\u00edodo", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Imposto diferido", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Impostos sobre o rendimento do per\u00edodo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Resultado antes de impostos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Resultado l\u00edquido do per\u00edodo", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Resultados"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Outras provis\u00f5es", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Mat\u00e9rias ambientais", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Acidentes de trabalho e doen\u00e7as profissionais", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Reestrutura\u00e7\u00e3o", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Contratos onerosos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Impostos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Processos judiciais em curso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Garantias a clientes", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Provis\u00f5es", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Rendimentos a reconhecer", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Gastos a reconhecer", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Diferimentos", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Outros financiadores", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "account_type": "Equity", 
+          "name": "Empr\u00e9stimos banc\u00e1rios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Loca\u00e7\u00f5es financeiras", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Descobertos banc\u00e1rios", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Institui\u00e7\u00f5es de cr\u00e9dito e sociedades financeiras", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "account_type": "Equity", 
+          "name": "Outros participantes suprimentos e outros m\u00fatuos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Empresa m\u00e3e suprimentos e outros m\u00fatuos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Participantes de capital", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "account_type": "Equity", 
+          "name": "Empr\u00e9stimos por obriga\u00e7\u00f5es", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Mercado de valores mobili\u00e1rios", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Subsidi\u00e1rias, associadas e empreendimentos conjuntos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Financiamentos obtidos", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "children": [
+       {
+        "account_type": "Tax", 
+        "name": "Outras tributa\u00e7\u00f5es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Reten\u00e7\u00e3o de impostos sobre rendimentos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "children": [
+         {
+          "account_type": "Tax", 
+          "name": "Iva reembolsos pedidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva liquida\u00e7\u00f5es oficiosas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva dedut\u00edvel", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva liquidado", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva suportado", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva a pagar", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva a recuperar", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva regulariza\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Tax", 
+          "name": "Iva apuramento", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Imposto sobre o valor acrescentado", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Imposto sobre o rendimento", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Tributos das autarquias locais", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Outros impostos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Tax", 
+        "name": "Contribui\u00e7\u00f5es para a seguran\u00e7a social", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Estado e outros entes p\u00fablicos", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Outros devedores e credores", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Adiantamentos por conta de vendas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Credores por subscri\u00e7\u00f5es n\u00e3o liberadas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "account_type": "Equity", 
+          "name": "Activos por impostos diferidos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Passivos por impostos diferidos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Impostos diferidos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Benef\u00edcios p\u00f3s emprego", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "account_type": "Equity", 
+          "name": "Credores por acr\u00e9scimos de gastos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Devedores por acr\u00e9scimo de rendimentos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Devedores e credores por acr\u00e9scimos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "children": [
+         {
+          "account_type": "Equity", 
+          "name": "Adiantamentos a fornecedores de investimentos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Facturas em recep\u00e7\u00e3o e confer\u00eancia", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Equity", 
+          "name": "Fornecedores de investimentos contas gerais", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Fornecedores de investimentos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Outras contas a receber e a pagar", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Accionistas c. subscri\u00e7\u00e3o", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Quotas n\u00e3o liberadas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Adiantamentos por conta de lucros", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Resultados atribu\u00eddos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Lucros dispon\u00edveis", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Empr\u00e9stimos concedidos empresa m\u00e3e", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Outras opera\u00e7\u00f5es", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Accionistas/s\u00f3cios", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "children": [
+       {
+        "account_type": "Receivable", 
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empreendimentos conjuntos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empresas associadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes outras partes relacionadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes gerais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empresas subsidi\u00e1rias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empresa m\u00e3e", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Clientes c/c", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes gerais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empresa m\u00e3e", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empresas subsidi\u00e1rias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empresas associadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes empreendimentos conjuntos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Receivable", 
+          "name": "Clientes outras partes relacionadas", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Clientes t\u00edtulos a receber", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Receivable", 
+        "name": "Adiantamentos de clientes", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Clientes", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Com os \u00f3rg\u00e3os sociais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Com o pessoal", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Outras opera\u00e7\u00f5es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Ao pessoal", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Aos \u00f3rg\u00e3os sociais", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Adiantamentos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Ao pessoal", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Aos \u00f3rg\u00e3os sociais", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Remunera\u00e7\u00f5es a pagar", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Dos \u00f3rg\u00e3os sociais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Do pessoal", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Cau\u00e7\u00f5es", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Pessoal", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Payable", 
+      "children": [
+       {
+        "account_type": "Payable", 
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Adiantamentos a fornecedores", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "name": "Facturas em recep\u00e7\u00e3o e confer\u00eancia", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores outras partes relacionadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empresas associadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empreendimentos conjuntos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empresa m\u00e3e", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empresas subsidi\u00e1rias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores gerais", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Fornecedores c/c", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "account_type": "Payable", 
+        "children": [
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empresas subsidi\u00e1rias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores outras partes relacionadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empreendimentos conjuntos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empresas associadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores empresa m\u00e3e", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "account_type": "Payable", 
+          "name": "Fornecedores gerais", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Fornecedores t\u00edtulos a pagar", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Fornecedores", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Contas a receber e a pagar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Produtos e trabalhos em curso", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Produtos acabados e interm\u00e9dios", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mercadorias", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Reclassifica\u00e7\u00e3o e regular. de invent. e activos biol\u00f3g.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Adiantamentos por conta de compras", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mercadorias em tr\u00e2nsito", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mercadorias em poder de terceiros", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Mercadorias", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mat\u00e9rias subsidi\u00e1rias", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Embalagens", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mat\u00e9rias primas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Materiais diversos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mat\u00e9rias em tr\u00e2nsito", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Devolu\u00e7\u00f5es de compras", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mercadorias", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Descontos e abatimentos em compras", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Compras", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Produtos e trabalhos em curso", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Animais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Plantas", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "De produ\u00e7\u00e3o", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Animais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Plantas", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Consum\u00edveis", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Activos biol\u00f3gicos", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Produtos em poder de terceiros", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Produtos acabados e interm\u00e9dios", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Subprodutos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Desperd\u00edcios, res\u00edduos e refugos", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Invent\u00e1rios e activos biol\u00f3gicos"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Cash", 
+      "name": "Caixa", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Outros dep\u00f3sitos banc\u00e1rios", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "children": [
+       {
+        "account_type": "Cash", 
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Potencialmente favor\u00e1veis", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Potencialmente desfavor\u00e1veis", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Derivados", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Outros passivos financeiros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Outros activos financeiros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Outros activos e passivos financeiros", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "children": [
+         {
+          "account_type": "Cash", 
+          "name": "Activos financeiros", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "account_type": "Cash", 
+          "name": "Passivos financeiros", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Instrumentos financeiros detidos para negocia\u00e7\u00e3o", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Outros instrumentos financeiros", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Cash", 
+      "name": "Dep\u00f3sitos \u00e0 ordem", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Meios financeiros l\u00edquidos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Mercadorias", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos (compras)", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Custo das mercadorias vendidas e mat\u00e9rias consumidas", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Subcontratos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Publicidade e propaganda", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Trabalhos especializados", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Comiss\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Honor\u00e1rios", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Vigil\u00e2ncia e seguran\u00e7a", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Conserva\u00e7\u00e3o e repara\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Trabalhos especializados", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Artigos de oferta", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Ferramentas e utens\u00edlios de desgaste r\u00e1pido", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Livros de documenta\u00e7\u00e3o t\u00e9cnica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Material de escrit\u00f3rio", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Materiais", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Electricidade", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "\u00c1gua", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Combust\u00edveis", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Energia e flu\u00eddos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Transporte de pessoal", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Transportes de mercadorias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Desloca\u00e7\u00f5es e estadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Desloca\u00e7\u00f5es, estadas e transportes", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Limpeza, higiene e conforto", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Despesas de representa\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Seguros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Rendas e alugueres", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros servi\u00e7os", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Comunica\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Contencioso e notariado", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Servi\u00e7os diversos", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Fornecimentos e servi\u00e7os externos", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Em activos n\u00e3o correntes detidos para venda", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em activos fixos tang\u00edveis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em propriedades de investimento", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em investimentos em curso", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em activos intang\u00edveis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Clientes", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros devedores", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Em d\u00edvidas a receber", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em investimentos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em invent\u00e1rios", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Perdas por imparidade", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos fixos tang\u00edveis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos intang\u00edveis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Propriedades de investimento", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Gastos de deprecia\u00e7\u00e3o e de amortiza\u00e7\u00e3o", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Relativos a financiamentos obtidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Outros gastos e perdas de financiamento", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros juros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Juros de financiamento obtidos", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Juros suportados", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Relativos a financiamentos obtidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outras", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Diferen\u00e7as de c\u00e2mbio desfavor\u00e1veis", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Gastos e perdas de financiamento", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Outros n\u00e3o especificados", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Quotiza\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Donativos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Perdas em instrumentos financeiros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Insufici\u00eancia da estimativa para impostos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Ofertas e amostras de invent\u00e1rios", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Outros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Descontos de pronto pagamento concedidos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "D\u00edvidas incobr\u00e1veis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Taxas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Impostos directos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Impostos indirectos", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Impostos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cobertura de preju\u00edzos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros gastos e perdas", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Gastos e perdas nos restantes investimentos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Gastos em propriedades de investimento", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sinistros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Abates", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros gastos e perdas", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Gastos e perdas em investimentos n\u00e3o financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outras perdas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Quebras", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sinistros", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Perdas em invent\u00e1rios", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros gastos e perdas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Cobertura de preju\u00edzos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Gastos e perdas em subsid. , assoc. e empreend. conjuntos", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Outros gastos e perdas", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gastos de ac\u00e7\u00e3o social", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Seguros de acidentes no trabalho e doen\u00e7as profissionais", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Encargos sobre remunera\u00e7\u00f5es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Indemniza\u00e7\u00f5es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Pr\u00e9mios para pens\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros benef\u00edcios", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Benef\u00edcios p\u00f3s emprego", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Remunera\u00e7\u00f5es do pessoal", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Remunera\u00e7\u00f5es dos \u00f3rg\u00e3os sociais", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Outros gastos com o pessoal", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Gastos com o pessoal", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Acidentes de trabalho e doen\u00e7as profissionais", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Processos judiciais em curso", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Garantias a clientes", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Impostos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Reestrutura\u00e7\u00e3o", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Contratos onerosos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mat\u00e9rias ambientais", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Outras provis\u00f5es", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Provis\u00f5es do per\u00edodo", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Em activos biol\u00f3gicos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em instrumentos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em investimentos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em propriedades de investimento", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Perdas por redu\u00e7\u00f5es de justo valor", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Gastos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Recupera\u00e7\u00e3o de d\u00edvidas a receber", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Descontos de pronto pagamento obtidos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Estudos, projectos e assist\u00eancia tecnol\u00f3gica", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aluguer de equipamento", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Servi\u00e7os sociais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros rendimentos suplementares", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Desempenho de cargos sociais noutras empresas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Royalties", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Rendimentos suplementares", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros rendimentos e ganhos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Rendas e outros rendimentos em propriedades de investimento", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sinistros", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Rendimentos e ganhos em investimentos n\u00e3o financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros rendimentos e ganhos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Diferen\u00e7as de c\u00e2mbio favor\u00e1veis", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Rendimentos e ganhos nos restantes activos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros rendimentos e ganhos", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Rendimentos e ganhos em subsidi\u00e1rias, associadas e empr", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sinistros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Sobras", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros ganhos", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Ganhos em invent\u00e1rios", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ganhos em outros instrumentos financeiros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Restitui\u00e7\u00e3o de impostos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Excesso da estimativa para impostos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Imputa\u00e7\u00e3o de subs\u00eddios para investimentos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outros n\u00e3o especificados", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Outros", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Outros rendimentos e ganhos", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "De outros financiamentos obtidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De financiamentos obtidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De financiamentos concedidos a subsidi\u00e1rias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De outras aplica\u00e7\u00f5es de meios financeiros l\u00edquidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De financiamentos concedidos a associadas e emp. conjun", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De dep\u00f3sitos", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Juros obtidos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "De subsidi\u00e1rias", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De associadas e empreendimentos conjuntos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "De aplica\u00e7\u00f5es de meios financeiros l\u00edquidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outras", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Dividendos obtidos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Outros rendimentos similares", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Juros, dividendos e outros rendimentos similares", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Em investimentos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em instrumentos financeiros", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em activos biol\u00f3gicos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Em propriedades de investimento", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Ganhos por aumentos de justo valor", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos por gastos diferidos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Propriedades de investimento", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos intang\u00edveis", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos fixos tang\u00edveis", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Trabalhos para a pr\u00f3pria entidade", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Subs\u00eddios do estado e outros entes p\u00fablicos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Subs\u00eddios de outras entidades", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Subs\u00eddios \u00e0 explora\u00e7\u00e3o", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Servi\u00e7os secund\u00e1rios", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Iva dos servi\u00e7os com imposto inclu\u00eddo", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Servi\u00e7o a", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Servi\u00e7o b", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Descontos e abatimentos", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Presta\u00e7\u00f5es de servi\u00e7os", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Propriedades de investimento", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Activos intang\u00edveis", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Activos fixos tang\u00edveis", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "De deprecia\u00e7\u00f5es e de amortiza\u00e7\u00f5es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Garantias a clientes", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Impostos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Reestrutura\u00e7\u00e3o", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Contratos onerosos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Mat\u00e9rias ambientais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Acidentes no trabalho e doen\u00e7as profissionais", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Outras provis\u00f5es", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Processos judiciais em curso", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "De provis\u00f5es", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Em propriedades de investimento", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Em activos fixos tang\u00edveis", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Em activos intang\u00edveis", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Em investimentos em curso", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Em invent\u00e1rios", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Em investimentos financeiros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Em activos n\u00e3o correntes detidos para venda", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Outros devedores", 
+            "report_type": "Profit and Loss"
+           }, 
+           {
+            "name": "Clientes", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Em d\u00edvidas a receber", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "De perdas por imparidade", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Revers\u00f5es", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Produtos e trabalhos em curso", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Produtos acabados e interm\u00e9dios", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Varia\u00e7\u00f5es nos invent\u00e1rios da produ\u00e7\u00e3o", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Devolu\u00e7\u00f5es de vendas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Produtos acabados e interm\u00e9dios", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Descontos e abatimentos em vendas", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Iva das vendas com imposto inclu\u00eddo", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Mercadoria", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Vendas", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Rendimentos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Deprecia\u00e7\u00f5es acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Terrenos e recursos naturais", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipamento b\u00e1sico", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Edif\u00edcios e outras constru\u00e7\u00f5es", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipamento administrativo", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipamento de transporte", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Outros activos fixos tang\u00edveis", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Equipamentos biol\u00f3gicos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Activo fixos tang\u00edveis", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Deprecia\u00e7\u00f5es acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Edif\u00edcios e outras constru\u00e7\u00f5es", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Terrenos e recursos naturais", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Outras propriedades de investimento", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Propriedades de investimento", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Detidos at\u00e9 \u00e0 maturidade", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Ac\u00e7\u00f5es da sgm (6500x1,00)", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Outros investimentos financeiros", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Participa\u00e7\u00f5es de capital", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Investimentos noutras empresas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Investimentos em entidades conjuntamente controladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Investimentos em associadas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Investimentos em subsidi\u00e1rias", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Investimentos financeiros", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Activos n\u00e3o correntes detidos para venda", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos intang\u00edveis em curso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Activos fixos tang\u00edveis em curso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Propriedades de investimento em curso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Investimentos financeiros em curso", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Adiantamentos por conta de investimentos", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Investimentos em curso", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Deprecia\u00e7\u00f5es acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Outros activos intang\u00edveis", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Goodwill", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Propriedade industrial", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Projectos de desenvolvimento", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Programas de computador", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Activos intang\u00edveis", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Investimentos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Antes de imposto sobre o rendimento", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Impostos diferidos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Reavalia\u00e7\u00f5es decorrentes de diplomas legais", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Antes de imposto sobre o rendimento", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Impostos diferidos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Outros excedentes", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Excedentes de revalor. de activos fixos tang\u00edveis e int", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Ajustamentos por impostos diferidos", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Subs\u00eddios", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Diferen\u00e7as de convers\u00e3o de demonstra\u00e7\u00f5es financeiras", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Doa\u00e7\u00f5es", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Outras", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Outras varia\u00e7\u00f5es no capital pr\u00f3prio", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Capital", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Descontos e pr\u00e9mios", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Valor nominal", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Ac\u00e7\u00f5es (quotas) pr\u00f3prias", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Outros instrumentos de capital pr\u00f3prio", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Pr\u00e9mios de emiss\u00e3o", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Outras reservas", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Reservas legais", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Reservas", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Resultados transitados", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Outros", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Lucros n\u00e3o atribu\u00eddos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Decorrentes de outras varia\u00e7\u00f5es nos capitais pr\u00f3prios d", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Ajustamentos de transi\u00e7\u00e3o", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Relacionados com o m\u00e9todo da equival\u00eancia patrimonial", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Ajustamentos em activos financeiros", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Capital, reservas e resultados transitados"
+   }
+  ], 
+  "name": "SNC Portugal"
+ }
+}

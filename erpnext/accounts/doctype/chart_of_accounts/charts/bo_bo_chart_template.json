@@ -1,0 +1,657 @@
+{
+ "name": "Bolivia - Plan de Cuentas", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Acreedor por Garant\u00edas Otorgadas"
+       }, 
+       {
+        "name": "Acreedor por Documentos Descontados"
+       }, 
+       {
+        "name": "Comitente por Mercaderias Recibidas en Consignaci\u00f3n"
+       }
+      ], 
+      "name": "CUENTAS DE ORDEN ACREEDORAS"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Documentos Endosados"
+       }, 
+       {
+        "name": "Documentos Descontados"
+       }, 
+       {
+        "name": "Garantias Otorgadas"
+       }, 
+       {
+        "name": "Dep\u00f3sito de Valores Recibos en Garant\u00eda"
+       }, 
+       {
+        "name": "Mercaderias Recibidas en Consignaci\u00f3n"
+       }
+      ], 
+      "name": "CUENTAS DE ORDEN DEUDORAS"
+     }
+    ], 
+    "name": "Cuentas de Orden"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Recupero de Rezagos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Ganancia Venta de Bienes de Uso", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Recupero de Deudores Incobrables", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Ganancia Venta Inversiones Permanentes", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Donaciones obtenidas, ganandas, percibidas", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Resultados Positivos Extraordinarios"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Comisiones gananados, obtenidos, percibidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Descuentos gananados, obtenidos, percibidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Renta de T\u00edtulos P\u00fablicos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Honorarios gananados, obtenidos, percibidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Ventas - Categoria de productos 01", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Ventas"
+         }, 
+         {
+          "name": "Intereses gananados, obtenidos, percibidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Alquileres gananados, obtenidos, percibidos", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Ganancia Venta de Acciones", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Resultados Positivos Ordinarios"
+       }
+      ], 
+      "name": "RESULTADOS POSITIVOS"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Gastos de Publicidad y Propaganda", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Gastos en Servicios P\u00fablicos"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Costo de Mercader\u00edas Vendidas - Categoria de productos 01", 
+            "report_type": "Profit and Loss"
+           }
+          ], 
+          "name": "Costo de Mercader\u00edas Vendidas"
+         }, 
+         {
+          "name": "Gastos en Amortizaci\u00f3n", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Gastos en Cargas Sociales", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Gastos en Sueldos y Jormales", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Gastos Bancarios"
+         }, 
+         {
+          "name": "Gastos en Impuestos"
+         }, 
+         {
+          "name": "Gastos en Depreciaci\u00f3n de Bienes de Uso", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Resultados Negativos Ordinarios"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Gastos en Siniestros", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "Donaciones Cedidas, Otorgadas", 
+          "report_type": "Profit and Loss"
+         }, 
+         {
+          "name": "P\u00e9rdida Venta Bienes de Uso", 
+          "report_type": "Profit and Loss"
+         }
+        ], 
+        "name": "Resultados Negativos Extraordinarios"
+       }
+      ], 
+      "name": "RESULTADOS NEGATIVOS"
+     }
+    ], 
+    "name": "Cuentas de Resultado"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Ajustes al Patrimonio / Revaluo T\u00e9cnico de Bienes de Uso", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Ajustes al Patrimonio"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aportes No Capitalizados / Aportes Irrevocables Futura Suscripci\u00f3n de Acciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Aportes No Capitalizados / Primas de Emsi\u00f3n", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Aportes No Capitalizados"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Capital social / Dividendos a Distribuir en Acciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Capital social / Acciones en Circulaci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Capital social / Capital Suscripto", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Capital social / (-) Descuento de Emisi\u00f3n de Acciones", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Capital Social"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Resultados Acumulados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Resultado del Ejercicio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Ganancias y P\u00e9rdidas del Ejercicio", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Resultados Acumulados del Ejercicio Anterior", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Resultados No Asignados"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Reserva para Renovaci\u00f3n de Bienes de Uso", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Reserva Estatutaria", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Reserva Facultativa", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Reserva Legal", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Ganancias Reservadas"
+       }
+      ], 
+      "name": "PATRIMONIO NETO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Deudas Sociales / Retenciones a Depositar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Sociales / Sueldos a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Sociales / Provisi\u00f3n para Sueldo Anual Complementario", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Sociales / Cargas Sociales a Pagar", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Deudas Sociales"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otras Deudas / Acreedores Varios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otras Deudas / Honorarios Directores y S\u00edndicos a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otras Deudas / Dividendos a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otras Deudas / Cobros por Adelantado", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Otras Deudas"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Previsiones / Previsi\u00f3n para Garant\u00edas por Service", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Previsiones / Previsi\u00f3n para juicios Pendientes", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Previsiones / Previsi\u00f3n Indemnizaci\u00f3n por Despidos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Previsiones"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Deudas Comerciales / Anticipos de Clientes", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Comerciales / (-) Intereses a Devengar por Compras al Cr\u00e9dito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Comerciales / Proveedores", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Deudas Comerciales"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Deudas Bancarias y Financieras / Letras de Cambio Emitidos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Bancarias y Financieras / Intereses a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Bancarias y Financieras / Obligaciones a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Bancarias y Financieras / Prestamos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Bancarias y Financieras / Adelantos en Cuenta Corriente", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Deudas Bancarias y Financieras"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Deudas Fiscales / IVA a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Fiscales / Impuesto a las Transacciones IT a Pagar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Deudas Fiscales / Impuesto a las Utilidades de Empresas IUE a Pagar", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Deudas Fiscales"
+       }
+      ], 
+      "name": "PASIVO"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Caja y bancos - Valores a Depositar ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caja y Bancos.../ BCO. CTA CTE BOB", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Caja y Bancos - Cuentas Corrientes"
+         }, 
+         {
+          "name": "Caja y bancos - Recaudaciones a Depositar ", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caja y bancos - Caja / efectivo en BOB", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Caja y Bancos - Caja"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caja y ...- Fondos fijos / caja chica 01 BOB", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Caja y Bancos - Fondos fijos"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Caja y bancos - Caja / efectivo USD", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Caja y Bancos - Moneda Extranjera"
+         }
+        ], 
+        "name": "Caja y Bancos"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Otros Cr\u00e9ditos / Anticipo de Impuestos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / Anticipos a Proveedores", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / Pr\u00e9stamos otorgados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / Accionistas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / Intereses Pagados por Adelantado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / Alquileres Pagados por Adelantado", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / Anticipo al Personal", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / (-) Intereses (+) a Devengar", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Otros Cr\u00e9ditos / (-) Previsi\u00f3n para Descuentos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Otros Cr\u00e9ditos"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Cr\u00e9ditos fiscal IVA / Deudores por Ventas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos fiscal IVA / Deudores Morosos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos fiscal IVA / Deudores en Gesti\u00f3n Judicial", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos fiscal IVA / Deudores Varios", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Cr\u00e9ditos fiscal IVA / (-) Previsi\u00f3n para Ds. Incobrables", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Cr\u00e9ditos fiscal IVA"
+       }, 
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Bienes de Cambio - Existencia de Mercader\u00edas / Categoria de productos 01", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Bienes de Cambio - Mercader\u00edas"
+         }, 
+         {
+          "name": "Materias primas", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes de Cambio - Mercader\u00edas en Tr\u00e1nsito", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Productos Elaborados", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Productos en Curso de Elaboraci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "(-) Desvalorizaci\u00f3n de Existencias", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Materiales Varios ", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Bienes de Cambio o Realizables"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Inversiones / (-) Previsi\u00f3n para Devalorizaci\u00f3n de Acciones", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Inversiones / Acciones Permanentes", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Inversiones / T\u00edtulos P\u00fablicos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Inversiones / Acciones Transitorias", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Inversiones"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bienes Intangibles / (-) Amortizaci\u00f3n Acumulada", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes Intangibles / Patentes de Invenci\u00f3n", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes Intangibles / Concesiones y Franquicias", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes Intangibles / Marcas de F\u00e1brica", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Bienes Intangibles"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Bienes de Uso / Inmuebles", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes de Uso / Maquinaria", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes de Uso / Veh\u00edculos", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes de Uso / (-) Depreciaci\u00f3n Acumulada Bienes de Uso", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Bienes de Uso / Equipos", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Bienes de Uso"
+       }
+      ], 
+      "name": "ACTIVO"
+     }
+    ], 
+    "name": "Cuentas Patrimoniales"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Compras - Categoria de productos 01"
+       }
+      ], 
+      "name": "Compras"
+     }, 
+     {
+      "name": "Costos de Producci\u00f3n", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Gastos de Administraci\u00f3n", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Gastos de Comercializaci\u00f3n", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Cuentas de Movimiento"
+   }
+  ], 
+  "name": "Bolivia"
+ }
+}

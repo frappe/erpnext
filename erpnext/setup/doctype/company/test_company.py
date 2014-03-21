@@ -3,6 +3,32 @@
 
 test_ignore = ["Account", "Cost Center"]
 
+import frappe
+import unittest
+
+class TestCompany(unittest.TestCase):
+	def test_coa(self):
+		for country, chart_name in frappe.db.sql("""select country, chart_name 
+			from `tabChart of Accounts` where country="India" order by country""", as_list=1):
+				print "Country: ", country
+				print "Chart Name: ", chart_name
+				
+				company_bean = frappe.bean({
+					"doctype": "Company",
+					"company_name": "_Test Company 2",
+					"abbr": "_TC2",
+					"default_currency": "INR",
+					"country": country,
+					"chart_of_accounts": chart_name
+				})
+
+				company_bean.insert()
+				self.assertTrue(frappe.db.sql("""select count(*) from tabAccount 
+					where company='_Test Company 2'""")[0][0] > 10)
+				
+				frappe.delete_doc("Company", "_Test Company 2")
+		
+
 test_records = [
 	[{
 		"doctype": "Company",

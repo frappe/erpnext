@@ -8,6 +8,8 @@ import frappe
 def after_install():
 	import_defaults()
 	import_country_and_currency()
+	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
+	import_charts()
 	frappe.db.set_value('Control Panel', None, 'home_page', 'setup-wizard')
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
@@ -24,6 +26,7 @@ def import_country_and_currency():
 		frappe.doc({
 			"doctype": "Country",
 			"country_name": name,
+			"code": country.code,
 			"date_format": country.date_format or "dd-mm-yyyy",
 			"time_zones": "\n".join(country.timezones or [])
 		}).insert()

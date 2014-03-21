@@ -182,13 +182,16 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount", 
-				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), precision("write_off_amount"));
+				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount), 
+				precision("write_off_amount"));
 		}
+		
+		this.calculate_outstanding_amount();
+		this.frm.refresh_fields();
 	},
 	
 	write_off_amount: function() {
-		this.calculate_outstanding_amount();
-		this.frm.refresh_fields();
+		this.write_off_outstanding_amount_automatically();
 	},
 	
 	paid_amount: function() {
@@ -289,8 +292,7 @@ cur_frm.cscript.make_bank_voucher = function() {
 cur_frm.fields_dict.debit_to.get_query = function(doc) {
 	return{
 		filters: {
-			'debit_or_credit': 'Debit',
-			'is_pl_account': 'No',
+			'report_type': 'Balance Sheet',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
 		}
@@ -300,8 +302,7 @@ cur_frm.fields_dict.debit_to.get_query = function(doc) {
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return{
 		filters: {
-			'debit_or_credit': 'Debit',
-			'is_pl_account': 'No',
+			'report_type': 'Balance Sheet',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
 		}
@@ -311,8 +312,7 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 	return{
 		filters:{
-			'debit_or_credit': 'Debit',
-			'is_pl_account': 'Yes',
+			'report_type': 'Profit and Loss',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
 		}
@@ -353,8 +353,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
 			filters: {
-				'is_pl_account': 'Yes',
-				'debit_or_credit': 'Debit',
+				'report_type': 'Profit and Loss',
 				'company': doc.company,
 				'group_or_ledger': 'Ledger'
 			}
@@ -362,17 +361,6 @@ if (sys_defaults.auto_accounting_for_stock) {
 	}
 }
 
-// warehouse in detail table
-//----------------------------
-cur_frm.fields_dict['entries'].grid.get_field('warehouse').get_query = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return{
-		filters:[
-			['Bin', 'item_code', '=', d.item_code],
-			['Bin', 'actual_qty', '>', 0]
-		]
-	}	
-}
 
 // Cost Center in Details Table
 // -----------------------------

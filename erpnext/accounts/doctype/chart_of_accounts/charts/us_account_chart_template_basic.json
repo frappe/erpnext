@@ -1,0 +1,543 @@
+{
+ "name": "Basic Chart of Account", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "Automobile Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Payroll Expenses", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Interest Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Continuing Education", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Meals and Entertainment", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Custom Hire and Contract Labor", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Repairs and Maintenance", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Postage and Delivery", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Small Tools and Equipment", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Chemicals Purchased", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Gasoline, Fuel and Oil", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Equipment Rental", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Taxes - Property", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Miscellaneous Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Uniforms", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Veterinary, Breeding, Medicine", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Professional Fees", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Janitorial Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "children": [
+       {
+        "name": "General Liability Insurance", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Life and Disability Insurance", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Health Insurance", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Professional Liability", 
+        "report_type": "Profit and Loss"
+       }, 
+       {
+        "name": "Worker's Compensation", 
+        "report_type": "Profit and Loss"
+       }
+      ], 
+      "name": "Insurance Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Travel Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Advertising and Promotion", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Office Supplies", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Dues and Subscriptions", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Feed Purchased", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Bank Service Charges", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Marketing Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Storage and Warehousing", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Computer and Internet Expenses", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Fertilizers and Lime", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Seeds and Plants Purchased", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Conservation Expenses", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Freight and Trucking", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Depreciation Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Printing and Reproduction", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Car and Truck Expenses", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Charitable Contributions", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Rent Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Utilities", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Telephone Expense", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Business Licenses and Permits", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Expenses", 
+    "report_type": "Profit and Loss"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Client Trust Account", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "account_type": "Receivable", 
+          "name": "Account Receivable", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Receivable", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Cash", 
+        "name": "Cash or Cash Equivalents", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Current Assets", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Security Deposits Asset", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Other Assets", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Court Costs", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Advanced Client Costs", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Filing Fees", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Expert Witness Fees", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Other Current Assets", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Fixed Asset", 
+      "children": [
+       {
+        "account_type": "Fixed Asset", 
+        "name": "Furniture and Equipment", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "name": "Accumulated Depreciation", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Fixed Assets", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Assets", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Equity", 
+      "children": [
+       {
+        "account_type": "Equity", 
+        "name": "Capital Stock", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Retained Earnings", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Dividends Paid", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "account_type": "Equity", 
+        "name": "Opening Balance Equity", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Equity", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "children": [
+           {
+            "name": "Account Payable", 
+            "report_type": "Balance Sheet"
+           }
+          ], 
+          "name": "Payable", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Current Liabilities", 
+        "report_type": "Balance Sheet"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sales Tax Payable", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Customer Deposits Received", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Payroll Liabilities", 
+          "report_type": "Balance Sheet"
+         }, 
+         {
+          "name": "Use Tax Payable", 
+          "report_type": "Balance Sheet"
+         }
+        ], 
+        "name": "Other Current Liabilities", 
+        "report_type": "Balance Sheet"
+       }
+      ], 
+      "name": "Liabilities", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Liabilities and Equity", 
+    "report_type": "Balance Sheet"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Settlement Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Commodity Credit Loans", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Administrative Fees", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Shipping and Delivery Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Sales", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Commission income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Fuel Tax Credits and Other Inc.", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Livestock Sales", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Custom Hire Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Crop Insurance Proceeds", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Legal Fee Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Cooperative Distributions", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Job Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Crop Sales", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Sales Discounts", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Rental Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Farmers Market Sales", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Sales", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Sales Discounts", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Service Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Agricultural Program Payments", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Income", 
+    "report_type": "Profit and Loss"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Proceeds from Sale of Assets", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Finance Charge Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Interest Income", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Insurance Proceeds Received", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Other Income", 
+    "report_type": "Profit and Loss"
+   }, 
+   {
+    "account_type": "Cost of Goods Sold", 
+    "children": [
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Other Job Related Costs", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Commissions Paid", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Tools and Small Equipment", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Merchant Account Fees", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Job Materials Purchased", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Subcontracted Services", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Equipment Rental for Jobs", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Purchases - Resale Items", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Commissions Paid", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Freight and Shipping Costs", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Merchant Account Fees", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Media Purchased for Clients", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Purchase Discounts", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Cost of Goods Sold", 
+      "name": "Subcontractors Expense", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Cost of Goods Sold", 
+    "report_type": "Profit and Loss"
+   }
+  ], 
+  "name": "Basic", 
+  "parent_id": null
+ }
+}

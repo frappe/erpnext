@@ -1,0 +1,1103 @@
+{
+ "name": "Austria - Chart of Accounts", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "name": "1600 bis 1690 Waren", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1350 bis 1390 Betriebsstoffe", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1700 bis 1790 Noch nicht abgerechenbare Leistungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1200 bis 1290 Bezogene Teile", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1300 bis 1340 Hilfsstoffe", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1000 bis 1090 Bezugsverrechnung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1400 bis 1490 Unfertige Erzeugniss", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "geleistete Anzahlungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1500 bis 1590 Fertige Erzeugniss", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1900 bis 1990 Wertberichtigungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "1100 bis 1190 Rohstoffe", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Summe Vorr\u00e4te"
+   }, 
+   {
+    "children": [
+     {
+      "name": "4600 bis 4620 Erl\u00f6se aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se 0 % Ausfuhrlieferungen/Drittl\u00e4nder", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4500 bis 4570 Ver\u00e4nderungen des Bestandes an fertigen und unfertigen Erzeugn. sowie an noch nicht abrechenbaren Leistungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4660 bis 4670 Ertr\u00e4ge aus der Zuschreibung zum Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se 10 %", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 10 % USt", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se i.g. Lieferungen (stfr)", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4800 bis 4990 \u00dcbrige betriebliche Ertr\u00e4ge", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4580 bis 4590 andere aktivierte Eigenleistungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4400 bis 4490 Erl\u00f6sschm\u00e4lerungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se 20 %", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4700 bis 4790 Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "4630 bis 4650 Ertr\u00e4ge aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 20 % USt", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Summe Betriebliche Ertr\u00e4ge"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Aufwandsstellenrechnung", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6400 bis 6440 Aufwendungen f\u00fcr Abfertigungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6000 bis 6190 L\u00f6hne", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6700 bis 6890 Sonstige Sozialaufwendungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6660 bis 6690 Gehaltsabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6500 bis 6550 Gesetzlicher Sozialaufwand Arbeiter", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6560 bis 6590 Gesetzlicher Sozialaufwand Angestellte", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6600 bis 6650 Lohnabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6450 bis 6490 Aufwendungen f\u00fcr Altersversorgung", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "6200 bis 6390 Geh\u00e4lter", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Summe Personalaufwand"
+   }, 
+   {
+    "children": [
+     {
+      "name": "5100 bis 5190 Verbrauch an Rohstoffen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Aufwandsstellenrechnung", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "5500 bis 5590 Verbrauch von Werkzeugen und anderen Erzeugungshilfsmittel", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb 10 % VSt/10 % USt", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb ohne Vorsteuerabzug und 20 % USt", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "5600 bis 5690 Verbrauch von Brenn- und Treibstoffen, Energie und Wasser", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb ohne Vorsteuerabzug und 10 % USt", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Wareneinkauf 20 %", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Wareneinkauf 10 %", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "5200 bis 5290 Verbrauch von bezogenen Fertig- und Einzelteilen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Wareneinkauf igErwerb 20 % VSt/20 % USt", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "5700 bis 5790 Sonstige bezogene Herstellungsleistungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Skontoertr\u00e4ge auf sonstige bezogene Herstellungsleistungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Skontoertr\u00e4ge auf Materialaufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "5300 bis 5390 Verbrauch von Hilfsstoffen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "5400 bis 5490 Verbrauch von Betriebsstoffen", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Summe Wareneinsatz"
+   }, 
+   {
+    "children": [
+     {
+      "name": "8400 bis 8440 Au\u00dferordentliche Ertr\u00e4ge", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "nicht ausgenutzte Lieferantenskonti", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se aus dem Abgang von Wertpapieren des Umlaufverm\u00f6gens", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8260 bis 8270 Aufwendungen aus sonst. Fiananzanlagen und aus Wertpapieren des Umlaufverm\u00f6gens", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Erl\u00f6se aus dem Abgang von sonstigen Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8600 bis 8690 Aufl\u00f6sung unversteuerten R\u00fccklagen"
+     }, 
+     {
+      "name": "Erl\u00f6se aus dem Abgang von Beteiligungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Gewinabfuhr bzw. Verlust\u00fcberrechnung aus Ergebnisabf\u00fchrungsvertr\u00e4gen"
+     }, 
+     {
+      "name": "8220 bis 8250 Aufwendungen aus Beteiligungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8750 bis 8790 Aufl\u00f6sung von Gewinnr\u00fccklagen"
+     }, 
+     {
+      "name": "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8280 bis 8340 Zinsen und \u00e4hnliche Aufwendungem", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8800 bis 8890 Zuweisung von unversteuerten R\u00fccklagen"
+     }, 
+     {
+      "name": "8000 bis 8040 Ertr\u00e4ge aus Beteiligungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8450 bis 8490 Au\u00dferordentliche Aufwendungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8700 bis 8740 Aufl\u00f6sung von Kapitalr\u00fccklagen"
+     }, 
+     {
+      "name": "Buchwert abgegangener Wertpapiere des Umlaufverm\u00f6gens", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Wertpapieren des Umlaufverm\u00f6gens", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8050 bis 8090 Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "8500 bis 8590 Steuern vom Einkommen und vom Ertrag"
+     }, 
+     {
+      "name": "Buchwert abgegangener sonstiger Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "8100 bis 8130 Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Buchwert abgegangener Beteiligungen", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Summe Finanzertr\u00e4ge und Aufwendungen"
+   }, 
+   {
+    "children": [
+     {
+      "name": "7480 bis 7490 Lizenzaufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Spenden und Trinkgelder", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Sonstige betrieblichen Aufwendungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7200 bis 7290 Instandhaltung u. Reinigung durh Dritte, Entsorgung, Beleuchtung", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7320 bis 7330 Kfz - Aufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7750 bis 7760 Beratungs- und Pr\u00fcfungsaufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7800 bis 7810 Schadensf\u00e4lle", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "B\u00fcromaterial und Drucksorten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Aufwandsstellenrechnung", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Skontoertr\u00e4ge auf sonstige betriebliche Aufwendungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7840 bis 7880 Verschiedene betriebliche Aufwendungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7910 bis 7950 Aufwandsstellenrechung der Hersteller", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Fachliteratur und Zeitungen ", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7540 bis 7570 Provisionen an Dritte", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7380 bis 7390 Nachrichtenaufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Abschreibungen vom Umlaufverm\u00f6gen, soweit diese die im Unternehmen \u00fcblichen Abschreibungen \u00fcbersteigen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7700 bis 7740 Versicherungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7010 bis 7080 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verluste aus dem Abgang vom Anlageverm\u00f6gen, ausgenommen Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Spesen des Geldverkehrs", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7360 bis 7370 Tag- und N\u00e4chtigungsgelder", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Abschreibungen auf aktivierte Aufwendungen f\u00fcr das Ingangs. u. Erweitern des Betriebes", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7580 bis 7590 Aufsichtsratsverg\u00fctungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Buchwert abgegangener Anlagen, ausgenommen Finanzanlagen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7400 bis 7430 Miet- und Pachtaufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7440 bis 7470 Leasingaufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7340 bis 7350 Reise- und Fahraufwand", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Aus- und Fortbildung", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "7100 bis 7190 Sonstige Steuern"
+     }, 
+     {
+      "name": "7650 bis 7680 Werbung und Repr\u00e4sentationen", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Vertriebskosten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Verwaltungskosten", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "Mitgliedsbeitr\u00e4ge", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7300 bis 7310 Transporte durch Dritte", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7500 bis 7530 Aufwand f\u00fcr beigestelltes Personal", 
+      "report_type": "Profit and Loss"
+     }, 
+     {
+      "name": "7610 bis 7620 Druckerzeugnisse und Vervielf\u00e4ltigungen", 
+      "report_type": "Profit and Loss"
+     }
+    ], 
+    "name": "Summe Abschreibungen und Aufwendungen"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Umsatzsteuer-Evidenzkonto f\u00fcr erhaltene Anzahlungen auf Bestellungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "R\u00fcckstellungen f\u00fcr Pensionen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Payable", 
+      "name": "3380 bis 3390 Verbindlichkeiten aus der Annahme gezogener Wechsel u. d. Ausstellungen eigener Wechsel", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Verbindlichkeiten gegen\u00fcber Gesellschaften", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Payable", 
+      "name": "Verbindlichkeiten aus Lieferungen u. Leistungen EU", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "3180 bis 3190 Verbindlichkeiten gegen\u00fcber Finanzinstituten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "3110 bis 3170 Verbindlichkeiten gegen\u00fcber Kredidinstituten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Payable", 
+      "name": "Verbindlichkeiten aus Lieferungen u. Leistungen Inland", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "3400 bis 3470 Verbindlichkeiten gegen\u00fc. verb. Untern., Verbindl. gegen\u00fc. Untern., mit denen eine Beteiligungsverh\u00e4lnis besteht", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Anleihen (einschlie\u00dflich konvertibler)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Umsatzsteuer aus i.g. Erwerb 10%"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "USt. \u00a719 /art (reverse charge)"
+     }, 
+     {
+      "name": "3040 bis 3090 Sonstige R\u00fcckstellungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "3700 bis 3890 \u00dcbrige sonstige Verbindlichkeiten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Umsatzsteuer aus i.g. Erwerb 20%"
+     }, 
+     {
+      "name": "Umsatzsteuer", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Umsatzsteuer aus i.g. Lieferungen 20%"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Umsatzsteuer aus i.g. Lieferungen 10%"
+     }, 
+     {
+      "name": "Erhaltene Anzahlungenauf Bestellungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Payable", 
+      "name": "Verbindlichkeiten aus Lieferungen u. Leistungen sonst. Ausland", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "3900 bis 3990 Passive Rechnungsabgrenzungsposten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Verrechnung Finanzamt"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Umsatzsteuer Zahllast"
+     }, 
+     {
+      "name": "3020 bis 3030 Steuerr\u00fcckstellungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "R\u00fcckstellungen f\u00fcr Abfertigung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "3600 bis 3690 Verbindlichkeiten im Rahmen der sozialen Sicherheit", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Summe Fremdkapital"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Equity", 
+      "name": "9400 bis 9590 Bewertungsreserven uns sonst. unversteuerte R\u00fccklagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "9700 bis 9790 Einlagen stiller Gesellschafter "
+     }, 
+     {
+      "name": "9900 bis 9999 Evidenzkonten"
+     }, 
+     {
+      "account_type": "Equity", 
+      "name": "Bilanzgewinn (-verlust )", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Equity", 
+      "name": "9300 bis 9380 Gewinnr\u00fccklagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Equity", 
+      "name": "9000 bis 9180 Gezeichnetes bzw. gewidmetes Kapital", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Er\u00f6ffnungsbilanz"
+     }, 
+     {
+      "account_type": "Equity", 
+      "name": "nicht eingeforderte ausstehende Einlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Gewinn- und Verlustrechnung"
+     }, 
+     {
+      "name": "9600 bis 9690 Privat und Verrechnungskonten bei Einzelunternehmen und Personengesellschaften"
+     }, 
+     {
+      "name": "Schlussbilanz"
+     }, 
+     {
+      "account_type": "Equity", 
+      "name": "9200 bis 9290 Kapitalr\u00fccklagen", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Summe Eigenkapital R\u00fccklagen Abschlusskonten"
+   }, 
+   {
+    "children": [
+     {
+      "account_type": "Receivable", 
+      "name": "Pauschalwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Disagio", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2150 bis 2170 Forderungen aus Lief. und Leist. Ausland", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Vorsteuer aus ig. Erwerb 10%"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Schecks in Inlandsw\u00e4hrung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. EU", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Steuerabgrenzung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2200 bis 2220 Forderungen gegen\u00fcber verbundenen Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Kassenbestand", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Eigene Anteile (Wertpapiere)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Einfuhrumsatzsteuer (bezahlt)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Unterschiedsbetrag zur gebotenen Pensionsr\u00fcckstellung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Wertberichtigungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Besitzwechsel ...", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Unterschiedsbetrag gem. Abschnitt XII Pensionskassengesetz", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2300 bis 2460 Sonstige Forderungen und Verm\u00f6gensgegenst\u00e4nde", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Einzelwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Anteile an verbundenen Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Vorsteuer \u00a719/Art 19 ( reverse charge ) "
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Vorsteuer", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Tax", 
+      "name": "Vorsteuer aus ig. Erwerb 20%"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Eingeforderte aber noch nicht eingezahlte Einlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Wertberichtigungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Sonstige Anteile", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Aktive Rechnungsabrenzungsposten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2100 bis 2120 Forderungen aus Lief. und Leist. EU", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2750 bis 2770 Kassenbest\u00e4nde in Fremdw\u00e4hrung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Postwertzeichen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. EU", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Stempelmarken", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Einzelwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2250 bis 2270 Forderungen gegen\u00fcber Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Einzelwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "Bank / Guthaben bei Kreditinstituten", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2000 bis 2007 Forderungen aus Lief. und Leist. Inland", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "account_type": "Receivable", 
+      "name": "2630 bis 2670 Sonstige Wertpapiere", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Summe Umlaufverm\u00f6gen"
+   }, 
+   {
+    "children": [
+     {
+      "name": "Fertigungsmaschinen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Geleistete Anzahlungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Sonstige Ausleihungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Genossenschaften ohne Beteiligungscharakter", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Gebinde", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Konzessionen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Bauliche Investitionen in fremden (gepachteten) Wohn- und Sozialgeb\u00e4uden", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Antriebsmaschinen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Wohn- und Sozialgeb\u00e4ude auf eigenem Grund", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit im Erzeugerprozess verwendet", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Anteile an Kapitalgesellschaften ohne Beteiligungscharakter", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "LKW", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Bauliche Investitionen in fremden (gepachteten) Betriebs- und Gesch\u00e4ftsgeb\u00e4uden", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Hebezeuge und Montageanlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Aufwendungen f\u00fcs das Ingangssetzen u. Erweitern eines Betriebes", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf eigenem Grund", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Anteile an Personengesellschaften ohne Beteiligungscharakter", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Andere Erzeugungshilfsmittel", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Andere Bef\u00f6rderungsmittel", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Anteile an verbundenen Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Anlagen im Bau", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Wohn- und Sozialgeb\u00e4ude auf fremdem Grund", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Beteiligungen an Gemeinschaftunternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Geleistete Anzahlungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "B\u00fcromaschinen, EDV - Anlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Gesch\u00e4fts(Firmen)wert", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Energieversorgungsanlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf fremdem Grund", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Marken, Warenzeichen und Musterschutzrechte", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Vorrichtungen, Formen und Modelle", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "44 bis 49 Sonstige Maschinen und maschinelle Anlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit nicht im Erzeugungsprozess verwendet", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "940 bis 970 Sonstige Finanzanlagen, Wertrechte", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Beteiligungen an angeschlossenen (assoziierten) Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "PKW", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Pacht- und Mietrechte", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Transportanlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Grundst\u00fccksgleiche Rechte", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Datenverarbeitungsprogramme", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Grundst\u00fcckseinrichtunten auf fremdem Grund", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Sonstige Beteiligungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Beheizungs- und Beleuchtungsanlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Grundst\u00fcckseinrichtunten auf eigenem Grund", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Patentrechte und Lizenzen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Ausleihungen an  verbundene Unternehmen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Nachrichten- und Kontrollanlagen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "920 bis 930 Festverzinsliche Wertpapiere des Anlageverm\u00f6gens", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Unbebaute Grundst\u00fccke", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Allgemeine Werkzeuge und Handwerkzeuge", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Geleistete Anzahlungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Kumulierte Abschreibungen", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Ausleihungen an  verbundene Unternehmen, mit denen ein Beteiligungsverh\u00e4lnis besteht", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Andere Betriebs- und Gesch\u00e4ftsausstattung", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Anteile an Investmentfonds", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Bebaute Grundst\u00fccke (Grundwert)", 
+      "report_type": "Balance Sheet"
+     }, 
+     {
+      "name": "Maschinenwerkzeuge", 
+      "report_type": "Balance Sheet"
+     }
+    ], 
+    "name": "Summe Kontoklasse 0 Anlageverm\u00f6gen"
+   }
+  ], 
+  "name": "Account Chart - Austria EKR2010"
+ }
+}

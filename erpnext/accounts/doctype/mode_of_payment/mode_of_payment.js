@@ -3,10 +3,10 @@
 
 cur_frm.set_query("default_account", function(doc) {
 	return{
-		filters: {
-			'account_type': "Bank or Cash",
-			"group_or_ledger": "Ledger",
-			'company': doc.company
-		}
+		filters: [
+			['Account', 'account_type', 'in', 'Bank, Cash'],
+			['Account', 'group_or_ledger', '=', 'Ledger'],
+			['Account', 'company', '=', doc.company]
+		]
 	}
 });

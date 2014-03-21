@@ -37,7 +37,7 @@ class DocType:
 		cond = ''
 		for f in ['company', 'branch', 'department', 'designation', 'grade']:
 			if self.doc.fields.get(f):
-				cond += " and t1." + f + " = '" + self.doc.fields.get(f) + "'"		
+				cond += " and t1." + f + " = '" + self.doc.fields.get(f).replace("'", "\'") + "'"		
 		
 		return cond
 
@@ -58,7 +58,7 @@ class DocType:
 		
 	
 	def get_month_details(self, year, month):
-		ysd = frappe.db.sql("select year_start_date from `tabFiscal Year` where name ='%s'"%year)[0][0]
+		ysd = frappe.db.get_value("Fiscal Year", year, "year_start_date")
 		if ysd:
 			from dateutil.relativedelta import relativedelta
 			import calendar, datetime
@@ -117,8 +117,8 @@ class DocType:
 		cond = self.get_filter_condition()
 		ss_list = frappe.db.sql("""
 			select t1.name from `tabSalary Slip` t1 
-			where t1.docstatus = 0 and month = '%s' and fiscal_year = '%s' %s
-		""" % (self.doc.month, self.doc.fiscal_year, cond))
+			where t1.docstatus = 0 and month = %s and fiscal_year = %s %s
+		""" % ('%s', '%s', cond), (self.doc.month, self.doc.fiscal_year))
 		return ss_list
 			
 				
@@ -179,8 +179,8 @@ class DocType:
 		cond = self.get_filter_condition()
 		tot = frappe.db.sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1 
-			where t1.docstatus = 1 and month = '%s' and fiscal_year = '%s' %s
-		""" % (self.doc.month, self.doc.fiscal_year, cond))
+			where t1.docstatus = 1 and month = %s and fiscal_year = %s %s
+		""" % ('%s', '%s', cond), (self.doc.month, self.doc.fiscal_year))
 		
 		return flt(tot[0][0])
 	
