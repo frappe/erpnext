@@ -3,6 +3,9 @@ import os
 
 version = '4.0.0-beta'
 
+with open("requirements.txt", "r") as f:
+	install_requires = f.readlines()
+
 setup(
     name='erpnext',
     version=version,
@@ -12,5 +15,5 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=("frappe",),
+    install_requires=install_requires
 )
