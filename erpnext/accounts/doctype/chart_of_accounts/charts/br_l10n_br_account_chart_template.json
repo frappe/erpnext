@@ -10,315 +10,315 @@
         "children": [
          {
           "name": "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 Previd\u00eancia Social", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Remunera\u00e7\u00e3o a Dirigentes de Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Consumo de Insumos", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Alimenta\u00e7\u00e3o do Trabalhador", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Arrendamento Mercantil", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 FGTS", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 Outros", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Constitui\u00e7\u00e3o de Provis\u00f5es", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Outros Custos", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados Pessoa Jur\u00eddica", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS DA ATIVIDADE RURAL", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "name": "Outros Custos", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Constitui\u00e7\u00e3o de Provis\u00f5es", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 Previd\u00eancia Social", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Consumo de Insumos", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Remunera\u00e7\u00e3o a Dirigentes de Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 FGTS", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Arrendamento Mercantil", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados Pessoa Jur\u00eddica", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Alimenta\u00e7\u00e3o do Trabalhador", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 Outros", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "name": "Encargos de Deprecia\u00e7\u00e3o, Amortiza\u00e7\u00e3o e Exaust\u00e3o", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Presta\u00e7\u00e3o de Servi\u00e7os por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 PA\u00cdS", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Manuten\u00e7\u00e3o e Reparo de Bens Aplicados na Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Constitui\u00e7\u00e3o de Provis\u00f5es", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 Outros", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Alimenta\u00e7\u00e3o do Trabalhador", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Outros Custos", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados Pessoa Jur\u00eddica", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Loca\u00e7\u00e3o de M\u00e3o-de-obra", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Material Aplicado na Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Plano de Previd\u00eancia Privada de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Fundo de Aposentadoria Programada Individual de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Planos de Poupan\u00e7a e Investimentos de Empregados Ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Custo do Pessoal Aplicado na Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Outros Gastos com Pessoal Ligado \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados por Cooperativa de Trabalho", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 Previd\u00eancia Social", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Arrendamento Mercantil", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Presta\u00e7\u00e3o de Servi\u00e7o Pessoa Jur\u00eddica", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Remunera\u00e7\u00e3o a Dirigentes ligados \u00e0 Produ\u00e7\u00e3o de Servi\u00e7os", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Royalties e Assist\u00eancia T\u00e9cnica \u2013 EXTERIOR", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Encargos Sociais \u2013 FGTS", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "CUSTO DOS SERVI\u00c7OS PRODUZIDOS", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "CUSTO DOS BENS E SERVI\u00c7OS PRODUZIDOS", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "CUSTOS DE PRODU\u00c7\u00c3O", 
-    "root_type": "Expense"
+    "report_type": "Profit and Loss"
    }, 
    {
     "children": [
@@ -842,214 +842,214 @@
         "children": [
          {
           "name": "Contas Banc\u00e1rias \u2013 Subven\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores Mobili\u00e1rios - Mercado de Capitais Interno", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Recursos no Exterior Decorrentes de Exporta\u00e7\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores Mobili\u00e1rios \u2013 Aplica\u00e7\u00f5es de Subven\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores Mobili\u00e1rios - Mercado de Capitais Externo", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores Mobili\u00e1rios \u2013 Aplica\u00e7\u00f5es de Outros Recursos Sujeitos a Restri\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Bancos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Bank", 
           "name": "Caixa", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Contas Banc\u00e1rias \u2013 Outros Recursos Sujeitos a Restri\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Contas Banc\u00e1rias \u2013 Doa\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores Mobili\u00e1rios \u2013 Aplica\u00e7\u00f5es de Doa\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DISPONIBILIDADES", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "Im\u00f3veis Destinados \u00e0 Venda", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Constru\u00e7\u00f5es em Andamento de Im\u00f3veis Destinados \u00e0 Venda", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Produtos Agropecu\u00e1rios em Forma\u00e7\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Insumos Agropecu\u00e1rios", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Servi\u00e7os em andamento", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Produtos Acabados", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Produtos em Elabora\u00e7\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Insumos (materiais diretos)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Mercadorias para Revenda", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Produtos Agropecu\u00e1rios Acabados", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Estoques Destinados \u00e0 Doa\u00e7\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "ESTOQUES", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "account_type": "Receivable", 
           "name": "Clientes", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Adiantamentos a Fornecedores", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias e Preju\u00edzos Fiscais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias e Base de C\u00e1lculo Negativa", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos por Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "ICMS e Contribui\u00e7\u00f5es a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "CSLL a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Tributos Municipais a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Imposto de Renda a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "PIS e COFINS a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "IPI a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outros Impostos e Contribui\u00e7\u00f5es a Recuperar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "CR\u00c9DITOS", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "Outras Contas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Despesas do Exerc\u00edcio Seguinte", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DESPESAS DO EXERC\u00cdCIO SEGUINTE", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "(-) Outras Contas Retificadoras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Provis\u00e3o para Ajuste do Estoque ao Valor de Mercado", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Provis\u00f5es para Ajuste ao Valor Prov\u00e1vel de Realiza\u00e7\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Duplicatas Descontadas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Provis\u00f5es para Cr\u00e9ditos de Liquida\u00e7\u00e3o Duvidosa", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "CONTAS RETIFICADORAS", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "CIRCULANTE", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
@@ -1057,252 +1057,252 @@
         "children": [
          {
           "name": "Despesas Pr\u00e9-Operacionais ou Pr\u00e9-Industriais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Amortiza\u00e7\u00e3o do Diferido", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Demais Aplica\u00e7\u00f5es em Despesas Amortiz\u00e1veis", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Despesas com Pesquisas Cient\u00edficas ou Tecnol\u00f3gicas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DIFERIDO", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "Florestamento e Reflorestamento", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Terrenos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Aeronaves", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Embarca\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Ve\u00edculos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Constru\u00e7\u00f5es em Andamento", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Edif\u00edcios e Constru\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Direitos Contratuais de Explora\u00e7\u00e3o de Florestas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "M\u00f3veis, Utens\u00edlios e Instala\u00e7\u00f5es Comerciais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Recursos Minerais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Outras Contas Redutoras do Imobilizado", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Equipamentos, M\u00e1quinas e Instala\u00e7\u00f5es Industriais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Deprecia\u00e7\u00f5es, Amortiza\u00e7\u00f5es e Quotas de Exaust\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outras Imobiliza\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "IMOBILIZADO", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "\u00c1gios em Investimentos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Des\u00e1gios e Provis\u00e3o para Perdas Prov\u00e1veis em Investimentos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Outras Contas Retificadoras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outros Investimentos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Corre\u00e7\u00e3o Monet\u00e1ria Especial (Lei no 8.200/1991)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outras Contas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Investimentos Decorrentes de Incentivos Fiscais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Corre\u00e7\u00e3o Monet\u00e1ria - Diferen\u00e7a IPC/BTNF (Lei no 8.200/1991)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Participa\u00e7\u00f5es Permanentes em Coligadas ou Controladas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "INVESTIMENTOS", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "Fundo de Com\u00e9rcio", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Desenvolvimento de Produtos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Concess\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Franquias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Direitos Autorais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Marcas e Patentes", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Amortiza\u00e7\u00e3o do Intang\u00edvel", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Outras Contas Redutoras do Intang\u00edvel", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Outras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Software ou Programas de Computador", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "INTANG\u00cdVEL", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
          {
           "name": "Outras Contas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Provis\u00f5es para Cr\u00e9ditos de Liquida\u00e7\u00e3o Duvidosa", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos com Pessoas Ligadas (F\u00edsicas/Jur\u00eddicas)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos por Contribui\u00e7\u00f5es e Doa\u00e7\u00f5es", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores Mobili\u00e1rios", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Outras Contas Retificadoras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Dep\u00f3sitos Judiciais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Provis\u00f5es para Ajuste ao Valor Prov\u00e1vel de Realiza\u00e7\u00e3o", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Duplicatas Descontadas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos Fiscais CSLL \u2013 Diferen\u00e7as Tempor\u00e1rias e Base de C\u00e1lculo Negativa", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cr\u00e9ditos Fiscais IRPJ \u2013 Diferen\u00e7as Tempor\u00e1rias e Preju\u00edzos Fiscais", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "account_type": "Receivable", 
           "name": "Clientes", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "REALIZ\u00c1VEL A LONGO PRAZO", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "N\u00c3O CIRCULANTE", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "ATIVO", 
-    "root_type": "Asset"
+    "report_type": "Balance Sheet"
    }, 
    {
     "children": [
@@ -2173,7 +2173,7 @@
          {
           "account_type": "Payable", 
           "name": "Fornecedores", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Adiantamentos de Clientes"
@@ -2233,7 +2233,7 @@
          {
           "account_type": "Payable", 
           "name": "Fornecedores", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Doa\u00e7\u00f5es e Subven\u00e7\u00f5es para Investimentos"

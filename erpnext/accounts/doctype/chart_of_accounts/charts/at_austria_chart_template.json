@@ -6,47 +6,47 @@
     "children": [
      {
       "name": "1600 bis 1690 Waren", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1350 bis 1390 Betriebsstoffe", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1700 bis 1790 Noch nicht abgerechenbare Leistungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1200 bis 1290 Bezogene Teile", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1300 bis 1340 Hilfsstoffe", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1000 bis 1090 Bezugsverrechnung", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1400 bis 1490 Unfertige Erzeugniss", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "geleistete Anzahlungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1500 bis 1590 Fertige Erzeugniss", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1900 bis 1990 Wertberichtigungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "1100 bis 1190 Rohstoffe", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Summe Vorr\u00e4te"
@@ -55,59 +55,59 @@
     "children": [
      {
       "name": "4600 bis 4620 Erl\u00f6se aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se 0 % Ausfuhrlieferungen/Drittl\u00e4nder", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4500 bis 4570 Ver\u00e4nderungen des Bestandes an fertigen und unfertigen Erzeugn. sowie an noch nicht abrechenbaren Leistungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4660 bis 4670 Ertr\u00e4ge aus der Zuschreibung zum Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se 10 %", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 10 % USt", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se i.g. Lieferungen (stfr)", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4800 bis 4990 \u00dcbrige betriebliche Ertr\u00e4ge", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4580 bis 4590 andere aktivierte Eigenleistungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4400 bis 4490 Erl\u00f6sschm\u00e4lerungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se 20 %", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4700 bis 4790 Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "4630 bis 4650 Ertr\u00e4ge aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se aus im Inland stpfl. EG Lieferungen 20 % USt", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Summe Betriebliche Ertr\u00e4ge"
@@ -116,43 +116,43 @@
     "children": [
      {
       "name": "Aufwandsstellenrechnung", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6400 bis 6440 Aufwendungen f\u00fcr Abfertigungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6000 bis 6190 L\u00f6hne", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6700 bis 6890 Sonstige Sozialaufwendungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6660 bis 6690 Gehaltsabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6500 bis 6550 Gesetzlicher Sozialaufwand Arbeiter", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6560 bis 6590 Gesetzlicher Sozialaufwand Angestellte", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6600 bis 6650 Lohnabh\u00e4ngige Abgaben und Pflichtbeitr\u00e4gte", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6450 bis 6490 Aufwendungen f\u00fcr Altersversorgung", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "6200 bis 6390 Geh\u00e4lter", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Summe Personalaufwand"
@@ -161,67 +161,67 @@
     "children": [
      {
       "name": "5100 bis 5190 Verbrauch an Rohstoffen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Aufwandsstellenrechnung", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "5500 bis 5590 Verbrauch von Werkzeugen und anderen Erzeugungshilfsmittel", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Wareneinkauf igErwerb 10 % VSt/10 % USt", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Wareneinkauf igErwerb ohne Vorsteuerabzug und 20 % USt", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "5600 bis 5690 Verbrauch von Brenn- und Treibstoffen, Energie und Wasser", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Wareneinkauf igErwerb ohne Vorsteuerabzug und 10 % USt", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Wareneinkauf 20 %", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Wareneinkauf 10 %", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "5200 bis 5290 Verbrauch von bezogenen Fertig- und Einzelteilen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Wareneinkauf igErwerb 20 % VSt/20 % USt", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "5700 bis 5790 Sonstige bezogene Herstellungsleistungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Skontoertr\u00e4ge auf sonstige bezogene Herstellungsleistungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Skontoertr\u00e4ge auf Materialaufwand", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "5300 bis 5390 Verbrauch von Hilfsstoffen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "5400 bis 5490 Verbrauch von Betriebsstoffen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Summe Wareneinsatz"
@@ -230,74 +230,74 @@
     "children": [
      {
       "name": "8400 bis 8440 Au\u00dferordentliche Ertr\u00e4ge", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "nicht ausgenutzte Lieferantenskonti", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se aus dem Abgang von Wertpapieren des Umlaufverm\u00f6gens", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8260 bis 8270 Aufwendungen aus sonst. Fiananzanlagen und aus Wertpapieren des Umlaufverm\u00f6gens", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Erl\u00f6se aus dem Abgang von sonstigen Finanzanlagen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8600 bis 8690 Aufl\u00f6sung unversteuerten R\u00fccklagen"
      }, 
      {
       "name": "Erl\u00f6se aus dem Abgang von Beteiligungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Gewinabfuhr bzw. Verlust\u00fcberrechnung aus Ergebnisabf\u00fchrungsvertr\u00e4gen"
      }, 
      {
       "name": "8220 bis 8250 Aufwendungen aus Beteiligungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8750 bis 8790 Aufl\u00f6sung von Gewinnr\u00fccklagen"
      }, 
      {
       "name": "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Finanzanlagen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8280 bis 8340 Zinsen und \u00e4hnliche Aufwendungem", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8800 bis 8890 Zuweisung von unversteuerten R\u00fccklagen"
      }, 
      {
       "name": "8000 bis 8040 Ertr\u00e4ge aus Beteiligungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8450 bis 8490 Au\u00dferordentliche Aufwendungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8700 bis 8740 Aufl\u00f6sung von Kapitalr\u00fccklagen"
      }, 
      {
       "name": "Buchwert abgegangener Wertpapiere des Umlaufverm\u00f6gens", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Ertr\u00e4ge aus dem Abgang von und der Zuschreibung zu Wertpapieren des Umlaufverm\u00f6gens", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8050 bis 8090 Ertr\u00e4ge aus anderen Wertpapieren und Ausleihungen des Finanzanlageverm\u00f6gens", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "account_type": "Tax", 
@@ -305,15 +305,15 @@
      }, 
      {
       "name": "Buchwert abgegangener sonstiger Finanzanlagen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "8100 bis 8130 Sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Buchwert abgegangener Beteiligungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Summe Finanzertr\u00e4ge und Aufwendungen"
@@ -322,119 +322,119 @@
     "children": [
      {
       "name": "7480 bis 7490 Lizenzaufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Spenden und Trinkgelder", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Sonstige betrieblichen Aufwendungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7200 bis 7290 Instandhaltung u. Reinigung durh Dritte, Entsorgung, Beleuchtung", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7320 bis 7330 Kfz - Aufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7750 bis 7760 Beratungs- und Pr\u00fcfungsaufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7800 bis 7810 Schadensf\u00e4lle", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "B\u00fcromaterial und Drucksorten", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Aufwandsstellenrechnung", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Skontoertr\u00e4ge auf sonstige betriebliche Aufwendungen", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7840 bis 7880 Verschiedene betriebliche Aufwendungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7910 bis 7950 Aufwandsstellenrechung der Hersteller", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Fachliteratur und Zeitungen ", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7540 bis 7570 Provisionen an Dritte", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7380 bis 7390 Nachrichtenaufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Abschreibungen vom Umlaufverm\u00f6gen, soweit diese die im Unternehmen \u00fcblichen Abschreibungen \u00fcbersteigen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7700 bis 7740 Versicherungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7010 bis 7080 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Verluste aus dem Abgang vom Anlageverm\u00f6gen, ausgenommen Finanzanlagen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Spesen des Geldverkehrs", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7360 bis 7370 Tag- und N\u00e4chtigungsgelder", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Abschreibungen auf aktivierte Aufwendungen f\u00fcr das Ingangs. u. Erweitern des Betriebes", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7580 bis 7590 Aufsichtsratsverg\u00fctungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Buchwert abgegangener Anlagen, ausgenommen Finanzanlagen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7400 bis 7430 Miet- und Pachtaufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7440 bis 7470 Leasingaufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7340 bis 7350 Reise- und Fahraufwand", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Aus- und Fortbildung", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "account_type": "Tax", 
@@ -442,31 +442,31 @@
      }, 
      {
       "name": "7650 bis 7680 Werbung und Repr\u00e4sentationen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Vertriebskosten", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Verwaltungskosten", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Mitgliedsbeitr\u00e4ge", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7300 bis 7310 Transporte durch Dritte", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7500 bis 7530 Aufwand f\u00fcr beigestelltes Personal", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "7610 bis 7620 Druckerzeugnisse und Vervielf\u00e4ltigungen", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Summe Abschreibungen und Aufwendungen"
@@ -475,46 +475,46 @@
     "children": [
      {
       "name": "Umsatzsteuer-Evidenzkonto f\u00fcr erhaltene Anzahlungen auf Bestellungen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "R\u00fcckstellungen f\u00fcr Pensionen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Payable", 
       "name": "3380 bis 3390 Verbindlichkeiten aus der Annahme gezogener Wechsel u. d. Ausstellungen eigener Wechsel", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Verbindlichkeiten gegen\u00fcber Gesellschaften", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Payable", 
       "name": "Verbindlichkeiten aus Lieferungen u. Leistungen EU", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "3180 bis 3190 Verbindlichkeiten gegen\u00fcber Finanzinstituten", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "3110 bis 3170 Verbindlichkeiten gegen\u00fcber Kredidinstituten", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Payable", 
       "name": "Verbindlichkeiten aus Lieferungen u. Leistungen Inland", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "3400 bis 3470 Verbindlichkeiten gegen\u00fc. verb. Untern., Verbindl. gegen\u00fc. Untern., mit denen eine Beteiligungsverh\u00e4lnis besteht", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Anleihen (einschlie\u00dflich konvertibler)", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -526,11 +526,11 @@
      }, 
      {
       "name": "3040 bis 3090 Sonstige R\u00fcckstellungen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "3700 bis 3890 \u00dcbrige sonstige Verbindlichkeiten", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -538,7 +538,7 @@
      }, 
      {
       "name": "Umsatzsteuer", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -550,16 +550,16 @@
      }, 
      {
       "name": "Erhaltene Anzahlungenauf Bestellungen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Payable", 
       "name": "Verbindlichkeiten aus Lieferungen u. Leistungen sonst. Ausland", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "3900 bis 3990 Passive Rechnungsabgrenzungsposten", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -571,15 +571,15 @@
      }, 
      {
       "name": "3020 bis 3030 Steuerr\u00fcckstellungen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "R\u00fcckstellungen f\u00fcr Abfertigung", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "3600 bis 3690 Verbindlichkeiten im Rahmen der sozialen Sicherheit", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Summe Fremdkapital"
@@ -589,7 +589,7 @@
      {
       "account_type": "Equity", 
       "name": "9400 bis 9590 Bewertungsreserven uns sonst. unversteuerte R\u00fccklagen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "9700 bis 9790 Einlagen stiller Gesellschafter "
@@ -600,17 +600,17 @@
      {
       "account_type": "Equity", 
       "name": "Bilanzgewinn (-verlust )", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Equity", 
       "name": "9300 bis 9380 Gewinnr\u00fccklagen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Equity", 
       "name": "9000 bis 9180 Gezeichnetes bzw. gewidmetes Kapital", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Er\u00f6ffnungsbilanz"
@@ -618,7 +618,7 @@
      {
       "account_type": "Equity", 
       "name": "nicht eingeforderte ausstehende Einlagen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Gewinn- und Verlustrechnung"
@@ -632,7 +632,7 @@
      {
       "account_type": "Equity", 
       "name": "9200 bis 9290 Kapitalr\u00fccklagen", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Summe Eigenkapital R\u00fccklagen Abschlusskonten"
@@ -642,22 +642,22 @@
      {
       "account_type": "Receivable", 
       "name": "Pauschalwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Disagio", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2150 bis 2170 Forderungen aus Lief. und Leist. Ausland", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -666,76 +666,76 @@
      {
       "account_type": "Receivable", 
       "name": "Schecks in Inlandsw\u00e4hrung", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. EU", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Steuerabgrenzung", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2200 bis 2220 Forderungen gegen\u00fcber verbundenen Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Kassenbestand", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Eigene Anteile (Wertpapiere)", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Ausland", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Einfuhrumsatzsteuer (bezahlt)", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Unterschiedsbetrag zur gebotenen Pensionsr\u00fcckstellung", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Wertberichtigungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Besitzwechsel ...", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Unterschiedsbetrag gem. Abschnitt XII Pensionskassengesetz", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2300 bis 2460 Sonstige Forderungen und Verm\u00f6gensgegenst\u00e4nde", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Einzelwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Anteile an verbundenen Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -744,7 +744,7 @@
      {
       "account_type": "Receivable", 
       "name": "Vorsteuer", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Tax", 
@@ -753,97 +753,97 @@
      {
       "account_type": "Receivable", 
       "name": "Eingeforderte aber noch nicht eingezahlte Einlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber Unternehmen mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Wertberichtigungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Sonstige Anteile", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Aktive Rechnungsabrenzungsposten", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2100 bis 2120 Forderungen aus Lief. und Leist. EU", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2750 bis 2770 Kassenbest\u00e4nde in Fremdw\u00e4hrung", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Postwertzeichen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Pauschalwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Einzelwertberichtigungen zu Forderungen aus Lief. und Leist. EU", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Stempelmarken", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Einzelwertberichtigungen zu Forderungen gegen\u00fcber verbundenen Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Pauschalwertberichtigungen zu Forderungen aus Lief. und Leist. Inland ", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2250 bis 2270 Forderungen gegen\u00fcber Unternehmen, mit denen ein Beteiligungsverh\u00e4ltnis besteht", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Einzelwertberichtigungen zu sonstigen Forderungen und Verm\u00f6gensgegenst\u00e4nden", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "Bank / Guthaben bei Kreditinstituten", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2000 bis 2007 Forderungen aus Lief. und Leist. Inland", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "account_type": "Receivable", 
       "name": "2630 bis 2670 Sonstige Wertpapiere", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Summe Umlaufverm\u00f6gen"
@@ -852,247 +852,247 @@
     "children": [
      {
       "name": "Fertigungsmaschinen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Geleistete Anzahlungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Sonstige Ausleihungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Genossenschaften ohne Beteiligungscharakter", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Gebinde", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Konzessionen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Bauliche Investitionen in fremden (gepachteten) Wohn- und Sozialgeb\u00e4uden", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Antriebsmaschinen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Wohn- und Sozialgeb\u00e4ude auf eigenem Grund", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit im Erzeugerprozess verwendet", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Anteile an Kapitalgesellschaften ohne Beteiligungscharakter", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "LKW", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Bauliche Investitionen in fremden (gepachteten) Betriebs- und Gesch\u00e4ftsgeb\u00e4uden", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Hebezeuge und Montageanlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Aufwendungen f\u00fcs das Ingangssetzen u. Erweitern eines Betriebes", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf eigenem Grund", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Anteile an Personengesellschaften ohne Beteiligungscharakter", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Kumulierte Abschreibungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Andere Erzeugungshilfsmittel", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Andere Bef\u00f6rderungsmittel", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Anteile an verbundenen Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Anlagen im Bau", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Kumulierte Abschreibungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Wohn- und Sozialgeb\u00e4ude auf fremdem Grund", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Beteiligungen an Gemeinschaftunternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Geleistete Anzahlungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "B\u00fcromaschinen, EDV - Anlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Gesch\u00e4fts(Firmen)wert", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Energieversorgungsanlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Betriebs- und Gesch\u00e4ftsgeb\u00e4ude auf fremdem Grund", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Marken, Warenzeichen und Musterschutzrechte", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Vorrichtungen, Formen und Modelle", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "44 bis 49 Sonstige Maschinen und maschinelle Anlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Geringwertige Verm\u00f6gensgegenst\u00e4nde, soweit nicht im Erzeugungsprozess verwendet", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "940 bis 970 Sonstige Finanzanlagen, Wertrechte", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Beteiligungen an angeschlossenen (assoziierten) Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "PKW", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Pacht- und Mietrechte", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Transportanlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Grundst\u00fccksgleiche Rechte", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Kumulierte Abschreibungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Datenverarbeitungsprogramme", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Grundst\u00fcckseinrichtunten auf fremdem Grund", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Sonstige Beteiligungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Beheizungs- und Beleuchtungsanlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Grundst\u00fcckseinrichtunten auf eigenem Grund", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Patentrechte und Lizenzen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Kumulierte Abschreibungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Ausleihungen an  verbundene Unternehmen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Nachrichten- und Kontrollanlagen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "920 bis 930 Festverzinsliche Wertpapiere des Anlageverm\u00f6gens", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Unbebaute Grundst\u00fccke", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Allgemeine Werkzeuge und Handwerkzeuge", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Kumulierte Abschreibungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Geleistete Anzahlungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Kumulierte Abschreibungen", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Ausleihungen an  verbundene Unternehmen, mit denen ein Beteiligungsverh\u00e4lnis besteht", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Andere Betriebs- und Gesch\u00e4ftsausstattung", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Anteile an Investmentfonds", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Bebaute Grundst\u00fccke (Grundwert)", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "name": "Maschinenwerkzeuge", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Summe Kontoklasse 0 Anlageverm\u00f6gen"

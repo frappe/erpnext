@@ -140,97 +140,97 @@
       "children": [
        {
         "name": "Verilen Sipari\u015f Avanslar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Yar\u0131 Mamuller", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "\u0130lk Madde Malzeme", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Ticari Mallar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Mamuller", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Stoklar", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Maliyetleri", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Ta\u015feronlara Verilen Avanslar", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Y\u0131llara Yayg\u0131n \u0130n\u015faat ve Onar\u0131m Maliyetleri", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
        {
         "name": "\u00d6zel Kesim Tahvil Senet Ve Bonolar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Hisse Senetleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Kamu Kesimi Tahvil, Senet ve Bonolar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Menkul K\u0131ymetler De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Di\u011fer Menkul K\u0131ymetler", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Menkul K\u0131ymetler", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Bank", 
         "name": "Bankalar"
        }, 
        {
         "name": "Verilen \u00c7ekler ve \u00d6deme Emirleri(-)", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Kasa"
        }, 
        {
         "name": "Al\u0131nan \u00c7ekler", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Di\u011fer Haz\u0131r De\u011ferler", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Haz\u0131r De\u011ferler", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
@@ -265,11 +265,11 @@
       "children": [
        {
         "name": "\u015e\u00fcpheli Ticari Alacaklar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Kazan\u0131lmam\u0131\u015f Finansal Kiralama Faiz Gelirleri(-)"
@@ -282,7 +282,7 @@
        }, 
        {
         "name": "Al\u0131c\u0131lar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Alacak Senetleri"
@@ -292,7 +292,7 @@
        }
       ], 
       "name": "Ticari Alacaklar", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
@@ -330,18 +330,18 @@
       "children": [
        {
         "name": "Gelecek Aylara Ait Giderler", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Gelir Tahakkuklar\u0131"
        }
       ], 
       "name": "Gelecek Aylara Ait Giderler ve Gelir Tahakkuklar\u0131", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "D\u00f6nen Varl\u0131klar", 
-    "root_type": "Asset"
+    "report_type": "Balance Sheet"
    }, 
    {
     "children": [
@@ -354,12 +354,12 @@
        {
         "account_type": "Tax", 
         "name": "Di\u011fer KDV", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "account_type": "Tax", 
         "name": "Hesaplanan KDV", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Say\u0131m Ve Tesell\u00fcm Fazlalar\u0131"
@@ -374,14 +374,14 @@
       "children": [
        {
         "name": "Gelecek Aylara Ait Gelirler", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Gider Tahakkuklar\u0131"
        }
       ], 
       "name": "Gelecek Aylara Ait Gelirler Ve Gider Tahakkuklar\u0131", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "account_type": "Payable", 
@@ -389,20 +389,20 @@
        {
         "account_type": "Tax", 
         "name": "D\u00f6nem K\u00e2r\u0131n\u0131n Pe\u015fin \u00d6denen Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler(-)", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "account_type": "Tax", 
         "name": "D\u00f6nem K\u00e2r\u0131 Vergi Ve Di\u011fer Yasal Y\u00fck\u00fcml\u00fcl\u00fck Kar\u015f\u0131l\u0131klar\u0131", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Maliyet Giderleri Kar\u015f\u0131l\u0131\u011f\u0131", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "account_type": "Payable", 
@@ -417,26 +417,26 @@
        {
         "account_type": "Tax", 
         "name": "Vadesi Ge\u00e7mi\u015f, Ertelenmi\u015f Veya Taksitlendirilmi\u015f Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "account_type": "Tax", 
         "name": "\u00d6denecek Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "account_type": "Tax", 
         "name": "\u00d6denecek Vergi Ve Fonlar", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "account_type": "Tax", 
         "name": "\u00d6denecek Sosyal G\u00fcvenl\u00fck Kesintileri", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "\u00d6denecek Vergi ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "account_type": "Payable", 
@@ -569,15 +569,15 @@
       "children": [
        {
         "name": "Gelir Tahakkuklar\u0131", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Gelecek Y\u0131llara Ait Giderler", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Gelecek Y\u0131llara Ait Giderler ve Gelir Tahakkuklar\u0131", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -618,42 +618,42 @@
       "children": [
        {
         "name": "Binalar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Tesis, Makine Ve Cihazlar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Arazi Ve Arsalar"
        }, 
        {
         "name": "Yer Alt\u0131 Ve Yer \u00dcst\u00fc D\u00fczenleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Di\u011fer Maddi Duran Varl\u0131klar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Birikmi\u015f Amortismanlar(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Ta\u015f\u0131tlar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Demirba\u015flar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Yap\u0131lmakta Olan Yat\u0131r\u0131mlar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Verilen Avanslar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Maddi Duran Varl\u0131klar"
@@ -662,65 +662,65 @@
       "children": [
        {
         "name": "Birikmi\u015f Amortismanlar(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "\u015eerefiye", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Verilen Avanslar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Di\u011fer Maddi Olmayan Duran Varl\u0131klar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "\u00d6zel Maliyetler", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Ara\u015ft\u0131rma Ve Geli\u015ftirme Giderleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Kurulu\u015f Ve \u00d6rg\u00fctlenme Giderleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Haklar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Maddi Olmayan Duran Varl\u0131klar", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "Birikmi\u015f T\u00fckenme Paylar\u0131(-)", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Verilen Avanslar", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Arama Giderleri", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Haz\u0131rl\u0131k Ve Geli\u015ftirme Giderleri", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Di\u011fer \u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "\u00d6zel T\u00fckenmeye Tabi Varl\u0131klar", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -775,39 +775,39 @@
       "children": [
        {
         "name": "Di\u011fer \u00c7e\u015fitli Duran Varl\u0131klar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Elden \u00c7\u0131kar\u0131lacak Stoklar Ve Maddi Duran Varl\u0131klar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Pe\u015fin \u00d6denen Vergi Ve Fonlar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Di\u011fer KDV", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Gelecek Y\u0131llar \u0130htiyac\u0131 Stoklar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Gelecek Y\u0131llarda \u0130ndirilecek KDV", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Stok De\u011fer D\u00fc\u015f\u00fckl\u00fc\u011f\u00fc Kar\u015f\u0131l\u0131\u011f\u0131(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Birikmi\u015f Amortismanlar(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Di\u011fer Duran Varl\u0131klar", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Duran Varl\u0131klar"
@@ -818,31 +818,31 @@
       "children": [
        {
         "name": "D\u00f6nem Net K\u00e2r\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "D\u00f6nem Net Zarar\u0131(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "D\u00f6nem Net K\u00e2r\u0131 (Zarar\u0131)", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "Ge\u00e7mi\u015f Y\u0131llar Zararlar\u0131(-)", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Ge\u00e7mi\u015f Y\u0131llar Zararlar\u0131(-)", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "Sermaye", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "account_type": "Payable", 
@@ -850,77 +850,77 @@
        }
       ], 
       "name": "\u00d6denmi\u015f Sermaye", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "Di\u011fer Sermaye Yedekleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Maliyet Art\u0131\u015flar\u0131 Fonu", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Hisse Senetleri \u0130hra\u00e7 Primleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Hisse Senedi \u0130ptal K\u00e2rlar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Maddi Duran Varl\u0131k Yeniden De\u011ferlenme Art\u0131\u015flar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "\u0130\u015ftirakler Yeniden De\u011ferleme Art\u0131\u015flar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Sermaye Yedekleri", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "\u00d6zel Fonlar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Stat\u00fc Yedekleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Ola\u011fan\u00fcst\u00fc Yedekler", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Yasal Yedekler", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Di\u011fer K\u00e2r Yedekleri", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "K\u00e2r Yedekleri", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
        {
         "name": "Ge\u00e7mi\u015f Y\u0131llar K\u00e2rlar\u0131", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Ge\u00e7mi\u015f Y\u0131llar K\u00e2rlar\u0131", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "\u00d6z Kaynaklar", 
-    "root_type": "Asset"
+    "report_type": "Balance Sheet"
    }, 
    {
     "children": [
@@ -958,7 +958,7 @@
       "children": [
        {
         "name": "K\u0131dem Tazminat\u0131 Kar\u015f\u0131l\u0131\u011f\u0131", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "account_type": "Payable", 

@@ -11,8 +11,7 @@
          {
           "children": [
            {
-            "name": "INTERESES DE BANCOS NACIONALES", 
-            "root_type": "Income"
+            "name": "INTERESES DE BANCOS NACIONALES"
            }, 
            {
             "name": "OTROS INGRESOS FINANCIEROS"
@@ -29,8 +28,7 @@
             "name": "INTERESES VARIOS"
            }, 
            {
-            "name": "GANANCIAS EN DIFERENCIAL CAMBIARIO", 
-            "root_type": "Income"
+            "name": "GANANCIAS EN DIFERENCIAL CAMBIARIO"
            }, 
            {
             "name": "GANANCIAS EN VENTAS DE ACTIVOS FIJOS"
@@ -485,8 +483,7 @@
             "name": "VENTAS NACIONALES AL DETAL"
            }, 
            {
-            "name": "VENTAS EXPORTACION", 
-            "root_type": "Income"
+            "name": "VENTAS EXPORTACION"
            }, 
            {
             "name": "VENTAS NACIONALES"

@@ -7,12 +7,10 @@
      {
       "children": [
        {
-        "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w", 
-        "root_type": "Asset"
+        "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w"
        }, 
        {
-        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w produkt\u00f3w", 
-        "root_type": "Asset"
+        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w produkt\u00f3w"
        }
       ], 
       "name": "Odchylenia od cen ewidencyjnych produkt\u00f3w"
@@ -20,18 +18,15 @@
      {
       "children": [
        {
-        "name": "P\u00f3\u0142produkty", 
-        "root_type": "Asset"
+        "name": "P\u00f3\u0142produkty"
        }, 
        {
         "children": [
          {
-          "name": "Produkty gotowe w magazynie", 
-          "root_type": "Asset"
+          "name": "Produkty gotowe w magazynie"
          }, 
          {
-          "name": "Produkty gotowe poza jednostk\u0105", 
-          "root_type": "Asset"
+          "name": "Produkty gotowe poza jednostk\u0105"
          }
         ], 
         "name": "Produkty gotowe"
@@ -42,11 +37,11 @@
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Bierne rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Czynne rozliczenia mi\u0119dzyokresowe koszt\u00f3w"
        }
       ], 
@@ -55,11 +50,11 @@
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Inne rozliczenia mi\u0119dzyokresowe"
        }
       ], 
@@ -75,68 +70,54 @@
        {
         "children": [
          {
-          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w hurcie", 
-          "root_type": "Asset"
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w hurcie"
          }, 
          {
-          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w detalu", 
-          "root_type": "Asset"
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w detalu"
          }, 
          {
-          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w skupu", 
-          "root_type": "Asset"
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w skupu"
          }, 
          {
-          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w zak\u0142adach gastronomicznych", 
-          "root_type": "Asset"
+          "name": "Odchylenia od cen ewidencyjnych towar\u00f3w w zak\u0142adach gastronomicznych"
          }
         ], 
         "name": "Odchylenia od cen ewidencyjnych towar\u00f3w"
        }, 
        {
-        "name": "Odchylenia od cen ewidencyjnych opakowa\u0144", 
-        "root_type": "Asset"
+        "name": "Odchylenia od cen ewidencyjnych opakowa\u0144"
        }, 
        {
-        "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w", 
-        "root_type": "Asset"
+        "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w"
        }, 
        {
-        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w materia\u0142\u00f3w i towar\u00f3w", 
-        "root_type": "Asset"
+        "name": "Odchylenia z tytu\u0142u aktualizacji warto\u015bci zapas\u00f3w materia\u0142\u00f3w i towar\u00f3w"
        }
       ], 
       "name": "Odchylenia od cen ewidencyjnych materia\u0142\u00f3w i towar\u00f3w"
      }, 
      {
-      "name": "Zapasy obce", 
-      "root_type": "Asset"
+      "name": "Zapasy obce"
      }, 
      {
       "children": [
        {
-        "name": "Towary w zak\u0142adach gastronomicznych", 
-        "root_type": "Asset"
+        "name": "Towary w zak\u0142adach gastronomicznych"
        }, 
        {
-        "name": "Nieruchomo\u015bci i prawa maj\u0105tkowe przeznaczone do obrotu", 
-        "root_type": "Asset"
+        "name": "Nieruchomo\u015bci i prawa maj\u0105tkowe przeznaczone do obrotu"
        }, 
        {
-        "name": "Towary w detalu", 
-        "root_type": "Asset"
+        "name": "Towary w detalu"
        }, 
        {
-        "name": "Towary w hurcie", 
-        "root_type": "Asset"
+        "name": "Towary w hurcie"
        }, 
        {
-        "name": "Towary skupu", 
-        "root_type": "Asset"
+        "name": "Towary skupu"
        }, 
        {
-        "name": "Towary poza jednostk\u0105", 
-        "root_type": "Asset"
+        "name": "Towary poza jednostk\u0105"
        }
       ], 
       "name": "Towary"
@@ -144,40 +125,31 @@
      {
       "children": [
        {
-        "name": "Rozliczenie zakupu us\u0142ug obcych", 
-        "root_type": "Asset"
+        "name": "Rozliczenie zakupu us\u0142ug obcych"
        }, 
        {
-        "name": "Rozliczenie zakupu materia\u0142\u00f3w", 
-        "root_type": "Asset"
+        "name": "Rozliczenie zakupu materia\u0142\u00f3w"
        }, 
        {
-        "name": "Reklamacje faktur dostawc\u00f3w", 
-        "root_type": "Asset"
+        "name": "Reklamacje faktur dostawc\u00f3w"
        }, 
        {
-        "name": "Op\u0142aty manipulacyjne policzone przez Urz\u0105d Celny", 
-        "root_type": "Asset"
+        "name": "Op\u0142aty manipulacyjne policzone przez Urz\u0105d Celny"
        }, 
        {
-        "name": "Rozliczenie zakupu sk\u0142adnik\u00f3w aktyw\u00f3w trwa\u0142ych", 
-        "root_type": "Asset"
+        "name": "Rozliczenie zakupu sk\u0142adnik\u00f3w aktyw\u00f3w trwa\u0142ych"
        }, 
        {
-        "name": "Warto\u015bci dostaw niefakturowanych", 
-        "root_type": "Asset"
+        "name": "Warto\u015bci dostaw niefakturowanych"
        }, 
        {
-        "name": "Rozliczenie zakupu towar\u00f3w", 
-        "root_type": "Asset"
+        "name": "Rozliczenie zakupu towar\u00f3w"
        }, 
        {
-        "name": "Rozliczenie warto\u015bci materia\u0142\u00f3w i towar\u00f3w w drodze", 
-        "root_type": "Asset"
+        "name": "Rozliczenie warto\u015bci materia\u0142\u00f3w i towar\u00f3w w drodze"
        }, 
        {
-        "name": "Niedobory, szkody i nadwy\u017cki w transporcie", 
-        "root_type": "Asset"
+        "name": "Niedobory, szkody i nadwy\u017cki w transporcie"
        }
       ], 
       "name": "Rozliczenie zakupu"
@@ -185,16 +157,13 @@
      {
       "children": [
        {
-        "name": "Materia\u0142y w przerobie", 
-        "root_type": "Asset"
+        "name": "Materia\u0142y w przerobie"
        }, 
        {
-        "name": "Materia\u0142y", 
-        "root_type": "Asset"
+        "name": "Materia\u0142y"
        }, 
        {
-        "name": "Opakowania", 
-        "root_type": "Asset"
+        "name": "Opakowania"
        }
       ], 
       "name": "Materia\u0142y i opakowania"
@@ -207,12 +176,10 @@
      {
       "children": [
        {
-        "name": "Nieruchomo\u015bci", 
-        "root_type": "Asset"
+        "name": "Nieruchomo\u015bci"
        }, 
        {
-        "name": "Warto\u015bci niematerialne i prawne", 
-        "root_type": "Asset"
+        "name": "Warto\u015bci niematerialne i prawne"
        }
       ], 
       "name": "Inwestycje w nieruchomo\u015bci i prawa"
@@ -222,12 +189,10 @@
        {
         "children": [
          {
-          "name": "Odpisy umorzeniowe inwestycji w warto\u015bci niematerialne i prawne", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe inwestycji w warto\u015bci niematerialne i prawne"
          }, 
          {
-          "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci"
          }
         ], 
         "name": "Odpisy umorzeniowe inwestycji w nieruchomo\u015bci i prawa"
@@ -235,16 +200,13 @@
        {
         "children": [
          {
-          "name": "Odpisy umorzeniowe innych warto\u015bci niematerialnych i prawnych", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe innych warto\u015bci niematerialnych i prawnych"
          }, 
          {
-          "name": "Odpisy umorzeniowe zako\u0144czonych prac rozwojowych", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe zako\u0144czonych prac rozwojowych"
          }, 
          {
-          "name": "Odpisy umorzeniowe warto\u015bci firmy", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe warto\u015bci firmy"
          }
         ], 
         "name": "Odpisy umorzeniowe warto\u015bci niematerialnych i prawnych"
@@ -252,28 +214,22 @@
        {
         "children": [
          {
-          "name": "Odpisy umorzeniowe innych \u015brodk\u00f3w trwa\u0142ych", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe innych \u015brodk\u00f3w trwa\u0142ych"
          }, 
          {
-          "name": "Odpisy umorzeniowe budynk\u00f3w, lokali i obiekt\u00f3w in\u017cynierii l\u0105dowej i wodnej", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe budynk\u00f3w, lokali i obiekt\u00f3w in\u017cynierii l\u0105dowej i wodnej"
          }, 
          {
-          "name": "Odpisy umorzeniowe warto\u015bci grunt\u00f3w i prawa wieczystego u\u017cytkowania grunt\u00f3w", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe warto\u015bci grunt\u00f3w i prawa wieczystego u\u017cytkowania grunt\u00f3w"
          }, 
          {
-          "name": "Odpisy umorzeniowe ulepsze\u0144 obcych \u015brodk\u00f3w trwa\u0142ych", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe ulepsze\u0144 obcych \u015brodk\u00f3w trwa\u0142ych"
          }, 
          {
-          "name": "Odpisy umorzeniowe \u015brodk\u00f3w transportu", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe \u015brodk\u00f3w transportu"
          }, 
          {
-          "name": "Odpisy umorzeniowe urz\u0105dze\u0144 technicznych i maszyn", 
-          "root_type": "Asset"
+          "name": "Odpisy umorzeniowe urz\u0105dze\u0144 technicznych i maszyn"
          }
         ], 
         "name": "Odpisy umorzeniowe \u015brodk\u00f3w trwa\u0142ych"
@@ -284,20 +240,16 @@
      {
       "children": [
        {
-        "name": "Koszty zako\u0144czonych prac rozwojowych", 
-        "root_type": "Asset"
+        "name": "Koszty zako\u0144czonych prac rozwojowych"
        }, 
        {
-        "name": "Zaliczki na warto\u015bci niematerialne i prawne", 
-        "root_type": "Asset"
+        "name": "Zaliczki na warto\u015bci niematerialne i prawne"
        }, 
        {
-        "name": "Nabyta warto\u015b\u0107 firmy", 
-        "root_type": "Asset"
+        "name": "Nabyta warto\u015b\u0107 firmy"
        }, 
        {
-        "name": "Inne warto\u015bci niematerialne i prawne", 
-        "root_type": "Asset"
+        "name": "Inne warto\u015bci niematerialne i prawne"
        }
       ], 
       "name": "Warto\u015bci niematerialne i prawne"
@@ -305,12 +257,10 @@
      {
       "children": [
        {
-        "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego", 
-        "root_type": "Asset"
+        "name": "Aktywa z tytu\u0142u odroczonego podatku dochodowego"
        }, 
        {
-        "name": "Inne rozliczenia mi\u0119dzyokresowe", 
-        "root_type": "Asset"
+        "name": "Inne rozliczenia mi\u0119dzyokresowe"
        }
       ], 
       "name": "D\u0142ugoterminowe rozliczenia mi\u0119dzyokresowe"
@@ -318,24 +268,19 @@
      {
       "children": [
        {
-        "name": "Inwestycje budowy \u015brodka trwa\u0142ego", 
-        "root_type": "Asset"
+        "name": "Inwestycje budowy \u015brodka trwa\u0142ego"
        }, 
        {
-        "name": "Zaliczki na \u015brodki trwa\u0142e w budowie", 
-        "root_type": "Asset"
+        "name": "Zaliczki na \u015brodki trwa\u0142e w budowie"
        }, 
        {
-        "name": "Ulepszenia \u015brodka trwa\u0142ego", 
-        "root_type": "Asset"
+        "name": "Ulepszenia \u015brodka trwa\u0142ego"
        }, 
        {
-        "name": "Ulepszenia obcych \u015brodk\u00f3w trwa\u0142ych", 
-        "root_type": "Asset"
+        "name": "Ulepszenia obcych \u015brodk\u00f3w trwa\u0142ych"
        }, 
        {
-        "name": "Nak\u0142ady na budow\u0119 \u015brodka trwa\u0142ego", 
-        "root_type": "Asset"
+        "name": "Nak\u0142ady na budow\u0119 \u015brodka trwa\u0142ego"
        }
       ], 
       "name": "\u015arodki trwa\u0142e w budowie"
@@ -345,8 +290,7 @@
        {
         "children": [
          {
-          "name": "Inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych", 
-          "root_type": "Asset"
+          "name": "Inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych"
          }
         ], 
         "name": "Inne inwestycje d\u0142ugoterminowe"
@@ -354,20 +298,16 @@
        {
         "children": [
          {
-          "name": "Udzia\u0142y lub akcje", 
-          "root_type": "Asset"
+          "name": "Udzia\u0142y lub akcje"
          }, 
          {
-          "name": "Inne d\u0142ugoterminowe aktywa finansowe", 
-          "root_type": "Asset"
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe"
          }, 
          {
-          "name": "Inne papiery warto\u015bciowe", 
-          "root_type": "Asset"
+          "name": "Inne papiery warto\u015bciowe"
          }, 
          {
-          "name": "Udzielone po\u017cyczki", 
-          "root_type": "Asset"
+          "name": "Udzielone po\u017cyczki"
          }
         ], 
         "name": "W jednostkach powi\u0105zanych"
@@ -375,20 +315,16 @@
        {
         "children": [
          {
-          "name": "Udzia\u0142y lub akcje", 
-          "root_type": "Asset"
+          "name": "Udzia\u0142y lub akcje"
          }, 
          {
-          "name": "Inne papiery warto\u015bciowe", 
-          "root_type": "Asset"
+          "name": "Inne papiery warto\u015bciowe"
          }, 
          {
-          "name": "Inne d\u0142ugoterminowe aktywa finansowe", 
-          "root_type": "Asset"
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe"
          }, 
          {
-          "name": "Udzielone po\u017cyczki", 
-          "root_type": "Asset"
+          "name": "Udzielone po\u017cyczki"
          }
         ], 
         "name": "Odpisy aktualizuj\u0105ce d\u0142ugoterminowe aktywa finansowe"
@@ -396,20 +332,16 @@
        {
         "children": [
          {
-          "name": "Udzia\u0142y lub akcje", 
-          "root_type": "Asset"
+          "name": "Udzia\u0142y lub akcje"
          }, 
          {
-          "name": "Udzielone po\u017cyczki", 
-          "root_type": "Asset"
+          "name": "Udzielone po\u017cyczki"
          }, 
          {
-          "name": "Inne d\u0142ugoterminowe aktywa finansowe", 
-          "root_type": "Asset"
+          "name": "Inne d\u0142ugoterminowe aktywa finansowe"
          }, 
          {
-          "name": "Inne papiery warto\u015bciowe", 
-          "root_type": "Asset"
+          "name": "Inne papiery warto\u015bciowe"
          }
         ], 
         "name": "W pozosta\u0142ych jednostkach"
@@ -420,12 +352,10 @@
      {
       "children": [
        {
-        "name": "Od jednostek powi\u0105zanych", 
-        "root_type": "Asset"
+        "name": "Od jednostek powi\u0105zanych"
        }, 
        {
-        "name": "Od pozosta\u0142ych jednostek", 
-        "root_type": "Asset"
+        "name": "Od pozosta\u0142ych jednostek"
        }
       ], 
       "name": "Nale\u017cno\u015bci d\u0142ugoterminowe"
@@ -433,24 +363,19 @@
      {
       "children": [
        {
-        "name": "Urz\u0105dzenia techniczne i maszyny", 
-        "root_type": "Asset"
+        "name": "Urz\u0105dzenia techniczne i maszyny"
        }, 
        {
-        "name": "\u015arodki transportu", 
-        "root_type": "Asset"
+        "name": "\u015arodki transportu"
        }, 
        {
-        "name": "Grunty w\u0142asne i prawa wieczystego u\u017cytkowania grunt\u00f3w", 
-        "root_type": "Asset"
+        "name": "Grunty w\u0142asne i prawa wieczystego u\u017cytkowania grunt\u00f3w"
        }, 
        {
-        "name": "Budynki, lokale i obiekty in\u017cynierii l\u0105dowej i wodnej", 
-        "root_type": "Asset"
+        "name": "Budynki, lokale i obiekty in\u017cynierii l\u0105dowej i wodnej"
        }, 
        {
-        "name": "Inne \u015brodki trwa\u0142e", 
-        "root_type": "Asset"
+        "name": "Inne \u015brodki trwa\u0142e"
        }
       ], 
       "name": "\u015arodki Trwa\u0142e"
@@ -458,20 +383,16 @@
      {
       "children": [
        {
-        "name": "Odpisy aktualizuj\u0105ce udzia\u0142y i akcje w obcych jednostkach", 
-        "root_type": "Asset"
+        "name": "Odpisy aktualizuj\u0105ce udzia\u0142y i akcje w obcych jednostkach"
        }, 
        {
-        "name": "Odpisy aktualizuj\u0105ce udzielone po\u017cyczki d\u0142ugoterminowe", 
-        "root_type": "Asset"
+        "name": "Odpisy aktualizuj\u0105ce udzielone po\u017cyczki d\u0142ugoterminowe"
        }, 
        {
-        "name": "Odpisy aktualizuj\u0105ce inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych", 
-        "root_type": "Asset"
+        "name": "Odpisy aktualizuj\u0105ce inne rodzaje d\u0142ugoterminowych aktyw\u00f3w finansowych"
        }, 
        {
-        "name": "Odpisy aktualizuj\u0105ce lokaty", 
-        "root_type": "Asset"
+        "name": "Odpisy aktualizuj\u0105ce lokaty"
        }
       ], 
       "name": "Odpisy aktualizuj\u0105ce d\u0142ugoterminowe aktywa finansowe"
@@ -482,24 +403,20 @@
    {
     "children": [
      {
-      "name": "Pozosta\u0142e koszty rodzajowe", 
-      "root_type": "Expense"
+      "name": "Pozosta\u0142e koszty rodzajowe"
      }, 
      {
       "children": [
        {
         "children": [
          {
-          "name": "Sk\u0142adki na ubezpieczenia spo\u0142eczne, FP, FG\u015aP", 
-          "root_type": "Expense"
+          "name": "Sk\u0142adki na ubezpieczenia spo\u0142eczne, FP, FG\u015aP"
          }, 
          {
-          "name": "Odpisy na zak\u0142adowy fundusz \u015bwiadcze\u0144 socjalnych lub \u015bwiadczenia urlopowe", 
-          "root_type": "Expense"
+          "name": "Odpisy na zak\u0142adowy fundusz \u015bwiadcze\u0144 socjalnych lub \u015bwiadczenia urlopowe"
          }, 
          {
-          "name": "Pozosta\u0142e \u015bwiadczenia", 
-          "root_type": "Expense"
+          "name": "Pozosta\u0142e \u015bwiadczenia"
          }
         ], 
         "name": "Ubezpieczenia spo\u0142eczne i inne \u015bwiadczenia"
@@ -507,40 +424,31 @@
        {
         "children": [
          {
-          "name": "Podatek od \u015brodk\u00f3w transportowych", 
-          "root_type": "Expense"
+          "name": "Podatek od \u015brodk\u00f3w transportowych"
          }, 
          {
-          "name": "Op\u0142aty skarbowe", 
-          "root_type": "Expense"
+          "name": "Op\u0142aty skarbowe"
          }, 
          {
-          "name": "Pozosta\u0142e podatki i op\u0142aty", 
-          "root_type": "Expense"
+          "name": "Pozosta\u0142e podatki i op\u0142aty"
          }, 
          {
-          "name": "VAT niepodlegaj\u0105cy odliczeniu", 
-          "root_type": "Expense"
+          "name": "VAT niepodlegaj\u0105cy odliczeniu"
          }, 
          {
-          "name": "Podatek akcyzowy", 
-          "root_type": "Expense"
+          "name": "Podatek akcyzowy"
          }, 
          {
-          "name": "Op\u0142aty i prowizje bankowe", 
-          "root_type": "Expense"
+          "name": "Op\u0142aty i prowizje bankowe"
          }, 
          {
-          "name": "Podatek od nieruchomo\u015bci", 
-          "root_type": "Expense"
+          "name": "Podatek od nieruchomo\u015bci"
          }, 
          {
-          "name": "Op\u0142aty s\u0105dowe, prawnicze i notarialne", 
-          "root_type": "Expense"
+          "name": "Op\u0142aty s\u0105dowe, prawnicze i notarialne"
          }, 
          {
-          "name": "Koncesje", 
-          "root_type": "Expense"
+          "name": "Koncesje"
          }
         ], 
         "name": "Podatki i op\u0142aty"
@@ -548,24 +456,19 @@
        {
         "children": [
          {
-          "name": "Zu\u017cycie energii", 
-          "root_type": "Expense"
+          "name": "Zu\u017cycie energii"
          }, 
          {
-          "name": "Zu\u017cycie paliwa do \u015brodk\u00f3w transportu", 
-          "root_type": "Expense"
+          "name": "Zu\u017cycie paliwa do \u015brodk\u00f3w transportu"
          }, 
          {
-          "name": "Zu\u017cycie innych materia\u0142\u00f3w", 
-          "root_type": "Expense"
+          "name": "Zu\u017cycie innych materia\u0142\u00f3w"
          }, 
          {
-          "name": "Zu\u017cycie materia\u0142\u00f3w biurowych", 
-          "root_type": "Expense"
+          "name": "Zu\u017cycie materia\u0142\u00f3w biurowych"
          }, 
          {
-          "name": "Zu\u017cycie surowc\u00f3w do wytwarzania produkt\u00f3w", 
-          "root_type": "Expense"
+          "name": "Zu\u017cycie surowc\u00f3w do wytwarzania produkt\u00f3w"
          }
         ], 
         "name": "Zu\u017cycie materia\u0142\u00f3w i energii"
@@ -573,12 +476,10 @@
        {
         "children": [
          {
-          "name": "Wynagrodzenia os\u00f3b dora\u017anie zatrudnionych", 
-          "root_type": "Expense"
+          "name": "Wynagrodzenia os\u00f3b dora\u017anie zatrudnionych"
          }, 
          {
-          "name": "Wynagrodzenia pracownik\u00f3w", 
-          "root_type": "Expense"
+          "name": "Wynagrodzenia pracownik\u00f3w"
          }
         ], 
         "name": "Wynagrodzenia"
@@ -586,36 +487,28 @@
        {
         "children": [
          {
-          "name": "Us\u0142ugi remontowe", 
-          "root_type": "Expense"
+          "name": "Us\u0142ugi remontowe"
          }, 
          {
-          "name": "Pozosta\u0142e us\u0142ugi", 
-          "root_type": "Expense"
+          "name": "Pozosta\u0142e us\u0142ugi"
          }, 
          {
-          "name": "Us\u0142ugi pocztowe", 
-          "root_type": "Expense"
+          "name": "Us\u0142ugi pocztowe"
          }, 
          {
-          "name": "Us\u0142ugi graficzne i drukarskie", 
-          "root_type": "Expense"
+          "name": "Us\u0142ugi graficzne i drukarskie"
          }, 
          {
-          "name": "Analizy sanitarne", 
-          "root_type": "Expense"
+          "name": "Analizy sanitarne"
          }, 
          {
-          "name": "Us\u0142ugi telekomunikacyjne", 
-          "root_type": "Expense"
+          "name": "Us\u0142ugi telekomunikacyjne"
          }, 
          {
-          "name": "Us\u0142ugi celne", 
-          "root_type": "Expense"
+          "name": "Us\u0142ugi celne"
          }, 
          {
-          "name": "Us\u0142ugi kurierskie i transportowe", 
-          "root_type": "Expense"
+          "name": "Us\u0142ugi kurierskie i transportowe"
          }
         ], 
         "name": "Us\u0142ugi obce"
@@ -624,33 +517,27 @@
       "name": "Koszty wed\u0142ug rodzaj\u00f3w"
      }, 
      {
-      "name": "Amortyzacja", 
-      "root_type": "Expense"
+      "name": "Amortyzacja"
      }, 
      {
       "children": [
        {
-        "name": "Nie podlegaj\u0105ce rozliczeniu w czasie", 
-        "root_type": "Expense"
+        "name": "Nie podlegaj\u0105ce rozliczeniu w czasie"
        }, 
        {
-        "name": "Przypadaj\u0105ce na przysz\u0142e okresy", 
-        "root_type": "Expense"
+        "name": "Przypadaj\u0105ce na przysz\u0142e okresy"
        }, 
        {
-        "name": "Koszty zgromadzone", 
-        "root_type": "Expense"
+        "name": "Koszty zgromadzone"
        }, 
        {
-        "name": "Koszty nie wliczane do warto\u015bci sprzeda\u017cy", 
-        "root_type": "Expense"
+        "name": "Koszty nie wliczane do warto\u015bci sprzeda\u017cy"
        }
       ], 
       "name": "Rozliczenie koszt\u00f3w"
      }, 
      {
-      "name": "\u015awiadczenia na rzecz pracownik\u00f3w", 
-      "root_type": "Expense"
+      "name": "\u015awiadczenia na rzecz pracownik\u00f3w"
      }
     ], 
     "name": "Koszty wed\u0142ug rodzaj\u00f3w i ich rozliczenie"
@@ -660,20 +547,16 @@
      {
       "children": [
        {
-        "name": "\u015awiadczenia na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie", 
-        "root_type": "Income"
+        "name": "\u015awiadczenia na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie"
        }, 
        {
-        "name": "Koszt niedobor\u00f3w produkt\u00f3w", 
-        "root_type": "Income"
+        "name": "Koszt niedobor\u00f3w produkt\u00f3w"
        }, 
        {
-        "name": "Koszt wyrob\u00f3w w\u0142asnej produkcji wydanych do w\u0142asnych sklep\u00f3w", 
-        "root_type": "Income"
+        "name": "Koszt wyrob\u00f3w w\u0142asnej produkcji wydanych do w\u0142asnych sklep\u00f3w"
        }, 
        {
-        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci", 
-        "root_type": "Income"
+        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci"
        }
       ], 
       "name": "Obroty wewn\u0119trzne"
@@ -681,45 +564,36 @@
      {
       "children": [
        {
-        "name": "Sprzeda\u017c produkt\u00f3w na kraj", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c produkt\u00f3w na kraj"
        }, 
        {
-        "name": "Sprzeda\u017c us\u0142ug na kraj", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c us\u0142ug na kraj"
        }, 
        {
-        "name": "Sprzeda\u017c produkt\u00f3w na eksport", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c produkt\u00f3w na eksport"
        }, 
        {
-        "name": "Sprzeda\u017c us\u0142ug na eksport", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c us\u0142ug na eksport"
        }
       ], 
       "name": "Sprzeda\u017c produkt\u00f3w"
      }, 
      {
-      "name": "Straty nadzwyczajne", 
-      "root_type": "Expense"
+      "name": "Straty nadzwyczajne"
      }, 
      {
       "children": [
        {
-        "name": "Sprzeda\u017c wysy\u0142kowa towar\u00f3w", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c wysy\u0142kowa towar\u00f3w"
        }, 
        {
-        "name": "Prowizja komisowa", 
-        "root_type": "Income"
+        "name": "Prowizja komisowa"
        }, 
        {
-        "name": "Sprzeda\u017c detaliczna towar\u00f3w", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c detaliczna towar\u00f3w"
        }, 
        {
-        "name": "Sprzeda\u017c hurtowa towar\u00f3w", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c hurtowa towar\u00f3w"
        }
       ], 
       "name": "Sprzeda\u017c towar\u00f3w"
@@ -727,20 +601,16 @@
      {
       "children": [
        {
-        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na eksport", 
-        "root_type": "Expense"
+        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na eksport"
        }, 
        {
-        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na kraj", 
-        "root_type": "Expense"
+        "name": "Koszt w\u0142asny sprzeda\u017cy us\u0142ug na kraj"
        }, 
        {
-        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na kraj", 
-        "root_type": "Expense"
+        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na kraj"
        }, 
        {
-        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na eksport", 
-        "root_type": "Expense"
+        "name": "Koszt w\u0142asny sprzeda\u017cy produkt\u00f3w na eksport"
        }
       ], 
       "name": "Koszty sprzedanych produkt\u00f3w"
@@ -748,20 +618,16 @@
      {
       "children": [
        {
-        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy hurtowej", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy hurtowej"
        }, 
        {
-        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy detalicznej", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy detalicznej"
        }, 
        {
-        "name": "Prowizja komisowa", 
-        "root_type": "Expense"
+        "name": "Prowizja komisowa"
        }, 
        {
-        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy wysy\u0142kowej", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy wysy\u0142kowej"
        }
       ], 
       "name": "Warto\u015b\u0107 sprzedanych towar\u00f3w w cenach zakupu"
@@ -769,24 +635,19 @@
      {
       "children": [
        {
-        "name": "Koszt wytworzenia zako\u0144czonych prac rozwojowych", 
-        "root_type": "Expense"
+        "name": "Koszt wytworzenia zako\u0144czonych prac rozwojowych"
        }, 
        {
-        "name": "Koszt wytworzenia produkt\u00f3w uznanych za niedobory", 
-        "root_type": "Expense"
+        "name": "Koszt wytworzenia produkt\u00f3w uznanych za niedobory"
        }, 
        {
-        "name": "Koszt wytworzenia wyrob\u00f3w gotowych wydanych do w\u0142asnych sklep\u00f3w", 
-        "root_type": "Expense"
+        "name": "Koszt wytworzenia wyrob\u00f3w gotowych wydanych do w\u0142asnych sklep\u00f3w"
        }, 
        {
-        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci", 
-        "root_type": "Expense"
+        "name": "Koszt zaniechania okre\u015blonego rodzaju dzia\u0142alno\u015bci"
        }, 
        {
-        "name": "Koszt wytworzenia \u015bwiadcze\u0144 na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie", 
-        "root_type": "Expense"
+        "name": "Koszt wytworzenia \u015bwiadcze\u0144 na rzecz \u015brodk\u00f3w trwa\u0142ych w budowie"
        }
       ], 
       "name": "Koszt obrot\u00f3w wewn\u0119trznych"
@@ -794,24 +655,19 @@
      {
       "children": [
        {
-        "name": "Otrzymane dotacje", 
-        "root_type": "Income"
+        "name": "Otrzymane dotacje"
        }, 
        {
-        "name": "Przychody z us\u0142ug socjalnych", 
-        "root_type": "Income"
+        "name": "Przychody z us\u0142ug socjalnych"
        }, 
        {
-        "name": "Inne pozosta\u0142e przychody operacyjne", 
-        "root_type": "Income"
+        "name": "Inne pozosta\u0142e przychody operacyjne"
        }, 
        {
-        "name": "Przychody ze wzrostu warto\u015bci niefinansowych aktyw\u00f3w trwa\u0142ych", 
-        "root_type": "Income"
+        "name": "Przychody ze wzrostu warto\u015bci niefinansowych aktyw\u00f3w trwa\u0142ych"
        }, 
        {
-        "name": "Przychody ze zbycia niefinansowych aktyw\u00f3w trwa\u0142ych", 
-        "root_type": "Income"
+        "name": "Przychody ze zbycia niefinansowych aktyw\u00f3w trwa\u0142ych"
        }
       ], 
       "name": "Pozosta\u0142e przychody operacyjne"
@@ -819,37 +675,30 @@
      {
       "children": [
        {
-        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych materia\u0142\u00f3w", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych materia\u0142\u00f3w"
        }, 
        {
-        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych odpad\u00f3w", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych odpad\u00f3w"
        }, 
        {
-        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych opakowa\u0144", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 w cenach zakupu sprzedanych opakowa\u0144"
        }
       ], 
       "name": "Warto\u015b\u0107 sprzedanych materia\u0142\u00f3w i opakowa\u0144"
      }, 
      {
-      "name": "Zyski nadzwyczajne", 
-      "root_type": "Income"
+      "name": "Zyski nadzwyczajne"
      }, 
      {
       "children": [
        {
-        "name": "Sprzeda\u017c odpad\u00f3w", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c odpad\u00f3w"
        }, 
        {
-        "name": "Sprzeda\u017c materia\u0142\u00f3w", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c materia\u0142\u00f3w"
        }, 
        {
-        "name": "Sprzeda\u017c opakowa\u0144", 
-        "root_type": "Income"
+        "name": "Sprzeda\u017c opakowa\u0144"
        }
       ], 
       "name": "Sprzeda\u017c materia\u0142\u00f3w i opakowa\u0144"
@@ -857,32 +706,25 @@
      {
       "children": [
        {
-        "name": "Aktualizacja warto\u015bci inwestycji-przychody", 
-        "root_type": "Income"
+        "name": "Aktualizacja warto\u015bci inwestycji-przychody"
        }, 
        {
-        "name": "Kwoty nale\u017cne ze sprzeda\u017cy aktyw\u00f3w finansowych", 
-        "root_type": "Income"
+        "name": "Kwoty nale\u017cne ze sprzeda\u017cy aktyw\u00f3w finansowych"
        }, 
        {
-        "name": "Dodatnie r\u00f3\u017cnice kursu walut", 
-        "root_type": "Income"
+        "name": "Dodatnie r\u00f3\u017cnice kursu walut"
        }, 
        {
-        "name": "Otrzymane odsetki", 
-        "root_type": "Income"
+        "name": "Otrzymane odsetki"
        }, 
        {
-        "name": "Przychody ze zbycia inwestycji", 
-        "root_type": "Income"
+        "name": "Przychody ze zbycia inwestycji"
        }, 
        {
-        "name": "Pozosta\u0142e przychody finansowe", 
-        "root_type": "Income"
+        "name": "Pozosta\u0142e przychody finansowe"
        }, 
        {
-        "name": "Kwoty nale\u017cne z tytu\u0142u dywidend", 
-        "root_type": "Income"
+        "name": "Kwoty nale\u017cne z tytu\u0142u dywidend"
        }
       ], 
       "name": "Przychody finansowe"
@@ -890,24 +732,19 @@
      {
       "children": [
        {
-        "name": "Warto\u015b\u0107 sprzedanych inwestycji", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 sprzedanych inwestycji"
        }, 
        {
-        "name": "Pozosta\u0142e koszty finansowe", 
-        "root_type": "Expense"
+        "name": "Pozosta\u0142e koszty finansowe"
        }, 
        {
-        "name": "Odpisy z tytu\u0142u utraty warto\u015bci inwestycji-koszty", 
-        "root_type": "Expense"
+        "name": "Odpisy z tytu\u0142u utraty warto\u015bci inwestycji-koszty"
        }, 
        {
-        "name": "Odsetki zap\u0142acone", 
-        "root_type": "Expense"
+        "name": "Odsetki zap\u0142acone"
        }, 
        {
-        "name": "Ujemne r\u00f3\u017cnice kursu walut", 
-        "root_type": "Expense"
+        "name": "Ujemne r\u00f3\u017cnice kursu walut"
        }
       ], 
       "name": "Koszty finansowe"
@@ -915,20 +752,16 @@
      {
       "children": [
        {
-        "name": "Odpisy z tytu\u0142u utraty warto\u015bci aktyw\u00f3w niefinansowych", 
-        "root_type": "Expense"
+        "name": "Odpisy z tytu\u0142u utraty warto\u015bci aktyw\u00f3w niefinansowych"
        }, 
        {
-        "name": "Dotacje przekazane", 
-        "root_type": "Expense"
+        "name": "Dotacje przekazane"
        }, 
        {
-        "name": "Inne pozosta\u0142e koszty operacyjne", 
-        "root_type": "Expense"
+        "name": "Inne pozosta\u0142e koszty operacyjne"
        }, 
        {
-        "name": "Warto\u015b\u0107 sprzedanych niefinansowych aktyw\u00f3w trwa\u0142ych", 
-        "root_type": "Expense"
+        "name": "Warto\u015b\u0107 sprzedanych niefinansowych aktyw\u00f3w trwa\u0142ych"
        }
       ], 
       "name": "Pozosta\u0142e koszty operacyjne"
@@ -941,29 +774,24 @@
      {
       "children": [
        {
-        "name": "Koszty zarz\u0105dzania jednostk\u0105", 
-        "root_type": "Expense"
+        "name": "Koszty zarz\u0105dzania jednostk\u0105"
        }, 
        {
-        "name": "\u015awiadczenia us\u0142ug na potrzeby reprezentacji i reklamy", 
-        "root_type": "Expense"
+        "name": "\u015awiadczenia us\u0142ug na potrzeby reprezentacji i reklamy"
        }
       ], 
       "name": "Koszty zarz\u0105du"
      }, 
      {
-      "name": "Rozliczenie koszt\u00f3w dzia\u0142alno\u015bci", 
-      "root_type": "Expense"
+      "name": "Rozliczenie koszt\u00f3w dzia\u0142alno\u015bci"
      }, 
      {
       "children": [
        {
-        "name": "Koszty utrzymania punkt\u00f3w sprzeda\u017cy detalicznej", 
-        "root_type": "Expense"
+        "name": "Koszty utrzymania punkt\u00f3w sprzeda\u017cy detalicznej"
        }, 
        {
-        "name": "Koszty sprzeda\u017cy wyrob\u00f3w", 
-        "root_type": "Expense"
+        "name": "Koszty sprzeda\u017cy wyrob\u00f3w"
        }
       ], 
       "name": "Koszty dzia\u0142alno\u015bci podstawowej-handlowej"
@@ -971,12 +799,10 @@
      {
       "children": [
        {
-        "name": "Pozosta\u0142e koszty", 
-        "root_type": "Expense"
+        "name": "Pozosta\u0142e koszty"
        }, 
        {
-        "name": "\u015awiadczenia us\u0142ug transportowych", 
-        "root_type": "Expense"
+        "name": "\u015awiadczenia us\u0142ug transportowych"
        }
       ], 
       "name": "Koszty dzia\u0142alno\u015bci pomocniczej"
@@ -984,20 +810,16 @@
      {
       "children": [
        {
-        "name": "Straty zwi\u0105zane z wykonaniem d\u0142ugotrwa\u0142ych us\u0142ug", 
-        "root_type": "Expense"
+        "name": "Straty zwi\u0105zane z wykonaniem d\u0142ugotrwa\u0142ych us\u0142ug"
        }, 
        {
-        "name": "Rozliczone koszty dzia\u0142alno\u015bci", 
-        "root_type": "Expense"
+        "name": "Rozliczone koszty dzia\u0142alno\u015bci"
        }, 
        {
-        "name": "Koszty utrzymania hurtowni", 
-        "root_type": "Expense"
+        "name": "Koszty utrzymania hurtowni"
        }, 
        {
-        "name": "Koszty nie zako\u0144czonych d\u0142ugotrwa\u0142ych us\u0142ug", 
-        "root_type": "Expense"
+        "name": "Koszty nie zako\u0144czonych d\u0142ugotrwa\u0142ych us\u0142ug"
        }
       ], 
       "name": "Koszty dzia\u0142alno\u015bci podstawowej-produkcyjnej"
@@ -1008,36 +830,29 @@
    {
     "children": [
      {
-      "name": "Inne inwestycje kr\u00f3tkoterminowe", 
-      "root_type": "Asset"
+      "name": "Inne inwestycje kr\u00f3tkoterminowe"
      }, 
      {
-      "name": "Kr\u00f3tkoterminowe rozliczenia mi\u0119dzyokresowe", 
-      "root_type": "Asset"
+      "name": "Kr\u00f3tkoterminowe rozliczenia mi\u0119dzyokresowe"
      }, 
      {
       "children": [
        {
-        "name": "Odpisy aktualizuj\u0105ce kr\u00f3tkoterminowe aktywa finansowe", 
-        "root_type": "Asset"
+        "name": "Odpisy aktualizuj\u0105ce kr\u00f3tkoterminowe aktywa finansowe"
        }, 
        {
         "children": [
          {
-          "name": "Inne papiery warto\u015bciowe", 
-          "root_type": "Asset"
+          "name": "Inne papiery warto\u015bciowe"
          }, 
          {
-          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe", 
-          "root_type": "Asset"
+          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe"
          }, 
          {
-          "name": "Udzielone po\u017cyczki", 
-          "root_type": "Expense"
+          "name": "Udzielone po\u017cyczki"
          }, 
          {
-          "name": "Udzia\u0142y lub akcje", 
-          "root_type": "Asset"
+          "name": "Udzia\u0142y lub akcje"
          }
         ], 
         "name": "Kr\u00f3tkoterminowe aktywa finansowe w jednostkach powi\u0105zanych"
@@ -1045,16 +860,13 @@
        {
         "children": [
          {
-          "name": "Udzia\u0142y lub akcje", 
-          "root_type": "Asset"
+          "name": "Udzia\u0142y lub akcje"
          }, 
          {
-          "name": "Inne papiery warto\u015bciowe", 
-          "root_type": "Asset"
+          "name": "Inne papiery warto\u015bciowe"
          }, 
          {
-          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe", 
-          "root_type": "Asset"
+          "name": "Inne kr\u00f3tkoterminowe aktywa finansowe"
          }
         ], 
         "name": "Kr\u00f3tkoterminowe aktywa finansowe w pozosta\u0142ych jednostkach"
@@ -1063,64 +875,52 @@
       "name": "Kr\u00f3tkoterminowe aktywa finansowe"
      }, 
      {
-      "name": "Inne aktywa pieni\u0119\u017cne", 
-      "root_type": "Asset"
+      "name": "Inne aktywa pieni\u0119\u017cne"
      }, 
      {
       "children": [
        {
         "children": [
          {
-          "name": "Rachunek bankowy akretytywy", 
-          "root_type": "Asset"
+          "name": "Rachunek bankowy akretytywy"
          }, 
          {
-          "name": "Rachunek bankowy lokat terminowych", 
-          "root_type": "Asset"
+          "name": "Rachunek bankowy lokat terminowych"
          }, 
          {
-          "name": "Rachunek bankowy wyodr\u0119bnionych \u015brodk\u00f3w pieni\u0119\u017cnych ZF\u015aS", 
-          "root_type": "Asset"
+          "name": "Rachunek bankowy wyodr\u0119bnionych \u015brodk\u00f3w pieni\u0119\u017cnych ZF\u015aS"
          }
         ], 
         "name": "Inne rachunki bankowe"
        }, 
        {
-        "name": "Rachunek \u015brodk\u00f3w walutowych", 
-        "root_type": "Asset"
+        "name": "Rachunek \u015brodk\u00f3w walutowych"
        }, 
        {
-        "name": "Rachunek bie\u017c\u0105cy", 
-        "root_type": "Asset"
+        "name": "Rachunek bie\u017c\u0105cy"
        }, 
        {
-        "name": "Rachunek \u015brodk\u00f3w wyodr\u0119bnionych i zablokowanych", 
-        "root_type": "Asset"
+        "name": "Rachunek \u015brodk\u00f3w wyodr\u0119bnionych i zablokowanych"
        }, 
        {
-        "name": "\u015arodki pieni\u0119\u017cne w drodze", 
-        "root_type": "Asset"
+        "name": "\u015arodki pieni\u0119\u017cne w drodze"
        }, 
        {
-        "name": "Rachunki kredyt\u00f3w bankowych", 
-        "root_type": "Asset"
+        "name": "Rachunki kredyt\u00f3w bankowych"
        }
       ], 
       "name": "Rachunki i kredyty bankowe"
      }, 
      {
-      "name": "Inne \u015brodki pieni\u0119\u017cne", 
-      "root_type": "Asset"
+      "name": "Inne \u015brodki pieni\u0119\u017cne"
      }, 
      {
       "children": [
        {
-        "name": "Kasa zagranicznych \u015brodk\u00f3w pieni\u0119\u017cnych", 
-        "root_type": "Asset"
+        "name": "Kasa zagranicznych \u015brodk\u00f3w pieni\u0119\u017cnych"
        }, 
        {
-        "name": "Kasa krajowych \u015brodk\u00f3w pieni\u0119\u017cnych", 
-        "root_type": "Asset"
+        "name": "Kasa krajowych \u015brodk\u00f3w pieni\u0119\u017cnych"
        }
       ], 
       "name": "\u015arodki pieni\u0119\u017cne w kasie"
@@ -1137,15 +937,15 @@
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki z tytu\u0142u po\u017cyczek udzielonych pracownikom"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Inne rozrachunki z pracownikami"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki z tytu\u0142u wynagrodze\u0144"
        }
       ], 
@@ -1158,15 +958,15 @@
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Nale\u017cno\u015bci warunkowe"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Weksle obce dyskontowane lub indosowane"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Zobowi\u0105zania warunkowe"
        }
       ], 
@@ -1175,29 +975,29 @@
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki z tytu\u0142u dop\u0142at i zwrotu dop\u0142at"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki wewn\u0105trzzak\u0142adowe"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki z tytu\u0142u dywidend"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Pozosta\u0142e rozrachunki"
        }, 
        {
         "children": [
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Po\u017cyczki otrzymane"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Po\u017cyczki udzielone"
          }
         ], 
@@ -1206,19 +1006,19 @@
        {
         "children": [
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozrachunki z tytu\u0142u umorzenia udzia\u0142\u00f3w w\u0142asnych"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozrachunki z tytu\u0142u wk\u0142ad\u00f3w niepieni\u0119\u017cnych na kapita\u0142 zak\u0142adowy"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozrachunki z tytu\u0142u wp\u0142at na kapita\u0142 zak\u0142adowy"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozrachunki z tytu\u0142u podwy\u017cszenia kapita\u0142u ze \u015brodk\u00f3w w\u0142asnych sp\u00f3\u0142ki"
          }
         ], 
@@ -1227,18 +1027,18 @@
        {
         "children": [
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie nadwy\u017cek"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie niedobor\u00f3w"
          }
         ], 
         "name": "Rozliczenie niedobor\u00f3w i nadwy\u017cek"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Nale\u017cno\u015bci dochodzone na drodze s\u0105dowej"
        }
       ], 
@@ -1247,48 +1047,48 @@
      {
       "children": [
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki publicznoprawne z urz\u0119dem celnym"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki publicznoprawne z PFRON"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki z urz\u0119dem skarbowym z tytu\u0142u VAT"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki publicznoprawne z urz\u0119dem miasta/gminy"
        }, 
        {
         "children": [
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie naliczonego VAT-23%"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie naliczonego VAT-0%"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie naliczonego VAT-5%"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie naliczonego VAT-8%"
          }
         ], 
         "name": "VAT naliczony i jego rozliczenie"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Pozosta\u0142e rozrachunki z urz\u0119dem skarbowym"
        }, 
        {
-        "account_type": "Bank or Cash", 
+        "account_type": "Cash", 
         "name": "Rozrachunki publicznoprawne z ZUS"
        }, 
        {
@@ -1297,19 +1097,19 @@
        {
         "children": [
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie nale\u017cnego VAT-23%"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie nale\u017cnego VAT-8%"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie nale\u017cnego VAT-0%"
          }, 
          {
-          "account_type": "Bank or Cash", 
+          "account_type": "Cash", 
           "name": "Rozliczenie nale\u017cnego VAT-5%"
          }
         ], 
@@ -1319,7 +1119,7 @@
       "name": "Rozrachunki publicznoprawne"
      }, 
      {
-      "account_type": "Bank or Cash", 
+      "account_type": "Cash", 
       "name": "Odpisy aktualizuj\u0105ce rozrachunki"
      }
     ], 

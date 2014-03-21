@@ -172,11 +172,11 @@
             "children": [
              {
               "name": "Venituri financiare din ajustari pentru pierderea de valoare a imobilizarilor financiare", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri financiare din ajustari pentru pierderea de valoare a activelor circulante", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Venituri financiare din ajustari pentru pierdere de valoare"
@@ -185,19 +185,19 @@
             "children": [
              {
               "name": "Venituri din ajustari pentru deprecierea imobilizarilor", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din provizioane", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din fondul comercial negativ", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din ajustari pentru deprecierea activelor circulante ", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Venituri din provizioane si ajustari pentru depreciere privind activitatea de exploatare"
@@ -209,53 +209,53 @@
           "children": [
            {
             "name": "Alte venituri financiare", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din creante imobilizate", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din diferente de curs valutar", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
               "name": "Castiguri din investitii pe termen scurt cedate", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din imobilizari financiare cedate", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Venituri din investitii financiare cedate"
            }, 
            {
             "name": "Venituri din sconturi obtinute", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din dobanzi", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
               "name": "Venituri din actiuni detinute la entitatile afiliate", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din interese de participare", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Venituri din imobilizari financiare"
            }, 
            {
             "name": "Venituri din investitii financiare pe termen scurt", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "VENITURI FINANCIARE"
@@ -264,7 +264,7 @@
           "children": [
            {
             "name": "Venituri din subventii pentru evenimente extraordinare si altele similare", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "VENITURI EXTRAORDINARE"
@@ -275,35 +275,35 @@
             "children": [
              {
               "name": "Venituri din subventii de exploatare pentru dobanda datorata", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare aferente altor venituri", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare pentru alte cheltuieli de exploatare", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare pentru asigurari si protectie sociala", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare pentru plata personalului", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare pentru alte cheltuieli externe", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare pentru materii prime si materiale consumabile ", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii de exploatare aferente cifrei de afaceri", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Venituri din subventii de exploatare"
@@ -315,29 +315,29 @@
           "children": [
            {
             "name": "Venituri din creante reactivate si debitori diversi", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
               "name": "Venituri din despagubiri, amenzi si penalitati", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din vanzarea activelor si alte operatii de capital", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din donatii si subventii primite", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Alte venituri din exploatare", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Venituri din subventii pentru investitii", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Alte venituri din exploatare"
@@ -349,11 +349,11 @@
           "children": [
            {
             "name": "Venituri din productia de imobilizari corporale", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din productia de imobilizari necorporale", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Venituri din productia de imobilizari"
@@ -362,39 +362,39 @@
           "children": [
            {
             "name": "Venituri din vanzarea marfurilor", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Reduceri comerciale acordate", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din activitati diverse", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din redevente, locatii de gestiune si chirii", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din studii si cercetari", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din lucrari executate si servicii prestate", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din vanzarea produselor reziduale", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din vanzarea semifabricatelor", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri din vanzarea produselor finite", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CIFRA DE AFACERI NETA"
@@ -403,11 +403,11 @@
           "children": [
            {
             "name": "Venituri aferente costurilor stocurilor de produse", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Venituri aferente costurilor serviciilor in curs de executie", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Venituri aferente costului productiei in curs de executie"
@@ -421,53 +421,53 @@
           "children": [
            {
             "name": "Cheltuieli cu tichetele de masa acordate salariatilor", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu primele reprezentand participarea personalului la profit", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu salariile personalului", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu renumerarea in instrumente de capitaluri proprii", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
               "name": "Contributia unitatii la schemele de pensii facultative", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Contributia unitatii la asigurarile sociale", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Contributia unitatii la fondul de garantare", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Contributia unitatii la fondul de concedii medicale", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Contributia unitatii la primele de asigurare voluntara de sanatate", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Contributia unitatii pentru ajutorul de somaj", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Contributia angajatorului pentru asigurarile sociale de sanatate", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Alte cheltuieli privind asigurarile si protectia sociala", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Cheltuieli privind asigurarile si protectia sociala"
@@ -479,11 +479,11 @@
           "children": [
            {
             "name": "Impozitul pe profit", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu impozitul pe venit si cu alte impozite care nu apar in elementele de mai sus", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CHELTUIELI CU IMPOZITUL PE PROFIT SI ALTE IMPOZITE"
@@ -494,15 +494,15 @@
             "children": [
              {
               "name": "Cheltuieli financiare privind ajustarile pentru pierderea de valoare a activelor circulante", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli financiare privind ajustarile pentru pierderea de valoare a imobilizarilor financiare", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli financiare privind amortizarea primelor de rambursare a obligatiunilor", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Cheltuieli financiare privind amortizarile si ajustarile pentru pierdere de valoare"
@@ -511,19 +511,19 @@
             "children": [
              {
               "name": "Cheltuieli de exploatare privind provizioanele", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli de exploatare privind amortizarea imobilizarilor", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli de exploatare privind ajustarile pentru deprecierea imobilizarilor", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli de exploatare privind ajustarile pentru deprecierea activelor circulante", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Cheltuieli de exploatare privind amortizarile, provizioanele si ajustarile pentru depreciere"
@@ -537,30 +537,30 @@
             "children": [
              {
               "name": "Alte cheltuieli de exploatare", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Donatii si subventii acordate", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli privind activele cedate si alte operatii de capital", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Despagubiri, amenzi si penalitati", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Alte cheltuieli de exploatare"
            }, 
            {
             "name": "Pierderi din creante si debitori diversi", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu protectia mediului inconjurator", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Alte cheltuieli de exploatare"
@@ -569,7 +569,7 @@
           "children": [
            {
             "name": "Cheltuieli privind calamitatile si alte evenimente extraordinare", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CHELTUIELI EXTRAORDINARE"
@@ -578,36 +578,36 @@
           "children": [
            {
             "name": "Alte cheltuieli financiare", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Pierderi din creante legate de participatii", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
               "name": "Cheltuieli privind imobilizarile financiare cedate", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Pierderi din investitiile pe termen scurt cedate", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Cheltuieli privind investitiile financiare cedate"
            }, 
            {
             "name": "Cheltuieli din diferente de curs valutar", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind dobanzile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind sconturile acordate", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CHELTUIELI FINANCIARE"
@@ -616,19 +616,19 @@
           "children": [
            {
             "name": "Cheltuieli cu intretinerile si reparatiile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu redeventele, locatiile de gestiune si chiriile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu studiile si cercetarile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu primele de asigurare", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CHELTUIELI CU LUCRARIRE SI SERVICIILE EXECUTATE DE TERTI"
@@ -637,68 +637,68 @@
           "children": [
            {
             "name": "Reduceri comerciale primite", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind marfurile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind animalele si pasarile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind materialele nestocate", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind energia si apa", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
               "name": "Cheltuieli privind materialele pentru ambalat", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli privind combustibilul", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli privind semintele si materialele de plantat", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli privind piesele de schimb", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli privind furajele", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli cu materiale auxiliare", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }, 
              {
               "name": "Cheltuieli privind alte materiale consumabile", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "Cheltuieli cu materialele consumabile"
            }, 
            {
             "name": "Cheltuieli privind materialele de natura obiectelor de inventar", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu materiile prime", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind ambalajele", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CHELTUIELI PRIVIND STOCURILE"
@@ -707,7 +707,7 @@
           "children": [
            {
             "name": "Cheltuieli cu alte impozite, taxe si varsaminte asimilate", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Cheltuieli cu alte impozite, taxe si varsaminte asimilate"
@@ -716,35 +716,35 @@
           "children": [
            {
             "name": "Cheltuieli cu transportul de bunuri si personal", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu deplasari, detasari si transferari", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli postale si taxe de telecomunicatii", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu serviciile bancare si asimilate", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli cu colaboratorii", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli privind comisioanele si onorariile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Cheltuieli de protocol, reclama si publicitate", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Alte cheltuieli cu serviciile executate de terti", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "CHELTUIELI CU ALTE SERVICII EXECUTATE DE TERTI"
@@ -975,7 +975,7 @@
            {
             "account_type": "Receivable", 
             "name": "Cheltuieli integistrate in avans", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Decontari din operatiuni in curs de clarificare"
@@ -994,7 +994,7 @@
            {
             "account_type": "Receivable", 
             "name": "Debitori diversi", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "DEBITORI SI CREDITORI DIVERSI"
@@ -1009,12 +1009,12 @@
              {
               "account_type": "Receivable", 
               "name": "Decontari din operatii in participare - activ", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "account_type": "Receivable", 
               "name": "Decontari din operatii in participare - pasiv", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Decontari din operatii in participare"
@@ -1047,12 +1047,12 @@
              {
               "account_type": "Receivable", 
               "name": "Actionari/asociati dobanzi la conturi curente", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "account_type": "Receivable", 
               "name": "Actionari/asociati - conturi curente", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Sume datorate actionarilor/asociatilor"
@@ -1107,7 +1107,7 @@
              {
               "account_type": "Receivable", 
               "name": "Alte creante sociale", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Alte datorii si creante sociale"
@@ -1122,7 +1122,7 @@
              {
               "account_type": "Receivable", 
               "name": "Alte creante in legatura cu personalul", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "Alte datorii in legatura cu personalul"
@@ -1142,7 +1142,7 @@
            {
             "account_type": "Receivable", 
             "name": "Avansuri acordate personalului", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Personal - ajutoare materiale datorate"
@@ -1158,19 +1158,19 @@
            {
             "account_type": "Receivable", 
             "name": "Efecte de primit de la clienti", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
               "account_type": "Receivable", 
               "name": "Clienti incerti sau in litigiu", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "account_type": "Receivable", 
               "name": "Clienti", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Clienti"
@@ -1181,7 +1181,7 @@
            {
             "account_type": "Receivable", 
             "name": "Clienti - facturi de intocmit", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "CLIENTI SI CONTURI ASIMILATE"
@@ -1191,22 +1191,22 @@
            {
             "account_type": "Payable", 
             "name": "Furnizori de imobilizari", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Payable", 
             "name": "Efecte de platit pentru imobilizari", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Payable", 
             "name": "Efecte de platit", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Payable", 
             "name": "Furnizori - facturi nesosite", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -1222,7 +1222,7 @@
            {
             "account_type": "Payable", 
             "name": "Furnizori", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "FURNIZORI SI CONTURI ASIMILATE"
@@ -1232,7 +1232,7 @@
            {
             "account_type": "Receivable", 
             "name": "Ajustari pentru deprecierea creantelor - debitori diversi", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Ajustari pentru deprecierea creantelor - decontari in cadrul grupului si cu actionarii/asociatii"
@@ -1306,17 +1306,17 @@
              {
               "account_type": "Receivable", 
               "name": "Imprumuturi nerambursabile cu caracter de subventii", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "account_type": "Receivable", 
               "name": "Subventii guvernamentale", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "account_type": "Receivable", 
               "name": "Alte sume primite cu caracter de subventii", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Subventii"

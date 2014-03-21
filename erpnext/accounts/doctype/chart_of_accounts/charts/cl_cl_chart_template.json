@@ -49,23 +49,23 @@
         "children": [
          {
           "name": "Recupero de Rezagos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Ganancia Venta de Activo Fijo", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Recupero de Deudores Incobrables", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Ganancia Venta Inversiones Permanentes", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Donaciones obtenidas, ganandas, percibidas", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Ingresos Fuera de Explotaci\u00f3n"
@@ -74,40 +74,40 @@
         "children": [
          {
           "name": "Comisiones gananados, obtenidos, percibidos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Descuentos gananados, obtenidos, percibidos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Interese sobre Inversiones", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Honorarios gananados, obtenidos, percibidos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
             "name": "Ventas - Categoria de productos 01", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Ventas"
          }, 
          {
           "name": "Intereses gananados, obtenidos, percibidos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Alquileres gananados, obtenidos, percibidos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Ganancia Venta de Acciones", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Ingresos de Explotaci\u00f3n"
@@ -121,7 +121,7 @@
         "children": [
          {
           "name": "Gastos de Publicidad y Propaganda", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Gastos en Servicios P\u00fablicos"
@@ -130,22 +130,22 @@
           "children": [
            {
             "name": "Costo de Mercader\u00edas Vendidas - Categoria de productos 01", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Costo de Mercader\u00edas Vendidas"
          }, 
          {
           "name": "Gastos en Amortizaci\u00f3n", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Gastos en Cargas Sociales", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Gastos en Sueldos y Jornales", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Gastos Bancarios"
@@ -155,7 +155,7 @@
          }, 
          {
           "name": "Gastos en Depreciaci\u00f3n de Activo Fijo", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Egresos de Explotaci\u00f3n"
@@ -164,15 +164,15 @@
         "children": [
          {
           "name": "Gastos en Siniestros", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Donaciones Cedidas, Otorgadas", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "P\u00e9rdida Venta Activo Fijo", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Egresos Fuera de Explotaci\u00f3n"
@@ -191,7 +191,7 @@
         "children": [
          {
           "name": "Ajustes al Patrimonio / Revaluo T\u00e9cnico de Activo Fijo", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Ajustes al Patrimonio"
@@ -200,11 +200,11 @@
         "children": [
          {
           "name": "Aportes No Capitalizados / Aportes Irrevocables Futura Suscripci\u00f3n de Acciones", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Aportes No Capitalizados / Primas de Emsi\u00f3n", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Aportes No Capitalizados"
@@ -213,19 +213,19 @@
         "children": [
          {
           "name": "Capital / Dividendos a Distribuir en Acciones", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Capital / Acciones en Circulaci\u00f3n", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Capital / Capital Propio", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Capital / (-) Descuento de Emisi\u00f3n de Acciones", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Capital"
@@ -234,19 +234,19 @@
         "children": [
          {
           "name": "Resultados Acumulados", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Resultado del Ejercicio", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Utilidades y P\u00e9rdidas del Ejercicio", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Resultados Acumulados del Ejercicio Anterior", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Resultados No Asignados"
@@ -255,19 +255,19 @@
         "children": [
          {
           "name": "Reserva para Renovaci\u00f3n de Activo Fijo", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Reserva Estatutaria", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Reserva Facultativa", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Reserva Legal", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Futuras Eventualidades"
@@ -281,19 +281,19 @@
         "children": [
          {
           "name": "Remuneraciones por Pagar / Retenciones a Depositar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Remuneraciones por Pagar / Sueldos a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Remuneraciones por Pagar / Provisi\u00f3n para Sueldo Anual Complementario", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Remuneraciones por Pagar / Cargas Sociales a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Remuneraciones por Pagar"
@@ -302,19 +302,19 @@
         "children": [
          {
           "name": "Otras Cuentas por Pagar / Acreedores Varios", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Otras Cuentas por Pagar / Honorarios Directores y S\u00edndicos a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Otras Cuentas por Pagar / Dividendos a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Otras Cuentas por Pagar / Cobros por Adelantado", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Otras Cuentas por Pagar"
@@ -323,15 +323,15 @@
         "children": [
          {
           "name": "Provisiones / Previsi\u00f3n para Garant\u00edas por Service", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Provisiones / Previsi\u00f3n para juicios Pendientes", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Provisiones / Previsi\u00f3n Indemnizaci\u00f3n por Despidos", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Provisiones"
@@ -340,15 +340,15 @@
         "children": [
          {
           "name": "Cuentas por Pagar / Anticipos de Clientes", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cuentas por Pagar / (-) Intereses a Devengar por Compras al Cr\u00e9dito", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cuentas por Pagar / Proveedores", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Cuentas por Pagar"
@@ -357,23 +357,23 @@
         "children": [
          {
           "name": "Pasivo Circulante / Debentures Emitidos", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Pasivo Circulante / Intereses a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Pasivo Circulante / Obligaciones a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Pasivo Circulante / Prestamos", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Pasivo Circulante / Adelantos en Cuenta Corriente", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Pasivo Circulante"
@@ -382,11 +382,11 @@
         "children": [
          {
           "name": "Impuestos por Pagar / IVA a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Impuestos por Pagar / Impuesto a la Renta a Pagar", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Impuestos por Pagar"
@@ -398,39 +398,39 @@
       "children": [
        {
         "name": "Cuentas por Cobrar / Anticipo de Impuestos", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / Anticipos a Proveedores", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / Pr\u00e9stamos otorgados", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / Accionistas", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / Intereses Pagados por Adelantado", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / Alquileres Pagados por Adelantado", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / Anticipo al Personal", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / (-) Intereses (+) a Devengar", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Cuentas por Cobrar / (-) Previsi\u00f3n para Descuentos", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Cuentas por Cobrar"
@@ -439,23 +439,23 @@
       "children": [
        {
         "name": "Documentos por Cobrar / Deudores por Ventas", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Documentos por Cobrar / Deudores Morosos", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Documentos por Cobrar / Deudores en Gesti\u00f3n Judicial", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Documentos por Cobrar / Deudores Varios", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Documentos por Cobrar / (-) Previsi\u00f3n para Incobrables", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Documentos por Cobrar"
@@ -466,26 +466,26 @@
         "children": [
          {
           "name": "Activo Circulante - Valores a Depositar ", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "name": "Activo Circulante.../ BCO. CTA CTE CLP", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Activo Circulante - Bancos"
          }, 
          {
           "name": "Activo Circulante - Recaudaciones a Depositar ", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "name": "Activo Circulante - Caja / efectivo CLP", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Activo Circulante - Caja"
@@ -494,7 +494,7 @@
           "children": [
            {
             "name": "Activo Circulante - Fondos fijos / caja chica 01 CLP", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Activo Circulante - Fondos fijos"
@@ -503,7 +503,7 @@
           "children": [
            {
             "name": "Activo Circulante - Caja / efectivo USD", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Activo Circulante - Moneda Extranjera"
@@ -517,34 +517,34 @@
           "children": [
            {
             "name": "Existencias - Mercader\u00edas / Categoria de productos 01", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Existencias - Mercader\u00edas"
          }, 
          {
           "name": "Materias primas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Existencias - Mercader\u00edas en Tr\u00e1nsito", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Productos Elaborados", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Productos en Curso de Elaboraci\u00f3n", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "(-) Previsi\u00f3n para Desvalorizaci\u00f3n de Existencias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Materiales Varios ", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Existencias"
@@ -553,19 +553,19 @@
         "children": [
          {
           "name": "Inversiones / (-) Previsi\u00f3n para Devalorizaci\u00f3n de Acciones", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Inversiones / Acciones Permanentes", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Inversiones / T\u00edtulos P\u00fablicos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Inversiones / Acciones Transitorias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Inversiones Financieras"
@@ -574,19 +574,19 @@
         "children": [
          {
           "name": "Activo Intangible / (-) Amortizaci\u00f3n Acumulada", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Intangible / Marcas y Patentes de Invenci\u00f3n", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Intangible / Concesiones y Franquicias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Intangible / Derecho de Llaves", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Activo Intangible"
@@ -595,23 +595,23 @@
         "children": [
          {
           "name": "Activo Fijo / Inmuebles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Fijo / Maquinaria", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Fijo / Material Rodante Motorizado", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Fijo / (-) Depreciaci\u00f3n Acumulada", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Activo Fijo / Equipos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Activo Fijo"
@@ -634,15 +634,15 @@
      }, 
      {
       "name": "Costos de Producci\u00f3n", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Gastos de Administraci\u00f3n", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "name": "Gastos de Comercializaci\u00f3n", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Cuentas de Movimiento"

@@ -19,22 +19,22 @@
       "children": [
        {
         "name": "Ventes avec des provinces harmonis\u00e9es", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Ventes avec des provinces non-harmonis\u00e9es", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "AUTRES PRODUITS D'EXPLOITATION"
        }, 
        {
         "name": "Ventes", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Ventes \u00e0 l'\u00e9tranger", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "PRODUITS D'EXPLOITATION"
@@ -97,7 +97,7 @@
          {
           "account_type": "Payable", 
           "name": "Comptes fournisseurs", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "FOURNISSEURS ET COMPTES RATTACH\u00c9S"
@@ -108,26 +108,26 @@
           "children": [
            {
             "name": "TVH \u00e0 payer - 14%", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "TVH \u00e0 payer - 15%", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "TVH \u00e0 payer - 13%", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "TVH \u00e0 payer"
          }, 
          {
           "name": "TVP/TVQ \u00e0 payer", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "TPS \u00e0 payer", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "IMP\u00d4TS \u00c0 PAYER"
@@ -141,45 +141,45 @@
           "children": [
            {
             "name": "Fond des Services de Sant\u00e9 \u00e0 payer", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
               "name": "AP - Contribution de l'employeur", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "AP - Contribution des employ\u00e9s", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "ASSURANCE PARENTALE \u00c0 PAYER"
            }, 
            {
             "name": "Imp\u00f4t provincial sur les revenus", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
               "name": "Rentes - Contribution des employ\u00e9s", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "Rentes - Contribution de l'employeur", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "RENTES \u00c0 PAYER"
            }, 
            {
             "name": "Sant\u00e9 et S\u00e9curit\u00e9 au Travail \u00e0 payer", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Normes du Travail \u00e0 payer", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "AGENCE DU REVENU PROVINCIAL"
@@ -190,18 +190,18 @@
             "children": [
              {
               "name": "AE - Contribution des employ\u00e9s", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "AE - Contribution de l'employeur", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "ASSURANCE EMPLOI \u00c0 PAYER"
            }, 
            {
             "name": "Imp\u00f4t f\u00e9d\u00e9ral sur les revenus", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "AGENCE DU REVENU DU CANADA"
@@ -213,7 +213,7 @@
         "children": [
          {
           "name": "Stock re\u00e7u non factur\u00e9", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "PASSIFS DE STOCK"
@@ -238,43 +238,43 @@
         "children": [
          {
           "name": "Imp\u00f4t f\u00e9d\u00e9ral", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Assurance parentale", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Imp\u00f4t provincial", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Rentes", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Sant\u00e9 et s\u00e9curit\u00e9 au travail", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Fonds des services de sant\u00e9", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Normes du travail", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Assurance Emploi", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Salaires", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Vacances", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "SALAIRES ET CHARGES SOCIALES"
@@ -292,19 +292,19 @@
         "children": [
          {
           "name": "Achats", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Achats dans des provinces harmonis\u00e9es", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Achats dans des provinces non-harmonis\u00e9es", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Achats \u00e0 l'\u00e9tranger", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "CO\u00dbT DES PRODUITS VENDUS"
@@ -361,28 +361,28 @@
         "children": [
          {
           "name": "TPS \u00e0 recevoir", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "name": "TVH \u00e0 recevoir - 13%", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "TVH \u00e0 recevoir - 14%", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "TVH \u00e0 recevoir - 15%", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "TVH \u00e0 recevoir"
          }, 
          {
           "name": "TVP/TVQ \u00e0 recevoir", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "IMP\u00d4TS \u00c0 RECEVOIR"
@@ -395,7 +395,7 @@
          {
           "account_type": "Receivable", 
           "name": "Comptes clients", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "COMPTES CLIENTS"
@@ -404,11 +404,11 @@
         "children": [
          {
           "name": "Stock exp\u00e9di\u00e9 non-factur\u00e9", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Stock", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "STOCKS"

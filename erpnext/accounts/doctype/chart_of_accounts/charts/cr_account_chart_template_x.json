@@ -65,11 +65,11 @@
       "children": [
        {
         "name": "xReserva para mejoras", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "xReserva para proyectos", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xOtras reservas"
@@ -78,7 +78,7 @@
       "children": [
        {
         "name": "xSocio 1", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xAportes de capital"
@@ -87,7 +87,7 @@
       "children": [
        {
         "name": "xUtilidad o p\u00e9rdida del per\u00edodo actual", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xUtilidad o p\u00e9rdida del per\u00edodo actual"
@@ -96,7 +96,7 @@
       "children": [
        {
         "name": "xBalance inicial", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xBalance inicial"
@@ -105,7 +105,7 @@
       "children": [
        {
         "name": "xReserva legal", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xReserva legal"
@@ -114,15 +114,15 @@
       "children": [
        {
         "name": "xSuperavit ganado", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "xSuperavit por revaluaci\u00f3n de activos", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "xSuper\u00e1vit de capital", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xCuentas de super\u00e1vit"
@@ -131,7 +131,7 @@
       "children": [
        {
         "name": "xSocio 1", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xCapital social"
@@ -140,7 +140,7 @@
       "children": [
        {
         "name": "xPeriodo 1", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "xUtilidad o p\u00e9rdida acumulada de periodos anteriores"
@@ -153,20 +153,16 @@
      {
       "children": [
        {
-        "name": "xDiferencial cambiario", 
-        "root_type": "Expense"
+        "name": "xDiferencial cambiario"
        }, 
        {
-        "name": "xMultas", 
-        "root_type": "Expense"
+        "name": "xMultas"
        }, 
        {
-        "name": "xGastos de presidencia", 
-        "root_type": "Expense"
+        "name": "xGastos de presidencia"
        }, 
        {
-        "name": "xDonaciones no deducibles", 
-        "root_type": "Expense"
+        "name": "xDonaciones no deducibles"
        }
       ], 
       "name": "xGastos no deducibles"
@@ -180,16 +176,13 @@
            {
             "children": [
              {
-              "name": "xTransporte", 
-              "root_type": "Expense"
+              "name": "xTransporte"
              }, 
              {
-              "name": "xHospedaje", 
-              "root_type": "Expense"
+              "name": "xHospedaje"
              }, 
              {
-              "name": "xAlimentaci\u00f3n", 
-              "root_type": "Expense"
+              "name": "xAlimentaci\u00f3n"
              }
             ], 
             "name": "xVi\u00e1ticos"
@@ -197,36 +190,28 @@
            {
             "children": [
              {
-              "name": "xCesant\u00eda", 
-              "root_type": "Expense"
+              "name": "xCesant\u00eda"
              }, 
              {
-              "name": "xComisiones", 
-              "root_type": "Expense"
+              "name": "xComisiones"
              }, 
              {
-              "name": "xCargas patronales", 
-              "root_type": "Expense"
+              "name": "xCargas patronales"
              }, 
              {
-              "name": "xAguinaldo", 
-              "root_type": "Expense"
+              "name": "xAguinaldo"
              }, 
              {
-              "name": "xPreaviso", 
-              "root_type": "Expense"
+              "name": "xPreaviso"
              }, 
              {
-              "name": "xSalarios", 
-              "root_type": "Expense"
+              "name": "xSalarios"
              }, 
              {
-              "name": "xExtras", 
-              "root_type": "Expense"
+              "name": "xExtras"
              }, 
              {
-              "name": "xBonificaciones", 
-              "root_type": "Expense"
+              "name": "xBonificaciones"
              }
             ], 
             "name": "xSalarios y deducciones"
@@ -237,12 +222,10 @@
          {
           "children": [
            {
-            "name": "xCampa\u00f1as publicitarias", 
-            "root_type": "Expense"
+            "name": "xCampa\u00f1as publicitarias"
            }, 
            {
-            "name": "xDise\u00f1o de imagen", 
-            "root_type": "Expense"
+            "name": "xDise\u00f1o de imagen"
            }
           ], 
           "name": "xGastos de mercadeo"
@@ -250,24 +233,19 @@
          {
           "children": [
            {
-            "name": "xCosto de distribuci\u00f3n", 
-            "root_type": "Expense"
+            "name": "xCosto de distribuci\u00f3n"
            }, 
            {
-            "name": "xCosto de almacenamiento", 
-            "root_type": "Expense"
+            "name": "xCosto de almacenamiento"
            }, 
            {
-            "name": "xCosto de producto", 
-            "root_type": "Expense"
+            "name": "xCosto de producto"
            }, 
            {
-            "name": "xCosto de producci\u00f3n", 
-            "root_type": "Expense"
+            "name": "xCosto de producci\u00f3n"
            }, 
            {
-            "name": "xCosto de materia prima", 
-            "root_type": "Expense"
+            "name": "xCosto de materia prima"
            }
           ], 
           "name": "xCosto de venta de producto"
@@ -275,8 +253,7 @@
          {
           "children": [
            {
-            "name": "xCategor\u00eda 1", 
-            "root_type": "Expense"
+            "name": "xCategor\u00eda 1"
            }
           ], 
           "name": "xServicios profesionales"
@@ -289,8 +266,7 @@
          {
           "children": [
            {
-            "name": "xDepartamento 1", 
-            "root_type": "Expense"
+            "name": "xDepartamento 1"
            }
           ], 
           "name": "xSuministros de oficina"
@@ -298,8 +274,7 @@
          {
           "children": [
            {
-            "name": "xCompa\u00f1\u00eda administradora 1", 
-            "root_type": "Expense"
+            "name": "xCompa\u00f1\u00eda administradora 1"
            }
           ], 
           "name": "xCuota por administraci\u00f3n"
@@ -307,8 +282,7 @@
          {
           "children": [
            {
-            "name": "xOficina 1", 
-            "root_type": "Expense"
+            "name": "xOficina 1"
            }
           ], 
           "name": "xAlquiler"
@@ -318,8 +292,7 @@
            {
             "children": [
              {
-              "name": "xMedidor 1", 
-              "root_type": "Expense"
+              "name": "xMedidor 1"
              }
             ], 
             "name": "xAgua"
@@ -327,8 +300,7 @@
            {
             "children": [
              {
-              "name": "xMedidor 1", 
-              "root_type": "Expense"
+              "name": "xMedidor 1"
              }
             ], 
             "name": "xLuz"
@@ -336,8 +308,7 @@
            {
             "children": [
              {
-              "name": "xTel\u00e9fono 1", 
-              "root_type": "Expense"
+              "name": "xTel\u00e9fono 1"
              }
             ], 
             "name": "xTel\u00e9fono"
@@ -345,8 +316,7 @@
            {
             "children": [
              {
-              "name": "xContrato 1", 
-              "root_type": "Expense"
+              "name": "xContrato 1"
              }
             ], 
             "name": "xInternet"
@@ -357,8 +327,7 @@
          {
           "children": [
            {
-            "name": "xDepartamento 1", 
-            "root_type": "Expense"
+            "name": "xDepartamento 1"
            }
           ], 
           "name": "xEquipo de c\u00f3mputo y comunicaci\u00f3n"
@@ -372,24 +341,19 @@
      {
       "children": [
        {
-        "name": "xGastos Financieros", 
-        "root_type": "Expense"
+        "name": "xGastos Financieros"
        }, 
        {
-        "name": "xDepreciaci\u00f3n de activo fijo", 
-        "root_type": "Expense"
+        "name": "xDepreciaci\u00f3n de activo fijo"
        }, 
        {
-        "name": "xAjustes", 
-        "root_type": "Expense"
+        "name": "xAjustes"
        }, 
        {
-        "name": "xPerdida por robo", 
-        "root_type": "Expense"
+        "name": "xPerdida por robo"
        }, 
        {
-        "name": "xDonaciones deducibles", 
-        "root_type": "Expense"
+        "name": "xDonaciones deducibles"
        }
       ], 
       "name": "xOtros gastos"
@@ -430,16 +394,13 @@
          {
           "children": [
            {
-            "name": "xFondos en tr\u00e1nsito en bancos", 
-            "root_type": "Asset"
+            "name": "xFondos en tr\u00e1nsito en bancos"
            }, 
            {
-            "name": "xFondos en tr\u00e1nsito de PayPal a Bancos", 
-            "root_type": "Asset"
+            "name": "xFondos en tr\u00e1nsito de PayPal a Bancos"
            }, 
            {
-            "name": "xFondos en tr\u00e1nsito en tesorer\u00eda", 
-            "root_type": "Asset"
+            "name": "xFondos en tr\u00e1nsito en tesorer\u00eda"
            }
           ], 
           "name": "xFondos en tr\u00e1nsito"
@@ -447,8 +408,7 @@
          {
           "children": [
            {
-            "name": "xInversi\u00f3n 1", 
-            "root_type": "Asset"
+            "name": "xInversi\u00f3n 1"
            }
           ], 
           "name": "xInversiones a la vista"
@@ -469,12 +429,10 @@
          {
           "children": [
            {
-            "name": "xInventario de producto para la venta", 
-            "root_type": "Asset"
+            "name": "xInventario de producto para la venta"
            }, 
            {
-            "name": "xInventario de consumibles", 
-            "root_type": "Asset"
+            "name": "xInventario de consumibles"
            }
           ], 
           "name": "xInventarios"
@@ -514,8 +472,7 @@
            {
             "children": [
              {
-              "name": "xTerreno 1", 
-              "root_type": "Asset"
+              "name": "xTerreno 1"
              }
             ], 
             "name": "xValores originales"
@@ -523,8 +480,7 @@
            {
             "children": [
              {
-              "name": "xTerreno 1", 
-              "root_type": "Asset"
+              "name": "xTerreno 1"
              }
             ], 
             "name": "xRevaluaciones"
@@ -542,8 +498,7 @@
            {
             "children": [
              {
-              "name": "xEdificio 1", 
-              "root_type": "Asset"
+              "name": "xEdificio 1"
              }
             ], 
             "name": "xEdificios \u2013 Revaluaciones"
@@ -551,8 +506,7 @@
            {
             "children": [
              {
-              "name": "xEdificio 1", 
-              "root_type": "Asset"
+              "name": "xEdificio 1"
              }
             ], 
             "name": "xEdificios \u2013 Valores originales"
@@ -563,24 +517,19 @@
          {
           "children": [
            {
-            "name": "xMoibliario y equipo de oficina", 
-            "root_type": "Asset"
+            "name": "xMoibliario y equipo de oficina"
            }, 
            {
-            "name": "xHerramientas mayores", 
-            "root_type": "Asset"
+            "name": "xHerramientas mayores"
            }, 
            {
-            "name": "xMaquinaria y equipo de edificios", 
-            "root_type": "Asset"
+            "name": "xMaquinaria y equipo de edificios"
            }, 
            {
-            "name": "xVeh\u00edculos", 
-            "root_type": "Asset"
+            "name": "xVeh\u00edculos"
            }, 
            {
-            "name": "xEquipo de c\u00f3mputo", 
-            "root_type": "Asset"
+            "name": "xEquipo de c\u00f3mputo"
            }
           ], 
           "name": "xActivos depreciables m\u00f3viles"
@@ -590,8 +539,7 @@
            {
             "children": [
              {
-              "name": "xEdificio 1", 
-              "root_type": "Asset"
+              "name": "xEdificio 1"
              }
             ], 
             "name": "xMejoras a edificios \u2013 Valores originales"
@@ -599,8 +547,7 @@
            {
             "children": [
              {
-              "name": "xEdificio 1", 
-              "root_type": "Asset"
+              "name": "xEdificio 1"
              }
             ], 
             "name": "xMejoras a edificios \u2013 Revaluaciones"
@@ -621,8 +568,7 @@
          {
           "children": [
            {
-            "name": "xEdificio 1", 
-            "root_type": "Asset"
+            "name": "xEdificio 1"
            }
           ], 
           "name": "xDep. ac. de edificios \u2013 Revaluaciones"
@@ -630,8 +576,7 @@
          {
           "children": [
            {
-            "name": "xEdificio 1", 
-            "root_type": "Asset"
+            "name": "xEdificio 1"
            }
           ], 
           "name": "xDep. ac. de edificios \u2013 Valores originales"
@@ -642,24 +587,19 @@
        {
         "children": [
          {
-          "name": "xDep. ac. de herramientas mayores", 
-          "root_type": "Asset"
+          "name": "xDep. ac. de herramientas mayores"
          }, 
          {
-          "name": "xDep. ac. de mobiliario y equipo de oficina", 
-          "root_type": "Asset"
+          "name": "xDep. ac. de mobiliario y equipo de oficina"
          }, 
          {
-          "name": "xDep. ac. de maquinaria y equipo de edificios", 
-          "root_type": "Asset"
+          "name": "xDep. ac. de maquinaria y equipo de edificios"
          }, 
          {
-          "name": "xDep. ac. de equipo de c\u00f3mputo", 
-          "root_type": "Asset"
+          "name": "xDep. ac. de equipo de c\u00f3mputo"
          }, 
          {
-          "name": "xDep. ac. de veh\u00edculos", 
-          "root_type": "Asset"
+          "name": "xDep. ac. de veh\u00edculos"
          }
         ], 
         "name": "xDep. ac. de activos depreciables m\u00f3viles"
@@ -669,8 +609,7 @@
          {
           "children": [
            {
-            "name": "xEdificio 1", 
-            "root_type": "Asset"
+            "name": "xEdificio 1"
            }
           ], 
           "name": "xDep. ac. de mejoras a edificios \u2013 Valores originales"
@@ -678,8 +617,7 @@
          {
           "children": [
            {
-            "name": "xEdificio 1", 
-            "root_type": "Asset"
+            "name": "xEdificio 1"
            }
           ], 
           "name": "xDep. ac. de mejoras a edificios \u2013 Revaluaciones"
@@ -725,12 +663,10 @@
      {
       "children": [
        {
-        "name": "xDonaciones", 
-        "root_type": "Income"
+        "name": "xDonaciones"
        }, 
        {
-        "name": "xAjustes", 
-        "root_type": "Income"
+        "name": "xAjustes"
        }
       ], 
       "name": "xOtros ingresos"
@@ -738,8 +674,7 @@
      {
       "children": [
        {
-        "name": "xIntereses ganados sobre cuentas corrientes", 
-        "root_type": "Income"
+        "name": "xIntereses ganados sobre cuentas corrientes"
        }
       ], 
       "name": "xIngresos financieros"
@@ -750,8 +685,7 @@
      {
       "children": [
        {
-        "name": "xCuota por administraci\u00f3n", 
-        "root_type": "Income"
+        "name": "xCuota por administraci\u00f3n"
        }
       ], 
       "name": "xIngresos por administraci\u00f3n"
@@ -759,8 +693,7 @@
      {
       "children": [
        {
-        "name": "xDiferencial cambiario", 
-        "root_type": "Income"
+        "name": "xDiferencial cambiario"
        }
       ], 
       "name": "xIngresos no gravables"

@@ -8,22 +8,22 @@
       "children": [
        {
         "name": "International Sales", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Inside Sales", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Non-Harmonized Provinces Sales", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "OTHER OPERATING INCOMES"
        }, 
        {
         "name": "Harmonized Provinces Sales", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "OPERATING INCOMES"
@@ -56,17 +56,17 @@
            {
             "account_type": "Receivable", 
             "name": "HST receivable - 13%", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Receivable", 
             "name": "HST receivable - 15%", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Receivable", 
             "name": "HST receivable - 14%", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "HST receivable"
@@ -74,12 +74,12 @@
          {
           "account_type": "Receivable", 
           "name": "PST/QST receivable", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "account_type": "Receivable", 
           "name": "GST receivable", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "TAXES RECEIVABLES"
@@ -94,11 +94,11 @@
         "children": [
          {
           "name": "Stock In Hand", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Stock Delivered But Not Billed", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "STOCKS"
@@ -114,7 +114,7 @@
          {
           "account_type": "Receivable", 
           "name": "Customers Account", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "ALLOWANCE FOR DOUBTFUL ACCOUNTS"
@@ -166,19 +166,19 @@
         "children": [
          {
           "name": "International Purchases", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Purchases in non-harmonized provinces", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Purchases in harmonized provinces", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Inside Purchases", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "COST OF GOODS SOLD"
@@ -193,43 +193,43 @@
         "children": [
          {
           "name": "Parental Insurance", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Holidays", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Labour Health and Safety", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Employment Insurance", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Federal Income Tax", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Salaries, wages and commissions", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Annuities", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Provincial Income Tax", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Labour Standards", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Health Services Fund", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "LABOUR EXPENSES"
@@ -263,40 +263,40 @@
             "children": [
              {
               "name": "Annuities - Employees Contribution", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "Annuities - Employer Contribution", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "ANNUITIES TO PAY"
            }, 
            {
             "name": "Health Services Fund to pay", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Labour Health and Safety to pay", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Provincial Income Tax", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "name": "Labour Standards to pay", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
               "name": "PAP - Employer Contribution", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "PAP - Employee Contribution", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "PARENTAL INSURANCE PLAN TO PAY"
@@ -310,18 +310,18 @@
             "children": [
              {
               "name": "EI - Employees Contribution", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "name": "EI - Employer Contribution", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "EMPLOYMENT INSURANCE TO PAY"
            }, 
            {
             "name": "Federal Income Tax", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "CANADIAN REVENU AGENCY"
@@ -340,7 +340,7 @@
          {
           "account_type": "Payable", 
           "name": "Suppliers Account", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "ACCOUNTS PAYABLES"
@@ -350,24 +350,24 @@
          {
           "account_type": "Payable", 
           "name": "GST to pay", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "account_type": "Payable", 
             "name": "HST to pay - 14%", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Payable", 
             "name": "HST to pay - 13%", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "account_type": "Payable", 
             "name": "HST to pay - 15%", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "HST to pay"
@@ -375,7 +375,7 @@
          {
           "account_type": "Payable", 
           "name": "PST/QST to pay", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "TAXES PAYABLES"
@@ -387,7 +387,7 @@
         "children": [
          {
           "name": "Stock Received But Not Billed", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "LIABILITIES ASSETS HELD FOR TRANSFER"
@@ -439,7 +439,6 @@
     "name": "EQUITY"
    }
   ], 
-  "name": "Account Chart CA EN", 
-  "parent_id": 0
+  "name": "Account Chart CA EN"
  }
 }

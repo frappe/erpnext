@@ -11,608 +11,511 @@
          {
           "children": [
            {
-            "name": "Pertes sur clients", 
-            "root_type": "Income"
+            "name": "Pertes sur clients"
            }, 
            {
-            "name": "Frais d'encaissement", 
-            "root_type": "Income"
+            "name": "Frais d'encaissement"
            }, 
            {
-            "name": "Frets et ports", 
-            "root_type": "Income"
+            "name": "Frets et ports"
            }, 
            {
-            "name": "Diff\u00e9rences de change s/vente", 
-            "root_type": "Income"
+            "name": "Diff\u00e9rences de change s/vente"
            }, 
            {
-            "name": "Rabais et r\u00e9ductions de prix", 
-            "root_type": "Income"
+            "name": "Rabais et r\u00e9ductions de prix"
            }, 
            {
-            "name": "Escomptes s/ventes", 
-            "root_type": "Income"
+            "name": "Escomptes s/ventes"
            }, 
            {
-            "name": "Commissions de tiers", 
-            "root_type": "Income"
+            "name": "Commissions de tiers"
            }, 
            {
-            "name": "Remises s/ventes", 
-            "root_type": "Income"
+            "name": "Remises s/ventes"
            }
           ], 
           "name": "D\u00e9ductions sur le caf de la production vendue", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Variations des stocks de produits en cours/finis", 
-            "root_type": "Income"
+            "name": "Variations des stocks de produits en cours/finis"
            }
           ], 
           "name": "Variations des stocks de produits en cours/finis", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Chiffre d'affaires brut des ventes de d\u00e9tail", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut des ventes de d\u00e9tail"
            }, 
            {
-            "name": "Chiffre d'affaires brut au comptant", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut au comptant"
            }, 
            {
-            "name": "Chiffre d'affaires brut des ventes en gros", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut des ventes en gros"
            }
           ], 
           "name": "Caf brut de la production vendue secteur B", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Variations des stocks de produits en cours / finis", 
-            "root_type": "Income"
+            "name": "Variations des stocks de produits en cours / finis"
            }, 
            {
-            "name": "D\u00e9ductions sur le chiffre d'affaires", 
-            "root_type": "Income"
+            "name": "D\u00e9ductions sur le chiffre d'affaires"
            }, 
            {
-            "name": "Chiffre d'affaires brut du produit X", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut du produit X"
            }, 
            {
-            "name": "Chiffre d'affaires brut du produit Y", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut du produit Y"
            }, 
            {
-            "name": "Chiffre d'affaires brut prestations annexes", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut prestations annexes"
            }
           ], 
           "name": "Caf brut de la production vendue secteur A", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Chiffre d'affaires brut TVA taux normal", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut TVA taux normal"
            }, 
            {
-            "name": "Chiffre d'affaires brut TVA taux r\u00e9duit", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut TVA taux r\u00e9duit"
            }, 
            {
-            "name": "Chiffre d'affaires brut TVA taux z\u00e9ro", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut TVA taux z\u00e9ro"
            }, 
            {
-            "name": "Chiffre d'affaires brut TVA avec d\u00e9duction IP", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut TVA avec d\u00e9duction IP"
            }, 
            {
-            "name": "Chiffre d'affaires brut TVA sans d\u00e9duction IP", 
-            "root_type": "Income"
+            "name": "Chiffre d'affaires brut TVA sans d\u00e9duction IP"
            }
           ], 
           "name": "Caf brut de la production vendue secteur C", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Retours de marchandises", 
-            "root_type": "Income"
+            "name": "Retours de marchandises"
            }
           ], 
           "name": "Caf brut de la production livr\u00e9e \u00e0 des st\u00e9s groupe", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Chiffre d'affaires brut de la production vendue", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Ventes brutes TVA avec d\u00e9duction IP", 
-            "root_type": "Income"
+            "name": "Ventes brutes TVA avec d\u00e9duction IP"
            }, 
            {
-            "name": "Ventes brutes TVA sans d\u00e9duction IP", 
-            "root_type": "Income"
+            "name": "Ventes brutes TVA sans d\u00e9duction IP"
            }, 
            {
-            "name": "Ventes brutes TVA taux normal", 
-            "root_type": "Income"
+            "name": "Ventes brutes TVA taux normal"
            }, 
            {
-            "name": "Ventes brutes TVA taux r\u00e9duit", 
-            "root_type": "Income"
+            "name": "Ventes brutes TVA taux r\u00e9duit"
            }, 
            {
-            "name": "Ventes brutes de prestations annexes exploitation", 
-            "root_type": "Income"
+            "name": "Ventes brutes de prestations annexes exploitation"
            }
           ], 
           "name": "Ventes brutes de marchandises secteur C", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Ventes en gros brutes \u00e0 cr\u00e9dit", 
-            "root_type": "Income"
+            "name": "Ventes en gros brutes \u00e0 cr\u00e9dit"
            }, 
            {
-            "name": "Ventes de d\u00e9tail brutes \u00e0 cr\u00e9dit", 
-            "root_type": "Income"
+            "name": "Ventes de d\u00e9tail brutes \u00e0 cr\u00e9dit"
            }, 
            {
-            "name": "Ventes brutes au comptant", 
-            "root_type": "Income"
+            "name": "Ventes brutes au comptant"
            }
           ], 
           "name": "Ventes brutes de marchandises secteur B", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "D\u00e9ductions sur les ventes", 
-            "root_type": "Income"
+            "name": "D\u00e9ductions sur les ventes"
            }, 
            {
-            "name": "Ventes brutes de l'article X", 
-            "root_type": "Income"
+            "name": "Ventes brutes de l'article X"
            }, 
            {
-            "name": "Ventes brutes de l'article Y", 
-            "root_type": "Income"
+            "name": "Ventes brutes de l'article Y"
            }
           ], 
           "name": "Ventes brutes de marchandises secteur A", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Ventes brutes de marchandises st\u00e9s groupe", 
-            "root_type": "Income"
+            "name": "Ventes brutes de marchandises st\u00e9s groupe"
            }
           ], 
           "name": "Ventes brutes de marchandises st\u00e9s groupe", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Commissions de tiers", 
-            "root_type": "Income"
+            "name": "Commissions de tiers"
            }, 
            {
-            "name": "Frets et ports", 
-            "root_type": "Income"
+            "name": "Frets et ports"
            }, 
            {
-            "name": "Pertes sur clients", 
-            "root_type": "Income"
+            "name": "Pertes sur clients"
            }, 
            {
-            "name": "Frais d'encaissement", 
-            "root_type": "Income"
+            "name": "Frais d'encaissement"
            }, 
            {
-            "name": "Remises s/ventes", 
-            "root_type": "Income"
+            "name": "Remises s/ventes"
            }, 
            {
-            "name": "Rabais et r\u00e9ductions de prix", 
-            "root_type": "Income"
+            "name": "Rabais et r\u00e9ductions de prix"
            }, 
            {
-            "name": "Escomptes s/ventes", 
-            "root_type": "Income"
+            "name": "Escomptes s/ventes"
            }, 
            {
-            "name": "Diff\u00e9rences de change s/vente", 
-            "root_type": "Income"
+            "name": "Diff\u00e9rences de change s/vente"
            }
           ], 
           "name": "D\u00e9ductions sur les ventes de marchandises", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Ventes de marchandises", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Variations de stocks de produits en cours", 
-            "root_type": "Income"
+            "name": "Variations de stocks de produits en cours"
            }, 
            {
-            "name": "Variations de stocks de produits finis", 
-            "root_type": "Income"
+            "name": "Variations de stocks de produits finis"
            }
           ], 
           "name": "Variations de stocks de produits et services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Variations de stocks de services en cours", 
-            "root_type": "Income"
+            "name": "Variations de stocks de services en cours"
            }, 
            {
-            "name": "Variations de stocks de services termin\u00e9s", 
-            "root_type": "Income"
+            "name": "Variations de stocks de services termin\u00e9s"
            }
           ], 
           "name": "Variations de stocks de services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Variations de stocks de produits et services", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Escomptes s/ventes", 
-            "root_type": "Income"
+            "name": "Escomptes s/ventes"
            }, 
            {
-            "name": "Frets et ports", 
-            "root_type": "Income"
+            "name": "Frets et ports"
            }, 
            {
-            "name": "Diff\u00e9rences de change s/vente", 
-            "root_type": "Income"
+            "name": "Diff\u00e9rences de change s/vente"
            }, 
            {
-            "name": "Pertes s/clients", 
-            "root_type": "Income"
+            "name": "Pertes s/clients"
            }
           ], 
           "name": "D\u00e9ductions s/produits", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "D\u00e9ductions s/produits des ventes", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Ventes brutes prestations services \u00e0 st\u00e9s groupe", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations services \u00e0 st\u00e9s groupe"
            }
           ], 
           "name": "Ventes brutes prestations services \u00e0 st\u00e9s groupe", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Ventes brutes prestations de services \u00e0 cr\u00e9dit", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations de services \u00e0 cr\u00e9dit"
            }, 
            {
-            "name": "Ventes brutes prestations de services au comptant", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations de services au comptant"
            }
           ], 
           "name": "Ventes brutes de prestations de services secteur B", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Ventes brutes prestations annexes d'exploitation", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations annexes d'exploitation"
            }, 
            {
-            "name": "Ventes brutes prestations services TVA taux normal", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations services TVA taux normal"
            }, 
            {
-            "name": "Ventes brutes prestations services TVA avec d\u00e9d.IP", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations services TVA avec d\u00e9d.IP"
            }, 
            {
-            "name": "Ventes brutes prestations services TVA sans d\u00e9d.IP", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations services TVA sans d\u00e9d.IP"
            }, 
            {
-            "name": "Ventes brutes prestations services TVA taux r\u00e9duit", 
-            "root_type": "Income"
+            "name": "Ventes brutes prestations services TVA taux r\u00e9duit"
            }
           ], 
           "name": "Ventes brutes prestations de services du secteur C", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Rabais et r\u00e9ductions de prix", 
-            "root_type": "Income"
+            "name": "Rabais et r\u00e9ductions de prix"
            }, 
            {
-            "name": "Escomptes s/ventes", 
-            "root_type": "Income"
+            "name": "Escomptes s/ventes"
            }, 
            {
-            "name": "Commissions de tiers", 
-            "root_type": "Income"
+            "name": "Commissions de tiers"
            }, 
            {
-            "name": "Remises s/ventes", 
-            "root_type": "Income"
+            "name": "Remises s/ventes"
            }, 
            {
-            "name": "Pertes sur clients", 
-            "root_type": "Income"
+            "name": "Pertes sur clients"
            }, 
            {
-            "name": "Frais d'encaissement", 
-            "root_type": "Income"
+            "name": "Frais d'encaissement"
            }, 
            {
-            "name": "Ports", 
-            "root_type": "Income"
+            "name": "Ports"
            }, 
            {
-            "name": "Diff\u00e9rences de change s/vente", 
-            "root_type": "Income"
+            "name": "Diff\u00e9rences de change s/vente"
            }
           ], 
           "name": "D\u00e9ductions s/ventes prestations de services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Variations stocks c/travaux en cours", 
-            "root_type": "Income"
+            "name": "Variations stocks c/travaux en cours"
            }, 
            {
-            "name": "D\u00e9ductions sur les ventes", 
-            "root_type": "Income"
+            "name": "D\u00e9ductions sur les ventes"
            }, 
            {
-            "name": "Ventes brutes de prestations de services X", 
-            "root_type": "Income"
+            "name": "Ventes brutes de prestations de services X"
            }, 
            {
-            "name": "Ventes brutes de prestations de services Y", 
-            "root_type": "Income"
+            "name": "Ventes brutes de prestations de services Y"
            }
           ], 
           "name": "Ventes brutes de prestations de service secteur A", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Ventes de prestations de services", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Rabais et r\u00e9ductions de prix", 
-            "root_type": "Income"
+            "name": "Rabais et r\u00e9ductions de prix"
            }, 
            {
-            "name": "Escomptes s/ventes", 
-            "root_type": "Income"
+            "name": "Escomptes s/ventes"
            }
           ], 
           "name": "D\u00e9ductions s/les autres produits", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Produits r\u00e9sultant d'expertises", 
-            "root_type": "Income"
+            "name": "Produits r\u00e9sultant d'expertises"
            }, 
            {
-            "name": "Produits r\u00e9sultant de services de formation", 
-            "root_type": "Income"
+            "name": "Produits r\u00e9sultant de services de formation"
            }
           ], 
           "name": "Autres produits c/ventes et prestations services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Produits c/mise \u00e0 disposition du personnel", 
-            "root_type": "Income"
+            "name": "Produits c/mise \u00e0 disposition du personnel"
            }
           ], 
           "name": "Produits c/mise \u00e0 disposition du personnel", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Autres produits prestations services st\u00e9s groupe", 
-            "root_type": "Income"
+            "name": "Autres produits prestations services st\u00e9s groupe"
            }
           ], 
           "name": "Autres produits prestations services st\u00e9s groupe", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Droits de douane", 
-            "root_type": "Income"
+            "name": "Droits de douane"
            }, 
            {
-            "name": "D\u00e9ductions s/produits des licences, brevets.etc.", 
-            "root_type": "Income"
+            "name": "D\u00e9ductions s/produits des licences, brevets.etc."
            }, 
            {
-            "name": "Produits de licence pour brevet Y", 
-            "root_type": "Income"
+            "name": "Produits de licence pour brevet Y"
            }, 
            {
-            "name": "Produits de licence pour brevet X", 
-            "root_type": "Income"
+            "name": "Produits de licence pour brevet X"
            }
           ], 
           "name": "Produits des licences, des brevets, etc.", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Variations des stocks de travaux en cours", 
-            "root_type": "Income"
+            "name": "Variations des stocks de travaux en cours"
            }, 
            {
-            "name": "D\u00e9ductions sur les produits accessoires", 
-            "root_type": "Income"
+            "name": "D\u00e9ductions sur les produits accessoires"
            }, 
            {
-            "name": "Ventes de mati\u00e8res premi\u00e8res", 
-            "root_type": "Income"
+            "name": "Ventes de mati\u00e8res premi\u00e8res"
            }, 
            {
-            "name": "Ventes de mati\u00e8res auxiliaires", 
-            "root_type": "Income"
+            "name": "Ventes de mati\u00e8res auxiliaires"
            }, 
            {
-            "name": "Ventes de d\u00e9chets", 
-            "root_type": "Income"
+            "name": "Ventes de d\u00e9chets"
            }, 
            {
-            "name": "Produits de travaux annexes d'exploitation", 
-            "root_type": "Income"
+            "name": "Produits de travaux annexes d'exploitation"
            }
           ], 
           "name": "Autres produits c/ventes et prestations services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Autres produits", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Production propre d'immobi. corporelles immeubles", 
-            "root_type": "Income"
+            "name": "Production propre d'immobi. corporelles immeubles"
            }, 
            {
-            "name": "Production propre d'immobi. corporelles meubles", 
-            "root_type": "Income"
+            "name": "Production propre d'immobi. corporelles meubles"
            }, 
            {
-            "name": "R\u00e9parations propres d'immobi.corporelles immeubles", 
-            "root_type": "Income"
+            "name": "R\u00e9parations propres d'immobi.corporelles immeubles"
            }, 
            {
-            "name": "R\u00e9parations propres d'immobi. corporelles meubles", 
-            "root_type": "Income"
+            "name": "R\u00e9parations propres d'immobi. corporelles meubles"
            }
           ], 
           "name": "Prestations propres", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Consommation propre produit X", 
-            "root_type": "Income"
+            "name": "Consommation propre produit X"
            }, 
            {
-            "name": "Consommation propre produit Y", 
-            "root_type": "Income"
+            "name": "Consommation propre produit Y"
            }
           ], 
           "name": "Consommations propres pour propre production", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Consommation propre article Y", 
-            "root_type": "Income"
+            "name": "Consommation propre article Y"
            }, 
            {
-            "name": "Consommation propre article X", 
-            "root_type": "Income"
+            "name": "Consommation propre article X"
            }
           ], 
           "name": "Consommations propres de marchandises", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
            {
-            "name": "Consommation propre du service Y", 
-            "root_type": "Income"
+            "name": "Consommation propre du service Y"
            }, 
            {
-            "name": "Consommation propre du service X", 
-            "root_type": "Income"
+            "name": "Consommation propre du service X"
            }
           ], 
           "name": "Consommations propres de services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Prestations propres et consommations propres", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Chiffre d'affaires ventes, prestations services", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -628,7 +531,7 @@
            }
           ], 
           "name": "Gaz", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -640,7 +543,7 @@
            }
           ], 
           "name": "Electricit\u00e9", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -655,7 +558,7 @@
            }
           ], 
           "name": "Carburants", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -667,7 +570,7 @@
            }
           ], 
           "name": "Combustibles", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -676,11 +579,11 @@
            }
           ], 
           "name": "Eau", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges d'\u00e9nergie", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -700,7 +603,7 @@
            }
           ], 
           "name": "D\u00e9ductions obtenues s/achats de prestations tiers", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -718,7 +621,7 @@
            }
           ], 
           "name": "Charges pour prestations de services de tiers A", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -733,11 +636,11 @@
            }
           ], 
           "name": "Charges directes d'achat s/prestations de services", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges pour prestations de tiers (services)", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -754,11 +657,11 @@
            }
           ], 
           "name": "Charges directes d'achat", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges directes d'achat", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -769,7 +672,7 @@
            }
           ], 
           "name": "Autres charges pour prestations de tiers", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -778,7 +681,7 @@
            }
           ], 
           "name": "Charges d'emballage", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -787,7 +690,7 @@
            }
           ], 
           "name": "Autres charges de mati\u00e8res pour la production", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -796,11 +699,11 @@
            }
           ], 
           "name": "Autres charges de marchandises", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Autres charges", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -817,7 +720,7 @@
            }
           ], 
           "name": "Charges directes d'achat", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -841,7 +744,7 @@
            }
           ], 
           "name": "Variations de stocks, pertes de mati\u00e8res", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -862,7 +765,7 @@
            }
           ], 
           "name": "D\u00e9ductions obtenues s/achats de mati\u00e8res", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -880,7 +783,7 @@
            }
           ], 
           "name": "Charges de mati\u00e8res du secteur A", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -895,7 +798,7 @@
            }
           ], 
           "name": "Travaux de tiers", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -919,7 +822,7 @@
            }
           ], 
           "name": "Charges de mati\u00e8res du secteur C", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -943,11 +846,11 @@
            }
           ], 
           "name": "Charges de mati\u00e8res du secteur B", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de mati\u00e8res", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -967,7 +870,7 @@
            }
           ], 
           "name": "Charges de marchandises du secteur A", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -988,7 +891,7 @@
            }
           ], 
           "name": "Charges de marchandises du secteur B", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1003,7 +906,7 @@
            }
           ], 
           "name": "Charges directes d'achat s/marchandises", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1027,7 +930,7 @@
            }
           ], 
           "name": "Variations de stocks de marchandises, pertes", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1048,11 +951,11 @@
            }
           ], 
           "name": "D\u00e9ductions obtenues s/achats li\u00e9s aux marchandises", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de marchandises", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1075,11 +978,11 @@
            }
           ], 
           "name": "D\u00e9ductions s/charges", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "D\u00e9ductions obtenues s/charges", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1093,7 +996,7 @@
            }
           ], 
           "name": "Pertes de mati\u00e8res et de marchandises", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1102,7 +1005,7 @@
            }
           ], 
           "name": "Variations de stocks de marchandises", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1111,15 +1014,15 @@
            }
           ], 
           "name": "Variations de stocks des mati\u00e8res de production", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Variations de stocks, pertes de mati\u00e8res et march.", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Charges de mati\u00e8res, marchandises et services", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -1132,7 +1035,7 @@
            }
           ], 
           "name": "Prestations de travail de tiers c/l'administration", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1153,7 +1056,7 @@
            }
           ], 
           "name": "Autres charges de personnel pour l'administration", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1189,7 +1092,7 @@
            }
           ], 
           "name": "Salaires pour l'administration", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1213,11 +1116,11 @@
            }
           ], 
           "name": "Charges sociales pour l'administration", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de personnel dans l'administration", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1228,7 +1131,7 @@
            }
           ], 
           "name": "Imp\u00f4ts \u00e0 la source", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1237,7 +1140,7 @@
            }
           ], 
           "name": "Pr\u00e9voyance professionnelle", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1246,7 +1149,7 @@
            }
           ], 
           "name": "Assurance-accidents", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1255,7 +1158,7 @@
            }
           ], 
           "name": "AVS, AI, APG, assurance-ch\u00f4mage", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1264,7 +1167,7 @@
            }
           ], 
           "name": "Caisse de compensation familiale", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1273,11 +1176,11 @@
            }
           ], 
           "name": "Assurance indemnit\u00e9s journali\u00e8res en cas maladie", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges sociales", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1312,7 +1215,7 @@
            }
           ], 
           "name": "Salaires pour la fourniture des prestations serv.", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1336,7 +1239,7 @@
            }
           ], 
           "name": "Charges sociales pour les prestations de services", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1345,7 +1248,7 @@
            }
           ], 
           "name": "Prestations de tiers pour les prestations service", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1366,11 +1269,11 @@
            }
           ], 
           "name": "Autres charges de personnel pour les prestations", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de personnel pour la fourniture", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1396,7 +1299,7 @@
            }
           ], 
           "name": "Charges sociales pour le commerce des marchandises", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1405,7 +1308,7 @@
            }
           ], 
           "name": "Prestations de travail de tiers dans le commerce", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1426,7 +1329,7 @@
            }
           ], 
           "name": "Autres charges de personnel pour le commerce march", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1459,11 +1362,11 @@
            }
           ], 
           "name": "Charges de personnel pour le commerce A", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de personnel pour le commerce des march.", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1477,7 +1380,7 @@
            }
           ], 
           "name": "Prestations de travail de tiers dans la production", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1501,7 +1404,7 @@
            }
           ], 
           "name": "Charges sociales de production", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1534,7 +1437,7 @@
            }
           ], 
           "name": "Charges de personnel de production du secteur A", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1555,11 +1458,11 @@
            }
           ], 
           "name": "Autres charges de personnel de production", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de personnel de production", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1579,7 +1482,7 @@
            }
           ], 
           "name": "Restaurant du personnel", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1594,7 +1497,7 @@
            }
           ], 
           "name": "Indemnit\u00e9s forfaitaires", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1609,7 +1512,7 @@
            }
           ], 
           "name": "Indemnit\u00e9s effectives", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1621,7 +1524,7 @@
            }
           ], 
           "name": "Formation et formation continue", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1633,7 +1536,7 @@
            }
           ], 
           "name": "Recherche de personnel", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1642,7 +1545,7 @@
            }
           ], 
           "name": "Charges de personnel comme pr\u00e9l\u00e8vements priv\u00e9s", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1654,11 +1557,11 @@
            }
           ], 
           "name": "Autres charges de personnel", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Autres charges de personnel", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1672,15 +1575,15 @@
            }
           ], 
           "name": "Prestations de travail de tiers", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Prestations de travail de tiers", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Charges de personnel", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -1698,7 +1601,7 @@
              }
             ], 
             "name": "ERR d'installations pour le personnel", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -1713,7 +1616,7 @@
              }
             ], 
             "name": "ERR d'installations de production", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -1725,7 +1628,7 @@
              }
             ], 
             "name": "ERR d'installations d'entreposage", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -1737,7 +1640,7 @@
              }
             ], 
             "name": "ERR d'installations de bureau", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -1749,11 +1652,11 @@
              }
             ], 
             "name": "ERR d'installations pour le commerce des march.", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Entretien, r\u00e9parations, remplacements (ERR)", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1776,15 +1679,15 @@
              }
             ], 
             "name": "Charges c/immobi. corporelles meubles cr\u00e9dit-bail", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Charges c/immobi. corporelles meubles cr\u00e9dit-bail", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Entretien, r\u00e9parations, remplacements (ERR)", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1819,7 +1722,7 @@
            }
           ], 
           "name": "Charges de nettoyage", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1846,7 +1749,7 @@
            }
           ], 
           "name": "Charges pour immobilisations en cr\u00e9dit-bail", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1873,7 +1776,7 @@
            }
           ], 
           "name": "Loyers pour locaux de tiers", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1900,7 +1803,7 @@
            }
           ], 
           "name": "Loyers pour locaux propres", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1936,7 +1839,7 @@
            }
           ], 
           "name": "Charges accessoires", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1945,7 +1848,7 @@
            }
           ], 
           "name": "Charges de locaux comme pr\u00e9l\u00e8vements priv\u00e9s", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -1981,11 +1884,11 @@
            }
           ], 
           "name": "Charges d'entretien des locaux", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de locaux", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -1993,7 +1896,7 @@
           "children": [
            {
             "name": "Primes d'assurance c/dommages, bris de glace, vols", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2002,7 +1905,7 @@
              }
             ], 
             "name": "Primes d'assurance pour arr\u00eats d'exploitation", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2014,7 +1917,7 @@
              }
             ], 
             "name": "Primes pour assurances li\u00e9es aux cr\u00e9dits", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2029,7 +1932,7 @@
              }
             ], 
             "name": "Primes d'assurance responsabilit\u00e9 civile /garantie", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "name": "Assurance vols"
@@ -2042,7 +1945,7 @@
            }
           ], 
           "name": "Assurances-choses", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2056,7 +1959,7 @@
              }
             ], 
             "name": "Autorisations et patentes", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2068,15 +1971,15 @@
              }
             ], 
             "name": "Droits et taxes", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Droits, taxes, autorisations, patentes", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Assurances-choses, droits, taxes, autorisations", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2101,11 +2004,11 @@
              }
             ], 
             "name": "Frets, frais de transport, cargo domicile", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Charges de transport", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2134,7 +2037,7 @@
              }
             ], 
             "name": "R\u00e9paration, service et nettoyage des v\u00e9hicules", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2161,7 +2064,7 @@
              }
             ], 
             "name": "Assurances", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2170,7 +2073,7 @@
              }
             ], 
             "name": "Charges de v\u00e9hicules comme pr\u00e9l\u00e8vements priv\u00e9s", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2197,7 +2100,7 @@
              }
             ], 
             "name": "Carburants", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2221,7 +2124,7 @@
              }
             ], 
             "name": "Droits de circulation, cotisations, taxes", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2242,15 +2145,15 @@
              }
             ], 
             "name": "Charges de location pour v\u00e9hicules en cr\u00e9dit-bail", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Charges de v\u00e9hicules", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges de v\u00e9hicules et de transport", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2264,7 +2167,7 @@
            }
           ], 
           "name": "S\u00e9curit\u00e9 et surveillance", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2276,7 +2179,7 @@
            }
           ], 
           "name": "Informations \u00e9conomiques, poursuites", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2288,11 +2191,11 @@
            }
           ], 
           "name": "Recherche et d\u00e9veloppement", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Autres charges d'exploitation", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2306,7 +2209,7 @@
            }
           ], 
           "name": "Publicit\u00e9, sponsoring", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2321,7 +2224,7 @@
            }
           ], 
           "name": "Relations publiques", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2336,7 +2239,7 @@
            }
           ], 
           "name": "Frais de voyage, conseils \u00e0 la client\u00e8le", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2348,7 +2251,7 @@
            }
           ], 
           "name": "Vitrines, d\u00e9coration, foires, expositions", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2384,7 +2287,7 @@
            }
           ], 
           "name": "Publicit\u00e9, m\u00e9dias \u00e9lectroniques", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2396,7 +2299,7 @@
            }
           ], 
           "name": "Imprim\u00e9s, mat\u00e9riel, articles de publicit\u00e9", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2408,11 +2311,11 @@
            }
           ], 
           "name": "Conseils en publicit\u00e9, \u00e9tudes de march\u00e9", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Publicit\u00e9", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2425,7 +2328,7 @@
              }
             ], 
             "name": "Charges d'administration comme pr\u00e9l\u00e8vements priv\u00e9s", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2443,7 +2346,7 @@
              }
             ], 
             "name": "Mat\u00e9riel de bureau, imprim\u00e9s, photocopies", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2461,7 +2364,7 @@
              }
             ], 
             "name": "T\u00e9l\u00e9phone, t\u00e9l\u00e9fax, Internet, frais de port", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2476,7 +2379,7 @@
              }
             ], 
             "name": "Honoraires pour fiduciaire et conseil", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2491,7 +2394,7 @@
              }
             ], 
             "name": "Cotisations, dons, cadeaux et pourboires", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2506,11 +2409,11 @@
              }
             ], 
             "name": "Conseil d'administration, AG, OR", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Charges d'administration", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2536,7 +2439,7 @@
              }
             ], 
             "name": "Licences et entretien", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2557,7 +2460,7 @@
              }
             ], 
             "name": "Conseils et d\u00e9veloppements", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2572,15 +2475,15 @@
              }
             ], 
             "name": "Locations en cr\u00e9dit-bail et locations de hard/soft", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Informatique", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges d'administration et d'informatique", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2596,7 +2499,7 @@
              }
             ], 
             "name": "Combustibles et mat\u00e9riaux de chauffage", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2611,7 +2514,7 @@
              }
             ], 
             "name": "Electricit\u00e9", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2620,7 +2523,7 @@
              }
             ], 
             "name": "Eau", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2632,11 +2535,11 @@
              }
             ], 
             "name": "Gaz", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Charges d'\u00e9nergie", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2653,15 +2556,15 @@
              }
             ], 
             "name": "Evacuation de d\u00e9chets", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Evacuation de d\u00e9chets", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges d'\u00e9nergie et \u00e9vacuation des d\u00e9chets", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2675,7 +2578,7 @@
            }
           ], 
           "name": "Amortissements s/immobilisations corporelles imm.", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2693,7 +2596,7 @@
            }
           ], 
           "name": "Amortissements s/immobilisations corporelles", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2705,7 +2608,7 @@
            }
           ], 
           "name": "D\u00e9pr\u00e9ciations s/participations \u00e0 des st\u00e9s groupe", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2717,7 +2620,7 @@
            }
           ], 
           "name": "D\u00e9pr\u00e9ciations s/immobilisations financi\u00e8res", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2729,7 +2632,7 @@
            }
           ], 
           "name": "Amortissements s/charges activ\u00e9es", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2744,11 +2647,11 @@
            }
           ], 
           "name": "Amortissements s/immobilisations incorporelles", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Amortissement", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -2764,7 +2667,7 @@
              }
             ], 
             "name": "Produits financiers placement aupr\u00e8s actionnaires", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2785,7 +2688,7 @@
              }
             ], 
             "name": "Produits financiers des liquidit\u00e9s et des titres", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2797,7 +2700,7 @@
              }
             ], 
             "name": "Produits financiers de placement aupr\u00e8s des st\u00e9s", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2821,7 +2724,7 @@
              }
             ], 
             "name": "Autres produits financiers", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2842,11 +2745,11 @@
              }
             ], 
             "name": "Produits financiers c/immobilisations financi\u00e8res", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Produits financiers", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2860,7 +2763,7 @@
              }
             ], 
             "name": "Charges financi\u00e8res pour financement actionnaires", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2881,7 +2784,7 @@
              }
             ], 
             "name": "Charges financi\u00e8res pour financement par des tiers", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2893,7 +2796,7 @@
              }
             ], 
             "name": "Charges financi\u00e8res pour financement par des st\u00e9s", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2902,7 +2805,7 @@
              }
             ], 
             "name": "Charges financi\u00e8res pour financement LPP", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -2926,19 +2829,19 @@
              }
             ], 
             "name": "Autres charges financi\u00e8res", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Charges financi\u00e8res", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "R\u00e9sultat financier", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Autres charges d'exploitation", 
-      "root_type": "Expense"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -2951,7 +2854,7 @@
            }
           ], 
           "name": "B\u00e9n\u00e9fice s/immobilisations corporelles immeubles", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2960,7 +2863,7 @@
            }
           ], 
           "name": "B\u00e9n\u00e9fices s/immobilisations incorporelles", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2975,7 +2878,7 @@
            }
           ], 
           "name": "B\u00e9n\u00e9fices s/immobilisations financi\u00e8res", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -2984,11 +2887,11 @@
            }
           ], 
           "name": "B\u00e9n\u00e9fices s/immobilisations corporelles meubles", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "B\u00e9n\u00e9fices provenant de l'ali\u00e9nation d'actifs immob", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3008,7 +2911,7 @@
            }
           ], 
           "name": "Charges s/placements financiers", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -3026,11 +2929,11 @@
            }
           ], 
           "name": "Produits de placements financiers", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "R\u00e9sultat des placements financiers", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3061,7 +2964,7 @@
              }
             ], 
             "name": "Charges de l'immeuble d'exploitation 1", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3082,15 +2985,15 @@
              }
             ], 
             "name": "Produits de l'immeuble d'exploitation 1", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "R\u00e9sultat de l'immeuble d'exploitation 1", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "R\u00e9sultat d'immeuble", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3106,7 +3009,7 @@
              }
             ], 
             "name": "Produits de l'activit\u00e9 annexe 1", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3118,7 +3021,7 @@
              }
             ], 
             "name": "R\u00e9sultat de l'activit\u00e9 annexe 2", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3154,7 +3057,7 @@
              }
             ], 
             "name": "Charges de l'activit\u00e9 annexe 2", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3190,19 +3093,19 @@
              }
             ], 
             "name": "Charges de l'activit\u00e9 annexe 1", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "R\u00e9sultat de l'activit\u00e9 annexe 2", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "R\u00e9sultat des activit\u00e9s annexes", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "R\u00e9sultat des activit\u00e9s annexes d'exploitation", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -3233,7 +3136,7 @@
            }
           ], 
           "name": "Produits exceptionnels", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -3266,11 +3169,11 @@
            }
           ], 
           "name": "Charges exceptionnelles", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "R\u00e9sultat exceptionnel", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3288,7 +3191,7 @@
                }
               ], 
               "name": "Produits de l'activit\u00e9 hors exploitation 1", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "children": [
@@ -3324,15 +3227,15 @@
                }
               ], 
               "name": "Charges de l'activit\u00e9 hors exploitation 1", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "R\u00e9sultat de l'activit\u00e9 hors exploitation 1", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "R\u00e9sultat de l'activit\u00e9 hors exploitation", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -3352,7 +3255,7 @@
              }
             ], 
             "name": "Charges financi\u00e8res s/placements financiers hors exploitation", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3364,11 +3267,11 @@
              }
             ], 
             "name": "Produits financiers s/placements financiers hors exploitation", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "R\u00e9sultat des placements financiers hors exploitation", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -3390,7 +3293,7 @@
                }
               ], 
               "name": "Produits de l'immeuble hors exploitation 1", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "children": [
@@ -3417,15 +3320,15 @@
                }
               ], 
               "name": "Charges de l'immeuble hors exploitation 1", 
-              "root_type": "Expense"
+              "report_type": "Profit and Loss"
              }
             ], 
             "name": "R\u00e9sultat de l'immeuble hors exploitation 1", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "R\u00e9sultat de l'immeuble hors exploitation", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -3439,7 +3342,7 @@
              }
             ], 
             "name": "Autres produits hors exploitation", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3448,15 +3351,15 @@
              }
             ], 
             "name": "Autres charges hors exploitation", 
-            "root_type": "Expense"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Autres r\u00e9sultats hors exploitation", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "R\u00e9sultat hors exploitation", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3473,15 +3376,15 @@
            }
           ], 
           "name": "Imp\u00f4ts directs de l'entreprise", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Charges d'imp\u00f4t", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "R\u00e9sultats exceptionnel et hors exploitation imp\u00f4ts", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
@@ -3497,11 +3400,11 @@
            }
           ], 
           "name": "Utilisation du b\u00e9n\u00e9fice", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Utilisation du b\u00e9n\u00e9fice", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3515,11 +3418,11 @@
            }
           ], 
           "name": "Bilan", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Bilan", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -3533,7 +3436,7 @@
            }
           ], 
           "name": "Ecritures de regroupements", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "children": [
@@ -3542,11 +3445,11 @@
            }
           ], 
           "name": "Ecritures de corrections", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Ecriture de regroupements et de corrections", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "children": [
@@ -3557,19 +3460,19 @@
            }
           ], 
           "name": "Compte de r\u00e9sultat", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }
         ], 
         "name": "Compte de r\u00e9sultat", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "Cl\u00f4ture", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }
     ], 
     "name": "Compte de r\u00e9sultat", 
-    "root_type": "Income"
+    "report_type": "Profit and Loss"
    }, 
    {
     "children": [
@@ -3584,102 +3487,89 @@
              {
               "children": [
                {
-                "name": "Disagio s/emprunts", 
-                "root_type": "Asset"
+                "name": "Disagio s/emprunts"
                }, 
                {
-                "name": "Disagio s/emprunts par obligations", 
-                "root_type": "Asset"
+                "name": "Disagio s/emprunts par obligations"
                }
               ], 
               "name": "Disagio s/emprunts et s/emprunts par obligations", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
                {
-                "name": "Amortissement cumul\u00e9 s/frais", 
-                "root_type": "Asset"
+                "name": "Amortissement cumul\u00e9 s/frais"
                }, 
                {
-                "name": "Frais d'augmentation de capital", 
-                "root_type": "Asset"
+                "name": "Frais d'augmentation de capital"
                }, 
                {
-                "name": "Frais d'organisation", 
-                "root_type": "Asset"
+                "name": "Frais d'organisation"
                }, 
                {
-                "name": "Frais de fondation", 
-                "root_type": "Asset"
+                "name": "Frais de fondation"
                }
               ], 
               "name": "Frais de fondation, augmentation de capital", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
                {
-                "name": "Charges de proc\u00e8s", 
-                "root_type": "Asset"
+                "name": "Charges de proc\u00e8s"
                }, 
                {
-                "name": "Amortissement cumul\u00e9 s/autres charges activ\u00e9es", 
-                "root_type": "Asset"
+                "name": "Amortissement cumul\u00e9 s/autres charges activ\u00e9es"
                }
               ], 
               "name": "Autres charges activ\u00e9es", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
                {
-                "name": "Frais de recherche", 
-                "root_type": "Asset"
+                "name": "Frais de recherche"
                }, 
                {
-                "name": "Frais de d\u00e9veloppement", 
-                "root_type": "Asset"
+                "name": "Frais de d\u00e9veloppement"
                }, 
                {
-                "name": "Amortissement cumul\u00e9 s/frais rech./d\u00e9veloppement", 
-                "root_type": "Asset"
+                "name": "Amortissement cumul\u00e9 s/frais rech./d\u00e9veloppement"
                }
               ], 
               "name": "Frais de recherche et de d\u00e9veloppement", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Charges activ\u00e9es", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
               "children": [
                {
-                "name": "Capital-actions non lib\u00e9r\u00e9", 
-                "root_type": "Asset"
+                "name": "Capital-actions non lib\u00e9r\u00e9"
                }, 
                {
-                "name": "Corrections de valeur s/capital-actions non lib\u00e9r\u00e9", 
-                "root_type": "Asset"
+                "name": "Corrections de valeur s/capital-actions non lib\u00e9r\u00e9"
                }
               ], 
               "name": "Capital-actions non lib\u00e9r\u00e9", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Comptes d'actif de corrections de valeur", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Charges activ\u00e9es et comptes d'actif de corrections de valeur", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Charges activ\u00e9es et comptes d'actif de corrections de valeur", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -3688,184 +3578,154 @@
            {
             "children": [
              {
-              "name": "Machines et appareils", 
-              "root_type": "Asset"
+              "name": "Machines et appareils"
              }, 
              {
-              "name": "Mobilier et installations", 
-              "root_type": "Asset"
+              "name": "Mobilier et installations"
              }, 
              {
-              "name": "Acomptes pour immobilisations corporelles meubles", 
-              "root_type": "Asset"
+              "name": "Acomptes pour immobilisations corporelles meubles"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/immobilisations corporelles", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/immobilisations corporelles"
              }
             ], 
             "name": "Immobilisations corporelles meubles", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Travaux en cours", 
-              "root_type": "Asset"
+              "name": "Travaux en cours"
              }, 
              {
-              "name": "Stocks", 
-              "root_type": "Asset"
+              "name": "Stocks"
              }, 
              {
-              "name": "Corrections de valeur s/stocks et travaux en cours", 
-              "root_type": "Asset"
+              "name": "Corrections de valeur s/stocks et travaux en cours"
              }, 
              {
-              "name": "Acomptes pour stocks", 
-              "root_type": "Asset"
+              "name": "Acomptes pour stocks"
              }
             ], 
             "name": "Stocks et travaux en cours", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Ch\u00e8ques postaux", 
-              "root_type": "Asset"
+              "name": "Ch\u00e8ques postaux"
              }, 
              {
-              "name": "Banques", 
-              "root_type": "Asset"
+              "name": "Banques"
              }, 
              {
-              "name": "Corrections de valeur s/liquidit\u00e9s et titres", 
-              "root_type": "Asset"
+              "name": "Corrections de valeur s/liquidit\u00e9s et titres"
              }, 
              {
-              "name": "Caisse", 
-              "root_type": "Asset"
+              "name": "Caisse"
              }
             ], 
             "name": "Liquidit\u00e9s et titres", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/immobilisations corporelles", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/immobilisations corporelles"
              }, 
              {
-              "name": "Acomptes pour immobilisations corporelles", 
-              "root_type": "Asset"
+              "name": "Acomptes pour immobilisations corporelles"
              }, 
              {
-              "name": "Biens-fonds non b\u00e2tis", 
-              "root_type": "Asset"
+              "name": "Biens-fonds non b\u00e2tis"
              }, 
              {
-              "name": "Immeubles en propri\u00e9t\u00e9 par \u00e9tage", 
-              "root_type": "Asset"
+              "name": "Immeubles en propri\u00e9t\u00e9 par \u00e9tage"
              }, 
              {
-              "name": "B\u00e2timents d'habitation", 
-              "root_type": "Asset"
+              "name": "B\u00e2timents d'habitation"
              }
             ], 
             "name": "Immobilisations corporelles immeubles", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Actifs de r\u00e9gularisation", 
-              "root_type": "Asset"
+              "name": "Actifs de r\u00e9gularisation"
              }
             ], 
             "name": "Actifs de r\u00e9gularisation", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Cr\u00e9ances \u00e0 court terme", 
-              "root_type": "Asset"
+              "name": "Cr\u00e9ances \u00e0 court terme"
              }, 
              {
-              "name": "Corrections de valeur s/cr\u00e9ances \u00e0 court terme", 
-              "root_type": "Asset"
+              "name": "Corrections de valeur s/cr\u00e9ances \u00e0 court terme"
              }
             ], 
             "name": "Cr\u00e9ances \u00e0 court terme", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/immob. incorporelles", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/immob. incorporelles"
              }, 
              {
-              "name": "Brevets, know-how, recettes de fabrication", 
-              "root_type": "Asset"
+              "name": "Brevets, know-how, recettes de fabrication"
              }, 
              {
-              "name": "Marques commerciales, \u00e9chantillons, mod\u00e8les, plans", 
-              "root_type": "Asset"
+              "name": "Marques commerciales, \u00e9chantillons, mod\u00e8les, plans"
              }, 
              {
-              "name": "Droits de licence, concessions, d'usage, commerce", 
-              "root_type": "Asset"
+              "name": "Droits de licence, concessions, d'usage, commerce"
              }, 
              {
-              "name": "Droits de propri\u00e9t\u00e9, d'\u00e9dition, conventionnels", 
-              "root_type": "Asset"
+              "name": "Droits de propri\u00e9t\u00e9, d'\u00e9dition, conventionnels"
              }
             ], 
             "name": "Immobilisations incorporelles", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Obligations", 
-              "root_type": "Asset"
+              "name": "Obligations"
              }, 
              {
-              "name": "Actions", 
-              "root_type": "Asset"
+              "name": "Actions"
              }, 
              {
-              "name": "Corrections de valeur s/immobilisations", 
-              "root_type": "Asset"
+              "name": "Corrections de valeur s/immobilisations"
              }
             ], 
             "name": "Immobilisations financi\u00e8res", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissements cumul\u00e9s s/charges activ\u00e9es", 
-              "root_type": "Asset"
+              "name": "Amortissements cumul\u00e9s s/charges activ\u00e9es"
              }, 
              {
-              "name": "Charges activ\u00e9es", 
-              "root_type": "Asset"
+              "name": "Charges activ\u00e9es"
              }
             ], 
             "name": "Charges activ\u00e9es", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Actifs hors exploitation", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Actifs hors exploitation", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -3874,20 +3734,18 @@
            {
             "children": [
              {
-              "name": "Produits \u00e0 recevoir", 
-              "root_type": "Asset"
+              "name": "Produits \u00e0 recevoir"
              }, 
              {
-              "name": "Charges constat\u00e9es d'avance", 
-              "root_type": "Asset"
+              "name": "Charges constat\u00e9es d'avance"
              }
             ], 
             "name": "Actifs de r\u00e9gularisation (Actifs transitoires)", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Actifs de r\u00e9gularisation", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -3901,7 +3759,7 @@
              }
             ], 
             "name": "Stocks de produits semi-ouvr\u00e9s", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3910,7 +3768,7 @@
              }
             ], 
             "name": "Marchandises en consignation", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3931,7 +3789,7 @@
              }
             ], 
             "name": "Stocks de mati\u00e8res auxiliaires et de fournitures", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -3949,7 +3807,7 @@
              }
             ], 
             "name": "Stocks de mati\u00e8res premi\u00e8res", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -3961,7 +3819,7 @@
              }
             ], 
             "name": "Stocks de produits en cours", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -3979,7 +3837,7 @@
              }
             ], 
             "name": "Stocks de marchandises", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -3991,7 +3849,7 @@
              }
             ], 
             "name": "Stocks de produits finis", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -4006,7 +3864,7 @@
              }
             ], 
             "name": "Stocks obligatoires", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -4024,11 +3882,11 @@
              }
             ], 
             "name": "Stocks d'autres approvisionnements", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Stocks et travaux en cours", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -4041,7 +3899,7 @@
                }
               ], 
               "name": "Capital-actions non lib\u00e9r\u00e9", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4065,7 +3923,7 @@
                }
               ], 
               "name": "Autres cr\u00e9ances \u00e0 court terme", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4080,7 +3938,7 @@
                }
               ], 
               "name": "Autres cr\u00e9ances \u00e0 court terme envers des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4101,7 +3959,7 @@
                }
               ], 
               "name": "Cr\u00e9ances envers des institutions publiques", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4116,7 +3974,7 @@
                }
               ], 
               "name": "Autres cr\u00e9ances \u00e0 court terme envers actionnaires", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4134,11 +3992,11 @@
                }
               ], 
               "name": "Autres cr\u00e9ances \u00e0 court terme envers des tiers", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Autres cr\u00e9ances \u00e0 court terme", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -4157,7 +4015,7 @@
                }
               ], 
               "name": "Cr\u00e9ances r\u00e9sultant prestations envers des tiers", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4174,7 +4032,7 @@
                }
               ], 
               "name": "Cr\u00e9ances r\u00e9sultant prestations envers actionnaires", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -4191,201 +4049,201 @@
                }
               ], 
               "name": "Cr\u00e9ances r\u00e9sultant prestations envers des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Asset"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Cr\u00e9ances r\u00e9sultant de vente et de prestations de services (d\u00e9biteurs-clients)", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Cr\u00e9ances", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Provision pour pertes s/avoirs \u00e0 court terme"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Placement fiduciaires en devises"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Placements fiduciaires"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Placements fixes"
              }
             ], 
             "name": "Avoirs \u00e0 court terme", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte d'attente en monnaie"
              }
             ], 
             "name": "Compte d'attente en monnaie", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Provisions risques de change s/comptes en devises"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte d'\u00e9pargne"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte de placement"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte courant exploitation principale"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte courant exploitation accessoire"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte en devise EUR"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Compte en devise B"
              }
             ], 
             "name": "Banques", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Bons de jouissance (cot\u00e9s)"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Obligations (cot\u00e9es)"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Actions (cot\u00e9es)"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Bons de participation (cot\u00e9s)"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Correction valeur s/titres r\u00e9alisables court terme"
              }
             ], 
             "name": "Titres r\u00e9alisables \u00e0 court terme", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Caisse auxiliaire"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Caisse principale"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Caisse succursale"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Devise A"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Devise B"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Provisions pour risques de change"
              }
             ], 
             "name": "Caisse", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Provisions pertes s/ch\u00e8ques et effets \u00e0 recevoir"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Ch\u00e8ques"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Effets \u00e0 recevoir"
              }
             ], 
             "name": "Ch\u00e8ques, effets \u00e0 recevoir", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Ch\u00e8ques postaux succursale"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Ch\u00e8ques postaux exploitation principale"
              }
             ], 
             "name": "Poste (CCP)", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Correction valeur s/autres placements court terme"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Instruments financiers d\u00e9riv\u00e9s"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Correction valeur s/actions propres"
              }, 
              {
-              "account_type": "Bank or Cash", 
+              "account_type": "Cash", 
               "name": "Actions propres (r\u00e9alisables \u00e0 court terme)"
              }
             ], 
             "name": "Autres placements \u00e0 court terme", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Liquidit\u00e9s et titres", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Actifs circulants", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -4394,692 +4252,569 @@
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 sur goodwill", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 sur goodwill"
              }, 
              {
-              "name": "Goodwill (survaleur)", 
-              "root_type": "Asset"
+              "name": "Goodwill (survaleur)"
              }
             ], 
             "name": "Goodwill", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/marques, \u00e9chantillons, etc.", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/marques, \u00e9chantillons, etc."
              }, 
              {
-              "name": "Marques commerciales", 
-              "root_type": "Asset"
+              "name": "Marques commerciales"
              }, 
              {
-              "name": "Echantillons", 
-              "root_type": "Asset"
+              "name": "Echantillons"
              }, 
              {
-              "name": "Plans", 
-              "root_type": "Asset"
+              "name": "Plans"
              }, 
              {
-              "name": "Mod\u00e8les", 
-              "root_type": "Asset"
+              "name": "Mod\u00e8les"
              }
             ], 
             "name": "Marques commerciales, \u00e9chantillons, mod\u00e8les, plans", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Droits conventionnels", 
-              "root_type": "Asset"
+              "name": "Droits conventionnels"
              }, 
              {
-              "name": "Droits de propri\u00e9t\u00e9 intellectuelle", 
-              "root_type": "Asset"
+              "name": "Droits de propri\u00e9t\u00e9 intellectuelle"
              }, 
              {
-              "name": "Droits d'\u00e9dition", 
-              "root_type": "Asset"
+              "name": "Droits d'\u00e9dition"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/droits", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/droits"
              }
             ], 
             "name": "Droits de propri\u00e9t\u00e9s, d'\u00e9dition, conventionnels", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Fichiers de clients", 
-              "root_type": "Asset"
+              "name": "Fichiers de clients"
              }, 
              {
-              "name": "Logiciels (d\u00e9veloppement interne)", 
-              "root_type": "Asset"
+              "name": "Logiciels (d\u00e9veloppement interne)"
              }, 
              {
-              "name": "Interdiction de concurrence", 
-              "root_type": "Asset"
+              "name": "Interdiction de concurrence"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/autres immobilisations", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/autres immobilisations"
              }
             ], 
             "name": "Autres immobilisations incorporelles", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/brevets, know-how, recettes", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/brevets, know-how, recettes"
              }, 
              {
-              "name": "Recettes de fabrication", 
-              "root_type": "Asset"
+              "name": "Recettes de fabrication"
              }, 
              {
-              "name": "Know-how", 
-              "root_type": "Asset"
+              "name": "Know-how"
              }, 
              {
-              "name": "Brevets", 
-              "root_type": "Asset"
+              "name": "Brevets"
              }
             ], 
             "name": "Brevets, know-how, recettes de fabrication", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/droits", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/droits"
              }, 
              {
-              "name": "Concessions", 
-              "root_type": "Asset"
+              "name": "Concessions"
              }, 
              {
-              "name": "Droits de licences", 
-              "root_type": "Asset"
+              "name": "Droits de licences"
              }, 
              {
-              "name": "Raisons de commerce", 
-              "root_type": "Asset"
+              "name": "Raisons de commerce"
              }, 
              {
-              "name": "Droits de jouissance", 
-              "root_type": "Asset"
+              "name": "Droits de jouissance"
              }
             ], 
             "name": "Droits de licences, concessions, etc.", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Immobilisations incorporelles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "children": [
              {
-              "name": "Maisons d'habitation du personnel", 
-              "root_type": "Asset"
+              "name": "Maisons d'habitation du personnel"
              }, 
              {
-              "name": "Maisons d'habitations de soci\u00e9t\u00e9s immobili\u00e8res", 
-              "root_type": "Asset"
+              "name": "Maisons d'habitations de soci\u00e9t\u00e9s immobili\u00e8res"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }, 
              {
-              "name": "Acomptes s/immeubles d'habitation", 
-              "root_type": "Asset"
+              "name": "Acomptes s/immeubles d'habitation"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/biens-fonds non b\u00e2tis", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/biens-fonds non b\u00e2tis"
              }
             ], 
             "name": "Immeubles d'habitation", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Acomptes s/b\u00e2timents d'exposition et vente", 
-              "root_type": "Asset"
+              "name": "Acomptes s/b\u00e2timents d'exposition et vente"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/b\u00e2timents exposition, vente", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/b\u00e2timents exposition, vente"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }, 
              {
-              "name": "Halles d'exposition", 
-              "root_type": "Asset"
+              "name": "Halles d'exposition"
              }, 
              {
-              "name": "Halle de vente", 
-              "root_type": "Asset"
+              "name": "Halle de vente"
              }
             ], 
             "name": "B\u00e2timents d'exposition et de vente", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Ateliers", 
-              "root_type": "Asset"
+              "name": "Ateliers"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }, 
              {
-              "name": "Acomptes s/ateliers", 
-              "root_type": "Asset"
+              "name": "Acomptes s/ateliers"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/ateliers", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/ateliers"
              }
             ], 
             "name": "Ateliers", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "B\u00e2timents d'exploitation", 
-              "root_type": "Asset"
+              "name": "B\u00e2timents d'exploitation"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }, 
              {
-              "name": "Acomptes s/b\u00e2timents d'exploitation", 
-              "root_type": "Asset"
+              "name": "Acomptes s/b\u00e2timents d'exploitation"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/b\u00e2timents d'exploitation", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/b\u00e2timents d'exploitation"
              }
             ], 
             "name": "B\u00e2timents d'exploitation", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/b\u00e2timents administratifs", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/b\u00e2timents administratifs"
              }, 
              {
-              "name": "Acomptes s/b\u00e2timents administratifs", 
-              "root_type": "Asset"
+              "name": "Acomptes s/b\u00e2timents administratifs"
              }, 
              {
-              "name": "B\u00e2timents d'administration", 
-              "root_type": "Asset"
+              "name": "B\u00e2timents d'administration"
              }, 
              {
-              "name": "B\u00e2timents de bureau", 
-              "root_type": "Asset"
+              "name": "B\u00e2timents de bureau"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }
             ], 
             "name": "B\u00e2timents administratifs", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/entrep\u00f4ts", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/entrep\u00f4ts"
              }, 
              {
-              "name": "Acomptes s/entrep\u00f4ts", 
-              "root_type": "Asset"
+              "name": "Acomptes s/entrep\u00f4ts"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }, 
              {
-              "name": "Entrep\u00f4ts", 
-              "root_type": "Asset"
+              "name": "Entrep\u00f4ts"
              }
             ], 
             "name": "Entrep\u00f4ts", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/usines", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/usines"
              }, 
              {
-              "name": "Acomptes s/usines", 
-              "root_type": "Asset"
+              "name": "Acomptes s/usines"
              }, 
              {
-              "name": "Terrains", 
-              "root_type": "Asset"
+              "name": "Terrains"
              }, 
              {
-              "name": "Usines", 
-              "root_type": "Asset"
+              "name": "Usines"
              }
             ], 
             "name": "Usines", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Immobilisation corporelles immeubles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/machines et appareils prod.", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/machines et appareils prod."
              }, 
              {
-              "name": "Acomptes s/machines et appareils de production", 
-              "root_type": "Asset"
+              "name": "Acomptes s/machines et appareils de production"
              }, 
              {
-              "name": "Cha\u00eenes de production", 
-              "root_type": "Asset"
+              "name": "Cha\u00eenes de production"
              }, 
              {
-              "name": "Machines et appareils", 
-              "root_type": "Asset"
+              "name": "Machines et appareils"
              }
             ], 
             "name": "Machines et appareils destin\u00e9s \u00e0 la production", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Amortissement cumul\u00e9 s/instruments et outillage", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/instruments et outillage"
              }, 
              {
-              "name": "Acomptes s/instruments et outillage", 
-              "root_type": "Asset"
+              "name": "Acomptes s/instruments et outillage"
              }, 
              {
-              "name": "Instruments et outillage", 
-              "root_type": "Asset"
+              "name": "Instruments et outillage"
              }
             ], 
             "name": "Instruments et outillage", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Installations de s\u00e9curit\u00e9", 
-              "root_type": "Asset"
+              "name": "Installations de s\u00e9curit\u00e9"
              }, 
              {
-              "name": "Syst\u00e8mes \u00e0 commande automatique", 
-              "root_type": "Asset"
+              "name": "Syst\u00e8mes \u00e0 commande automatique"
              }, 
              {
-              "name": "Syst\u00e8mes de communication", 
-              "root_type": "Asset"
+              "name": "Syst\u00e8mes de communication"
              }, 
              {
-              "name": "Infrastructures informatiques", 
-              "root_type": "Asset"
+              "name": "Infrastructures informatiques"
              }, 
              {
-              "name": "Machines de bureau", 
-              "root_type": "Asset"
+              "name": "Machines de bureau"
              }, 
              {
-              "name": "Logiciels", 
-              "root_type": "Asset"
+              "name": "Logiciels"
              }, 
              {
-              "name": "Appareils \u00e9lectroniques de mesure et de contr\u00f4le", 
-              "root_type": "Asset"
+              "name": "Appareils \u00e9lectroniques de mesure et de contr\u00f4le"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 machines, informatique, comm", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 machines, informatique, comm"
              }, 
              {
-              "name": "Acomptes s/machines, informatique, communication", 
-              "root_type": "Asset"
+              "name": "Acomptes s/machines, informatique, communication"
              }
             ], 
             "name": "Machines de bureau, informatiques, communication", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Camions", 
-              "root_type": "Asset"
+              "name": "Camions"
              }, 
              {
-              "name": "Automobiles", 
-              "root_type": "Asset"
+              "name": "Automobiles"
              }, 
              {
-              "name": "Camionnettes", 
-              "root_type": "Asset"
+              "name": "Camionnettes"
              }, 
              {
-              "name": "V\u00e9hicules sp\u00e9ciaux", 
-              "root_type": "Asset"
+              "name": "V\u00e9hicules sp\u00e9ciaux"
              }, 
              {
-              "name": "Acomptes s/v\u00e9hicules", 
-              "root_type": "Asset"
+              "name": "Acomptes s/v\u00e9hicules"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/v\u00e9hicules", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/v\u00e9hicules"
              }
             ], 
             "name": "V\u00e9hicules", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Acomptes sur mobilier et installations", 
-              "root_type": "Asset"
+              "name": "Acomptes sur mobilier et installations"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 sur mobilier et installations", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 sur mobilier et installations"
              }, 
              {
-              "name": "Installations d'entrep\u00f4ts", 
-              "root_type": "Asset"
+              "name": "Installations d'entrep\u00f4ts"
              }, 
              {
-              "name": "Mobilier de bureau", 
-              "root_type": "Asset"
+              "name": "Mobilier de bureau"
              }, 
              {
-              "name": "Mobilier d'exploitation", 
-              "root_type": "Asset"
+              "name": "Mobilier d'exploitation"
              }, 
              {
-              "name": "Installations d'ateliers", 
-              "root_type": "Asset"
+              "name": "Installations d'ateliers"
              }
             ], 
             "name": "Mobilier et installations", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Lingerie et habits de travail", 
-              "root_type": "Asset"
+              "name": "Lingerie et habits de travail"
              }, 
              {
-              "name": "Moules et mod\u00e8les", 
-              "root_type": "Asset"
+              "name": "Moules et mod\u00e8les"
              }, 
              {
-              "name": "Acomptes s/autres immobilisations corporelles", 
-              "root_type": "Asset"
+              "name": "Acomptes s/autres immobilisations corporelles"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/immobilisations corporelles", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/immobilisations corporelles"
              }
             ], 
             "name": "Autres immobilisations corporelles meubles", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Acomptes s/\u00e9quipements et installations", 
-              "root_type": "Asset"
+              "name": "Acomptes s/\u00e9quipements et installations"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/\u00e9quipements et installation", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/\u00e9quipements et installation"
              }, 
              {
-              "name": "Ascenseurs, escaliers roulants", 
-              "root_type": "Asset"
+              "name": "Ascenseurs, escaliers roulants"
              }, 
              {
-              "name": "Baraques", 
-              "root_type": "Asset"
+              "name": "Baraques"
              }, 
              {
-              "name": "Constructions mobili\u00e8res", 
-              "root_type": "Asset"
+              "name": "Constructions mobili\u00e8res"
              }, 
              {
-              "name": "Voies ferr\u00e9es industrielles", 
-              "root_type": "Asset"
+              "name": "Voies ferr\u00e9es industrielles"
              }, 
              {
-              "name": "R\u00e9servoirs", 
-              "root_type": "Asset"
+              "name": "R\u00e9servoirs"
              }, 
              {
-              "name": "Conteneurs", 
-              "root_type": "Asset"
+              "name": "Conteneurs"
              }
             ], 
             "name": "Equipements et installations", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Installations de stockage", 
-              "root_type": "Asset"
+              "name": "Installations de stockage"
              }, 
              {
-              "name": "Entrep\u00f4ts \u00e0 hauts rayonnages", 
-              "root_type": "Asset"
+              "name": "Entrep\u00f4ts \u00e0 hauts rayonnages"
              }, 
              {
-              "name": "Acomptes s/installations de stockage", 
-              "root_type": "Asset"
+              "name": "Acomptes s/installations de stockage"
              }, 
              {
-              "name": "Amortissement cumul\u00e9 s/installations de stockage", 
-              "root_type": "Asset"
+              "name": "Amortissement cumul\u00e9 s/installations de stockage"
              }
             ], 
             "name": "Installations de stockage", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Immobilisation corporelles meubles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "children": [
              {
-              "name": "Pr\u00eats \u00e0 long terme \u00e0 des actionnaires", 
-              "root_type": "Asset"
+              "name": "Pr\u00eats \u00e0 long terme \u00e0 des actionnaires"
              }, 
              {
-              "name": "Pr\u00eats hypoth\u00e9caires \u00e0 des actionnaires", 
-              "root_type": "Asset"
+              "name": "Pr\u00eats hypoth\u00e9caires \u00e0 des actionnaires"
              }, 
              {
-              "name": "Corrections valeur s/cr\u00e9ances long terme \u00e0 action.", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/cr\u00e9ances long terme \u00e0 action."
              }
             ], 
             "name": "Cr\u00e9ances \u00e0 long terme envers des actionnaires", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Actions", 
-              "root_type": "Asset"
+              "name": "Actions"
              }, 
              {
-              "name": "Obligations de caisse", 
-              "root_type": "Asset"
+              "name": "Obligations de caisse"
              }, 
              {
-              "name": "Bons de participation", 
-              "root_type": "Asset"
+              "name": "Bons de participation"
              }, 
              {
-              "name": "Bons de jouissance", 
-              "root_type": "Asset"
+              "name": "Bons de jouissance"
              }, 
              {
-              "name": "Obligations", 
-              "root_type": "Asset"
+              "name": "Obligations"
              }, 
              {
-              "name": "Corrections valeur s/titres \u00e0 long terme", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/titres \u00e0 long terme"
              }
             ], 
             "name": "Titres \u00e0 long terme", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Corrections valeur s/participations", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/participations"
              }, 
              {
-              "name": "Autres participations", 
-              "root_type": "Asset"
+              "name": "Autres participations"
              }, 
              {
-              "name": "Participation dans la filiale A", 
-              "root_type": "Asset"
+              "name": "Participation dans la filiale A"
              }, 
              {
-              "name": "Participation dans la filiale B", 
-              "root_type": "Asset"
+              "name": "Participation dans la filiale B"
              }
             ], 
             "name": "Participations", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Corrections valeur s/cr\u00e9ances long terme \u00e0 tiers", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/cr\u00e9ances long terme \u00e0 tiers"
              }, 
              {
-              "name": "Pr\u00eats \u00e0 long terme \u00e0 des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Asset"
+              "name": "Pr\u00eats \u00e0 long terme \u00e0 des soci\u00e9t\u00e9s du groupe"
              }, 
              {
-              "name": "Pr\u00eats hypoth\u00e9caires \u00e0 des tiers", 
-              "root_type": "Asset"
+              "name": "Pr\u00eats hypoth\u00e9caires \u00e0 des tiers"
              }
             ], 
             "name": "Cr\u00e9ances \u00e0 long terme envers des tiers", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Corrections valeur s/actions propres", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/actions propres"
              }, 
              {
-              "name": "Actions propres", 
-              "root_type": "Asset"
+              "name": "Actions propres"
              }
             ], 
             "name": "Actions propres", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Comptes bloqu\u00e9s \u00e0 titre de r\u00e9serve de crise", 
-              "root_type": "Asset"
+              "name": "Comptes bloqu\u00e9s \u00e0 titre de r\u00e9serve de crise"
              }, 
              {
-              "name": "Comptes de placement", 
-              "root_type": "Asset"
+              "name": "Comptes de placement"
              }, 
              {
-              "name": "Corrections valeur s/autres placements long terme", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/autres placements long terme"
              }
             ], 
             "name": "Autres placements \u00e0 long terme", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Corrections valeur s/cr\u00e9ances long terme des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Asset"
+              "name": "Corrections valeur s/cr\u00e9ances long terme des soci\u00e9t\u00e9s du groupe"
              }, 
              {
-              "name": "Pr\u00eats hypoth\u00e9caires \u00e0 des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Asset"
+              "name": "Pr\u00eats hypoth\u00e9caires \u00e0 des soci\u00e9t\u00e9s du groupe"
              }, 
              {
-              "name": "Pr\u00eats \u00e0 long terme \u00e0 des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Asset"
+              "name": "Pr\u00eats \u00e0 long terme \u00e0 des soci\u00e9t\u00e9s du groupe"
              }
             ], 
             "name": "Cr\u00e9ances \u00e0 long terme envers des soci\u00e9t\u00e9s du groupe", 
-            "root_type": "Asset"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Immobilisations financi\u00e8res", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Actifs immobilis\u00e9s", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Actif", 
-      "root_type": "Asset"
+      "report_type": "Balance Sheet"
      }, 
      {
       "children": [
@@ -5100,7 +4835,7 @@
              }
             ], 
             "name": "Dettes financi\u00e8res \u00e0 court terme", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5115,7 +4850,7 @@
              }
             ], 
             "name": "Autres dettes \u00e0 long terme", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5127,7 +4862,7 @@
              }
             ], 
             "name": "Passifs de r\u00e9gularisation, provisions court terme", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5136,7 +4871,7 @@
              }
             ], 
             "name": "Autres dettes \u00e0 court terme", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5145,7 +4880,7 @@
              }
             ], 
             "name": "Dettes \u00e0 court terme r\u00e9sultant prestations service", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5154,7 +4889,7 @@
              }
             ], 
             "name": "Provisions", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5166,15 +4901,15 @@
              }
             ], 
             "name": "Dettes financi\u00e8res \u00e0 long terme", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Dettes hors exploitation", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Dettes hors exploitation", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -5190,7 +4925,7 @@
              }
             ], 
             "name": "Provisions pour recherche et d\u00e9veloppement", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5199,7 +4934,7 @@
              }
             ], 
             "name": "Provisions r\u00e9sultant de ventes/prestations service", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5208,7 +4943,7 @@
              }
             ], 
             "name": "Provisions pour la protection de l'environnement", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5217,7 +4952,7 @@
              }
             ], 
             "name": "Provisions pour prestations en cas de vieillesse", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5226,7 +4961,7 @@
              }
             ], 
             "name": "Autres provisions", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5235,7 +4970,7 @@
              }
             ], 
             "name": "Provisions pour restructuration de l'entreprise", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5244,7 +4979,7 @@
              }
             ], 
             "name": "Provisions pour imp\u00f4ts (long terme)", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5259,147 +4994,129 @@
              }
             ], 
             "name": "Provisions r\u00e9paration, assainissements, r\u00e9novation", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Provisions \u00e0 long terme", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "children": [
              {
-              "name": "Dettes r\u00e9sultant d'op\u00e9rations de cr\u00e9dit-bail", 
-              "root_type": "Liability"
+              "name": "Dettes r\u00e9sultant d'op\u00e9rations de cr\u00e9dit-bail"
              }
             ], 
             "name": "Dettes r\u00e9sultant d'op\u00e9rations de cr\u00e9dit-bail", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Dettes bancaires \u00e0 long terme", 
-              "root_type": "Liability"
+              "name": "Dettes bancaires \u00e0 long terme"
              }
             ], 
             "name": "Dettes bancaires \u00e0 long terme", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Emprunts par obligations", 
-              "root_type": "Liability"
+              "name": "Emprunts par obligations"
              }
             ], 
             "name": "Emprunts par obligations", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
              {
-              "name": "Hypoth\u00e8ques sur entrep\u00f4ts", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur entrep\u00f4ts"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur b\u00e2timents d'exposition et de vente", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur b\u00e2timents d'exposition et de vente"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur biens-fonds non b\u00e2tis", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur biens-fonds non b\u00e2tis"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur b\u00e2timents de bureau/administration", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur b\u00e2timents de bureau/administration"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur b\u00e2timents d'exploitation", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur b\u00e2timents d'exploitation"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur immeubles d'habitation", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur immeubles d'habitation"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur usines", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur usines"
              }, 
              {
-              "name": "Hypoth\u00e8ques sur ateliers", 
-              "root_type": "Liability"
+              "name": "Hypoth\u00e8ques sur ateliers"
              }
             ], 
             "name": "Dettes hypoth\u00e9caires", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Dettes financi\u00e8re \u00e0 long terme", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
            {
             "children": [
              {
-              "name": "Dettes hypoth\u00e9caires envers des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Liability"
+              "name": "Dettes hypoth\u00e9caires envers des soci\u00e9t\u00e9s du groupe"
              }, 
              {
-              "name": "Emprunts \u00e0 long terme \u00e0 des soci\u00e9t\u00e9s du groupe", 
-              "root_type": "Liability"
+              "name": "Emprunts \u00e0 long terme \u00e0 des soci\u00e9t\u00e9s du groupe"
              }
             ], 
             "name": "Dettes \u00e0 long terme envers des soci\u00e9t\u00e9s du groupe", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Dettes hypoth\u00e9caires envers des institutions LPP", 
-              "root_type": "Liability"
+              "name": "Dettes hypoth\u00e9caires envers des institutions LPP"
              }, 
              {
-              "name": "Emprunts \u00e0 long terme \u00e0 des institutions LPP", 
-              "root_type": "Liability"
+              "name": "Emprunts \u00e0 long terme \u00e0 des institutions LPP"
              }
             ], 
             "name": "Dettes \u00e0 long terme envers des institutions LPP", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Emprunts \u00e0 long terme \u00e0 des actionnaires", 
-              "root_type": "Liability"
+              "name": "Emprunts \u00e0 long terme \u00e0 des actionnaires"
              }, 
              {
-              "name": "Dettes hypoth\u00e9caires envers des actionnaires", 
-              "root_type": "Liability"
+              "name": "Dettes hypoth\u00e9caires envers des actionnaires"
              }
             ], 
             "name": "Dettes \u00e0 long terme envers des actionnaires", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Emprunts \u00e0 long terme \u00e0 des tiers", 
-              "root_type": "Liability"
+              "name": "Emprunts \u00e0 long terme \u00e0 des tiers"
              }
             ], 
             "name": "Emprunts \u00e0 long terme \u00e0 des tiers", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }
           ], 
           "name": "Autres dettes \u00e0 long terme", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Dettes \u00e0 long terme", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -5415,7 +5132,7 @@
              }
             ], 
             "name": "Autres dettes \u00e0 court terme envers des tiers", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5430,7 +5147,7 @@
              }
             ], 
             "name": "Dividendes et coupons d'obligations non encaiss\u00e9s", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5442,7 +5159,7 @@
              }
             ], 
             "name": "Autres dettes \u00e0 court terme c/st\u00e9s du groupe", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5454,7 +5171,7 @@
              }
             ], 
             "name": "Autres dettes \u00e0 court terme envers actionnaires", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5463,7 +5180,7 @@
              }
             ], 
             "name": "Autres dettes \u00e0 court terme c/fonds pr\u00e9voyance", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5472,7 +5189,7 @@
              }
             ], 
             "name": "R\u00e9sultat \u00e0 verser", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5490,7 +5207,7 @@
              }
             ], 
             "name": "Dettes envers des institutions publiques", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5499,11 +5216,11 @@
              }
             ], 
             "name": "Obligations \u00e0 rembourser", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Autres dettes \u00e0 court terme", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -5517,21 +5234,19 @@
              }
             ], 
             "name": "Provisions \u00e0 court terme pour imp\u00f4ts", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
              {
-              "name": "Charges \u00e0 payer", 
-              "root_type": "Liability"
+              "name": "Charges \u00e0 payer"
              }, 
              {
-              "name": "Produits constat\u00e9s d'avance", 
-              "root_type": "Liability"
+              "name": "Produits constat\u00e9s d'avance"
              }
             ], 
             "name": "Passifs de r\u00e9gularisation", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5543,11 +5258,11 @@
              }
             ], 
             "name": "Provisions \u00e0 court terme c/ventes, services", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Passifs de r\u00e9gularisation, provisions court terme", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -5563,7 +5278,7 @@
              }
             ], 
             "name": "Dettes c/achats, prestations services st\u00e9s groupe", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5573,7 +5288,7 @@
              }
             ], 
             "name": "Acomptes de clients", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5603,7 +5318,7 @@
              }
             ], 
             "name": "Dettes \u00e0 court terme r\u00e9sultant d'achats et prestations services envers des tiers (fournisseurs)", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5617,11 +5332,11 @@
              }
             ], 
             "name": "Dettes c/achats, prestations services actionnaires", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Dettes \u00e0 court terme r\u00e9sultant d'achats et prestations services", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -5632,7 +5347,7 @@
              }
             ], 
             "name": "Autres dettes financi\u00e8res \u00e0 court terme \u00e0 tiers", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5644,7 +5359,7 @@
              }
             ], 
             "name": "Dettes financi\u00e8res \u00e0 court terme actionnaires", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5653,7 +5368,7 @@
              }
             ], 
             "name": "Dettes bancaires \u00e0 court terme", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5665,7 +5380,7 @@
              }
             ], 
             "name": "Effets \u00e0 payer", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5674,7 +5389,7 @@
              }
             ], 
             "name": "Dettes financi\u00e8res \u00e0 court terme fonds pr\u00e9voyance", 
-            "root_type": "Income"
+            "report_type": "Profit and Loss"
            }, 
            {
             "children": [
@@ -5686,7 +5401,7 @@
              }
             ], 
             "name": "Dettes c/ch\u00e8ques postaux, soci\u00e9t\u00e9s de virement", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5698,7 +5413,7 @@
              }
             ], 
             "name": "Dettes financi\u00e8res \u00e0 court terme st\u00e9s du groupe", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5710,15 +5425,15 @@
              }
             ], 
             "name": "Part \u00e0 rembourser dettes financi\u00e8res \u00e0 long terme", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Dettes financi\u00e8res \u00e0 court terme", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Dettes \u00e0 court terme", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -5730,62 +5445,53 @@
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Immeuble priv\u00e9 B", 
-                "root_type": "Liability"
+                "name": "Immeuble priv\u00e9 B"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Immeuble priv\u00e9 A", 
-                "root_type": "Liability"
+                "name": "Immeuble priv\u00e9 A"
                }
               ], 
               "name": "Comptes pour immeubles et biens-fonds priv\u00e9s", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Imp\u00f4ts priv\u00e9s", 
-                "root_type": "Liability"
+                "name": "Imp\u00f4ts priv\u00e9s"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Primes d'assurance priv\u00e9es", 
-                "root_type": "Liability"
+                "name": "Primes d'assurance priv\u00e9es"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Cotisations priv\u00e9es \u00e0 titre de pr\u00e9voyance", 
-                "root_type": "Liability"
+                "name": "Cotisations priv\u00e9es \u00e0 titre de pr\u00e9voyance"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Participations priv\u00e9es aux charges d'exploitation", 
-                "root_type": "Liability"
+                "name": "Participations priv\u00e9es aux charges d'exploitation"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Valeur locative de l'appartement priv\u00e9", 
-                "root_type": "Liability"
+                "name": "Valeur locative de l'appartement priv\u00e9"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Pr\u00e9l\u00e8vements priv\u00e9s en esp\u00e8ces", 
-                "root_type": "Liability"
+                "name": "Pr\u00e9l\u00e8vements priv\u00e9s en esp\u00e8ces"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Pr\u00e9l\u00e8vements priv\u00e9s en nature", 
-                "root_type": "Liability"
+                "name": "Pr\u00e9l\u00e8vements priv\u00e9s en nature"
                }
               ], 
               "name": "Compte priv\u00e9", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Priv\u00e9", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5793,84 +5499,75 @@
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Capital-participation", 
-                "root_type": "Liability"
+                "name": "Capital-participation"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Capital-actions", 
-                "root_type": "Liability"
+                "name": "Capital-actions"
                }
               ], 
               "name": "Capital-actions et participation", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Compte de commandite, commanditaire C", 
-                "root_type": "Liability"
+                "name": "Compte de commandite, commanditaire C"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Compte de capital, associ\u00e9 A", 
-                "root_type": "Liability"
+                "name": "Compte de capital, associ\u00e9 A"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Compte de capital, associ\u00e9 B", 
-                "root_type": "Liability"
+                "name": "Compte de capital, associ\u00e9 B"
                }
               ], 
               "name": "Capital propre des soci\u00e9t\u00e9s de personnes", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Capital de la soci\u00e9t\u00e9 coop\u00e9rative", 
-                "root_type": "Liability"
+                "name": "Capital de la soci\u00e9t\u00e9 coop\u00e9rative"
                }
               ], 
               "name": "Capital de la soci\u00e9t\u00e9 coop\u00e9rative", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Capital social de la S.\u00e0.r.l", 
-                "root_type": "Liability"
+                "name": "Capital social de la S.\u00e0.r.l"
                }
               ], 
               "name": "Capital social de la S.\u00e0.r.l", 
-              "root_type": "Income"
+              "report_type": "Profit and Loss"
              }, 
              {
               "children": [
                {
                 "account_type": "Equity", 
-                "name": "Capital propre du conjoint", 
-                "root_type": "Liability"
+                "name": "Capital propre du conjoint"
                }, 
                {
                 "account_type": "Equity", 
-                "name": "Capital propre", 
-                "root_type": "Liability"
+                "name": "Capital propre"
                }
               ], 
               "name": "Capital propre des entreprises raison individuelle", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "Capital", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "Capital/Priv\u00e9", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -5898,7 +5595,7 @@
                }
               ], 
               "name": "Autres r\u00e9serves", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }, 
              {
               "children": [
@@ -5916,11 +5613,11 @@
                }
               ], 
               "name": "R\u00e9serves l\u00e9gales", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "R\u00e9serves", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }, 
            {
             "children": [
@@ -5934,27 +5631,27 @@
                }
               ], 
               "name": "B\u00e9n\u00e9fice/Perte r\u00e9sultant du bilan", 
-              "root_type": "Liability"
+              "report_type": "Balance Sheet"
              }
             ], 
             "name": "B\u00e9n\u00e9fice/Perte r\u00e9sultant du bilan", 
-            "root_type": "Liability"
+            "report_type": "Balance Sheet"
            }
           ], 
           "name": "R\u00e9serves, B\u00e9n\u00e9fice/Perte r\u00e9sultant du bilan", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "Capitaux propres", 
-        "root_type": "Liability"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "Passif", 
-      "root_type": "Liability"
+      "report_type": "Balance Sheet"
      }
     ], 
     "name": "Bilan", 
-    "root_type": "Asset"
+    "report_type": "Balance Sheet"
    }
   ], 
   "name": "Plan comptable"

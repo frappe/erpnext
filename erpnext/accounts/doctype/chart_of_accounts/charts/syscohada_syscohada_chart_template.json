@@ -9,474 +9,369 @@
        {
         "children": [
          {
-          "name": "TRANSFERTS DE CHARGES FINANCIERES", 
-          "root_type": "Income"
+          "name": "TRANSFERTS DE CHARGES FINANCIERES"
          }, 
          {
-          "name": "TRANSFERTS DE CHARGES D'EXPLOITATION", 
-          "root_type": "Income"
+          "name": "TRANSFERTS DE CHARGES D'EXPLOITATION"
          }
         ], 
-        "name": "TRANSFERTS DE CHARGES", 
-        "root_type": "Income"
+        "name": "TRANSFERTS DE CHARGES"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "pour risques et charges", 
-            "root_type": "Income"
+            "name": "pour risques et charges"
            }, 
            {
-            "name": "pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res", 
-            "root_type": "Income"
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res"
            }
           ], 
-          "name": "REPRISES DE PROVISIONS FINANCI\u00c8RES", 
-          "root_type": "Income"
+          "name": "REPRISES DE PROVISIONS FINANCI\u00c8RES"
          }, 
          {
-          "name": "REPRISES D'AMORTISSEMENTS", 
-          "root_type": "Income"
+          "name": "REPRISES D'AMORTISSEMENTS"
          }, 
          {
           "children": [
            {
-            "name": "pour grosses r\u00e9parations", 
-            "root_type": "Income"
+            "name": "pour grosses r\u00e9parations"
            }, 
            {
-            "name": "pour d\u00e9pr\u00e9ciation des immobilisations incorporelles", 
-            "root_type": "Income"
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations incorporelles"
            }, 
            {
-            "name": "pour d\u00e9pr\u00e9ciation des immobilisations corporelles", 
-            "root_type": "Income"
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations corporelles"
            }, 
            {
-            "name": "pour risques et charges", 
-            "root_type": "Income"
+            "name": "pour risques et charges"
            }
           ], 
-          "name": "REPRISES DE PROVISIONS D'EXPLOITATION", 
-          "root_type": "Income"
+          "name": "REPRISES DE PROVISIONS D'EXPLOITATION"
          }
         ], 
-        "name": "REPRISES DE PROVISIONS", 
-        "root_type": "Income"
+        "name": "REPRISES DE PROVISIONS"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "sur instruments de tr\u00e9sorerie", 
-            "root_type": "Income"
+            "name": "sur instruments de tr\u00e9sorerie"
            }, 
            {
-            "name": "sur op\u00e9rations financi\u00e8res", 
-            "root_type": "Income"
+            "name": "sur op\u00e9rations financi\u00e8res"
            }, 
            {
-            "name": "sur rentes viag\u00e8res", 
-            "root_type": "Income"
+            "name": "sur rentes viag\u00e8res"
            }
           ], 
-          "name": "GAINS SUR RISQUES FINANCIERS", 
-          "root_type": "Income"
+          "name": "GAINS SUR RISQUES FINANCIERS"
          }, 
          {
-          "name": "GAINS SUR CESSIONS DE TITRES DE PLACEMENT", 
-          "root_type": "Income"
+          "name": "GAINS SUR CESSIONS DE TITRES DE PLACEMENT"
          }, 
          {
-          "name": "REVENUS DE PARTICIPATIONS", 
-          "root_type": "Income"
+          "name": "REVENUS DE PARTICIPATIONS"
          }, 
          {
-          "name": "ESCOMPTES OBTENUS", 
-          "root_type": "Income"
+          "name": "ESCOMPTES OBTENUS"
          }, 
          {
-          "name": "GAINS DE CHANGE", 
-          "root_type": "Income"
+          "name": "GAINS DE CHANGE"
          }, 
          {
-          "name": "REVENUS DE TITRES DE PLACEMENT", 
-          "root_type": "Income"
+          "name": "REVENUS DE TITRES DE PLACEMENT"
          }, 
          {
-          "name": "INT\u00c9R\u00caTS DE PR\u00caTS", 
-          "root_type": "Income"
+          "name": "INT\u00c9R\u00caTS DE PR\u00caTS"
          }, 
          {
           "children": [
            {
-            "name": "sur risques financiers", 
-            "root_type": "Income"
+            "name": "sur risques financiers"
            }, 
            {
-            "name": "sur titres de placement", 
-            "root_type": "Income"
+            "name": "sur titres de placement"
            }, 
            {
-            "name": "autres charges provisionn\u00e9es financi\u00e8res", 
-            "root_type": "Income"
+            "name": "autres charges provisionn\u00e9es financi\u00e8res"
            }
           ], 
-          "name": "REPRISES DE CHARGES PROVISIONN\u00c9ES FINANCI\u00c8RES", 
-          "root_type": "Income"
+          "name": "REPRISES DE CHARGES PROVISIONN\u00c9ES FINANCI\u00c8RES"
          }
         ], 
-        "name": "REVENUS FINANCIERS ET PRODUITS ASSIMIL\u00c9S", 
-        "root_type": "Income"
+        "name": "REVENUS FINANCIERS ET PRODUITS ASSIMIL\u00c9S"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "B\u00e9n\u00e9fices attribu\u00e9s par transfert (comptabilit\u00e9 des associ\u00e9s non g\u00e9rants)", 
-            "root_type": "Income"
+            "name": "B\u00e9n\u00e9fices attribu\u00e9s par transfert (comptabilit\u00e9 des associ\u00e9s non g\u00e9rants)"
            }, 
            {
-            "name": "Quote-part transf\u00e9r\u00e9e de pertes (comptabilit\u00e9 du g\u00e9rant)", 
-            "root_type": "Income"
+            "name": "Quote-part transf\u00e9r\u00e9e de pertes (comptabilit\u00e9 du g\u00e9rant)"
            }
           ], 
-          "name": "QUOTE-PART DE R\u00c9SULTAT SUR OP\u00c9RATIONS FAITES EN COMMUN", 
-          "root_type": "Income"
+          "name": "QUOTE-PART DE R\u00c9SULTAT SUR OP\u00c9RATIONS FAITES EN COMMUN"
          }, 
          {
           "children": [
            {
-            "name": "Jetons de pr\u00e9sence et autres r\u00e9mun\u00e9rations d'administrateurs", 
-            "root_type": "Income"
+            "name": "Jetons de pr\u00e9sence et autres r\u00e9mun\u00e9rations d'administrateurs"
            }, 
            {
-            "name": "Indemnit\u00e9s d\u2019assurances re\u00e7ues", 
-            "root_type": "Income"
+            "name": "Indemnit\u00e9s d\u2019assurances re\u00e7ues"
            }
           ], 
-          "name": "PRODUITS DIVERS", 
-          "root_type": "Income"
+          "name": "PRODUITS DIVERS"
          }, 
          {
           "children": [
            {
-            "name": "sur stocks", 
-            "root_type": "Income"
+            "name": "sur stocks"
            }, 
            {
-            "name": "sur risques \u00e0 court terme", 
-            "root_type": "Income"
+            "name": "sur risques \u00e0 court terme"
            }, 
            {
-            "name": "sur autres charges provisionn\u00e9es", 
-            "root_type": "Income"
+            "name": "sur autres charges provisionn\u00e9es"
            }, 
            {
-            "name": "sur cr\u00e9ances", 
-            "root_type": "Income"
+            "name": "sur cr\u00e9ances"
            }
           ], 
-          "name": "REPRISES DE CHARGES PROVISIONN\u00c9ES D'EXPLOITATION", 
-          "root_type": "Income"
+          "name": "REPRISES DE CHARGES PROVISIONN\u00c9ES D'EXPLOITATION"
          }, 
          {
-          "name": "PRODUITS DES CESSIONS COURANTES D'IMMOBILISATIONS", 
-          "root_type": "Income"
+          "name": "PRODUITS DES CESSIONS COURANTES D'IMMOBILISATIONS"
          }, 
          {
-          "name": "QUOTE-PART DE R\u00c9SULTAT SUR EX\u00c9CUTION PARTIELLE DE CONTRATS PLURIEXERCICES", 
-          "root_type": "Income"
+          "name": "QUOTE-PART DE R\u00c9SULTAT SUR EX\u00c9CUTION PARTIELLE DE CONTRATS PLURIEXERCICES"
          }
         ], 
-        "name": "AUTRES PRODUITS", 
-        "root_type": "Income"
+        "name": "AUTRES PRODUITS"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "hors R\u00e9gion"
            }, 
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "dans la R\u00e9gion"
            }
           ], 
-          "name": "SERVICES VENDUS", 
-          "root_type": "Income"
+          "name": "SERVICES VENDUS"
          }, 
          {
           "children": [
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "dans la R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "hors R\u00e9gion"
            }
           ], 
-          "name": "TRAVAUX FACTUR\u00c9S", 
-          "root_type": "Income"
+          "name": "TRAVAUX FACTUR\u00c9S"
          }, 
          {
           "children": [
            {
-            "name": "Autres produits accessoires", 
-            "root_type": "Income"
+            "name": "Autres produits accessoires"
            }, 
            {
-            "name": "Ports, emballages perdus et autres frais factur\u00e9s", 
-            "root_type": "Income"
+            "name": "Ports, emballages perdus et autres frais factur\u00e9s"
            }, 
            {
-            "name": "Services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel", 
-            "root_type": "Income"
+            "name": "Services exploit\u00e9s dans l'int\u00e9r\u00eat du personnel"
            }, 
            {
-            "name": "Mise \u00e0 disposition de personnel", 
-            "root_type": "Income"
+            "name": "Mise \u00e0 disposition de personnel"
            }, 
            {
-            "name": "Bonis sur reprises et cessions d'emballages", 
-            "root_type": "Income"
+            "name": "Bonis sur reprises et cessions d'emballages"
            }, 
            {
-            "name": "Locations", 
-            "root_type": "Income"
+            "name": "Locations"
            }, 
            {
-            "name": "Commissions et courtages", 
-            "root_type": "Income"
+            "name": "Commissions et courtages"
            }, 
            {
-            "name": "Redevances pour brevets, logiciels, marques et droits similaires", 
-            "root_type": "Income"
+            "name": "Redevances pour brevets, logiciels, marques et droits similaires"
            }
           ], 
-          "name": "PRODUITS ACCESSOIRES", 
-          "root_type": "Income"
+          "name": "PRODUITS ACCESSOIRES"
          }, 
          {
           "children": [
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "dans la R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "hors R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }
           ], 
-          "name": "VENTES DE PRODUITS R\u00c9SIDUELS", 
-          "root_type": "Income"
+          "name": "VENTES DE PRODUITS R\u00c9SIDUELS"
          }, 
          {
           "children": [
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "dans la R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "hors R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }
           ], 
-          "name": "VENTES DE PRODUITS INTERM\u00c9DIAIRES", 
-          "root_type": "Income"
+          "name": "VENTES DE PRODUITS INTERM\u00c9DIAIRES"
          }, 
          {
           "children": [
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "hors R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "dans la R\u00e9gion"
            }
           ], 
-          "name": "VENTES DE PRODUITS FINIS", 
-          "root_type": "Income"
+          "name": "VENTES DE PRODUITS FINIS"
          }, 
          {
           "children": [
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "dans la R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Income"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Income"
+            "name": "hors R\u00e9gion"
            }
           ], 
-          "name": "VENTES DE MARCHANDISES", 
-          "root_type": "Income"
+          "name": "VENTES DE MARCHANDISES"
          }
         ], 
-        "name": "VENTES", 
-        "root_type": "Income"
+        "name": "VENTES"
        }, 
        {
         "children": [
          {
-          "name": "SUR PRODUITS \u00c0 L'EXPORTATION", 
-          "root_type": "Income"
+          "name": "SUR PRODUITS \u00c0 L'EXPORTATION"
          }, 
          {
-          "name": "SUR PRODUITS DE P\u00c9R\u00c9QUATION", 
-          "root_type": "Income"
+          "name": "SUR PRODUITS DE P\u00c9R\u00c9QUATION"
          }, 
          {
           "children": [
            {
-            "name": "Vers\u00e9es par des tiers", 
-            "root_type": "Income"
+            "name": "Vers\u00e9es par des tiers"
            }, 
            {
-            "name": "Vers\u00e9es par les organismes internationaux", 
-            "root_type": "Income"
+            "name": "Vers\u00e9es par les organismes internationaux"
            }, 
            {
-            "name": "Vers\u00e9es par l'\u00c9tat et les collectivit\u00e9s publiques", 
-            "root_type": "Income"
+            "name": "Vers\u00e9es par l'\u00c9tat et les collectivit\u00e9s publiques"
            }
           ], 
-          "name": "AUTRES SUBVENTIONS D'EXPLOITATION", 
-          "root_type": "Income"
+          "name": "AUTRES SUBVENTIONS D'EXPLOITATION"
          }, 
          {
-          "name": "SUR PRODUITS \u00c0 L'IMPORTATION", 
-          "root_type": "Income"
+          "name": "SUR PRODUITS \u00c0 L'IMPORTATION"
          }
         ], 
-        "name": "SUBVENTIONS D'EXPLOITATION", 
-        "root_type": "Income"
+        "name": "SUBVENTIONS D'EXPLOITATION"
        }, 
        {
         "children": [
          {
-          "name": "IMMOBILISATIONS CORPORELLES", 
-          "root_type": "Income"
+          "name": "IMMOBILISATIONS CORPORELLES"
          }, 
          {
-          "name": "IMMOBILISATIONS FINANCI\u00c8RES", 
-          "root_type": "Income"
+          "name": "IMMOBILISATIONS FINANCI\u00c8RES"
          }, 
          {
-          "name": "IMMOBILISATIONS INCORPORELLES", 
-          "root_type": "Income"
+          "name": "IMMOBILISATIONS INCORPORELLES"
          }
         ], 
-        "name": "PRODUCTION IMMOBILIS\u00c9E", 
-        "root_type": "Income"
+        "name": "PRODUCTION IMMOBILIS\u00c9E"
        }, 
        {
         "children": [
          {
-          "name": "VARIATIONS DES STOCKS DE PRODUITS FINIS", 
-          "root_type": "Income"
+          "name": "VARIATIONS DES STOCKS DE PRODUITS FINIS"
          }, 
          {
           "children": [
            {
-            "name": "Produits r\u00e9siduels", 
-            "root_type": "Income"
+            "name": "Produits r\u00e9siduels"
            }, 
            {
-            "name": "Produits interm\u00e9diaires", 
-            "root_type": "Income"
+            "name": "Produits interm\u00e9diaires"
            }
           ], 
-          "name": "VARIATIONS DES STOCKS DE PRODUITS INTERM\u00c9DIAIRES ET R\u00c9SIDUELS", 
-          "root_type": "Income"
+          "name": "VARIATIONS DES STOCKS DE PRODUITS INTERM\u00c9DIAIRES ET R\u00c9SIDUELS"
          }, 
          {
           "children": [
            {
-            "name": "Travaux en cours", 
-            "root_type": "Income"
+            "name": "Travaux en cours"
            }, 
            {
-            "name": "Produits en cours", 
-            "root_type": "Income"
+            "name": "Produits en cours"
            }
           ], 
-          "name": "VARIATIONS DES STOCKS DE PRODUITS EN COURS", 
-          "root_type": "Income"
+          "name": "VARIATIONS DES STOCKS DE PRODUITS EN COURS"
          }, 
          {
           "children": [
            {
-            "name": "Prestations de services en cours", 
-            "root_type": "Income"
+            "name": "Prestations de services en cours"
            }, 
            {
-            "name": "\u00c9tudes en cours", 
-            "root_type": "Income"
+            "name": "\u00c9tudes en cours"
            }
           ], 
-          "name": "VARIATIONS DES EN-COURS DE SERVICES", 
-          "root_type": "Income"
+          "name": "VARIATIONS DES EN-COURS DE SERVICES"
          }
         ], 
-        "name": "VARIATIONS DES STOCKS DE BIENS ET DE SERVICES PRODUITS", 
-        "root_type": "Income"
+        "name": "VARIATIONS DES STOCKS DE BIENS ET DE SERVICES PRODUITS"
        }
       ], 
       "name": "Comptes de produits"
@@ -488,1102 +383,853 @@
          {
           "children": [
            {
-            "name": "Dotations aux amortissements des primes de remboursement des obligations", 
-            "root_type": "Expense"
+            "name": "Dotations aux amortissements des primes de remboursement des obligations"
            }, 
            {
-            "name": "Autres dotations aux amortissements \u00e0 caract\u00e8re financier", 
-            "root_type": "Expense"
+            "name": "Autres dotations aux amortissements \u00e0 caract\u00e8re financier"
            }
           ], 
-          "name": "DOTATIONS AUX AMORTISSEMENTS \u00c0 CARACT\u00c8RE FINANCIER", 
-          "root_type": "Expense"
+          "name": "DOTATIONS AUX AMORTISSEMENTS \u00c0 CARACT\u00c8RE FINANCIER"
          }, 
          {
           "children": [
            {
-            "name": "Dotations aux amortissements des charges immobilis\u00e9es", 
-            "root_type": "Expense"
+            "name": "Dotations aux amortissements des charges immobilis\u00e9es"
            }, 
            {
-            "name": "Dotations aux amortissements des immobilisations corporelles", 
-            "root_type": "Expense"
+            "name": "Dotations aux amortissements des immobilisations corporelles"
            }, 
            {
-            "name": "Dotations aux amortissements des immobilisations incorporelles", 
-            "root_type": "Expense"
+            "name": "Dotations aux amortissements des immobilisations incorporelles"
            }
           ], 
-          "name": "DOTATIONS AUX AMORTISSEMENTS D'EXPLOITATION", 
-          "root_type": "Expense"
+          "name": "DOTATIONS AUX AMORTISSEMENTS D'EXPLOITATION"
          }
         ], 
-        "name": "DOTATIONS AUX AMORTISSEMENTS", 
-        "root_type": "Expense"
+        "name": "DOTATIONS AUX AMORTISSEMENTS"
        }, 
        {
         "children": [
          {
-          "name": "AUTRES IMP\u00d4TS ET TAXES", 
-          "root_type": "Expense"
+          "name": "AUTRES IMP\u00d4TS ET TAXES"
          }, 
          {
-          "name": "IMP\u00d4TS ET TAXES INDIRECTS", 
-          "root_type": "Expense"
-         }, 
-         {
-          "children": [
-           {
-            "name": "Autres imp\u00f4ts et taxes directs", 
-            "root_type": "Expense"
-           }, 
-           {
-            "name": "Taxes d'apprentissage", 
-            "root_type": "Expense"
-           }, 
-           {
-            "name": "Formation professionnelle continue", 
-            "root_type": "Expense"
-           }, 
-           {
-            "name": "Imp\u00f4ts fonciers et taxes annexes", 
-            "root_type": "Expense"
-           }, 
-           {
-            "name": "Patentes, licences et taxes annexes", 
-            "root_type": "Expense"
-           }, 
-           {
-            "name": "Taxes sur appointements et salaires", 
-            "root_type": "Expense"
-           }
-          ], 
-          "name": "IMP\u00d4TS ET TAXES DIRECTS", 
-          "root_type": "Expense"
+          "name": "IMP\u00d4TS ET TAXES INDIRECTS"
          }, 
          {
           "children": [
            {
-            "name": "Autres droits", 
-            "root_type": "Expense"
+            "name": "Autres imp\u00f4ts et taxes directs"
            }, 
            {
-            "name": "Droits de timbre", 
-            "root_type": "Expense"
+            "name": "Taxes d'apprentissage"
            }, 
            {
-            "name": "Vignettes", 
-            "root_type": "Expense"
+            "name": "Formation professionnelle continue"
            }, 
            {
-            "name": "Taxes sur les v\u00e9hicules de soci\u00e9t\u00e9", 
-            "root_type": "Expense"
+            "name": "Imp\u00f4ts fonciers et taxes annexes"
            }, 
            {
-            "name": "Droits de mutation", 
-            "root_type": "Expense"
+            "name": "Patentes, licences et taxes annexes"
+           }, 
+           {
+            "name": "Taxes sur appointements et salaires"
            }
           ], 
-          "name": "DROITS D'ENREGISTREMENT", 
-          "root_type": "Expense"
+          "name": "IMP\u00d4TS ET TAXES DIRECTS"
          }, 
          {
           "children": [
            {
-            "name": "Autres amendes p\u00e9nales et fiscales", 
-            "root_type": "Expense"
+            "name": "Autres droits"
            }, 
            {
-            "name": "P\u00e9nalit\u00e9s de recouvrement, imp\u00f4ts indirects", 
-            "root_type": "Expense"
+            "name": "Droits de timbre"
            }, 
            {
-            "name": "P\u00e9nalit\u00e9s d'assiette, imp\u00f4ts indirects", 
-            "root_type": "Expense"
+            "name": "Vignettes"
            }, 
            {
-            "name": "P\u00e9nalit\u00e9s de recouvrement, imp\u00f4ts directs", 
-            "root_type": "Expense"
+            "name": "Taxes sur les v\u00e9hicules de soci\u00e9t\u00e9"
            }, 
            {
-            "name": "P\u00e9nalit\u00e9s d'assiette, imp\u00f4ts directs", 
-            "root_type": "Expense"
+            "name": "Droits de mutation"
            }
           ], 
-          "name": "P\u00c9NALIT\u00c9S ET AMENDES FISCALES", 
-          "root_type": "Expense"
+          "name": "DROITS D'ENREGISTREMENT"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres amendes p\u00e9nales et fiscales"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s de recouvrement, imp\u00f4ts indirects"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s d'assiette, imp\u00f4ts indirects"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s de recouvrement, imp\u00f4ts directs"
+           }, 
+           {
+            "name": "P\u00e9nalit\u00e9s d'assiette, imp\u00f4ts directs"
+           }
+          ], 
+          "name": "P\u00c9NALIT\u00c9S ET AMENDES FISCALES"
          }
         ], 
-        "name": "IMP\u00d4TS ET TAXES", 
-        "root_type": "Expense"
+        "name": "IMP\u00d4TS ET TAXES"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Concours divers", 
-            "root_type": "Expense"
+            "name": "Concours divers"
            }, 
            {
-            "name": "Cotisations", 
-            "root_type": "Expense"
+            "name": "Cotisations"
            }
           ], 
-          "name": "COTISATIONS", 
-          "root_type": "Expense"
+          "name": "COTISATIONS"
          }, 
          {
           "children": [
            {
-            "name": "R\u00e9ceptions", 
-            "root_type": "Expense"
+            "name": "R\u00e9ceptions"
            }, 
            {
-            "name": "Frais de recrutement du personnel", 
-            "root_type": "Expense"
+            "name": "Frais de recrutement du personnel"
            }, 
            {
-            "name": "Frais de d\u00e9m\u00e9nagement", 
-            "root_type": "Expense"
+            "name": "Frais de d\u00e9m\u00e9nagement"
            }, 
            {
-            "name": "Missions", 
-            "root_type": "Expense"
+            "name": "Missions"
            }
           ], 
-          "name": "AUTRES CHARGES EXTERNES", 
-          "root_type": "Expense"
+          "name": "AUTRES CHARGES EXTERNES"
          }, 
          {
           "children": [
            {
-            "name": "Frais d'actes et de contentieux", 
-            "root_type": "Expense"
+            "name": "Frais d'actes et de contentieux"
            }, 
            {
-            "name": "Commissions et courtages sur achats", 
-            "root_type": "Expense"
+            "name": "Commissions et courtages sur achats"
            }, 
            {
-            "name": "R\u00e9mun\u00e9rations des transitaires", 
-            "root_type": "Expense"
+            "name": "R\u00e9mun\u00e9rations des transitaires"
            }, 
            {
-            "name": "Honoraires", 
-            "root_type": "Expense"
+            "name": "Honoraires"
            }, 
            {
-            "name": "Commissions et courtages sur ventes", 
-            "root_type": "Expense"
+            "name": "Commissions et courtages sur ventes"
            }, 
            {
-            "name": "Divers frais", 
-            "root_type": "Expense"
+            "name": "Divers frais"
            }
           ], 
-          "name": "R\u00c9MUN\u00c9RATIONS D'INTERM\u00c9DIAIRES ET DE CONSEILS", 
-          "root_type": "Expense"
+          "name": "R\u00c9MUN\u00c9RATIONS D'INTERM\u00c9DIAIRES ET DE CONSEILS"
          }, 
          {
           "children": [
            {
-            "name": "Personnel int\u00e9rimaire", 
-            "root_type": "Expense"
+            "name": "Personnel int\u00e9rimaire"
            }, 
            {
-            "name": "Personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0 l'entreprise", 
-            "root_type": "Expense"
+            "name": "Personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0 l'entreprise"
            }
           ], 
-          "name": "R\u00c9MUN\u00c9RATIONS DE PERSONNEL EXT\u00c9RIEUR \u00c0 L'ENTREPRISE", 
-          "root_type": "Expense"
+          "name": "R\u00c9MUN\u00c9RATIONS DE PERSONNEL EXT\u00c9RIEUR \u00c0 L'ENTREPRISE"
          }, 
          {
           "children": [
            {
-            "name": "Redevances pour brevets, licences, concessions et droits similaires", 
-            "root_type": "Expense"
+            "name": "Redevances pour brevets, licences, concessions et droits similaires"
            }, 
            {
-            "name": "Redevances pour logiciels", 
-            "root_type": "Expense"
+            "name": "Redevances pour logiciels"
            }, 
            {
-            "name": "Redevances pour marques", 
-            "root_type": "Expense"
+            "name": "Redevances pour marques"
            }
           ], 
-          "name": "REDEVANCES POUR BREVETS, LICENCES, LOGICIELS ET DROITS SIMILAIRES", 
-          "root_type": "Expense"
+          "name": "REDEVANCES POUR BREVETS, LICENCES, LOGICIELS ET DROITS SIMILAIRES"
          }, 
          {
           "children": [
            {
-            "name": "Commissions sur cartes de cr\u00e9dit", 
-            "root_type": "Expense"
+            "name": "Commissions sur cartes de cr\u00e9dit"
            }, 
            {
-            "name": "Frais sur titres (achat, vente, garde)", 
-            "root_type": "Expense"
+            "name": "Frais sur titres (achat, vente, garde)"
            }, 
            {
-            "name": "Location de coffres", 
-            "root_type": "Expense"
+            "name": "Location de coffres"
            }, 
            {
-            "name": "Frais sur effets", 
-            "root_type": "Expense"
+            "name": "Frais sur effets"
            }, 
            {
-            "name": "Frais d'\u00e9mission d'emprunts", 
-            "root_type": "Expense"
+            "name": "Frais d'\u00e9mission d'emprunts"
            }, 
            {
-            "name": "Autres frais bancaires", 
-            "root_type": "Expense"
+            "name": "Autres frais bancaires"
            }
           ], 
-          "name": "FRAIS BANCAIRES", 
-          "root_type": "Expense"
+          "name": "FRAIS BANCAIRES"
          }, 
          {
-          "name": "FRAIS DE FORMATION DU PERSONNEL", 
-          "root_type": "Expense"
+          "name": "FRAIS DE FORMATION DU PERSONNEL"
          }
         ], 
-        "name": "SERVICES EXT\u00c9RIEURS B", 
-        "root_type": "Expense"
+        "name": "SERVICES EXT\u00c9RIEURS B"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "pour risques et charges", 
-            "root_type": "Expense"
+            "name": "pour risques et charges"
            }, 
            {
-            "name": "pour d\u00e9pr\u00e9ciation des immobilisations incorporelles", 
-            "root_type": "Expense"
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations incorporelles"
            }, 
            {
-            "name": "pour grosses r\u00e9parations", 
-            "root_type": "Expense"
+            "name": "pour grosses r\u00e9parations"
            }, 
            {
-            "name": "pour d\u00e9pr\u00e9ciation des immobilisations corporelles", 
-            "root_type": "Expense"
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations corporelles"
            }
           ], 
-          "name": "DOTATIONS AUX PROVISIONS D'EXPLOITATION", 
-          "root_type": "Expense"
+          "name": "DOTATIONS AUX PROVISIONS D'EXPLOITATION"
          }, 
          {
           "children": [
            {
-            "name": "pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res", 
-            "root_type": "Expense"
+            "name": "pour d\u00e9pr\u00e9ciation des immobilisations financi\u00e8res"
            }, 
            {
-            "name": "pour risques et charges", 
-            "root_type": "Expense"
+            "name": "pour risques et charges"
            }
           ], 
-          "name": "DOTATIONS AUX PROVISIONS FINANCI\u00c8RES", 
-          "root_type": "Expense"
+          "name": "DOTATIONS AUX PROVISIONS FINANCI\u00c8RES"
          }
         ], 
-        "name": "DOTATIONS AUX PROVISIONS", 
-        "root_type": "Expense"
+        "name": "DOTATIONS AUX PROVISIONS"
        }, 
        {
         "children": [
          {
-          "name": "QUOTE-PART DE R\u00c9SULTAT ANNUL\u00c9E SUR EX\u00c9CUTION PARTIELLE DE CONTRATS PLURI-EXERCICES", 
-          "root_type": "Expense"
+          "name": "QUOTE-PART DE R\u00c9SULTAT ANNUL\u00c9E SUR EX\u00c9CUTION PARTIELLE DE CONTRATS PLURI-EXERCICES"
          }, 
          {
           "children": [
            {
-            "name": "Quote-part transf\u00e9r\u00e9e de b\u00e9n\u00e9fices (comptabilit\u00e9 du g\u00e9rant)", 
-            "root_type": "Expense"
+            "name": "Quote-part transf\u00e9r\u00e9e de b\u00e9n\u00e9fices (comptabilit\u00e9 du g\u00e9rant)"
            }, 
            {
-            "name": "Pertes imput\u00e9es par transfert (comptabilit\u00e9 des associ\u00e9s non g\u00e9rants)", 
-            "root_type": "Expense"
+            "name": "Pertes imput\u00e9es par transfert (comptabilit\u00e9 des associ\u00e9s non g\u00e9rants)"
            }
           ], 
-          "name": "QUOTE-PART DE R\u00c9SULTAT SUR OP\u00c9RATIONS FAITES EN COMMUN", 
-          "root_type": "Expense"
+          "name": "QUOTE-PART DE R\u00c9SULTAT SUR OP\u00c9RATIONS FAITES EN COMMUN"
          }, 
          {
-          "name": "VALEUR COMPTABLE DES CESSIONS COURANTES D'IMMOBILISATIONS", 
-          "root_type": "Expense"
+          "name": "VALEUR COMPTABLE DES CESSIONS COURANTES D'IMMOBILISATIONS"
          }, 
          {
           "children": [
            {
-            "name": "Clients", 
-            "root_type": "Expense"
+            "name": "Clients"
            }, 
            {
-            "name": "Autres d\u00e9biteurs", 
-            "root_type": "Expense"
+            "name": "Autres d\u00e9biteurs"
            }
           ], 
-          "name": "PERTES SUR CR\u00c9ANCES CLIENTS ET AUTRES D\u00c9BITEURS", 
-          "root_type": "Expense"
+          "name": "PERTES SUR CR\u00c9ANCES CLIENTS ET AUTRES D\u00c9BITEURS"
          }, 
          {
           "children": [
            {
-            "name": "Dons", 
-            "root_type": "Expense"
+            "name": "Dons"
            }, 
            {
-            "name": "Jetons de pr\u00e9sence et autres r\u00e9mun\u00e9rations d'administrateurs", 
-            "root_type": "Expense"
+            "name": "Jetons de pr\u00e9sence et autres r\u00e9mun\u00e9rations d'administrateurs"
            }, 
            {
-            "name": "M\u00e9c\u00e9nat", 
-            "root_type": "Expense"
+            "name": "M\u00e9c\u00e9nat"
            }
           ], 
-          "name": "CHARGES DIVERSES", 
-          "root_type": "Expense"
+          "name": "CHARGES DIVERSES"
          }, 
          {
           "children": [
            {
-            "name": "sur risques \u00e0 court terme", 
-            "root_type": "Expense"
+            "name": "sur risques \u00e0 court terme"
            }, 
            {
-            "name": "sur cr\u00e9ances", 
-            "root_type": "Expense"
+            "name": "sur cr\u00e9ances"
            }, 
            {
-            "name": "sur stocks", 
-            "root_type": "Expense"
+            "name": "sur stocks"
            }, 
            {
-            "name": "Autres charges provisionn\u00e9es", 
-            "root_type": "Expense"
+            "name": "Autres charges provisionn\u00e9es"
            }
           ], 
-          "name": "CHARGES PROVISIONN\u00c9ES D'EXPLOITATION", 
-          "root_type": "Expense"
+          "name": "CHARGES PROVISIONN\u00c9ES D'EXPLOITATION"
          }
         ], 
-        "name": "AUTRES CHARGES", 
-        "root_type": "Expense"
+        "name": "AUTRES CHARGES"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Int\u00e9r\u00eats sur dettes diverses", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats sur dettes diverses"
            }, 
            {
-            "name": "Avances re\u00e7ues et d\u00e9p\u00f4ts cr\u00e9diteurs", 
-            "root_type": "Expense"
+            "name": "Avances re\u00e7ues et d\u00e9p\u00f4ts cr\u00e9diteurs"
            }, 
            {
-            "name": "Comptes courants bloqu\u00e9s", 
-            "root_type": "Expense"
+            "name": "Comptes courants bloqu\u00e9s"
            }, 
            {
-            "name": "Int\u00e9r\u00eats sur obligations cautionn\u00e9es", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats sur obligations cautionn\u00e9es"
            }, 
            {
-            "name": "Int\u00e9r\u00eats sur dettes commerciales", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats sur dettes commerciales"
            }, 
            {
-            "name": "Int\u00e9r\u00eats bancaires et sur op\u00e9rations de tr\u00e9sorerie et d\u2019escompte", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats bancaires et sur op\u00e9rations de tr\u00e9sorerie et d\u2019escompte"
            }
           ], 
-          "name": "AUTRES INT\u00c9R\u00caTS", 
-          "root_type": "Expense"
+          "name": "AUTRES INT\u00c9R\u00caTS"
          }, 
          {
           "children": [
            {
-            "name": "Dettes li\u00e9es \u00e0 des participations", 
-            "root_type": "Expense"
+            "name": "Dettes li\u00e9es \u00e0 des participations"
            }, 
            {
-            "name": "Emprunts aupr\u00e8s des \u00e9tablissements de cr\u00e9dit", 
-            "root_type": "Expense"
+            "name": "Emprunts aupr\u00e8s des \u00e9tablissements de cr\u00e9dit"
            }, 
            {
-            "name": "Emprunts obligataires", 
-            "root_type": "Expense"
+            "name": "Emprunts obligataires"
            }
           ], 
-          "name": "INT\u00c9R\u00caTS DES EMPRUNTS", 
-          "root_type": "Expense"
+          "name": "INT\u00c9R\u00caTS DES EMPRUNTS"
          }, 
          {
-          "name": "ESCOMPTES ACCORD\u00c9S", 
-          "root_type": "Expense"
+          "name": "ESCOMPTES ACCORD\u00c9S"
          }, 
          {
           "children": [
            {
-            "name": "Int\u00e9r\u00eats dans loyers des autres contrats", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats dans loyers des autres contrats"
            }, 
            {
-            "name": "Int\u00e9r\u00eats dans loyers de cr\u00e9dit-bail mobilier", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats dans loyers de cr\u00e9dit-bail mobilier"
            }, 
            {
-            "name": "Int\u00e9r\u00eats dans loyers de cr\u00e9dit-bail immobilier", 
-            "root_type": "Expense"
+            "name": "Int\u00e9r\u00eats dans loyers de cr\u00e9dit-bail immobilier"
            }
           ], 
-          "name": "INT\u00c9R\u00caTS DANS LOYERS DE CR\u00c9DIT-BAIL ET CONTRATS ASSIMIL\u00c9S", 
-          "root_type": "Expense"
+          "name": "INT\u00c9R\u00caTS DANS LOYERS DE CR\u00c9DIT-BAIL ET CONTRATS ASSIMIL\u00c9S"
          }, 
          {
-          "name": "PERTES SUR CESSIONS DE TITRES DE PLACEMENT", 
-          "root_type": "Expense"
+          "name": "PERTES SUR CESSIONS DE TITRES DE PLACEMENT"
          }, 
          {
-          "name": "PERTES DE CHANGE", 
-          "root_type": "Expense"
+          "name": "PERTES DE CHANGE"
          }, 
          {
           "children": [
            {
-            "name": "sur risques financiers", 
-            "root_type": "Expense"
+            "name": "sur risques financiers"
            }, 
            {
-            "name": "Autres charges provisionn\u00e9es financi\u00e8res", 
-            "root_type": "Expense"
+            "name": "Autres charges provisionn\u00e9es financi\u00e8res"
            }, 
            {
-            "name": "sur titres de placement", 
-            "root_type": "Expense"
+            "name": "sur titres de placement"
            }
           ], 
-          "name": "CHARGES PROVISIONN\u00c9ES FINANCI\u00c8RES", 
-          "root_type": "Expense"
+          "name": "CHARGES PROVISIONN\u00c9ES FINANCI\u00c8RES"
          }, 
          {
-          "name": "ESCOMPTES DES EFFETS DE COMMERCE", 
-          "root_type": "Expense"
+          "name": "ESCOMPTES DES EFFETS DE COMMERCE"
          }, 
          {
           "children": [
            {
-            "name": "sur instruments de tr\u00e9sorerie", 
-            "root_type": "Expense"
+            "name": "sur instruments de tr\u00e9sorerie"
            }, 
            {
-            "name": "sur rentes viag\u00e8res", 
-            "root_type": "Expense"
+            "name": "sur rentes viag\u00e8res"
            }, 
            {
-            "name": "sur op\u00e9rations financi\u00e8res", 
-            "root_type": "Expense"
+            "name": "sur op\u00e9rations financi\u00e8res"
            }
           ], 
-          "name": "PERTES SUR RISQUES FINANCIERS", 
-          "root_type": "Expense"
+          "name": "PERTES SUR RISQUES FINANCIERS"
          }
         ], 
-        "name": "FRAIS FINANCIERS ET CHARGES ASSIMIL\u00c9ES", 
-        "root_type": "Expense"
+        "name": "FRAIS FINANCIERS ET CHARGES ASSIMIL\u00c9ES"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Indemnit\u00e9s de maladie vers\u00e9es aux travailleurs", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s de maladie vers\u00e9es aux travailleurs"
            }, 
            {
-            "name": "Suppl\u00e9ment familial", 
-            "root_type": "Expense"
+            "name": "Suppl\u00e9ment familial"
            }, 
            {
-            "name": "Autres r\u00e9mun\u00e9rations directes", 
-            "root_type": "Expense"
+            "name": "Autres r\u00e9mun\u00e9rations directes"
            }, 
            {
-            "name": "Appointements salaires et commissions", 
-            "root_type": "Expense"
+            "name": "Appointements salaires et commissions"
            }, 
            {
-            "name": "Primes et gratifications", 
-            "root_type": "Expense"
+            "name": "Primes et gratifications"
            }, 
            {
-            "name": "Cong\u00e9s pay\u00e9s", 
-            "root_type": "Expense"
+            "name": "Cong\u00e9s pay\u00e9s"
            }, 
            {
-            "name": "Avantages en nature", 
-            "root_type": "Expense"
+            "name": "Avantages en nature"
            }, 
            {
-            "name": "Indemnit\u00e9s de pr\u00e9avis, de licenciement et de recherche d'embauche", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s de pr\u00e9avis, de licenciement et de recherche d'embauche"
            }
           ], 
-          "name": "R\u00c9MUN\u00c9RATIONS DIRECTES VERS\u00c9ES AU PERSONNEL NATIONAL", 
-          "root_type": "Expense"
+          "name": "R\u00c9MUN\u00c9RATIONS DIRECTES VERS\u00c9ES AU PERSONNEL NATIONAL"
          }, 
          {
           "children": [
            {
-            "name": "R\u00e9mun\u00e9ration du travail de l'exploitant", 
-            "root_type": "Expense"
+            "name": "R\u00e9mun\u00e9ration du travail de l'exploitant"
            }, 
            {
-            "name": "Charges sociales", 
-            "root_type": "Expense"
+            "name": "Charges sociales"
            }
           ], 
-          "name": "R\u00c9MUN\u00c9RATIONS ET CHARGES SOCIALES DE L'EXPLOITANT INDIVIDUEL", 
-          "root_type": "Expense"
+          "name": "R\u00c9MUN\u00c9RATIONS ET CHARGES SOCIALES DE L'EXPLOITANT INDIVIDUEL"
          }, 
          {
           "children": [
            {
-            "name": "M\u00e9decine du travail et pharmacie", 
-            "root_type": "Expense"
+            "name": "M\u00e9decine du travail et pharmacie"
            }, 
            {
-            "name": "Versements aux Syndicats et Comit\u00e9s d'entreprise, d'\u00e9tablissement", 
-            "root_type": "Expense"
+            "name": "Versements aux Syndicats et Comit\u00e9s d'entreprise, d'\u00e9tablissement"
            }, 
            {
-            "name": "Versements aux autres oeuvres sociales", 
-            "root_type": "Expense"
+            "name": "Versements aux autres oeuvres sociales"
            }, 
            {
-            "name": "Versements aux Comit\u00e9s d'hygi\u00e8ne et de s\u00e9curit\u00e9", 
-            "root_type": "Expense"
+            "name": "Versements aux Comit\u00e9s d'hygi\u00e8ne et de s\u00e9curit\u00e9"
            }
           ], 
-          "name": "AUTRES CHARGES SOCIALES", 
-          "root_type": "Expense"
+          "name": "AUTRES CHARGES SOCIALES"
          }, 
          {
           "children": [
            {
-            "name": "Suppl\u00e9ment familial", 
-            "root_type": "Expense"
+            "name": "Suppl\u00e9ment familial"
            }, 
            {
-            "name": "Cong\u00e9s pay\u00e9s", 
-            "root_type": "Expense"
+            "name": "Cong\u00e9s pay\u00e9s"
            }, 
            {
-            "name": "Appointements salaires et commissions", 
-            "root_type": "Expense"
+            "name": "Appointements salaires et commissions"
            }, 
            {
-            "name": "Autres r\u00e9mun\u00e9rations directes", 
-            "root_type": "Expense"
+            "name": "Autres r\u00e9mun\u00e9rations directes"
            }, 
            {
-            "name": "Indemnit\u00e9s de maladie vers\u00e9es aux travailleurs", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s de maladie vers\u00e9es aux travailleurs"
            }, 
            {
-            "name": "Avantages en nature", 
-            "root_type": "Expense"
+            "name": "Avantages en nature"
            }, 
            {
-            "name": "Indemnit\u00e9s de pr\u00e9avis, de licenciement et de recherche d'embauche", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s de pr\u00e9avis, de licenciement et de recherche d'embauche"
            }, 
            {
-            "name": "Primes et gratifications", 
-            "root_type": "Expense"
+            "name": "Primes et gratifications"
            }
           ], 
-          "name": "R\u00c9MUN\u00c9RATIONS DIRECTES VERS\u00c9ES AU PERSONNEL NON NATIONAL", 
-          "root_type": "Expense"
+          "name": "R\u00c9MUN\u00c9RATIONS DIRECTES VERS\u00c9ES AU PERSONNEL NON NATIONAL"
          }, 
          {
           "children": [
            {
-            "name": "Indemnit\u00e9s d'expatriation", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s d'expatriation"
            }, 
            {
-            "name": "Indemnit\u00e9s de logement", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s de logement"
            }, 
            {
-            "name": "Autres indemnit\u00e9s et avantages divers", 
-            "root_type": "Expense"
+            "name": "Autres indemnit\u00e9s et avantages divers"
            }, 
            {
-            "name": "Indemnit\u00e9s de repr\u00e9sentation", 
-            "root_type": "Expense"
+            "name": "Indemnit\u00e9s de repr\u00e9sentation"
            }
           ], 
-          "name": "INDEMNIT\u00c9S FORFAITAIRES VERS\u00c9ES AU PERSONNEL", 
-          "root_type": "Expense"
+          "name": "INDEMNIT\u00c9S FORFAITAIRES VERS\u00c9ES AU PERSONNEL"
          }, 
          {
           "children": [
            {
-            "name": "Charges sociales sur r\u00e9mun\u00e9ration du personnel national", 
-            "root_type": "Expense"
+            "name": "Charges sociales sur r\u00e9mun\u00e9ration du personnel national"
            }, 
            {
-            "name": "Charges sociales sur r\u00e9mun\u00e9ration du personnel non national", 
-            "root_type": "Expense"
+            "name": "Charges sociales sur r\u00e9mun\u00e9ration du personnel non national"
            }
           ], 
-          "name": "CHARGES SOCIALES", 
-          "root_type": "Expense"
+          "name": "CHARGES SOCIALES"
          }, 
          {
           "children": [
            {
-            "name": "Personnel int\u00e9rimaire", 
-            "root_type": "Expense"
+            "name": "Personnel int\u00e9rimaire"
            }, 
            {
-            "name": "Personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0 l\u2019entreprise", 
-            "root_type": "Expense"
+            "name": "Personnel d\u00e9tach\u00e9 ou pr\u00eat\u00e9 \u00e0 l\u2019entreprise"
            }
           ], 
-          "name": "R\u00c9MUN\u00c9RATION TRANSF\u00c9R\u00c9E DE PERSONNEL EXT\u00c9RIEUR", 
-          "root_type": "Expense"
+          "name": "R\u00c9MUN\u00c9RATION TRANSF\u00c9R\u00c9E DE PERSONNEL EXT\u00c9RIEUR"
          }
         ], 
-        "name": "CHARGES DE PERSONNEL", 
-        "root_type": "Expense"
+        "name": "CHARGES DE PERSONNEL"
        }, 
        {
         "children": [
          {
-          "name": "TRANSPORTS POUR LE COMPTE DE TIERS", 
-          "root_type": "Expense"
+          "name": "TRANSPORTS POUR LE COMPTE DE TIERS"
          }, 
          {
-          "name": "TRANSPORTS DU PERSONNEL", 
-          "root_type": "Expense"
+          "name": "TRANSPORTS DU PERSONNEL"
          }, 
          {
-          "name": "TRANSPORTS DE PLIS", 
-          "root_type": "Expense"
+          "name": "TRANSPORTS DE PLIS"
          }, 
          {
           "children": [
            {
-            "name": "Transports administratifs", 
-            "root_type": "Expense"
+            "name": "Transports administratifs"
            }, 
            {
-            "name": "Transports entre \u00e9tablissements ou chantiers", 
-            "root_type": "Expense"
+            "name": "Transports entre \u00e9tablissements ou chantiers"
            }, 
            {
-            "name": "Voyages et d\u00e9placements", 
-            "root_type": "Expense"
+            "name": "Voyages et d\u00e9placements"
            }
           ], 
-          "name": "AUTRES FRAIS DE TRANSPORT", 
-          "root_type": "Expense"
+          "name": "AUTRES FRAIS DE TRANSPORT"
          }, 
          {
-          "name": "TRANSPORTS SUR VENTES", 
-          "root_type": "Expense"
+          "name": "TRANSPORTS SUR VENTES"
          }, 
          {
-          "name": "TRANSPORTS SUR ACHATS()", 
-          "root_type": "Expense"
+          "name": "TRANSPORTS SUR ACHATS()"
          }
         ], 
-        "name": "TRANSPORTS", 
-        "root_type": "Expense"
+        "name": "TRANSPORTS"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Fournitures de magasin", 
-            "root_type": "Expense"
+            "name": "Fournitures de magasin"
            }, 
            {
-            "name": "Produits d'entretien", 
-            "root_type": "Expense"
+            "name": "Produits d'entretien"
            }, 
            {
-            "name": "Fournitures de bureau", 
-            "root_type": "Expense"
+            "name": "Fournitures de bureau"
            }, 
            {
-            "name": "Mati\u00e8res combustibles", 
-            "root_type": "Expense"
+            "name": "Mati\u00e8res combustibles"
            }, 
            {
-            "name": "Mati\u00e8res consommables", 
-            "root_type": "Expense"
+            "name": "Mati\u00e8res consommables"
            }, 
            {
-            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)", 
-            "root_type": "Expense"
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
            }, 
            {
-            "name": "Fournitures d'atelier et d'usine", 
-            "root_type": "Expense"
+            "name": "Fournitures d'atelier et d'usine"
            }
           ], 
-          "name": "ACHATS STOCK\u00c9S DE MATI\u00c8RES ET FOURNITURES CONSOMMABLES", 
-          "root_type": "Expense"
+          "name": "ACHATS STOCK\u00c9S DE MATI\u00c8RES ET FOURNITURES CONSOMMABLES"
          }, 
          {
           "children": [
            {
-            "name": "Fournitures d'entretien non stockables", 
-            "root_type": "Expense"
+            "name": "Fournitures d'entretien non stockables"
            }, 
            {
-            "name": "Fournitures de bureau non stockables", 
-            "root_type": "Expense"
+            "name": "Fournitures de bureau non stockables"
            }, 
            {
-            "name": "Achats de petit mat\u00e9riel et outillage", 
-            "root_type": "Expense"
+            "name": "Achats de petit mat\u00e9riel et outillage"
            }, 
            {
-            "name": "Achats d'\u00e9tudes et prestations de services", 
-            "root_type": "Expense"
+            "name": "Achats d'\u00e9tudes et prestations de services"
            }, 
            {
-            "name": "Fournitures non stockables -Eau", 
-            "root_type": "Expense"
+            "name": "Fournitures non stockables -Eau"
            }, 
            {
-            "name": "Fournitures non stockables - Electricit\u00e9", 
-            "root_type": "Expense"
+            "name": "Fournitures non stockables - Electricit\u00e9"
            }, 
            {
-            "name": "Fournitures non stockables \u2013 Autres \u00e9nergies", 
-            "root_type": "Expense"
+            "name": "Fournitures non stockables \u2013 Autres \u00e9nergies"
            }, 
            {
-            "name": "Achats de travaux, mat\u00e9riels et \u00e9quipements", 
-            "root_type": "Expense"
+            "name": "Achats de travaux, mat\u00e9riels et \u00e9quipements"
            }, 
            {
-            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)", 
-            "root_type": "Expense"
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
            }
           ], 
-          "name": "AUTRES ACHATS", 
-          "root_type": "Expense"
+          "name": "AUTRES ACHATS"
          }, 
          {
           "children": [
            {
-            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)", 
-            "root_type": "Expense"
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
            }, 
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "hors R\u00e9gion"
            }, 
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "dans la R\u00e9gion"
            }
           ], 
-          "name": "ACHATS DE MATI\u00c8RES PREMI\u00c8RES ET FOURNITURES LI\u00c9ES", 
-          "root_type": "Expense"
+          "name": "ACHATS DE MATI\u00c8RES PREMI\u00c8RES ET FOURNITURES LI\u00c9ES"
          }, 
          {
           "children": [
            {
-            "name": "Variations des stocks d'autres approvisionnements", 
-            "root_type": "Expense"
+            "name": "Variations des stocks d'autres approvisionnements"
            }, 
            {
-            "name": "Variations des stocks de marchandises", 
-            "root_type": "Expense"
+            "name": "Variations des stocks de marchandises"
            }, 
            {
-            "name": "Variations des stocks de mati\u00e8res premi\u00e8res et fournitures li\u00e9es", 
-            "root_type": "Expense"
+            "name": "Variations des stocks de mati\u00e8res premi\u00e8res et fournitures li\u00e9es"
            }
           ], 
-          "name": "VARIATIONS DES STOCKS DE BIENS ACHET\u00c9S", 
-          "root_type": "Expense"
+          "name": "VARIATIONS DES STOCKS DE BIENS ACHET\u00c9S"
          }, 
          {
           "children": [
            {
-            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)", 
-            "root_type": "Expense"
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
            }, 
            {
-            "name": "hors R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "hors R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe dans la R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "aux entreprises du groupe dans la R\u00e9gion"
            }, 
            {
-            "name": "aux entreprises du groupe hors R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "aux entreprises du groupe hors R\u00e9gion"
            }, 
            {
-            "name": "dans la R\u00e9gion", 
-            "root_type": "Expense"
+            "name": "dans la R\u00e9gion"
            }
           ], 
-          "name": "ACHATS DE MARCHANDISES", 
-          "root_type": "Expense"
+          "name": "ACHATS DE MARCHANDISES"
          }, 
          {
           "children": [
            {
-            "name": "Emballages \u00e0 usage mixte", 
-            "root_type": "Expense"
+            "name": "Emballages \u00e0 usage mixte"
            }, 
            {
-            "name": "Emballages perdus", 
-            "root_type": "Expense"
+            "name": "Emballages perdus"
            }, 
            {
-            "name": "Emballages r\u00e9cup\u00e9rables non identifiables", 
-            "root_type": "Expense"
+            "name": "Emballages r\u00e9cup\u00e9rables non identifiables"
            }, 
            {
-            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)", 
-            "root_type": "Expense"
+            "name": "Rabais, Remises et Ristournes obtenus (non ventil\u00e9s)"
            }
           ], 
-          "name": "ACHATS D'EMBALLAGES", 
-          "root_type": "Expense"
+          "name": "ACHATS D'EMBALLAGES"
          }
         ], 
-        "name": "ACHATS ET VARIATIONS DE STOCKS", 
-        "root_type": "Expense"
+        "name": "ACHATS ET VARIATIONS DE STOCKS"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Documentation technique", 
-            "root_type": "Expense"
+            "name": "Documentation technique"
            }, 
            {
-            "name": "Documentation g\u00e9n\u00e9rale", 
-            "root_type": "Expense"
+            "name": "Documentation g\u00e9n\u00e9rale"
            }, 
            {
-            "name": "\u00c9tudes et recherches", 
-            "root_type": "Expense"
+            "name": "\u00c9tudes et recherches"
            }
           ], 
-          "name": "\u00c9TUDES, RECHERCHES ET DOCUMENTATION", 
-          "root_type": "Expense"
+          "name": "\u00c9TUDES, RECHERCHES ET DOCUMENTATION"
          }, 
          {
           "children": [
            {
-            "name": "Locations de terrains", 
-            "root_type": "Expense"
+            "name": "Locations de terrains"
            }, 
            {
-            "name": "Malis sur emballages", 
-            "root_type": "Expense"
+            "name": "Malis sur emballages"
            }, 
            {
-            "name": "Locations et charges locatives diverses", 
-            "root_type": "Expense"
+            "name": "Locations et charges locatives diverses"
            }, 
            {
-            "name": "Locations de mat\u00e9riels et outillages", 
-            "root_type": "Expense"
+            "name": "Locations de mat\u00e9riels et outillages"
            }, 
            {
-            "name": "Locations de b\u00e2timents", 
-            "root_type": "Expense"
+            "name": "Locations de b\u00e2timents"
            }, 
            {
-            "name": "Locations d'emballages", 
-            "root_type": "Expense"
+            "name": "Locations d'emballages"
            }
           ], 
-          "name": "LOCATIONS ET CHARGES LOCATIVES", 
-          "root_type": "Expense"
+          "name": "LOCATIONS ET CHARGES LOCATIVES"
          }, 
          {
           "children": [
            {
-            "name": "Frais de t\u00e9l\u00e9phone", 
-            "root_type": "Expense"
+            "name": "Frais de t\u00e9l\u00e9phone"
            }, 
            {
-            "name": "Frais de t\u00e9l\u00e9copie", 
-            "root_type": "Expense"
+            "name": "Frais de t\u00e9l\u00e9copie"
            }, 
            {
-            "name": "Frais de t\u00e9lex", 
-            "root_type": "Expense"
+            "name": "Frais de t\u00e9lex"
            }, 
            {
-            "name": "Autres frais de t\u00e9l\u00e9communications", 
-            "root_type": "Expense"
+            "name": "Autres frais de t\u00e9l\u00e9communications"
            }
           ], 
-          "name": "FRAIS DE T\u00c9L\u00c9COMMUNICATIONS", 
-          "root_type": "Expense"
+          "name": "FRAIS DE T\u00c9L\u00c9COMMUNICATIONS"
          }, 
          {
           "children": [
            {
-            "name": "Maintenance", 
-            "root_type": "Expense"
+            "name": "Maintenance"
            }, 
            {
-            "name": "Autres entretiens et r\u00e9parations", 
-            "root_type": "Expense"
+            "name": "Autres entretiens et r\u00e9parations"
            }, 
            {
-            "name": "Entretien et r\u00e9parations des biens immobiliers", 
-            "root_type": "Expense"
+            "name": "Entretien et r\u00e9parations des biens immobiliers"
            }, 
            {
-            "name": "Entretien et r\u00e9parations des biens mobiliers", 
-            "root_type": "Expense"
+            "name": "Entretien et r\u00e9parations des biens mobiliers"
            }
           ], 
-          "name": "ENTRETIEN, R\u00c9PARATIONS ET MAINTENANCE", 
-          "root_type": "Expense"
+          "name": "ENTRETIEN, R\u00c9PARATIONS ET MAINTENANCE"
          }, 
          {
           "children": [
            {
-            "name": "Assurances multirisques", 
-            "root_type": "Expense"
+            "name": "Assurances multirisques"
            }, 
            {
-            "name": "Assurances transport sur ventes", 
-            "root_type": "Expense"
+            "name": "Assurances transport sur ventes"
            }, 
            {
-            "name": "Assurances mat\u00e9riel de transport", 
-            "root_type": "Expense"
+            "name": "Assurances mat\u00e9riel de transport"
            }, 
            {
-            "name": "Assurances risques d'exploitation", 
-            "root_type": "Expense"
+            "name": "Assurances risques d'exploitation"
            }, 
            {
-            "name": "Assurances transport sur achats", 
-            "root_type": "Expense"
+            "name": "Assurances transport sur achats"
            }, 
            {
-            "name": "Assurances responsabilit\u00e9 du producteur", 
-            "root_type": "Expense"
+            "name": "Assurances responsabilit\u00e9 du producteur"
            }, 
            {
-            "name": "Assurances insolvabilit\u00e9 clients", 
-            "root_type": "Expense"
+            "name": "Assurances insolvabilit\u00e9 clients"
            }, 
            {
-            "name": "Autres primes d'assurances", 
-            "root_type": "Expense"
+            "name": "Autres primes d'assurances"
            }
           ], 
-          "name": "PRIMES D'ASSURANCE", 
-          "root_type": "Expense"
+          "name": "PRIMES D'ASSURANCE"
          }, 
          {
-          "name": "SOUS-TRAITANCE G\u00c9N\u00c9RALE", 
-          "root_type": "Expense"
+          "name": "SOUS-TRAITANCE G\u00c9N\u00c9RALE"
          }, 
          {
           "children": [
            {
-            "name": "Catalogues, imprim\u00e9s publicitaires", 
-            "root_type": "Expense"
+            "name": "Catalogues, imprim\u00e9s publicitaires"
            }, 
            {
-            "name": "Autres charges de publicit\u00e9 et relations publiques", 
-            "root_type": "Expense"
+            "name": "Autres charges de publicit\u00e9 et relations publiques"
            }, 
            {
-            "name": "Foires et expositions", 
-            "root_type": "Expense"
+            "name": "Foires et expositions"
            }, 
            {
-            "name": "Publications", 
-            "root_type": "Expense"
+            "name": "Publications"
            }, 
            {
-            "name": "Cadeaux \u00e0 la client\u00e8le", 
-            "root_type": "Expense"
+            "name": "Cadeaux \u00e0 la client\u00e8le"
            }, 
            {
-            "name": "Frais de colloques, s\u00e9minaires, conf\u00e9rences", 
-            "root_type": "Expense"
+            "name": "Frais de colloques, s\u00e9minaires, conf\u00e9rences"
            }, 
            {
-            "name": "Annonces, insertions", 
-            "root_type": "Expense"
+            "name": "Annonces, insertions"
            }, 
            {
-            "name": "\u00c9chantillons", 
-            "root_type": "Expense"
+            "name": "\u00c9chantillons"
            }
           ], 
-          "name": "PUBLICIT\u00c9, PUBLICATIONS, RELATIONS PUBLIQUES", 
-          "root_type": "Expense"
+          "name": "PUBLICIT\u00c9, PUBLICATIONS, RELATIONS PUBLIQUES"
          }, 
          {
           "children": [
            {
-            "name": "Contrats assimil\u00e9s", 
-            "root_type": "Expense"
+            "name": "Contrats assimil\u00e9s"
            }, 
            {
-            "name": "Cr\u00e9dit-bail mobilier", 
-            "root_type": "Expense"
+            "name": "Cr\u00e9dit-bail mobilier"
            }, 
            {
-            "name": "Cr\u00e9dit-bail immobilier", 
-            "root_type": "Expense"
+            "name": "Cr\u00e9dit-bail immobilier"
            }
           ], 
-          "name": "REDEVANCES DE CR\u00c9DIT-BAIL ET CONTRATS ASSIMIL\u00c9S", 
-          "root_type": "Expense"
+          "name": "REDEVANCES DE CR\u00c9DIT-BAIL ET CONTRATS ASSIMIL\u00c9S"
          }
         ], 
-        "name": "SERVICES EXT\u00c9RIEURS A", 
-        "root_type": "Expense"
+        "name": "SERVICES EXT\u00c9RIEURS A"
        }
       ], 
       "name": "Comptes de charges"
@@ -2726,54 +2372,42 @@
        {
         "children": [
          {
-          "name": "AUTRES SUBVENTIONS D'INVESTISSEMENT", 
-          "root_type": "Liability"
+          "name": "AUTRES SUBVENTIONS D'INVESTISSEMENT"
          }, 
          {
           "children": [
            {
-            "name": "Autres", 
-            "root_type": "Liability"
+            "name": "Autres"
            }, 
            {
-            "name": "\u00c9tat", 
-            "root_type": "Liability"
+            "name": "\u00c9tat"
            }, 
            {
-            "name": "D\u00e9partements", 
-            "root_type": "Liability"
+            "name": "D\u00e9partements"
            }, 
            {
-            "name": "R\u00e9gions", 
-            "root_type": "Liability"
+            "name": "R\u00e9gions"
            }, 
            {
-            "name": "Entreprises publiques ou mixtes", 
-            "root_type": "Liability"
+            "name": "Entreprises publiques ou mixtes"
            }, 
            {
-            "name": "Communes et collectivit\u00e9s publiques d\u00e9centralis\u00e9es", 
-            "root_type": "Liability"
+            "name": "Communes et collectivit\u00e9s publiques d\u00e9centralis\u00e9es"
            }, 
            {
-            "name": "Organismes internationaux", 
-            "root_type": "Liability"
+            "name": "Organismes internationaux"
            }, 
            {
-            "name": "Entreprises et organismes priv\u00e9s", 
-            "root_type": "Liability"
+            "name": "Entreprises et organismes priv\u00e9s"
            }
           ], 
-          "name": "SUBVENTIONS D'\u00c9QUIPEMENT A", 
-          "root_type": "Liability"
+          "name": "SUBVENTIONS D'\u00c9QUIPEMENT A"
          }, 
          {
-          "name": "SUBVENTIONS D'\u00c9QUIPEMENT B", 
-          "root_type": "Liability"
+          "name": "SUBVENTIONS D'\u00c9QUIPEMENT B"
          }
         ], 
-        "name": "SUBVENTIONS D'INVESTISSEMENT", 
-        "root_type": "Liability"
+        "name": "SUBVENTIONS D'INVESTISSEMENT"
        }, 
        {
         "children": [
@@ -2964,262 +2598,204 @@
        {
         "children": [
          {
-          "name": "ACTIONNAIRES, CAPITAL SOUSCRIT, NON APPEL\u00c9", 
-          "root_type": "Liability"
+          "name": "ACTIONNAIRES, CAPITAL SOUSCRIT, NON APPEL\u00c9"
          }, 
          {
           "children": [
            {
-            "name": "Capital souscrit, appel\u00e9, vers\u00e9, amorti", 
-            "root_type": "Liability"
+            "name": "Capital souscrit, appel\u00e9, vers\u00e9, amorti"
            }, 
            {
-            "name": "Capital souscrit, non appel\u00e9", 
-            "root_type": "Liability"
+            "name": "Capital souscrit, non appel\u00e9"
            }, 
            {
-            "name": "Capital souscrit, appel\u00e9, vers\u00e9, non amorti", 
-            "root_type": "Liability"
+            "name": "Capital souscrit, appel\u00e9, vers\u00e9, non amorti"
            }, 
            {
-            "name": "Capital souscrit, appel\u00e9, non vers\u00e9", 
-            "root_type": "Liability"
+            "name": "Capital souscrit, appel\u00e9, non vers\u00e9"
            }, 
            {
-            "name": "Capital souscrit soumis \u00e0 des conditions particuli\u00e8res", 
-            "root_type": "Liability"
+            "name": "Capital souscrit soumis \u00e0 des conditions particuli\u00e8res"
            }
           ], 
-          "name": "CAPITAL SOCIAL", 
-          "root_type": "Liability"
+          "name": "CAPITAL SOCIAL"
          }, 
          {
-          "name": "CAPITAL PERSONNEL", 
-          "root_type": "Liability"
+          "name": "CAPITAL PERSONNEL"
          }, 
          {
           "children": [
            {
-            "name": "Autres dotations", 
-            "root_type": "Liability"
+            "name": "Autres dotations"
            }, 
            {
-            "name": "Dotation initiale", 
-            "root_type": "Liability"
+            "name": "Dotation initiale"
            }, 
            {
-            "name": "Dotations compl\u00e9mentaires", 
-            "root_type": "Liability"
+            "name": "Dotations compl\u00e9mentaires"
            }
           ], 
-          "name": "CAPITAL PAR DOTATION", 
-          "root_type": "Liability"
+          "name": "CAPITAL PAR DOTATION"
          }, 
          {
           "children": [
            {
-            "name": "Autres primes", 
-            "root_type": "Liability"
+            "name": "Autres primes"
            }, 
            {
-            "name": "Primes d'\u00e9mission", 
-            "root_type": "Liability"
+            "name": "Primes d'\u00e9mission"
            }, 
            {
-            "name": "Primes de fusion", 
-            "root_type": "Liability"
+            "name": "Primes de fusion"
            }, 
            {
-            "name": "Primes d'apport", 
-            "root_type": "Liability"
+            "name": "Primes d'apport"
            }, 
            {
-            "name": "Primes de conversion", 
-            "root_type": "Liability"
+            "name": "Primes de conversion"
            }
           ], 
-          "name": "PRIMES LI\u00c9ES AUX CAPITAUX PROPRES", 
-          "root_type": "Liability"
+          "name": "PRIMES LI\u00c9ES AUX CAPITAUX PROPRES"
          }, 
          {
           "children": [
            {
-            "name": "Pr\u00e9l\u00e8vements d\u2019autoconsommation", 
-            "root_type": "Liability"
+            "name": "Pr\u00e9l\u00e8vements d\u2019autoconsommation"
            }, 
            {
-            "name": "Op\u00e9rations courantes", 
-            "root_type": "Liability"
+            "name": "Op\u00e9rations courantes"
            }, 
            {
-            "name": "R\u00e9mun\u00e9rations, imp\u00f4ts et autres charges personnelles", 
-            "root_type": "Liability"
+            "name": "R\u00e9mun\u00e9rations, imp\u00f4ts et autres charges personnelles"
            }, 
            {
-            "name": "Apports temporaires", 
-            "root_type": "Liability"
+            "name": "Apports temporaires"
            }, 
            {
-            "name": "Autres pr\u00e9l\u00e8vements", 
-            "root_type": "Liability"
+            "name": "Autres pr\u00e9l\u00e8vements"
            }
           ], 
-          "name": "COMPTE DE L'EXPLOITANT", 
-          "root_type": "Liability"
+          "name": "COMPTE DE L'EXPLOITANT"
          }, 
          {
           "children": [
            {
-            "name": "\u00c9carts de r\u00e9\u00e9valuation l\u00e9gale", 
-            "root_type": "Liability"
+            "name": "\u00c9carts de r\u00e9\u00e9valuation l\u00e9gale"
            }, 
            {
-            "name": "\u00c9carts de r\u00e9\u00e9valuation libre", 
-            "root_type": "Liability"
+            "name": "\u00c9carts de r\u00e9\u00e9valuation libre"
            }
           ], 
-          "name": "\u00c9CARTS DE R\u00c9\u00c9VALUATION", 
-          "root_type": "Liability"
+          "name": "\u00c9CARTS DE R\u00c9\u00c9VALUATION"
          }
         ], 
-        "name": "CAPITAL", 
-        "root_type": "Liability"
+        "name": "CAPITAL"
        }, 
        {
         "children": [
          {
-          "name": "R\u00c9SERVES STATUTAIRES OU CONTRACTUELLES", 
-          "root_type": "Liability"
+          "name": "R\u00c9SERVES STATUTAIRES OU CONTRACTUELLES"
          }, 
          {
-          "name": "R\u00c9SERVE L\u00c9GALE", 
-          "root_type": "Liability"
-         }, 
-         {
-          "children": [
-           {
-            "name": "R\u00e9serves facultatives", 
-            "root_type": "Liability"
-           }, 
-           {
-            "name": "R\u00e9serves diverses", 
-            "root_type": "Liability"
-           }
-          ], 
-          "name": "AUTRES R\u00c9SERVES", 
-          "root_type": "Liability"
+          "name": "R\u00c9SERVE L\u00c9GALE"
          }, 
          {
           "children": [
            {
-            "name": "Autres r\u00e9serves r\u00e9glement\u00e9es", 
-            "root_type": "Liability"
+            "name": "R\u00e9serves facultatives"
            }, 
            {
-            "name": "R\u00e9serves cons\u00e9cutives \u00e0 l'octroi de subventions d'investissement", 
-            "root_type": "Liability"
-           }, 
-           {
-            "name": "R\u00e9serves de plus-values nettes \u00e0 long terme", 
-            "root_type": "Liability"
+            "name": "R\u00e9serves diverses"
            }
           ], 
-          "name": "R\u00c9SERVES R\u00c9GLEMENT\u00c9ES", 
-          "root_type": "Liability"
+          "name": "AUTRES R\u00c9SERVES"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Autres r\u00e9serves r\u00e9glement\u00e9es"
+           }, 
+           {
+            "name": "R\u00e9serves cons\u00e9cutives \u00e0 l'octroi de subventions d'investissement"
+           }, 
+           {
+            "name": "R\u00e9serves de plus-values nettes \u00e0 long terme"
+           }
+          ], 
+          "name": "R\u00c9SERVES R\u00c9GLEMENT\u00c9ES"
          }
         ], 
-        "name": "R\u00c9SERVES", 
-        "root_type": "Liability"
+        "name": "R\u00c9SERVES"
        }, 
        {
         "children": [
          {
           "children": [
            {
-            "name": "Perte - Amortissements r\u00e9put\u00e9s diff\u00e9r\u00e9s", 
-            "root_type": "Liability"
+            "name": "Perte - Amortissements r\u00e9put\u00e9s diff\u00e9r\u00e9s"
            }, 
            {
-            "name": "Perte nette \u00e0 reporter", 
-            "root_type": "Liability"
+            "name": "Perte nette \u00e0 reporter"
            }
           ], 
-          "name": "REPORT \u00c0 NOUVEAU D\u00c9BITEUR", 
-          "root_type": "Liability"
+          "name": "REPORT \u00c0 NOUVEAU D\u00c9BITEUR"
          }, 
          {
-          "name": "REPORT \u00c0 NOUVEAU CR\u00c9DITEUR", 
-          "root_type": "Liability"
+          "name": "REPORT \u00c0 NOUVEAU CR\u00c9DITEUR"
          }
         ], 
-        "name": "REPORT \u00c0 NOUVEAU", 
-        "root_type": "Liability"
+        "name": "REPORT \u00c0 NOUVEAU"
        }, 
        {
         "children": [
          {
-          "name": "R\u00c9SULTAT HORS ACTIVIT\u00c9S ORDINAIRES (R.H.A.O.)", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT HORS ACTIVIT\u00c9S ORDINAIRES (R.H.A.O.)"
          }, 
          {
-          "name": "R\u00c9SULTAT NET : PERTE", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT NET : PERTE"
          }, 
          {
-          "name": "EXC\u00c9DENT BRUT D'EXPLOITATION (E.B.E.)", 
-          "root_type": "Liability"
+          "name": "EXC\u00c9DENT BRUT D'EXPLOITATION (E.B.E.)"
          }, 
          {
-          "name": "R\u00c9SULTAT D'EXPLOITATION (R.E.)", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT D'EXPLOITATION (R.E.)"
          }, 
          {
-          "name": "R\u00c9SULTAT FINANCIER (R.F.)", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT FINANCIER (R.F.)"
          }, 
          {
-          "name": "R\u00c9SULTAT DES ACTIVIT\u00c9S ORDINAIRES (R.A.O.)", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT DES ACTIVIT\u00c9S ORDINAIRES (R.A.O.)"
          }, 
          {
           "children": [
            {
-            "name": "R\u00e9sultat en instance d'affectation : Perte", 
-            "root_type": "Liability"
+            "name": "R\u00e9sultat en instance d'affectation : Perte"
            }, 
            {
-            "name": "R\u00e9sultat en instance d'affectation : B\u00e9n\u00e9fice", 
-            "root_type": "Liability"
+            "name": "R\u00e9sultat en instance d'affectation : B\u00e9n\u00e9fice"
            }
           ], 
-          "name": "R\u00c9SULTAT EN INSANCE D\u2019AFFECTATION", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT EN INSANCE D\u2019AFFECTATION"
          }, 
          {
-          "name": "R\u00c9SULTAT NET : B\u00c9N\u00c9FICE", 
-          "root_type": "Liability"
+          "name": "R\u00c9SULTAT NET : B\u00c9N\u00c9FICE"
          }, 
          {
           "children": [
            {
-            "name": "Marge brute sur marchandises", 
-            "root_type": "Liability"
+            "name": "Marge brute sur marchandises"
            }, 
            {
-            "name": "Marge brute sur mati\u00e8res", 
-            "root_type": "Liability"
+            "name": "Marge brute sur mati\u00e8res"
            }
           ], 
-          "name": "MARGE BRUTE (M.B.)", 
-          "root_type": "Liability"
+          "name": "MARGE BRUTE (M.B.)"
          }, 
          {
-          "name": "VALEUR AJOUT\u00c9E (V.A.)", 
-          "root_type": "Liability"
+          "name": "VALEUR AJOUT\u00c9E (V.A.)"
          }
         ], 
-        "name": "R\u00c9SULTAT NET DE L'EXERCICE", 
-        "root_type": "Liability"
+        "name": "R\u00c9SULTAT NET DE L'EXERCICE"
        }
       ], 
       "name": "Comptes de capitaux"

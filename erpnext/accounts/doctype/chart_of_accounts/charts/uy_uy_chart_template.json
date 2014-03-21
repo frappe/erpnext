@@ -10,27 +10,27 @@
         "children": [
          {
           "name": "Deuds. Contratos de Cambio Import.", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Proveedores de Plaza", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Acreedores Varios (def)", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Proveedores por Importaciones", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Documentos a Pagar ds/Comerciales", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Intereses a vencer ds/Comerciales", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DEUDAS COMERCIALES"
@@ -39,7 +39,7 @@
         "children": [
          {
           "name": "Responsabilidad frente a terceros", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "PREVISIONES"
@@ -48,23 +48,23 @@
         "children": [
          {
           "name": "Controladas/Vinculadas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Sueldos y Jornales a pagar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Acreedores fiscales", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Otras deudas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Saldos Acreedores Cuentas Directores", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -85,19 +85,19 @@
          }, 
          {
           "name": "Cobros Anticipados", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Dividendos a Pagar", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Casa Matriz, Empresas Controlantes,", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Acreedores por Cargas Sociales", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "children": [
@@ -169,23 +169,23 @@
         "children": [
          {
           "name": "Ints. a vencer ds/Financieras", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Prestamos Bancarios", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Documentos a pagar MN a pagar ds/Financieras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Obligaciones", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Documentos a pagar ME a pagar ds/Financieras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DEUDAS FINANCIERAS"
@@ -199,7 +199,7 @@
         "children": [
          {
           "name": "Deudas Comerciales", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DEUDAS COMERCIALES"
@@ -208,7 +208,7 @@
         "children": [
          {
           "name": "Deudas Financieras", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DEUDAS FINANCIERAS"
@@ -217,7 +217,7 @@
         "children": [
          {
           "name": "Previsiones No Corrientes", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "PREVISIONES NO CORRIENTES"
@@ -226,7 +226,7 @@
         "children": [
          {
           "name": "Deudas Diversas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "DEUDAS DIVERSAS"
@@ -246,12 +246,12 @@
          {
           "account_type": "Equity", 
           "name": "Revaluaciones fiscales", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "account_type": "Equity", 
           "name": "Revaluaciones voluntarias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "AJUSTES PATRIMONIO (H)"
@@ -269,7 +269,7 @@
          {
           "account_type": "Equity", 
           "name": "Capital Integrado", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "CAPITAL"
@@ -284,12 +284,12 @@
          {
           "account_type": "Equity", 
           "name": "Resultados del ejercicio", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "account_type": "Equity", 
           "name": "Dividendos provisorios", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "RESULTADOS ACUMULADOS"
@@ -299,17 +299,17 @@
          {
           "account_type": "Equity", 
           "name": "Reservas Legales", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "account_type": "Equity", 
           "name": "Reservas Voluntarias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "account_type": "Equity", 
           "name": "P\u00e9rdidas y Ganancias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "RESERVAS"
@@ -328,31 +328,31 @@
         "children": [
          {
           "name": "Importaciones en tramite", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Materiales y Suministros", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Materias Primas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Productos en Proceso", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Productos Terminados", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Mercaderia de Reventa", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Prevision p/desvalorizaciones", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "BIENES DE CAMBIO"
@@ -364,14 +364,14 @@
          }, 
          {
           "name": "Pagos adelantados", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Saldos Deudor de ctas de Directores"
          }, 
          {
           "name": "Anticipos a Proveedores", 
-          "root_type": "Liability"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Casa Matriz, Empresas Controlantes"
@@ -432,7 +432,7 @@
         "children": [
          {
           "name": "Ingresos diferidos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Prevision para Deudores Incobrables"
@@ -442,35 +442,35 @@
          }, 
          {
           "name": "Intereses percibidos por adelantado", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Documentos a Cobrar MN", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Deudores por Exportaciones", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Deudores Simples Plaza", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Deudores Varios (def)", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cheques en Cartera ME", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Cheques en Cartera MN", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Documentos a Cobrar ME", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "CREDITOS POR VENTAS"
@@ -511,15 +511,15 @@
          }, 
          {
           "name": "Ingresos diferidos", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Ingresos percibidos por adelantado", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Prevision para Deudores Incobrables", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "account_type": "Tax", 
@@ -537,15 +537,15 @@
         "children": [
          {
           "name": "Amortizaciones Acumuladas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Patentes, marcas y licencias", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Gastos de investigacion", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "INTANGIBLES"
@@ -554,35 +554,35 @@
         "children": [
          {
           "name": "Veh\u00edculos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Muebles y \u00datiles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Maquinas y Herramientas", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Inmuebles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Amort.Ac.Vehiculos", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Amort.Ac.Maq.y Herram.", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Amort.Ac.Inmuebles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Amort.Ac.Mueb.y Utiles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "BIENES DE USO"
@@ -591,31 +591,31 @@
         "children": [
          {
           "name": "Prevision para Desvalorizaciones", 
-          "root_type": "Expense"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Intereses percibidos por adelantado", 
-          "root_type": "Income"
+          "report_type": "Profit and Loss"
          }, 
          {
           "name": "Inmuebles", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Valores orig. y revaluados s/anexo", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Menos: Amort. Acum.", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Titulos y Acciones", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }, 
          {
           "name": "Depositos Bancarios", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "INVERSIONES A LARGO PLAZO"
@@ -624,7 +624,7 @@
         "children": [
          {
           "name": "Bienes de cambio no corrientes", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "BIENES DE CAMBIO NO CORRIENTES"
@@ -633,7 +633,7 @@
         "children": [
          {
           "name": "Cr\u00e9ditos a Largo Plazo", 
-          "root_type": "Asset"
+          "report_type": "Balance Sheet"
          }
         ], 
         "name": "CREDITOS A LARGO PLAZO"
@@ -670,13 +670,13 @@
     "children": [
      {
       "name": "Ingresos Operativos (def)", 
-      "root_type": "Income"
+      "report_type": "Profit and Loss"
      }, 
      {
       "children": [
        {
         "name": "Ventas extraordinarias", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "VENTAS EXTRAORDINARIAS"
@@ -685,15 +685,15 @@
       "children": [
        {
         "name": "Diferencias de Cambio ganadas", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Descuentos Obtenidos", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Intereses ganados", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "INGRESOS FINANCIEROS"
@@ -702,19 +702,19 @@
       "children": [
        {
         "name": "Ventas Exentas", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Ventas Tasa B\u00e1sica", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Ventas Tasa M\u00ednima", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Ventas por Exportaciones", 
-        "root_type": "Income"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "VENTAS ORDINARIAS"
@@ -728,7 +728,7 @@
       "children": [
        {
         "name": "Amortizaciones", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "AMORTIZACIONES"
@@ -737,63 +737,63 @@
       "children": [
        {
         "name": "Representaci\u00f3n", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Energ\u00eda El\u00e9ctrica y Aguas Corrientes", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Servicios Contratados", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Honorarios Profesionales", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Mantenimiento Veh\u00edculos", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Combustible", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Papeler\u00eda", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Cargas Sociales", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Fletes", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Comunicaciones y Servicios Telef\u00f3nicos", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Seguros", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Sueldos y Jornales", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Gastos Varios (def)", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Publicidad", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Alquileres", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "GASTOS DE ADMINISTRACION Y VENTAS"
@@ -802,11 +802,11 @@
       "children": [
        {
         "name": "Retenciones", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "name": "Otros", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }, 
        {
         "children": [
@@ -823,7 +823,7 @@
        }, 
        {
         "name": "Contribuciones", 
-        "root_type": "Asset"
+        "report_type": "Balance Sheet"
        }
       ], 
       "name": "OBLIGACIONES TRIBUTARIAS"
@@ -832,19 +832,19 @@
       "children": [
        {
         "name": "Multas y Recargos Fiscales", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Descuentos Concedidos", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Diferencias de Cambio perdidas", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Intereses y Gastos Bancarios", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "GASTOS FINANCIEROS"
@@ -853,15 +853,15 @@
       "children": [
        {
         "name": "Costos de lo vendido", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Costo de Mercader\u00edas", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }, 
        {
         "name": "Costo de Venta de Bienes de Uso", 
-        "root_type": "Expense"
+        "report_type": "Profit and Loss"
        }
       ], 
       "name": "COSTO DE LO VENDIDO"
