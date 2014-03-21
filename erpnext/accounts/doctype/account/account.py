@@ -48,7 +48,7 @@ class DocType:
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.doc.parent_account:
-			par = frappe.db.sql("""select name, group_or_ledger, root_type 
+			par = frappe.db.sql("""select name, group_or_ledger, report_type 
 				from tabAccount where name =%s""", self.doc.parent_account, as_dict=1)
 			if not par:
 				throw(_("Parent account does not exists"))
@@ -57,8 +57,8 @@ class DocType:
 			elif par[0]["group_or_ledger"] != 'Group':
 				throw(_("Parent account can not be a ledger"))
 				
-			if par[0]["root_type"]:
-				self.doc.root_type = par[0]["root_type"]
+			if par[0]["report_type"]:
+				self.doc.report_type = par[0]["report_type"]
 	
 	def validate_duplicate_account(self):
 		if self.doc.fields.get('__islocal') or not self.doc.name:
@@ -121,8 +121,8 @@ class DocType:
 			and docstatus != 2""", self.doc.name)
 	
 	def validate_mandatory(self):
-		if not self.doc.is_pl_account:
-			throw(_("Is PL Account field is mandatory"))
+		if not self.doc.report_type:
+			throw(_("Report Type is mandatory"))
 			
 	def validate_warehouse_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -203,12 +203,12 @@ class DocType:
 				throw(_("Account ") + new +_(" does not exists"))
 				
 			val = list(frappe.db.get_value("Account", new_account, 
-				["group_or_ledger", "is_pl_account", "company"]))
+				["group_or_ledger", "report_type", "company"]))
 			
-			if val != [self.doc.group_or_ledger, self.doc.is_pl_account, self.doc.company]:
+			if val != [self.doc.group_or_ledger, self.doc.report_type, self.doc.company]:
 				throw(_("""Merging is only possible if following \
 					properties are same in both records.
-					Group or Ledger, Debit or Credit, Is PL Account"""))
+					Group or Ledger, Report Type, Company"""))
 					
 		return new_account
 

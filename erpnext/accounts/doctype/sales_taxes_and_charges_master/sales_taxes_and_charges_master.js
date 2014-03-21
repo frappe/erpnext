@@ -137,7 +137,6 @@ cur_frm.fields_dict['other_charges'].grid.get_field("account_head").get_query = 
 		query: "erpnext.controllers.queries.tax_account_query",
     	filters: {
 			"account_type": ["Tax", "Chargeable", "Income Account"],
-			"root_type": "Income",
 			"company": doc.company
 		}
 	}	

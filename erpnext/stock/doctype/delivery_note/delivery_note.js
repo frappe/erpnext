@@ -217,8 +217,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
 			filters: {
-				"is_pl_account": "Yes",
-				"root_type": "Expense",
+				"report_type": "Profit and Loss",
 				"company": doc.company,
 				"group_or_ledger": "Ledger"
 			}

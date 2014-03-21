@@ -42,10 +42,10 @@ class DocType:
 				self.doc.account)
 			
 	def pl_must_have_cost_center(self):
-		if frappe.db.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
+		if frappe.db.get_value("Account", self.doc.account, "report_type") == "Profit and Loss":
 			if not self.doc.cost_center and self.doc.voucher_type != 'Period Closing Voucher':
-				frappe.throw(_("Cost Center must be specified for PL Account: ") + 
-					self.doc.account)
+				frappe.throw(_("Cost Center must be specified for Profit and Loss type account: ") 
+					+ self.doc.account)
 		elif self.doc.cost_center:
 			self.doc.cost_center = None
 		
@@ -55,8 +55,9 @@ class DocType:
 
 	def check_pl_account(self):
 		if self.doc.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.doc.account, "is_pl_account") == "Yes":
-			frappe.throw(_("For opening balance entry account can not be a PL account"))			
+				frappe.db.get_value("Account", self.doc.account, "report_type")=="Profit and Loss":
+			frappe.throw(_("For opening balance entry, account can not be \
+				a Profit and Loss type account"))			
 
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""

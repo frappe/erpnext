@@ -175,7 +175,7 @@ class DocType(AccountsController):
 						' - '.join(d.account.split(' - ')[:-1]), 
 						master_type == 'Customer' and 'customer_name' or 'supplier_name')
 			
-			if account_type == 'Bank or Cash':
+			if account_type in ['Bank', 'Cash']:
 				company_currency = get_company_currency(self.doc.company)
 				amt = flt(d.debit) and d.debit or d.credit	
 				self.doc.total_amount = company_currency + ' ' + cstr(amt)
@@ -413,7 +413,7 @@ def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
 	from erpnext.accounts.utils import get_balance_on
 	accounts = frappe.db.sql_list("""select name from tabAccount 
-		where group_or_ledger='Ledger' and is_pl_account='No' and company=%s""", company)
+		where group_or_ledger='Ledger' and report_type='Profit and Loss' and company=%s""", company)
 	
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 	

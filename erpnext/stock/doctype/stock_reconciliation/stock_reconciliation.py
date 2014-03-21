@@ -291,7 +291,7 @@ class DocType(StockController):
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
 		elif not frappe.db.sql("""select * from `tabStock Ledger Entry`"""):
 			if frappe.db.get_value("Account", self.doc.expense_account, 
-					"is_pl_account") == "Yes":
+					"report_type") == "Profit and Loss":
 				msgprint(_("""Expense Account can not be a PL Account, as this stock \
 					reconciliation is an opening entry. \
 					Please select 'Temporary Account (Liabilities)' or relevant account"""), 

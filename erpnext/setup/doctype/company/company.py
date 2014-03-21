@@ -57,22 +57,15 @@ class DocType:
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
 			if not frappe.db.exists("Warehouse", whname + " - " + self.doc.abbr):
-				if not frappe.db.exists("Account", "Stock Assets - " + self.doc.abbr):
+				stock_group = frappe.db.get_value("Account", {"account_type": "Stock", 
+					"group_or_ledger": "Group"})
+				if stock_group:
 					frappe.bean({
-						"doctype": "Account",
-						"account_name": "Stock Assets",
+						"doctype":"Warehouse",
+						"warehouse_name": whname,
 						"company": self.doc.name,
-						"group_or_ledger": "Group",
-						"root_type": "Asset",
-						"is_pl_account": "No"
+						"create_account_under": stock_group
 					}).insert()
-				
-				frappe.bean({
-					"doctype":"Warehouse",
-					"warehouse_name": whname,
-					"company": self.doc.name,
-					"create_account_under": "Stock Assets - " + self.doc.abbr
-				}).insert()
 			
 	def create_default_web_page(self):
 		if not frappe.db.get_value("Website Settings", None, "home_page") and \
@@ -133,15 +126,16 @@ class DocType:
 
 	def set_default_accounts(self):
 		def _set_default_accounts(accounts):
-			for a in accounts:
-				account_name = accounts[a] + " - " + self.doc.abbr
-				if not self.doc.fields.get(a) and frappe.db.exists("Account", account_name):
-					frappe.db.set(self.doc, a, account_name)
+			for field, account_type in accounts.items():
+				account = frappe.db.get_value("Account", {"account_type": account_type, 
+					"group_or_ledger": "Ledger", "company": self.doc.name})
+
+				if account and not self.doc.fields.get(field):
+					frappe.db.set(self.doc, field, account)
 			
 		_set_default_accounts({
-			"receivables_group": "Accounts Receivable",
-			"payables_group": "Accounts Payable",
-			"default_cash_account": "Cash"
+			"default_cash_account": "Cash",
+			"default_bank_account": "Bank"
 		})
 		
 		if cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
@@ -213,117 +207,125 @@ class DocType:
 		frappe.defaults.clear_cache()
 		
 	def create_standard_accounts(self):
-		self.fld_dict = {'account_name':0,'parent_account':1,'group_or_ledger':2,'is_pl_account':3,'account_type':4,'root_type':5,'company':6,'tax_rate':7}
+		self.fld_dict = {
+			'account_name': 0,
+			'parent_account': 1,
+			'group_or_ledger': 2,
+			'account_type': 3,
+			'report_type': 4,
+			'company': 5,
+			'tax_rate': 6
+		}
+		
 		acc_list_common = [
-			['Application of Funds (Assets)','','Group','No','','Asset',self.doc.name,''],
-				['Current Assets','Application of Funds (Assets)','Group','No','','Asset',self.doc.name,''],
-					['Accounts Receivable','Current Assets','Group','No','','Asset',self.doc.name,''],
-					['Bank Accounts','Current Assets','Group','No','Bank or Cash','Asset',self.doc.name,''],
-					['Cash In Hand','Current Assets','Group','No','Bank or Cash','Asset',self.doc.name,''],
-						['Cash','Cash In Hand','Ledger','No','Bank or Cash','Asset',self.doc.name,''],
-					['Loans and Advances (Assets)','Current Assets','Group','No','','Asset',self.doc.name,''],
-					['Securities and Deposits','Current Assets','Group','No','','Asset',self.doc.name,''],
-						['Earnest Money','Securities and Deposits','Ledger','No','','Asset',self.doc.name,''],
-					['Stock Assets','Current Assets','Group','No','','Asset',self.doc.name,''],
-					['Tax Assets','Current Assets','Group','No','','Asset',self.doc.name,''],
-				['Fixed Assets','Application of Funds (Assets)','Group','No','','Asset',self.doc.name,''],
-					['Capital Equipments','Fixed Assets','Ledger','No','Fixed Asset','Asset',self.doc.name,''],
-					['Computers','Fixed Assets','Ledger','No','Fixed Asset','Asset',self.doc.name,''],
-					['Furniture and Fixture','Fixed Assets','Ledger','No','Fixed Asset','Asset',self.doc.name,''],
-					['Office Equipments','Fixed Assets','Ledger','No','Fixed Asset','Asset',self.doc.name,''],
-					['Plant and Machinery','Fixed Assets','Ledger','No','Fixed Asset','Asset',self.doc.name,''],
-				['Investments','Application of Funds (Assets)','Group','No','','Asset',self.doc.name,''],
-				['Temporary Accounts (Assets)','Application of Funds (Assets)','Group','No','','Asset',self.doc.name,''],
-					['Temporary Account (Assets)','Temporary Accounts (Assets)','Ledger','No','','Asset',self.doc.name,''],
-			['Expenses','','Group','Yes','Expense Account','Expense',self.doc.name,''],
-				['Direct Expenses','Expenses','Group','Yes','Expense Account','Expense',self.doc.name,''],
-					['Stock Expenses','Direct Expenses','Group','Yes','Expense Account','Expense',self.doc.name,''],
-						['Cost of Goods Sold','Stock Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-						['Stock Adjustment','Stock Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-						['Expenses Included In Valuation', "Stock Expenses", 'Ledger', 'Yes', 'Expense Account', 'Expense', self.doc.name, ''],
-				['Indirect Expenses','Expenses','Group','Yes','Expense Account','Expense',self.doc.name,''],
-					['Advertising and Publicity','Indirect Expenses','Ledger','Yes','Chargeable','Expense',self.doc.name,''],
-					['Bad Debts Written Off','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Bank Charges','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Books and Periodicals','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Charity and Donations','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Commission on Sales','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Conveyance Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Customer Entertainment Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Depreciation Account','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Freight and Forwarding Charges','Indirect Expenses','Ledger','Yes','Chargeable','Expense',self.doc.name,''],
-					['Legal Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Miscellaneous Expenses','Indirect Expenses','Ledger','Yes','Chargeable','Expense',self.doc.name,''],
-					['Office Maintenance Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Office Rent','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Postal Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Print and Stationary','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Rounded Off','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Salary','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Sales Promotion Expenses','Indirect Expenses','Ledger','Yes','Chargeable','Expense',self.doc.name,''],
-					['Service Charges Paid','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Staff Welfare Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Telephone Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Travelling Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-					['Water and Electricity Expenses','Indirect Expenses','Ledger','Yes','Expense Account','Expense',self.doc.name,''],
-			['Income','','Group','Yes','','Income',self.doc.name,''],
-				['Direct Income','Income','Group','Yes','Income Account','Income',self.doc.name,''],
-					['Sales','Direct Income','Ledger','Yes','Income Account','Income',self.doc.name,''],
-					['Service','Direct Income','Ledger','Yes','Income Account','Income',self.doc.name,''],
-				['Indirect Income','Income','Group','Yes','Income Account','Income',self.doc.name,''],
-			['Source of Funds (Liabilities)','','Group','No','','Liability',self.doc.name,''],
-				['Capital Account','Source of Funds (Liabilities)','Group','No','','Liability',self.doc.name,''],
-					['Reserves and Surplus','Capital Account','Ledger','No','','Liability',self.doc.name,''],
-					['Shareholders Funds','Capital Account','Ledger','No','','Liability',self.doc.name,''],
-				['Current Liabilities','Source of Funds (Liabilities)','Group','No','','Liability',self.doc.name,''],
-					['Accounts Payable','Current Liabilities','Group','No','','Liability',self.doc.name,''],
-					['Stock Liabilities','Current Liabilities','Group','No','','Liability',self.doc.name,''],
-						['Stock Received But Not Billed', 'Stock Liabilities', 'Ledger', 
-							'No', '', 'Liability', self.doc.name, ''],					
-					['Duties and Taxes','Current Liabilities','Group','No','','Liability',self.doc.name,''],
-					['Loans (Liabilities)','Current Liabilities','Group','No','','Liability',self.doc.name,''],
-						['Secured Loans','Loans (Liabilities)','Group','No','','Liability',self.doc.name,''],
-						['Unsecured Loans','Loans (Liabilities)','Group','No','','Liability',self.doc.name,''],
-						['Bank Overdraft Account','Loans (Liabilities)','Group','No','','Liability',self.doc.name,''],
-				['Temporary Accounts (Liabilities)','Source of Funds (Liabilities)','Group','No','','Liability',self.doc.name,''],
-					['Temporary Account (Liabilities)','Temporary Accounts (Liabilities)','Ledger','No','','Liability',self.doc.name,'']
+			['Application of Funds (Assets)','','Group','','Balance Sheet',self.doc.name,''],
+				['Current Assets','Application of Funds (Assets)','Group','','Balance Sheet',self.doc.name,''],
+					['Accounts Receivable','Current Assets','Group','','Balance Sheet',self.doc.name,''],
+					['Bank Accounts','Current Assets','Group','Bank','Balance Sheet',self.doc.name,''],
+					['Cash In Hand','Current Assets','Group','Cash','Balance Sheet',self.doc.name,''],
+						['Cash','Cash In Hand','Ledger','Cash','Balance Sheet',self.doc.name,''],
+					['Loans and Advances (Assets)','Current Assets','Group','','Balance Sheet',self.doc.name,''],
+					['Securities and Deposits','Current Assets','Group','','Balance Sheet',self.doc.name,''],
+						['Earnest Money','Securities and Deposits','Ledger','','Balance Sheet',self.doc.name,''],
+					['Stock Assets','Current Assets','Group','','Balance Sheet',self.doc.name,''],
+					['Tax Assets','Current Assets','Group','','Balance Sheet',self.doc.name,''],
+				['Fixed Assets','Application of Funds (Assets)','Group','','Balance Sheet',self.doc.name,''],
+					['Capital Equipments','Fixed Assets','Ledger','Fixed Asset','Balance Sheet',self.doc.name,''],
+					['Computers','Fixed Assets','Ledger','Fixed Asset','Balance Sheet',self.doc.name,''],
+					['Furniture and Fixture','Fixed Assets','Ledger','Fixed Asset','Balance Sheet',self.doc.name,''],
+					['Office Equipments','Fixed Assets','Ledger','Fixed Asset','Balance Sheet',self.doc.name,''],
+					['Plant and Machinery','Fixed Assets','Ledger','Fixed Asset','Balance Sheet',self.doc.name,''],
+				['Investments','Application of Funds (Assets)','Group','','Balance Sheet',self.doc.name,''],
+				['Temporary Accounts (Assets)','Application of Funds (Assets)','Group','','Balance Sheet',self.doc.name,''],
+					['Temporary Account (Assets)','Temporary Accounts (Assets)','Ledger','','Balance Sheet',self.doc.name,''],
+			['Expenses','','Group','Expense Account','Profit and Loss',self.doc.name,''],
+				['Direct Expenses','Expenses','Group','Expense Account','Profit and Loss',self.doc.name,''],
+					['Stock Expenses','Direct Expenses','Group','Expense Account','Profit and Loss',self.doc.name,''],
+						['Cost of Goods Sold','Stock Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+						['Stock Adjustment','Stock Expenses','Ledger','Stock Adjustment','Profit and Loss',self.doc.name,''],
+						['Expenses Included In Valuation', "Stock Expenses", 'Ledger', 'Expenses Included In Valuation', 'Profit and Loss', self.doc.name, ''],
+				['Indirect Expenses','Expenses','Group','Expense Account','Profit and Loss',self.doc.name,''],
+					['Advertising and Publicity','Indirect Expenses','Ledger','Chargeable','Profit and Loss',self.doc.name,''],
+					['Bad Debts Written Off','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Bank Charges','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Books and Periodicals','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Charity and Donations','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Commission on Sales','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Conveyance Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Customer Entertainment Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Depreciation Account','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Freight and Forwarding Charges','Indirect Expenses','Ledger','Chargeable','Profit and Loss',self.doc.name,''],
+					['Legal Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Miscellaneous Expenses','Indirect Expenses','Ledger','Chargeable','Profit and Loss',self.doc.name,''],
+					['Office Maintenance Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Office Rent','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Postal Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Print and Stationary','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Rounded Off','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Salary','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Sales Promotion Expenses','Indirect Expenses','Ledger','Chargeable','Profit and Loss',self.doc.name,''],
+					['Service Charges Paid','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Staff Welfare Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Telephone Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Travelling Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+					['Water and Electricity Expenses','Indirect Expenses','Ledger','Expense Account','Profit and Loss',self.doc.name,''],
+			['Income','','Group','','Profit and Loss',self.doc.name,''],
+				['Direct Income','Income','Group','Income Account','Profit and Loss',self.doc.name,''],
+					['Sales','Direct Income','Ledger','Income Account','Profit and Loss',self.doc.name,''],
+					['Service','Direct Income','Ledger','Income Account','Profit and Loss',self.doc.name,''],
+				['Indirect Income','Profit and Loss','Group','Income Account','Profit and Loss',self.doc.name,''],
+			['Source of Funds (Liabilities)','','Group','','Balance Sheet',self.doc.name,''],
+				['Capital Account','Source of Funds (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
+					['Reserves and Surplus','Capital Account','Ledger','','Balance Sheet',self.doc.name,''],
+					['Shareholders Funds','Capital Account','Ledger','','Balance Sheet',self.doc.name,''],
+				['Current Liabilities','Source of Funds (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
+					['Accounts Payable','Current Liabilities','Group','','Balance Sheet',self.doc.name,''],
+					['Stock Liabilities','Current Liabilities','Group','','Balance Sheet',self.doc.name,''],
+						['Stock Received But Not Billed', 'Stock Liabilities', 'Ledger', 'Stock Received But Not Billed', 'Balance Sheet', self.doc.name, ''],					
+					['Duties and Taxes','Current Liabilities','Group','','Balance Sheet',self.doc.name,''],
+					['Loans (Liabilities)','Current Liabilities','Group','','Balance Sheet',self.doc.name,''],
+						['Secured Loans','Loans (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
+						['Unsecured Loans','Loans (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
+						['Bank Overdraft Account','Loans (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
+				['Temporary Accounts (Liabilities)','Source of Funds (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
+					['Temporary Account (Liabilities)','Temporary Accounts (Liabilities)','Ledger','','Balance Sheet',self.doc.name,'']
 		]
 		
 		acc_list_india = [
-			['CENVAT Capital Goods','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['CENVAT','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['CENVAT Service Tax','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['CENVAT Service Tax Cess 1','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['CENVAT Service Tax Cess 2','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['CENVAT Edu Cess','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['CENVAT SHE Cess','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['Excise Duty 4','Tax Assets','Ledger','No','Tax','Asset',self.doc.name,'4.00'],
-			['Excise Duty 8','Tax Assets','Ledger','No','Tax','Asset',self.doc.name,'8.00'],
-			['Excise Duty 10','Tax Assets','Ledger','No','Tax','Asset',self.doc.name,'10.00'],
-			['Excise Duty 14','Tax Assets','Ledger','No','Tax','Asset',self.doc.name,'14.00'],
-			['Excise Duty Edu Cess 2','Tax Assets','Ledger','No','Tax','Asset',self.doc.name,'2.00'],
-			['Excise Duty SHE Cess 1','Tax Assets','Ledger','No','Tax','Asset',self.doc.name,'1.00'],
-			['P L A','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['P L A - Cess Portion','Tax Assets','Ledger','No','Chargeable','Asset',self.doc.name,''],
-			['Edu. Cess on Excise','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'2.00'],
-			['Edu. Cess on Service Tax','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'2.00'],
-			['Edu. Cess on TDS','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'2.00'],
-			['Excise Duty @ 4','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'4.00'],
-			['Excise Duty @ 8','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'8.00'],
-			['Excise Duty @ 10','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'10.00'],
-			['Excise Duty @ 14','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'14.00'],
-			['Service Tax','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'10.3'],
-			['SHE Cess on Excise','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'1.00'],
-			['SHE Cess on Service Tax','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'1.00'],
-			['SHE Cess on TDS','Duties and Taxes','Ledger','No','Tax','Liability',self.doc.name,'1.00'],
-			['Professional Tax','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['VAT','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['TDS (Advertisement)','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['TDS (Commission)','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['TDS (Contractor)','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['TDS (Interest)','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['TDS (Rent)','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,''],
-			['TDS (Salary)','Duties and Taxes','Ledger','No','Chargeable','Liability',self.doc.name,'']
+			['CENVAT Capital Goods','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['CENVAT','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['CENVAT Service Tax','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['CENVAT Service Tax Cess 1','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['CENVAT Service Tax Cess 2','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['CENVAT Edu Cess','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['CENVAT SHE Cess','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['Excise Duty 4','Tax Assets','Ledger','Tax','Balance Sheet',self.doc.name,'4.00'],
+			['Excise Duty 8','Tax Assets','Ledger','Tax','Balance Sheet',self.doc.name,'8.00'],
+			['Excise Duty 10','Tax Assets','Ledger','Tax','Balance Sheet',self.doc.name,'10.00'],
+			['Excise Duty 14','Tax Assets','Ledger','Tax','Balance Sheet',self.doc.name,'14.00'],
+			['Excise Duty Edu Cess 2','Tax Assets','Ledger','Tax','Balance Sheet',self.doc.name,'2.00'],
+			['Excise Duty SHE Cess 1','Tax Assets','Ledger','Tax','Balance Sheet',self.doc.name,'1.00'],
+			['P L A','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['P L A - Cess Portion','Tax Assets','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['Edu. Cess on Excise','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'2.00'],
+			['Edu. Cess on Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'2.00'],
+			['Edu. Cess on TDS','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'2.00'],
+			['Excise Duty @ 4','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'4.00'],
+			['Excise Duty @ 8','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'8.00'],
+			['Excise Duty @ 10','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'10.00'],
+			['Excise Duty @ 14','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'14.00'],
+			['Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'10.3'],
+			['SHE Cess on Excise','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'1.00'],
+			['SHE Cess on Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'1.00'],
+			['SHE Cess on TDS','Duties and Taxes','Ledger','Tax','Balance Sheet',self.doc.name,'1.00'],
+			['Professional Tax','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['VAT','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['TDS (Advertisement)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['TDS (Commission)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['TDS (Contractor)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['TDS (Interest)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['TDS (Rent)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,''],
+			['TDS (Salary)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',self.doc.name,'']
 		 ]
 		# load common account heads
 		for d in acc_list_common:

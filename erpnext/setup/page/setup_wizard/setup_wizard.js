@@ -113,6 +113,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 							frappe.datetime.add_days(frappe.datetime.add_months(
 								frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
 						slide.get_input("fy_end_date").val(frappe.datetime.obj_to_user(year_end_date));
+
 					});
 				}
 			},
@@ -128,6 +129,8 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						options: "", fieldtype: 'Select'},
 					{fieldname:'timezone', label: frappe._('Time Zone'), reqd:1,
 						options: "", fieldtype: 'Select'},
+					{fieldname:'chart_of_accounts', label: frappe._('Chart of Accounts'), 
+						options: "", fieldtype: 'Select'}
 				],
 				help: frappe._('Select your home country and check the timezone and currency.'),
 				onload: function(slide, form) {
@@ -158,6 +161,17 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						}
 						// add all timezones at the end, so that user has the option to change it to any timezone
 						$timezone.add_options([""].concat(erpnext.all_timezones));
+						
+						// get country specific chart of accounts
+						frappe.call({
+							method: "erpnext.accounts.doctype.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+							args: {"country": country},
+							callback: function(r) {
+								if(r.message) 
+									slide.get_input("chart_of_accounts").empty()
+										.add_options([""].concat(r.message));
+							}
+						})
 					});
 				}
 			},

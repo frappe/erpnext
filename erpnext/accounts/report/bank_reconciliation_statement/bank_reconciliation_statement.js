@@ -12,10 +12,10 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 			"get_query": function() {
 				return {
 					"query": "accounts.utils.get_account_list", 
-					"filters": {
-						"is_pl_account": "No",
-						"account_type": "Bank or Cash"
-					}
+					"filters": [
+						['Account', 'account_type', 'in', 'Bank, Cash'],
+						['Account', 'group_or_ledger', '=', 'Ledger'],
+					]
 				}
 			}
 		},

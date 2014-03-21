@@ -55,8 +55,8 @@ cur_frm.fields_dict['default_bom'].get_query = function(doc) {
 cur_frm.fields_dict['expense_account'].get_query = function(doc) {
 	return {
 		filters: {
-			'root_type': "Expense",
-			'group_or_ledger': "Ledger"
+			"report_type": "Profit and Loss",
+			"group_or_ledger": "Ledger"
 		}
 	}
 }
@@ -66,7 +66,7 @@ cur_frm.fields_dict['expense_account'].get_query = function(doc) {
 cur_frm.fields_dict['income_account'].get_query = function(doc) {
 	return {
 		filters: {
-			'root_type': "Income",
+			"report_type": "Profit and Loss",
 			'group_or_ledger': "Ledger",
 			'account_type': "Income Account"
 		}

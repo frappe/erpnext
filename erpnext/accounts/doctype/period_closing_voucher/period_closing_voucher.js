@@ -12,9 +12,8 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{
-			'is_pl_account': "No",
 			"company": doc.company,
-			"root_type": "Liability",
+			"report_type": "Balance Sheet",
 			"freeze_account": "No",
 			"group_or_ledger": "Ledger"
 		}

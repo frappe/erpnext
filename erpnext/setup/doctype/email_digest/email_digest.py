@@ -158,9 +158,9 @@ class DocType(DocListController):
 			self.meta.get_label("income_year_to_date"))
 			
 	def get_bank_balance(self):
-		# account is of type "Bank or Cash"
+		# account is of type "Bank" or "Cash"
 		accounts = dict([[a["name"], [a["account_name"], 0]] for a in self.get_accounts()
-			if a["account_type"]=="Bank or Cash"])
+			if a["account_type"] in ["Bank", "Cash"]])
 		ackeys = accounts.keys()
 		
 		for gle in self.get_gl_entries(None, self.to_date):
@@ -211,9 +211,9 @@ class DocType(DocListController):
 		accounts = [a["name"] for a in self.get_accounts()
 			if a["master_type"]==party_type]
 
-		# account is "Bank or Cash"
+		# account is "Bank" or "Cash"
 		bc_accounts = [esc(a["name"], "()|") for a in self.get_accounts() 
-			if a["account_type"]=="Bank or Cash"]
+			if a["account_type"] in ["Bank", "Cash"]]
 		bc_regex = re.compile("""(%s)""" % "|".join(bc_accounts))
 		
 		total = 0

@@ -25,8 +25,8 @@ class DocType(AccountsController):
 			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.doc.name)
 
 	def validate_account_head(self):
-		if frappe.db.get_value("Account", self.doc.closing_account_head, "root_type") \
-				!= "Liability":
+		if frappe.db.get_value("Account", self.doc.closing_account_head, "report_type") \
+				!= "Balance Sheet":
 			frappe.throw(_("Account") + ": " + self.doc.closing_account_head + 
 				_("must be a Liability account"))
 
@@ -67,7 +67,7 @@ class DocType(AccountsController):
 		return frappe.db.sql("""
 			select t1.account, sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance
 			from `tabGL Entry` t1, `tabAccount` t2 
-			where t1.account = t2.name and ifnull(t2.is_pl_account, 'No') = 'Yes'
+			where t1.account = t2.name and ifnull(t2.report_type, '') = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s 
 			and t1.posting_date between %s and %s 
 			group by t1.account

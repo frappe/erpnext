@@ -80,7 +80,7 @@ def create_fiscal_year_and_company(args):
 		'year_end_date': args.get('fy_end_date'),
 	}]).insert()
 
-	
+	print args
 	# Company
 	frappe.bean([{
 		"doctype":"Company",
@@ -88,7 +88,8 @@ def create_fiscal_year_and_company(args):
 		'company_name':args.get('company_name'),
 		'abbr':args.get('company_abbr'),
 		'default_currency':args.get('currency'),
-		'country': args.get('country')
+		'country': args.get('country'),
+		'chart_of_accounts': args.get(('chart_of_accounts')),
 	}]).insert()
 	
 	args["curr_fiscal_year"] = curr_fiscal_year
@@ -229,7 +230,7 @@ def create_taxes(args):
 				"parent_account": "Duties and Taxes - " + args.get("company_abbr"),
 				"account_name": args.get("tax_" + str(i)),
 				"group_or_ledger": "Ledger",
-				"is_pl_account": "No",
+				"report_type": "Balance Sheet",
 				"account_type": "Tax",
 				"tax_rate": args.get("tax_rate_" + str(i))
 			}).insert()

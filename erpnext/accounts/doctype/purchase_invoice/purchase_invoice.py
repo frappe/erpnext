@@ -109,8 +109,8 @@ class DocType(BuyingController):
 			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		if frappe.db.get_value("Account", self.doc.debit_to, "root_type") != "Liability":
-			frappe.throw(_("Account must be an liability account"))
+		if frappe.db.get_value("Account", self.doc.debit_to, "report_type") != "Balance Sheet":
+			frappe.throw(_("Account must be a balance sheet account"))
 	
 	# Validate Acc Head of Supplier and Credit To Account entered
 	# ------------------------------------------------------------
@@ -424,7 +424,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	# but can also be a Liability account with account_type='Expense Account' in special circumstances. 
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount` 
-			where (tabAccount.root_type in ("Asset", "Expense")
+			where (tabAccount.report_type = "Profit and Loss"
 					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2 

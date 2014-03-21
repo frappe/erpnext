@@ -16,8 +16,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn){
 cur_frm.fields_dict['cash_bank_account'].get_query = function(doc,cdt,cdn) {
 	return{
 		filters:{
-			'root_type': "Asset",
-			'is_pl_account': "No",
+			'report_type': "Balance Sheet",
 			'group_or_ledger': "Ledger",
 			'company': doc.company
 		}
@@ -54,8 +53,7 @@ cur_frm.fields_dict['cost_center'].get_query = function(doc,cdt,cdn) {
 cur_frm.fields_dict["expense_account"].get_query = function(doc) {
 	return {
 		filters: {
-			"is_pl_account": "Yes",
-			"root_type": "Expense",
+			"report_type": "Profit and Loss",
 			"company": doc.company,
 			"group_or_ledger": "Ledger"
 		}

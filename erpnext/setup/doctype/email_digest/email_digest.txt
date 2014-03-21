@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-21 14:15:31", 
   "docstatus": 0, 
-  "modified": "2014-01-20 17:48:39", 
+  "modified": "2014-03-19 11:39:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -119,7 +119,7 @@
   "label": "Income Year to Date"
  }, 
  {
-  "description": "Balances of Accounts of type \"Bank or Cash\"", 
+  "description": "Balances of Accounts of type \"Bank\" or \"Cash\"", 
   "doctype": "DocField", 
   "fieldname": "bank_balance", 
   "fieldtype": "Check", 

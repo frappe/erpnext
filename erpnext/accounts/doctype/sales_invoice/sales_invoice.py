@@ -257,8 +257,8 @@ class DocType(SellingController):
 
 
 	def validate_debit_acc(self):
-		if frappe.db.get_value("Account", self.doc.debit_to, "root_type") != "Asset":
-			frappe.throw(_("Account must be an asset account"))
+		if frappe.db.get_value("Account", self.doc.debit_to, "report_type") != "Balance Sheet":
+			frappe.throw(_("Account must be a balance sheet account"))
 			
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
@@ -787,7 +787,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	# but can also be a Asset account with account_type='Income Account' in special circumstances. 
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount` 
-			where (tabAccount.root_type in ("Liability", "Income")
+			where (tabAccount.report_type = "Profit and Loss"
 					or tabAccount.account_type = "Income Account") 
 				and tabAccount.group_or_ledger="Ledger" 
 				and tabAccount.docstatus!=2

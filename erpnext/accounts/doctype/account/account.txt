@@ -2,7 +2,7 @@
  {
   "creation": "2013-01-30 12:49:46", 
   "docstatus": 0, 
-  "modified": "2014-03-07 16:26:42", 
+  "modified": "2014-03-19 12:07:27", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -95,18 +95,6 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "is_pl_account", 
-  "fieldtype": "Select", 
-  "in_filter": 1, 
-  "label": "Is PL Account", 
-  "oldfieldname": "is_pl_account", 
-  "oldfieldtype": "Select", 
-  "options": "Yes\nNo", 
-  "read_only": 1, 
-  "search_index": 1
- }, 
- {
-  "doctype": "DocField", 
   "fieldname": "company", 
   "fieldtype": "Link", 
   "in_filter": 1, 
@@ -137,10 +125,10 @@
  }, 
  {
   "doctype": "DocField", 
-  "fieldname": "root_type", 
+  "fieldname": "report_type", 
   "fieldtype": "Select", 
-  "label": "Root Type", 
-  "options": "\nAsset\nLiability\nExpense\nIncome"
+  "label": "Report Type", 
+  "options": "\nBalance Sheet\nProfit and Loss"
  }, 
  {
   "description": "Setting Account Type helps in selecting this Account in transactions.", 
@@ -151,7 +139,7 @@
   "label": "Account Type", 
   "oldfieldname": "account_type", 
   "oldfieldtype": "Select", 
-  "options": "Bank or Cash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nIncome Account", 
+  "options": "Bank\nCash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nIncome Account\nStock Received But Not Billed\nExpenses Included In Valuation\nStock Adjustment", 
   "search_index": 0
  }, 
  {

@@ -14,7 +14,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
 		
 	// disable fields
-	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'is_pl_account', 'company'], false);
+	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
 	
 	if(doc.group_or_ledger=='Ledger') {
 		frappe.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
@@ -52,7 +52,7 @@ cur_frm.cscript.master_type = function(doc, cdt, cdn) {
 		in_list(['Customer', 'Supplier'], doc.master_type));
 }
 
-cur_frm.add_fetch('parent_account', 'is_pl_account', 'is_pl_account');
+cur_frm.add_fetch('parent_account', 'report_type', 'report_type');
 
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {

@@ -106,17 +106,24 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		'page_len': page_len})
 		
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select name, parent_account	from tabAccount 
+	tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount 
 		where tabAccount.docstatus!=2 
-			and (account_type in (%s) or root_type = %s)
+			and account_type in (%s)
 			and group_or_ledger = 'Ledger'
 			and company = %s
 			and `%s` LIKE %s
 		limit %s, %s""" % 
-		(", ".join(['%s']*len(filters.get("account_type"))), 
-			"%s", "%s", searchfield, "%s", "%s", "%s"), 
-		tuple(filters.get("account_type") + [filters.get("root_type"), 
-			filters.get("company"), "%%%s%%" % txt, start, page_len]))
+		(", ".join(['%s']*len(filters.get("account_type"))), "%s", searchfield, "%s", "%s", "%s"), 
+		tuple(filters.get("account_type") + [filters.get("company"), "%%%s%%" % txt, 
+			start, page_len]))
+	if not tax_accounts:
+		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount 
+			where tabAccount.docstatus!=2 and group_or_ledger = 'Ledger' 
+				and company = %s and `%s` LIKE %s limit %s, %s""" 
+			% ("%s", searchfield, "%s", "%s", "%s"), 
+			(filters.get("company"), "%%%s%%" % txt, start, page_len))
+			
+	return tax_accounts
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.utils import nowdate
