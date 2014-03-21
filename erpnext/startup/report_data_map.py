@@ -18,8 +18,8 @@ data_map = {
 
 	# Accounts
 	"Account": {
-		"columns": ["name", "parent_account", "lft", "rgt", "root_type", 
-			"is_pl_account", "company", "group_or_ledger"],
+		"columns": ["name", "parent_account", "lft", "rgt", "report_type", 
+			"company", "group_or_ledger"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "lft",
 		"links": {
