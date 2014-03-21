@@ -23,6 +23,7 @@ class DocType:
 			
 		if chart:
 			accounts = []
+						
 			def _import_accounts(children, parent):
 				for child in children:
 					account_name = child.get("name")
@@ -31,8 +32,9 @@ class DocType:
 					if account_name_in_db in accounts:
 						count = accounts.count(account_name_in_db)
 						account_name = account_name + " " + cstr(count)
-					
-					child.update(account_properties.get(chart.get("name"), {}).get(account_name))
+
+					child.update(account_properties.get(chart.get("name"), {})\
+						.get(account_name, {}))
 					
 					account = frappe.bean({
 						"doctype": "Account",

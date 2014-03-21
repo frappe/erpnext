@@ -119,9 +119,9 @@ class DocType:
 			"freeze_account": "No",
 			"master_type": "",
 		})
+		
 		for d in self.fld_dict.keys():
 			account.doc.fields[d] = (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.doc.abbr or lst[self.fld_dict[d]]
-		
 		account.insert()
 
 	def set_default_accounts(self):
@@ -273,7 +273,7 @@ class DocType:
 				['Direct Income','Income','Group','Income Account','Profit and Loss',self.doc.name,''],
 					['Sales','Direct Income','Ledger','Income Account','Profit and Loss',self.doc.name,''],
 					['Service','Direct Income','Ledger','Income Account','Profit and Loss',self.doc.name,''],
-				['Indirect Income','Profit and Loss','Group','Income Account','Profit and Loss',self.doc.name,''],
+				['Indirect Income','Income','Group','Income Account','Profit and Loss',self.doc.name,''],
 			['Source of Funds (Liabilities)','','Group','','Balance Sheet',self.doc.name,''],
 				['Capital Account','Source of Funds (Liabilities)','Group','','Balance Sheet',self.doc.name,''],
 					['Reserves and Surplus','Capital Account','Ledger','','Balance Sheet',self.doc.name,''],
