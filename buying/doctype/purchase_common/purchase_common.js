@@ -76,7 +76,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							if(me.frm.doc.buying_price_list !== buying_price_list) me.buying_price_list();
+							if(me.frm.doc.buying_price_list !== buying_price_list) 
+								me.buying_price_list();
+							me.frm.script_manager.trigger("currency");
 						}
 					}
 				});

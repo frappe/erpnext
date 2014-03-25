@@ -89,7 +89,6 @@ class DocType(TransactionBase):
 					self.is_serial_no_match(sr_list, prevdoc_s_no, d.prevdoc_docname)
 				
 				self.is_serial_no_installed(sr_list, d.item_code)
-		return sr_list
 
 	def validate_installation_date(self):
 		for d in getlist(self.doclist, 'installed_item_details'):
@@ -107,23 +106,10 @@ class DocType(TransactionBase):
 		webnotes.conn.set(self.doc, 'status', 'Draft')
 	
 	def on_submit(self):
-		valid_lst = []
-		valid_lst = self.validate_serial_no()
-		
-		for x in valid_lst:
-			if webnotes.conn.get_value("Serial No", x, "warranty_period"):
-				webnotes.conn.set_value("Serial No", x, "maintenance_status", "Under Warranty")
-			webnotes.conn.set_value("Serial No", x, "status", "Installed")
-
+		self.validate_serial_no()
 		self.update_prevdoc_status()
 		webnotes.conn.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
-		for d in getlist(self.doclist, 'installed_item_details'):
-			if d.serial_no:
-				d.serial_no = d.serial_no.replace(",", "\n")
-				for sr_no in d.serial_no.split("\n"):
-					webnotes.conn.set_value("Serial No", sr_no, "status", "Delivered")
-
 		self.update_prevdoc_status()
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
