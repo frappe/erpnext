@@ -108,6 +108,8 @@ class DocType:
 			self.import_chart_of_account()
 		else:
 			self.create_standard_accounts()
+			frappe.db.set(self.doc, "receivables_group", "Accounts Receivable - " + self.doc.abbr)
+			frappe.db.set(self.doc, "payables_group", "Accounts Payable - " + self.doc.abbr)
 			
 	def import_chart_of_account(self):
 		chart = frappe.bean("Chart of Accounts", self.doc.chart_of_accounts)
@@ -227,7 +229,7 @@ class DocType:
 					['Loans and Advances (Assets)','Current Assets','Group','','Balance Sheet',self.doc.name,''],
 					['Securities and Deposits','Current Assets','Group','','Balance Sheet',self.doc.name,''],
 						['Earnest Money','Securities and Deposits','Ledger','','Balance Sheet',self.doc.name,''],
-					['Stock Assets','Current Assets','Group','','Balance Sheet',self.doc.name,''],
+					['Stock Assets','Current Assets','Group','Stock','Balance Sheet',self.doc.name,''],
 					['Tax Assets','Current Assets','Group','','Balance Sheet',self.doc.name,''],
 				['Fixed Assets','Application of Funds (Assets)','Group','','Balance Sheet',self.doc.name,''],
 					['Capital Equipments','Fixed Assets','Ledger','Fixed Asset','Balance Sheet',self.doc.name,''],

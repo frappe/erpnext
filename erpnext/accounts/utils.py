@@ -74,10 +74,10 @@ def get_balance_on(account=None, date=None):
 			return 0.0
 		
 	acc = frappe.db.get_value('Account', account, \
-		['lft', 'rgt', 'is_pl_account', 'group_or_ledger'], as_dict=1)
+		['lft', 'rgt', 'report_type', 'group_or_ledger'], as_dict=1)
 	
 	# for pl accounts, get balance within a fiscal year
-	if acc.is_pl_account == 'Yes':
+	if acc.report_type == 'Profit and Loss':
 		cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
 			% year_start_date)
 	

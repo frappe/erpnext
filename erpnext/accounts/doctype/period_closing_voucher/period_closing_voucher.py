@@ -15,7 +15,6 @@ class DocType(AccountsController):
 	def validate(self):
 		self.validate_account_head()
 		self.validate_posting_date()
-		self.validate_pl_balances()
 
 	def on_submit(self):
 		self.make_gl_entries()
@@ -40,27 +39,6 @@ class DocType(AccountsController):
 		if pce and pce[0][0]:
 			frappe.throw(_("Another Period Closing Entry") + ": " + cstr(pce[0][0]) + 
 				  _("has been made after posting date") + ": " + self.doc.posting_date)
-		 
-	def validate_pl_balances(self):
-		income_bal = frappe.db.sql("""
-			select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) 
-			from `tabGL Entry` t1, tabAccount t2 
-			where t1.account = t2.name and t1.posting_date between %s and %s 
-			and t2.root_type = 'Income' and t2.docstatus < 2 and t2.company = %s""", 
-			(self.year_start_date, self.doc.posting_date, self.doc.company))
-			
-		expense_bal = frappe.db.sql("""
-			select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0))
-			from `tabGL Entry` t1, tabAccount t2 
-			where t1.account = t2.name and t1.posting_date between %s and %s
-			and t2.root_type = 'Expense' and t2.docstatus < 2 and t2.company=%s""", 
-			(self.year_start_date, self.doc.posting_date, self.doc.company))
-		
-		income_bal = income_bal and income_bal[0][0] or 0
-		expense_bal = expense_bal and expense_bal[0][0] or 0
-		
-		if not income_bal and not expense_bal:
-			frappe.throw(_("Both Income and Expense balances are zero. No Need to make Period Closing Entry."))
 		
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""

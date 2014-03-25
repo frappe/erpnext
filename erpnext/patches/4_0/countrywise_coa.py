@@ -10,6 +10,9 @@ def execute():
 	
 	frappe.db.sql("""update tabAccount set account_type='Cash' 
 		where account_type='Bank or Cash' and account_name in ('Cash', 'Cash In Hand')""")
+		
+	frappe.db.sql("""update tabAccount set account_type='Stock' 
+		where account_name = 'Stock Assets'""")
 	
 	ac_types = {"Fixed Asset Account": "Fixed Asset", "Bank or Cash": "Bank"}
 	for old, new in ac_types.items():

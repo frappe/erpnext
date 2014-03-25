@@ -119,7 +119,7 @@ class StatusUpdater(DocListController):
 
 					# get all qty where qty > target_field
 					item = frappe.db.sql("""select item_code, `{target_ref_field}`, 
-						`{target_field}`, parenttype, parent from `{target_dt}` 
+						`{target_field}`, parenttype, parent from `tab{target_dt}` 
 						where `{target_ref_field}` < `{target_field}` 
 						and name=%s and docstatus=1""".format(**args), 
 						args['name'], as_dict=1)

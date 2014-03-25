@@ -19,12 +19,14 @@ import unittest
 
 class TestLead(unittest.TestCase):
 	def test_make_customer(self):
+		print "test_make_customer"
 		from erpnext.selling.doctype.lead.lead import make_customer
 
 		customer = make_customer("_T-Lead-00001")
 		self.assertEquals(customer[0]["doctype"], "Customer")
 		self.assertEquals(customer[0]["lead_name"], "_T-Lead-00001")
 		
+		customer[0]["company"] = "_Test Company"
 		customer[0]["customer_group"] = "_Test Customer Group"
 		frappe.bean(customer).insert()
 		

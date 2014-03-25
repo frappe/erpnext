@@ -109,7 +109,7 @@ class DocType(BuyingController):
 			self.doc.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		if frappe.db.get_value("Account", self.doc.debit_to, "report_type") != "Balance Sheet":
+		if frappe.db.get_value("Account", self.doc.credit_to, "report_type") != "Balance Sheet":
 			frappe.throw(_("Account must be a balance sheet account"))
 	
 	# Validate Acc Head of Supplier and Credit To Account entered
