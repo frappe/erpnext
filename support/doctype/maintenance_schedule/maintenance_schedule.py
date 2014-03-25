@@ -7,8 +7,8 @@ import webnotes
 from webnotes.utils import add_days, cstr, getdate
 from webnotes.model.doc import addchild
 from webnotes.model.bean import getlist
-from webnotes import msgprint
-
+from webnotes import msgprint, _
+from stock.utils import get_valid_serial_nos
 	
 
 from utilities.transaction_base import TransactionBase, delete_events
@@ -19,7 +19,8 @@ class DocType(TransactionBase):
 		self.doclist = doclist
 	
 	def get_item_details(self, item_code):
-		item = webnotes.conn.sql("select item_name, description from `tabItem` where name = '%s'" %(item_code), as_dict=1)
+		item = webnotes.conn.sql("""select item_name, description from `tabItem` 
+			where name = %s""", (item_code), as_dict=1)
 		ret = {
 			'item_name': item and item[0]['item_name'] or '',
 			'description' : item and item[0]['description'] or ''
@@ -54,13 +55,14 @@ class DocType(TransactionBase):
 			msgprint("Please click on 'Generate Schedule' to get schedule")
 			raise Exception
 		self.check_serial_no_added()
-		self.validate_serial_no_warranty()
 		self.validate_schedule()
 
 		email_map ={}
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
-				self.update_amc_date(d.serial_no, d.end_date)
+				serial_nos = get_valid_serial_nos(d.serial_no)
+				self.validate_serial_no(serial_nos, d.start_date)
+				self.update_amc_date(serial_nos, d.end_date)
 
 			if d.incharge_name not in email_map:
 				email_map[d.incharge_name] = webnotes.bean("Sales Person", 
@@ -141,8 +143,6 @@ class DocType(TransactionBase):
 		ret = {'no_of_visits':count}
 		return ret
 	
-
-
 	def validate_maintenance_detail(self):
 		if not getlist(self.doclist, 'item_maintenance_detail'):
 			msgprint("Please enter Maintaince Details first")
@@ -165,9 +165,7 @@ class DocType(TransactionBase):
 			if getdate(d.start_date) >= getdate(d.end_date):
 				msgprint("Start date should be less than end date for item "+d.item_code)
 				raise Exception
-	
-	#check if maintenance schedule already created against same sales order
-	#-----------------------------------------------------------------------------------
+
 	def validate_sales_order(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.prevdoc_docname:
@@ -176,73 +174,36 @@ class DocType(TransactionBase):
 					msgprint("Maintenance Schedule against "+d.prevdoc_docname+" already exist")
 					raise Exception
 	
-
-	def validate_serial_no(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			cur_s_no=[]			
-			if d.serial_no:
-				cur_serial_no = d.serial_no.replace(' ', '')
-				cur_s_no = cur_serial_no.split(',')
-				
-				for x in cur_s_no:
-					chk = webnotes.conn.sql("select name, status from `tabSerial No` where docstatus!=2 and name=%s", (x))
-					chk1 = chk and chk[0][0] or ''
-					status = chk and chk[0][1] or ''
-					
-					if not chk1:
-						msgprint("Serial no "+x+" does not exist in system.")
-						raise Exception
-	
 	def validate(self):
 		self.validate_maintenance_detail()
 		self.validate_sales_order()
-		self.validate_serial_no()
-		self.validate_start_date()
-	
-	# validate that maintenance start date can not be before serial no delivery date
-	#-------------------------------------------------------------------------------------------
-	def validate_start_date(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			if d.serial_no:
-				cur_serial_no = d.serial_no.replace(' ', '')
-				cur_s_no = cur_serial_no.split(',')
-				
-				for x in cur_s_no:
-					dt = webnotes.conn.sql("select delivery_date from `tabSerial No` where name = %s", x)
-					dt = dt and dt[0][0] or ''
-					
-					if dt:
-						if dt > getdate(d.start_date):
-							msgprint("Maintenance start date can not be before delivery date "+dt.strftime('%Y-%m-%d')+" for serial no "+x)
-							raise Exception
-	
-	#update amc expiry date in serial no
-	#------------------------------------------
-	def update_amc_date(self,serial_no,amc_end_date):
-		#get current list of serial no
-		cur_serial_no = serial_no.replace(' ', '')
-		cur_s_no = cur_serial_no.split(',')
-		
-		for x in cur_s_no:
-			webnotes.conn.sql("update `tabSerial No` set amc_expiry_date = '%s', maintenance_status = 'Under AMC' where name = '%s'"% (amc_end_date,x))
-	
+
 	def on_update(self):
 		webnotes.conn.set(self.doc, 'status', 'Draft')
+			
+	def update_amc_date(self, serial_nos, amc_expiry_date=None):
+		for serial_no in serial_nos:
+			serial_no_bean = webnotes.bean("Serial No", serial_no)
+			serial_no_bean.doc.amc_expiry_date = amc_expiry_date
+			serial_no_bean.save()
 	
-	def validate_serial_no_warranty(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			if cstr(d.serial_no).strip():
-				dt = webnotes.conn.sql("""select warranty_expiry_date, amc_expiry_date 
-					from `tabSerial No` where name = %s""", d.serial_no, as_dict=1)
-				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
-					webnotes.msgprint("""Serial No: %s is already under warranty upto %s. 
-						Please check AMC Start Date.""" % 
-						(d.serial_no, dt[0]["warranty_expiry_date"]), raise_exception=1)
-						
-				if dt[0]['amc_expiry_date'] and dt[0]['amc_expiry_date'] >= d.start_date:
-					webnotes.msgprint("""Serial No: %s is already under AMC upto %s.
-						Please check AMC Start Date.""" % 
-						(d.serial_no, dt[0]["amc_expiry_date"]), raise_exception=1)
+	def validate_serial_no(self, serial_nos, amc_start_date):
+		for serial_no in serial_nos:
+			sr_details = webnotes.conn.get_value("Serial No", serial_no, 
+				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
+			
+			if sr_details.warranty_expiry_date and sr_details.warranty_expiry_date>=amc_start_date:
+				webnotes.throw("""Serial No: %s is already under warranty upto %s. 
+					Please check AMC Start Date.""" % (serial_no, sr_details.warranty_expiry_date))
+					
+			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
+				webnotes.throw("""Serial No: %s is already under AMC upto %s.
+					Please check AMC Start Date.""" % (serial_no, sr_details.amc_expiry_date))
+					
+			if sr_details.status=="Delivered" and sr_details.delivery_date and \
+				sr_details.delivery_date >= amc_start_date:
+					webnotes.throw(_("Maintenance start date can not be before \
+						delivery date for serial no: ") + serial_no)
 
 	def validate_schedule(self):
 		item_lst1 =[]
@@ -278,12 +239,12 @@ class DocType(TransactionBase):
 					msgprint("Please click on 'Generate Schedule' to fetch serial no added for item "+m.item_code)
 					raise Exception
 	
-	
-	
 	def on_cancel(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
-				self.update_amc_date(d.serial_no, '')
+				serial_nos = get_valid_serial_nos(d.serial_no)
+				self.update_amc_date(serial_nos)
+				
 		webnotes.conn.set(self.doc, 'status', 'Cancelled')
 		delete_events(self.doc.doctype, self.doc.name)
 		
