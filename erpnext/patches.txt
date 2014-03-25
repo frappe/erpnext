@@ -1,3 +1,5 @@
+execute:import unidecode # new requirement
+
 erpnext.patches.4_0.validate_v3_patch
 erpnext.patches.4_0.update_user_properties
 erpnext.patches.4_0.move_warehouse_user_to_restrictions
@@ -29,6 +31,6 @@ erpnext.patches.4_0.remove_module_home_pages
 erpnext.patches.4_0.split_email_settings
 erpnext.patches.4_0.fix_employee_user_id
 erpnext.patches.4_0.import_country_codes
-execute:patches.4_0.countrywise_coa
+erpnext.patches.4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
 execute:frappe.delete_doc("Page", "Financial Statements")
