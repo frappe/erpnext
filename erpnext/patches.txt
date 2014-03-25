@@ -1,3 +1,5 @@
+execute:import unidecode # new requirement
+
 erpnext.patches.4_0.validate_v3_patch
 erpnext.patches.4_0.update_user_properties
 erpnext.patches.4_0.move_warehouse_user_to_restrictions

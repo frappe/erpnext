@@ -23,13 +23,14 @@ def import_country_and_currency():
 	
 	for name in data:
 		country = frappe._dict(data[name])
-		frappe.doc({
-			"doctype": "Country",
-			"country_name": name,
-			"code": country.code,
-			"date_format": country.date_format or "dd-mm-yyyy",
-			"time_zones": "\n".join(country.timezones or [])
-		}).insert()
+		if not frappe.db.exists("Country", name):
+			frappe.doc({
+				"doctype": "Country",
+				"country_name": name,
+				"code": country.code,
+				"date_format": country.date_format or "dd-mm-yyyy",
+				"time_zones": "\n".join(country.timezones or [])
+			}).insert()
 		
 		if country.currency and not frappe.db.exists("Currency", country.currency):
 			frappe.doc({
