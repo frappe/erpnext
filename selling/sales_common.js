@@ -119,6 +119,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 							(me.frm.doc.selling_price_list !== selling_price_list) ? 
 								me.selling_price_list() :
 								me.price_list_currency();
+							me.frm.script_manager.trigger("currency");
 						}
 					}
 				});
@@ -416,7 +417,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	calculate_outstanding_amount: function() {
 		// NOTE: 
 		// paid_amount and write_off_amount is only for POS Invoice
-		// total_advance is only for non POS Invoice
+		// total_advance is only for no\n POS Invoice
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0) {
 			wn.model.round_floats_in(this.frm.doc, 
 				["grand_total", "total_advance", "write_off_amount", "paid_amount"]);
