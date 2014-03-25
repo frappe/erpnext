@@ -801,6 +801,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertFalse(webnotes.conn.get_value("Serial No", serial_no, "warehouse"))
 
 	def test_freeze_stocks (self):
+		from webnotes.utils import getdate
 		self._clear_stock_account_balance()
 		stock_auth_role = webnotes.conn.set_value('Stock Settings', None,'stock_auth_role', '')
 
