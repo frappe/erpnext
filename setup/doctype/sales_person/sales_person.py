@@ -26,10 +26,10 @@ class DocType(DocTypeNestedSet):
 		self.validate_one_root()
 	
 	def get_email_id(self):
-		profile = webnotes.conn.get_value("Employee", self.doc.employee, "user_id")
-		if not profile:
-			webnotes.msgprint("User ID (Profile) no set for Employee %s" % self.doc.employee, 
-				raise_exception=True)
-		else:
-			return webnotes.conn.get_value("Profile", profile, "email") or profile
-		
+		if self.doc.employee:
+			profile = webnotes.conn.get_value("Employee", self.doc.employee, "user_id")
+			if not profile:
+				webnotes.msgprint("User ID (Profile) no set for Employee %s" % self.doc.employee, 
+					raise_exception=True)
+			else:
+				return webnotes.conn.get_value("Profile", profile, "email") or profile
