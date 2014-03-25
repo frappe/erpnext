@@ -14,7 +14,6 @@ install:
   - sudo apt-get update
   - sudo apt-get purge -y mysql-common
   - sudo apt-get install mariadb-server mariadb-common libmariadbclient-dev
-	
   - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop &&
   - pip install --editable .
 
