@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cint, getdate, cstr, flt, add_days
-import datetime
+from frappe.utils import cint, cstr, flt, add_days, nowdate
 from frappe import _, ValidationError
 
 from erpnext.controllers.stock_controller import StockController
@@ -32,22 +31,26 @@ class DocType(StockController):
 			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be \
 				set by Stock Entry or Purchase Receipt"), SerialNoCannotCreateDirectError)
 			
-		self.validate_warranty_status()
-		self.validate_amc_status()
+		self.set_maintenance_status()
 		self.validate_warehouse()
 		self.validate_item()
 		self.on_stock_ledger_entry()
 
-	def validate_amc_status(self):
-		if (self.doc.maintenance_status == 'Out of AMC' and self.doc.amc_expiry_date and getdate(self.doc.amc_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under AMC' and (not self.doc.amc_expiry_date or getdate(self.doc.amc_expiry_date) < datetime.date.today())):
-			frappe.throw(self.doc.name + ": " + 
-				_("AMC expiry date and maintenance status mismatched"))
-
-	def validate_warranty_status(self):
-		if (self.doc.maintenance_status == 'Out of Warranty' and self.doc.warranty_expiry_date and getdate(self.doc.warranty_expiry_date) >= datetime.date.today()) or (self.doc.maintenance_status == 'Under Warranty' and (not self.doc.warranty_expiry_date or getdate(self.doc.warranty_expiry_date) < datetime.date.today())):
-			frappe.throw(self.doc.name + ": " + 
-				_("Warranty expiry date and maintenance status mismatched"))
-
+	def set_maintenance_status(self):
+		if not self.doc.warranty_expiry_date and not self.doc.amc_expiry_date:
+			self.doc.maintenance_status = None
+			
+		if self.doc.warranty_expiry_date and self.doc.warranty_expiry_date < nowdate():
+			self.doc.maintenance_status = "Out of Warranty"
+		
+		if self.doc.amc_expiry_date and self.doc.amc_expiry_date < nowdate():
+			self.doc.maintenance_status = "Out of AMC"
+		
+		if self.doc.amc_expiry_date and self.doc.amc_expiry_date >= nowdate():
+			self.doc.maintenance_status = "Under AMC"
+			
+		if self.doc.warranty_expiry_date and self.doc.warranty_expiry_date >= nowdate():
+			self.doc.maintenance_status = "Under Warranty"
 
 	def validate_warehouse(self):
 		if not self.doc.fields.get("__islocal"):
@@ -190,6 +193,7 @@ class DocType(StockController):
 			self.set_status(last_sle.get("last_sle"))
 			self.set_purchase_details(last_sle.get("purchase_sle"))
 			self.set_sales_details(last_sle.get("delivery_sle"))
+			self.set_maintenance_status()
 			
 	def on_communication(self):
 		return
