@@ -66,7 +66,7 @@ class DocType(DocListController):
 			self.add_restriction_if_required("Leave Application", user)
 				
 	def add_restriction_if_required(self, doctype, user):
-		if frappe.permissions.has_only_non_restrict_role(frappe.get_doctype(doctype), user) \
+		if frappe.permissions.has_only_non_restrict_role(doctype, user) \
 			and self.doc.name not in get_restrictions(user).get("Employee", []):
 			
 			frappe.defaults.add_default("Employee", self.doc.name, user, "Restriction")
