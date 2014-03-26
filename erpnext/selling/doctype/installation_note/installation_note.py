@@ -89,7 +89,6 @@ class DocType(TransactionBase):
 					self.is_serial_no_match(sr_list, prevdoc_s_no, d.prevdoc_docname)
 				
 				self.is_serial_no_installed(sr_list, d.item_code)
-		return sr_list
 
 	def validate_installation_date(self):
 		for d in getlist(self.doclist, 'installed_item_details'):
@@ -107,14 +106,7 @@ class DocType(TransactionBase):
 		frappe.db.set(self.doc, 'status', 'Draft')
 	
 	def on_submit(self):
-		valid_lst = []
-		valid_lst = self.validate_serial_no()
-		
-		for x in valid_lst:
-			if frappe.db.get_value("Serial No", x, "warranty_period"):
-				frappe.db.set_value("Serial No", x, "maintenance_status", "Under Warranty")
-			frappe.db.set_value("Serial No", x, "status", "Installed")
-
+		self.validate_serial_no()
 		self.update_prevdoc_status()
 		frappe.db.set(self.doc, 'status', 'Submitted')
 	

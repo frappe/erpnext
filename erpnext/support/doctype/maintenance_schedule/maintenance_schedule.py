@@ -7,8 +7,9 @@ import frappe
 from frappe.utils import add_days, cstr, getdate, cint
 from frappe.model.doc import addchild
 from frappe.model.bean import getlist
-from frappe import msgprint, throw, _
+from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
+from stock.utils import get_valid_serial_nos
 
 class DocType(TransactionBase):
 	def __init__(self, doc, doclist=[]):
@@ -52,13 +53,14 @@ class DocType(TransactionBase):
 		if not getlist(self.doclist, 'maintenance_schedule_detail'):
 			throw("Please click on 'Generate Schedule' to get schedule")
 		self.check_serial_no_added()
-		self.validate_serial_no_warranty()
 		self.validate_schedule()
 
 		email_map = {}
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
-				self.update_amc_date(d.serial_no, d.end_date)
+				serial_nos = get_valid_serial_nos(d.serial_no)
+				self.validate_serial_no(serial_nos, d.start_date)
+				self.update_amc_date(serial_nos, d.end_date)
 
 			if d.sales_person not in email_map:
 				sp = frappe.bean("Sales Person", d.sales_person).make_controller()
@@ -84,9 +86,7 @@ class DocType(TransactionBase):
 					}).insert(ignore_permissions=1)
 
 		frappe.db.set(self.doc, 'status', 'Submitted')		
-		
-	#get schedule dates
-	#----------------------
+
 	def create_schedule_list(self, start_date, end_date, no_of_visit, sales_person):
 		schedule_list = []		
 		start_date_copy = start_date
@@ -138,8 +138,6 @@ class DocType(TransactionBase):
 
 		return schedule_date
 
-	#validate date range and periodicity selected
-	#-------------------------------------------------
 	def validate_period(self, arg):
 		args = eval(arg)
 		if getdate(args['start_date']) >= getdate(args['end_date']):
@@ -192,8 +190,6 @@ class DocType(TransactionBase):
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for item") + " " + d.item_code)
 	
-	#check if maintenance schedule already created against same sales order
-	#-----------------------------------------------------------------------------------
 	def validate_sales_order(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.prevdoc_docname:
@@ -203,74 +199,36 @@ class DocType(TransactionBase):
 				if chk:
 					throw("Maintenance Schedule against " + d.prevdoc_docname + " already exist")
 	
-
-	def validate_serial_no(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			cur_s_no=[]			
-			if d.serial_no:
-				cur_serial_no = d.serial_no.replace(' ', '')
-				cur_s_no = cur_serial_no.split(',')
-				
-				for x in cur_s_no:
-					chk = frappe.db.sql("""select name, status from `tabSerial No` 
-						where docstatus!=2 and name=%s""", (x))
-					chk1 = chk and chk[0][0] or ''
-					status = chk and chk[0][1] or ''
-					
-					if not chk1:
-						throw("Serial no " + x + " does not exist in system.")
-	
 	def validate(self):
 		self.validate_maintenance_detail()
 		self.validate_sales_order()
-		self.validate_serial_no()
-		self.validate_start_date()
-	
-	# validate that maintenance start date can not be before serial no delivery date
-	#-------------------------------------------------------------------------------------------
-	def validate_start_date(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			if d.serial_no:
-				cur_serial_no = d.serial_no.replace(' ', '')
-				cur_s_no = cur_serial_no.split(',')
-				
-				for x in cur_s_no:
-					dt = frappe.db.sql("""select delivery_date from `tabSerial No` 
-						where name=%s""", x)
-					dt = dt and dt[0][0] or ''
-					
-					if dt:
-						if dt > getdate(d.start_date):
-							throw("Maintenance start date can not be before delivery date " + dt.strftime('%Y-%m-%d') + " for serial no " + x)
-	
-	#update amc expiry date in serial no
-	#------------------------------------------
-	def update_amc_date(self,serial_no,amc_end_date):
-		#get current list of serial no
-		cur_serial_no = serial_no.replace(' ', '')
-		cur_s_no = cur_serial_no.split(',')
-		
-		for x in cur_s_no:
-			frappe.db.sql("""update `tabSerial No` set amc_expiry_date=%s, 
-				maintenance_status='Under AMC' where name=%s""", (amc_end_date, x))
 	
 	def on_update(self):
 		frappe.db.set(self.doc, 'status', 'Draft')
-	
-	def validate_serial_no_warranty(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
-			if cstr(d.serial_no).strip():
-				dt = frappe.db.sql("""select warranty_expiry_date, amc_expiry_date 
-					from `tabSerial No` where name=%s""", d.serial_no, as_dict=1)
-				if dt[0]['warranty_expiry_date'] and dt[0]['warranty_expiry_date'] >= d.start_date:
-					throw("""Serial No: %s is already under warranty upto %s. 
-						Please check AMC Start Date.""" % 
-						(d.serial_no, dt[0]["warranty_expiry_date"]))
-						
-				if dt[0]['amc_expiry_date'] and dt[0]['amc_expiry_date'] >= d.start_date:
-					throw("""Serial No: %s is already under AMC upto %s.
-						Please check AMC Start Date.""" % 
-						(d.serial_no, dt[0]["amc_expiry_date"]))
+
+	def update_amc_date(self, serial_nos, amc_expiry_date=None):
+		for serial_no in serial_nos:
+			serial_no_bean = frappe.bean("Serial No", serial_no)
+			serial_no_bean.doc.amc_expiry_date = amc_expiry_date
+			serial_no_bean.save()
+
+	def validate_serial_no(self, serial_nos, amc_start_date):
+		for serial_no in serial_nos:
+			sr_details = frappe.db.get_value("Serial No", serial_no, 
+				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
+			
+			if sr_details.warranty_expiry_date and sr_details.warranty_expiry_date>=amc_start_date:
+				throw("""Serial No: %s is already under warranty upto %s. 
+					Please check AMC Start Date.""" % (serial_no, sr_details.warranty_expiry_date))
+					
+			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
+				throw("""Serial No: %s is already under AMC upto %s.
+					Please check AMC Start Date.""" % (serial_no, sr_details.amc_expiry_date))
+					
+			if sr_details.status=="Delivered" and sr_details.delivery_date and \
+				sr_details.delivery_date >= amc_start_date:
+					throw(_("Maintenance start date can not be before \
+						delivery date for serial no: ") + serial_no)
 
 	def validate_schedule(self):
 		item_lst1 =[]
@@ -284,14 +242,14 @@ class DocType(TransactionBase):
 				item_lst2.append(m.item_code)
 		
 		if len(item_lst1) != len(item_lst2):
-			throw("Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule'")
+			throw(_("Maintenance Schedule is not generated for all the items. \
+				Please click on 'Generate Schedule'"))
 		else:
 			for x in item_lst1:
 				if x not in item_lst2:
-					throw("Maintenance Schedule is not generated for item "+x+". Please click on 'Generate Schedule'")
+					throw(_("Maintenance Schedule is not generated for item ") + x + 
+						_(". Please click on 'Generate Schedule'"))
 	
-	#check if serial no present in item maintenance table
-	#-----------------------------------------------------------
 	def check_serial_no_added(self):
 		serial_present =[]
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
@@ -306,7 +264,8 @@ class DocType(TransactionBase):
 	def on_cancel(self):
 		for d in getlist(self.doclist, 'item_maintenance_detail'):
 			if d.serial_no:
-				self.update_amc_date(d.serial_no, '')
+				serial_nos = get_valid_serial_nos(d.serial_no)
+				self.update_amc_date(serial_nos)
 		frappe.db.set(self.doc, 'status', 'Cancelled')
 		delete_events(self.doc.doctype, self.doc.name)
 
