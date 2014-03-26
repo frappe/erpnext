@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.get_states=function(doc, dt, dn) {
-	return $c('runserverobj', args={'method': 'check_state', 'docs':frappe.model.compress(make_doclist(doc.doctype, doc.name))},
+	return $c('runserverobj', args={'method': 'check_state', 'docs':doc},
 		function(r, rt) {
 			if(r.message)
 				set_field_options('state', r.message);

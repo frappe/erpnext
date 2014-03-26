@@ -29,7 +29,7 @@ cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
 	}
 
 	if(doc.select_doc_for_series)
-		return $c_obj(make_doclist(doc.doctype, doc.name),'get_options','',callback);
+		return $c_obj(doc,'get_options','',callback);
 }
 
 cur_frm.cscript.update = function() {

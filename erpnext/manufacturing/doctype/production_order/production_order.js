@@ -70,7 +70,7 @@ cur_frm.cscript['Stop Production Order'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm(frappe._("Do you really want to stop production order: " + doc.name));
 	if (check) {
-		return $c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
+		return $c_obj(doc, 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
 	}
 }
 
@@ -78,7 +78,7 @@ cur_frm.cscript['Unstop Production Order'] = function() {
 	var doc = cur_frm.doc;
 	var check = confirm(frappe._("Do really want to unstop production order: " + doc.name));
 	if (check)
-		return $c_obj(make_doclist(doc.doctype, doc.name), 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
+		return $c_obj(doc, 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
 }
 
 cur_frm.cscript['Transfer Raw Materials'] = function() {

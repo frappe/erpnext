@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-	return $c_obj(make_doclist(cdt,cdn),'get_series','',function(r,rt){
+	return $c_obj(cur_frm.doc, 'get_series','',function(r,rt){
 		if(r.message) set_field_options('naming_series', r.message);
 	});
 	

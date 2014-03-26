@@ -46,7 +46,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					freeze: true,
 					callback: function(r) {
 						// remove this call when using client side mapper
-						me.set_default_values();
 						me.set_dynamic_labels();
 						me.calculate_taxes_and_totals();
 					}
@@ -192,18 +191,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	validate: function() {
 		this.calculate_taxes_and_totals();
 	},
-	
-	set_default_values: function() {
-		$.each(frappe.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
-			var updated = frappe.model.set_default_values(doc);
-			if(doc.parentfield) {
-				refresh_field(doc.parentfield);
-			} else {
-				refresh_field(updated);
-			}
-		});
-	},
-	
+		
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
 			var company_currency = this.get_company_currency();
@@ -517,13 +505,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	get_item_doclist: function() {
-		return frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
-			{parentfield: this.fname});
+		return this.frm.doc[this.fname] || [];
 	},
 	
 	get_tax_doclist: function() {
-		return frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
-			{parentfield: this.other_fname});
+		return this.frm.doc[this.other_fname] || [];
 	},
 	
 	validate_conversion_rate: function() {
@@ -716,8 +702,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	calculate_total_advance: function(parenttype, advance_parentfield) {
 		if(this.frm.doc.doctype == parenttype && this.frm.doc.docstatus < 2) {
-			var advance_doclist = frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
-				{parentfield: advance_parentfield});
+			var advance_doclist = this.frm.doc[advance_parentfield] || [];
 			this.frm.doc.total_advance = flt(frappe.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));

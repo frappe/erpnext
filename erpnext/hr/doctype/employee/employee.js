@@ -68,7 +68,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 						Go to the active Salary Structure and set \"Is Active\" = \"No\""));
 			} else if(!r.exc) {
 				frappe.model.map({
-					source: frappe.model.get_doclist(me.frm.doc.doctype, me.frm.doc.name),
+					source: me.frm.doc,
 					target: "Salary Structure"
 				});
 			}

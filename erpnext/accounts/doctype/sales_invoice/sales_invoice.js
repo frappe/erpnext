@@ -68,7 +68,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
-				from_delivery_note = cur_frm.get_doclist({parentfield: "entries"})
+				from_delivery_note = cur_frm.doc.entries
 					.some(function(item) { 
 						return item.delivery_note ? true : false; 
 					});

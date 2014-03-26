@@ -7,7 +7,7 @@ cur_frm.cscript.onload = function(doc, dt, dn){
   e_tbl = getchildren('Salary Structure Earning', doc.name, 'earning_details', doc.doctype);
   d_tbl = getchildren('Salary Structure Deduction', doc.name, 'deduction_details', doc.doctype);
   if (e_tbl.length == 0 && d_tbl.length == 0)
-    return $c_obj(make_doclist(doc.doctype,doc.name),'make_earn_ded_table','', function(r, rt) { refresh_many(['earning_details', 'deduction_details']);});
+    return $c_obj(doc,'make_earn_ded_table','', function(r, rt) { refresh_many(['earning_details', 'deduction_details']);});
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn){

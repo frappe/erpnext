@@ -128,7 +128,7 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 }
 
 cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
-	return $c_obj(make_doclist(doc.doctype, doc.name), 'get_last_purchase_rate', '', function(r, rt) { 
+	return $c_obj(doc, 'get_last_purchase_rate', '', function(r, rt) { 
 		refresh_field(cur_frm.cscript.fname);
 		var doc = locals[cdt][cdn];
 		cur_frm.cscript.calc_amount( doc, 2);
@@ -140,7 +140,7 @@ cur_frm.cscript['Stop Purchase Order'] = function() {
 	var check = confirm(frappe._("Do you really want to STOP ") + doc.name);
 
 	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': frappe.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs':doc}, function(r,rt) {
 			cur_frm.refresh();
 		});	
 	}
@@ -151,7 +151,7 @@ cur_frm.cscript['Unstop Purchase Order'] = function() {
 	var check = confirm(frappe._("Do you really want to UNSTOP ") + doc.name);
 
 	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs': frappe.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs':doc}, function(r,rt) {
 			cur_frm.refresh();
 		});	
 	}

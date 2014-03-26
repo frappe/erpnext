@@ -156,7 +156,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	project_name: function(doc, cdt, cdn) {
 		var item = frappe.model.get_doc(cdt, cdn);
 		if(item.project_name) {
-			$.each(frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: this.fname}),
+			$.each(this.frm.doc[this.fname],
 				function(i, other_item) { 
 					if(!other_item.project_name) {
 						other_item.project_name = item.project_name;

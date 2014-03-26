@@ -98,7 +98,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.toggle_display("customer_name", 
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 		if(this.frm.fields_dict.packing_details) {
-			var packing_list_exists = this.frm.get_doclist({parentfield: "packing_details"}).length;
+			var packing_list_exists = (this.frm.doc.packing_details || []).length;
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
 		}
 	},
@@ -434,8 +434,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_contribution: function() {
 		var me = this;
-		$.each(frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
-			{parentfield: "sales_team"}), function(i, sales_person) {
+		$.each(this.frm.doc.doctype.sales_team || [], function(i, sales_person) {
 				frappe.model.round_floats_in(sales_person);
 				if(sales_person.allocated_percentage) {
 					sales_person.allocated_amount = flt(
@@ -545,8 +544,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
 		var show = (this.frm.doc.currency != company_currency) || 
-			(frappe.model.get_doclist(cur_frm.doctype, cur_frm.docname, 
-				{parentfield: "other_charges", included_in_print_rate: 1}).length);
+			(cur_frm.doc.other_charges.filter(
+					function(d) { return d.included_in_print_rate===1}).length);
 		
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))

@@ -12,8 +12,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			frappe.model.set_default_values(this.frm.doc);
-			$.each(frappe.model.get_doclist(this.frm.doc.doctype, 
-				this.frm.doc.name, {parentfield: "entries"}), function(i, jvd) {
+			$.each(this.frm.doc.entries, function(i, jvd) {
 					frappe.model.set_default_values(jvd);
 				}
 			);
@@ -156,7 +155,7 @@ cur_frm.cscript.credit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc
 
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc); 
-	return $c_obj(make_doclist(dt,dn), 'get_balance', '', function(r, rt){
+	return $c_obj(cur_frm.doc, 'get_balance', '', function(r, rt){
 	cur_frm.refresh();
 	});
 }
@@ -194,8 +193,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
 	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Voucher");
 
-	if(frappe.model.get("Journal Voucher Detail", {"parent":doc.name}).length!==0 // too late
-		|| !doc.company) // too early
+	if((doc.entries || []).length!==0 || !doc.company) // too early
 		return;
 	
 	var update_jv_details = function(doc, r) {

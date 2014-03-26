@@ -151,8 +151,7 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 
 cur_frm.cscript.copy_from_item_group = function(doc) {
 	frappe.model.with_doc("Item Group", doc.item_group, function() {
-		$.each(frappe.model.get("Item Website Specification", {parent:doc.item_group}), 
-			function(i, d) {
+		$.each((doc.item_website_specifications || []), function(i, d) {
 				var n = frappe.model.add_child(doc, "Item Website Specification", 
 					"item_website_specifications");
 				n.label = d.label;
