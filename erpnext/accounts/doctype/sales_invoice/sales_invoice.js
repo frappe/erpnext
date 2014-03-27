@@ -199,7 +199,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	entries_add: function(doc, cdt, cdn) {
-		var row = frappe.model.get_doc(cdt, cdn);
+		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
 	},
 	

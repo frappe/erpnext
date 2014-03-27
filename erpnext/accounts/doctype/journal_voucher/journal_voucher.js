@@ -39,7 +39,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 		$.each([["against_voucher", "Purchase Invoice", "credit_to"], 
 			["against_invoice", "Sales Invoice", "debit_to"]], function(i, opts) {
 				me.frm.set_query(opts[0], "entries", function(doc, cdt, cdn) {
-					var jvd = frappe.model.get_doc(cdt, cdn);
+					var jvd = frappe.get_doc(cdt, cdn);
 					frappe.model.validate_missing(jvd, "account");
 					return {
 						filters: [
@@ -52,7 +52,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 		});
 		
 		this.frm.set_query("against_jv", "entries", function(doc, cdt, cdn) {
-			var jvd = frappe.model.get_doc(cdt, cdn);
+			var jvd = frappe.get_doc(cdt, cdn);
 			frappe.model.validate_missing(jvd, "account");
 			
 			return {
@@ -63,7 +63,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	},
 	
 	against_voucher: function(doc, cdt, cdn) {
-		var d = frappe.model.get_doc(cdt, cdn);
+		var d = frappe.get_doc(cdt, cdn);
 		if (d.against_voucher && !flt(d.debit)) {
 			this.get_outstanding({
 				'doctype': 'Purchase Invoice', 
@@ -73,7 +73,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	},
 	
 	against_invoice: function(doc, cdt, cdn) {
-		var d = frappe.model.get_doc(cdt, cdn);
+		var d = frappe.get_doc(cdt, cdn);
 		if (d.against_invoice && !flt(d.credit)) {
 			this.get_outstanding({
 				'doctype': 'Sales Invoice', 
@@ -83,7 +83,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	},
 	
 	against_jv: function(doc, cdt, cdn) {
-		var d = frappe.model.get_doc(cdt, cdn);
+		var d = frappe.get_doc(cdt, cdn);
 		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
 			this.get_outstanding({
 				'doctype': 'Journal Voucher', 
@@ -138,7 +138,7 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
-	var el = getchildren('Journal Voucher Detail', doc.name, 'entries');
+	var el = doc.entries || [];
 	for(var i in el) {
 		td += flt(el[i].debit, 2);
 		tc += flt(el[i].credit, 2);

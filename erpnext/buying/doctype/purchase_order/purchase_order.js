@@ -170,7 +170,7 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 
 	out ='';
 	
-	var cl = getchildren('Purchase Order Item',doc.name,'po_details');
+	var cl = doc.po_details || [];
 
 	// outer table	
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';

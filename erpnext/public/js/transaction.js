@@ -113,7 +113,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
@@ -156,7 +156,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 
 		if (item.serial_no) {
 			if (!item.item_code) {
@@ -262,7 +262,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	get_exchange_rate: function(from_currency, to_currency, callback) {
 		var exchange_name = from_currency + "-" + to_currency;
 		frappe.model.with_doc("Currency Exchange", exchange_name, function(name) {
-			var exchange_doc = frappe.model.get_doc("Currency Exchange", exchange_name);
+			var exchange_doc = frappe.get_doc("Currency Exchange", exchange_name);
 			callback(exchange_doc ? flt(exchange_doc.exchange_rate) : 0);
 		});
 	},
@@ -304,7 +304,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	row_id: function(doc, cdt, cdn) {
-		var tax = frappe.model.get_doc(cdt, cdn);
+		var tax = frappe.get_doc(cdt, cdn);
 		try {
 			this.validate_on_previous_row(tax);
 			this.calculate_taxes_and_totals();
@@ -339,7 +339,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	included_in_print_rate: function(doc, cdt, cdn) {
-		var tax = frappe.model.get_doc(cdt, cdn);
+		var tax = frappe.get_doc(cdt, cdn);
 		try {
 			this.validate_on_previous_row(tax);
 			this.validate_inclusive_tax(tax);

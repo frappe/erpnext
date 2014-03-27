@@ -18,7 +18,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	
 	if(doc.group_or_ledger=='Ledger') {
 		frappe.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
-			var accounts_settings = frappe.model.get_doc("Accounts Settings", name);
+			var accounts_settings = frappe.get_doc("Accounts Settings", name);
 			var display = accounts_settings["frozen_accounts_modifier"] 
 				&& in_list(user_roles, accounts_settings["frozen_accounts_modifier"]);
 			

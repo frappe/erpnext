@@ -86,7 +86,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.selling.utils.get_available_qty",

@@ -47,7 +47,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 	
 	received_qty: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 
 		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
@@ -55,7 +55,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 	
 	qty: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 		
 		if(!(item.received_qty || item.rejected_qty) && item.qty) {
@@ -74,7 +74,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 	
 	rejected_qty: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 		
 		if(item.rejected_qty > item.received_qty) {

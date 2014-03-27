@@ -105,9 +105,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						for(d in getchildren('Stock Entry Detail', me.frm.doc.name, 'mtn_details')) {
+						$.each(doc.mtn_details || [], function(i, d) {
 							if(!d.expense_account) d.expense_account = r.message;
-						}
+						});
 					}
 				}
 			});
@@ -225,7 +225,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	mtn_details_add: function(doc, cdt, cdn) {
-		var row = frappe.model.get_doc(cdt, cdn);
+		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("mtn_details", row, 
 			["expense_account", "cost_center"]);
 		
@@ -388,7 +388,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.validate_items = function(doc) {
-	cl = getchildren('Stock Entry Detail', doc.name, 'mtn_details');
+	cl = doc.mtn_details || [];
 	if (!cl.length) {
 		msgprint(frappe._("Item table can not be blank"));
 		validated = false;

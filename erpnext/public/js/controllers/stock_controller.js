@@ -39,7 +39,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 	copy_account_in_all_row: function(doc, dt, dn, fieldname) {
 		var d = locals[dt][dn];
 		if(d[fieldname]){
-			var cl = getchildren(this.frm.cscript.tname, doc.name, this.frm.cscript.fname, doc.doctype);
+			var cl = doc[this.frm.cscript.fname] || [];
 			for(var i = 0; i < cl.length; i++) {
 				if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
 			}

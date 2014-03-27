@@ -65,7 +65,7 @@ cur_frm.cscript.d_depends_on_lwp = cur_frm.cscript.d_modified_amount;
 // Calculate earning total
 // ------------------------------------------------------------------------
 var calculate_earning_total = function(doc, dt, dn) {
-	var tbl = getchildren('Salary Slip Earning', doc.name, 'earning_details', doc.doctype);
+	var tbl = doc.earning_details || [];
 
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
@@ -82,7 +82,7 @@ var calculate_earning_total = function(doc, dt, dn) {
 // Calculate deduction total
 // ------------------------------------------------------------------------
 var calculate_ded_total = function(doc, dt, dn) {
-	var tbl = getchildren('Salary Slip Deduction', doc.name, 'deduction_details', doc.doctype);
+	var tbl = doc.deduction_details || [];
 
 	var total_ded = 0;
 	for(var i = 0; i < tbl.length; i++){

@@ -41,7 +41,7 @@ cur_frm.pformat.other_charges= function(doc) {
 		return doc_field.print_hide;
 	}
 
-	var cl = getchildren('Purchase Taxes and Charges', doc.name, 'other_charges');
+	var cl = doc.other_charges || [];
 
 	// outer table
 	var out='<div><table class="noborder" style="width:100%">\

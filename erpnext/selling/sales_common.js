@@ -70,7 +70,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 		if(this.frm.fields_dict[this.fname].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
-				var item = frappe.model.get_doc(cdt, cdn);
+				var item = frappe.get_doc(cdt, cdn);
 				if(!item.item_code) {
 					frappe.throw(frappe._("Please enter Item Code to get batch no"));
 				} else {
@@ -128,7 +128,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
 		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
@@ -138,7 +138,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	discount_percentage: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(!item.price_list_rate) {
 			item.discount_percentage = 0.0;
 		} else {
@@ -147,7 +147,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	rate: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 		
 		if(item.price_list_rate) {
@@ -188,7 +188,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	allocated_percentage: function(doc, cdt, cdn) {
-		var sales_person = frappe.model.get_doc(cdt, cdn);
+		var sales_person = frappe.get_doc(cdt, cdn);
 		
 		if(sales_person.allocated_percentage) {
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
@@ -203,7 +203,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.selling.utils.get_available_qty",
@@ -565,7 +565,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
 	if(!cur_frm.fields_dict.packing_list) return;
-	if (getchildren('Packed Item', doc.name, 'packing_details').length) {
+	if ((doc.packing_details || []).length) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {

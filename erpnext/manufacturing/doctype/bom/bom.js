@@ -34,7 +34,7 @@ cur_frm.cscript.operation_no = function(doc, cdt, cdn) {
 }
 
 var set_operation_no = function(doc) {
-	var op_table = getchildren('BOM Operation', doc.name, 'bom_operations');
+	var op_table = doc.bom_operations || [];
 	var operations = [];
 
 	for (var i=0, j=op_table.length; i<j; i++) {
@@ -45,7 +45,7 @@ var set_operation_no = function(doc) {
 	frappe.meta.get_docfield("BOM Item", "operation_no", 
 		cur_frm.docname).options = operations.join("\n");
 	
-	$.each(getchildren("BOM Item", doc.name, "bom_materials"), function(i, v) {
+	$.each(doc.bom_materials || [], function(i, v) {
 		if(!inList(operations, cstr(v.operation_no))) v.operation_no = null;
 	});
 	
@@ -132,7 +132,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 }
 
 var calculate_op_cost = function(doc) {	
-	var op = getchildren('BOM Operation', doc.name, 'bom_operations');
+	var op = doc.bom_operations || [];
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
 		op_cost =	flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
@@ -144,7 +144,7 @@ var calculate_op_cost = function(doc) {
 }
 
 var calculate_rm_cost = function(doc) {	
-	var rm = getchildren('BOM Item', doc.name, 'bom_materials');
+	var rm = doc.bom_materials || [];
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
 		amt =	flt(rm[i].rate) * flt(rm[i].qty);

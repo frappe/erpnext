@@ -54,7 +54,7 @@ cur_frm.pformat.other_charges= function(doc){
 	
 	out ='';
 	if (!doc.print_without_amount) {
-		var cl = getchildren('Sales Taxes and Charges', doc.name, 'other_charges');
+		var cl = doc.other_charges || [];
 
 		// outer table	
 		var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';

@@ -69,8 +69,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
-	var val = getchildren('Expense Claim Detail', doc.name, 
-		'expense_voucher_details', doc.doctype);
+	var val = doc.expense_voucher_details || [];
 	for(var i = 0; i<val.length; i++){
 		val[i].sanctioned_amount ='';
 	}
