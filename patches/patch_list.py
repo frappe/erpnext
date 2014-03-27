@@ -272,4 +272,5 @@ patch_list = [
 	"patches.1401.fix_invoice_outstanding",
 	"patches.1401.delete_duplicate_bins",
 	"patches.1401.repost_stock_for_serialized_item",
+	"patches.1401.repost_gl_entries_for_warehouse",
 ]

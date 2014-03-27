@@ -507,7 +507,7 @@ class DocType(SellingController):
 		
 		self.make_sl_entries(sl_entries)
 		
-	def make_gl_entries(self, update_gl_entries_after=True):
+	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
 		
 		if gl_entries:
@@ -518,9 +518,12 @@ class DocType(SellingController):
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
 				update_outstanding=update_outstanding, merge_entries=False)
 			
-			if update_gl_entries_after and cint(self.doc.update_stock) \
+			if repost_future_gle and cint(self.doc.update_stock) \
 				and cint(webnotes.defaults.get_global_default("auto_accounting_for_stock")):
-					self.update_gl_entries_after()
+					items, warehouse_account = self.get_items_and_warehouse_accounts()
+					from controllers.stock_controller import update_gl_entries_after
+					update_gl_entries_after(self.doc.posting_date, self.doc.posting_time, 
+						warehouse_account, items)
 				
 	def get_gl_entries(self, warehouse_account=None):
 		from accounts.general_ledger import merge_similar_entries
