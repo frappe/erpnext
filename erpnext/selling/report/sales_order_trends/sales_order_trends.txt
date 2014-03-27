@@ -1,22 +1,15 @@
-[
- {
-  "creation": "2013-06-13 18:43:30", 
-  "docstatus": 0, 
-  "modified": "2014-03-07 15:30:27", 
-  "modified_by": "Administrator", 
-  "owner": "Administrator"
- }, 
- {
-  "doctype": "Report", 
-  "is_standard": "Yes", 
-  "module": "Selling", 
-  "name": "__common__", 
-  "ref_doctype": "Sales Order", 
-  "report_name": "Sales Order Trends", 
-  "report_type": "Script Report"
- }, 
- {
-  "doctype": "Report", 
-  "name": "Sales Order Trends"
- }
-]
+{
+ "creation": "2013-06-13 18:43:30", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-03-07 15:30:27", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Sales Order Trends", 
+ "owner": "Administrator", 
+ "ref_doctype": "Sales Order", 
+ "report_name": "Sales Order Trends", 
+ "report_type": "Script Report"
+}

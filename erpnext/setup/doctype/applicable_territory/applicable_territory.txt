@@ -1,37 +1,24 @@
-[
- {
-  "creation": "2013-06-20 12:48:38", 
-  "docstatus": 0, 
-  "modified": "2013-12-20 19:22:53", 
-  "modified_by": "Administrator", 
-  "owner": "Administrator"
- }, 
- {
-  "doctype": "DocType", 
-  "istable": 1, 
-  "module": "Setup", 
-  "name": "__common__"
- }, 
- {
-  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
-  "doctype": "DocField", 
-  "fieldname": "territory", 
-  "fieldtype": "Link", 
-  "in_list_view": 1, 
-  "label": "Territory", 
-  "name": "__common__", 
-  "options": "Territory", 
-  "parent": "Applicable Territory", 
-  "parentfield": "fields", 
-  "parenttype": "DocType", 
-  "permlevel": 0, 
-  "reqd": 1
- }, 
- {
-  "doctype": "DocType", 
-  "name": "Applicable Territory"
- }, 
- {
-  "doctype": "DocField"
- }
-]
+{
+ "creation": "2013-06-20 12:48:38", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "fieldname": "territory", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Territory", 
+   "options": "Territory", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:22:53", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Applicable Territory", 
+ "owner": "Administrator"
+}

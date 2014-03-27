@@ -1,80 +1,72 @@
-[
- {
-  "creation": "2013-02-22 01:27:45", 
-  "docstatus": 0, 
-  "modified": "2013-12-20 19:23:12", 
-  "modified_by": "Administrator", 
-  "owner": "Administrator"
- }, 
- {
-  "doctype": "DocType", 
-  "istable": 1, 
-  "module": "HR", 
-  "name": "__common__"
- }, 
- {
-  "doctype": "DocField", 
-  "in_list_view": 1, 
-  "name": "__common__", 
-  "parent": "Employee Internal Work History", 
-  "parentfield": "fields", 
-  "parenttype": "DocType", 
-  "permlevel": 0
- }, 
- {
-  "doctype": "DocType", 
-  "name": "Employee Internal Work History"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "branch", 
-  "fieldtype": "Select", 
-  "label": "Branch", 
-  "oldfieldname": "branch", 
-  "oldfieldtype": "Select", 
-  "options": "link:Branch"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "department", 
-  "fieldtype": "Select", 
-  "label": "Department", 
-  "oldfieldname": "department", 
-  "oldfieldtype": "Select", 
-  "options": "link:Department"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "designation", 
-  "fieldtype": "Select", 
-  "label": "Designation", 
-  "oldfieldname": "designation", 
-  "oldfieldtype": "Select", 
-  "options": "link:Designation"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "grade", 
-  "fieldtype": "Select", 
-  "label": "Grade", 
-  "oldfieldname": "grade", 
-  "oldfieldtype": "Select", 
-  "options": "link:Grade"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "from_date", 
-  "fieldtype": "Date", 
-  "label": "From Date", 
-  "oldfieldname": "from_date", 
-  "oldfieldtype": "Date"
- }, 
- {
-  "doctype": "DocField", 
-  "fieldname": "to_date", 
-  "fieldtype": "Date", 
-  "label": "To Date", 
-  "oldfieldname": "to_date", 
-  "oldfieldtype": "Date"
- }
-]
+{
+ "creation": "2013-02-22 01:27:45", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "branch", 
+   "fieldtype": "Select", 
+   "in_list_view": 1, 
+   "label": "Branch", 
+   "oldfieldname": "branch", 
+   "oldfieldtype": "Select", 
+   "options": "link:Branch", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "department", 
+   "fieldtype": "Select", 
+   "in_list_view": 1, 
+   "label": "Department", 
+   "oldfieldname": "department", 
+   "oldfieldtype": "Select", 
+   "options": "link:Department", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "designation", 
+   "fieldtype": "Select", 
+   "in_list_view": 1, 
+   "label": "Designation", 
+   "oldfieldname": "designation", 
+   "oldfieldtype": "Select", 
+   "options": "link:Designation", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "grade", 
+   "fieldtype": "Select", 
+   "in_list_view": 1, 
+   "label": "Grade", 
+   "oldfieldname": "grade", 
+   "oldfieldtype": "Select", 
+   "options": "link:Grade", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "from_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "From Date", 
+   "oldfieldname": "from_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "to_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "To Date", 
+   "oldfieldname": "to_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:12", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Employee Internal Work History", 
+ "owner": "Administrator"
+}

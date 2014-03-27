@@ -1,23 +1,16 @@
-[
- {
-  "creation": "2013-04-22 16:16:03", 
-  "docstatus": 0, 
-  "modified": "2014-03-07 15:30:27", 
-  "modified_by": "Administrator", 
-  "owner": "Administrator"
- }, 
- {
-  "add_total_row": 1, 
-  "doctype": "Report", 
-  "is_standard": "Yes", 
-  "module": "Accounts", 
-  "name": "__common__", 
-  "ref_doctype": "Purchase Invoice", 
-  "report_name": "Accounts Payable", 
-  "report_type": "Report Builder"
- }, 
- {
-  "doctype": "Report", 
-  "name": "Accounts Payable"
- }
-]
+{
+ "add_total_row": 1, 
+ "creation": "2013-04-22 16:16:03", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-03-07 15:30:27", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Accounts Payable", 
+ "owner": "Administrator", 
+ "ref_doctype": "Purchase Invoice", 
+ "report_name": "Accounts Payable", 
+ "report_type": "Report Builder"
+}

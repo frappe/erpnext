@@ -1,37 +1,23 @@
-[
- {
-  "creation": "2013-01-27 16:30:52", 
-  "docstatus": 0, 
-  "modified": "2013-07-11 14:42:16", 
-  "modified_by": "Administrator", 
-  "owner": "Administrator"
- }, 
- {
-  "doctype": "Page", 
-  "icon": "icon-bar-chart", 
-  "module": "Accounts", 
-  "name": "__common__", 
-  "page_name": "financial-analytics", 
-  "standard": "Yes", 
-  "title": "Financial Analytics"
- }, 
- {
-  "doctype": "Page Role", 
-  "name": "__common__", 
-  "parent": "financial-analytics", 
-  "parentfield": "roles", 
-  "parenttype": "Page"
- }, 
- {
-  "doctype": "Page", 
-  "name": "financial-analytics"
- }, 
- {
-  "doctype": "Page Role", 
-  "role": "Analytics"
- }, 
- {
-  "doctype": "Page Role", 
-  "role": "Accounts Manager"
- }
-]
+{
+ "creation": "2013-01-27 16:30:52", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "icon-bar-chart", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:42:16", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "financial-analytics", 
+ "owner": "Administrator", 
+ "page_name": "financial-analytics", 
+ "roles": [
+  {
+   "role": "Analytics"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Financial Analytics"
+}
