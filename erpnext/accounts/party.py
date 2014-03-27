@@ -162,7 +162,9 @@ def create_party_account(party, party_type, company):
 	if not frappe.db.exists("Account", (party + " - " + company_details.abbr)):
 		parent_account = company_details.receivables_group \
 			if party_type=="Customer" else company_details.payables_group
-
+		if not parent_account:
+			frappe.throw(_("Please enter Account Receivable/Payable group in company master"))
+		
 		# create
 		account = frappe.bean({
 			"doctype": "Account",
@@ -172,7 +174,8 @@ def create_party_account(party, party_type, company):
 			'company': company, 
 			'master_type': party_type, 
 			'master_name': party,
-			"freeze_account": "No"
+			"freeze_account": "No",
+			"report_type": "Balance Sheet"
 		}).insert(ignore_permissions=True)
 		
 		frappe.msgprint(_("Account Created") + ": " + account.doc.name)
