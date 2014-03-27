@@ -8,9 +8,9 @@ import frappe
 
 from frappe.utils import cint
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class HrSettings(Document):
 		
 	def validate(self):
 		self.update_birthday_reminders()

@@ -10,10 +10,7 @@ from frappe import _, msgprint
 
 from erpnext.controllers.selling_controller import SellingController
 
-class DocType(SellingController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class Quotation(SellingController):
 		self.tname = 'Quotation Item'
 		self.fname = 'quotation_details'
 
@@ -22,7 +19,7 @@ class DocType(SellingController):
 
 	def validate_for_items(self):
 		chk_dupl_itm = []
-		for d in getlist(self.doclist,'quotation_details'):
+		for d in self.get('quotation_details'):
 			if [cstr(d.item_code),cstr(d.description)] in chk_dupl_itm:
 				msgprint("Item %s has been entered twice. Please change description atleast to continue" % d.item_code)
 				raise Exception
@@ -33,7 +30,7 @@ class DocType(SellingController):
 		super(DocType, self).validate_order_type()
 		
 		if self.doc.order_type in ['Maintenance', 'Service']:
-			for d in getlist(self.doclist, 'quotation_details'):
+			for d in self.get('quotation_details'):
 				is_service_item = frappe.db.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 				
@@ -41,7 +38,7 @@ class DocType(SellingController):
 					msgprint("You can not select non service item "+d.item_code+" in Maintenance Quotation")
 					raise Exception
 		else:
-			for d in getlist(self.doclist, 'quotation_details'):
+			for d in self.get('quotation_details'):
 				is_sales_item = frappe.db.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 				
@@ -69,7 +66,7 @@ class DocType(SellingController):
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 	
 	def check_item_table(self):
-		if not getlist(self.doclist, 'quotation_details'):
+		if not self.get('quotation_details'):
 			msgprint("Please enter item details")
 			raise Exception
 		
@@ -89,7 +86,7 @@ class DocType(SellingController):
 			
 	def print_other_charges(self,docname):
 		print_lst = []
-		for d in getlist(self.doclist,'other_charges'):
+		for d in self.get('other_charges'):
 			lst1 = []
 			lst1.append(d.description)
 			lst1.append(d.total)

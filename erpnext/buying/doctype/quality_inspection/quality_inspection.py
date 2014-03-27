@@ -4,19 +4,17 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.model.doc import addchild
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class QualityInspection(Document):
 
 	def get_item_specification_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'qa_specification_details')
+		self.set('qa_specification_details', [])
 		specification = frappe.db.sql("select specification, value from `tabItem Quality Inspection Parameter` \
 			where parent = '%s' order by idx" % (self.doc.item_code))
 		for d in specification:
-			child = addchild(self.doc, 'qa_specification_details', 'Quality Inspection Reading', self.doclist)
+			child = self.doc.append('qa_specification_details', {})
 			child.specification = d[0]
 			child.value = d[1]
 			child.status = 'Accepted'

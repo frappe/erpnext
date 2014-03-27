@@ -12,10 +12,9 @@ from frappe import session, msgprint
 from erpnext.stock.utils import get_valid_serial_nos
 
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class StockLedger(Document):
 		
 	def update_stock(self, values, is_amended = 'No'):
 		for v in values:

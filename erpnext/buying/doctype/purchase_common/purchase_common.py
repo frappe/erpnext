@@ -11,10 +11,7 @@ from frappe import msgprint, _
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.controllers.buying_controller import BuyingController
 
-class DocType(BuyingController):
-	def __init__(self, doc, doclist=None):
-		self.doc = doc
-		self.doclist = doclist
+class PurchaseCommon(BuyingController):
 	
 	def update_last_purchase_rate(self, obj, is_submit):
 		"""updates last_purchase_rate in item table for each item"""

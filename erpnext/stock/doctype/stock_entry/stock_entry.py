@@ -6,7 +6,6 @@ import frappe
 import frappe.defaults
 
 from frappe.utils import cstr, cint, flt, comma_or, nowdate
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint, _
@@ -24,10 +23,7 @@ class StockOverProductionError(frappe.ValidationError): pass
 	
 from erpnext.controllers.stock_controller import StockController
 
-class DocType(StockController):
-	def __init__(self, doc, doclist=None):
-		self.doc = doc
-		self.doclist = doclist
+class StockEntry(StockController):
 		self.fname = 'mtn_details' 
 		
 	def validate(self):
@@ -77,7 +73,7 @@ class DocType(StockController):
 		
 	def validate_item(self):
 		stock_items = self.get_stock_items()
-		for item in self.doclist.get({"parentfield": "mtn_details"}):
+		for item in self.get("mtn_details"):
 			if item.item_code not in stock_items:
 				msgprint(_("""Only Stock Items are allowed for Stock Entry"""),
 					raise_exception=True)
@@ -93,14 +89,14 @@ class DocType(StockController):
 
 		if self.doc.purpose in source_mandatory and self.doc.purpose not in target_mandatory:
 			self.doc.to_warehouse = None
-			for d in getlist(self.doclist, 'mtn_details'):
+			for d in self.get('mtn_details'):
 				d.t_warehouse = None
 		elif self.doc.purpose in target_mandatory and self.doc.purpose not in source_mandatory:
 			self.doc.from_warehouse = None
-			for d in getlist(self.doclist, 'mtn_details'):
+			for d in self.get('mtn_details'):
 				d.s_warehouse = None
 
-		for d in getlist(self.doclist, 'mtn_details'):
+		for d in self.get('mtn_details'):
 			if not d.s_warehouse and not d.t_warehouse:
 				d.s_warehouse = self.doc.from_warehouse
 				d.t_warehouse = self.doc.to_warehouse
@@ -176,11 +172,11 @@ class DocType(StockController):
 					+ self.doc.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
 
 	def set_total_amount(self):
-		self.doc.total_amount = sum([flt(item.amount) for item in self.doclist.get({"parentfield": "mtn_details"})])
+		self.doc.total_amount = sum([flt(item.amount) for item in self.get("mtn_details")])
 			
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
-		for d in getlist(self.doclist, 'mtn_details'):
+		for d in self.get('mtn_details'):
 			args = frappe._dict({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
@@ -225,12 +221,12 @@ class DocType(StockController):
 		return incoming_rate
 		
 	def validate_incoming_rate(self):
-		for d in getlist(self.doclist, 'mtn_details'):
+		for d in self.get('mtn_details'):
 			if d.t_warehouse:
 				self.validate_value("incoming_rate", ">", 0, d, raise_exception=IncorrectValuationRateError)
 					
 	def validate_bom(self):
-		for d in getlist(self.doclist, 'mtn_details'):
+		for d in self.get('mtn_details'):
 			if d.bom_no and not frappe.db.sql("""select name from `tabBOM`
 					where item = %s and name = %s and docstatus = 1 and is_active = 1""",
 					(d.item_code, d.bom_no)):
@@ -240,7 +236,7 @@ class DocType(StockController):
 					
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
-		for d in getlist(self.doclist, 'mtn_details'):
+		for d in self.get('mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.doc.fg_completed_qty):
 				msgprint(_("Row #") + " %s: " % d.idx 
 					+ _("Quantity should be equal to Manufacturing Quantity. To fetch items again, click on 'Get Items' button or update the Quantity manually."), raise_exception=1)
@@ -275,7 +271,7 @@ class DocType(StockController):
 			stock_items = get_stock_items_for_return(ref.doclist, ref.parentfields)
 			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)
 			
-			for item in self.doclist.get({"parentfield": "mtn_details"}):
+			for item in self.get("mtn_details"):
 				# validate if item exists in the ref doclist and that it is a stock item
 				if item.item_code not in stock_items:
 					msgprint(_("Item") + ': "' + item.item_code + _("\" does not exist in ") +
@@ -303,7 +299,7 @@ class DocType(StockController):
 						
 	def update_stock_ledger(self):
 		sl_entries = []			
-		for d in getlist(self.doclist, 'mtn_details'):
+		for d in self.get('mtn_details'):
 			if cstr(d.s_warehouse) and self.doc.docstatus == 1:
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
@@ -431,7 +427,7 @@ class DocType(StockController):
 		
 	def get_items(self):
 		self.doclist = filter(lambda d: d.parentfield!="mtn_details", self.doclist)
-		# self.doclist = self.doc.clear_table(self.doclist, 'mtn_details')
+		# self.set('mtn_details', [])
 		
 		pro_obj = None
 		if self.doc.production_order:
@@ -566,8 +562,7 @@ class DocType(StockController):
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:
-			se_child = addchild(self.doc, 'mtn_details', 'Stock Entry Detail', 
-				self.doclist)
+			se_child = self.doc.append('mtn_details', {})
 			se_child.idx = idx
 			se_child.s_warehouse = item_dict[d].get("from_warehouse", self.doc.from_warehouse)
 			se_child.t_warehouse = item_dict[d].get("to_warehouse", self.doc.to_warehouse)
@@ -592,7 +587,7 @@ class DocType(StockController):
 		return idx
 		
 	def validate_with_material_request(self):
-		for item in self.doclist.get({"parentfield": "mtn_details"}):
+		for item in self.get("mtn_details"):
 			if item.material_request:
 				mreq_item = frappe.db.get_value("Material Request Item", 
 					{"name": item.material_request_item, "parent": item.material_request},
@@ -801,7 +796,7 @@ def make_return_jv_from_sales_invoice(se, ref):
 	
 	# income account entries
 	children = []
-	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
+	for se_item in se.get("mtn_details"):
 		# find item in ref.doclist
 		ref_item = ref.doclist.getone({"item_code": se_item.item_code})
 		
@@ -843,7 +838,7 @@ def make_return_jv_from_delivery_note(se, ref):
 	parent = {}
 	children = []
 	
-	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
+	for se_item in se.get("mtn_details"):
 		for sales_invoice in invoices_against_delivery:
 			si = frappe.bean("Sales Invoice", sales_invoice)
 			
@@ -900,7 +895,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 	parent = {}
 	children = []
 	
-	for se_item in se.doclist.get({"parentfield": "mtn_details"}):
+	for se_item in se.get("mtn_details"):
 		for purchase_invoice in invoice_against_receipt:
 			pi = frappe.bean("Purchase Invoice", purchase_invoice)
 			ref_item = pi.doclist.get({"item_code": se_item.item_code})

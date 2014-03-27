@@ -20,7 +20,7 @@ class SerialNoStatusError(ValidationError): pass
 class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
-class DocType(StockController):
+class SerialNo(StockController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		self.doclist = doclist or []

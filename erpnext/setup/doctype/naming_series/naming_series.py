@@ -8,9 +8,9 @@ from frappe.utils import cstr
 from frappe import msgprint, throw, _
 import frappe.model.doctype
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class NamingSeries(Document):
 
 	def get_transactions(self, arg=None):
 		return {

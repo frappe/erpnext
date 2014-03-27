@@ -6,10 +6,9 @@ import frappe
 from frappe.utils import cint, validate_email_add
 from frappe import throw, msgprint, _
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Warehouse(Document):
 	
 	def autoname(self):
 		suffix = " - " + frappe.db.get_value("Company", self.doc.company, "abbr")

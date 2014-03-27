@@ -54,11 +54,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 		
 		# check if children are saved
-		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+		self.assertEquals(len(si.get("entries")),
 			len(expected_values)-1)
 		
 		# check if item values are calculated
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
 		
@@ -79,7 +79,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Discount - _TC": [-180.78, 1627.05]
 		}
 		
-		for d in si.doclist.get({"parentfield": "other_charges"}):
+		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 				
@@ -104,11 +104,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 		
 		# check if children are saved
-		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+		self.assertEquals(len(si.get("entries")),
 			len(expected_values)-1)
 		
 		# check if item values are calculated
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
 		
@@ -129,7 +129,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Discount - _TC": [-180.78, 1627.05]
 		}
 		
-		for d in si.doclist.get({"parentfield": "other_charges"}):
+		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 				
@@ -160,11 +160,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 		
 		# check if children are saved
-		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+		self.assertEquals(len(si.get("entries")),
 			len(expected_values)-1)
 		
 		# check if item values are calculated
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
 		
@@ -186,7 +186,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Service Tax - _TC": [-18.03, -16.88, 1500]
 		}
 		
-		for d in si.doclist.get({"parentfield": "other_charges"}):
+		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 				
@@ -245,7 +245,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_inclusive_rate_validations(self):
 		si = frappe.bean(copy=test_records[2])
-		for i, tax in enumerate(si.doclist.get({"parentfield": "other_charges"})):
+		for i, tax in enumerate(si.get("other_charges")):
 			tax.idx = i+1
 		
 		si.doclist[1].price_list_rate = 62.5
@@ -273,11 +273,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 		
 		# check if children are saved
-		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+		self.assertEquals(len(si.get("entries")),
 			len(expected_values)-1)
 		
 		# check if item values are calculated
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
 		
@@ -298,7 +298,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Discount - _TC": [-180.33, 1622.98]
 		}
 		
-		for d in si.doclist.get({"parentfield": "other_charges"}):
+		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 		
@@ -326,11 +326,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 		
 		# check if children are saved
-		self.assertEquals(len(si.doclist.get({"parentfield": "entries"})),
+		self.assertEquals(len(si.get("entries")),
 			len(expected_values)-1)
 		
 		# check if item values are calculated
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
 		
@@ -351,7 +351,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"_Test Account Discount - _TC": [-7245.01, 65205.16]
 		}
 		
-		for d in si.doclist.get({"parentfield": "other_charges"}):
+		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
 		

@@ -8,14 +8,13 @@ import frappe
 from frappe.utils import cstr, add_days, date_diff
 from frappe import msgprint, _
 from frappe.utils.datautils import UnicodeWriter
+from frappe.model.document import Document
 
 # doclist = None
 doclist = frappe.local('uploadattendance_doclist')
 
-class DocType():
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class UploadAttendance(Document):
+	pass
 
 @frappe.whitelist()
 def get_template():

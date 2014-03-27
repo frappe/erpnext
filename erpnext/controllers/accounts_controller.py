@@ -87,7 +87,7 @@ class AccountsController(TransactionBase):
 	def set_missing_item_details(self):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
-		for item in self.doclist.get({"parentfield": self.fname}):
+		for item in self.get(self.fname):
 			if item.fields.get("item_code"):
 				args = item.fields.copy()
 				args.update(self.doc.fields)
@@ -103,7 +103,7 @@ class AccountsController(TransactionBase):
 			
 		tax_master_doctype = self.meta.get_field(tax_master_field).options
 			
-		if not self.doclist.get({"parentfield": tax_parentfield}):
+		if not self.get(tax_parentfield):
 			if not self.doc.fields.get(tax_master_field):
 				# get the default tax master
 				self.doc.fields[tax_master_field] = \
@@ -134,7 +134,7 @@ class AccountsController(TransactionBase):
 				self.doclist.append(tax)
 
 	def get_other_charges(self):
-		self.doclist = self.doc.clear_table(self.doclist, "other_charges")
+		self.set("other_charges", [])
 		self.set_taxes("other_charges", "taxes_and_charges")
 					
 	def calculate_taxes_and_totals(self):
@@ -156,8 +156,8 @@ class AccountsController(TransactionBase):
 				self.meta.get_label("conversion_rate"), self.doc.company)
 
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
-		self.item_doclist = self.doclist.get({"parentfield": self.fname})
-		self.tax_doclist = self.doclist.get({"parentfield": self.other_fname})
+		self.item_doclist = self.get(self.fname)
+		self.tax_doclist = self.get(self.other_fname)
 		
 		self.calculate_item_values()
 		self.initialize_taxes()
@@ -368,7 +368,7 @@ class AccountsController(TransactionBase):
 	def calculate_total_advance(self, parenttype, advance_parentfield):
 		if self.doc.doctype == parenttype and self.doc.docstatus < 2:
 			sum_of_allocated_amount = sum([flt(adv.allocated_amount, self.precision("allocated_amount", adv)) 
-				for adv in self.doclist.get({"parentfield": advance_parentfield})])
+				for adv in self.get(advance_parentfield)])
 
 			self.doc.total_advance = flt(sum_of_allocated_amount, self.precision("total_advance"))
 			
@@ -408,7 +408,7 @@ class AccountsController(TransactionBase):
 			and t1.docstatus = 1 order by t1.posting_date""" % 
 			(dr_or_cr, '%s'), account_head, as_dict=1)
 			
-		self.doclist = self.doc.clear_table(self.doclist, parentfield)
+		self.set(parentfield, [])
 		for d in res:
 			self.doclist.append({
 				"doctype": child_doctype,
@@ -425,7 +425,7 @@ class AccountsController(TransactionBase):
 		item_tolerance = {}
 		global_tolerance = None
 		
-		for item in self.doclist.get({"parentfield": "entries"}):
+		for item in self.get("entries"):
 			if item.fields.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item", 
 					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
@@ -467,7 +467,7 @@ class AccountsController(TransactionBase):
 	def get_stock_items(self):
 		stock_items = []
 		item_codes = list(set(item.item_code for item in 
-			self.doclist.get({"parentfield": self.fname})))
+			self.get(self.fname)))
 		if item_codes:
 			stock_items = [r[0] for r in frappe.db.sql("""select name
 				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
-from frappe.model.doc import addchild
 from frappe import msgprint, throw, _
 from frappe.utils import formatdate
 from erpnext.utilities import build_filter_conditions
@@ -182,7 +181,7 @@ def update_against_doc(d, jv_obj):
 		jvd = frappe.db.sql("""select cost_center, balance, against_account, is_advance 
 			from `tabJournal Voucher Detail` where name = %s""", d['voucher_detail_no'])
 		# new entry with balance amount
-		ch = addchild(jv_obj.doc, 'entries', 'Journal Voucher Detail')
+		ch = jv_obj.append("entries")
 		ch.account = d['account']
 		ch.cost_center = cstr(jvd[0][0])
 		ch.balance = cstr(jvd[0][1])

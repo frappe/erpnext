@@ -299,7 +299,7 @@ def send_email_notification(mr_list):
 	for mr in mr_list:
 		msg += "<p><b><u>" + mr.doc.name + """</u></b></p><table class='table table-bordered'><tr>
 			<th>Item Code</th><th>Warehouse</th><th>Qty</th><th>UOM</th></tr>"""
-		for item in mr.doclist.get({"parentfield": "indent_details"}):
+		for item in mr.get("indent_details"):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"

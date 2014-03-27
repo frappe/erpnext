@@ -13,7 +13,7 @@ from frappe.model.mapper import get_mapped_doclist
 
 from erpnext.controllers.selling_controller import SellingController
 
-class DocType(SellingController):
+class SalesOrder(SellingController):
 	def __init__(self, doc, doclist=None):
 		self.doc = doc
 		if not doclist: doclist = []
@@ -48,7 +48,7 @@ class DocType(SellingController):
 	def validate_for_items(self):
 		check_list, flag = [], 0
 		chk_dupl_itm = []
-		for d in getlist(self.doclist, 'sales_order_details'):
+		for d in self.get('sales_order_details'):
 			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '']
 			f = [d.item_code, d.description]
 
@@ -75,7 +75,7 @@ class DocType(SellingController):
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
 	def validate_sales_mntc_quotation(self):
-		for d in getlist(self.doclist, 'sales_order_details'):
+		for d in self.get('sales_order_details'):
 			if d.prevdoc_docname:
 				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.doc.order_type))
 				if not res:

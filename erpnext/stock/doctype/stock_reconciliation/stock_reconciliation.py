@@ -10,7 +10,7 @@ from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 
-class DocType(StockController):
+class StockReconciliation(StockController):
 	def setup(self):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 		self.entries = []

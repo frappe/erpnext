@@ -7,9 +7,9 @@ import frappe
 from frappe.utils import flt, fmt_money, getdate
 from frappe import _
 	
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class GlEntry(Document):
 
 	def validate(self):
 		self.check_mandatory()

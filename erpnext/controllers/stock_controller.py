@@ -70,7 +70,7 @@ class StockController(AccountsController):
 			
 	def get_voucher_details(self, stock_ledger, default_expense_account, default_cost_center):
 		if not default_expense_account:
-			details = self.doclist.get({"parentfield": self.fname})
+			details = self.get(self.fname)
 			for d in details:
 				self.check_expense_account(d)
 		else:
@@ -129,7 +129,7 @@ class StockController(AccountsController):
 		future_stock_vouchers = []
 		
 		if hasattr(self, "fname"):
-			item_list = [d.item_code for d in self.doclist.get({"parentfield": self.fname})]
+			item_list = [d.item_code for d in self.get(self.fname)]
 			condition = ''.join(['and item_code in (\'', '\', \''.join(item_list) ,'\')'])
 		else:
 			condition = ""
@@ -256,8 +256,8 @@ class StockController(AccountsController):
 	def get_distinct_item_warehouse(self):
 		item_list = []
 		warehouse_list = []
-		for item in self.doclist.get({"parentfield": self.fname}) \
-				+ self.doclist.get({"parentfield": "packing_details"}):
+		for item in self.get(self.fname) \
+				+ self.get("packing_details"):
 			item_list.append(item.item_code)
 			warehouse_list.append(item.warehouse)
 			

@@ -11,10 +11,7 @@ from datetime import date
 
 class StockFreezeError(frappe.ValidationError): pass
 
-class DocType(DocListController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class StockLedgerEntry(DocListController):
 
 	def validate(self):
 		from erpnext.stock.utils import validate_warehouse_company

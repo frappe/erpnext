@@ -8,12 +8,12 @@ from frappe.utils import cint
 from frappe.model.controller import DocListController
 import frappe.defaults
 
-class DocType(DocListController):
+class PriceList(DocListController):
 	def validate(self):
 		if not cint(self.doc.buying) and not cint(self.doc.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
 				
-		if not self.doclist.get({"parentfield": "valid_for_territories"}):
+		if not self.get("valid_for_territories"):
 			# if no territory, set default territory
 			if frappe.defaults.get_user_default("territory"):
 				self.doclist.append({

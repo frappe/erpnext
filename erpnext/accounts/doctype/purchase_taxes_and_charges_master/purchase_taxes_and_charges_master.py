@@ -3,15 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.model.document import Document
 
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
-from frappe.model.code import get_obj
-
-	
-
-
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class PurchaseTaxesAndChargesMaster(Document):
+	pass

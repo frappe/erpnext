@@ -12,10 +12,7 @@ import frappe.defaults
 from erpnext.stock.utils import update_bin
 
 from erpnext.controllers.buying_controller import BuyingController
-class DocType(BuyingController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class PurchaseReceipt(BuyingController):
 		self.tname = 'Purchase Receipt Item'
 		self.fname = 'purchase_receipt_details'
 		self.count = 0
@@ -35,7 +32,7 @@ class DocType(BuyingController):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
 			where purchase_receipt=%s""", self.doc.name)
 		if billed_qty:
-			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "purchase_receipt_details"})))
+			total_qty = sum((item.qty for item in self.get("purchase_receipt_details")))
 			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
 
 	def validate(self):
@@ -68,7 +65,7 @@ class DocType(BuyingController):
 		self.update_valuation_rate("purchase_receipt_details")
 
 	def validate_rejected_warehouse(self):
-		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+		for d in self.get("purchase_receipt_details"):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
 				d.rejected_warehouse = self.doc.rejected_warehouse
 				if not d.rejected_warehouse:
@@ -76,7 +73,7 @@ class DocType(BuyingController):
 
 	# validate accepted and rejected qty
 	def validate_accepted_rejected_qty(self):
-		for d in getlist(self.doclist, "purchase_receipt_details"):
+		for d in self.get("purchase_receipt_details"):
 			if not flt(d.received_qty) and flt(d.qty):
 				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
 
@@ -129,7 +126,7 @@ class DocType(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
-			 for d in getlist(self.doclist,'purchase_receipt_details'):
+			 for d in self.get('purchase_receipt_details'):
 				 if not d.prevdoc_docname:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
@@ -138,7 +135,7 @@ class DocType(BuyingController):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 		
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
+		for d in self.get('purchase_receipt_details'):
 			if d.item_code in stock_items and d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 				
@@ -162,7 +159,7 @@ class DocType(BuyingController):
 				
 	def update_ordered_qty(self):
 		stock_items = self.get_stock_items()
-		for d in self.doclist.get({"parentfield": "purchase_receipt_details"}):
+		for d in self.get("purchase_receipt_details"):
 			if d.item_code in stock_items and d.warehouse \
 					and cstr(d.prevdoc_doctype) == 'Purchase Order':
 									
@@ -198,7 +195,7 @@ class DocType(BuyingController):
 		return po_qty, po_warehouse
 	
 	def bk_flush_supp_wh(self, sl_entries):
-		for d in getlist(self.doclist, 'pr_raw_material_details'):
+		for d in self.get('pr_raw_material_details'):
 			# negative quantity is passed as raw material qty has to be decreased 
 			# when PR is submitted and it has to be increased when PR is cancelled
 			sl_entries.append(self.get_sl_entries(d, {
@@ -209,7 +206,7 @@ class DocType(BuyingController):
 			}))
 
 	def validate_inspection(self):
-		for d in getlist(self.doclist, 'purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
+		for d in self.get('purchase_receipt_details'):		 #Enter inspection date for all items that require inspection
 			ins_reqd = frappe.db.sql("select inspection_required from `tabItem` where name = %s",
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
@@ -219,7 +216,7 @@ class DocType(BuyingController):
 	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
 		check_list =[]
-		for d in getlist(self.doclist, 'purchase_receipt_details'):
+		for d in self.get('purchase_receipt_details'):
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
@@ -282,7 +279,7 @@ class DocType(BuyingController):
 		self.make_cancel_gl_entries()
 			
 	def get_current_stock(self):
-		for d in getlist(self.doclist, 'pr_raw_material_details'):
+		for d in self.get('pr_raw_material_details'):
 			if self.doc.supplier_warehouse:
 				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0

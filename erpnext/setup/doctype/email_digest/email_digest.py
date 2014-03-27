@@ -45,9 +45,9 @@ row_template = """<p style="%(style)s">
 </span></p>"""
 
 from frappe.model.controller import DocListController
-class DocType(DocListController):
-	def __init__(self, doc, doclist=[]):
-		self.doc, self.doclist = doc, doclist
+class EmailDigest(DocListController):
+	def __init__(self, arg1, arg2=None):
+		super(EmailDigest, self).__init__(arg1, arg2)
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.future_from_date, self.future_to_date = self.get_future_from_to_date()
 		self.currency = frappe.db.get_value("Company", self.doc.company,

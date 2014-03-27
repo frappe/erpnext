@@ -6,9 +6,9 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import getdate
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class FiscalYear(Document):
 		
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.doc.name)

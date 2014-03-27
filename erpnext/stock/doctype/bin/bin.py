@@ -9,10 +9,9 @@ from frappe import msgprint, _
 import frappe.defaults
 
 
-class DocType:	
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Bin(Document):	
 		
 	def validate(self):
 		if self.doc.fields.get("__islocal") or not self.doc.stock_uom:

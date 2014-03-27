@@ -7,10 +7,7 @@ from frappe import msgprint
 
 	
 from frappe.utils.nestedset import DocTypeNestedSet
-class DocType(DocTypeNestedSet):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class CustomerGroup(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_customer_group';
 
 	def validate(self): 

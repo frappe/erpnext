@@ -5,14 +5,12 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import flt
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 from frappe import msgprint
 
-class DocType:
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class PaymentToInvoiceMatchingTool(Document):
 	
 	def set_account_type(self):
 		self.doc.account_type = ""
@@ -49,7 +47,7 @@ class DocType:
 			Payment entry will be decided based on account type (Dr/Cr)
 		"""
 
-		self.doclist = self.doc.clear_table(self.doclist, 'ir_payment_details')		
+		self.set('ir_payment_details', [])		
 		gle = self.get_gl_entries()
 		self.create_payment_table(gle)
 
@@ -79,8 +77,7 @@ class DocType:
 
 	def create_payment_table(self, gle):
 		for d in gle:
-			ch = addchild(self.doc, 'ir_payment_details', 
-				'Payment to Invoice Matching Tool Detail', self.doclist)
+			ch = self.doc.append('ir_payment_details', {})
 			ch.voucher_no = d.get('voucher_no')
 			ch.posting_date = d.get('posting_date')
 			ch.amt_due =  self.doc.account_type == 'debit' and flt(d.get('amt_due')) \
@@ -106,7 +103,7 @@ class DocType:
 			msgprint("Please select valid Voucher No to proceed", raise_exception=1)
 		
 		lst = []
-		for d in getlist(self.doclist, 'ir_payment_details'):
+		for d in self.get('ir_payment_details'):
 			if flt(d.amt_to_be_reconciled) > 0:
 				args = {
 					'voucher_no' : d.voucher_no,

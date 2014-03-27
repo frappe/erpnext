@@ -7,10 +7,7 @@ from frappe.utils import cstr, extract_email_id
 
 from erpnext.controllers.status_updater import StatusUpdater
 
-class DocType(StatusUpdater):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class Contact(StatusUpdater):
 
 	def autoname(self):
 		# concat first and last name

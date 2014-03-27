@@ -5,21 +5,18 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import flt
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 from frappe import msgprint, _
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc,self.doclist = doc,doclist
-		
+from frappe.model.document import Document
+
+class BudgetDistribution(Document):
 	def get_months(self):
 		month_list = ['January','February','March','April','May','June','July','August','September',
 		'October','November','December']
 		idx =1
 		for m in month_list:
-			mnth = addchild(self.doc, 'budget_distribution_details',
-				'Budget Distribution Detail', self.doclist)
+			mnth = self.append('budget_distribution_details')
 			mnth.month = m or ''
 			mnth.idx = idx
 			idx += 1

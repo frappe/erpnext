@@ -9,14 +9,11 @@ from frappe.utils import flt
 
 from frappe.utils.nestedset import DocTypeNestedSet
 	
-class DocType(DocTypeNestedSet):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		self.nsm_parent_field = 'parent_territory'
+class Territory(DocTypeNestedSet):
+	nsm_parent_field = 'parent_territory'
 
 	def validate(self): 
-		for d in getlist(self.doclist, 'target_details'):
+		for d in self.get('target_details'):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				msgprint("Either target qty or target amount is mandatory.")
 				raise Exception

@@ -6,12 +6,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class PackedItem(Document):
 		
 def get_sales_bom_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom 
@@ -39,7 +38,7 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 			break
 
 	if not exists:
-		pi = addchild(obj.doc, 'packing_details', 'Packed Item', obj.doclist)
+		pi = obj.doc.append('packing_details', {})
 
 	pi.parent_item = line.item_code
 	pi.item_code = packing_item_code
@@ -81,7 +80,7 @@ def make_packing_list(obj, item_table_fieldname):
 def cleanup_packing_list(obj, parent_items):
 	"""Remove all those child items which are no longer present in main item table"""
 	delete_list = []
-	for d in obj.doclist.get({"parentfield": "packing_details"}):
+	for d in obj.get("packing_details"):
 		if [d.parent_item, d.parent_detail_docname] not in parent_items:
 			# mark for deletion from doclist
 			delete_list.append([d.parent_item, d.parent_detail_docname])

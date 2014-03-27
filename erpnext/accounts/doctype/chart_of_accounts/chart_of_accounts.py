@@ -7,9 +7,9 @@ from frappe.utils import cstr
 from unidecode import unidecode
 
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class ChartOfAccounts(Document):
 		self.no_report_type = False
 		
 	def create_accounts(self, company):

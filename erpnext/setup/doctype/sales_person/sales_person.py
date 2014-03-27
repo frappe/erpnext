@@ -7,14 +7,11 @@ from frappe.model.bean import getlist
 from frappe.utils import flt
 from frappe.utils.nestedset import DocTypeNestedSet
 
-class DocType(DocTypeNestedSet):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class SalesPerson(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_sales_person';
 
 	def validate(self): 
-		for d in getlist(self.doclist, 'target_details'):
+		for d in self.get('target_details'):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory."))
 	

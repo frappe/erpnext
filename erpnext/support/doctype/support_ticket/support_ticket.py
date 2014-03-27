@@ -7,10 +7,7 @@ import frappe
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils import now, extract_email_id
 
-class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class SupportTicket(TransactionBase):
 	
 	def get_sender(self, comm):
 		return frappe.db.get_value('Support Email Settings',None,'support_email')

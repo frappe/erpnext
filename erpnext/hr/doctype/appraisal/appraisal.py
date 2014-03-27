@@ -8,10 +8,9 @@ from frappe.utils import cstr, flt, getdate
 from frappe.model.bean import getlist
 from frappe import msgprint
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Appraisal(Document):
 
 	def validate(self):
 		if not self.doc.status:
@@ -45,7 +44,7 @@ class DocType:
 	
 	def calculate_total(self):
 		total, total_w  = 0, 0
-		for d in getlist(self.doclist, 'appraisal_details'):
+		for d in self.get('appraisal_details'):
 			if d.score:
 				d.score_earned = flt(d.score) * flt(d.per_weightage) / 100
 				total = total + d.score_earned

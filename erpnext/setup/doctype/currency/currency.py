@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import throw, _
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class Currency(Document):
 		
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""

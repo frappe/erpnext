@@ -8,9 +8,7 @@ import frappe
 from frappe import throw, _
 from frappe.model.controller import DocListController
 
-class DocType(DocListController):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class PricingRule(DocListController):
 		
 	def validate(self):
 		self.validate_mandatory()

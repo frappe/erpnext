@@ -12,7 +12,9 @@ from frappe import msgprint, _
 	
 
 
-class DocType:
+from frappe.model.document import Document
+
+class LeaveControlPanel(Document):
 	def __init__(self, doc, doclist):
 		self.doc = doc
 		self.doclist = doclist	 

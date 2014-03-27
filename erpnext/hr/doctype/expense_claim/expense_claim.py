@@ -7,10 +7,9 @@ import frappe
 from frappe.model.bean import getlist
 from frappe import msgprint
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class ExpenseClaim(Document):
 
 	def validate(self):
 		self.validate_fiscal_year()
@@ -26,6 +25,6 @@ class DocType:
 		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
 			
 	def validate_exp_details(self):
-		if not getlist(self.doclist, 'expense_voucher_details'):
+		if not self.get('expense_voucher_details'):
 			msgprint("Please add expense voucher details")
 			raise Exception

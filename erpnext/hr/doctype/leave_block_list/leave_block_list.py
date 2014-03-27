@@ -8,9 +8,9 @@ import frappe
 from erpnext.accounts.utils import validate_fiscal_year
 from frappe import _
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class LeaveBlockList(Document):
 		
 	def validate(self):
 		dates = []

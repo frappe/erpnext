@@ -8,9 +8,9 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class JobsEmailSettings(Document):
 		
 	def validate(self):
 		if cint(self.doc.extract_emails) and not (self.doc.email_id and self.doc.host and \

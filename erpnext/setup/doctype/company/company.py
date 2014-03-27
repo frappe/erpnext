@@ -9,9 +9,10 @@ from frappe.utils import cstr, cint
 import frappe.defaults
 
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
+
+class Company(Document):
+
 		
 	def onload(self):
 		self.doc.fields["__transactions_exist"] = self.check_if_transactions_exist()

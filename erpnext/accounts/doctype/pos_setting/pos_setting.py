@@ -6,10 +6,9 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import cint
 
-class DocType:
-	def __init__(self,doc,doclist):
-		self.doc, self.doclist = doc,doclist
+from frappe.model.document import Document
 
+class PosSetting(Document):
 	def get_series(self):
 		import frappe.model.doctype
 		docfield = frappe.model.doctype.get('Sales Invoice')

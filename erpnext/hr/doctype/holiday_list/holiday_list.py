@@ -5,17 +5,13 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, add_years, cint, getdate
-from frappe.model import db_exists
-from frappe.model.doc import addchild, make_autoname
-from frappe.model.bean import copy_doclist
+from frappe.model.doc import make_autoname
 from frappe import msgprint, throw, _
 import datetime
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
 
+class HolidayList(Document):
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.fiscal_year + "/" + self.doc.holiday_list_name + "/.###")
 		
@@ -29,7 +25,7 @@ class DocType:
 		last_idx = max([cint(d.idx) for d in self.doclist.get(
 			{"parentfield": "holiday_list_details"})] or [0,])
 		for i, d in enumerate(date_list):
-			ch = addchild(self.doc, 'holiday_list_details', 'Holiday', self.doclist)
+			ch = self.doc.append('holiday_list_details', {})
 			ch.description = self.doc.weekly_off
 			ch.holiday_date = d
 			ch.idx = last_idx + i + 1
@@ -63,7 +59,7 @@ class DocType:
 		return date_list
 	
 	def clear_table(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'holiday_list_details')
+		self.set('holiday_list_details', [])
 
 	def update_default_holiday_list(self):
 		frappe.db.sql("""update `tabHoliday List` set is_default = 0 

@@ -7,9 +7,7 @@ from frappe.utils import cstr, flt
 from frappe import _
 from erpnext.controllers.accounts_controller import AccountsController
 
-class DocType(AccountsController):
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d, dl
+class PeriodClosingVoucher(AccountsController):
 		self.year_start_date = ''
 
 	def validate(self):

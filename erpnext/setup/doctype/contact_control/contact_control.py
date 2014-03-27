@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class ContactControl(Document):
+	pass

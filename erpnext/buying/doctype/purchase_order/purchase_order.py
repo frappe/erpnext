@@ -11,10 +11,7 @@ from frappe import msgprint
 
 	
 from erpnext.controllers.buying_controller import BuyingController
-class DocType(BuyingController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class PurchaseOrder(BuyingController):
 		self.tname = 'Purchase Order Item'
 		self.fname = 'po_details'
 		self.status_updater = [{
@@ -65,7 +62,7 @@ class DocType(BuyingController):
 		})
 
 	def get_schedule_dates(self):
-		for d in getlist(self.doclist, 'po_details'):
+		for d in self.get('po_details'):
 			if d.prevdoc_detail_docname and not d.schedule_date:
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
@@ -76,7 +73,7 @@ class DocType(BuyingController):
 	# Check for Stopped status 
 	def check_for_stopped_status(self, pc_obj):
 		check_list =[]
-		for d in getlist(self.doclist, 'po_details'):
+		for d in self.get('po_details'):
 			if d.fields.has_key('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
@@ -85,7 +82,7 @@ class DocType(BuyingController):
 	def update_bin(self, is_submit, is_stopped = 0):
 		from erpnext.stock.utils import update_bin
 		pc_obj = get_obj('Purchase Common')
-		for d in getlist(self.doclist, 'po_details'):
+		for d in self.get('po_details'):
 			#1. Check if is_stock_item == 'Yes'
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				# this happens when item is changed from non-stock to stock item

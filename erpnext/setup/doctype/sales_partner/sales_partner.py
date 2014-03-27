@@ -4,12 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, filter_strip_join
+from frappe.model.document import Document
 
-class DocType():
-	def __init__(self, doc, doclist=None):
-		self.doc = doc
-		self.doclist = doclist
-
+class SalesPartner(Document):
 	def validate(self):
 		if self.doc.partner_website and not self.doc.partner_website.startswith("http"):
 			self.doc.partner_website = "http://" + self.doc.partner_website

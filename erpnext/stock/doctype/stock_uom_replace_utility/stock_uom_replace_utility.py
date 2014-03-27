@@ -7,7 +7,9 @@ from frappe.utils import cstr, flt, cint
 from frappe import msgprint, _
 
 
-class DocType:
+from frappe.model.document import Document
+
+class StockUomReplaceUtility(Document):
 	def __init__(self, d, dl=[]):
 		self.doc, self.doclist = d,dl
 

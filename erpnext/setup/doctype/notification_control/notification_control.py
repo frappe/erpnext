@@ -7,9 +7,10 @@ import frappe
 from frappe import msgprint
 
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
+
+class NotificationControl(Document):
+
 
 	def get_message(self, arg):
 		fn = arg.lower().replace(' ', '_') + '_message'

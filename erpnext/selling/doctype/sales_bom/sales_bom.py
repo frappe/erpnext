@@ -4,9 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
+
+class SalesBom(Document):
+
 
 	def autoname(self):
 		self.doc.name = self.doc.new_item_code

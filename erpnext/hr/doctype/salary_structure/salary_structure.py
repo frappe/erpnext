@@ -5,15 +5,13 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt
-from frappe.model.doc import addchild, make_autoname
+from frappe.model.doc import make_autoname
 from frappe import msgprint, _
 
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
 
+class SalaryStructure(Document):
 	def autoname(self):
 		self.doc.name = make_autoname(self.doc.employee + '/.SST' + '/.#####')
 
@@ -44,7 +42,7 @@ class DocType:
 	def make_table(self, doct_name, tab_fname, tab_name):
 		list1 = frappe.db.sql("select name from `tab%s` where docstatus != 2" % doct_name)
 		for li in list1:
-			child = addchild(self.doc, tab_fname, tab_name, self.doclist)
+			child = self.doc.append(tab_fname, {})
 			if(tab_fname == 'earning_details'):
 				child.e_type = cstr(li[0])
 				child.modified_value = 0

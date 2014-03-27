@@ -8,9 +8,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.controller import DocListController
 
-class DocType(DocListController):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class CurrencyExchange(DocListController):
 		
 	def autoname(self):
 		self.doc.name = self.doc.from_currency + "-" + self.doc.to_currency

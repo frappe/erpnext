@@ -7,9 +7,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class StockSettings(Document):
 
 	def validate(self):
 		for key in ["item_naming_by", "item_group", "stock_uom",

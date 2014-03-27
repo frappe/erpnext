@@ -95,7 +95,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_subcontracting(self):
 		po = frappe.bean(copy=test_records[0])
 		po.insert()
-		self.assertEquals(len(po.doclist.get({"parentfield": "po_raw_material_details"})), 2)
+		self.assertEquals(len(po.get("po_raw_material_details")), 2)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany

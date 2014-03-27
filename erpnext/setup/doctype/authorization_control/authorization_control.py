@@ -12,9 +12,7 @@ from erpnext.setup.utils import get_company_currency
 	
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class AuthorizationControl(TransactionBase):
 
 
 	# Get Names of all Approving Users and Roles

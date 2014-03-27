@@ -13,19 +13,16 @@ from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 from erpnext.controllers.buying_controller import BuyingController
-class DocType(BuyingController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class MaterialRequest(BuyingController):
 		self.tname = 'Material Request Item'
 		self.fname = 'indent_details'
 
 	def check_if_already_pulled(self):
-		pass#if self.[d.sales_order_no for d in getlist(self.doclist, 'indent_details')]
+		pass#if self.[d.sales_order_no for d in self.get('indent_details')]
 
 	def validate_qty_against_so(self):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
-		for d in getlist(self.doclist, 'indent_details'):
+		for d in self.get('indent_details'):
 			if d.sales_order_no:
 				if not so_items.has_key(d.sales_order_no):
 					so_items[d.sales_order_no] = {d.item_code: flt(d.qty)}
@@ -53,7 +50,7 @@ class DocType(BuyingController):
 						% (actual_so_qty - already_indented, item, so_no))
 				
 	def validate_schedule_date(self):
-		for d in getlist(self.doclist, 'indent_details'):
+		for d in self.get('indent_details'):
 			if d.schedule_date < self.doc.transaction_date:
 				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 				
@@ -84,7 +81,7 @@ class DocType(BuyingController):
 		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
 		
 		from erpnext.stock.utils import update_bin
-		for d in getlist(self.doclist, 'indent_details'):
+		for d in self.get('indent_details'):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
 					frappe.throw("Please Enter Warehouse for Item %s as it is stock item" 
@@ -146,7 +143,7 @@ class DocType(BuyingController):
 		if self.doc.material_request_type != "Transfer":
 			return
 			
-		item_doclist = self.doclist.get({"parentfield": "indent_details"})
+		item_doclist = self.get("indent_details")
 		
 		if not mr_items:
 			mr_items = [d.name for d in item_doclist]
@@ -174,7 +171,7 @@ def update_completed_qty(bean, method):
 	if bean.doc.doctype == "Stock Entry":
 		material_request_map = {}
 		
-		for d in bean.doclist.get({"parentfield": "mtn_details"}):
+		for d in bean.get("mtn_details"):
 			if d.material_request:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 			

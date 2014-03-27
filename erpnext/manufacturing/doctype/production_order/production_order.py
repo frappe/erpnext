@@ -10,10 +10,9 @@ from frappe import msgprint, _
 
 class OverProductionError(frappe.ValidationError): pass
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class ProductionOrder(Document):
 
 	def validate(self):
 		if self.doc.docstatus == 0:

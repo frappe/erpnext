@@ -138,7 +138,7 @@ def get_basic_details(args, item_bean):
 			if args.transaction_type == "selling" else item.buying_cost_center,
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
-			item_bean.doclist.get({"parentfield": "item_tax"})))),
+			item_bean.get("item_tax")))),
 		"uom": item.stock_uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"conversion_factor": 1.0,

@@ -13,10 +13,7 @@ from frappe.model.mapper import get_mapped_doclist
 from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
-class DocType(SellingController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class DeliveryNote(SellingController):
 		self.tname = 'Delivery Note Item'
 		self.fname = 'delivery_note_details'
 		self.status_updater = [{
@@ -37,14 +34,14 @@ class DocType(SellingController):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.doc.name)
 		if billed_qty:
-			total_qty = sum((item.qty for item in self.doclist.get({"parentfield": "delivery_note_details"})))
+			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
 			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
 			
 	def get_portal_page(self):
 		return "shipment" if self.doc.docstatus==1 else None
 
 	def set_actual_qty(self):
-		for d in getlist(self.doclist, 'delivery_note_details'):
+		for d in self.get('delivery_note_details'):
 			if d.item_code and d.warehouse:
 				actual_qty = frappe.db.sql("""select actual_qty from `tabBin` 
 					where item_code = %s and warehouse = %s""", (d.item_code, d.warehouse))
@@ -53,7 +50,7 @@ class DocType(SellingController):
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
-			 for d in getlist(self.doclist,'delivery_note_details'):
+			 for d in self.get('delivery_note_details'):
 				 if not d.against_sales_order:
 					 msgprint("Sales Order No. required against item %s"%d.item_code)
 					 raise Exception
@@ -81,7 +78,7 @@ class DocType(SellingController):
 		if not self.doc.installation_status: self.doc.installation_status = 'Not Installed'	
 		
 	def validate_with_previous_doc(self):
-		items = self.doclist.get({"parentfield": "delivery_note_details"})
+		items = self.get("delivery_note_details")
 		
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
 			if items.get_distinct_values(fn[1]):
@@ -114,7 +111,7 @@ class DocType(SellingController):
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
-		for d in getlist(self.doclist,'delivery_note_details'):
+		for d in self.get('delivery_note_details'):
 			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
@@ -140,11 +137,11 @@ class DocType(SellingController):
 				
 
 	def update_current_stock(self):
-		for d in getlist(self.doclist, 'delivery_note_details'):
+		for d in self.get('delivery_note_details'):
 			bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
-		for d in getlist(self.doclist, 'packing_details'):
+		for d in self.get('packing_details'):
 			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
@@ -268,7 +265,7 @@ class DocType(SellingController):
 	def credit_limit(self):
 		"""check credit limit of items in DN Detail which are not fetched from sales order"""
 		amount, total = 0, 0
-		for d in getlist(self.doclist, 'delivery_note_details'):
+		for d in self.get('delivery_note_details'):
 			if not (d.against_sales_order or d.against_sales_invoice):
 				amount += d.base_amount
 		if amount != 0:
@@ -299,7 +296,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 		si.set_doclist(si.doclist.get({"parentfield": ["!=", "entries"]}) +
 			si.doclist.get({"parentfield": "entries", "qty": [">", 0]}))
 		
-		if len(si.doclist.get({"parentfield": "entries"})) == 0:
+		if len(si.get("entries")) == 0:
 			frappe.msgprint(_("Hey! All these items have already been invoiced."),
 				raise_exception=True)
 				

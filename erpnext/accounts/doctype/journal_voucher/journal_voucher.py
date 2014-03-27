@@ -5,16 +5,13 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cint, cstr, flt, fmt_money, formatdate, getdate
-from frappe.model.doc import addchild
-from frappe.model.bean import getlist
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 
 from erpnext.controllers.accounts_controller import AccountsController
 
-class DocType(AccountsController):
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+class JournalVoucher(AccountsController):
+
 		self.master_type = {}
 		self.credit_days_for = {}
 		self.credit_days_global = -1
@@ -57,7 +54,7 @@ class DocType(AccountsController):
 		#	frappe.delete_doc("Journal Voucher", self.doc.amended_from)
 
 	def validate_debit_credit(self):
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if d.debit and d.credit:
 				msgprint("You cannot credit and debit same account at the same time.", 
 				 	raise_exception=1)
@@ -72,7 +69,7 @@ class DocType(AccountsController):
 			msgprint("Reference No is mandatory if you entered Reference Date", raise_exception=1)
 
 	def validate_entries_for_advance(self):
-		for d in getlist(self.doclist,'entries'):
+		for d in self.get('entries'):
 			if not d.is_advance and not d.against_voucher and \
 					not d.against_invoice and not d.against_jv:
 				master_type = frappe.db.get_value("Account", d.account, "master_type")
@@ -82,7 +79,7 @@ class DocType(AccountsController):
 						Account %s if this is an advance entry." % d.account)
 
 	def validate_against_jv(self):
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if d.against_jv:
 				if d.against_jv == self.doc.name:
 					msgprint("You can not enter current voucher in 'Against JV' column",
@@ -96,7 +93,7 @@ class DocType(AccountsController):
 		# Debit = Credit
 		debit, credit = 0.0, 0.0
 		debit_list, credit_list = [], []
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			debit += flt(d.debit, 2)
 			credit += flt(d.credit, 2)
 			if flt(d.debit)>0 and (d.account not in debit_list): debit_list.append(d.account)
@@ -110,7 +107,7 @@ class DocType(AccountsController):
 			 	(self.doc.total_debit-self.doc.total_credit), raise_exception=1)
 		
 		# update against account
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if flt(d.debit) > 0: d.against_account = ', '.join(credit_list)
 			if flt(d.credit) > 0: d.against_account = ', '.join(debit_list)
 
@@ -123,7 +120,7 @@ class DocType(AccountsController):
 			else :
 				msgprint("Please enter Reference date", raise_exception=1)
 		
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
 				r.append('%s %s against Invoice: %s' % 
@@ -152,7 +149,7 @@ class DocType(AccountsController):
 		else:
 			# check account type whether supplier or customer
 			exists = False
-			for d in getlist(self.doclist, 'entries'):
+			for d in self.get('entries'):
 				account_type = frappe.db.get_value("Account", d.account, "account_type")
 				if account_type in ["Supplier", "Customer"]:
 					exists = True
@@ -165,7 +162,7 @@ class DocType(AccountsController):
 				self.doc.aging_date = self.doc.posting_date
 
 	def set_print_format_fields(self):
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			account_type, master_type = frappe.db.get_value("Account", d.account, 
 				["account_type", "master_type"])
 				
@@ -191,7 +188,7 @@ class DocType(AccountsController):
 		
 		# Get List of Customer Account
 		acc_list = filter(lambda d: frappe.db.get_value("Account", d.account, 
-		 	"master_type")=='Customer', getlist(self.doclist,'entries'))
+		 	"master_type")=='Customer', self.get('entries'))
 		
 		for d in acc_list:
 			credit_days = self.get_credit_days_for(d.account)
@@ -228,7 +225,7 @@ class DocType(AccountsController):
 		return self.is_approving_authority
 
 	def check_account_against_entries(self):
-		for d in self.doclist.get({"parentfield": "entries"}):
+		for d in self.get("entries"):
 			if d.against_invoice and frappe.db.get_value("Sales Invoice", 
 					d.against_invoice, "debit_to") != d.account:
 				frappe.throw(_("Row #") + cstr(d.idx) +  ": " +
@@ -246,7 +243,7 @@ class DocType(AccountsController):
 			self.check_account_against_entries()
 		
 		gl_map = []
-		for d in self.doclist.get({"parentfield": "entries"}):
+		for d in self.get("entries"):
 			if d.debit or d.credit:
 				gl_map.append(
 					self.get_gl_dict({
@@ -266,21 +263,21 @@ class DocType(AccountsController):
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 			
 	def check_credit_limit(self):
-		for d in self.doclist.get({"parentfield": "entries"}):
+		for d in self.get("entries"):
 			master_type, master_name = frappe.db.get_value("Account", d.account, 
 				["master_type", "master_name"])
 			if master_type == "Customer" and master_name:
 				super(DocType, self).check_credit_limit(d.account)
 
 	def get_balance(self):
-		if not getlist(self.doclist,'entries'):
+		if not self.get('entries'):
 			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
 		else:
 			flag, self.doc.total_debit, self.doc.total_credit = 0, 0, 0
 			diff = flt(self.doc.difference, 2)
 			
 			# If any row without amount, set the diff on that row
-			for d in getlist(self.doclist,'entries'):
+			for d in self.get('entries'):
 				if not d.credit and not d.debit and diff != 0:
 					if diff>0:
 						d.credit = diff
@@ -290,25 +287,25 @@ class DocType(AccountsController):
 					
 			# Set the diff in a new row
 			if flag == 0 and diff != 0:
-				jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
+				jd = self.doc.append('entries', {})
 				if diff>0:
 					jd.credit = abs(diff)
 				elif diff<0:
 					jd.debit = abs(diff)
 					
 			# Set the total debit, total credit and difference
-			for d in getlist(self.doclist,'entries'):
+			for d in self.get('entries'):
 				self.doc.total_debit += flt(d.debit, 2)
 				self.doc.total_credit += flt(d.credit, 2)
 
 			self.doc.difference = flt(self.doc.total_debit, 2) - flt(self.doc.total_credit, 2)
 
 	def get_outstanding_invoices(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'entries')
+		self.set('entries', [])
 		total = 0
 		for d in self.get_values():
 			total += flt(d[2])
-			jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
+			jd = self.doc.append('entries', {})
 			jd.account = cstr(d[1])
 			if self.doc.write_off_based_on == 'Accounts Receivable':
 				jd.credit = flt(d[2])
@@ -317,7 +314,7 @@ class DocType(AccountsController):
 				jd.debit = flt(d[2])
 				jd.against_voucher = cstr(d[0])
 			jd.save(1)
-		jd = addchild(self.doc, 'entries', 'Journal Voucher Detail', self.doclist)
+		jd = self.doc.append('entries', {})
 		if self.doc.write_off_based_on == 'Accounts Receivable':
 			jd.debit = total
 		elif self.doc.write_off_based_on == 'Accounts Payable':

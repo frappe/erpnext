@@ -20,27 +20,23 @@ month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 from erpnext.controllers.selling_controller import SellingController
 
-class DocType(SellingController):
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d, dl
-		self.log = []
-		self.tname = 'Sales Invoice Item'
-		self.fname = 'entries'
-		self.status_updater = [{
-			'source_dt': 'Sales Invoice Item',
-			'target_field': 'billed_amt',
-			'target_ref_field': 'amount',
-			'target_dt': 'Sales Order Item',
-			'join_field': 'so_detail',
-			'target_parent_dt': 'Sales Order',
-			'target_parent_field': 'per_billed',
-			'source_field': 'amount',
-			'join_field': 'so_detail',
-			'percent_join_field': 'sales_order',
-			'status_field': 'billing_status',
-			'keyword': 'Billed'
-		}]
-		
+class SalesInvoice(SellingController):
+	tname = 'Sales Invoice Item'
+	fname = 'entries'
+	status_updater = [{
+		'source_dt': 'Sales Invoice Item',
+		'target_field': 'billed_amt',
+		'target_ref_field': 'amount',
+		'target_dt': 'Sales Order Item',
+		'join_field': 'so_detail',
+		'target_parent_dt': 'Sales Order',
+		'target_parent_field': 'per_billed',
+		'source_field': 'amount',
+		'join_field': 'so_detail',
+		'percent_join_field': 'sales_order',
+		'status_field': 'billing_status',
+		'keyword': 'Billed'
+	}]
 
 	def validate(self):
 		super(DocType, self).validate()
@@ -194,7 +190,7 @@ class DocType(SellingController):
 				self.doc.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
-			for item in self.doclist.get({"parentfield": "entries"}):
+			for item in self.get("entries"):
 				if item.fields.get('item_code'):
 					for fname, val in get_pos_settings_item_details(pos, 
 						frappe._dict(item.fields), pos).items():
@@ -207,7 +203,7 @@ class DocType(SellingController):
 				self.doc.terms = frappe.db.get_value("Terms and Conditions", self.doc.tc_name, "terms")
 			
 			# fetch charges
-			if self.doc.charge and not len(self.doclist.get({"parentfield": "other_charges"})):
+			if self.doc.charge and not len(self.get("other_charges")):
 				self.set_taxes("other_charges", "taxes_and_charges")
 	
 	def get_advances(self):
@@ -226,7 +222,7 @@ class DocType(SellingController):
 		"""
 		
 		lst = []
-		for d in getlist(self.doclist, 'advance_adjustment_details'):
+		for d in self.get('advance_adjustment_details'):
 			if flt(d.allocated_amount) > 0:
 				args = {
 					'voucher_no' : d.journal_voucher, 
@@ -262,7 +258,7 @@ class DocType(SellingController):
 			
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
-		for d in getlist(self.doclist,'entries'):
+		for d in self.get('entries'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem` 
 				where name = %s and (ifnull(end_of_life,'')='' or end_of_life = '0000-00-00' 
 					or end_of_life > now())""", d.item_code)
@@ -314,7 +310,7 @@ class DocType(SellingController):
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
 		against_acc = []
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.doc.against_income_account = ','.join(against_acc)
@@ -329,7 +325,7 @@ class DocType(SellingController):
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:
 			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
-				for d in getlist(self.doclist,'entries'):
+				for d in self.get('entries'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.fields[i.lower().replace(' ','_')]:
 						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
@@ -356,13 +352,13 @@ class DocType(SellingController):
 
 
 	def validate_item_code(self):
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if not d.item_code:
 				msgprint("Please enter Item Code at line no : %s to update stock or remove check from Update Stock in Basic Info Tab." % (d.idx),
 				raise_exception=True)
 				
 	def validate_delivery_note(self):
-		for d in self.doclist.get({"parentfield": "entries"}):
+		for d in self.get("entries"):
 			if d.delivery_note:
 				msgprint("""Stock update can not be made against Delivery Note""", raise_exception=1)
 
@@ -381,12 +377,12 @@ class DocType(SellingController):
 			frappe.db.set(self.doc, 'c_form_no', '')
 			
 	def update_current_stock(self):
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if d.item_code and d.warehouse:
 				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
-		for d in getlist(self.doclist, 'packing_details'):
+		for d in self.get('packing_details'):
 			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
@@ -414,14 +410,14 @@ class DocType(SellingController):
 			if cint(self.doc.is_pos) == 1:
 				w = self.get_warehouse()
 				if w:
-					for d in getlist(self.doclist, 'entries'):
+					for d in self.get('entries'):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
 			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 			make_packing_list(self, 'entries')
 		else:
-			self.doclist = self.doc.clear_table(self.doclist, 'packing_details')
+			self.set('packing_details', [])
 			
 		if cint(self.doc.is_pos) == 1:
 			if flt(self.doc.paid_amount) == 0:
@@ -436,7 +432,7 @@ class DocType(SellingController):
 			frappe.db.set(self.doc,'paid_amount',0)
 		
 	def check_prev_docstatus(self):
-		for d in getlist(self.doclist,'entries'):
+		for d in self.get('entries'):
 			if d.sales_order:
 				submitted = frappe.db.sql("""select name from `tabSales Order` 
 					where docstatus = 1 and name = %s""", d.sales_order)
@@ -510,7 +506,7 @@ class DocType(SellingController):
 			)
 				
 	def make_tax_gl_entries(self, gl_entries):
-		for tax in self.doclist.get({"parentfield": "other_charges"}):
+		for tax in self.get("other_charges"):
 			if flt(tax.tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({
@@ -524,7 +520,7 @@ class DocType(SellingController):
 				
 	def make_item_gl_entries(self, gl_entries):			
 		# income account gl entries	
-		for item in self.doclist.get({"parentfield": "entries"}):
+		for item in self.get("entries"):
 			if flt(item.base_amount):
 				gl_entries.append(
 					self.get_gl_dict({

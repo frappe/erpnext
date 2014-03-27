@@ -6,7 +6,9 @@ import frappe
 from frappe.utils import cint, flt
 from frappe import msgprint
 	
-class DocType:
+from frappe.model.document import Document
+
+class LeaveAllocation(Document):
 	def __init__(self, doc, doclist):
 		self.doc, self.doclist = doc, doclist
 		

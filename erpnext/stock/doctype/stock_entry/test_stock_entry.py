@@ -335,7 +335,7 @@ class TestStockEntry(unittest.TestCase):
 		si = frappe.bean(si_doclist)
 		si.doc.posting_date = dn.doc.posting_date
 		si.doc.debit_to = "_Test Customer - _TC"
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		si.insert()
@@ -433,7 +433,7 @@ class TestStockEntry(unittest.TestCase):
 		si = frappe.bean(si_doclist)
 		si.doc.posting_date = dn.doc.posting_date
 		si.doc.debit_to = "_Test Customer - _TC"
-		for d in si.doclist.get({"parentfield": "entries"}):
+		for d in si.get("entries"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		si.insert()
@@ -479,11 +479,11 @@ class TestStockEntry(unittest.TestCase):
 		pi = frappe.bean(pi_doclist)
 		pi.doc.posting_date = pr.doc.posting_date
 		pi.doc.credit_to = "_Test Supplier - _TC"
-		for d in pi.doclist.get({"parentfield": "entries"}):
+		for d in pi.get("entries"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 
-		for d in pi.doclist.get({"parentfield": "other_charges"}):
+		for d in pi.get("other_charges"):
 			d.cost_center = "_Test Cost Center - _TC"
 
 		pi.run_method("calculate_taxes_and_totals")
@@ -582,10 +582,10 @@ class TestStockEntry(unittest.TestCase):
 		pi = frappe.bean(pi_doclist)
 		pi.doc.posting_date = pr.doc.posting_date
 		pi.doc.credit_to = "_Test Supplier - _TC"
-		for d in pi.doclist.get({"parentfield": "entries"}):
+		for d in pi.get("entries"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
-		for d in pi.doclist.get({"parentfield": "other_charges"}):
+		for d in pi.get("other_charges"):
 			d.cost_center = "_Test Cost Center - _TC"
 
 		pi.run_method("calculate_taxes_and_totals")

@@ -7,9 +7,9 @@ import frappe
 from frappe.utils import cint, cstr, flt, has_common
 from frappe import msgprint
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class AuthorizationRule(Document):
 
 
 	def check_duplicate_entry(self):

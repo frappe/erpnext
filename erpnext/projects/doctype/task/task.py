@@ -5,16 +5,12 @@ from __future__ import unicode_literals
 import frappe, json
 
 from frappe.utils import getdate, today
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
 from frappe import msgprint
 
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-	
+from frappe.model.document import Document
+
+class Task(Document):
 	def get_project_details(self):
 		return {
 			"project": self.doc.project

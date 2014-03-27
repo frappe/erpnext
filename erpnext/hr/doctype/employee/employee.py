@@ -11,7 +11,7 @@ import frappe.permissions
 from frappe.defaults import get_restrictions
 from frappe.model.controller import DocListController
 
-class DocType(DocListController):
+class Employee(DocListController):
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
@@ -57,7 +57,7 @@ class DocType(DocListController):
 	
 	def restrict_leave_approver(self):
 		"""restrict to this employee for leave approver"""
-		employee_leave_approvers = [d.leave_approver for d in self.doclist.get({"parentfield": "employee_leave_approvers"})]
+		employee_leave_approvers = [d.leave_approver for d in self.get("employee_leave_approvers")]
 		if self.doc.reports_to and self.doc.reports_to not in employee_leave_approvers:
 			employee_leave_approvers.append(frappe.db.get_value("Employee", self.doc.reports_to, "user_id"))
 			
@@ -167,7 +167,7 @@ class DocType(DocListController):
 		from frappe.utils.user import User
 		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 		
-		for l in self.doclist.get({"parentfield": "employee_leave_approvers"}):
+		for l in self.get("employee_leave_approvers"):
 			if "Leave Approver" not in User(l.leave_approver).get_roles():
 				throw(_("Invalid Leave Approver") + ": \"" + l.leave_approver + "\"",
 					exc=InvalidLeaveApproverError)

@@ -14,13 +14,11 @@ class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
 class ManyBlankToValuesError(frappe.ValidationError): pass
 
-class DocType(DocListController):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class ShippingRule(DocListController):
 		
 	def validate(self):
 		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
-		self.shipping_rule_conditions = self.doclist.get({"parentfield": "shipping_rule_conditions"})
+		self.shipping_rule_conditions = self.get("shipping_rule_conditions")
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()

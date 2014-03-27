@@ -11,10 +11,7 @@ from frappe.utils import today
 
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class CustomerIssue(TransactionBase):
 	
 	def validate(self):
 		if session['user'] != 'Guest' and not self.doc.customer:

@@ -7,10 +7,9 @@ from frappe.utils import cint, flt
 from frappe.model.code import get_obj
 from frappe import msgprint
 
-class DocType:
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class SalaryManager(Document):
 		
 	def get_emp_list(self):
 		"""

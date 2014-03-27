@@ -10,10 +10,7 @@ from frappe import session
 	
 from erpnext.controllers.selling_controller import SellingController
 
-class DocType(SellingController):
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist
+class Lead(SellingController):
 
 		self._prev = frappe._dict({
 			"contact_date": frappe.db.get_value("Lead", self.doc.name, "contact_date") if \

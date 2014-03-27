@@ -6,7 +6,7 @@ import frappe
 from frappe.model.code import get_obj
 
 from erpnext.controllers.buying_controller import BuyingController
-class DocType(BuyingController):
+class SupplierQuotation(BuyingController):
 	def __init__(self, doc, doclist=None):
 		self.doc, self.doclist = doc, doclist or []
 		self.tname, self.fname = "Supplier Quotation Item", "quotation_items"

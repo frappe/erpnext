@@ -4,13 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
-from frappe.model.doc import addchild
 from frappe import msgprint, _
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class LandedCostWizard(Document):
 			
 	def update_landed_cost(self):
 		"""
@@ -18,7 +16,7 @@ class DocType:
 			Recalculate valuation rate in all sle after pr posting date
 		"""
 		purchase_receipts = [row.purchase_receipt for row in 
-			self.doclist.get({"parentfield": "lc_pr_details"})]
+			self.get("lc_pr_details")]
 			
 		self.validate_purchase_receipts(purchase_receipts)
 		self.cancel_pr(purchase_receipts)
@@ -37,10 +35,9 @@ class DocType:
 		
 		for pr in purchase_receipts:
 			pr_bean = frappe.bean('Purchase Receipt', pr)
-			pr_items = pr_bean.doclist.get({"parentfield": "purchase_tax_details"})
-			idx = max([d.idx for d in pr_items]) if pr_items else 0
+			pr_items = pr_bean.get("purchase_tax_details")
 			
-			for lc in self.doclist.get({"parentfield": "landed_cost_details"}):
+			for lc in self.get("landed_cost_details"):
 				amt = flt(lc.amount) * flt(pr_bean.doc.net_total)/ flt(total_amt)
 				
 				matched_row = pr_bean.doclist.get({
@@ -52,7 +49,7 @@ class DocType:
 				})
 				
 				if not matched_row:	# add if not exists
-					ch = addchild(pr_bean.doc, 'other_charges', 'Purchase Taxes and Charges')
+					ch = pr_bean.append("other_charges")
 					ch.category = 'Valuation'
 					ch.add_deduct_tax = 'Add'
 					ch.charge_type = 'Actual'
@@ -62,9 +59,7 @@ class DocType:
 					ch.rate = amt
 					ch.tax_amount = amt
 					ch.docstatus = 1
-					ch.idx = idx + 1
 					ch.save(1)
-					idx += 1
 				else:	# overwrite if exists
 					matched_row[0].rate = amt
 					matched_row[0].tax_amount = amt

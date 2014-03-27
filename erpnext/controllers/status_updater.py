@@ -240,7 +240,7 @@ class StatusUpdater(DocListController):
 		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s` 
 			where docstatus=1 and net_total = 0""" % ref_dt)
 	
-		for item in self.doclist.get({"parentfield": "entries"}):
+		for item in self.get("entries"):
 			if item.fields.get(ref_fieldname) \
 				and item.fields.get(ref_fieldname) in all_zero_amount_refdoc \
 				and item.fields.get(ref_fieldname) not in zero_amount_refdoc:

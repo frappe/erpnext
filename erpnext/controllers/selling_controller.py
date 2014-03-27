@@ -54,7 +54,7 @@ class SellingController(StockController):
 			# shipping rule calculation based on item's net weight
 			
 			shipping_amount = 0.0
-			for condition in shipping_rule.doclist.get({"parentfield": "shipping_rule_conditions"}):
+			for condition in shipping_rule.get("shipping_rule_conditions"):
 				if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
 					shipping_amount = condition.shipping_amount
 					break
@@ -242,7 +242,7 @@ class SellingController(StockController):
 
 	def calculate_contribution(self):
 		total = 0.0
-		sales_team = self.doclist.get({"parentfield": "sales_team"})
+		sales_team = self.get("sales_team")
 		for sales_person in sales_team:
 			self.round_floats_in(sales_person)
 
@@ -279,7 +279,7 @@ class SellingController(StockController):
 				outstanding_including_current)
 				
 	def validate_max_discount(self):
-		for d in self.doclist.get({"parentfield": self.fname}):
+		for d in self.get(self.fname):
 			discount = flt(frappe.db.get_value("Item", d.item_code, "max_discount"))
 			
 			if discount and flt(d.discount_percentage) > discount:
@@ -288,7 +288,7 @@ class SellingController(StockController):
 					
 	def get_item_list(self):
 		il = []
-		for d in self.doclist.get({"parentfield": self.fname}):
+		for d in self.get(self.fname):
 			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
 			
@@ -315,7 +315,7 @@ class SellingController(StockController):
 					reserved_qty_for_main_item = -flt(d.qty)
 
 			if self.has_sales_bom(d.item_code):
-				for p in self.doclist.get({"parentfield": "packing_details"}):
+				for p in self.get("packing_details"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(frappe._dict({
@@ -362,7 +362,7 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 		
 	def check_stop_sales_order(self, ref_fieldname):
-		for d in self.doclist.get({"parentfield": self.fname}):
+		for d in self.get(self.fname):
 			if d.fields.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.fields[ref_fieldname], "status")
 				if status == "Stopped":

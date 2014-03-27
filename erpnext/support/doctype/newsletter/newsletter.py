@@ -7,10 +7,9 @@ import frappe
 import frappe.utils
 from frappe.utils import cstr
 from frappe import msgprint, throw, _
+from frappe.model.document import Document
 
-class DocType():
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class Newsletter(Document):
 		
 	def onload(self):
 		if self.doc.email_sent:

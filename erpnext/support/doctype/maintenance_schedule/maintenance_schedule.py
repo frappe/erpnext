@@ -5,16 +5,12 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, cstr, getdate, cint
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos
 
-class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class MaintenanceSchedule(TransactionBase):
 	
 	def get_item_details(self, item_code):
 		item = frappe.db.sql("""select item_name, description from `tabItem` 
@@ -26,17 +22,16 @@ class DocType(TransactionBase):
 		return ret
 		
 	def generate_schedule(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'maintenance_schedule_detail')
+		self.set('maintenance_schedule_detail', [])
 		frappe.db.sql("""delete from `tabMaintenance Schedule Detail` 
 			where parent=%s""", (self.doc.name))
 		count = 1
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			self.validate_maintenance_detail()
 			s_list = []
 			s_list = self.create_schedule_list(d.start_date, d.end_date, d.no_of_visits, d.sales_person)
 			for i in range(d.no_of_visits):
-				child = addchild(self.doc, 'maintenance_schedule_detail',
-					'Maintenance Schedule Detail', self.doclist)
+				child = self.append('maintenance_schedule_detail')
 				child.item_code = d.item_code
 				child.item_name = d.item_name
 				child.scheduled_date = s_list[i].strftime('%Y-%m-%d')
@@ -50,13 +45,13 @@ class DocType(TransactionBase):
 		self.on_update()
 
 	def on_submit(self):
-		if not getlist(self.doclist, 'maintenance_schedule_detail'):
+		if not self.get('maintenance_schedule_detail'):
 			throw("Please click on 'Generate Schedule' to get schedule")
 		self.check_serial_no_added()
 		self.validate_schedule()
 
 		email_map = {}
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			if d.serial_no:
 				serial_nos = get_valid_serial_nos(d.serial_no)
 				self.validate_serial_no(serial_nos, d.start_date)
@@ -174,10 +169,10 @@ class DocType(TransactionBase):
 		return ret
 
 	def validate_maintenance_detail(self):
-		if not getlist(self.doclist, 'item_maintenance_detail'):
+		if not self.get('item_maintenance_detail'):
 			throw(_("Please enter Maintaince Details first"))
 		
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			if not d.item_code:
 				throw(_("Please select item code"))
 			elif not d.start_date or not d.end_date:
@@ -191,7 +186,7 @@ class DocType(TransactionBase):
 				throw(_("Start date should be less than end date for item") + " " + d.item_code)
 	
 	def validate_sales_order(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			if d.prevdoc_docname:
 				chk = frappe.db.sql("""select ms.name from `tabMaintenance Schedule` ms, 
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and 
@@ -233,11 +228,11 @@ class DocType(TransactionBase):
 	def validate_schedule(self):
 		item_lst1 =[]
 		item_lst2 =[]
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			if d.item_code not in item_lst1:
 				item_lst1.append(d.item_code)
 		
-		for m in getlist(self.doclist, 'maintenance_schedule_detail'):
+		for m in self.get('maintenance_schedule_detail'):
 			if m.item_code not in item_lst2:
 				item_lst2.append(m.item_code)
 		
@@ -252,17 +247,17 @@ class DocType(TransactionBase):
 	
 	def check_serial_no_added(self):
 		serial_present =[]
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			if d.serial_no:
 				serial_present.append(d.item_code)
 		
-		for m in getlist(self.doclist, 'maintenance_schedule_detail'):
+		for m in self.get('maintenance_schedule_detail'):
 			if serial_present:
 				if m.item_code in serial_present and not m.serial_no:
 					throw("Please click on 'Generate Schedule' to fetch serial no added for item "+m.item_code)
 
 	def on_cancel(self):
-		for d in getlist(self.doclist, 'item_maintenance_detail'):
+		for d in self.get('item_maintenance_detail'):
 			if d.serial_no:
 				serial_nos = get_valid_serial_nos(d.serial_no)
 				self.update_amc_date(serial_nos)

@@ -6,10 +6,7 @@ import frappe
 
 from frappe.utils.nestedset import DocTypeNestedSet
 
-class DocType(DocTypeNestedSet):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class ItemGroup(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_item_group'
 	
 	def validate(self):

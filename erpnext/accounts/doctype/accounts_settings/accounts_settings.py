@@ -8,9 +8,9 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class AccountsSettings(Document):
 
 	def on_update(self):
 		frappe.db.set_default("auto_accounting_for_stock", self.doc.auto_accounting_for_stock)

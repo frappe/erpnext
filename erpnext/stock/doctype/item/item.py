@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 from frappe import msgprint, _
 
@@ -13,7 +12,7 @@ from frappe.model.controller import DocListController
 
 class WarehouseNotSet(Exception): pass
 
-class DocType(DocListController):
+class Item(DocListController):
 	def onload(self):
 		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
 	
@@ -58,13 +57,13 @@ class DocType(DocListController):
 				raise_exception=WarehouseNotSet)
 			
 	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.doclist.get({"parentfield": "uom_conversion_details"})]
+		uom_conv_list = [d.uom for d in self.get("uom_conversion_details")]
 		if self.doc.stock_uom not in uom_conv_list:
-			ch = addchild(self.doc, 'uom_conversion_details', 'UOM Conversion Detail', self.doclist)
+			ch = self.doc.append('uom_conversion_details', {})
 			ch.uom = self.doc.stock_uom
 			ch.conversion_factor = 1
 			
-		for d in self.doclist.get({"parentfield": "uom_conversion_details"}):
+		for d in self.get("uom_conversion_details"):
 			if d.conversion_factor == 1 and d.uom != self.doc.stock_uom:
 				self.doclist.remove(d)
 				
@@ -95,7 +94,7 @@ class DocType(DocListController):
 	
 	def validate_conversion_factor(self):
 		check_list = []
-		for d in getlist(self.doclist,'uom_conversion_details'):
+		for d in self.get('uom_conversion_details'):
 			if cstr(d.uom) in check_list:
 				msgprint(_("UOM %s has been entered more than once in Conversion Factor Table." %
 				 	cstr(d.uom)), raise_exception=1)
@@ -141,14 +140,14 @@ class DocType(DocListController):
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
 		cust_code=[]
-		for d in getlist(self.doclist,'item_customer_details'):
+		for d in self.get('item_customer_details'):
 			cust_code.append(d.ref_code)
 		self.doc.customer_code=','.join(cust_code)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
 		check_list=[]
-		for d in getlist(self.doclist,'item_tax'):
+		for d in self.get('item_tax'):
 			if d.tax_type:
 				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
 				

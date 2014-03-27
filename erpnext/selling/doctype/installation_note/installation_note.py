@@ -11,10 +11,7 @@ from erpnext.stock.utils import get_valid_serial_nos
 
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class InstallationNote(TransactionBase):
 		self.tname = 'Installation Note Item'
 		self.fname = 'installed_item_details'
 		self.status_updater = [{
@@ -78,7 +75,7 @@ class DocType(TransactionBase):
 
 	def validate_serial_no(self):
 		cur_s_no, prevdoc_s_no, sr_list = [], [], []
-		for d in getlist(self.doclist, 'installed_item_details'):
+		for d in self.get('installed_item_details'):
 			self.is_serial_no_added(d.item_code, d.serial_no)
 			if d.serial_no:
 				sr_list = get_valid_serial_nos(d.serial_no, d.qty, d.item_code)
@@ -91,7 +88,7 @@ class DocType(TransactionBase):
 				self.is_serial_no_installed(sr_list, d.item_code)
 
 	def validate_installation_date(self):
-		for d in getlist(self.doclist, 'installed_item_details'):
+		for d in self.get('installed_item_details'):
 			if d.prevdoc_docname:
 				d_date = frappe.db.get_value("Delivery Note", d.prevdoc_docname, "posting_date")				
 				if d_date > getdate(self.doc.inst_date):
@@ -99,7 +96,7 @@ class DocType(TransactionBase):
 						" for item "+d.item_code, raise_exception=1)
 	
 	def check_item_table(self):
-		if not(getlist(self.doclist, 'installed_item_details')):
+		if not(self.get('installed_item_details')):
 			msgprint("Please fetch items from Delivery Note selected", raise_exception=1)
 	
 	def on_update(self):
@@ -111,7 +108,7 @@ class DocType(TransactionBase):
 		frappe.db.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
-		for d in getlist(self.doclist, 'installed_item_details'):
+		for d in self.get('installed_item_details'):
 			if d.serial_no:
 				d.serial_no = d.serial_no.replace(",", "\n")
 				for sr_no in d.serial_no.split("\n"):

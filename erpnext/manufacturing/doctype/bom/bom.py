@@ -4,17 +4,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt, now, nowdate
-from frappe.model.doc import addchild
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Bom(Document):
 
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM` 
@@ -75,7 +73,7 @@ class DocType:
 			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
 			
 	def set_bom_material_details(self):
-		for item in self.doclist.get({"parentfield": "bom_materials"}):
+		for item in self.get("bom_materials"):
 			ret = self.get_bom_material_detail({"item_code": item.item_code, "bom_no": item.bom_no, 
 				"qty": item.qty})
 
@@ -128,7 +126,7 @@ class DocType:
 		return rate
 		
 	def update_cost(self):
-		for d in self.doclist.get({"parentfield": "bom_materials"}):
+		for d in self.get("bom_materials"):
 			d.rate = self.get_bom_material_detail({
 				'item_code': d.item_code, 
 				'bom_no': d.bom_no,
@@ -188,8 +186,8 @@ class DocType:
 
 	def clear_operations(self):
 		if not self.doc.with_operations:
-			self.doclist = self.doc.clear_table(self.doclist, 'bom_operations')
-			for d in self.doclist.get({"parentfield": "bom_materials"}):
+			self.set('bom_operations', [])
+			for d in self.get("bom_materials"):
 				d.operation_no = None
 
 	def validate_main_item(self):
@@ -210,7 +208,7 @@ class DocType:
 	def validate_operations(self):
 		""" Check duplicate operation no"""
 		self.op = []
-		for d in getlist(self.doclist, 'bom_operations'):
+		for d in self.get('bom_operations'):
 			if cstr(d.operation_no) in self.op:
 				msgprint("Operation no: %s is repeated in Operations Table" % 
 					d.operation_no, raise_exception=1)
@@ -221,7 +219,7 @@ class DocType:
 	def validate_materials(self):
 		""" Validate raw material entries """
 		check_list = []
-		for m in getlist(self.doclist, 'bom_materials'):
+		for m in self.get('bom_materials'):
 			# check if operation no not in op table
 			if self.doc.with_operations and cstr(m.operation_no) not in self.op:
 				msgprint("""Operation no: %s against item: %s at row no: %s \
@@ -315,7 +313,7 @@ class DocType:
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
 		total_op_cost = 0
-		for d in getlist(self.doclist, 'bom_operations'):
+		for d in self.get('bom_operations'):
 			if d.workstation and not d.hour_rate:
 				d.hour_rate = frappe.db.get_value("Workstation", d.workstation, "hour_rate")
 			if d.hour_rate and d.time_in_mins:
@@ -326,7 +324,7 @@ class DocType:
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
-		for d in getlist(self.doclist, 'bom_materials'):
+		for d in self.get('bom_materials'):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
 			d.amount = flt(d.rate) * flt(d.qty)
@@ -343,7 +341,7 @@ class DocType:
 	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
 		self.cur_exploded_items = {}
-		for d in getlist(self.doclist, 'bom_materials'):
+		for d in self.get('bom_materials'):
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
@@ -379,9 +377,9 @@ class DocType:
 
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
-		self.doclist = self.doc.clear_table(self.doclist, 'flat_bom_details', 1)
+		self.set('flat_bom_details', [])
 		for d in self.cur_exploded_items:
-			ch = addchild(self.doc, 'flat_bom_details', 'BOM Explosion Item', self.doclist)
+			ch = self.doc.append('flat_bom_details', {})
 			for i in self.cur_exploded_items[d].keys():
 				ch.fields[i] = self.cur_exploded_items[d][i]
 			ch.amount = flt(ch.qty) * flt(ch.rate)

@@ -12,29 +12,26 @@ from frappe import msgprint
 
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class MaintenanceVisit(TransactionBase):
 	
 	def get_item_details(self, item_code):
 		return frappe.db.get_value("Item", item_code, ["item_name", "description"], as_dict=1)
 			
 	def validate_serial_no(self):
-		for d in getlist(self.doclist, 'maintenance_visit_details'):
+		for d in self.get('maintenance_visit_details'):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw("Serial No: "+ d.serial_no + " not exists in the system")
 
 	
 	def validate(self):
-		if not getlist(self.doclist, 'maintenance_visit_details'):
+		if not self.get('maintenance_visit_details'):
 			msgprint("Please enter maintenance details")
 			raise Exception
 
 		self.validate_serial_no()
 	
 	def update_customer_issue(self, flag):
-		for d in getlist(self.doclist, 'maintenance_visit_details'):
+		for d in self.get('maintenance_visit_details'):
 			if d.prevdoc_docname and d.prevdoc_doctype == 'Customer Issue' :
 				if flag==1:
 					mntc_date = self.doc.mntc_date
@@ -64,7 +61,7 @@ class DocType(TransactionBase):
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ customer issue"""
 		check_for_docname = check_for_doctype = None
-		for d in getlist(self.doclist, 'maintenance_visit_details'):
+		for d in self.get('maintenance_visit_details'):
 			if d.prevdoc_docname:
 				check_for_docname = d.prevdoc_docname
 				check_for_doctype = d.prevdoc_doctype

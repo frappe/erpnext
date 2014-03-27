@@ -8,10 +8,9 @@ from frappe.utils import flt, getdate
 from frappe import msgprint
 from erpnext.utilities.transaction_base import delete_events
 
-class DocType:
-	def __init__(self, doc, doclist=None):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Project(Document):
 	
 	def get_gross_profit(self):
 		pft, per_pft =0, 0
@@ -45,7 +44,7 @@ class DocType:
 		delete_events(self.doc.doctype, self.doc.name)
 		
 		# add events
-		for milestone in self.doclist.get({"parentfield": "project_milestones"}):
+		for milestone in self.get("project_milestones"):
 			if milestone.milestone_date:
 				description = (milestone.milestone or "Milestone") + " for " + self.doc.name
 				frappe.bean({

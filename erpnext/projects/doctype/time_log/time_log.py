@@ -11,9 +11,9 @@ from frappe.utils import cstr
 
 class OverlapError(frappe.ValidationError): pass
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class TimeLog(Document):
 		
 	def validate(self):
 		self.set_status()

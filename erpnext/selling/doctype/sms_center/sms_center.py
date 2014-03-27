@@ -8,10 +8,9 @@ from frappe.utils import cstr
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class SmsCenter(Document):
 
 	def create_receiver_list(self):
 		rec, where_clause = '', ''

@@ -22,9 +22,9 @@ keydict = {
 	'disable_rounded_total': 'disable_rounded_total',
 }
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class GlobalDefaults(Document):
 		
 	def on_update(self):
 		"""update defaults"""

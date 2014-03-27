@@ -58,7 +58,7 @@ class BuyingController(StockController):
 	def validate_stock_or_nonstock_items(self):
 		if not self.get_stock_items():
 			tax_for_valuation = [d.account_head for d in 
-				self.doclist.get({"parentfield": "other_charges"}) 
+				self.get("other_charges") 
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
 				frappe.msgprint(_("""Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"""), raise_exception=1)
@@ -171,19 +171,19 @@ class BuyingController(StockController):
 		
 		stock_items_qty, stock_items_amount = 0, 0
 		last_stock_item_idx = 1
-		for d in self.doclist.get({"parentfield": parentfield}):
+		for d in self.get(parentfield):
 			if d.item_code and d.item_code in stock_items:
 				stock_items_qty += flt(d.qty)
 				stock_items_amount += flt(d.base_amount)
 				last_stock_item_idx = d.idx
 			
 		total_valuation_amount = sum([flt(d.tax_amount) for d in 
-			self.doclist.get({"parentfield": "other_charges"}) 
+			self.get("other_charges") 
 			if d.category in ["Valuation", "Valuation and Total"]])
 			
 		
 		valuation_amount_adjustment = total_valuation_amount
-		for i, item in enumerate(self.doclist.get({"parentfield": parentfield})):
+		for i, item in enumerate(self.get(parentfield)):
 			if item.item_code and item.qty and item.item_code in stock_items:
 				item_proportion = flt(item.base_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
@@ -218,9 +218,9 @@ class BuyingController(StockController):
 					raise_exception=1)
 										
 	def update_raw_materials_supplied(self, raw_material_table):
-		self.doclist = self.doc.clear_table(self.doclist, raw_material_table)
+		self.set(raw_material_table, [])
 		if self.doc.is_subcontracted=="Yes":
-			for item in self.doclist.get({"parentfield": self.fname}):
+			for item in self.get(self.fname):
 				if item.item_code in self.sub_contracted_items:
 					self.add_bom_items(item, raw_material_table)
 
@@ -271,7 +271,7 @@ class BuyingController(StockController):
 		if not hasattr(self, "_sub_contracted_items"):
 			self._sub_contracted_items = []
 			item_codes = list(set(item.item_code for item in 
-				self.doclist.get({"parentfield": self.fname})))
+				self.get(self.fname)))
 			if item_codes:
 				self._sub_contracted_items = [r[0] for r in frappe.db.sql("""select name
 					from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
@@ -284,7 +284,7 @@ class BuyingController(StockController):
 		if not hasattr(self, "_purchase_items"):
 			self._purchase_items = []
 			item_codes = list(set(item.item_code for item in 
-				self.doclist.get({"parentfield": self.fname})))
+				self.get(self.fname)))
 			if item_codes:
 				self._purchase_items = [r[0] for r in frappe.db.sql("""select name
 					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
@@ -294,5 +294,5 @@ class BuyingController(StockController):
 
 
 	def is_item_table_empty(self):
-		if not len(self.doclist.get({"parentfield": self.fname})):
+		if not len(self.get(self.fname)):
 			frappe.throw(_("Item table can not be blank"))

@@ -9,10 +9,10 @@ from frappe import msgprint, throw, _
 
 get_value = frappe.db.get_value
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
-		self.nsm_parent_field = 'parent_account'
+from frappe.model.document import Document
+
+class Account(Document):
+	nsm_parent_field = 'parent_account'
 
 	def autoname(self):
 		self.doc.name = self.doc.account_name.strip() + ' - ' + \

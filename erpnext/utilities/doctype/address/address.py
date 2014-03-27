@@ -7,10 +7,9 @@ import frappe
 from frappe import msgprint, throw, _
 from frappe.utils import cstr, cint
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Address(Document):
 
 	def autoname(self):
 		if not self.doc.address_title:

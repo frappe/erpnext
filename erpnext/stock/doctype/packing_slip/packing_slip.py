@@ -5,11 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, cint
 from frappe import msgprint, _
-from frappe.model.doc import addchild
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class PackingSlip(Document):
 
 	def validate(self):
 		"""
@@ -36,7 +35,7 @@ class DocType:
 			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again."""), raise_exception=1)
 	
 	def validate_items_mandatory(self):
-		rows = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
+		rows = [d.item_code for d in self.get("item_details")]
 		if not rows:
 			frappe.msgprint(_("No Items to Pack"), raise_exception=1)
 
@@ -87,7 +86,7 @@ class DocType:
 			* No. of Cases of this packing slip
 		"""
 		
-		rows = [d.item_code for d in self.doclist.get({"parentfield": "item_details"})]
+		rows = [d.item_code for d in self.get("item_details")]
 		
 		condition = ""
 		if rows:
@@ -132,7 +131,7 @@ class DocType:
 		if not self.doc.from_case_no:
 			self.doc.from_case_no = self.get_recommended_case_no()
 
-		for d in self.doclist.get({"parentfield": "item_details"}):
+		for d in self.get("item_details"):
 			res = frappe.db.get_value("Item", d.item_code, 
 				["net_weight", "weight_uom"], as_dict=True)
 			
@@ -151,12 +150,12 @@ class DocType:
 		return cint(recommended_case_no[0][0]) + 1
 		
 	def get_items(self):
-		self.doclist = self.doc.clear_table(self.doclist, "item_details", 1)
+		self.set("item_details", [])
 		
 		dn_details = self.get_details_for_packing()[0]
 		for item in dn_details:
 			if flt(item.qty) > flt(item.packed_qty):
-				ch = addchild(self.doc, 'item_details', 'Packing Slip Item', self.doclist)
+				ch = self.doc.append('item_details', {})
 				ch.item_code = item.item_code
 				ch.item_name = item.item_name
 				ch.stock_uom = item.stock_uom

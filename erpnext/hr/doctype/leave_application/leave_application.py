@@ -15,7 +15,7 @@ class InvalidLeaveApproverError(frappe.ValidationError): pass
 class LeaveApproverIdentityError(frappe.ValidationError): pass
 	
 from frappe.model.controller import DocListController
-class DocType(DocListController):
+class LeaveApplication(DocListController):
 	def setup(self):
 		if frappe.db.exists(self.doc.doctype, self.doc.name):
 			self.previous_doc = frappe.doc(self.doc.doctype, self.doc.name)
@@ -149,7 +149,7 @@ class DocType(DocListController):
 	def validate_leave_approver(self):
 		employee = frappe.bean("Employee", self.doc.employee)
 		leave_approvers = [l.leave_approver for l in 
-			employee.doclist.get({"parentfield": "employee_leave_approvers"})]
+			employee.get("employee_leave_approvers")]
 			
 		if len(leave_approvers) and self.doc.leave_approver not in leave_approvers:
 			msgprint(("[" + _("For Employee") + ' "' + self.doc.employee + '"] ' 

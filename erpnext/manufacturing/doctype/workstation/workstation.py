@@ -5,7 +5,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 
-class DocType:
+from frappe.model.document import Document
+
+class Workstation(Document):
   def __init__(self, doc, doclist=[]):
     self.doc = doc
     self.doclist = doclist

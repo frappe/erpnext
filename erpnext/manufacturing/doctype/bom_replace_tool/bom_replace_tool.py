@@ -7,7 +7,9 @@ from frappe.utils import cstr, flt
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 	
-class DocType:
+from frappe.model.document import Document
+
+class BomReplaceTool(Document):
 	def __init__( self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist

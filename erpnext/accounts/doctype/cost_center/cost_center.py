@@ -8,9 +8,8 @@ from frappe import msgprint, _
 
 from frappe.utils.nestedset import DocTypeNestedSet
 
-class DocType(DocTypeNestedSet):
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+class CostCenter(DocTypeNestedSet):
+
 		self.nsm_parent_field = 'parent_cost_center'
 				
 	def autoname(self):
@@ -54,7 +53,7 @@ class DocType(DocTypeNestedSet):
 
 	def validate_budget_details(self):
 		check_acc_list = []
-		for d in getlist(self.doclist, 'budget_details'):
+		for d in self.get('budget_details'):
 			if self.doc.group_or_ledger=="Group":
 				msgprint("Budget cannot be set for Group Cost Centers", raise_exception=1)
 				

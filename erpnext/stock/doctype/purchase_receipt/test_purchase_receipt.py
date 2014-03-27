@@ -95,7 +95,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 		
 		self.assertEquals(pr.doclist[1].rm_supp_cost, 70000.0)
-		self.assertEquals(len(pr.doclist.get({"parentfield": "pr_raw_material_details"})), 2)
+		self.assertEquals(len(pr.get("pr_raw_material_details")), 2)
 		
 	def test_serial_no_supplier(self):
 		pr = frappe.bean(copy=test_records[0])

@@ -11,19 +11,9 @@ from frappe import msgprint, _
 	
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self,doc,doclist):
-		self.doc = doc
-		self.doclist = doclist
-		self.fname = 'enq_details'
-		self.tname = 'Opportunity Item'
-		
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Opportunity", self.doc.name, "contact_date") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Opportunity", self.doc.name, "contact_by") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-		})
+class Opportunity(TransactionBase):
+	fname = 'enq_details'
+	tname = 'Opportunity Item'
 		
 	def get_item_details(self, item_code):
 		item = frappe.db.sql("""select item_name, stock_uom, description_html, description, item_group, brand
@@ -91,7 +81,7 @@ class DocType(TransactionBase):
 		super(DocType, self).add_calendar_event(opts, force)
 
 	def validate_item_details(self):
-		if not getlist(self.doclist, 'enquiry_details'):
+		if not self.get('enquiry_details'):
 			msgprint("Please select items for which enquiry needs to be made")
 			raise Exception
 
@@ -102,6 +92,13 @@ class DocType(TransactionBase):
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
+		self._prev = frappe._dict({
+			"contact_date": frappe.db.get_value("Opportunity", self.doc.name, "contact_date") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+			"contact_by": frappe.db.get_value("Opportunity", self.doc.name, "contact_by") if \
+				(not cint(self.doc.fields.get("__islocal"))) else None,
+		})
+		
 		self.set_status()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")

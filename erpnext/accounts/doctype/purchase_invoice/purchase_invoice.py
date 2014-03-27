@@ -15,22 +15,20 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 
-class DocType(BuyingController):
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d, dl 
-		self.tname = 'Purchase Invoice Item'
-		self.fname = 'entries'
-		self.status_updater = [{
-			'source_dt': 'Purchase Invoice Item',
-			'target_dt': 'Purchase Order Item',
-			'join_field': 'po_detail',
-			'target_field': 'billed_amt',
-			'target_parent_dt': 'Purchase Order',
-			'target_parent_field': 'per_billed',
-			'target_ref_field': 'amount',
-			'source_field': 'amount',
-			'percent_join_field': 'purchase_order',
-		}]
+class PurchaseInvoice(BuyingController):
+	tname = 'Purchase Invoice Item'
+	fname = 'entries'
+	status_updater = [{
+		'source_dt': 'Purchase Invoice Item',
+		'target_dt': 'Purchase Order Item',
+		'join_field': 'po_detail',
+		'target_field': 'billed_amt',
+		'target_parent_dt': 'Purchase Order',
+		'target_parent_field': 'per_billed',
+		'target_ref_field': 'amount',
+		'source_field': 'amount',
+		'percent_join_field': 'purchase_order',
+	}]
 		
 	def validate(self):
 		if not self.doc.is_opening:
@@ -71,7 +69,7 @@ class DocType(BuyingController):
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
 		
 	def check_active_purchase_items(self):
-		for d in getlist(self.doclist, 'entries'):
+		for d in self.get('entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
 				valid_item = frappe.db.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
 				if valid_item[0][0] == 2:
@@ -125,7 +123,7 @@ class DocType(BuyingController):
 	# ---------------------
 	def check_for_stopped_status(self):
 		check_list = []
-		for d in getlist(self.doclist,'entries'):
+		for d in self.get('entries'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purhcase_order)
 				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = %s", d.purchase_order)
@@ -187,7 +185,7 @@ class DocType(BuyingController):
 		
 		against_accounts = []
 		stock_items = self.get_stock_items()
-		for item in self.doclist.get({"parentfield": "entries"}):
+		for item in self.get("entries"):
 			if auto_accounting_for_stock and item.item_code in stock_items \
 					and self.doc.is_opening == 'No':
 				# in case of auto inventory accounting, against expense account is always
@@ -210,14 +208,14 @@ class DocType(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
-			 for d in getlist(self.doclist,'entries'):
+			 for d in self.get('entries'):
 				 if not d.purchase_order:
 					 msgprint("Purchse Order No. required against item %s"%d.item_code)
 					 raise Exception
 
 	def pr_required(self):
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
-			 for d in getlist(self.doclist,'entries'):
+			 for d in self.get('entries'):
 				 if not d.purchase_receipt:
 					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
 					 raise Exception
@@ -227,7 +225,7 @@ class DocType(BuyingController):
 			msgprint("Please enter Write Off Account", raise_exception=1)
 
 	def check_prev_docstatus(self):
-		for d in getlist(self.doclist,'entries'):
+		for d in self.get('entries'):
 			if d.purchase_order:
 				submitted = frappe.db.sql("select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order)
 				if not submitted:
@@ -247,7 +245,7 @@ class DocType(BuyingController):
 		"""
 		
 		lst = []
-		for d in getlist(self.doclist, 'advance_allocation_details'):
+		for d in self.get('advance_allocation_details'):
 			if flt(d.allocated_amount) > 0:
 				args = {
 					'voucher_no' : d.journal_voucher, 
@@ -299,7 +297,7 @@ class DocType(BuyingController):
 	
 		# tax table gl entries
 		valuation_tax = {}
-		for tax in self.doclist.get({"parentfield": "other_charges"}):
+		for tax in self.get("other_charges"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
 				gl_entries.append(
 					self.get_gl_dict({
@@ -325,7 +323,7 @@ class DocType(BuyingController):
 		# item gl entries
 		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
-		for item in self.doclist.get({"parentfield": "entries"}):
+		for item in self.get("entries"):
 			if auto_accounting_for_stock and item.item_code in stock_items:
 				if flt(item.valuation_rate):
 					# if auto inventory accounting enabled and stock item, 
@@ -404,7 +402,7 @@ class DocType(BuyingController):
 		
 	def update_raw_material_cost(self):
 		if self.sub_contracted_items:
-			for d in self.doclist.get({"parentfield": "entries"}):
+			for d in self.get("entries"):
 				rm_cost = frappe.db.sql("""select raw_material_cost / quantity 
 					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1 
 					and is_active = 1 """, (d.item_code,))

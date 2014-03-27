@@ -8,10 +8,9 @@ from frappe.utils import getdate, nowdate
 from frappe import msgprint, _
 
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Attendance(Document):
 	
 	def validate_duplicate_record(self):	 
 		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and att_date = %s 

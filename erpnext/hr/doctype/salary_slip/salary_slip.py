@@ -14,11 +14,7 @@ from erpnext.setup.utils import get_company_currency
 	
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		
+class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.doc.name = make_autoname('Sal Slip/' +self.doc.employee + '/.#####') 
 
@@ -146,8 +142,8 @@ class DocType(TransactionBase):
 		from frappe.utils import money_in_words
 		self.check_existing()
 		
-		if not (len(self.doclist.get({"parentfield": "earning_details"})) or 
-			len(self.doclist.get({"parentfield": "deduction_details"}))):
+		if not (len(self.get("earning_details")) or 
+			len(self.get("deduction_details"))):
 				self.get_emp_and_leave_details()
 		else:
 			self.get_leave_details(self.doc.leave_without_pay)
@@ -160,7 +156,7 @@ class DocType(TransactionBase):
 
 	def calculate_earning_total(self):
 		self.doc.gross_pay = flt(self.doc.arrear_amount) + flt(self.doc.leave_encashment_amount)
-		for d in self.doclist.get({"parentfield": "earning_details"}):
+		for d in self.get("earning_details"):
 			if cint(d.e_depends_on_lwp) == 1:
 				d.e_modified_amount = _round(flt(d.e_amount) * flt(self.doc.payment_days)
 					/ cint(self.doc.total_days_in_month), 2)
@@ -172,7 +168,7 @@ class DocType(TransactionBase):
 	
 	def calculate_ded_total(self):
 		self.doc.total_deduction = 0
-		for d in getlist(self.doclist, 'deduction_details'):
+		for d in self.get('deduction_details'):
 			if cint(d.d_depends_on_lwp) == 1:
 				d.d_modified_amount = _round(flt(d.d_amount) * flt(self.doc.payment_days) 
 					/ cint(self.doc.total_days_in_month), 2)

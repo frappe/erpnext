@@ -4,15 +4,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt, cint, nowdate, add_days
-from frappe.model.doc import addchild, Document
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class ProductionPlanningTool(Document):
 		self.item_dict = {}
 
 	def get_so_details(self, so):
@@ -39,10 +37,10 @@ class DocType:
 		return ret
 
 	def clear_so_table(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'pp_so_details')
+		self.set('pp_so_details', [])
 
 	def clear_item_table(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'pp_details')
+		self.set('pp_details', [])
 		
 	def validate_company(self):
 		if not self.doc.company:
@@ -84,11 +82,10 @@ class DocType:
 		""" Add sales orders in the table"""
 		self.clear_so_table()
 
-		so_list = [d.sales_order for d in getlist(self.doclist, 'pp_so_details')]
+		so_list = [d.sales_order for d in self.get('pp_so_details')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = addchild(self.doc, 'pp_so_details', 
-					'Production Plan Sales Order', self.doclist)
+				pp_so = self.doc.append('pp_so_details', {})
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
@@ -103,7 +100,7 @@ class DocType:
 		self.add_items(items)
 
 	def get_items(self):
-		so_list = filter(None, [d.sales_order for d in getlist(self.doclist, 'pp_so_details')])
+		so_list = filter(None, [d.sales_order for d in self.get('pp_so_details')])
 		if not so_list:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
@@ -138,7 +135,7 @@ class DocType:
 		for p in items:
 			item_details = frappe.db.sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
-			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
+			pi = self.doc.append('pp_details', {})
 			pi.sales_order				= p['parent']
 			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
@@ -151,7 +148,7 @@ class DocType:
 
 	def validate_data(self):
 		self.validate_company()
-		for d in getlist(self.doclist, 'pp_details'):
+		for d in self.get('pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
 				frappe.throw("Please Enter Planned Qty for item: %s at row no: %s" % 
@@ -193,7 +190,7 @@ class DocType:
 			}
 		"""
 		item_dict, bom_dict = {}, {}
-		for d in self.doclist.get({"parentfield": "pp_details"}):			
+		for d in self.get("pp_details"):			
 			bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
 			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
 				"production_item"	: d.item_code,

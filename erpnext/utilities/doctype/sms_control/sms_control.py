@@ -10,10 +10,9 @@ from frappe.model.doc import Document
 from frappe import msgprint, throw, _
 from frappe.model.bean import getlist
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class SmsControl(Document):
 
 	def validate_receiver_nos(self,receiver_list):
 		validated_receiver_list = []

@@ -6,15 +6,16 @@ import frappe
 from frappe.utils import flt, getdate
 from frappe.model.bean import getlist
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
+
+class CForm(Document):
+
 
 	def validate(self):
 		"""Validate invoice that c-form is applicable 
 			and no other c-form is received for that"""
 
-		for d in getlist(self.doclist, 'invoice_details'):
+		for d in self.get('invoice_details'):
 			if d.invoice_no:
 				inv = frappe.db.sql("""select c_form_applicable, c_form_no from
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
@@ -46,7 +47,7 @@ class DocType:
 			where c_form_no=%s""", self.doc.name)
 		
 	def set_cform_in_sales_invoices(self):
-		inv = [d.invoice_no for d in getlist(self.doclist, 'invoice_details')]
+		inv = [d.invoice_no for d in self.get('invoice_details')]
 		if inv:
 			frappe.db.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s 
 				where name in (%s)""" % ('%s', '%s', ', '.join(['%s'] * len(inv))), 
@@ -60,7 +61,7 @@ class DocType:
 			frappe.msgprint("Please enter atleast 1 invoice in the table", raise_exception=1)
 
 	def set_total_invoiced_amount(self):
-		total = sum([flt(d.grand_total) for d in getlist(self.doclist, 'invoice_details')])
+		total = sum([flt(d.grand_total) for d in self.get('invoice_details')])
 		frappe.db.set(self.doc, 'total_invoiced_amount', total)
 
 	def get_invoice_details(self, invoice_no):

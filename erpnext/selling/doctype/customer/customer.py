@@ -11,10 +11,7 @@ import frappe.defaults
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import create_party_account
 
-class DocType(TransactionBase):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class Customer(TransactionBase):
 				
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')

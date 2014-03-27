@@ -334,16 +334,14 @@ def create_letter_head(args):
 		fileurl = save_file(filename, content, "Letter Head", "Standard", decode=True).file_name
 		frappe.db.set_value("Letter Head", "Standard", "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
 		
-		
-				
 def add_all_roles_to(name):
-	user = frappe.doc("User", name)
+	user = frappe.get_doc("User", name)
 	for role in frappe.db.sql("""select name from tabRole"""):
 		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
-			d = user.addchild("user_roles", "UserRole")
+			d = user.append("user_roles")
 			d.role = role[0]
-			d.insert()
-			
+	user.save()
+
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
 	from frappe.utils.nestedset import get_root_of
