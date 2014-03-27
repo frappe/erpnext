@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import getdate, validate_email_add, cstr, cint
-from frappe.model.doc import make_autoname
+from frappe.model.naming import make_autoname
 from frappe import msgprint, throw, _
 import frappe.permissions
 from frappe.defaults import get_restrictions

@@ -242,7 +242,7 @@ def get_company_default(company, fieldname):
 	
 	if not value:
 		throw(_("Please mention default value for '") + 
-			_(frappe.get_doctype("company").get_label(fieldname) + 
+			_(frappe.get_meta("Company").get_label(fieldname) + 
 			_("' in Company: ") + company))
 			
 	return value

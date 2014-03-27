@@ -389,19 +389,12 @@ def get_payment_entry(doc):
 	jv.doc.company = doc.company
 	jv.doc.fiscal_year = doc.fiscal_year
 
-	jv.doclist.append({
-		"doctype": "Journal Voucher Detail",
-		"parentfield": "entries"
-	})
+	d1 = jv.append("entries")
+	d2 = jv.append("entries")
 
-	jv.doclist.append({
-		"doctype": "Journal Voucher Detail",
-		"parentfield": "entries"
-	})
-	
 	if bank_account:
-		jv.doclist[2].account = bank_account["account"]
-		jv.doclist[2].balance = bank_account["balance"]
+		d2.account = bank_account["account"]
+		d2.balance = bank_account["balance"]
 	
 	return jv
 	

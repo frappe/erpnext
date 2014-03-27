@@ -230,7 +230,6 @@ class BuyingController(StockController):
 		for item in bom_items:
 			required_qty = flt(item.qty_consumed_per_unit) * flt(d.qty) * flt(d.conversion_factor)
 			rm_doclist = {
-				"parentfield": raw_material_table,
 				"doctype": self.doc.doctype + " Item Supplied",
 				"reference_name": d.name,
 				"bom_detail_no": item.name,
@@ -248,7 +247,7 @@ class BuyingController(StockController):
 					"description": item.description,
 				})
 				
-			self.doclist.append(rm_doclist)
+			self.append(raw_material_table, rm_doclist)
 			
 			raw_materials_cost += required_qty * flt(item.rate)
 			

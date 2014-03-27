@@ -177,7 +177,7 @@ def update_completed_qty(bean, method):
 			
 		for mr_name, mr_items in material_request_map.items():
 			mr_obj = frappe.get_obj("Material Request", mr_name, with_children=1)
-			mr_doctype = frappe.get_doctype("Material Request")
+			mr_doctype = frappe.get_meta("Material Request")
 			
 			if mr_obj.doc.status in ["Stopped", "Cancelled"]:
 				frappe.throw(_("Material Request") + ": %s, " % mr_obj.doc.name 

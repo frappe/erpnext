@@ -16,11 +16,10 @@ class SupportEmailSettings(Document):
 		"""
 		if self.doc.sync_support_mails and self.doc.mail_server:
 			from frappe.utils.email_lib.receive import POP3Mailbox
-			from frappe.model.doc import Document
-			import _socket, poplib
+						import _socket, poplib
 			
-			inc_email = Document('Incoming Email Settings')
-			inc_email.encode()
+			inc_email = frappe.get_doc('Incoming Email Settings')
+			# inc_email.encode()
 			inc_email.host = self.doc.mail_server
 			inc_email.use_ssl = self.doc.use_ssl
 			try:

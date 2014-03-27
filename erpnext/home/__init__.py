@@ -59,8 +59,7 @@ feed_dict = {
 def make_feed(feedtype, doctype, name, owner, subject, color):
 	"makes a new Feed record"
 	#msgprint(subject)
-	from frappe.model.doc import Document
-	from frappe.utils import get_fullname
+		from frappe.utils import get_fullname
 
 	if feedtype in ('Login', 'Comment', 'Assignment'):
 		# delete old login, comment feed
@@ -72,7 +71,7 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 			where doc_type=%s and doc_name=%s 
 			and ifnull(feed_type,'') != 'Comment'""", (doctype, name))
 
-	f = Document('Feed')
+	f = frappe.get_doc('Feed')
 	f.owner = owner
 	f.feed_type = feedtype
 	f.doc_type = doctype

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, add_years, cint, getdate
-from frappe.model.doc import make_autoname
+from frappe.model.naming import make_autoname
 from frappe import msgprint, throw, _
 import datetime
 

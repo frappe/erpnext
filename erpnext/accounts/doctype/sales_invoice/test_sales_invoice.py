@@ -139,16 +139,14 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.bean(copy=test_records[3])
 		si.doc.discount_amount = 104.95
-		si.doclist.append({
+		si.append("other_charges", {
 			"doctype": "Sales Taxes and Charges",
-			"parentfield": "other_charges",
 			"charge_type": "On Previous Row Amount",
 			"account_head": "_Test Account Service Tax - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"description": "Service Tax",
 			"rate": 10,
 			"row_id": 8,
-			"idx": 9
 		})
 		si.insert()
 		
@@ -196,16 +194,14 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_discount_amount_gl_entry(self):
 		si = frappe.bean(copy=test_records[3])
 		si.doc.discount_amount = 104.95
-		si.doclist.append({
+		si.append("other_charges", {
 			"doctype": "Sales Taxes and Charges",
-			"parentfield": "other_charges",
 			"charge_type": "On Previous Row Amount",
 			"account_head": "_Test Account Service Tax - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"description": "Service Tax",
 			"rate": 10,
-			"row_id": 8,
-			"idx": 9
+			"row_id": 8
 		})
 		si.insert()
 		si.submit()
@@ -369,7 +365,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = frappe.bean(frappe.copy_doclist(jv_test_records[0]))
+		jv = frappe.bean(frappe.copy_doc(jv_test_records[0]))
 		jv.doclist[1].against_invoice = w.doc.name
 		jv.insert()
 		jv.submit()
@@ -385,7 +381,7 @@ class TestSalesInvoice(unittest.TestCase):
 		tlb = frappe.bean("Time Log Batch", "_T-Time Log Batch-00001")
 		tlb.submit()
 		
-		si = frappe.bean(frappe.copy_doclist(test_records[0]))
+		si = frappe.bean(frappe.copy_doc(test_records[0]))
 		si.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
 		si.insert()
 		si.submit()
@@ -444,7 +440,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._insert_purchase_receipt()
 		self._insert_pos_settings()
 		
-		pos = frappe.copy_doclist(test_records[1])
+		pos = frappe.copy_doc(test_records[1])
 		pos[0]["is_pos"] = 1
 		pos[0]["update_stock"] = 1
 		pos[0]["posting_time"] = "12:05"
@@ -510,7 +506,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 		
-		si_doclist = frappe.copy_doclist(test_records[1])
+		si_doclist = frappe.copy_doc(test_records[1])
 		si_doclist[0]["update_stock"] = 1
 		si_doclist[0]["posting_time"] = "12:05"
 		si_doclist[1]["warehouse"] = "_Test Warehouse No Account - _TC"
@@ -555,7 +551,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
 				
-		si_copy = frappe.copy_doclist(test_records[1])
+		si_copy = frappe.copy_doc(test_records[1])
 		si_copy[1]["item_code"] = None
 		si = frappe.bean(si_copy)		
 		si.insert()
@@ -582,7 +578,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
-		si_copy = frappe.copy_doclist(test_records[1])
+		si_copy = frappe.copy_doc(test_records[1])
 		si_copy[1]["item_code"] = "_Test Non Stock Item"
 		si = frappe.bean(si_copy)
 		si.insert()
@@ -640,9 +636,8 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.submit()
 		
 		si = frappe.bean(copy=test_records[0])
-		si.doclist.append({
+		si.append("advance_adjustment_details", {
 			"doctype": "Sales Invoice Advance",
-			"parentfield": "advance_adjustment_details",
 			"journal_voucher": jv.doc.name,
 			"jv_detail_no": jv.doclist[1].name,
 			"advance_amount": 400,

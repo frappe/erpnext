@@ -86,15 +86,13 @@ class Company(Document):
 				website_settings.doc.home_page = webpage.doc.name
 				website_settings.doc.brand_html = self.doc.name
 				website_settings.doc.copyright = self.doc.name
-				website_settings.doclist.append({
+				website_settings.append("top_bar_items", {
 					"doctype": "Top Bar Item",
-					"parentfield": "top_bar_items",
 					"label":"Contact",
 					"url": "contact"
 				})
-				website_settings.doclist.append({
+				website_settings.append("top_bar_items", {
 					"doctype": "Top Bar Item",
-					"parentfield": "top_bar_items",
 					"label":"Blog",
 					"url": "blog"
 				})

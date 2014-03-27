@@ -36,7 +36,7 @@ class TransactionBase(StatusUpdater):
 		opts = frappe._dict(opts)
 		
 		if self.doc.contact_date:
-			event_doclist = [{
+			event_doclist = frappe.get_doc({
 				"doctype": "Event",
 				"owner": opts.owner or self.doc.owner,
 				"subject": opts.subject,
@@ -45,16 +45,15 @@ class TransactionBase(StatusUpdater):
 				"event_type": "Private",
 				"ref_type": self.doc.doctype,
 				"ref_name": self.doc.name
-			}]
+			})
 			
 			if frappe.db.exists("User", self.doc.contact_by):
-				event_doclist.append({
+				event_doclist.append("event_individuals", {
 					"doctype": "Event User",
-					"parentfield": "event_individuals",
 					"person": self.doc.contact_by
 				})
 			
-			frappe.bean(event_doclist).insert()
+			event_doclist.insert()
 			
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self.doclist, uom_field, qty_fields)

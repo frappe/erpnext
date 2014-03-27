@@ -24,9 +24,8 @@ class TestLeaveApplication(unittest.TestCase):
 		temp_session_user = frappe.session.user
 		frappe.set_user("Administrator")
 		employee = frappe.bean("Employee", employee)
-		employee.doclist.append({
+		employee.append("employee_leave_approvers", {
 			"doctype": "Employee Leave Approver",
-			"parentfield": "employee_leave_approvers",
 			"leave_approver": leave_approver
 		})
 		employee.save()

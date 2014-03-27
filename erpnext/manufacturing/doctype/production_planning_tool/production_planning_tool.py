@@ -366,7 +366,7 @@ class ProductionPlanningTool(Document):
 		if items_to_be_requested:
 			for item in items_to_be_requested:
 				item_wrapper = frappe.bean("Item", item)
-				pr_doclist = [{
+				pr_doc = frappe.get_doc({
 					"doctype": "Material Request",
 					"__islocal": 1,
 					"naming_series": "IDT",
@@ -376,12 +376,11 @@ class ProductionPlanningTool(Document):
 					"fiscal_year": fiscal_year,
 					"requested_by": frappe.session.user,
 					"material_request_type": "Purchase"
-				}]
+				})
 				for sales_order, requested_qty in items_to_be_requested[item].items():
-					pr_doclist.append({
+					pr_doc.append("indent_details", {
 						"doctype": "Material Request Item",
 						"__islocal": 1,
-						"parentfield": "indent_details",
 						"item_code": item,
 						"item_name": item_wrapper.doc.item_name,
 						"description": item_wrapper.doc.description,
@@ -394,10 +393,9 @@ class ProductionPlanningTool(Document):
 						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
 					})
 
-				pr_wrapper = frappe.bean(pr_doclist)
-				pr_wrapper.ignore_permissions = 1
-				pr_wrapper.submit()
-				purchase_request_list.append(pr_wrapper.doc.name)
+				pr_doc.ignore_permissions = 1
+				pr_doc.submit()
+				purchase_request_list.append(pr_doc.name)
 			
 			if purchase_request_list:
 				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \

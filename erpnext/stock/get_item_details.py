@@ -158,7 +158,7 @@ def get_basic_details(args, item_bean):
 	return out
 	
 def get_price_list_rate(args, item_bean, out):
-	meta = frappe.get_doctype(args.doctype)
+	meta = frappe.get_meta(args.doctype)
 
 	if meta.get_field("currency"):
 		validate_price_list(args)

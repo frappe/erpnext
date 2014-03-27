@@ -7,7 +7,7 @@ import frappe.defaults
 
 from frappe.utils import cint
 from frappe import msgprint, _
-from frappe.model.doc import make_autoname
+from frappe.model.naming import make_autoname
 from erpnext.accounts.party import create_party_account
 
 from erpnext.utilities.transaction_base import TransactionBase

@@ -16,9 +16,8 @@ class PriceList(DocListController):
 		if not self.get("valid_for_territories"):
 			# if no territory, set default territory
 			if frappe.defaults.get_user_default("territory"):
-				self.doclist.append({
+				self.append("valid_for_territories", {
 					"doctype": "Applicable Territory",
-					"parentfield": "valid_for_territories",
 					"territory": frappe.defaults.get_user_default("territory")
 				})
 			else:

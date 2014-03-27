@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.doc import Document, make_autoname
+from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 import frappe.defaults
 
@@ -56,7 +56,8 @@ class Customer(TransactionBase):
 					(self.doc.name, self.doc.customer_name, self.doc.lead_name))
 
 			lead = frappe.db.get_value("Lead", self.doc.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
-			c = Document('Contact') 
+			c = frappe.get_doc('Contact')
+			c.set("__islocal", 1)
 			c.first_name = lead.lead_name 
 			c.email_id = lead.email_id
 			c.phone = lead.phone
@@ -65,7 +66,7 @@ class Customer(TransactionBase):
 			c.customer_name = self.doc.customer_name
 			c.is_primary_contact = 1
 			try:
-				c.save(1)
+				c.save()
 			except NameError, e:
 				pass
 

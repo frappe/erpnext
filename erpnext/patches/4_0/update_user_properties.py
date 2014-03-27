@@ -39,7 +39,7 @@ def update_user_match():
 		doctype_matches.setdefault(doctype, []).append(match)
 	
 	for doctype, user_matches in doctype_matches.items():
-		meta = frappe.get_doctype(doctype)
+		meta = frappe.get_meta(doctype)
 		
 		# for each user with roles of this doctype, check if match condition applies
 		for user in frappe.db.sql_list("""select name from `tabUser`

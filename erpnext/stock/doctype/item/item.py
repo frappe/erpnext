@@ -18,7 +18,7 @@ class Item(DocListController):
 	
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
-			from frappe.model.doc import make_autoname
+			from frappe.model.naming import make_autoname
 			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
 		elif not self.doc.item_code:
 			msgprint(_("Item Code (item_code) is mandatory because Item naming is not sequential."), raise_exception=1)
@@ -272,7 +272,7 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 			"in Item master") % {
 				"item_code": item_code,
 				"date": formatdate(end_of_life),
-				"end_of_life_label": frappe.get_doctype("Item").get_label("end_of_life")
+				"end_of_life_label": frappe.get_meta("Item").get_label("end_of_life")
 			}
 		
 		_msgprint(msg, verbose)

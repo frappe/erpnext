@@ -6,7 +6,6 @@ import frappe, json
 
 from frappe.utils import nowdate, cstr
 from frappe.model.code import get_obj
-from frappe.model.doc import Document
 from frappe import msgprint, throw, _
 from frappe.model.bean import getlist
 
@@ -109,11 +108,11 @@ class SmsControl(Document):
 	# Create SMS Log
 	# =========================================================
 	def create_sms_log(self, arg, sent_sms):
-		sl = Document('SMS Log')
+		sl = frappe.get_doc('SMS Log')
 		sl.sender_name = arg['sender_name']
 		sl.sent_on = nowdate()
 		sl.receiver_list = cstr(arg['receiver_list'])
 		sl.message = arg['message']
 		sl.no_of_requested_sms = len(arg['receiver_list'])
 		sl.no_of_sent_sms = sent_sms
-		sl.save(new=1)
+		sl.save()

@@ -174,9 +174,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		jv.submit()
 		
 		pi = frappe.bean(copy=test_records[0])
-		pi.doclist.append({
-			"doctype": "Purchase Invoice Advance",
-			"parentfield": "advance_allocation_details",
+		pi.append("advance_allocation_details", {
 			"journal_voucher": jv.doc.name,
 			"jv_detail_no": jv.doclist[1].name,
 			"advance_amount": 400,

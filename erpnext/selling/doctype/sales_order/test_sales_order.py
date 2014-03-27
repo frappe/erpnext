@@ -80,7 +80,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		_insert_purchase_receipt(so.doclist[1].item_code)
 		
-		dn = frappe.bean(frappe.copy_doclist(dn_test_records[0]))
+		dn = frappe.bean(frappe.copy_doc(dn_test_records[0]))
 		dn.doclist[1].item_code = so.doclist[1].item_code
 		dn.doclist[1].against_sales_order = so.doc.name
 		dn.doclist[1].prevdoc_detail_docname = so.doclist[1].name
@@ -199,7 +199,7 @@ class TestSalesOrder(unittest.TestCase):
 		
 		# change item in test so record
 		
-		test_record = frappe.copy_doclist(test_records[0])
+		test_record = frappe.copy_doc(test_records[0])
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 
 		# reset bin
@@ -248,7 +248,7 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
 		
 		# change item in test so record
-		test_record = frappe.copy_doclist(test_records[0])
+		test_record = frappe.copy_doc(test_records[0])
 		test_record[1]["item_code"] = "_Test Sales BOM Item"
 
 		# reset bin

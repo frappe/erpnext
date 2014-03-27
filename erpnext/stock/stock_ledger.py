@@ -116,7 +116,7 @@ def update_entries_after(args, verbose=1):
 		
 		# rounding as per precision
 		from frappe.model.meta import get_field_precision
-		meta = frappe.get_doctype("Stock Ledger Entry")
+		meta = frappe.get_meta("Stock Ledger Entry")
 		
 		stock_value = flt(stock_value, get_field_precision(meta.get_field("stock_value"), 
 			frappe._dict({"fields": sle})))

@@ -120,7 +120,7 @@ def upload():
 	error = False
 	
 	from frappe.utils.datautils import check_record, import_doc
-	doctype_dl = frappe.get_doctype("Attendance")
+	doctype_dl = frappe.get_meta("Attendance")
 	
 	for i, row in enumerate(rows[5:]):
 		if not row: continue
@@ -131,7 +131,7 @@ def upload():
 			d["docstatus"] = frappe.db.get_value("Attendance", d.name, "docstatus")
 			
 		try:
-			check_record(d, doctype_dl=doctype_dl)
+			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
 		except Exception, e:
 			error = True

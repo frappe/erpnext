@@ -59,9 +59,8 @@ class SellingController(StockController):
 					shipping_amount = condition.shipping_amount
 					break
 			
-			self.doclist.append({
+			self.append("other_charges", {
 				"doctype": "Sales Taxes and Charges",
-				"parentfield": "other_charges",
 				"charge_type": "Actual",
 				"account_head": shipping_rule.doc.account,
 				"cost_center": shipping_rule.doc.cost_center,

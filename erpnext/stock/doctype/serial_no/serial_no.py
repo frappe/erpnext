@@ -254,7 +254,7 @@ def validate_serial_no(sle, item_det):
 				
 def update_serial_nos(sle, item_det):
 	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
-		from frappe.model.doc import make_autoname
+		from frappe.model.naming import make_autoname
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):
 			serial_nos.append(make_autoname(item_det.serial_no_series))

@@ -56,26 +56,27 @@ class NamingSeries(Document):
 			default = options[0]
 
 		# update in property setter
-		from frappe.model.doc import Document
-		prop_dict = {'options': "\n".join(options), 'default': default}
+				prop_dict = {'options': "\n".join(options), 'default': default}
 		for prop in prop_dict:
 			ps_exists = frappe.db.sql("""SELECT name FROM `tabProperty Setter`
 					WHERE doc_type = %s AND field_name = 'naming_series'
 					AND property = %s""", (doctype, prop))
 			if ps_exists:
-				ps = Document('Property Setter', ps_exists[0][0])
+				ps = frappe.get_doc('Property Setter', ps_exists[0][0])
 				ps.value = prop_dict[prop]
 				ps.save()
 			else:
-				ps = Document('Property Setter', fielddata = {
+				ps = frappe.get_doc({
+					'doctype': 'Property Setter',
 					'doctype_or_field': 'DocField',
 					'doc_type': doctype,
 					'field_name': 'naming_series',
 					'property': prop,
 					'value': prop_dict[prop],
 					'property_type': 'Select',
+					'__islocal': 1
 				})
-				ps.save(1)
+				ps.save()
 
 		self.doc.set_options = "\n".join(options)
 

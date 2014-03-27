@@ -121,17 +121,11 @@ class AccountsController(TransactionBase):
 			from frappe.model import default_fields
 			tax_master = frappe.bean(tax_master_doctype, self.doc.fields.get(tax_master_field))
 			
-			for i, tax in enumerate(tax_master.doclist.get({"parentfield": tax_parentfield})):
+			for i, tax in enumerate(tax_master.get(tax_parentfield)):
 				for fieldname in default_fields:
-					tax.fields[fieldname] = None
-				
-				tax.fields.update({
-					"doctype": tax_doctype,
-					"parentfield": tax_parentfield,
-					"idx": i+1
-				})
-				
-				self.doclist.append(tax)
+					tax.set(fieldname, None)
+								
+				self.append(tax_parentfield, tax)
 
 	def get_other_charges(self):
 		self.set("other_charges", [])
@@ -410,9 +404,8 @@ class AccountsController(TransactionBase):
 			
 		self.set(parentfield, [])
 		for d in res:
-			self.doclist.append({
+			self.append(parentfield, {
 				"doctype": child_doctype,
-				"parentfield": parentfield,
 				"journal_voucher": d.jv_no,
 				"jv_detail_no": d.jv_detail_no,
 				"remarks": d.remark,

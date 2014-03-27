@@ -9,7 +9,7 @@ from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate,
 	get_first_day, get_last_day
 
 from frappe.utils import comma_and, get_url
-from frappe.model.doc import make_autoname
+from frappe.model.naming import make_autoname
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import _, msgprint
@@ -587,12 +587,6 @@ class SalesInvoice(SellingController):
 				invoice_date = %s, territory = %s, net_total = %s,
 				grand_total = %s where invoice_no = %s and parent = %s""", 
 				(self.doc.name, self.doc.amended_from, self.doc.c_form_no))
-
-	@property
-	def meta(self):
-		if not hasattr(self, "_meta"):
-			self._meta = frappe.get_doctype(self.doc.doctype)
-		return self._meta
 	
 	def validate_recurring_invoice(self):
 		if self.doc.convert_into_recurring_invoice:
