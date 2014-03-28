@@ -9,20 +9,16 @@ from frappe.utils import cstr, flt, getdate
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint
-from frappe.model.mapper import get_mapped_doclist
+from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 
 class SalesOrder(SellingController):
-	def __init__(self, doc, doclist=None):
-		self.doc = doc
-		if not doclist: doclist = []
-		self.doclist = doclist
-		self.tname = 'Sales Order Item'
-		self.fname = 'sales_order_details'
-		self.person_tname = 'Target Detail'
-		self.partner_tname = 'Partner Target Detail'
-		self.territory_tname = 'Territory Target Detail'
+	tname = 'Sales Order Item'
+	fname = 'sales_order_details'
+	person_tname = 'Target Detail'
+	partner_tname = 'Partner Target Detail'
+	territory_tname = 'Territory Target Detail'
 	
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
@@ -168,7 +164,7 @@ class SalesOrder(SellingController):
 		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
 		
 		self.update_prevdoc_status('submit')
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -180,7 +176,7 @@ class SalesOrder(SellingController):
 		
 		self.update_prevdoc_status('cancel')
 		
-		frappe.db.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self, 'status', 'Cancelled')
 		
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
@@ -224,14 +220,14 @@ class SalesOrder(SellingController):
 	def stop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(-1)
-		frappe.db.set(self.doc, 'status', 'Stopped')
+		frappe.db.set(self, 'status', 'Stopped')
 		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
 			you need to Unstop it.""" % (self.doctype, self.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(1)
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 		msgprint("%s: %s has been Unstopped" % (self.doctype, self.name))
 
 
@@ -261,11 +257,11 @@ def set_missing_values(source, target):
 	bean.run_method("onload_post_render")
 	
 @frappe.whitelist()
-def make_material_request(source_name, target_doclist=None):	
+def make_material_request(source_name, target_doc=None):	
 	def postprocess(source, doclist):
 		doclist[0].material_request_type = "Purchase"
 	
-	doclist = get_mapped_doclist("Sales Order", source_name, {
+	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Material Request", 
 			"validation": {
@@ -279,18 +275,18 @@ def make_material_request(source_name, target_doclist=None):
 				"stock_uom": "uom"
 			}
 		}
-	}, target_doclist, postprocess)
+	}, target_doc, postprocess)
 	
 	return [(d if isinstance(d, dict) else d.fields) for d in doclist]
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doclist=None):	
+def make_delivery_note(source_name, target_doc=None):	
 	def update_item(obj, target, source_parent):
 		target.base_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.base_rate)
 		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.rate)
 		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
 			
-	doclist = get_mapped_doclist("Sales Order", source_name, {
+	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Delivery Note", 
 			"field_map": {
@@ -319,12 +315,12 @@ def make_delivery_note(source_name, target_doclist=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 	
 	return [d.fields for d in doclist]
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):
+def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
 		bean.is_pos = 0
@@ -335,7 +331,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = obj.rate and target.amount / flt(obj.rate) or obj.qty
 			
-	doclist = get_mapped_doclist("Sales Order", source_name, {
+	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Sales Invoice", 
 			"validation": {
@@ -359,18 +355,18 @@ def make_sales_invoice(source_name, target_doclist=None):
 			"doctype": "Sales Team", 
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 	
 	return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_maintenance_schedule(source_name, target_doclist=None):
+def make_maintenance_schedule(source_name, target_doc=None):
 	maint_schedule = frappe.db.sql("""select t1.name 
 		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 
 		where t2.parent=t1.name and t2.prevdoc_docname=%s and t1.docstatus=1""", source_name)
 		
 	if not maint_schedule:
-		doclist = get_mapped_doclist("Sales Order", source_name, {
+		doclist = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
 				"doctype": "Maintenance Schedule", 
 				"field_map": {
@@ -387,19 +383,19 @@ def make_maintenance_schedule(source_name, target_doclist=None):
 				},
 				"add_if_empty": True
 			}
-		}, target_doclist)
+		}, target_doc)
 	
 		return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doclist=None):
+def make_maintenance_visit(source_name, target_doc=None):
 	visit = frappe.db.sql("""select t1.name 
 		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 
 		where t2.parent=t1.name and t2.prevdoc_docname=%s 
 		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
 		
 	if not visit:
-		doclist = get_mapped_doclist("Sales Order", source_name, {
+		doclist = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
 				"doctype": "Maintenance Visit", 
 				"field_map": {
@@ -417,6 +413,6 @@ def make_maintenance_visit(source_name, target_doclist=None):
 				},
 				"add_if_empty": True
 			}
-		}, target_doclist)
+		}, target_doc)
 	
 		return [d.fields for d in doclist]

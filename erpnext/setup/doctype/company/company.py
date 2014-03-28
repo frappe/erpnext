@@ -107,8 +107,8 @@ class Company(Document):
 			self.import_chart_of_account()
 		else:
 			self.create_standard_accounts()
-			frappe.db.set(self.doc, "receivables_group", "Accounts Receivable - " + self.abbr)
-			frappe.db.set(self.doc, "payables_group", "Accounts Payable - " + self.abbr)
+			frappe.db.set(self, "receivables_group", "Accounts Receivable - " + self.abbr)
+			frappe.db.set(self, "payables_group", "Accounts Payable - " + self.abbr)
 			
 	def import_chart_of_account(self):
 		chart = frappe.bean("Chart of Accounts", self.chart_of_accounts)
@@ -132,7 +132,7 @@ class Company(Document):
 					"group_or_ledger": "Ledger", "company": self.name})
 
 				if account and not self.get(field):
-					frappe.db.set(self.doc, field, account)
+					frappe.db.set(self, field, account)
 			
 		_set_default_accounts({
 			"default_cash_account": "Cash",
@@ -170,7 +170,7 @@ class Company(Document):
 				cc_bean.ignore_mandatory = True
 			cc_bean.insert()
 			
-		frappe.db.set(self.doc, "cost_center", "Main - " + self.abbr)
+		frappe.db.set(self, "cost_center", "Main - " + self.abbr)
 
 	def on_trash(self):
 		"""
@@ -200,7 +200,7 @@ class Company(Document):
 			frappe.throw(_("Sorry, companies cannot be merged"))
 	
 	def after_rename(self, olddn, newdn, merge=False):
-		frappe.db.set(self.doc, "company_name", newdn)
+		frappe.db.set(self, "company_name", newdn)
 
 		frappe.db.sql("""update `tabDefaultValue` set defvalue=%s 
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))

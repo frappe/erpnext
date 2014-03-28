@@ -94,7 +94,7 @@ class Supplier(TransactionBase):
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''
 		if frappe.defaults.get_global_default('supp_master_name') == 'Supplier Name':
-			frappe.db.set(self.doc, "supplier_name", newdn)
+			frappe.db.set(self, "supplier_name", newdn)
 			self.update_contact()
 			set_field = ", supplier_name=%(newdn)s"
 		self.update_supplier_address(newdn, set_field)

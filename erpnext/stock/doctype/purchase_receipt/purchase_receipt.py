@@ -229,7 +229,7 @@ class PurchaseReceipt(BuyingController):
 		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total)
 
 		# Set status as Submitted
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
 		
@@ -267,7 +267,7 @@ class PurchaseReceipt(BuyingController):
 			frappe.throw("Purchase Invoice : " + cstr(submitted[0][0]) + 
 				" has already been submitted !")
 		
-		frappe.db.set(self.doc,'status','Cancelled')
+		frappe.db.set(self,'status','Cancelled')
 
 		self.update_ordered_qty()
 		
@@ -295,14 +295,14 @@ class PurchaseReceipt(BuyingController):
 		
 	
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_purchase_invoice(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
 		bean.run_method("set_missing_values")
 
-	doclist = get_mapped_doclist("Purchase Receipt", source_name,	{
+	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice", 
 			"validation": {
@@ -322,6 +322,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 			"doctype": "Purchase Taxes and Charges", 
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]

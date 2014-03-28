@@ -21,9 +21,8 @@ class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
 class SerialNo(StockController):
-	def __init__(self, doc, doclist=None):
-		self.doc = doc
-		self.doclist = doclist or []
+	def __init__(self, arg1, arg2=None):
+		super(SerialNo, self).__init__(arg1, arg2)
 		self.via_stock_ledger = False
 
 	def validate(self):

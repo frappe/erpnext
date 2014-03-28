@@ -118,8 +118,8 @@ class Opportunity(TransactionBase):
 		
 	def declare_enquiry_lost(self,arg):
 		if not self.has_quotation():
-			frappe.db.set(self.doc, 'status', 'Lost')
-			frappe.db.set(self.doc, 'order_lost_reason', arg)
+			frappe.db.set(self, 'status', 'Lost')
+			frappe.db.set(self, 'order_lost_reason', arg)
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
@@ -130,15 +130,15 @@ class Opportunity(TransactionBase):
 		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
 		
 @frappe.whitelist()
-def make_quotation(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_quotation(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		quotation = frappe.bean(target)
 		quotation.run_method("onload_post_render")
 		quotation.run_method("calculate_taxes_and_totals")
 	
-	doclist = get_mapped_doclist("Opportunity", source_name, {
+	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Quotation", 
 			"field_map": {
@@ -159,6 +159,6 @@ def make_quotation(source_name, target_doclist=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 		
 	return [d.fields for d in doclist]

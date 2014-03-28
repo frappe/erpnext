@@ -29,7 +29,7 @@ class StockLedgerEntry(DocListController):
 		self.actual_amt_check()
 		
 		from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
-		process_serial_no(self.doc)
+		process_serial_no(self)
 
 	#check for item quantity available in stock
 	def actual_amt_check(self):

@@ -40,7 +40,7 @@ class Newsletter(Document):
 			"doctype": self.send_to_doctype
 		}))
 
-		frappe.db.set(self.doc, "email_sent", 1)
+		frappe.db.set(self, "email_sent", 1)
 	
 	def get_recipients(self):
 		self.email_field = None

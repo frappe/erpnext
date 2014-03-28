@@ -33,14 +33,14 @@ class CustomerIssue(TransactionBase):
 			msgprint("Maintenance Visit No. "+lst1+" already created against this customer issue. So can not be Cancelled")
 			raise Exception
 		else:
-			frappe.db.set(self.doc, 'status', 'Cancelled')
+			frappe.db.set(self, 'status', 'Cancelled')
 
 	def on_update(self):
 		pass
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_maintenance_visit(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	visit = frappe.db.sql("""select t1.name 
 		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 
@@ -48,7 +48,7 @@ def make_maintenance_visit(source_name, target_doclist=None):
 		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
 		
 	if not visit:
-		doclist = get_mapped_doclist("Customer Issue", source_name, {
+		doclist = get_mapped_doc("Customer Issue", source_name, {
 			"Customer Issue": {
 				"doctype": "Maintenance Visit", 
 				"field_map": {
@@ -57,6 +57,6 @@ def make_maintenance_visit(source_name, target_doclist=None):
 					"name": "prevdoc_docname"
 				}
 			}
-		}, target_doclist)
+		}, target_doc)
 	
 		return [d.fields for d in doclist]

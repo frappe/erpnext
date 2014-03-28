@@ -374,7 +374,7 @@ class SalesInvoice(SellingController):
 			frappe.db.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
 					and parent = %s""", (self.amended_from,	self.c_form_no))
 
-			frappe.db.set(self.doc, 'c_form_no', '')
+			frappe.db.set(self, 'c_form_no', '')
 			
 	def update_current_stock(self):
 		for d in self.get('entries'):
@@ -422,14 +422,14 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) == 1:
 			if flt(self.paid_amount) == 0:
 				if self.cash_bank_account: 
-					frappe.db.set(self.doc, 'paid_amount', 
+					frappe.db.set(self, 'paid_amount', 
 						(flt(self.grand_total) - flt(self.write_off_amount)))
 				else:
 					# show message that the amount is not paid
-					frappe.db.set(self.doc,'paid_amount',0)
+					frappe.db.set(self,'paid_amount',0)
 					frappe.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
 		else:
-			frappe.db.set(self.doc,'paid_amount',0)
+			frappe.db.set(self,'paid_amount',0)
 		
 	def check_prev_docstatus(self):
 		for d in self.get('entries'):
@@ -609,7 +609,7 @@ class SalesInvoice(SellingController):
 	def convert_to_recurring(self):
 		if self.convert_into_recurring_invoice:
 			if not self.recurring_id:
-				frappe.db.set(self.doc, "recurring_id",
+				frappe.db.set(self, "recurring_id",
 					make_autoname("RECINV/.#####"))
 			
 			self.set_next_date()
@@ -645,7 +645,7 @@ class SalesInvoice(SellingController):
 		next_date = get_next_date(self.posting_date,
 			month_map[self.recurring_type], cint(self.repeat_on_day_of_month))
 		
-		frappe.db.set(self.doc, 'next_date', next_date)
+		frappe.db.set(self, 'next_date', next_date)
 	
 def get_next_date(dt, mcount, day=None):
 	dt = getdate(dt)
@@ -794,8 +794,8 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_delivery_note(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
@@ -808,7 +808,7 @@ def make_delivery_note(source_name, target_doclist=None):
 			flt(source_doc.rate)
 		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
 	
-	doclist = get_mapped_doclist("Sales Invoice", source_name, 	{
+	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
 		"Sales Invoice": {
 			"doctype": "Delivery Note", 
 			"validation": {
@@ -835,6 +835,6 @@ def make_delivery_note(source_name, target_doclist=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 	
 	return [d.fields for d in doclist]

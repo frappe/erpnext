@@ -172,7 +172,7 @@ class SellingController(StockController):
 			self.net_total += item.base_amount
 			self.net_total_export += item.amount
 		
-		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
+		self.round_floats_in(self, ["net_total", "net_total_export"])
 				
 	def calculate_totals(self):
 		self.grand_total = flt(self.tax_doclist and \
@@ -223,7 +223,7 @@ class SellingController(StockController):
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
 		if self.doctype == "Sales Invoice" and self.docstatus == 0:
-			self.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount",
+			self.round_floats_in(self, ["grand_total", "total_advance", "write_off_amount",
 				"paid_amount"])
 			total_amount_to_pay = self.grand_total - self.write_off_amount
 			self.outstanding_amount = flt(total_amount_to_pay - self.total_advance \
@@ -231,7 +231,7 @@ class SellingController(StockController):
 		
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):
-			self.round_floats_in(self.doc, ["net_total", "commission_rate"])
+			self.round_floats_in(self, ["net_total", "commission_rate"])
 			if self.commission_rate > 100.0:
 				msgprint(_(self.meta.get_label("commission_rate")) + " " + 
 					_("cannot be greater than 100"), raise_exception=True)

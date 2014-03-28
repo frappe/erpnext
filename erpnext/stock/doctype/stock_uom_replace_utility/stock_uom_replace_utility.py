@@ -10,9 +10,6 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 class StockUomReplaceUtility(Document):
-	def __init__(self, d, dl=[]):
-		self.doc, self.doclist = d,dl
-
 	def validate_mandatory(self):
 		if not cstr(self.item_code):
 			msgprint("Please Enter an Item.")

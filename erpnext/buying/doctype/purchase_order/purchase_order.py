@@ -135,7 +135,7 @@ class PurchaseOrder(BuyingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		# step 1:=> Set Status
-		frappe.db.set(self.doc,'status',cstr(status))
+		frappe.db.set(self,'status',cstr(status))
 
 		# step 2:=> Update Bin
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
@@ -154,7 +154,7 @@ class PurchaseOrder(BuyingController):
 		
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 		
-		frappe.db.set(self.doc,'status','Submitted')
+		frappe.db.set(self,'status','Submitted')
 	 
 	def on_cancel(self):
 		pc_obj = get_obj(dt = 'Purchase Common')		
@@ -172,7 +172,7 @@ class PurchaseOrder(BuyingController):
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception
 
-		frappe.db.set(self.doc,'status','Cancelled')
+		frappe.db.set(self,'status','Cancelled')
 		self.update_prevdoc_status()
 		self.update_bin( is_submit = 0, is_stopped = 0)
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
@@ -181,8 +181,8 @@ class PurchaseOrder(BuyingController):
 		pass
 		
 @frappe.whitelist()
-def make_purchase_receipt(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_purchase_receipt(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
@@ -194,7 +194,7 @@ def make_purchase_receipt(source_name, target_doclist=None):
 		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
 		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.base_rate)
 
-	doclist = get_mapped_doclist("Purchase Order", source_name,	{
+	doclist = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
 			"doctype": "Purchase Receipt", 
 			"validation": {
@@ -215,13 +215,13 @@ def make_purchase_receipt(source_name, target_doclist=None):
 			"doctype": "Purchase Taxes and Charges", 
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_purchase_invoice(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
@@ -233,7 +233,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 		if flt(obj.base_rate):
 			target.qty = target.base_amount / flt(obj.base_rate)
 
-	doclist = get_mapped_doclist("Purchase Order", source_name,	{
+	doclist = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
 			"doctype": "Purchase Invoice", 
 			"validation": {
@@ -253,6 +253,6 @@ def make_purchase_invoice(source_name, target_doclist=None):
 			"doctype": "Purchase Taxes and Charges", 
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]

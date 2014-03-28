@@ -45,8 +45,8 @@ class Bom(Document):
 		self.manage_default_bom()
 
 	def on_cancel(self):
-		frappe.db.set(self.doc, "is_active", 0)
-		frappe.db.set(self.doc, "is_default", 0)
+		frappe.db.set(self, "is_active", 0)
+		frappe.db.set(self, "is_default", 0)
 
 		# check if used in any other bom
 		self.validate_bom_links()
@@ -174,12 +174,12 @@ class Bom(Document):
 		"""
 		if self.is_default and self.is_active:
 			from frappe.model.utils import set_default
-			set_default(self.doc, "item")
+			set_default(self, "item")
 			frappe.db.set_value("Item", self.item, "default_bom", self.name)
 		
 		else:
 			if not self.is_active:
-				frappe.db.set(self.doc, "is_default", 0)
+				frappe.db.set(self, "is_default", 0)
 			
 			frappe.db.sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
 				 (self.item, self.name))

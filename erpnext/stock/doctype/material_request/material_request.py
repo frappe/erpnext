@@ -100,7 +100,7 @@ class MaterialRequest(BuyingController):
 				update_bin(args)		
 		
 	def on_submit(self):
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 		self.update_bin(is_submit = 1, is_stopped = 0)
 	
 	def check_modified_date(self):
@@ -118,7 +118,7 @@ class MaterialRequest(BuyingController):
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
 
 		# Step 2:=> Set status 
-		frappe.db.set(self.doc, 'status', cstr(status))
+		frappe.db.set(self, 'status', cstr(status))
 		
 		# Step 3:=> Acknowledge User
 		msgprint(self.doctype + ": " + self.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
@@ -137,7 +137,7 @@ class MaterialRequest(BuyingController):
 		self.update_bin(is_submit = 0, is_stopped = (cstr(self.status) == 'Stopped') and 1 or 0)
 		
 		# Step 5:=> Set Status
-		frappe.db.set(self.doc,'status','Cancelled')
+		frappe.db.set(self,'status','Cancelled')
 		
 	def update_completed_qty(self, mr_items=None):
 		if self.material_request_type != "Transfer":
@@ -217,8 +217,8 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 			"posting_date": bean.posting_date,
 		})
 
-def set_missing_values(source, target_doclist):
-	po = frappe.bean(target_doclist)
+def set_missing_values(source, target_doc):
+	po = frappe.bean(target_doc)
 	po.run_method("set_missing_values")
 	
 def update_item(obj, target, source_parent):
@@ -226,10 +226,10 @@ def update_item(obj, target, source_parent):
 	target.qty = flt(obj.qty) - flt(obj.ordered_qty)
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_purchase_order(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 
-	doclist = get_mapped_doclist("Material Request", source_name, 	{
+	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {
 			"doctype": "Purchase Order", 
 			"validation": {
@@ -248,34 +248,34 @@ def make_purchase_order(source_name, target_doclist=None):
 			],
 			"postprocess": update_item
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_purchase_order_based_on_supplier(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
-	if target_doclist:
-		if isinstance(target_doclist, basestring):
+def make_purchase_order_based_on_supplier(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
+	if target_doc:
+		if isinstance(target_doc, basestring):
 			import json
-			target_doclist = frappe.doclist(json.loads(target_doclist))
-		target_doclist = target_doclist.get({"parentfield": ["!=", "po_details"]})
+			target_doc = frappe.doclist(json.loads(target_doc))
+		target_doc = target_doc.get({"parentfield": ["!=", "po_details"]})
 		
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
 	
-	def postprocess(source, target_doclist):
-		target_doclist[0].supplier = source_name
-		set_missing_values(source, target_doclist)
+	def postprocess(source, target_doc):
+		target_doc[0].supplier = source_name
+		set_missing_values(source, target_doc)
 		
-		po_items = target_doclist.get({"parentfield": "po_details"})
-		target_doclist = target_doclist.get({"parentfield": ["!=", "po_details"]}) + \
+		po_items = target_doc.get({"parentfield": "po_details"})
+		target_doc = target_doc.get({"parentfield": ["!=", "po_details"]}) + \
 			[d for d in po_items 
 				if d.get("item_code") in supplier_items and d.get("qty") > 0]
 		
-		return target_doclist
+		return target_doc
 		
 	for mr in material_requests:
-		target_doclist = get_mapped_doclist("Material Request", mr, 	{
+		target_doc = get_mapped_doc("Material Request", mr, 	{
 			"Material Request": {
 				"doctype": "Purchase Order", 
 			}, 
@@ -290,9 +290,9 @@ def make_purchase_order_based_on_supplier(source_name, target_doclist=None):
 				],
 				"postprocess": update_item
 			}
-		}, target_doclist, postprocess)
+		}, target_doc, postprocess)
 	
-	return [d.fields for d in target_doclist]
+	return [d.fields for d in target_doc]
 	
 def get_material_requests_based_on_supplier(supplier):
 	supplier_items = [d[0] for d in frappe.db.get_values("Item", 
@@ -309,10 +309,10 @@ def get_material_requests_based_on_supplier(supplier):
 	return material_requests, supplier_items
 	
 @frappe.whitelist()
-def make_supplier_quotation(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_supplier_quotation(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 
-	doclist = get_mapped_doclist("Material Request", source_name, {
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Supplier Quotation", 
 			"validation": {
@@ -328,13 +328,13 @@ def make_supplier_quotation(source_name, target_doclist=None):
 				"parenttype": "prevdoc_doctype"
 			}
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_stock_entry(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
@@ -346,7 +346,7 @@ def make_stock_entry(source_name, target_doclist=None):
 		se = frappe.bean(target)
 		se.run_method("get_stock_and_rate")
 
-	doclist = get_mapped_doclist("Material Request", source_name, {
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Stock Entry", 
 			"validation": {
@@ -364,6 +364,6 @@ def make_stock_entry(source_name, target_doclist=None):
 			},
 			"postprocess": update_item
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]

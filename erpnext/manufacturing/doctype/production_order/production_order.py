@@ -94,20 +94,20 @@ class ProductionOrder(Document):
 
 	def update_status(self, status):
 		if status == 'Stopped':
-			frappe.db.set(self.doc, 'status', cstr(status))
+			frappe.db.set(self, 'status', cstr(status))
 		else:
 			if flt(self.qty) == flt(self.produced_qty):
-				frappe.db.set(self.doc, 'status', 'Completed')
+				frappe.db.set(self, 'status', 'Completed')
 			if flt(self.qty) > flt(self.produced_qty):
-				frappe.db.set(self.doc, 'status', 'In Process')
+				frappe.db.set(self, 'status', 'In Process')
 			if flt(self.produced_qty) == 0:
-				frappe.db.set(self.doc, 'status', 'Submitted')
+				frappe.db.set(self, 'status', 'Submitted')
 
 
 	def on_submit(self):
 		if not self.wip_warehouse:
 			frappe.throw(_("WIP Warehouse required before Submit"))
-		frappe.db.set(self.doc,'status', 'Submitted')
+		frappe.db.set(self,'status', 'Submitted')
 		self.update_planned_qty(self.qty)
 		
 
@@ -119,7 +119,7 @@ class ProductionOrder(Document):
 			frappe.throw("""Submitted Stock Entry %s exists against this production order. 
 				Hence can not be cancelled.""" % stock_entry[0][0])
 
-		frappe.db.set(self.doc,'status', 'Cancelled')
+		frappe.db.set(self,'status', 'Cancelled')
 		self.update_planned_qty(-self.qty)
 
 	def update_planned_qty(self, qty):

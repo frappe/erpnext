@@ -9,7 +9,7 @@ from frappe.model.bean import getlist
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 import frappe.defaults
-from frappe.model.mapper import get_mapped_doclist
+from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
@@ -163,7 +163,7 @@ class DeliveryNote(SellingController):
 		self.make_gl_entries()
 
 		# set DN status
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 
 
 	def on_cancel(self):
@@ -174,7 +174,7 @@ class DeliveryNote(SellingController):
 		
 		self.update_stock_ledger()
 
-		frappe.db.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 		
 		self.make_cancel_gl_entries()
@@ -285,7 +285,7 @@ def get_invoiced_qty_map(delivery_note):
 	return invoiced_qty_map
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doclist=None):
+def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	
 	def update_accounts(source, target):
@@ -305,7 +305,7 @@ def make_sales_invoice(source_name, target_doclist=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
 	
-	doclist = get_mapped_doclist("Delivery Note", source_name, 	{
+	doclist = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
 			"doctype": "Sales Invoice", 
 			"validation": {
@@ -334,17 +334,17 @@ def make_sales_invoice(source_name, target_doclist=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doclist, update_accounts)
+	}, target_doc, update_accounts)
 	
 	return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_installation_note(source_name, target_doclist=None):
+def make_installation_note(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
 	
-	doclist = get_mapped_doclist("Delivery Note", source_name, 	{
+	doclist = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
 			"doctype": "Installation Note", 
 			"validation": {
@@ -361,6 +361,6 @@ def make_installation_note(source_name, target_doclist=None):
 			"postprocess": update_item,
 			"condition": lambda doc: doc.installed_qty < doc.qty
 		}
-	}, target_doclist)
+	}, target_doc)
 
 	return [d.fields for d in doclist]

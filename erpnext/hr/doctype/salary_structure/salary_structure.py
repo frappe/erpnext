@@ -70,11 +70,11 @@ class SalaryStructure(Document):
 		self.validate_amount()
 		
 @frappe.whitelist()
-def make_salary_slip(source_name, target_doclist=None):
-	return [d.fields for d in get_mapped_doclist(source_name, target_doclist)]
+def make_salary_slip(source_name, target_doc=None):
+	return [d.fields for d in get_mapped_doc(source_name, target_doc)]
 	
-def get_mapped_doclist(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def get_mapped_doc(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def postprocess(source, target):
 		sal_slip = frappe.bean(target)
@@ -82,7 +82,7 @@ def get_mapped_doclist(source_name, target_doclist=None):
 		sal_slip.run_method("get_leave_details")
 		sal_slip.run_method("calculate_net_pay")
 
-	doclist = get_mapped_doclist("Salary Structure", source_name, {
+	doclist = get_mapped_doc("Salary Structure", source_name, {
 		"Salary Structure": {
 			"doctype": "Salary Slip", 
 			"field_map": {
@@ -107,6 +107,6 @@ def get_mapped_doclist(source_name, target_doclist=None):
 			],
 			"add_if_empty": True
 		}
-	}, target_doclist, postprocess)
+	}, target_doc, postprocess)
 
 	return doclist

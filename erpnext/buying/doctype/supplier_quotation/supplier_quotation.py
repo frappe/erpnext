@@ -7,9 +7,8 @@ from frappe.model.code import get_obj
 
 from erpnext.controllers.buying_controller import BuyingController
 class SupplierQuotation(BuyingController):
-	def __init__(self, doc, doclist=None):
-		self.doc, self.doclist = doc, doclist or []
-		self.tname, self.fname = "Supplier Quotation Item", "quotation_items"
+	tname = "Supplier Quotation Item"
+	fname = "quotation_items"
 	
 	def validate(self):
 		super(DocType, self).validate()
@@ -26,10 +25,10 @@ class SupplierQuotation(BuyingController):
 		self.validate_uom_is_integer("uom", "qty")
 
 	def on_submit(self):
-		frappe.db.set(self.doc, "status", "Submitted")
+		frappe.db.set(self, "status", "Submitted")
 
 	def on_cancel(self):
-		frappe.db.set(self.doc, "status", "Cancelled")
+		frappe.db.set(self, "status", "Cancelled")
 		
 	def on_trash(self):
 		pass
@@ -53,8 +52,8 @@ class SupplierQuotation(BuyingController):
 		pc.validate_for_items(self)
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_purchase_order(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
@@ -64,7 +63,7 @@ def make_purchase_order(source_name, target_doclist=None):
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
 
-	doclist = get_mapped_doclist("Supplier Quotation", source_name,		{
+	doclist = get_mapped_doc("Supplier Quotation", source_name,		{
 		"Supplier Quotation": {
 			"doctype": "Purchase Order", 
 			"validation": {
@@ -88,6 +87,6 @@ def make_purchase_order(source_name, target_doclist=None):
 			"doctype": "Purchase Taxes and Charges", 
 			"add_if_empty": True
 		},
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 
 	return [d.fields for d in doclist]

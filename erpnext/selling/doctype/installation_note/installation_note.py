@@ -100,12 +100,12 @@ class InstallationNote(TransactionBase):
 			msgprint("Please fetch items from Delivery Note selected", raise_exception=1)
 	
 	def on_update(self):
-		frappe.db.set(self.doc, 'status', 'Draft')
+		frappe.db.set(self, 'status', 'Draft')
 	
 	def on_submit(self):
 		self.validate_serial_no()
 		self.update_prevdoc_status()
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		for d in self.get('installed_item_details'):
@@ -115,4 +115,4 @@ class InstallationNote(TransactionBase):
 					frappe.db.set_value("Serial No", sr_no, "status", "Delivered")
 
 		self.update_prevdoc_status()
-		frappe.db.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self, 'status', 'Cancelled')

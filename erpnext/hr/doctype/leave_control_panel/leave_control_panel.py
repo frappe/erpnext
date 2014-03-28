@@ -14,11 +14,6 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist	 
-	
-
 	def get_employees(self):		
 		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"],[self.grade,"grade"]]
 		condition = "where "

@@ -103,7 +103,7 @@ class BuyingController(StockController):
 			self.net_total += item.base_amount
 			self.net_total_import += item.amount
 			
-		self.round_floats_in(self.doc, ["net_total", "net_total_import"])
+		self.round_floats_in(self, ["net_total", "net_total_import"])
 		
 	def calculate_totals(self):
 		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist 

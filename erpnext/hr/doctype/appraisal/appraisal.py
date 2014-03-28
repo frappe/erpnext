@@ -6,12 +6,11 @@ import frappe
 
 from frappe.utils import cstr, flt, getdate
 from frappe.model.bean import getlist
-from frappe import msgprint
-
+from frappe import msgprint, _
+from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
 class Appraisal(Document):
-
 	def validate(self):
 		if not self.status:
 			self.status = "Draft"
@@ -21,26 +20,23 @@ class Appraisal(Document):
 		self.calculate_total()
 
 	def get_employee_name(self):
-		emp_nm = frappe.db.sql("select employee_name from `tabEmployee` where name=%s", self.employee)
-		emp_nm= emp_nm and emp_nm[0][0] or ''
-		self.employee_name = emp_nm
-		return emp_nm
+		self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
+		return self.employee_name
 		
 	def validate_dates(self):
 		if getdate(self.start_date) > getdate(self.end_date):
-			msgprint("End Date can not be less than Start Date")
-			raise Exception
+			frappe.throw(_("End Date can not be less than Start Date"))
 	
 	def validate_existing_appraisal(self):
 		chk = frappe.db.sql("""select name from `tabAppraisal` where employee=%s 
 			and (status='Submitted' or status='Completed') 
 			and ((start_date>=%s and start_date<=%s) 
-			or (end_date>=%s and end_date<=%s))""",(self.employee,self.start_date,self.end_date,self.start_date,self.end_date))
+			or (end_date>=%s and end_date<=%s))""",
+			(self.employee,self.start_date,self.end_date,self.start_date,self.end_date))
 		if chk:
-			msgprint("You have already created Appraisal "\
+			frappe.throw("You have already created Appraisal "\
 				+cstr(chk[0][0])+" in the current date range for employee "\
 				+cstr(self.employee_name))
-			raise Exception
 	
 	def calculate_total(self):
 		total, total_w  = 0, 0
@@ -61,22 +57,20 @@ class Appraisal(Document):
 		self.total_score = total
 			
 	def on_submit(self):
-		frappe.db.set(self.doc, 'status', 'Submitted')
+		frappe.db.set(self, 'status', 'Submitted')
 	
 	def on_cancel(self): 
-		frappe.db.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self, 'status', 'Cancelled')
 
 @frappe.whitelist()
-def fetch_appraisal_template(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
-	
-	doclist = get_mapped_doclist("Appraisal Template", source_name, {
+def fetch_appraisal_template(source_name, target_doc=None):
+	target_doc = get_mapped_doc("Appraisal Template", source_name, {
 		"Appraisal Template": {
 			"doctype": "Appraisal", 
 		}, 
 		"Appraisal Template Goal": {
 			"doctype": "Appraisal Goal", 
 		}
-	}, target_doclist)
+	}, target_doc)
 
-	return [d.fields for d in doclist]
+	return target_doc

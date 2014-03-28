@@ -9,9 +9,6 @@ from frappe import msgprint
 from frappe.model.document import Document
 
 class LeaveAllocation(Document):
-	def __init__(self, doc, doclist):
-		self.doc, self.doclist = doc, doclist
-		
 	def validate(self):
 		self.validate_new_leaves_allocated_value()
 		self.check_existing_leave_allocation()
@@ -84,7 +81,7 @@ class LeaveAllocation(Document):
 			self.leave_type)
 		cf = cf and cint(cf[0][0]) or 0
 		if not cf:
-			frappe.db.set(self.doc,'carry_forward',0)
+			frappe.db.set(self,'carry_forward',0)
 			msgprint("Sorry! You cannot carry forward %s" % (self.leave_type),
 				raise_exception=1)
 
@@ -107,8 +104,8 @@ class LeaveAllocation(Document):
 
 	def get_total_allocated_leaves(self):
 		leave_det = self.get_carry_forwarded_leaves()
-		frappe.db.set(self.doc,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
-		frappe.db.set(self.doc,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
+		frappe.db.set(self,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
+		frappe.db.set(self,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
 
 	def check_for_leave_application(self):
 		exists = frappe.db.sql("""select name from `tabLeave Application`

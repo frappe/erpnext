@@ -71,11 +71,11 @@ class Lead(SellingController):
 			"status": ["!=", "Lost"]})
 
 @frappe.whitelist()
-def make_customer(source_name, target_doclist=None):
-	return _make_customer(source_name, target_doclist)
+def make_customer(source_name, target_doc=None):
+	return _make_customer(source_name, target_doc)
 
-def _make_customer(source_name, target_doclist=None, ignore_permissions=False):
-	from frappe.model.mapper import get_mapped_doclist
+def _make_customer(source_name, target_doc=None, ignore_permissions=False):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
 		if source.company_name:
@@ -87,7 +87,7 @@ def _make_customer(source_name, target_doclist=None, ignore_permissions=False):
 			
 		target[0].customer_group = frappe.db.get_default("customer_group")
 			
-	doclist = get_mapped_doclist("Lead", source_name, 
+	doclist = get_mapped_doc("Lead", source_name, 
 		{"Lead": {
 			"doctype": "Customer",
 			"field_map": {
@@ -96,15 +96,15 @@ def _make_customer(source_name, target_doclist=None, ignore_permissions=False):
 				"contact_no": "phone_1",
 				"fax": "fax_1"
 			}
-		}}, target_doclist, set_missing_values, ignore_permissions=ignore_permissions)
+		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 		
 	return [d.fields for d in doclist]
 	
 @frappe.whitelist()
-def make_opportunity(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_opportunity(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 		
-	doclist = get_mapped_doclist("Lead", source_name, 
+	doclist = get_mapped_doc("Lead", source_name, 
 		{"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {
@@ -116,7 +116,7 @@ def make_opportunity(source_name, target_doclist=None):
 				"email_id": "contact_email",
 				"mobile_no": "contact_mobile"
 			}
-		}}, target_doclist)
+		}}, target_doc)
 		
 	return [d if isinstance(d, dict) else d.fields for d in doclist]
 	

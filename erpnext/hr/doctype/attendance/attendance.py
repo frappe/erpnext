@@ -6,8 +6,6 @@ import frappe
 
 from frappe.utils import getdate, nowdate
 from frappe import msgprint, _
-
-
 from frappe.model.document import Document
 
 class Attendance(Document):
@@ -58,4 +56,4 @@ class Attendance(Document):
 		# this is done because sometimes user entered wrong employee name 
 		# while uploading employee attendance
 		employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
-		frappe.db.set(self.doc, 'employee_name', employee_name)
+		frappe.db.set(self, 'employee_name', employee_name)

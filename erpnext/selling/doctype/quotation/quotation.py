@@ -59,8 +59,8 @@ class Quotation(SellingController):
 	
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
-			frappe.db.set(self.doc, 'status', 'Lost')
-			frappe.db.set(self.doc, 'order_lost_reason', arg)
+			frappe.db.set(self, 'status', 'Lost')
+			frappe.db.set(self, 'order_lost_reason', arg)
 			self.update_opportunity()
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
@@ -95,11 +95,11 @@ class Quotation(SellingController):
 		
 	
 @frappe.whitelist()
-def make_sales_order(source_name, target_doclist=None):
-	return _make_sales_order(source_name, target_doclist)
+def make_sales_order(source_name, target_doc=None):
+	return _make_sales_order(source_name, target_doc)
 	
-def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False):
-	from frappe.model.mapper import get_mapped_doclist
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
+	from frappe.model.mapper import get_mapped_doc
 	
 	customer = _make_customer(source_name, ignore_permissions)
 	
@@ -112,7 +112,7 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 		si.ignore_permissions = ignore_permissions
 		si.run_method("onload_post_render")
 			
-	doclist = get_mapped_doclist("Quotation", source_name, {
+	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order", 
 				"validation": {
@@ -133,7 +133,7 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 				"doctype": "Sales Team",
 				"add_if_empty": True
 			}
-		}, target_doclist, set_missing_values, ignore_permissions=ignore_permissions)
+		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 		
 	# postprocess: fetch shipping address, set missing values
 		

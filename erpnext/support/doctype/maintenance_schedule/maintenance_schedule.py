@@ -80,7 +80,7 @@ class MaintenanceSchedule(TransactionBase):
 						"ref_name": self.name
 					}).insert(ignore_permissions=1)
 
-		frappe.db.set(self.doc, 'status', 'Submitted')		
+		frappe.db.set(self, 'status', 'Submitted')		
 
 	def create_schedule_list(self, start_date, end_date, no_of_visit, sales_person):
 		schedule_list = []		
@@ -199,7 +199,7 @@ class MaintenanceSchedule(TransactionBase):
 		self.validate_sales_order()
 	
 	def on_update(self):
-		frappe.db.set(self.doc, 'status', 'Draft')
+		frappe.db.set(self, 'status', 'Draft')
 
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
@@ -261,20 +261,20 @@ class MaintenanceSchedule(TransactionBase):
 			if d.serial_no:
 				serial_nos = get_valid_serial_nos(d.serial_no)
 				self.update_amc_date(serial_nos)
-		frappe.db.set(self.doc, 'status', 'Cancelled')
+		frappe.db.set(self, 'status', 'Cancelled')
 		delete_events(self.doctype, self.name)
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_maintenance_visit(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def update_status(source, target, parent):
 		target.maintenance_type = "Scheduled"
 	
-	doclist = get_mapped_doclist("Maintenance Schedule", source_name, {
+	doclist = get_mapped_doc("Maintenance Schedule", source_name, {
 		"Maintenance Schedule": {
 			"doctype": "Maintenance Visit", 
 			"field_map": {
@@ -293,6 +293,6 @@ def make_maintenance_visit(source_name, target_doclist=None):
 				"sales_person": "service_person"
 			}
 		}
-	}, target_doclist)
+	}, target_doc)
 
 	return [d.fields for d in doclist]

@@ -128,7 +128,7 @@ class Customer(TransactionBase):
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''
 		if frappe.defaults.get_global_default('cust_master_name') == 'Customer Name':
-			frappe.db.set(self.doc, "customer_name", newdn)
+			frappe.db.set(self, "customer_name", newdn)
 			self.update_contact()
 			set_field = ", customer_name=%(newdn)s"
 		self.update_customer_address(newdn, set_field)
