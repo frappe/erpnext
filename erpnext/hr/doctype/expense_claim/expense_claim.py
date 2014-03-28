@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.model.bean import getlist
-from frappe import msgprint
+from frappe import _
 
 from frappe.model.document import Document
 
@@ -26,5 +26,4 @@ class ExpenseClaim(Document):
 			
 	def validate_exp_details(self):
 		if not self.get('expense_voucher_details'):
-			msgprint("Please add expense voucher details")
-			raise Exception
+			frappe.throw(_("Please add expense voucher details"))

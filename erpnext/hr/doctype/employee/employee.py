@@ -78,7 +78,7 @@ class Employee(DocListController):
 			from frappe.utils.user import add_role
 			add_role(self.user_id, "Employee")
 			
-		user_wrapper = frappe.bean("User", self.user_id)
+		user_wrapper = frappe.get_doc("User", self.user_id)
 		
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name:
@@ -182,12 +182,12 @@ class Employee(DocListController):
 			ends_on = self.date_of_birth + " 00:15:00"
 
 			if birthday_event:
-				event = frappe.bean("Event", birthday_event[0][0])
+				event = frappe.get_doc("Event", birthday_event[0][0])
 				event.starts_on = starts_on
 				event.ends_on = ends_on
 				event.save()
 			else:
-				frappe.bean({
+				frappe.get_doc({
 					"doctype": "Event",
 					"subject": _("Birthday") + ": " + self.employee_name,
 					"description": _("Happy Birthday!") + " " + self.employee_name,

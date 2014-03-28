@@ -31,8 +31,8 @@ class TestLeaveApplication(unittest.TestCase):
 		employee.save()
 		frappe.set_user(temp_session_user)
 	
-	def get_application(self, doclist):
-		application = frappe.bean(copy=doclist)
+	def get_application(self, doc):
+		application = frappe.copy_doc(doc)
 		application.from_date = "2013-01-01"
 		application.to_date = "2013-01-05"
 		return application
