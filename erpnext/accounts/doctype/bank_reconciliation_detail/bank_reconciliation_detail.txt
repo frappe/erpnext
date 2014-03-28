@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:37", 
+ "creation": "2013-02-22 01:27:37.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -101,7 +101,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:55", 
+ "modified": "2013-12-20 19:22:55.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation Detail", 

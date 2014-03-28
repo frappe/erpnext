@@ -1,6 +1,6 @@
 {
  "autoname": "SOD/.#####", 
- "creation": "2013-03-07 11:42:58", 
+ "creation": "2013-03-07 11:42:58.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -439,7 +439,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:20:05", 
+ "modified": "2014-02-28 11:20:05.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order Item", 

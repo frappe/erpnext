@@ -4,7 +4,7 @@
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
- "creation": "2013-04-09 11:43:55", 
+ "creation": "2013-04-09 11:43:55.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -580,7 +580,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-02-26 10:59:19", 
+ "modified": "2014-02-26 10:59:19.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

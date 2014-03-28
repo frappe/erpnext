@@ -1,7 +1,7 @@
 {
  "allow_attach": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-03-07 11:55:06", 
+ "creation": "2013-03-07 11:55:06.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -136,7 +136,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2013-12-20 19:23:58", 
+ "modified": "2013-12-20 19:23:58.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 

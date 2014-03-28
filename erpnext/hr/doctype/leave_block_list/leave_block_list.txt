@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:leave_block_list_name", 
- "creation": "2013-02-18 17:43:12", 
+ "creation": "2013-02-18 17:43:12.000000", 
  "description": "Block Holidays on important days.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -68,7 +68,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2013-12-20 19:24:13", 
+ "modified": "2013-12-20 19:24:13.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Block List", 

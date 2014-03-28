@@ -1,6 +1,6 @@
 {
  "autoname": "INVD.######", 
- "creation": "2013-06-04 11:02:19", 
+ "creation": "2013-06-04 11:02:19.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -456,7 +456,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:04:19", 
+ "modified": "2014-02-28 11:04:19.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

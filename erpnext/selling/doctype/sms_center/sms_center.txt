@@ -1,7 +1,7 @@
 {
  "allow_attach": 0, 
  "allow_copy": 1, 
- "creation": "2013-01-10 16:34:22", 
+ "creation": "2013-01-10 16:34:22.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -105,7 +105,7 @@
  "idx": 1, 
  "in_create": 0, 
  "issingle": 1, 
- "modified": "2014-01-30 15:29:04", 
+ "modified": "2014-01-30 15:29:04.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "SMS Center", 

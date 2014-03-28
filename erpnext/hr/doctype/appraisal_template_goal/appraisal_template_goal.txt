@@ -1,6 +1,6 @@
 {
  "autoname": "KSHEET.#####", 
- "creation": "2013-02-22 01:27:44", 
+ "creation": "2013-02-22 01:27:44.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -32,7 +32,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:54", 
+ "modified": "2013-12-20 19:22:54.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal Template Goal", 

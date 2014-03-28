@@ -1,6 +1,6 @@
 {
  "autoname": "field:currency_name", 
- "creation": "2013-01-28 10:06:02", 
+ "creation": "2013-01-28 10:06:02.000000", 
  "description": "**Currency** Master", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -58,7 +58,7 @@
  "icon": "icon-bitcoin", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-01-20 17:48:31", 
+ "modified": "2014-01-20 17:48:31.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency", 

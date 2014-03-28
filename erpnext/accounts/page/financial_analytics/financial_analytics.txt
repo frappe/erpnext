@@ -1,10 +1,10 @@
 {
- "creation": "2013-01-27 16:30:52", 
+ "creation": "2013-01-27 16:30:52.000000", 
  "docstatus": 0, 
  "doctype": "Page", 
  "icon": "icon-bar-chart", 
  "idx": 1, 
- "modified": "2013-07-11 14:42:16", 
+ "modified": "2013-07-11 14:42:16.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "financial-analytics", 

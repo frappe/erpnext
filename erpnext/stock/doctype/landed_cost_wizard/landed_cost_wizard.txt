@@ -1,5 +1,5 @@
 {
- "creation": "2013-01-22 16:50:39", 
+ "creation": "2013-01-22 16:50:39.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -49,7 +49,7 @@
  "icon": "icon-magic", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2013-12-20 19:23:18", 
+ "modified": "2013-12-20 19:23:18.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Wizard", 

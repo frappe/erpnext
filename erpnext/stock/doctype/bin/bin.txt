@@ -1,6 +1,6 @@
 {
  "autoname": "BIN/.#######", 
- "creation": "2013-01-10 16:34:25", 
+ "creation": "2013-01-10 16:34:25.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -162,7 +162,7 @@
  "hide_toolbar": 1, 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2013-12-20 19:23:56", 
+ "modified": "2013-12-20 19:23:56.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Bin", 

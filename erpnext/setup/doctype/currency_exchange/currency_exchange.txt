@@ -1,6 +1,6 @@
 {
  "allow_import": 1, 
- "creation": "2013-06-20 15:40:29", 
+ "creation": "2013-06-20 15:40:29.000000", 
  "description": "Specify Exchange Rate to convert one currency into another", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -32,7 +32,7 @@
  ], 
  "icon": "icon-exchange", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:31", 
+ "modified": "2014-01-20 17:48:31.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency Exchange", 

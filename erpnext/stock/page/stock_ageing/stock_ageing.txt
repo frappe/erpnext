@@ -1,10 +1,10 @@
 {
- "creation": "2012-09-21 20:15:14", 
+ "creation": "2012-09-21 20:15:14.000000", 
  "docstatus": 0, 
  "doctype": "Page", 
  "icon": "icon-table", 
  "idx": 1, 
- "modified": "2013-07-11 14:44:08", 
+ "modified": "2013-07-11 14:44:08.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "stock-ageing", 

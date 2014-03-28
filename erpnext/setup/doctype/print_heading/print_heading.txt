@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:print_heading", 
- "creation": "2013-01-10 16:34:24", 
+ "creation": "2013-01-10 16:34:24.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -37,7 +37,7 @@
  ], 
  "icon": "icon-font", 
  "idx": 1, 
- "modified": "2014-01-20 17:49:01", 
+ "modified": "2014-01-20 17:49:01.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Print Heading", 

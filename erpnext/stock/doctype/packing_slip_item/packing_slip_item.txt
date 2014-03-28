@@ -1,6 +1,6 @@
 {
  "autoname": "PSD/.#######", 
- "creation": "2013-04-08 13:10:16", 
+ "creation": "2013-04-08 13:10:16.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -89,7 +89,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:23", 
+ "modified": "2013-12-20 19:23:23.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packing Slip Item", 

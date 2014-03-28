@@ -1,6 +1,6 @@
 {
  "autoname": "MREQD-.#####", 
- "creation": "2013-02-22 01:28:02", 
+ "creation": "2013-02-22 01:28:02.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -232,7 +232,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 11:35:26", 
+ "modified": "2014-02-03 11:35:26.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 

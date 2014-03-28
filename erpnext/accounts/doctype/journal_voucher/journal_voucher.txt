@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-03-25 10:53:52", 
+ "creation": "2013-03-25 10:53:52.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -438,7 +438,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-20 17:48:51", 
+ "modified": "2014-01-20 17:48:51.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Voucher", 

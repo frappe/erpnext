@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:49", 
+ "creation": "2013-02-22 01:27:49.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -73,7 +73,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:53:03", 
+ "modified": "2014-02-03 12:53:03.000000", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 

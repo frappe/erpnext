@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:employee_type_name", 
- "creation": "2013-01-10 16:34:14", 
+ "creation": "2013-01-10 16:34:14.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -27,7 +27,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:43", 
+ "modified": "2014-01-20 17:48:43.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employment Type", 

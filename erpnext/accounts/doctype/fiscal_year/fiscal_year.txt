@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:year", 
- "creation": "2013-01-22 16:50:25", 
+ "creation": "2013-01-22 16:50:25.000000", 
  "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -51,7 +51,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:46", 
+ "modified": "2014-01-20 17:48:46.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fiscal Year", 

@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "allow_rename": 1, 
- "creation": "2013-01-10 16:34:32", 
+ "creation": "2013-01-10 16:34:32.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -208,7 +208,7 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2014-01-20 17:48:29", 
+ "modified": "2014-01-20 17:48:29.000000", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 

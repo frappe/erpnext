@@ -1,5 +1,5 @@
 {
- "creation": "2012-12-20 12:50:49", 
+ "creation": "2012-12-20 12:50:49.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -208,7 +208,7 @@
  "icon": "icon-glass", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2013-12-24 11:40:19", 
+ "modified": "2013-12-24 11:40:19.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Features Setup", 

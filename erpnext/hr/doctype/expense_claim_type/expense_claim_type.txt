@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:expense_type", 
- "creation": "2012-03-27 14:35:55", 
+ "creation": "2012-03-27 14:35:55.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -29,7 +29,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2013-12-20 19:24:07", 
+ "modified": "2013-12-20 19:24:07.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim Type", 

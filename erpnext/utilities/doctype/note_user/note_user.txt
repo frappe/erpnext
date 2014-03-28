@@ -1,5 +1,5 @@
 {
- "creation": "2013-05-24 14:24:48", 
+ "creation": "2013-05-24 14:24:48.000000", 
  "description": "List of users who can edit a particular Note", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -26,7 +26,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:23", 
+ "modified": "2013-12-20 19:23:23.000000", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Note User", 

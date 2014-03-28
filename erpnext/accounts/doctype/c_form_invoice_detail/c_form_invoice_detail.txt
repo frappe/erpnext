@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:38", 
+ "creation": "2013-02-22 01:27:38.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -60,7 +60,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:00", 
+ "modified": "2013-12-20 19:23:00.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form Invoice Detail", 

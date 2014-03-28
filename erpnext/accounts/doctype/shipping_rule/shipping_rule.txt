@@ -1,6 +1,6 @@
 {
  "autoname": "Prompt", 
- "creation": "2013-06-25 11:48:03", 
+ "creation": "2013-06-25 11:48:03.000000", 
  "description": "Specify conditions to calculate shipping amount", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -102,7 +102,7 @@
  ], 
  "icon": "icon-truck", 
  "idx": 1, 
- "modified": "2014-01-20 17:49:27", 
+ "modified": "2014-01-20 17:49:27.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule", 

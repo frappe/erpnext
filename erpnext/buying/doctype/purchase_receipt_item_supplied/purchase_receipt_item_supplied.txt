@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:42", 
+ "creation": "2013-02-22 01:27:42.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -137,7 +137,7 @@
  "hide_toolbar": 0, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-13 11:29:35", 
+ "modified": "2014-02-13 11:29:35.000000", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Receipt Item Supplied", 

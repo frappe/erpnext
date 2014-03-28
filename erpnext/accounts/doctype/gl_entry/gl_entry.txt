@@ -1,6 +1,6 @@
 {
  "autoname": "GL.#######", 
- "creation": "2013-01-10 16:34:06", 
+ "creation": "2013-01-10 16:34:06.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -181,7 +181,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2013-12-20 19:24:08", 
+ "modified": "2013-12-20 19:24:08.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 

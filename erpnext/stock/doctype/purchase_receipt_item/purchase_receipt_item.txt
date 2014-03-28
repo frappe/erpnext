@@ -1,6 +1,6 @@
 {
  "autoname": "GRND/.#######", 
- "creation": "2013-05-24 19:29:10", 
+ "creation": "2013-05-24 19:29:10.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -553,7 +553,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:27:09", 
+ "modified": "2014-02-28 11:27:09.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

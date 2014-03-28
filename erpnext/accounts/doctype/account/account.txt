@@ -1,7 +1,7 @@
 {
  "allow_copy": 1, 
  "allow_rename": 1, 
- "creation": "2013-01-30 12:49:46", 
+ "creation": "2013-01-30 12:49:46.000000", 
  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -206,7 +206,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-03-19 12:07:27", 
+ "modified": "2014-03-19 12:07:27.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 

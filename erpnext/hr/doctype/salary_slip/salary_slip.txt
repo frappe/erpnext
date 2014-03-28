@@ -1,5 +1,5 @@
 {
- "creation": "2013-01-10 16:34:15", 
+ "creation": "2013-01-10 16:34:15.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -355,7 +355,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-20 17:49:18", 
+ "modified": "2014-01-20 17:49:18.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 

@@ -1,5 +1,5 @@
 {
- "creation": "2013-06-25 11:54:50", 
+ "creation": "2013-06-25 11:54:50.000000", 
  "description": "A condition for a Shipping Rule", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -32,7 +32,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:46", 
+ "modified": "2013-12-20 19:21:46.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule Condition", 

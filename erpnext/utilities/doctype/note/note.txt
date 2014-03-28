@@ -1,6 +1,6 @@
 {
  "allow_rename": 1, 
- "creation": "2013-05-24 13:41:00", 
+ "creation": "2013-05-24 13:41:00.000000", 
  "description": "Note is a free page where users can share documents / notes", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -46,7 +46,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-01-22 16:05:35", 
+ "modified": "2014-01-22 16:05:35.000000", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Note", 

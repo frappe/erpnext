@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:activity_type", 
- "creation": "2013-03-05 10:14:59", 
+ "creation": "2013-03-05 10:14:59.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -17,7 +17,7 @@
  "icon": "icon-flag", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2013-12-20 19:23:54", 
+ "modified": "2013-12-20 19:23:54.000000", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Type", 

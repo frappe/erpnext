@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-03-07 18:50:30", 
+ "creation": "2013-03-07 18:50:30.000000", 
  "description": "Potential Sales Deal", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -409,7 +409,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-20 17:48:59", 
+ "modified": "2014-01-20 17:48:59.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 

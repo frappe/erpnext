@@ -1,11 +1,11 @@
 {
  "add_total_row": 1, 
- "creation": "2013-05-07 18:09:42", 
+ "creation": "2013-05-07 18:09:42.000000", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-03-07 15:30:27", 
+ "modified": "2014-03-07 15:30:27.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Monthly Salary Register", 

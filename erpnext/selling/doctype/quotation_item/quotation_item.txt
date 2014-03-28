@@ -1,6 +1,6 @@
 {
  "autoname": "QUOD/.#####", 
- "creation": "2013-03-07 11:42:57", 
+ "creation": "2013-03-07 11:42:57.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -353,7 +353,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:20:34", 
+ "modified": "2014-02-28 11:20:34.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

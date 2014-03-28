@@ -1,6 +1,6 @@
 {
  "autoname": "POD/.#####", 
- "creation": "2013-05-24 19:29:06", 
+ "creation": "2013-05-24 19:29:06.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -474,7 +474,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:26:25", 
+ "modified": "2014-02-28 11:26:25.000000", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

@@ -1,6 +1,6 @@
 {
  "autoname": "SMSLOG/.########", 
- "creation": "2012-03-27 14:36:47", 
+ "creation": "2012-03-27 14:36:47.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -55,7 +55,7 @@
  ], 
  "icon": "icon-mobile-phone", 
  "idx": 1, 
- "modified": "2013-12-20 19:24:35", 
+ "modified": "2013-12-20 19:24:35.000000", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "SMS Log", 

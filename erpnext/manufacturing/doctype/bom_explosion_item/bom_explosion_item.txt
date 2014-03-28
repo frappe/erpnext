@@ -1,6 +1,6 @@
 {
  "autoname": "FBD/.######", 
- "creation": "2013-03-07 11:42:57", 
+ "creation": "2013-03-07 11:42:57.000000", 
  "default_print_format": "Standard", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -82,7 +82,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:57", 
+ "modified": "2013-12-20 19:22:57.000000", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Explosion Item", 

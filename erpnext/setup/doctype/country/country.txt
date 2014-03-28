@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:country_name", 
- "creation": "2013-01-19 10:23:30", 
+ "creation": "2013-01-19 10:23:30.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -37,7 +37,7 @@
  "icon": "icon-globe", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-03-05 14:36:16", 
+ "modified": "2014-03-05 14:36:16.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Country", 

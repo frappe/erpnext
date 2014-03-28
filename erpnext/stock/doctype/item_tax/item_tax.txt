@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:28:01", 
+ "creation": "2013-02-22 01:28:01.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -27,7 +27,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:16", 
+ "modified": "2013-12-20 19:23:16.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Tax", 

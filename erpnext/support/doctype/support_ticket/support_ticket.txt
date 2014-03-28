@@ -1,7 +1,7 @@
 {
  "allow_attach": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-02-01 10:36:25", 
+ "creation": "2013-02-01 10:36:25.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -237,7 +237,7 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2014-01-20 17:49:31", 
+ "modified": "2014-01-20 17:49:31.000000", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Support Ticket", 

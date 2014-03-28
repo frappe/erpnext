@@ -1,6 +1,6 @@
 {
  "autoname": "IMD.#####", 
- "creation": "2013-02-22 01:28:05", 
+ "creation": "2013-02-22 01:28:05.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -133,7 +133,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-31 12:08:32", 
+ "modified": "2013-12-31 12:08:32.000000", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Schedule Item", 

@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:kra_title", 
- "creation": "2012-07-03 13:30:39", 
+ "creation": "2012-07-03 13:30:39.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -43,7 +43,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2013-12-20 19:23:55", 
+ "modified": "2013-12-20 19:23:55.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal Template", 

@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "AR.####", 
- "creation": "2013-01-10 16:34:22", 
+ "creation": "2013-01-10 16:34:22.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -123,7 +123,7 @@
  ], 
  "icon": "icon-shield", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:25", 
+ "modified": "2014-01-20 17:48:25.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Authorization Rule", 

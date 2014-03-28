@@ -1,7 +1,7 @@
 {
  "allow_import": 0, 
  "autoname": "LAPPR-/.#####", 
- "creation": "2013-04-12 06:56:15", 
+ "creation": "2013-04-12 06:56:15.000000", 
  "description": "Users who can approve a specific employee's leave applications", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -19,7 +19,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:12", 
+ "modified": "2013-12-20 19:23:12.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Leave Approver", 

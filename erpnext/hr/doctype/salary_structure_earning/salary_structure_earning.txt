@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:48", 
+ "creation": "2013-02-22 01:27:48.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -40,7 +40,7 @@
  "hide_toolbar": 0, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:43", 
+ "modified": "2013-12-20 19:23:43.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure Earning", 

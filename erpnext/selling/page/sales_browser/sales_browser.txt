@@ -1,10 +1,10 @@
 {
- "creation": "2012-06-14 15:07:26", 
+ "creation": "2012-06-14 15:07:26.000000", 
  "docstatus": 0, 
  "doctype": "Page", 
  "icon": "icon-sitemap", 
  "idx": 1, 
- "modified": "2013-07-11 14:43:56", 
+ "modified": "2013-07-11 14:43:56.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Browser", 

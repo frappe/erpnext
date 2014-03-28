@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "LAL/.#####", 
- "creation": "2013-02-20 19:10:38", 
+ "creation": "2013-02-20 19:10:38.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -132,7 +132,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-22 16:05:35", 
+ "modified": "2014-01-22 16:05:35.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Allocation", 

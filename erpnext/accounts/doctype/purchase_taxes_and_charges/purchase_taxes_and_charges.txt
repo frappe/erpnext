@@ -1,6 +1,6 @@
 {
  "autoname": "PVTD.######", 
- "creation": "2013-05-21 16:16:04", 
+ "creation": "2013-05-21 16:16:04.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -154,7 +154,7 @@
  "hide_heading": 1, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:36:04", 
+ "modified": "2014-02-03 12:36:04.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Taxes and Charges", 

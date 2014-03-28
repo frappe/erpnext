@@ -1,6 +1,6 @@
 {
  "autoname": "EXP.######", 
- "creation": "2013-01-10 16:34:14", 
+ "creation": "2013-01-10 16:34:14.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -187,7 +187,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-22 16:05:34", 
+ "modified": "2014-01-22 16:05:34.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 

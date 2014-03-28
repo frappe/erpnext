@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:partner_name", 
- "creation": "2013-04-12 15:34:06", 
+ "creation": "2013-04-12 15:34:06.000000", 
  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -194,7 +194,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-02-20 18:30:32", 
+ "modified": "2014-02-20 18:30:32.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

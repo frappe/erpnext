@@ -1,7 +1,7 @@
 {
  "allow_attach": 1, 
  "autoname": "LAP/.#####", 
- "creation": "2013-02-20 11:18:11", 
+ "creation": "2013-02-20 11:18:11.000000", 
  "description": "Apply / Approve Leaves", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -182,7 +182,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-01-20 17:48:56", 
+ "modified": "2014-01-20 17:48:56.000000", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 

@@ -1,5 +1,5 @@
 {
- "creation": "2013-01-25 11:35:08", 
+ "creation": "2013-01-25 11:35:08.000000", 
  "description": "Set prefix for numbering series on your transactions", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -76,7 +76,7 @@
  "icon": "icon-sort-by-order", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2013-12-20 19:23:21", 
+ "modified": "2013-12-20 19:23:21.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Naming Series", 

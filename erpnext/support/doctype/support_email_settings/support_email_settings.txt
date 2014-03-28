@@ -1,6 +1,6 @@
 {
  "allow_copy": 1, 
- "creation": "2014-03-03 19:48:46", 
+ "creation": "2014-03-03 19:48:46.000000", 
  "description": "Email Settings for Outgoing and Incoming Emails.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -75,7 +75,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2014-03-03 20:20:34", 
+ "modified": "2014-03-03 20:20:34.000000", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Support Email Settings", 

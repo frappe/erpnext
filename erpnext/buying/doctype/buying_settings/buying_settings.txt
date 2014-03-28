@@ -1,5 +1,5 @@
 {
- "creation": "2013-06-25 11:04:03", 
+ "creation": "2013-06-25 11:04:03.000000", 
  "description": "Settings for Buying Module", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -56,7 +56,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-02-19 19:02:00", 
+ "modified": "2014-02-19 19:02:00.000000", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Buying Settings", 

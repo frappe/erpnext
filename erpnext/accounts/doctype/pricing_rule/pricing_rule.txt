@@ -1,6 +1,6 @@
 {
  "autoname": "PRULE.#####", 
- "creation": "2014-02-21 15:02:51", 
+ "creation": "2014-02-21 15:02:51.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -208,7 +208,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-03-05 18:23:34", 
+ "modified": "2014-03-05 18:23:34.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 

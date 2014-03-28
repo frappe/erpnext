@@ -1,6 +1,6 @@
 {
  "autoname": "JVD.######", 
- "creation": "2013-02-22 01:27:39", 
+ "creation": "2013-02-22 01:27:39.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -158,7 +158,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:44:31", 
+ "modified": "2014-02-03 12:44:31.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Voucher Detail", 

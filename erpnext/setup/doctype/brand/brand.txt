@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:brand", 
- "creation": "2013-02-22 01:27:54", 
+ "creation": "2013-02-22 01:27:54.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -30,7 +30,7 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-01-20 17:48:27", 
+ "modified": "2014-01-20 17:48:27.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 

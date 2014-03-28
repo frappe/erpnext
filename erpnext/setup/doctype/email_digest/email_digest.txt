@@ -1,6 +1,6 @@
 {
  "autoname": "Prompt", 
- "creation": "2013-02-21 14:15:31", 
+ "creation": "2013-02-21 14:15:31.000000", 
  "description": "Send regular summary reports via Email.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -319,7 +319,7 @@
  ], 
  "icon": "icon-envelope", 
  "idx": 1, 
- "modified": "2014-03-19 11:39:27", 
+ "modified": "2014-03-19 11:39:27.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Email Digest", 

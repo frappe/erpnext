@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:41", 
+ "creation": "2013-02-22 01:27:41.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -80,7 +80,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:38:53", 
+ "modified": "2014-02-03 12:38:53.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Advance", 

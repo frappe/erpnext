@@ -1,5 +1,5 @@
 {
- "creation": "2013-05-23 16:55:51", 
+ "creation": "2013-05-23 16:55:51.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -60,7 +60,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:38", 
+ "modified": "2013-12-20 19:21:38.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales BOM Item", 

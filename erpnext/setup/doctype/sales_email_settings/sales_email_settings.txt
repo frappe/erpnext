@@ -1,5 +1,5 @@
 {
- "creation": "2013-01-16 10:25:26", 
+ "creation": "2013-01-16 10:25:26.000000", 
  "description": "Email settings to extract Leads from sales email id e.g. \"sales@example.com\"", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -54,7 +54,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2013-12-20 19:21:38", 
+ "modified": "2013-12-20 19:21:38.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Email Settings", 

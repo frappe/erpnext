@@ -1,5 +1,5 @@
 {
- "creation": "2013-03-05 09:11:06", 
+ "creation": "2013-03-05 09:11:06.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -41,7 +41,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:54", 
+ "modified": "2013-12-20 19:21:54.000000", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch Detail", 

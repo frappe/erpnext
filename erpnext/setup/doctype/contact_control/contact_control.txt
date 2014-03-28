@@ -1,5 +1,5 @@
 {
- "creation": "2012-03-27 14:36:19", 
+ "creation": "2012-03-27 14:36:19.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -28,7 +28,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2013-12-20 19:23:02", 
+ "modified": "2013-12-20 19:23:02.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Contact Control", 

@@ -1,6 +1,6 @@
 {
  "autoname": "CBD/.######", 
- "creation": "2013-03-07 11:55:04", 
+ "creation": "2013-03-07 11:55:04.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -44,7 +44,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:59", 
+ "modified": "2013-12-20 19:22:59.000000", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget Detail", 

@@ -1,6 +1,6 @@
 {
  "autoname": "ITEMCUST/.#####", 
- "creation": "2013-03-08 15:37:16", 
+ "creation": "2013-03-08 15:37:16.000000", 
  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -38,7 +38,7 @@
  "idx": 1, 
  "in_create": 0, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:16", 
+ "modified": "2013-12-20 19:23:16.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Customer Detail", 

@@ -1,6 +1,6 @@
 {
  "autoname": "MTND/.######", 
- "creation": "2013-03-29 18:22:12", 
+ "creation": "2013-03-29 18:22:12.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -300,7 +300,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:59:27", 
+ "modified": "2014-02-03 12:59:27.000000", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 

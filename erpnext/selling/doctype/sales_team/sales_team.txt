@@ -1,5 +1,5 @@
 {
- "creation": "2013-04-19 13:30:51", 
+ "creation": "2013-04-19 13:30:51.000000", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -99,7 +99,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-31 19:00:14", 
+ "modified": "2013-12-31 19:00:14.000000", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Team", 
