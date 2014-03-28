@@ -10,7 +10,7 @@ class SalesBom(Document):
 
 
 	def autoname(self):
-		self.doc.name = self.doc.new_item_code
+		self.name = self.new_item_code
 	
 	def validate(self):
 		self.validate_main_item()
@@ -21,7 +21,7 @@ class SalesBom(Document):
 	def validate_main_item(self):
 		"""main item must have Is Stock Item as No and Is Sales Item as Yes"""
 		if not frappe.db.sql("""select name from tabItem where name=%s and
-			ifnull(is_stock_item,'')='No' and ifnull(is_sales_item,'')='Yes'""", self.doc.new_item_code):
+			ifnull(is_stock_item,'')='No' and ifnull(is_sales_item,'')='Yes'""", self.new_item_code):
 			frappe.msgprint("""Parent Item %s is either a Stock Item or a not a Sales Item""",
 				raise_exception=1)
 

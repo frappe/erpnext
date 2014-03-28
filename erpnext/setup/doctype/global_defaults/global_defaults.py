@@ -32,11 +32,11 @@ class GlobalDefaults(Document):
 		self.update_control_panel()
 		
 		for key in keydict:
-			frappe.db.set_default(key, self.doc.fields.get(keydict[key], ''))
+			frappe.db.set_default(key, self.get(keydict[key], ''))
 			
 		# update year start date and year end date from fiscal_year
 		year_start_end_date = frappe.db.sql("""select year_start_date, year_end_date 
-			from `tabFiscal Year` where name=%s""", self.doc.current_fiscal_year)
+			from `tabFiscal Year` where name=%s""", self.current_fiscal_year)
 
 		ysd = year_start_end_date[0][0] or ''
 		yed = year_start_end_date[0][1] or ''
@@ -46,25 +46,25 @@ class GlobalDefaults(Document):
 			frappe.db.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
 		
 		# enable default currency
-		if self.doc.default_currency:
-			frappe.db.set_value("Currency", self.doc.default_currency, "enabled", 1)
+		if self.default_currency:
+			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 		
 		# clear cache
 		frappe.clear_cache()
 	
 	def validate_session_expiry(self):
-		if self.doc.session_expiry:
-			parts = self.doc.session_expiry.split(":")
+		if self.session_expiry:
+			parts = self.session_expiry.split(":")
 			if len(parts)!=2 or not (cint(parts[0]) or cint(parts[1])):
 				frappe.msgprint("""Session Expiry must be in format hh:mm""",
 					raise_exception=1)
 
 	def update_control_panel(self):
 		cp_bean = frappe.bean("Control Panel")
-		if self.doc.country:
-			cp_bean.doc.country = self.doc.country
-		if self.doc.time_zone:
-			cp_bean.doc.time_zone = self.doc.time_zone
+		if self.country:
+			cp_bean.country = self.country
+		if self.time_zone:
+			cp_bean.time_zone = self.time_zone
 		cp_bean.ignore_permissions = True
 		cp_bean.save()
 

@@ -24,7 +24,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 		lead.ignore_permissions = True
 		lead.ignore_mandatory = True
 		lead.insert()
-		lead_name = lead.doc.name
+		lead_name = lead.name
 
 	parent_doctype = "Contact" if contact_name else "Lead"
 	parent_name = contact_name or lead_name

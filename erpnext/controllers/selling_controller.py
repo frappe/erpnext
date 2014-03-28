@@ -28,27 +28,27 @@ class SellingController(StockController):
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
 		self.set_price_list_and_item_details()
-		if self.doc.fields.get("__islocal"):
+		if self.get("__islocal"):
 			self.set_taxes("other_charges", "taxes_and_charges")
 					
 	def set_missing_lead_customer_details(self):
-		if self.doc.customer:
+		if self.customer:
 			from erpnext.accounts.party import _get_party_details
-			self.doc.update_if_missing(_get_party_details(self.doc.customer,
+			self.update_if_missing(_get_party_details(self.customer,
 				ignore_permissions=self.bean.ignore_permissions))
 		
-		elif self.doc.lead:
+		elif self.lead:
 			from erpnext.selling.doctype.lead.lead import get_lead_details
-			self.doc.update_if_missing(get_lead_details(self.doc.lead))
+			self.update_if_missing(get_lead_details(self.lead))
 	
 	def set_price_list_and_item_details(self):
 		self.set_price_list_currency("Selling")
 		self.set_missing_item_details()
 										
 	def apply_shipping_rule(self):
-		if self.doc.shipping_rule:
-			shipping_rule = frappe.bean("Shipping Rule", self.doc.shipping_rule)
-			value = self.doc.net_total
+		if self.shipping_rule:
+			shipping_rule = frappe.bean("Shipping Rule", self.shipping_rule)
+			value = self.net_total
 			
 			# TODO
 			# shipping rule calculation based on item's net weight
@@ -62,25 +62,25 @@ class SellingController(StockController):
 			self.append("other_charges", {
 				"doctype": "Sales Taxes and Charges",
 				"charge_type": "Actual",
-				"account_head": shipping_rule.doc.account,
-				"cost_center": shipping_rule.doc.cost_center,
-				"description": shipping_rule.doc.label,
+				"account_head": shipping_rule.account,
+				"cost_center": shipping_rule.cost_center,
+				"description": shipping_rule.label,
 				"rate": shipping_amount
 			})
 		
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		company_currency = get_company_currency(self.doc.company)
+		company_currency = get_company_currency(self.company)
 		
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, 
 			"disable_rounded_total"))
 			
 		if self.meta.get_field("in_words"):
-			self.doc.in_words = money_in_words(disable_rounded_total and 
-				self.doc.grand_total or self.doc.rounded_total, company_currency)
+			self.in_words = money_in_words(disable_rounded_total and 
+				self.grand_total or self.rounded_total, company_currency)
 		if self.meta.get_field("in_words_export"):
-			self.doc.in_words_export = money_in_words(disable_rounded_total and 
-				self.doc.grand_total_export or self.doc.rounded_total_export, self.doc.currency)
+			self.in_words_export = money_in_words(disable_rounded_total and 
+				self.grand_total_export or self.rounded_total_export, self.currency)
 				
 	def calculate_taxes_and_totals(self):
 		self.other_fname = "other_charges"
@@ -112,7 +112,7 @@ class SellingController(StockController):
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 			
 			if cumulated_tax_fraction and not self.discount_amount_applied:
-				item.base_amount = flt((item.amount * self.doc.conversion_rate) /
+				item.base_amount = flt((item.amount * self.conversion_rate) /
 					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 					
 				item.base_rate = flt(item.base_amount / item.qty, self.precision("base_rate", item))
@@ -166,38 +166,38 @@ class SellingController(StockController):
 				self._set_in_company_currency(item, "amount", "base_amount")
 
 	def calculate_net_total(self):
-		self.doc.net_total = self.doc.net_total_export = 0.0
+		self.net_total = self.net_total_export = 0.0
 
 		for item in self.item_doclist:
-			self.doc.net_total += item.base_amount
-			self.doc.net_total_export += item.amount
+			self.net_total += item.base_amount
+			self.net_total_export += item.amount
 		
 		self.round_floats_in(self.doc, ["net_total", "net_total_export"])
 				
 	def calculate_totals(self):
-		self.doc.grand_total = flt(self.tax_doclist and \
-			self.tax_doclist[-1].total or self.doc.net_total, self.precision("grand_total"))
-		self.doc.grand_total_export = flt(self.doc.grand_total / self.doc.conversion_rate, 
+		self.grand_total = flt(self.tax_doclist and \
+			self.tax_doclist[-1].total or self.net_total, self.precision("grand_total"))
+		self.grand_total_export = flt(self.grand_total / self.conversion_rate, 
 			self.precision("grand_total_export"))
 			
-		self.doc.other_charges_total = flt(self.doc.grand_total - self.doc.net_total,
+		self.other_charges_total = flt(self.grand_total - self.net_total,
 			self.precision("other_charges_total"))
 
-		self.doc.other_charges_total_export = flt(self.doc.grand_total_export - 
-			self.doc.net_total_export + flt(self.doc.discount_amount), 
+		self.other_charges_total_export = flt(self.grand_total_export - 
+			self.net_total_export + flt(self.discount_amount), 
 			self.precision("other_charges_total_export"))
 		
-		self.doc.rounded_total = _round(self.doc.grand_total)
-		self.doc.rounded_total_export = _round(self.doc.grand_total_export)
+		self.rounded_total = _round(self.grand_total)
+		self.rounded_total_export = _round(self.grand_total_export)
 
 	def apply_discount_amount(self):
-		if self.doc.discount_amount:
+		if self.discount_amount:
 			grand_total_for_discount_amount = self.get_grand_total_for_discount_amount()
 
 			if grand_total_for_discount_amount:
 				# calculate item amount after Discount Amount
 				for item in self.item_doclist:
-					distributed_amount = flt(self.doc.discount_amount) * item.base_amount / grand_total_for_discount_amount
+					distributed_amount = flt(self.discount_amount) * item.base_amount / grand_total_for_discount_amount
 					item.base_amount = flt(item.base_amount - distributed_amount, self.precision("base_amount", item))
 
 				self.discount_amount_applied = True
@@ -214,7 +214,7 @@ class SellingController(StockController):
 					flt(tax.rate) / 100
 				actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
 
-		grand_total_for_discount_amount = flt(self.doc.grand_total - sum(actual_taxes_dict.values()), 
+		grand_total_for_discount_amount = flt(self.grand_total - sum(actual_taxes_dict.values()), 
 			self.precision("grand_total"))
 		return grand_total_for_discount_amount
 
@@ -222,21 +222,21 @@ class SellingController(StockController):
 		# NOTE: 
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
-		if self.doc.doctype == "Sales Invoice" and self.doc.docstatus == 0:
+		if self.doctype == "Sales Invoice" and self.docstatus == 0:
 			self.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount",
 				"paid_amount"])
-			total_amount_to_pay = self.doc.grand_total - self.doc.write_off_amount
-			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance \
-				- self.doc.paid_amount,	self.precision("outstanding_amount"))
+			total_amount_to_pay = self.grand_total - self.write_off_amount
+			self.outstanding_amount = flt(total_amount_to_pay - self.total_advance \
+				- self.paid_amount,	self.precision("outstanding_amount"))
 		
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):
 			self.round_floats_in(self.doc, ["net_total", "commission_rate"])
-			if self.doc.commission_rate > 100.0:
+			if self.commission_rate > 100.0:
 				msgprint(_(self.meta.get_label("commission_rate")) + " " + 
 					_("cannot be greater than 100"), raise_exception=True)
 		
-			self.doc.total_commission = flt(self.doc.net_total * self.doc.commission_rate / 100.0,
+			self.total_commission = flt(self.net_total * self.commission_rate / 100.0,
 				self.precision("total_commission"))
 
 	def calculate_contribution(self):
@@ -246,7 +246,7 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.doc.net_total * sales_person.allocated_percentage / 100.0,
+				self.net_total * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 			
 			total += sales_person.allocated_percentage
@@ -258,15 +258,15 @@ class SellingController(StockController):
 			
 	def validate_order_type(self):
 		valid_types = ["Sales", "Maintenance", "Shopping Cart"]
-		if not self.doc.order_type:
-			self.doc.order_type = "Sales"
-		elif self.doc.order_type not in valid_types:
+		if not self.order_type:
+			self.order_type = "Sales"
+		elif self.order_type not in valid_types:
 			msgprint(_(self.meta.get_label("order_type")) + " " + 
 				_("must be one of") + ": " + comma_or(valid_types), raise_exception=True)
 				
 	def check_credit(self, grand_total):
-		customer_account = frappe.db.get_value("Account", {"company": self.doc.company, 
-			"master_name": self.doc.customer}, "name")
+		customer_account = frappe.db.get_value("Account", {"company": self.company, 
+			"master_name": self.customer}, "name")
 		if customer_account:
 			total_outstanding = frappe.db.sql("""select 
 				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
@@ -291,7 +291,7 @@ class SellingController(StockController):
 			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
 			
-			if self.doc.doctype == "Sales Order":
+			if self.doctype == "Sales Order":
 				if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or 
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
 						frappe.throw(_("Please enter Reserved Warehouse for item ") + 
@@ -300,11 +300,11 @@ class SellingController(StockController):
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 				
-			if self.doc.doctype == "Delivery Note" and d.against_sales_order:
+			if self.doctype == "Delivery Note" and d.against_sales_order:
 				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12
 				
-				already_delivered_qty = self.get_already_delivered_qty(self.doc.name, 
+				already_delivered_qty = self.get_already_delivered_qty(self.name, 
 					d.against_sales_order, d.prevdoc_detail_docname)
 				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
 				
@@ -362,10 +362,10 @@ class SellingController(StockController):
 		
 	def check_stop_sales_order(self, ref_fieldname):
 		for d in self.get(self.fname):
-			if d.fields.get(ref_fieldname):
+			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.fields[ref_fieldname], "status")
 				if status == "Stopped":
-					frappe.throw(self.doc.doctype + 
+					frappe.throw(self.doctype + 
 						_(" can not be created/modified against stopped Sales Order ") + 
 						d.fields[ref_fieldname])
 		

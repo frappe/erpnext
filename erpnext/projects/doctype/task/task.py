@@ -13,38 +13,38 @@ from frappe.model.document import Document
 class Task(Document):
 	def get_project_details(self):
 		return {
-			"project": self.doc.project
+			"project": self.project
 		}
 		
 	def get_customer_details(self):
-		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.doc.customer)
+		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
 		if cust:
 			ret = {'customer_name': cust and cust[0][0] or ''}
 			return ret
 	
 	def validate(self):
-		if self.doc.exp_start_date and self.doc.exp_end_date and getdate(self.doc.exp_start_date) > getdate(self.doc.exp_end_date):
+		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
 			msgprint("'Expected Start Date' can not be greater than 'Expected End Date'")
 			raise Exception
 		
-		if self.doc.act_start_date and self.doc.act_end_date and getdate(self.doc.act_start_date) > getdate(self.doc.act_end_date):
+		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			msgprint("'Actual Start Date' can not be greater than 'Actual End Date'")
 			raise Exception
 			
 		self.update_status()
 
 	def update_status(self):
-		status = frappe.db.get_value("Task", self.doc.name, "status")
-		if self.doc.status=="Working" and status !="Working" and not self.doc.act_start_date:
-			self.doc.act_start_date = today()
+		status = frappe.db.get_value("Task", self.name, "status")
+		if self.status=="Working" and status !="Working" and not self.act_start_date:
+			self.act_start_date = today()
 			
-		if self.doc.status=="Closed" and status != "Closed" and not self.doc.act_end_date:
-			self.doc.act_end_date = today()
+		if self.status=="Closed" and status != "Closed" and not self.act_end_date:
+			self.act_end_date = today()
 			
 	def on_update(self):
 		"""update percent complete in project"""
-		if self.doc.project:
-			project = frappe.bean("Project", self.doc.project)
+		if self.project:
+			project = frappe.bean("Project", self.project)
 			project.run_method("update_percent_complete")
 
 @frappe.whitelist()

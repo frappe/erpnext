@@ -14,16 +14,16 @@ class TestQuotation(unittest.TestCase):
 		quotation = frappe.bean(copy=test_records[0])
 		quotation.insert()
 		
-		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.doc.name)
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 		
 		quotation.submit()
 
-		sales_order = make_sales_order(quotation.doc.name)
+		sales_order = make_sales_order(quotation.name)
 				
 		self.assertEquals(sales_order[0]["doctype"], "Sales Order")
 		self.assertEquals(len(sales_order), 2)
 		self.assertEquals(sales_order[1]["doctype"], "Sales Order Item")
-		self.assertEquals(sales_order[1]["prevdoc_docname"], quotation.doc.name)
+		self.assertEquals(sales_order[1]["prevdoc_docname"], quotation.name)
 		self.assertEquals(sales_order[0]["customer"], "_Test Customer")
 		
 		sales_order[0]["delivery_date"] = "2014-01-01"

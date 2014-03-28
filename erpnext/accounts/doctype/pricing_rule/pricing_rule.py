@@ -16,14 +16,14 @@ class PricingRule(DocListController):
 		
 	def validate_mandatory(self):
 		for field in ["apply_on", "applicable_for", "price_or_discount"]:
-			val = self.doc.fields.get("applicable_for")
-			if val and not self.doc.fields.get(frappe.scrub(val)):
+			val = self.get("applicable_for")
+			if val and not self.get(frappe.scrub(val)):
 				throw("{fname} {msg}".format(fname = _(val), msg = _(" is mandatory")), 
 					frappe.MandatoryError)
 		
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "price_or_discount"]:
-			fieldname = frappe.scrub(self.doc.fields.get(logic_field) or "")
+			fieldname = frappe.scrub(self.get(logic_field) or "")
 			
 			# reset all values except for the logic field
 			options = (self.meta.get_options(logic_field) or "").split("\n")
@@ -32,5 +32,5 @@ class PricingRule(DocListController):
 				
 				f = frappe.scrub(f)
 				if f!=fieldname:
-					self.doc.fields[f] = None
+					self.set(f, None)
 		

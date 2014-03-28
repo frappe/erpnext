@@ -38,7 +38,7 @@ class InstallationNote(TransactionBase):
 
 	def validate_fiscal_year(self):
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.doc.inst_date, self.doc.fiscal_year, "Installation Date")
+		validate_fiscal_year(self.inst_date, self.fiscal_year, "Installation Date")
 	
 	def is_serial_no_added(self, item_code, serial_no):
 		ar_required = frappe.db.get_value("Item", item_code, "has_serial_no")
@@ -91,7 +91,7 @@ class InstallationNote(TransactionBase):
 		for d in self.get('installed_item_details'):
 			if d.prevdoc_docname:
 				d_date = frappe.db.get_value("Delivery Note", d.prevdoc_docname, "posting_date")				
-				if d_date > getdate(self.doc.inst_date):
+				if d_date > getdate(self.inst_date):
 					msgprint("Installation Date can not be before Delivery Date " + cstr(d_date) + 
 						" for item "+d.item_code, raise_exception=1)
 	

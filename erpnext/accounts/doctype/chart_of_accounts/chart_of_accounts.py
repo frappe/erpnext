@@ -15,7 +15,7 @@ class ChartOfAccounts(Document):
 	def create_accounts(self, company):
 		chart = {}
 		with open(os.path.join(os.path.dirname(__file__), "charts", 
-			self.doc.source_file), "r") as f:
+			self.source_file), "r") as f:
 			chart = json.loads(f.read())
 			
 		from erpnext.accounts.doctype.chart_of_accounts.charts.account_properties \
@@ -49,15 +49,15 @@ class ChartOfAccounts(Document):
 					accounts.append(account_name_in_db)
 					
 					# set report_type for all parents where blank
-					if not account.doc.report_type or account.doc.report_type == 'None':
+					if not account.report_type or account.report_type == 'None':
 						self.no_report_type = True
 					elif self.no_report_type:
 						frappe.db.sql("""update tabAccount set report_type=%s 
 							where lft<=%s and rgt>=%s and ifnull(report_type, '')=''""", 
-							(account.doc.report_type, account.doc.lft, account.doc.rgt))
+							(account.report_type, account.lft, account.rgt))
 					
 					if child.get("children"):
-						_import_accounts(child.get("children"), account.doc.name)
+						_import_accounts(child.get("children"), account.name)
 			
 			_import_accounts(chart.get("root").get("children"), None)
 			

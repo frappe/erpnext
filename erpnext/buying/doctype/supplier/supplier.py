@@ -18,44 +18,44 @@ class Supplier(TransactionBase):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
 		
 		if supp_master_name == 'Supplier Name':
-			if frappe.db.exists("Customer", self.doc.supplier_name):
+			if frappe.db.exists("Customer", self.supplier_name):
 				frappe.msgprint(_("A Customer exists with same name"), raise_exception=1)
-			self.doc.name = self.doc.supplier_name
+			self.name = self.supplier_name
 		else:
-			self.doc.name = make_autoname(self.doc.naming_series + '.#####')
+			self.name = make_autoname(self.naming_series + '.#####')
 
 	def update_address(self):
 		frappe.db.sql("""update `tabAddress` set supplier_name=%s, modified=NOW() 
-			where supplier=%s""", (self.doc.supplier_name, self.doc.name))
+			where supplier=%s""", (self.supplier_name, self.name))
 
 	def update_contact(self):
 		frappe.db.sql("""update `tabContact` set supplier_name=%s, modified=NOW() 
-			where supplier=%s""", (self.doc.supplier_name, self.doc.name))
+			where supplier=%s""", (self.supplier_name, self.name))
 
 	def update_credit_days_limit(self):
 		frappe.db.sql("""update tabAccount set credit_days = %s where name = %s""", 
-			(cint(self.doc.credit_days), self.doc.name + " - " + self.get_company_abbr()))
+			(cint(self.credit_days), self.name + " - " + self.get_company_abbr()))
 
 	def on_update(self):
-		if not self.doc.naming_series:
-			self.doc.naming_series = ''
+		if not self.naming_series:
+			self.naming_series = ''
 
 		self.update_address()
 		self.update_contact()
 
 		# create account head
-		create_party_account(self.doc.name, "Supplier", self.doc.company)
+		create_party_account(self.name, "Supplier", self.company)
 
 		# update credit days and limit in account
 		self.update_credit_days_limit()
 		
 	def get_company_abbr(self):
-		return frappe.db.sql("select abbr from tabCompany where name=%s", self.doc.company)[0][0]
+		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
 	
 	def validate(self):
 		#validation for Naming Series mandatory field...
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
-			if not self.doc.naming_series:
+			if not self.naming_series:
 				msgprint("Series is Mandatory.", raise_exception=1)
 			
 	def get_contacts(self,nm):
@@ -67,18 +67,18 @@ class Supplier(TransactionBase):
 			return ''
 			
 	def delete_supplier_address(self):
-		for rec in frappe.db.sql("select * from `tabAddress` where supplier=%s", (self.doc.name,), as_dict=1):
+		for rec in frappe.db.sql("select * from `tabAddress` where supplier=%s", (self.name,), as_dict=1):
 			frappe.db.sql("delete from `tabAddress` where name=%s",(rec['name']))
 	
 	def delete_supplier_contact(self):
 		for contact in frappe.db.sql_list("""select name from `tabContact` 
-			where supplier=%s""", self.doc.name):
+			where supplier=%s""", self.name):
 				frappe.delete_doc("Contact", contact)
 	
 	def delete_supplier_account(self):
 		"""delete supplier's ledger if exist and check balance before deletion"""
 		acc = frappe.db.sql("select name from `tabAccount` where master_type = 'Supplier' \
-			and master_name = %s and docstatus < 2", self.doc.name)
+			and master_name = %s and docstatus < 2", self.name)
 		if acc:
 			frappe.delete_doc('Account', acc[0][0])
 			
@@ -89,7 +89,7 @@ class Supplier(TransactionBase):
 		
 	def before_rename(self, olddn, newdn, merge=False):
 		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Supplier", olddn, newdn, merge, self.doc.company)
+		rename_account_for("Supplier", olddn, newdn, merge, self.company)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''

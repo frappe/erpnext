@@ -53,7 +53,7 @@ def make_entry(args):
 	sle.ignore_permissions = 1
 	sle.insert()
 	sle.submit()
-	return sle.doc.name
+	return sle.name
 	
 def delete_cancelled_entry(voucher_type, voucher_no):
 	frappe.db.sql("""delete from `tabStock Ledger Entry` 

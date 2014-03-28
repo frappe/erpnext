@@ -31,7 +31,7 @@ class PackingSlip(Document):
 		"""
 			Validates if delivery note has status as draft
 		"""
-		if cint(frappe.db.get_value("Delivery Note", self.doc.delivery_note, "docstatus")) != 0:
+		if cint(frappe.db.get_value("Delivery Note", self.delivery_note, "docstatus")) != 0:
 			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again."""), raise_exception=1)
 	
 	def validate_items_mandatory(self):
@@ -43,11 +43,11 @@ class PackingSlip(Document):
 		"""
 			Validate if case nos overlap. If they do, recommend next case no.
 		"""
-		if not cint(self.doc.from_case_no):
+		if not cint(self.from_case_no):
 			frappe.msgprint(_("Please specify a valid 'From Case No.'"), raise_exception=1)
-		elif not self.doc.to_case_no:
-			self.doc.to_case_no = self.doc.from_case_no
-		elif self.doc.from_case_no > self.doc.to_case_no:
+		elif not self.to_case_no:
+			self.to_case_no = self.from_case_no
+		elif self.from_case_no > self.to_case_no:
 			frappe.msgprint(_("'To Case No.' cannot be less than 'From Case No.'"),
 				raise_exception=1)
 		
@@ -57,7 +57,7 @@ class PackingSlip(Document):
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
 			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
 			OR %(from_case_no)s BETWEEN from_case_no AND to_case_no)
-			""", self.doc.fields)
+			""", self.fields)
 
 		if res:
 			frappe.msgprint(_("""Case No(s) already in use. Please rectify and try again.
@@ -102,10 +102,10 @@ class PackingSlip(Document):
 			from `tabDelivery Note Item` dni
 			where parent=%s %s 
 			group by item_code""" % ("%s", condition),
-			tuple([self.doc.delivery_note] + rows), as_dict=1)
+			tuple([self.delivery_note] + rows), as_dict=1)
 
 		ps_item_qty = dict([[d.item_code, d.qty] for d in self.doclist])
-		no_of_cases = cint(self.doc.to_case_no) - cint(self.doc.from_case_no) + 1
+		no_of_cases = cint(self.to_case_no) - cint(self.from_case_no) + 1
 
 		return res, ps_item_qty, no_of_cases
 
@@ -128,8 +128,8 @@ class PackingSlip(Document):
 		"""
 			Fill empty columns in Packing Slip Item
 		"""
-		if not self.doc.from_case_no:
-			self.doc.from_case_no = self.get_recommended_case_no()
+		if not self.from_case_no:
+			self.from_case_no = self.get_recommended_case_no()
 
 		for d in self.get("item_details"):
 			res = frappe.db.get_value("Item", d.item_code, 
@@ -145,7 +145,7 @@ class PackingSlip(Document):
 			note
 		"""
 		recommended_case_no = frappe.db.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
-			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.doc.fields)
+			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.fields)
 		
 		return cint(recommended_case_no[0][0]) + 1
 		
@@ -155,7 +155,7 @@ class PackingSlip(Document):
 		dn_details = self.get_details_for_packing()[0]
 		for item in dn_details:
 			if flt(item.qty) > flt(item.packed_qty):
-				ch = self.doc.append('item_details', {})
+				ch = self.append('item_details', {})
 				ch.item_code = item.item_code
 				ch.item_name = item.item_name
 				ch.stock_uom = item.stock_uom

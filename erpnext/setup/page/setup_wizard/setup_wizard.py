@@ -117,7 +117,7 @@ def set_defaults(args):
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
 	
 	global_defaults = frappe.bean("Global Defaults", "Global Defaults")
-	global_defaults.doc.fields.update({
+	global_defaults.update({
 		'current_fiscal_year': args.curr_fiscal_year,
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name'),
@@ -129,41 +129,41 @@ def set_defaults(args):
 	global_defaults.save()
 	
 	accounts_settings = frappe.bean("Accounts Settings")
-	accounts_settings.doc.auto_accounting_for_stock = 1
+	accounts_settings.auto_accounting_for_stock = 1
 	accounts_settings.save()
 
 	stock_settings = frappe.bean("Stock Settings")
-	stock_settings.doc.item_naming_by = "Item Code"
-	stock_settings.doc.valuation_method = "FIFO"
-	stock_settings.doc.stock_uom = "Nos"
-	stock_settings.doc.auto_indent = 1
+	stock_settings.item_naming_by = "Item Code"
+	stock_settings.valuation_method = "FIFO"
+	stock_settings.stock_uom = "Nos"
+	stock_settings.auto_indent = 1
 	stock_settings.save()
 	
 	selling_settings = frappe.bean("Selling Settings")
-	selling_settings.doc.cust_master_name = "Customer Name"
-	selling_settings.doc.so_required = "No"
-	selling_settings.doc.dn_required = "No"
+	selling_settings.cust_master_name = "Customer Name"
+	selling_settings.so_required = "No"
+	selling_settings.dn_required = "No"
 	selling_settings.save()
 
 	buying_settings = frappe.bean("Buying Settings")
-	buying_settings.doc.supp_master_name = "Supplier Name"
-	buying_settings.doc.po_required = "No"
-	buying_settings.doc.pr_required = "No"
-	buying_settings.doc.maintain_same_rate = 1
+	buying_settings.supp_master_name = "Supplier Name"
+	buying_settings.po_required = "No"
+	buying_settings.pr_required = "No"
+	buying_settings.maintain_same_rate = 1
 	buying_settings.save()
 
 	notification_control = frappe.bean("Notification Control")
-	notification_control.doc.quotation = 1
-	notification_control.doc.sales_invoice = 1
-	notification_control.doc.purchase_order = 1
+	notification_control.quotation = 1
+	notification_control.sales_invoice = 1
+	notification_control.purchase_order = 1
 	notification_control.save()
 
 	hr_settings = frappe.bean("HR Settings")
-	hr_settings.doc.emp_created_by = "Naming Series"
+	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
 
 	email_settings = frappe.bean("Outgoing Email Settings")
-	email_settings.doc.send_print_in_body_and_attachment = 1
+	email_settings.send_print_in_body_and_attachment = 1
 	email_settings.save()
 
 	# control panel
@@ -196,14 +196,14 @@ def create_email_digest():
 
 			for fieldname in edigest.meta.get_fieldnames({"fieldtype": "Check"}):
 				if fieldname != "scheduler_errors":
-					edigest.doc.fields[fieldname] = 1
+					edigest.set(fieldname, 1)
 		
 			edigest.insert()
 	
 	# scheduler errors digest
 	if companies:
 		edigest = frappe.new_bean("Email Digest")
-		edigest.doc.fields.update({
+		edigest.update({
 			"name": "Scheduler Errors",
 			"company": companies[0],
 			"frequency": "Daily",

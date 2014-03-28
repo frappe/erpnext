@@ -14,19 +14,19 @@ from frappe.model.document import Document
 class Bin(Document):	
 		
 	def validate(self):
-		if self.doc.fields.get("__islocal") or not self.doc.stock_uom:
-			self.doc.stock_uom = frappe.db.get_value('Item', self.doc.item_code, 'stock_uom')
+		if self.get("__islocal") or not self.stock_uom:
+			self.stock_uom = frappe.db.get_value('Item', self.item_code, 'stock_uom')
 				
 		self.validate_mandatory()
 		
-		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + \
-		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
+		self.projected_qty = flt(self.actual_qty) + flt(self.ordered_qty) + \
+		 	flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
 		
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
-			if (not self.doc.fields.has_key(f)) or (not self.doc.fields[f]): 
-				self.doc.fields[f] = 0.0
+			if (not self.has_key(f)) or (not self.fields[f]): 
+				self.set(f, 0.0)
 		
 	def update_stock(self, args):
 		self.update_qty(args)
@@ -39,24 +39,24 @@ class Bin(Document):
 			
 			# update valuation and qty after transaction for post dated entry
 			update_entries_after({
-				"item_code": self.doc.item_code,
-				"warehouse": self.doc.warehouse,
+				"item_code": self.item_code,
+				"warehouse": self.warehouse,
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time")
 			})
 			
 	def update_qty(self, args):
 		# update the stock values (for current quantities)
-		self.doc.actual_qty = flt(self.doc.actual_qty) + flt(args.get("actual_qty"))
-		self.doc.ordered_qty = flt(self.doc.ordered_qty) + flt(args.get("ordered_qty"))
-		self.doc.reserved_qty = flt(self.doc.reserved_qty) + flt(args.get("reserved_qty"))
-		self.doc.indented_qty = flt(self.doc.indented_qty) + flt(args.get("indented_qty"))
-		self.doc.planned_qty = flt(self.doc.planned_qty) + flt(args.get("planned_qty"))
+		self.actual_qty = flt(self.actual_qty) + flt(args.get("actual_qty"))
+		self.ordered_qty = flt(self.ordered_qty) + flt(args.get("ordered_qty"))
+		self.reserved_qty = flt(self.reserved_qty) + flt(args.get("reserved_qty"))
+		self.indented_qty = flt(self.indented_qty) + flt(args.get("indented_qty"))
+		self.planned_qty = flt(self.planned_qty) + flt(args.get("planned_qty"))
 		
-		self.doc.projected_qty = flt(self.doc.actual_qty) + flt(self.doc.ordered_qty) + \
-		 	flt(self.doc.indented_qty) + flt(self.doc.planned_qty) - flt(self.doc.reserved_qty)
+		self.projected_qty = flt(self.actual_qty) + flt(self.ordered_qty) + \
+		 	flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
 		
-		self.doc.save()
+		self.save()
 		
 	def get_first_sle(self):
 		sle = frappe.db.sql("""
@@ -65,5 +65,5 @@ class Bin(Document):
 			and warehouse = %s
 			order by timestamp(posting_date, posting_time) asc, name asc
 			limit 1
-		""", (self.doc.item_code, self.doc.warehouse), as_dict=1)
+		""", (self.item_code, self.warehouse), as_dict=1)
 		return sle and sle[0] or None

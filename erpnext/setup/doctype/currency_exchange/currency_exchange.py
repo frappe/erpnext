@@ -11,10 +11,10 @@ from frappe.model.controller import DocListController
 class CurrencyExchange(DocListController):
 		
 	def autoname(self):
-		self.doc.name = self.doc.from_currency + "-" + self.doc.to_currency
+		self.name = self.from_currency + "-" + self.to_currency
 		
 	def validate(self):
 		self.validate_value("exchange_rate", ">", 0)
 		
-		if self.doc.from_currency == self.doc.to_currency:
+		if self.from_currency == self.to_currency:
 			msgprint(_("From Currency and To Currency cannot be same"), raise_exception=True)

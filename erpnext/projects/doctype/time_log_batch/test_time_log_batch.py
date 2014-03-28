@@ -7,7 +7,7 @@ class TimeLogBatchTest(unittest.TestCase):
 	def test_time_log_status(self):
 		from erpnext.projects.doctype.time_log.test_time_log import test_records as time_log_records
 		time_log = frappe.bean(copy=time_log_records[0])
-		time_log.doc.fields.update({
+		time_log.update({
 			"from_time": "2013-01-02 10:00:00.000000",
 			"to_time": "2013-01-02 11:00:00.000000",
 			"docstatus": 0
@@ -15,15 +15,15 @@ class TimeLogBatchTest(unittest.TestCase):
 		time_log.insert()
 		time_log.submit()
 		
-		self.assertEquals(frappe.db.get_value("Time Log", time_log.doc.name, "status"), "Submitted")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Submitted")
 		tlb = frappe.bean(copy=test_records[0])
-		tlb.doclist[1].time_log = time_log.doc.name
+		tlb.doclist[1].time_log = time_log.name
 		tlb.insert()
 		tlb.submit()
 
-		self.assertEquals(frappe.db.get_value("Time Log", time_log.doc.name, "status"), "Batched for Billing")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Batched for Billing")
 		tlb.cancel()
-		self.assertEquals(frappe.db.get_value("Time Log", time_log.doc.name, "status"), "Submitted")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Submitted")
 
 test_records = [[
 	{

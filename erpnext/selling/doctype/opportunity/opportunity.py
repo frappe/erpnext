@@ -61,22 +61,22 @@ class Opportunity(TransactionBase):
 		
 		opts.description = ""
 		
-		if self.doc.customer:
-			if self.doc.contact_person:
-				opts.description = 'Contact '+cstr(self.doc.contact_person)
+		if self.customer:
+			if self.contact_person:
+				opts.description = 'Contact '+cstr(self.contact_person)
 			else:
-				opts.description = 'Contact customer '+cstr(self.doc.customer)
-		elif self.doc.lead:
-			if self.doc.contact_display:
-				opts.description = 'Contact '+cstr(self.doc.contact_display)
+				opts.description = 'Contact customer '+cstr(self.customer)
+		elif self.lead:
+			if self.contact_display:
+				opts.description = 'Contact '+cstr(self.contact_display)
 			else:
-				opts.description = 'Contact lead '+cstr(self.doc.lead)
+				opts.description = 'Contact lead '+cstr(self.lead)
 				
 		opts.subject = opts.description
-		opts.description += '. By : ' + cstr(self.doc.contact_by)
+		opts.description += '. By : ' + cstr(self.contact_by)
 		
-		if self.doc.to_discuss:
-			opts.description += ' To Discuss : ' + cstr(self.doc.to_discuss)
+		if self.to_discuss:
+			opts.description += ' To Discuss : ' + cstr(self.to_discuss)
 		
 		super(DocType, self).add_calendar_event(opts, force)
 
@@ -86,17 +86,17 @@ class Opportunity(TransactionBase):
 			raise Exception
 
 	def validate_lead_cust(self):
-		if self.doc.enquiry_from == 'Lead' and not self.doc.lead:
+		if self.enquiry_from == 'Lead' and not self.lead:
 			msgprint("Lead Id is mandatory if 'Opportunity From' is selected as Lead", raise_exception=1)
-		elif self.doc.enquiry_from == 'Customer' and not self.doc.customer:
+		elif self.enquiry_from == 'Customer' and not self.customer:
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
 		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Opportunity", self.doc.name, "contact_date") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Opportunity", self.doc.name, "contact_by") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
+			"contact_date": frappe.db.get_value("Opportunity", self.name, "contact_date") if \
+				(not cint(self.get("__islocal"))) else None,
+			"contact_by": frappe.db.get_value("Opportunity", self.name, "contact_by") if \
+				(not cint(self.get("__islocal"))) else None,
 		})
 		
 		self.set_status()
@@ -105,11 +105,11 @@ class Opportunity(TransactionBase):
 		self.validate_lead_cust()
 		
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
+		validate_fiscal_year(self.transaction_date, self.fiscal_year, "Opportunity Date")
 
 	def on_submit(self):
-		if self.doc.lead:
-			frappe.bean("Lead", self.doc.lead).get_controller().set_status(update=True)
+		if self.lead:
+			frappe.bean("Lead", self.lead).get_controller().set_status(update=True)
 	
 	def on_cancel(self):
 		if self.has_quotation():
@@ -127,7 +127,7 @@ class Opportunity(TransactionBase):
 		self.delete_events()
 		
 	def has_quotation(self):
-		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
 		
 @frappe.whitelist()
 def make_quotation(source_name, target_doclist=None):

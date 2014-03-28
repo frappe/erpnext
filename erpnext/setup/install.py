@@ -114,8 +114,8 @@ def import_defaults():
 		bean = frappe.bean(r)
 		
 		# ignore mandatory for root
-		parent_link_field = ("parent_" + scrub(bean.doc.doctype))
-		if parent_link_field in bean.doc.fields and not bean.doc.fields.get(parent_link_field):
+		parent_link_field = ("parent_" + scrub(bean.doctype))
+		if parent_link_field in bean.fields and not bean.get(parent_link_field):
 			bean.ignore_mandatory = True
 		
 		bean.insert()
@@ -133,7 +133,7 @@ def feature_setup():
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
-	bean.doc.fields.update(dict(zip(flds, [1]*len(flds))))
+	bean.update(dict(zip(flds, [1]*len(flds))))
 	bean.save()
 
 def set_single_defaults():
@@ -144,7 +144,7 @@ def set_single_defaults():
 			try:
 				b = frappe.bean(dt, dt)
 				for fieldname, value in default_values:
-					b.doc.fields[fieldname] = value
+					b.set(fieldname, value)
 				b.save()
 			except frappe.MandatoryError:
 				pass

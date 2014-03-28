@@ -19,7 +19,7 @@ def import_charts():
 						"source_file": fname,
 						"country": country
 					}).insert()
-					print bean.doc.name.encode("utf-8")
+					print bean.name.encode("utf-8")
 				else:
 					print "No chart for: " + chart.get("name").encode("utf-8")
 				

@@ -10,7 +10,7 @@ import frappe.defaults
 
 class PriceList(DocListController):
 	def validate(self):
-		if not cint(self.doc.buying) and not cint(self.doc.selling):
+		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
 				
 		if not self.get("valid_for_territories"):
@@ -29,26 +29,26 @@ class PriceList(DocListController):
 		self.update_item_price()
 
 	def set_default_if_missing(self):
-		if cint(self.doc.selling):
+		if cint(self.selling):
 			if not frappe.db.get_value("Selling Settings", None, "selling_price_list"):
-				frappe.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.doc.name)
+				frappe.set_value("Selling Settings", "Selling Settings", "selling_price_list", self.name)
 
-		elif cint(self.doc.buying):
+		elif cint(self.buying):
 			if not frappe.db.get_value("Buying Settings", None, "buying_price_list"):
-				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.doc.name)
+				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.name)
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set currency=%s, 
 			buying=%s, selling=%s, modified=NOW() where price_list=%s""", 
-			(self.doc.currency, cint(self.doc.buying), cint(self.doc.selling), self.doc.name))
+			(self.currency, cint(self.buying), cint(self.selling), self.name))
 
 	def on_trash(self):
 		def _update_default_price_list(module):
 			b = frappe.bean(module + " Settings")
 			price_list_fieldname = module.lower() + "_price_list"
 
-			if self.doc.name == b.doc.fields[price_list_fieldname]:
-				b.doc.fields[price_list_fieldname] = None
+			if self.name == b.fields[price_list_fieldname]:
+				b.set(price_list_fieldname, None)
 				b.save()
 		
 		for module in ["Selling", "Buying"]:

@@ -52,7 +52,7 @@ class TestStockReconciliation(unittest.TestCase):
 			# no gl entries
 			gl_entries = frappe.db.sql("""select name from `tabGL Entry` 
 				where voucher_type = 'Stock Reconciliation' and voucher_no = %s""",
-				 stock_reco.doc.name)
+				 stock_reco.name)
 			self.assertFalse(gl_entries)
 			
 		
@@ -99,7 +99,7 @@ class TestStockReconciliation(unittest.TestCase):
 			# no gl entries
 			gl_entries = frappe.db.sql("""select name from `tabGL Entry` 
 				where voucher_type = 'Stock Reconciliation' and voucher_no = %s""", 
-				stock_reco.doc.name)
+				stock_reco.name)
 			self.assertFalse(gl_entries)
 			
 	def test_reco_fifo_gl_entries(self):
@@ -226,8 +226,8 @@ class TestStockReconciliation(unittest.TestCase):
 		pr.submit()
 		
 		pr1 = frappe.bean(copy=stock_entry)
-		pr1.doc.posting_date = "2012-12-15"
-		pr1.doc.posting_time = "02:00"
+		pr1.posting_date = "2012-12-15"
+		pr1.posting_time = "02:00"
 		pr1.doclist[1].qty = 10
 		pr1.doclist[1].transfer_qty = 10
 		pr1.doclist[1].incoming_rate = 700
@@ -235,9 +235,9 @@ class TestStockReconciliation(unittest.TestCase):
 		pr1.submit()
 		
 		pr2 = frappe.bean(copy=stock_entry)
-		pr2.doc.posting_date = "2012-12-25"
-		pr2.doc.posting_time = "03:00"
-		pr2.doc.purpose = "Material Issue"
+		pr2.posting_date = "2012-12-25"
+		pr2.posting_time = "03:00"
+		pr2.purpose = "Material Issue"
 		pr2.doclist[1].s_warehouse = "_Test Warehouse - _TC"
 		pr2.doclist[1].t_warehouse = None
 		pr2.doclist[1].qty = 15
@@ -247,9 +247,9 @@ class TestStockReconciliation(unittest.TestCase):
 		pr2.submit()
 		
 		pr3 = frappe.bean(copy=stock_entry)
-		pr3.doc.posting_date = "2012-12-31"
-		pr3.doc.posting_time = "08:00"
-		pr3.doc.purpose = "Material Issue"
+		pr3.posting_date = "2012-12-31"
+		pr3.posting_time = "08:00"
+		pr3.purpose = "Material Issue"
 		pr3.doclist[1].s_warehouse = "_Test Warehouse - _TC"
 		pr3.doclist[1].t_warehouse = None
 		pr3.doclist[1].qty = 20
@@ -260,9 +260,9 @@ class TestStockReconciliation(unittest.TestCase):
 		
 		
 		pr4 = frappe.bean(copy=stock_entry)
-		pr4.doc.posting_date = "2013-01-05"
-		pr4.doc.fiscal_year = "_Test Fiscal Year 2013"
-		pr4.doc.posting_time = "07:00"
+		pr4.posting_date = "2013-01-05"
+		pr4.fiscal_year = "_Test Fiscal Year 2013"
+		pr4.posting_time = "07:00"
 		pr4.doclist[1].qty = 15
 		pr4.doclist[1].transfer_qty = 15
 		pr4.doclist[1].incoming_rate = 1200

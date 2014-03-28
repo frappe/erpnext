@@ -50,7 +50,7 @@ class EmailDigest(DocListController):
 		super(EmailDigest, self).__init__(arg1, arg2)
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.future_from_date, self.future_to_date = self.get_future_from_to_date()
-		self.currency = frappe.db.get_value("Company", self.doc.company,
+		self.currency = frappe.db.get_value("Company", self.company,
 			"default_currency")
 
 	def get_users(self):
@@ -61,8 +61,8 @@ class EmailDigest(DocListController):
 			and user_type != "Website User"
 			order by enabled desc, name asc""".format(", ".join(["%s"]*len(STANDARD_USERS))), STANDARD_USERS, as_dict=1)
 
-		if self.doc.recipient_list:
-			recipient_list = self.doc.recipient_list.split("\n")
+		if self.recipient_list:
+			recipient_list = self.recipient_list.split("\n")
 		else:
 			recipient_list = []
 		for p in user_list:
@@ -75,7 +75,7 @@ class EmailDigest(DocListController):
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
 		recipients = filter(lambda r: r in valid_users,
-			self.doc.recipient_list.split("\n"))
+			self.recipient_list.split("\n"))
 		
 		common_msg = self.get_common_content()
 		if recipients:
@@ -85,7 +85,7 @@ class EmailDigest(DocListController):
 				if msg_for_this_receipient:
 					sendmail(recipients=user_id, 
 						subject="[ERPNext] [{frequency} Digest] {name}".format(
-							frequency=self.doc.frequency, name=self.doc.name), 
+							frequency=self.frequency, name=self.name), 
 						msg=msg_for_this_receipient)
 			
 	def get_digest_msg(self):
@@ -97,7 +97,7 @@ class EmailDigest(DocListController):
 		for module, content in content_sequence:
 			module_out = []
 			for ctype in content:
-				if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
+				if self.get(ctype) and hasattr(self, "get_"+ctype):
 					module_out.append(getattr(self, "get_"+ctype)())
 			if any([m[0] for m in module_out]):
 				out += [[1, "<h4>" + _(module) + "</h4>"]] + module_out + [[1, "<hr>"]]
@@ -114,7 +114,7 @@ class EmailDigest(DocListController):
 		
 		out = []
 		for ctype in user_specific_content:
-			if self.doc.fields.get(ctype) and hasattr(self, "get_"+ctype):
+			if self.get(ctype) and hasattr(self, "get_"+ctype):
 				out.append(getattr(self, "get_"+ctype)(user_id))
 				
 		frappe.session.user = original_session_user
@@ -139,16 +139,16 @@ class EmailDigest(DocListController):
 		if no_value:
 			no_value = """<h4>No Updates For:</h4>""" + "\n".join(no_value)
 		
-		date = self.doc.frequency == "Daily" and formatdate(self.from_date) or \
+		date = self.frequency == "Daily" and formatdate(self.from_date) or \
 			"%s to %s" % (formatdate(self.from_date), formatdate(self.to_date))
 		
 		msg = digest_template % {
-				"digest": self.doc.frequency + " Digest",
+				"digest": self.frequency + " Digest",
 				"date": date,
-				"company": self.doc.company,
+				"company": self.company,
 				"with_value": with_value,
 				"no_value": no_value or "",
-				"name": self.doc.name
+				"name": self.name
 			}
 		
 		return msg
@@ -337,7 +337,7 @@ class EmailDigest(DocListController):
 	
 	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True):
 		if filter_by_company:
-			company = """and company="%s" """ % self.doc.company.replace('"', '\"')
+			company = """and company="%s" """ % self.company.replace('"', '\"')
 		else:
 			company = ""
 		count = frappe.db.sql("""select count(*) from `tab%s`
@@ -352,7 +352,7 @@ class EmailDigest(DocListController):
 		count_sum = frappe.db.sql("""select count(*), sum(ifnull(`%s`, 0))
 			from `tab%s` where docstatus=1 and company = %s and
 			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
-			"%s", "%s"), (self.doc.company, self.from_date, self.to_date))
+			"%s", "%s"), (self.company, self.from_date, self.to_date))
 		count, total = count_sum and count_sum[0] or (0, 0)
 		
 		return count, self.get_html(label, self.currency, 
@@ -379,7 +379,7 @@ class EmailDigest(DocListController):
 			where company=%s 
 			and posting_date <= %s %s""" % ("%s", "%s", 
 			from_date and "and posting_date>='%s'" % from_date or ""),
-			(self.doc.company, to_date or self.to_date), as_dict=1)
+			(self.company, to_date or self.to_date), as_dict=1)
 		
 		# cache if it is the normal cases
 		if from_date==self.from_date and to_date==self.to_date:
@@ -393,17 +393,17 @@ class EmailDigest(DocListController):
 				root_type, account_type, account_name, master_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
-				(self.doc.company,), as_dict=1)
+				(self.company,), as_dict=1)
 		return self.accounts
 		
 	def get_from_to_date(self):
 		today = now_datetime().date()
 		
 		# decide from date based on email digest frequency
-		if self.doc.frequency == "Daily":
+		if self.frequency == "Daily":
 			# from date, to_date is yesterday
 			from_date = to_date = today - timedelta(days=1)
-		elif self.doc.frequency == "Weekly":
+		elif self.frequency == "Weekly":
 			# from date is the previous week's monday
 			from_date = today - timedelta(days=today.weekday(), weeks=1)
 			# to date is sunday i.e. the previous day
@@ -420,10 +420,10 @@ class EmailDigest(DocListController):
 		today = now_datetime().date()
 		
 		# decide from date based on email digest frequency
-		if self.doc.frequency == "Daily":
+		if self.frequency == "Daily":
 			# from date, to_date is today
 			from_date = to_date = today
-		elif self.doc.frequency == "Weekly":
+		elif self.frequency == "Weekly":
 			# from date is the current week's monday
 			from_date = today - timedelta(days=today.weekday())
 			# to date is the current week's sunday
@@ -441,13 +441,13 @@ class EmailDigest(DocListController):
 
 		send_date = to_date + timedelta(days=1)
 		
-		if self.doc.frequency == "Daily":
+		if self.frequency == "Daily":
 			next_send_date = send_date + timedelta(days=1)
-		elif self.doc.frequency == "Weekly":
+		elif self.frequency == "Weekly":
 			next_send_date = send_date + timedelta(weeks=1)
 		else:
 			next_send_date = send_date + relativedelta(months=1)
-		self.doc.next_send = formatdate(next_send_date) + " at midnight"
+		self.next_send = formatdate(next_send_date) + " at midnight"
 		
 		return send_date
 	

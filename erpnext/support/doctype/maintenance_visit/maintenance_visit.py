@@ -34,15 +34,15 @@ class MaintenanceVisit(TransactionBase):
 		for d in self.get('maintenance_visit_details'):
 			if d.prevdoc_docname and d.prevdoc_doctype == 'Customer Issue' :
 				if flag==1:
-					mntc_date = self.doc.mntc_date
+					mntc_date = self.mntc_date
 					service_person = d.service_person
 					work_done = d.work_done
-					if self.doc.completion_status == 'Fully Completed':
+					if self.completion_status == 'Fully Completed':
 						status = 'Closed'
-					elif self.doc.completion_status == 'Partially Completed':
+					elif self.completion_status == 'Partially Completed':
 						status = 'Work In Progress'
 				else:
-					nm = frappe.db.sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.doc.name))
+					nm = frappe.db.sql("select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1", (d.prevdoc_docname, self.name))
 					
 					if nm:
 						status = 'Work In Progress'
@@ -67,7 +67,7 @@ class MaintenanceVisit(TransactionBase):
 				check_for_doctype = d.prevdoc_doctype
 		
 		if check_for_docname:
-			check = frappe.db.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.doc.name, check_for_docname, self.doc.mntc_date, self.doc.mntc_date, self.doc.mntc_time))
+			check = frappe.db.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.name, check_for_docname, self.mntc_date, self.mntc_date, self.mntc_time))
 			
 			if check:
 				check_lst = [x[0] for x in check]

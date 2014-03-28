@@ -17,11 +17,11 @@ class PurchaseCommon(BuyingController):
 		"""updates last_purchase_rate in item table for each item"""
 		
 		import frappe.utils
-		this_purchase_date = frappe.utils.getdate(obj.doc.fields.get('posting_date') or obj.doc.fields.get('transaction_date'))
+		this_purchase_date = frappe.utils.getdate(obj.get('posting_date') or obj.get('transaction_date'))
 		
 		for d in getlist(obj.doclist,obj.fname):
 			# get last purchase details
-			last_purchase_details = get_last_purchase_details(d.item_code, obj.doc.name)
+			last_purchase_details = get_last_purchase_details(d.item_code, obj.name)
 
 			# compare last purchase date and this transaction's date
 			last_purchase_rate = None
@@ -44,8 +44,8 @@ class PurchaseCommon(BuyingController):
 	
 	def get_last_purchase_rate(self, obj):
 		"""get last purchase rates for all items"""
-		doc_name = obj.doc.name
-		conversion_rate = flt(obj.doc.fields.get('conversion_rate')) or 1.0
+		doc_name = obj.name
+		conversion_rate = flt(obj.get('conversion_rate')) or 1.0
 		
 		for d in getlist(obj.doclist, obj.fname):
 			if d.item_code:
@@ -83,7 +83,7 @@ class PurchaseCommon(BuyingController):
 				f_lst.pop('received_qty')
 			for x in f_lst :
 				if d.fields.has_key(x):
-					d.fields[x] = f_lst[x]
+					d.set(x, f_lst[x])
 			
 			item = frappe.db.sql("""select is_stock_item, is_purchase_item, 
 				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""", d.item_code)

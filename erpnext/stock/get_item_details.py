@@ -68,7 +68,7 @@ def get_item_details(args):
 	apply_pricing_rule(out, args)
 		
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
-		if item_bean.doc.has_serial_no == "Yes" and not args.serial_no:
+		if item_bean.has_serial_no == "Yes" and not args.serial_no:
 			out.serial_no = get_serial_nos_by_fifo(args, item_bean)
 			
 	if args.transaction_date and item.lead_time_days:
@@ -153,7 +153,7 @@ def get_basic_details(args, item_bean):
 	})
 	
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
-		out[fieldname] = item.fields.get(fieldname)
+		out[fieldname] = item.get(fieldname)
 			
 	return out
 	
@@ -174,7 +174,7 @@ def get_price_list_rate(args, item_bean, out):
 		
 		if not out.price_list_rate and args.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
-			out.update(get_last_purchase_details(item_bean.doc.name, 
+			out.update(get_last_purchase_details(item_bean.name, 
 				args.docname, args.conversion_rate))
 			
 def validate_price_list(args):

@@ -14,7 +14,7 @@ class TestNewsletter(unittest.TestCase):
 
 	def test_get_recipients_lead_by_status(self):
 		w = frappe.bean(test_records[0])
-		w.doc.lead_status="Converted"
+		w.lead_status="Converted"
 		w.insert()
 		self.assertTrue("test_lead3@example.com" in w.controller.get_recipients())
 
@@ -25,7 +25,7 @@ class TestNewsletter(unittest.TestCase):
 
 	def test_get_recipients_contact_supplier(self):
 		w = frappe.bean(test_records[1])
-		w.doc.contact_type="Supplier"
+		w.contact_type="Supplier"
 		w.insert()
 		self.assertTrue("test_contact_supplier@example.com" in w.controller.get_recipients())
 

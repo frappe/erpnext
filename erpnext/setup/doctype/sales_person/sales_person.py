@@ -20,9 +20,9 @@ class SalesPerson(DocTypeNestedSet):
 		self.validate_one_root()
 	
 	def get_email_id(self):
-		if self.doc.employee:
-			user = frappe.db.get_value("Employee", self.doc.employee, "user_id")
+		if self.employee:
+			user = frappe.db.get_value("Employee", self.employee, "user_id")
 			if not user:
-				frappe.throw("User ID not set for Employee %s" % self.doc.employee)
+				frappe.throw("User ID not set for Employee %s" % self.employee)
 			else:
 				return frappe.db.get_value("User", user, "email") or user

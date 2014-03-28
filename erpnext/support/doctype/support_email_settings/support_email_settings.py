@@ -14,20 +14,20 @@ class SupportEmailSettings(Document):
 		"""
 			Checks support ticket email settings
 		"""
-		if self.doc.sync_support_mails and self.doc.mail_server:
+		if self.sync_support_mails and self.mail_server:
 			from frappe.utils.email_lib.receive import POP3Mailbox
 						import _socket, poplib
 			
 			inc_email = frappe.get_doc('Incoming Email Settings')
 			# inc_email.encode()
-			inc_email.host = self.doc.mail_server
-			inc_email.use_ssl = self.doc.use_ssl
+			inc_email.host = self.mail_server
+			inc_email.use_ssl = self.use_ssl
 			try:
 				err_msg = 'User Name or Support Password missing. Please enter and try again.'
-				if not (self.doc.mail_login and self.doc.mail_password):
+				if not (self.mail_login and self.mail_password):
 					raise AttributeError, err_msg
-				inc_email.username = self.doc.mail_login
-				inc_email.password = self.doc.mail_password
+				inc_email.username = self.mail_login
+				inc_email.password = self.mail_password
 			except AttributeError, e:
 				frappe.msgprint(err_msg)
 				raise

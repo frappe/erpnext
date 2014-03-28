@@ -120,12 +120,12 @@ def update_bin(item_code, warehouse, qty_dict=None):
 	bin = get_bin(item_code, warehouse)
 	mismatch = False
 	for fld, val in qty_dict.items():
-		if flt(bin.doc.fields.get(fld)) != flt(val):
-			bin.doc.fields[fld] = flt(val)
+		if flt(bin.get(fld)) != flt(val):
+			bin.set(fld, flt(val))
 			mismatch = True
 			
 	if mismatch:
-		bin.doc.projected_qty = flt(bin.doc.actual_qty) + flt(bin.doc.ordered_qty) + \
-			flt(bin.doc.indented_qty) + flt(bin.doc.planned_qty) - flt(bin.doc.reserved_qty)
+		bin.projected_qty = flt(bin.actual_qty) + flt(bin.ordered_qty) + \
+			flt(bin.indented_qty) + flt(bin.planned_qty) - flt(bin.reserved_qty)
 	
-		bin.doc.save()
+		bin.save()

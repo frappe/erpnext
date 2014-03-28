@@ -17,8 +17,8 @@ class LeaveApproverIdentityError(frappe.ValidationError): pass
 from frappe.model.controller import DocListController
 class LeaveApplication(DocListController):
 	def setup(self):
-		if frappe.db.exists(self.doc.doctype, self.doc.name):
-			self.previous_doc = frappe.doc(self.doc.doctype, self.doc.name)
+		if frappe.db.exists(self.doctype, self.name):
+			self.previous_doc = frappe.doc(self.doctype, self.name)
 		else:
 			self.previous_doc = None
 		
@@ -32,22 +32,22 @@ class LeaveApplication(DocListController):
 		self.validate_leave_approver()
 		
 	def on_update(self):
-		if (not self.previous_doc and self.doc.leave_approver) or (self.previous_doc and \
-				self.doc.status == "Open" and self.previous_doc.leave_approver != self.doc.leave_approver):
+		if (not self.previous_doc and self.leave_approver) or (self.previous_doc and \
+				self.status == "Open" and self.previous_doc.leave_approver != self.leave_approver):
 			# notify leave approver about creation
 			self.notify_leave_approver()
 		elif self.previous_doc and \
-				self.previous_doc.status == "Open" and self.doc.status == "Rejected":
+				self.previous_doc.status == "Open" and self.status == "Rejected":
 			# notify employee about rejection
-			self.notify_employee(self.doc.status)
+			self.notify_employee(self.status)
 	
 	def on_submit(self):
-		if self.doc.status != "Approved":
+		if self.status != "Approved":
 			frappe.msgprint("""Only Leave Applications with status 'Approved' can be Submitted.""",
 				raise_exception=True)
 
 		# notify leave applier about approval
-		self.notify_employee(self.doc.status)
+		self.notify_employee(self.status)
 				
 	def on_cancel(self):
 		# notify leave applier about cancellation
@@ -56,8 +56,8 @@ class LeaveApplication(DocListController):
 	def show_block_day_warning(self):
 		from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates		
 
-		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
-			self.doc.employee, self.doc.company, all_lists=True)
+		block_dates = get_applicable_block_dates(self.from_date, self.to_date, 
+			self.employee, self.company, all_lists=True)
 			
 		if block_dates:
 			frappe.msgprint(_("Warning: Leave application contains following block dates") + ":")
@@ -67,30 +67,30 @@ class LeaveApplication(DocListController):
 	def validate_block_days(self):
 		from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 
-		block_dates = get_applicable_block_dates(self.doc.from_date, self.doc.to_date, 
-			self.doc.employee, self.doc.company)
+		block_dates = get_applicable_block_dates(self.from_date, self.to_date, 
+			self.employee, self.company)
 			
 		if block_dates:
-			if self.doc.status == "Approved":
+			if self.status == "Approved":
 				frappe.msgprint(_("Cannot approve leave as you are not authorized to approve leaves on Block Dates."))
 				raise LeaveDayBlockedError
 			
 	def get_holidays(self):
 		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1 
 			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name 
-			and h1.holiday_date between %s and %s""", (self.doc.employee, self.doc.from_date, self.doc.to_date))
+			and h1.holiday_date between %s and %s""", (self.employee, self.from_date, self.to_date))
 		if not tot_hol:
 			tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2 
 				where h1.parent = h2.name and h1.holiday_date between %s and %s
 				and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s""",
-				(self.doc.from_date, self.doc.to_date, self.doc.fiscal_year))
+				(self.from_date, self.to_date, self.fiscal_year))
 		return tot_hol and flt(tot_hol[0][0]) or 0
 
 	def get_total_leave_days(self):
 		"""Calculates total leave days based on input and holidays"""
 		ret = {'total_leave_days' : 0.5}
-		if not self.doc.half_day:
-			tot_days = date_diff(self.doc.to_date, self.doc.from_date) + 1
+		if not self.half_day:
+			tot_days = date_diff(self.to_date, self.from_date) + 1
 			holidays = self.get_holidays()
 			ret = {
 				'total_leave_days' : flt(tot_days)-flt(holidays)
@@ -98,33 +98,33 @@ class LeaveApplication(DocListController):
 		return ret
 
 	def validate_to_date(self):
-		if self.doc.from_date and self.doc.to_date and \
-				(getdate(self.doc.to_date) < getdate(self.doc.from_date)):
+		if self.from_date and self.to_date and \
+				(getdate(self.to_date) < getdate(self.from_date)):
 			msgprint("To date cannot be before from date")
 			raise Exception
 			
 	def validate_balance_leaves(self):
-		if self.doc.from_date and self.doc.to_date:
-			self.doc.total_leave_days = self.get_total_leave_days()["total_leave_days"]
+		if self.from_date and self.to_date:
+			self.total_leave_days = self.get_total_leave_days()["total_leave_days"]
 			
-			if self.doc.total_leave_days == 0:
+			if self.total_leave_days == 0:
 				msgprint(_("The day(s) on which you are applying for leave coincide with holiday(s). You need not apply for leave."),
 					raise_exception=1)
 			
-			if not is_lwp(self.doc.leave_type):
-				self.doc.leave_balance = get_leave_balance(self.doc.employee,
-					self.doc.leave_type, self.doc.fiscal_year)["leave_balance"]
+			if not is_lwp(self.leave_type):
+				self.leave_balance = get_leave_balance(self.employee,
+					self.leave_type, self.fiscal_year)["leave_balance"]
 
-				if self.doc.status != "Rejected" \
-						and self.doc.leave_balance - self.doc.total_leave_days < 0:
+				if self.status != "Rejected" \
+						and self.leave_balance - self.total_leave_days < 0:
 					#check if this leave type allow the remaining balance to be in negative. If yes then warn the user and continue to save else warn the user and don't save.
 					msgprint("There is not enough leave balance for Leave Type: %s" % \
-						(self.doc.leave_type,), 
-						raise_exception=not(frappe.db.get_value("Leave Type", self.doc.leave_type,"allow_negative") or None))
+						(self.leave_type,), 
+						raise_exception=not(frappe.db.get_value("Leave Type", self.leave_type,"allow_negative") or None))
 					
 	def validate_leave_overlap(self):
-		if not self.doc.name:
-			self.doc.name = "New Leave Application"
+		if not self.name:
+			self.name = "New Leave Application"
 			
 		for d in frappe.db.sql("""select name, leave_type, posting_date, 
 			from_date, to_date 
@@ -136,45 +136,45 @@ class LeaveApplication(DocListController):
 			and (from_date between %(from_date)s and %(to_date)s 
 				or to_date between %(from_date)s and %(to_date)s
 				or %(from_date)s between from_date and to_date)
-			and name != %(name)s""", self.doc.fields, as_dict = 1):
+			and name != %(name)s""", self.fields, as_dict = 1):
  
-			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.doc.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
+			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
 
 	def validate_max_days(self):
-		max_days = frappe.db.get_value("Leave Type", self.doc.leave_type, "max_days_allowed")
-		if max_days and self.doc.total_leave_days > max_days:
+		max_days = frappe.db.get_value("Leave Type", self.leave_type, "max_days_allowed")
+		if max_days and self.total_leave_days > max_days:
 			frappe.throw("Sorry ! You cannot apply for %s for more than %s days" % 
-				(self.doc.leave_type, max_days))
+				(self.leave_type, max_days))
 			
 	def validate_leave_approver(self):
-		employee = frappe.bean("Employee", self.doc.employee)
+		employee = frappe.bean("Employee", self.employee)
 		leave_approvers = [l.leave_approver for l in 
 			employee.get("employee_leave_approvers")]
 			
-		if len(leave_approvers) and self.doc.leave_approver not in leave_approvers:
-			msgprint(("[" + _("For Employee") + ' "' + self.doc.employee + '"] ' 
+		if len(leave_approvers) and self.leave_approver not in leave_approvers:
+			msgprint(("[" + _("For Employee") + ' "' + self.employee + '"] ' 
 				+ _("Leave Approver can be one of") + ": "
 				+ comma_or(leave_approvers)), raise_exception=InvalidLeaveApproverError)
 		
-		elif self.doc.leave_approver and not frappe.db.sql("""select name from `tabUserRole` 
-			where parent=%s and role='Leave Approver'""", self.doc.leave_approver):
-				msgprint(get_fullname(self.doc.leave_approver) + ": " \
+		elif self.leave_approver and not frappe.db.sql("""select name from `tabUserRole` 
+			where parent=%s and role='Leave Approver'""", self.leave_approver):
+				msgprint(get_fullname(self.leave_approver) + ": " \
 					+ _("does not have role 'Leave Approver'"), raise_exception=InvalidLeaveApproverError)
 					
-		elif self.doc.docstatus==1 and len(leave_approvers) and self.doc.leave_approver != frappe.session.user:
+		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
 			msgprint(_("Only the selected Leave Approver can submit this Leave Application"),
 				raise_exception=LeaveApproverIdentityError)
 			
 	def notify_employee(self, status):
-		employee = frappe.doc("Employee", self.doc.employee)
+		employee = frappe.doc("Employee", self.employee)
 		if not employee.user_id:
 			return
 			
 		def _get_message(url=False):
 			if url:
-				name = get_url_to_form(self.doc.doctype, self.doc.name)
+				name = get_url_to_form(self.doctype, self.name)
 			else:
-				name = self.doc.name
+				name = self.name
 				
 			return (_("Leave Application") + ": %s - %s") % (name, _(status))
 		
@@ -186,21 +186,21 @@ class LeaveApplication(DocListController):
 		})
 		
 	def notify_leave_approver(self):
-		employee = frappe.doc("Employee", self.doc.employee)
+		employee = frappe.doc("Employee", self.employee)
 		
 		def _get_message(url=False):
-			name = self.doc.name
+			name = self.name
 			employee_name = cstr(employee.employee_name)
 			if url:
-				name = get_url_to_form(self.doc.doctype, self.doc.name)
-				employee_name = get_url_to_form("Employee", self.doc.employee, label=employee_name)
+				name = get_url_to_form(self.doctype, self.name)
+				employee_name = get_url_to_form("Employee", self.employee, label=employee_name)
 			
 			return (_("New Leave Application") + ": %s - " + _("Employee") + ": %s") % (name, employee_name)
 		
 		self.notify({
 			# for post in messages
 			"message": _get_message(url=True),
-			"message_to": self.doc.leave_approver,
+			"message_to": self.leave_approver,
 			
 			# for email
 			"subject": _get_message()
@@ -210,7 +210,7 @@ class LeaveApplication(DocListController):
 		args = frappe._dict(args)
 		from frappe.core.page.messages.messages import post
 		post({"txt": args.message, "contact": args.message_to, "subject": args.subject,
-			"notify": cint(self.doc.follow_via_email)})
+			"notify": cint(self.follow_via_email)})
 
 @frappe.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):	

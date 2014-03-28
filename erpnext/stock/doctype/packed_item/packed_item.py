@@ -38,7 +38,7 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 			break
 
 	if not exists:
-		pi = obj.doc.append('packing_details', {})
+		pi = obj.append('packing_details', {})
 
 	pi.parent_item = line.item_code
 	pi.item_code = packing_item_code

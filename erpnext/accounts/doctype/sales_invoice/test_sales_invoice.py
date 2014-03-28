@@ -11,14 +11,14 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
 		w = frappe.bean(copy=test_records[0])
-		w.doc.is_pos = 0
+		w.is_pos = 0
 		w.insert()
 		w.submit()
 		return w
 		
 	def test_double_submission(self):
 		w = frappe.bean(copy=test_records[0])
-		w.doc.docstatus = '0'
+		w.docstatus = '0'
 		w.insert()
 		
 		w2 = [d for d in w.doclist]
@@ -29,7 +29,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 	def test_timestamp_change(self):
 		w = frappe.bean(copy=test_records[0])
-		w.doc.docstatus = '0'
+		w.docstatus = '0'
 		w.insert()
 
 		w2 = frappe.bean([d.fields.copy() for d in w.doclist])
@@ -60,11 +60,11 @@ class TestSalesInvoice(unittest.TestCase):
 		# check if item values are calculated
 		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 		
 		# check net total
-		self.assertEquals(si.doc.net_total, 1250)
-		self.assertEquals(si.doc.net_total_export, 1250)
+		self.assertEquals(si.net_total, 1250)
+		self.assertEquals(si.net_total_export, 1250)
 		
 		# check tax calculation
 		expected_values = {
@@ -81,15 +81,15 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 				
-		self.assertEquals(si.doc.grand_total, 1627.05)
-		self.assertEquals(si.doc.grand_total_export, 1627.05)
+		self.assertEquals(si.grand_total, 1627.05)
+		self.assertEquals(si.grand_total_export, 1627.05)
 		
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.bean(copy=test_records[2])
-		si.doc.currency = "USD"
-		si.doc.conversion_rate = 50
+		si.currency = "USD"
+		si.conversion_rate = 50
 		si.doclist[1].rate = 1
 		si.doclist[1].price_list_rate = 1
 		si.doclist[2].rate = 3
@@ -110,11 +110,11 @@ class TestSalesInvoice(unittest.TestCase):
 		# check if item values are calculated
 		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 		
 		# check net total
-		self.assertEquals(si.doc.net_total, 1250)
-		self.assertEquals(si.doc.net_total_export, 25)
+		self.assertEquals(si.net_total, 1250)
+		self.assertEquals(si.net_total_export, 25)
 		
 		# check tax calculation
 		expected_values = {
@@ -131,14 +131,14 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 				
-		self.assertEquals(si.doc.grand_total, 1627.05)
-		self.assertEquals(si.doc.grand_total_export, 32.54)
+		self.assertEquals(si.grand_total, 1627.05)
+		self.assertEquals(si.grand_total_export, 32.54)
 
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.bean(copy=test_records[3])
-		si.doc.discount_amount = 104.95
+		si.discount_amount = 104.95
 		si.append("other_charges", {
 			"doctype": "Sales Taxes and Charges",
 			"charge_type": "On Previous Row Amount",
@@ -164,11 +164,11 @@ class TestSalesInvoice(unittest.TestCase):
 		# check if item values are calculated
 		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 		
 		# check net total
-		self.assertEquals(si.doc.net_total, 1163.45)
-		self.assertEquals(si.doc.net_total_export, 1578.3)
+		self.assertEquals(si.net_total, 1163.45)
+		self.assertEquals(si.net_total_export, 1578.3)
 		
 		# check tax calculation
 		expected_values = {
@@ -186,14 +186,14 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 				
-		self.assertEquals(si.doc.grand_total, 1500)
-		self.assertEquals(si.doc.grand_total_export, 1500)
+		self.assertEquals(si.grand_total, 1500)
+		self.assertEquals(si.grand_total_export, 1500)
 
 	def test_discount_amount_gl_entry(self):
 		si = frappe.bean(copy=test_records[3])
-		si.doc.discount_amount = 104.95
+		si.discount_amount = 104.95
 		si.append("other_charges", {
 			"doctype": "Sales Taxes and Charges",
 			"charge_type": "On Previous Row Amount",
@@ -208,12 +208,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""", si.doc.name, as_dict=1)
+			order by account asc""", si.name, as_dict=1)
 
 		self.assertTrue(gl_entries)
 
 		expected_values = sorted([
-			[si.doc.debit_to, 1500, 0.0],
+			[si.debit_to, 1500, 0.0],
 			[test_records[3][1]["income_account"], 0.0, 1163.45],
 			[test_records[3][3]["account_head"], 0.0, 130.31],
 			[test_records[3][4]["account_head"], 0.0, 2.61],
@@ -235,7 +235,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.cancel()
 
 		gle = frappe.db.sql("""select * from `tabGL Entry` 
-			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
 		self.assertFalse(gle)
 
@@ -275,11 +275,11 @@ class TestSalesInvoice(unittest.TestCase):
 		# check if item values are calculated
 		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 		
 		# check net total
-		self.assertEquals(si.doc.net_total, 1249.98)
-		self.assertEquals(si.doc.net_total_export, 1578.3)
+		self.assertEquals(si.net_total, 1249.98)
+		self.assertEquals(si.net_total_export, 1578.3)
 		
 		# check tax calculation
 		expected_values = {
@@ -296,16 +296,16 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 		
-		self.assertEquals(si.doc.grand_total, 1622.98)
-		self.assertEquals(si.doc.grand_total_export, 1622.98)
+		self.assertEquals(si.grand_total, 1622.98)
+		self.assertEquals(si.grand_total_export, 1622.98)
 		
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
 		si = frappe.bean(copy=test_records[3])
-		si.doc.currency = "USD"
-		si.doc.conversion_rate = 50
+		si.currency = "USD"
+		si.conversion_rate = 50
 		si.doclist[1].price_list_rate = 55.56
 		si.doclist[1].discount_percentage = 10
 		si.doclist[2].price_list_rate = 187.5
@@ -328,11 +328,11 @@ class TestSalesInvoice(unittest.TestCase):
 		# check if item values are calculated
 		for d in si.get("entries"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.item_code][i])
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 		
 		# check net total
-		self.assertEquals(si.doc.net_total, 49501.7)
-		self.assertEquals(si.doc.net_total_export, 1250)
+		self.assertEquals(si.net_total, 49501.7)
+		self.assertEquals(si.net_total_export, 1250)
 		
 		# check tax calculation
 		expected_values = {
@@ -349,14 +349,14 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		for d in si.get("other_charges"):
 			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.fields.get(k), expected_values[d.account_head][i])
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 		
-		self.assertEquals(si.doc.grand_total, 65205.16)
-		self.assertEquals(si.doc.grand_total_export, 1304.1)
+		self.assertEquals(si.grand_total, 65205.16)
+		self.assertEquals(si.grand_total_export, 1304.1)
 
 	def test_outstanding(self):
 		w = self.make()
-		self.assertEquals(w.doc.outstanding_amount, w.doc.grand_total)
+		self.assertEquals(w.outstanding_amount, w.grand_total)
 		
 	def test_payment(self):
 		frappe.db.sql("""delete from `tabGL Entry`""")
@@ -366,15 +366,15 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 			
 		jv = frappe.bean(frappe.copy_doc(jv_test_records[0]))
-		jv.doclist[1].against_invoice = w.doc.name
+		jv.doclist[1].against_invoice = w.name
 		jv.insert()
 		jv.submit()
 		
-		self.assertEquals(frappe.db.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
+		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"),
 			161.8)
 	
 		jv.cancel()
-		self.assertEquals(frappe.db.get_value("Sales Invoice", w.doc.name, "outstanding_amount"),
+		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"),
 			561.8)
 			
 	def test_time_log_batch(self):
@@ -409,12 +409,12 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""", si.doc.name, as_dict=1)
+			order by account asc""", si.name, as_dict=1)
 		
 		self.assertTrue(gl_entries)
 		
 		expected_values = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
+			[si.debit_to, 630.0, 0.0],
 			[test_records[1][1]["income_account"], 0.0, 500.0],
 			[test_records[1][2]["account_head"], 0.0, 80.0],
 			[test_records[1][3]["account_head"], 0.0, 50.0],
@@ -429,7 +429,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.cancel()
 		
 		gle = frappe.db.sql("""select * from `tabGL Entry` 
-			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 		
 		self.assertFalse(gle)
 		
@@ -454,7 +454,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check stock ledger entries
 		sle = frappe.db.sql("""select * from `tabStock Ledger Entry` 
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
-			si.doc.name, as_dict=1)[0]
+			si.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
 			["_Test Item", "_Test Warehouse - _TC", -1.0])
@@ -462,19 +462,19 @@ class TestSalesInvoice(unittest.TestCase):
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.doc.name, as_dict=1)
+			order by account asc, debit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
 		stock_in_hand = frappe.db.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
 				
 		expected_gl_entries = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
+			[si.debit_to, 630.0, 0.0],
 			[pos[1]["income_account"], 0.0, 500.0],
 			[pos[2]["account_head"], 0.0, 80.0],
 			[pos[3]["account_head"], 0.0, 50.0],
 			[stock_in_hand, 0.0, 75.0],
 			[pos[1]["expense_account"], 75.0, 0.0],
-			[si.doc.debit_to, 0.0, 600.0],
+			[si.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
 		])
 		for i, gle in enumerate(gl_entries):
@@ -484,7 +484,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		si.cancel()
 		gle = frappe.db.sql("""select * from `tabGL Entry` 
-			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 		
 		self.assertFalse(gle)
 		
@@ -501,7 +501,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
 		pr = frappe.bean(copy=pr_test_records[0])
-		pr.doc.naming_series = "_T-Purchase Receipt-"
+		pr.naming_series = "_T-Purchase Receipt-"
 		pr.doclist[1].warehouse = "_Test Warehouse No Account - _TC"
 		pr.insert()
 		pr.submit()
@@ -518,7 +518,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check stock ledger entries
 		sle = frappe.db.sql("""select * from `tabStock Ledger Entry` 
 			where voucher_type = 'Sales Invoice' and voucher_no = %s""", 
-			si.doc.name, as_dict=1)[0]
+			si.name, as_dict=1)[0]
 		self.assertTrue(sle)
 		self.assertEquals([sle.item_code, sle.warehouse, sle.actual_qty], 
 			["_Test Item", "_Test Warehouse No Account - _TC", -1.0])
@@ -526,11 +526,11 @@ class TestSalesInvoice(unittest.TestCase):
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.doc.name, as_dict=1)
+			order by account asc, debit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
 		expected_gl_entries = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
+			[si.debit_to, 630.0, 0.0],
 			[si_doclist[1]["income_account"], 0.0, 500.0],
 			[si_doclist[2]["account_head"], 0.0, 80.0],
 			[si_doclist[3]["account_head"], 0.0, 50.0],
@@ -542,7 +542,7 @@ class TestSalesInvoice(unittest.TestCase):
 				
 		si.cancel()
 		gle = frappe.db.sql("""select * from `tabGL Entry` 
-			where voucher_type='Sales Invoice' and voucher_no=%s""", si.doc.name)
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 		
 		self.assertFalse(gle)
 		set_perpetual_inventory(0)
@@ -559,11 +559,11 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""", si.doc.name, as_dict=1)
+			order by account asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
 		expected_values = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
+			[si.debit_to, 630.0, 0.0],
 			[test_records[1][1]["income_account"], 0.0, 500.0],
 			[test_records[1][2]["account_head"], 0.0, 80.0],
 			[test_records[1][3]["account_head"], 0.0, 50.0],
@@ -586,11 +586,11 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""", si.doc.name, as_dict=1)
+			order by account asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
 		expected_values = sorted([
-			[si.doc.debit_to, 630.0, 0.0],
+			[si.debit_to, 630.0, 0.0],
 			[test_records[1][1]["income_account"], 0.0, 500.0],
 			[test_records[1][2]["account_head"], 0.0, 80.0],
 			[test_records[1][3]["account_head"], 0.0, 50.0],
@@ -606,7 +606,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
 		pr = frappe.bean(copy=pr_test_records[0])
-		pr.doc.naming_series = "_T-Purchase Receipt-"
+		pr.naming_series = "_T-Purchase Receipt-"
 		pr.insert()
 		pr.submit()
 		
@@ -614,7 +614,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records \
 			as dn_test_records
 		dn = frappe.bean(copy=dn_test_records[0])
-		dn.doc.naming_series = "_T-Delivery Note-"
+		dn.naming_series = "_T-Delivery Note-"
 		dn.insert()
 		dn.submit()
 		return dn
@@ -638,35 +638,35 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.bean(copy=test_records[0])
 		si.append("advance_adjustment_details", {
 			"doctype": "Sales Invoice Advance",
-			"journal_voucher": jv.doc.name,
+			"journal_voucher": jv.name,
 			"jv_detail_no": jv.doclist[1].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
-			"remarks": jv.doc.remark
+			"remarks": jv.remark
 		})
 		si.insert()
 		si.submit()
 		si.load_from_db()
 		
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_invoice=%s""", si.doc.name))
+			where against_invoice=%s""", si.name))
 		
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_invoice=%s and credit=300""", si.doc.name))
+			where against_invoice=%s and credit=300""", si.name))
 			
-		self.assertEqual(si.doc.outstanding_amount, 261.8)
+		self.assertEqual(si.outstanding_amount, 261.8)
 		
 		si.cancel()
 		
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_invoice=%s""", si.doc.name))
+			where against_invoice=%s""", si.name))
 			
 	def test_recurring_invoice(self):
 		from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
 		from erpnext.accounts.utils import get_fiscal_year
 		today = nowdate()
 		base_si = frappe.bean(copy=test_records[0])
-		base_si.doc.fields.update({
+		base_si.update({
 			"convert_into_recurring_invoice": 1,
 			"recurring_type": "Monthly",
 			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
@@ -685,7 +685,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# monthly without a first and last day period
 		si2 = frappe.bean(copy=base_si.doclist)
-		si2.doc.fields.update({
+		si2.update({
 			"invoice_period_from_date": today,
 			"invoice_period_to_date": add_to_date(today, days=30)
 		})
@@ -695,7 +695,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# quarterly
 		si3 = frappe.bean(copy=base_si.doclist)
-		si3.doc.fields.update({
+		si3.update({
 			"recurring_type": "Quarterly",
 			"invoice_period_from_date": get_first_day(today),
 			"invoice_period_to_date": get_last_day(add_to_date(today, months=3))
@@ -706,7 +706,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# quarterly without a first and last day period
 		si4 = frappe.bean(copy=base_si.doclist)
-		si4.doc.fields.update({
+		si4.update({
 			"recurring_type": "Quarterly",
 			"invoice_period_from_date": today,
 			"invoice_period_to_date": add_to_date(today, months=3)
@@ -717,7 +717,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# yearly
 		si5 = frappe.bean(copy=base_si.doclist)
-		si5.doc.fields.update({
+		si5.update({
 			"recurring_type": "Yearly",
 			"invoice_period_from_date": get_first_day(today),
 			"invoice_period_to_date": get_last_day(add_to_date(today, years=1))
@@ -728,7 +728,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# yearly without a first and last day period
 		si6 = frappe.bean(copy=base_si.doclist)
-		si6.doc.fields.update({
+		si6.update({
 			"recurring_type": "Yearly",
 			"invoice_period_from_date": today,
 			"invoice_period_to_date": add_to_date(today, years=1)
@@ -739,14 +739,14 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		# change posting date but keep recuring day to be today
 		si7 = frappe.bean(copy=base_si.doclist)
-		si7.doc.fields.update({
+		si7.update({
 			"posting_date": add_to_date(today, days=-1)
 		})
 		si7.insert()
 		si7.submit()
 		
 		# setting so that _test function works
-		si7.doc.posting_date = today
+		si7.posting_date = today
 		self._test_recurring_invoice(si7, True)
 
 	def _test_recurring_invoice(self, base_si, first_and_last_day):
@@ -754,20 +754,20 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice \
 			import manage_recurring_invoices, get_next_date
 		
-		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.doc.recurring_type]
+		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.recurring_type]
 		
 		def _test(i):
 			self.assertEquals(i+1, frappe.db.sql("""select count(*) from `tabSales Invoice`
-				where recurring_id=%s and docstatus=1""", base_si.doc.recurring_id)[0][0])
+				where recurring_id=%s and docstatus=1""", base_si.recurring_id)[0][0])
 			
-			next_date = get_next_date(base_si.doc.posting_date, no_of_months, 
-				base_si.doc.repeat_on_day_of_month)
+			next_date = get_next_date(base_si.posting_date, no_of_months, 
+				base_si.repeat_on_day_of_month)
 
 			manage_recurring_invoices(next_date=next_date, commit=False)
 			
 			recurred_invoices = frappe.db.sql("""select name from `tabSales Invoice`
 				where recurring_id=%s and docstatus=1 order by name desc""",
-				base_si.doc.recurring_id)
+				base_si.recurring_id)
 			
 			self.assertEquals(i+2, len(recurred_invoices))
 			
@@ -775,21 +775,21 @@ class TestSalesInvoice(unittest.TestCase):
 			
 			for fieldname in ["convert_into_recurring_invoice", "recurring_type",
 				"repeat_on_day_of_month", "notification_email_address"]:
-					self.assertEquals(base_si.doc.fields.get(fieldname),
-						new_si.doc.fields.get(fieldname))
+					self.assertEquals(base_si.get(fieldname),
+						new_si.get(fieldname))
 
-			self.assertEquals(new_si.doc.posting_date, unicode(next_date))
+			self.assertEquals(new_si.posting_date, unicode(next_date))
 			
-			self.assertEquals(new_si.doc.invoice_period_from_date,
-				unicode(add_months(base_si.doc.invoice_period_from_date, no_of_months)))
+			self.assertEquals(new_si.invoice_period_from_date,
+				unicode(add_months(base_si.invoice_period_from_date, no_of_months)))
 			
 			if first_and_last_day:
-				self.assertEquals(new_si.doc.invoice_period_to_date, 
-					unicode(get_last_day(add_months(base_si.doc.invoice_period_to_date,
+				self.assertEquals(new_si.invoice_period_to_date, 
+					unicode(get_last_day(add_months(base_si.invoice_period_to_date,
 						no_of_months))))
 			else:
-				self.assertEquals(new_si.doc.invoice_period_to_date, 
-					unicode(add_months(base_si.doc.invoice_period_to_date, no_of_months)))
+				self.assertEquals(new_si.invoice_period_to_date, 
+					unicode(add_months(base_si.invoice_period_to_date, no_of_months)))
 					
 			
 			return new_si
@@ -812,7 +812,7 @@ class TestSalesInvoice(unittest.TestCase):
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
 		si = frappe.bean(copy=test_records[0])
-		si.doc.update_stock = 1
+		si.update_stock = 1
 		si.doclist[1].item_code = "_Test Serialized Item With Series"
 		si.doclist[1].qty = 1
 		si.doclist[1].serial_no = serial_nos[0]
@@ -822,7 +822,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Delivered")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], 
-			"delivery_document_no"), si.doc.name)
+			"delivery_document_no"), si.name)
 			
 		return si
 			
@@ -846,11 +846,11 @@ class TestSalesInvoice(unittest.TestCase):
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
 		sr = frappe.bean("Serial No", serial_nos[0])
-		sr.doc.status = "Not Available"
+		sr.status = "Not Available"
 		sr.save()
 		
 		si = frappe.bean(copy=test_records[0])
-		si.doc.update_stock = 1
+		si.update_stock = 1
 		si.doclist[1].item_code = "_Test Serialized Item With Series"
 		si.doclist[1].qty = 1
 		si.doclist[1].serial_no = serial_nos[0]

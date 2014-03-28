@@ -10,9 +10,9 @@ class ItemGroup(DocTypeNestedSet):
 		self.nsm_parent_field = 'parent_item_group'
 	
 	def validate(self):
-		if not self.doc.parent_website_route:
-			self.doc.parent_website_route = frappe.get_website_route("Item Group", 
-				self.doc.parent_item_group)
+		if not self.parent_website_route:
+			self.parent_website_route = frappe.get_website_route("Item Group", 
+				self.parent_item_group)
 		
 	def on_update(self):
 		DocTypeNestedSet.on_update(self)
@@ -22,6 +22,6 @@ class ItemGroup(DocTypeNestedSet):
 		self.validate_one_root()
 		
 	def validate_name_with_item(self):
-		if frappe.db.exists("Item", self.doc.name):
+		if frappe.db.exists("Item", self.name):
 			frappe.msgprint("An item exists with same name (%s), please change the \
-				item group name or rename the item" % self.doc.name, raise_exception=1)
+				item group name or rename the item" % self.name, raise_exception=1)

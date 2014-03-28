@@ -37,7 +37,7 @@ class MaterialRequest(BuyingController):
 				already_indented = frappe.db.sql("""select sum(ifnull(qty, 0)) 
 					from `tabMaterial Request Item` 
 					where item_code = %s and sales_order_no = %s and 
-					docstatus = 1 and parent != %s""", (item, so_no, self.doc.name))
+					docstatus = 1 and parent != %s""", (item, so_no, self.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 				
 				actual_so_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Order Item` 
@@ -51,7 +51,7 @@ class MaterialRequest(BuyingController):
 				
 	def validate_schedule_date(self):
 		for d in self.get('indent_details'):
-			if d.schedule_date < self.doc.transaction_date:
+			if d.schedule_date < self.transaction_date:
 				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 				
 	# Validate
@@ -62,11 +62,11 @@ class MaterialRequest(BuyingController):
 		self.validate_schedule_date()
 		self.validate_uom_is_integer("uom", "qty")
 		
-		if not self.doc.status:
-			self.doc.status = "Draft"
+		if not self.status:
+			self.status = "Draft"
 
 		from erpnext.utilities import validate_status
-		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
+		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 		
 		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
@@ -95,7 +95,7 @@ class MaterialRequest(BuyingController):
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,
 					"indented_qty": (is_submit and 1 or -1) * flt(qty),
-					"posting_date": self.doc.transaction_date
+					"posting_date": self.transaction_date
 				}
 				update_bin(args)		
 		
@@ -105,12 +105,12 @@ class MaterialRequest(BuyingController):
 	
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""", 
-			self.doc.name)
+			self.name)
 		date_diff = frappe.db.sql("""select TIMEDIFF('%s', '%s')"""
-			% (mod_db[0][0], cstr(self.doc.modified)))
+			% (mod_db[0][0], cstr(self.modified)))
 		
 		if date_diff and date_diff[0][0]:
-			frappe.throw(cstr(self.doc.doctype) + " => " + cstr(self.doc.name) + " has been modified. Please Refresh.")
+			frappe.throw(cstr(self.doctype) + " => " + cstr(self.name) + " has been modified. Please Refresh.")
 
 	def update_status(self, status):
 		self.check_modified_date()
@@ -121,7 +121,7 @@ class MaterialRequest(BuyingController):
 		frappe.db.set(self.doc, 'status', cstr(status))
 		
 		# Step 3:=> Acknowledge User
-		msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
+		msgprint(self.doctype + ": " + self.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
  
 
 	def on_cancel(self):
@@ -129,18 +129,18 @@ class MaterialRequest(BuyingController):
 		pc_obj = get_obj(dt='Purchase Common')
 		
 		# Step 2:=> Check for stopped status
-		pc_obj.check_for_stopped_status(self.doc.doctype, self.doc.name)
+		pc_obj.check_for_stopped_status(self.doctype, self.name)
 		
 		# Step 3:=> Check if Purchase Order has been submitted against current Material Request
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.doc.name, detail_doctype = 'Purchase Order Item')
+		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.name, detail_doctype = 'Purchase Order Item')
 		# Step 4:=> Update Bin
-		self.update_bin(is_submit = 0, is_stopped = (cstr(self.doc.status) == 'Stopped') and 1 or 0)
+		self.update_bin(is_submit = 0, is_stopped = (cstr(self.status) == 'Stopped') and 1 or 0)
 		
 		# Step 5:=> Set Status
 		frappe.db.set(self.doc,'status','Cancelled')
 		
 	def update_completed_qty(self, mr_items=None):
-		if self.doc.material_request_type != "Transfer":
+		if self.material_request_type != "Transfer":
 			return
 			
 		item_doclist = self.get("indent_details")
@@ -154,7 +154,7 @@ class MaterialRequest(BuyingController):
 				d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty) 
 					from `tabStock Entry Detail` where material_request = %s 
 					and material_request_item = %s and docstatus = 1""", 
-					(self.doc.name, d.name))[0][0])
+					(self.name, d.name))[0][0])
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 				
 			# note: if qty is 0, its row is still counted in len(item_doclist)
@@ -164,11 +164,11 @@ class MaterialRequest(BuyingController):
 			elif d.qty > 0:
 				per_ordered += flt(d.ordered_qty / flt(d.qty))
 		
-		self.doc.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
-		frappe.db.set_value(self.doc.doctype, self.doc.name, "per_ordered", self.doc.per_ordered)
+		self.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
+		frappe.db.set_value(self.doctype, self.name, "per_ordered", self.per_ordered)
 		
 def update_completed_qty(bean, method):
-	if bean.doc.doctype == "Stock Entry":
+	if bean.doctype == "Stock Entry":
 		material_request_map = {}
 		
 		for d in bean.get("mtn_details"):
@@ -179,9 +179,9 @@ def update_completed_qty(bean, method):
 			mr_obj = frappe.get_obj("Material Request", mr_name, with_children=1)
 			mr_doctype = frappe.get_meta("Material Request")
 			
-			if mr_obj.doc.status in ["Stopped", "Cancelled"]:
-				frappe.throw(_("Material Request") + ": %s, " % mr_obj.doc.name 
-					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.doc.status)
+			if mr_obj.status in ["Stopped", "Cancelled"]:
+				frappe.throw(_("Material Request") + ": %s, " % mr_obj.name 
+					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.status)
 					+ _("Cannot continue."), exc=frappe.InvalidStatusError)
 				
 			_update_requested_qty(bean, mr_obj, mr_items)
@@ -195,7 +195,7 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 	for mr_item_name in mr_items:
 		mr_item = mr_obj.doclist.getone({"parentfield": "indent_details", "name": mr_item_name})
 		se_detail = bean.doclist.getone({"parentfield": "mtn_details",
-			"material_request": mr_obj.doc.name, "material_request_item": mr_item_name})
+			"material_request": mr_obj.name, "material_request_item": mr_item_name})
 	
 		mr_item.ordered_qty = flt(mr_item.ordered_qty)
 		mr_item.qty = flt(mr_item.qty)
@@ -214,7 +214,7 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 			"item_code": se_detail.item_code,
 			"warehouse": se_detail.t_warehouse,
 			"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
-			"posting_date": bean.doc.posting_date,
+			"posting_date": bean.posting_date,
 		})
 
 def set_missing_values(source, target_doclist):
@@ -270,7 +270,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doclist=None):
 		po_items = target_doclist.get({"parentfield": "po_details"})
 		target_doclist = target_doclist.get({"parentfield": ["!=", "po_details"]}) + \
 			[d for d in po_items 
-				if d.fields.get("item_code") in supplier_items and d.fields.get("qty") > 0]
+				if d.get("item_code") in supplier_items and d.get("qty") > 0]
 		
 		return target_doclist
 		

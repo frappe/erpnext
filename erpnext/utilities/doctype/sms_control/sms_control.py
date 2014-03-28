@@ -70,14 +70,14 @@ class SmsControl(Document):
 
 	def send_via_gateway(self, arg):
 		ss = get_obj('SMS Settings', 'SMS Settings', with_children=1)
-		args = {ss.doc.message_parameter : arg.get('message')}
+		args = {ss.message_parameter : arg.get('message')}
 		for d in getlist(ss.doclist, 'static_parameter_details'):
 			args[d.parameter] = d.value
 		
 		resp = []
 		for d in arg.get('receiver_list'):
-			args[ss.doc.receiver_parameter] = d
-			resp.append(self.send_request(ss.doc.sms_gateway_url, args))
+			args[ss.receiver_parameter] = d
+			resp.append(self.send_request(ss.sms_gateway_url, args))
 
 		return resp
 

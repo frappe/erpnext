@@ -104,11 +104,11 @@ def add_ac(args=None):
 		args.pop("cmd")
 		
 	ac = frappe.bean(args)
-	ac.doc.doctype = "Account"
-	ac.doc.old_parent = ""
-	ac.doc.freeze_account = "No"
+	ac.doctype = "Account"
+	ac.old_parent = ""
+	ac.freeze_account = "No"
 	ac.insert()
-	return ac.doc.name
+	return ac.name
 
 @frappe.whitelist()
 def add_cc(args=None):
@@ -117,10 +117,10 @@ def add_cc(args=None):
 		args.pop("cmd")
 		
 	cc = frappe.bean(args)
-	cc.doc.doctype = "Cost Center"
-	cc.doc.old_parent = ""
+	cc.doctype = "Cost Center"
+	cc.old_parent = ""
 	cc.insert()
-	return cc.doc.name
+	return cc.name
 
 def reconcile_against_document(args):
 	"""
@@ -185,8 +185,8 @@ def update_against_doc(d, jv_obj):
 		ch.account = d['account']
 		ch.cost_center = cstr(jvd[0][0])
 		ch.balance = cstr(jvd[0][1])
-		ch.fields[d['dr_or_cr']] = flt(d['unadjusted_amt']) - flt(d['allocated_amt'])
-		ch.fields[d['dr_or_cr']== 'debit' and 'credit' or 'debit'] = 0
+		ch.set(d['dr_or_cr'], flt(d['unadjusted_amt']) - flt(d['allocated_amt']))
+		ch.set(d['dr_or_cr']== 'debit' and 'credit' or 'debit', 0)
 		ch.against_account = cstr(jvd[0][2])
 		ch.is_advance = cstr(jvd[0][3])
 		ch.docstatus = 1

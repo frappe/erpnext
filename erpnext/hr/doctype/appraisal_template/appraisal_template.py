@@ -10,11 +10,11 @@ from frappe.model.document import Document
 class AppraisalTemplate(Document):
 		
 	def validate(self):
-		self.doc.total_points = 0
+		self.total_points = 0
 		for d in self.doclist.get({"doctype":"Appraisal Template Goal"}):
-			self.doc.total_points += int(d.per_weightage or 0)
+			self.total_points += int(d.per_weightage or 0)
 		
-		if int(self.doc.total_points) != 100:
+		if int(self.total_points) != 100:
 			frappe.msgprint(_("Total (sum of) points distribution for all goals should be 100.") \
-				+ " " + _("Not") + " " + str(self.doc.total_points),
+				+ " " + _("Not") + " " + str(self.total_points),
 				raise_exception=True)

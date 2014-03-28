@@ -31,8 +31,8 @@ class PurchaseInvoice(BuyingController):
 	}]
 		
 	def validate(self):
-		if not self.doc.is_opening:
-			self.doc.is_opening = 'No'
+		if not self.is_opening:
+			self.is_opening = 'No'
 			
 		super(DocType, self).validate()
 		
@@ -56,16 +56,16 @@ class PurchaseInvoice(BuyingController):
 			"purchase_receipt_details")
 	
 	def set_missing_values(self, for_validate=False):
-		if not self.doc.credit_to:
-			self.doc.credit_to = get_party_account(self.doc.company, self.doc.supplier, "Supplier")
-		if not self.doc.due_date:
-			self.doc.due_date = get_due_date(self.doc.posting_date, self.doc.supplier, "Supplier",
-				self.doc.credit_to, self.doc.company)
+		if not self.credit_to:
+			self.credit_to = get_party_account(self.company, self.supplier, "Supplier")
+		if not self.due_date:
+			self.due_date = get_due_date(self.posting_date, self.supplier, "Supplier",
+				self.credit_to, self.company)
 		
 		super(DocType, self).set_missing_values(for_validate)
 	
 	def get_advances(self):
-		super(DocType, self).get_advances(self.doc.credit_to, 
+		super(DocType, self).get_advances(self.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
 		
 	def check_active_purchase_items(self):
@@ -80,44 +80,44 @@ class PurchaseInvoice(BuyingController):
 					raise Exception
 						
 	def check_conversion_rate(self):
-		default_currency = get_company_currency(self.doc.company)		
+		default_currency = get_company_currency(self.company)		
 		if not default_currency:
 			msgprint('Message: Please enter default currency in Company Master')
 			raise Exception
-		if (self.doc.currency == default_currency and flt(self.doc.conversion_rate) != 1.00) or not self.doc.conversion_rate or (self.doc.currency != default_currency and flt(self.doc.conversion_rate) == 1.00):
+		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			msgprint("Message: Please Enter Appropriate Conversion Rate.")
 			raise Exception				
 			
 	def validate_bill_no(self):
-		if self.doc.bill_no and self.doc.bill_no.lower().strip() \
+		if self.bill_no and self.bill_no.lower().strip() \
 				not in ['na', 'not applicable', 'none']:
 			b_no = frappe.db.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice` 
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""", 
-				(self.doc.bill_no, self.doc.credit_to, self.doc.name))
-			if b_no and cstr(b_no[0][2]) == cstr(self.doc.is_opening):
+				(self.bill_no, self.credit_to, self.name))
+			if b_no and cstr(b_no[0][2]) == cstr(self.is_opening):
 				msgprint("Please check you have already booked expense against Bill No. %s \
 					in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])), 
 					raise_exception=1)
 					
-			if not self.doc.remarks and self.doc.bill_date:
-				self.doc.remarks = (self.doc.remarks or '') + "\n" + ("Against Bill %s dated %s" 
-					% (self.doc.bill_no, formatdate(self.doc.bill_date)))
+			if not self.remarks and self.bill_date:
+				self.remarks = (self.remarks or '') + "\n" + ("Against Bill %s dated %s" 
+					% (self.bill_no, formatdate(self.bill_date)))
 
-		if not self.doc.remarks:
-			self.doc.remarks = "No Remarks"
+		if not self.remarks:
+			self.remarks = "No Remarks"
 
 	def validate_credit_acc(self):
-		if frappe.db.get_value("Account", self.doc.credit_to, "report_type") != "Balance Sheet":
+		if frappe.db.get_value("Account", self.credit_to, "report_type") != "Balance Sheet":
 			frappe.throw(_("Account must be a balance sheet account"))
 	
 	# Validate Acc Head of Supplier and Credit To Account entered
 	# ------------------------------------------------------------
 	def check_for_acc_head_of_supplier(self): 
-		if self.doc.supplier and self.doc.credit_to:
-			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s", self.doc.credit_to)
+		if self.supplier and self.credit_to:
+			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s", self.credit_to)
 			
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.doc.supplier)) or (not acc_head and (self.doc.credit_to != cstr(self.doc.supplier) + " - " + self.company_abbr)):
-				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.doc.credit_to,self.doc.supplier,self.doc.company), raise_exception=1)
+			if (acc_head and cstr(acc_head[0][0]) != cstr(self.supplier)) or (not acc_head and (self.credit_to != cstr(self.supplier) + " - " + self.company_abbr)):
+				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.credit_to,self.supplier,self.company), raise_exception=1)
 				
 	# Check for Stopped PO
 	# ---------------------
@@ -171,9 +171,9 @@ class PurchaseInvoice(BuyingController):
 			
 					
 	def set_aging_date(self):
-		if self.doc.is_opening != 'Yes':
-			self.doc.aging_date = self.doc.posting_date
-		elif not self.doc.aging_date:
+		if self.is_opening != 'Yes':
+			self.aging_date = self.posting_date
+		elif not self.aging_date:
 			msgprint("Aging Date is mandatory for opening entry")
 			raise Exception
 			
@@ -187,7 +187,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		for item in self.get("entries"):
 			if auto_accounting_for_stock and item.item_code in stock_items \
-					and self.doc.is_opening == 'No':
+					and self.is_opening == 'No':
 				# in case of auto inventory accounting, against expense account is always
 				# Stock Received But Not Billed for a stock item
 				item.expense_account = stock_not_billed_account
@@ -204,7 +204,7 @@ class PurchaseInvoice(BuyingController):
 				# if no auto_accounting_for_stock or not a stock item
 				against_accounts.append(item.expense_account)
 				
-		self.doc.against_expense_account = ",".join(against_accounts)
+		self.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
@@ -221,7 +221,7 @@ class PurchaseInvoice(BuyingController):
 					 raise Exception
 
 	def validate_write_off_account(self):
-		if self.doc.write_off_amount and not self.doc.write_off_account:
+		if self.write_off_amount and not self.write_off_account:
 			msgprint("Please enter Write Off Account", raise_exception=1)
 
 	def check_prev_docstatus(self):
@@ -251,8 +251,8 @@ class PurchaseInvoice(BuyingController):
 					'voucher_no' : d.journal_voucher, 
 					'voucher_detail_no' : d.jv_detail_no, 
 					'against_voucher_type' : 'Purchase Invoice', 
-					'against_voucher'  : self.doc.name,
-					'account' : self.doc.credit_to, 
+					'against_voucher'  : self.name,
+					'account' : self.credit_to, 
 					'is_advance' : 'Yes', 
 					'dr_or_cr' : 'debit', 
 					'unadjusted_amt' : flt(d.advance_amount),
@@ -267,8 +267,8 @@ class PurchaseInvoice(BuyingController):
 	def on_submit(self):
 		self.check_prev_docstatus()
 		
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
-			self.doc.company, self.doc.grand_total)
+		get_obj('Authorization Control').validate_approving_authority(self.doctype, 
+			self.company, self.grand_total)
 		
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -283,15 +283,15 @@ class PurchaseInvoice(BuyingController):
 		gl_entries = []
 		
 		# parent's gl entry
-		if self.doc.grand_total:
+		if self.grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": self.doc.credit_to,
-					"against": self.doc.against_expense_account,
-					"credit": self.doc.total_amount_to_pay,
-					"remarks": self.doc.remarks,
-					"against_voucher": self.doc.name,
-					"against_voucher_type": self.doc.doctype,
+					"account": self.credit_to,
+					"against": self.against_expense_account,
+					"credit": self.total_amount_to_pay,
+					"remarks": self.remarks,
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
 				})
 			)
 	
@@ -302,10 +302,10 @@ class PurchaseInvoice(BuyingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": self.doc.credit_to,
+						"against": self.credit_to,
 						"debit": tax.add_deduct_tax == "Add" and tax.tax_amount or 0,
 						"credit": tax.add_deduct_tax == "Deduct" and tax.tax_amount or 0,
-						"remarks": self.doc.remarks,
+						"remarks": self.remarks,
 						"cost_center": tax.cost_center
 					})
 				)
@@ -337,9 +337,9 @@ class PurchaseInvoice(BuyingController):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account,
-							"against": self.doc.credit_to,
+							"against": self.credit_to,
 							"debit": valuation_amt,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock"
+							"remarks": self.remarks or "Accounting Entry for Stock"
 						})
 					)
 			
@@ -348,9 +348,9 @@ class PurchaseInvoice(BuyingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
-						"against": self.doc.credit_to,
+						"against": self.credit_to,
 						"debit": item.base_amount,
-						"remarks": self.doc.remarks,
+						"remarks": self.remarks,
 						"cost_center": item.cost_center
 					})
 				)
@@ -366,32 +366,32 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": expenses_included_in_valuation,
 						"cost_center": cost_center,
-						"against": self.doc.credit_to,
+						"against": self.credit_to,
 						"credit": amount,
-						"remarks": self.doc.remarks or "Accounting Entry for Stock"
+						"remarks": self.remarks or "Accounting Entry for Stock"
 					})
 				)
 		
 		# writeoff account includes petty difference in the invoice amount 
 		# and the amount that is paid
-		if self.doc.write_off_account and flt(self.doc.write_off_amount):
+		if self.write_off_account and flt(self.write_off_amount):
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": self.doc.write_off_account,
-					"against": self.doc.credit_to,
-					"credit": flt(self.doc.write_off_amount),
-					"remarks": self.doc.remarks,
-					"cost_center": self.doc.write_off_cost_center
+					"account": self.write_off_account,
+					"against": self.credit_to,
+					"credit": flt(self.write_off_amount),
+					"remarks": self.remarks,
+					"cost_center": self.write_off_cost_center
 				})
 			)
 		
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2))
+			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_voucher")
+		remove_against_link_from_jv(self.doctype, self.name, "against_voucher")
 		
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")

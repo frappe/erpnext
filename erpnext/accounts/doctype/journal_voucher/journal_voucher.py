@@ -18,10 +18,10 @@ class JournalVoucher(AccountsController):
 		self.is_approving_authority = -1
 
 	def validate(self):
-		if not self.doc.is_opening:
-			self.doc.is_opening='No'
+		if not self.is_opening:
+			self.is_opening='No'
 			
-		self.doc.clearance_date = None
+		self.clearance_date = None
 		
 		super(DocType, self).validate_date_with_fiscal_year()
 		
@@ -37,21 +37,21 @@ class JournalVoucher(AccountsController):
 
 	
 	def on_submit(self):
-		if self.doc.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
+		if self.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
 			self.check_credit_days()
 		self.make_gl_entries()
 		self.check_credit_limit()
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doc.doctype, self.doc.name, "against_jv")
+		remove_against_link_from_jv(self.doctype, self.name, "against_jv")
 		
 		self.make_gl_entries(1)
 		
 	def on_trash(self):
 		pass
-		#if self.doc.amended_from:
-		#	frappe.delete_doc("Journal Voucher", self.doc.amended_from)
+		#if self.amended_from:
+		#	frappe.delete_doc("Journal Voucher", self.amended_from)
 
 	def validate_debit_credit(self):
 		for d in self.get('entries'):
@@ -60,12 +60,12 @@ class JournalVoucher(AccountsController):
 				 	raise_exception=1)
 
 	def validate_cheque_info(self):
-		if self.doc.voucher_type in ['Bank Voucher']:
-			if not self.doc.cheque_no or not self.doc.cheque_date:
+		if self.voucher_type in ['Bank Voucher']:
+			if not self.cheque_no or not self.cheque_date:
 				msgprint("Reference No & Reference Date is required for %s" %
-				self.doc.voucher_type, raise_exception=1)
+				self.voucher_type, raise_exception=1)
 				
-		if self.doc.cheque_date and not self.doc.cheque_no:
+		if self.cheque_date and not self.cheque_no:
 			msgprint("Reference No is mandatory if you entered Reference Date", raise_exception=1)
 
 	def validate_entries_for_advance(self):
@@ -81,7 +81,7 @@ class JournalVoucher(AccountsController):
 	def validate_against_jv(self):
 		for d in self.get('entries'):
 			if d.against_jv:
-				if d.against_jv == self.doc.name:
+				if d.against_jv == self.name:
 					msgprint("You can not enter current voucher in 'Against JV' column",
 						raise_exception=1)
 				elif not frappe.db.sql("""select name from `tabJournal Voucher Detail` 
@@ -99,12 +99,12 @@ class JournalVoucher(AccountsController):
 			if flt(d.debit)>0 and (d.account not in debit_list): debit_list.append(d.account)
 			if flt(d.credit)>0 and (d.account not in credit_list): credit_list.append(d.account)
 
-		self.doc.total_debit = debit
-		self.doc.total_credit = credit
+		self.total_debit = debit
+		self.total_credit = credit
 
-		if abs(self.doc.total_debit-self.doc.total_credit) > 0.001:
+		if abs(self.total_debit-self.total_credit) > 0.001:
 			msgprint("Debit must be equal to Credit. The difference is %s" % 
-			 	(self.doc.total_debit-self.doc.total_credit), raise_exception=1)
+			 	(self.total_debit-self.total_credit), raise_exception=1)
 		
 		# update against account
 		for d in self.get('entries'):
@@ -113,10 +113,10 @@ class JournalVoucher(AccountsController):
 
 	def create_remarks(self):
 		r = []
-		if self.doc.cheque_no :
-			if self.doc.cheque_date:
+		if self.cheque_no :
+			if self.cheque_date:
 				r.append('Via Reference #%s dated %s' % 
-					(self.doc.cheque_no, formatdate(self.doc.cheque_date)))
+					(self.cheque_no, formatdate(self.cheque_date)))
 			else :
 				msgprint("Please enter Reference date", raise_exception=1)
 		
@@ -135,17 +135,17 @@ class JournalVoucher(AccountsController):
 						(cstr(bill_no[0][2]), fmt_money(flt(d.debit)), bill_no[0][0], 
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d')) or ''))
 	
-		if self.doc.user_remark:
-			r.append("User Remark : %s"%self.doc.user_remark)
+		if self.user_remark:
+			r.append("User Remark : %s"%self.user_remark)
 
 		if r:
-			self.doc.remark = ("\n").join(r)
+			self.remark = ("\n").join(r)
 		else:
 			frappe.msgprint("User Remarks is mandatory", raise_exception=1)
 
 	def set_aging_date(self):
-		if self.doc.is_opening != 'Yes':
-			self.doc.aging_date = self.doc.posting_date
+		if self.is_opening != 'Yes':
+			self.aging_date = self.posting_date
 		else:
 			# check account type whether supplier or customer
 			exists = False
@@ -156,10 +156,10 @@ class JournalVoucher(AccountsController):
 					break
 
 			# If customer/supplier account, aging date is mandatory
-			if exists and not self.doc.aging_date: 
+			if exists and not self.aging_date: 
 				msgprint("Aging Date is mandatory for opening entry", raise_exception=1)
 			else:
-				self.doc.aging_date = self.doc.posting_date
+				self.aging_date = self.posting_date
 
 	def set_print_format_fields(self):
 		for d in self.get('entries'):
@@ -167,22 +167,22 @@ class JournalVoucher(AccountsController):
 				["account_type", "master_type"])
 				
 			if master_type in ['Supplier', 'Customer']:
-				if not self.doc.pay_to_recd_from:
-					self.doc.pay_to_recd_from = frappe.db.get_value(master_type, 
+				if not self.pay_to_recd_from:
+					self.pay_to_recd_from = frappe.db.get_value(master_type, 
 						' - '.join(d.account.split(' - ')[:-1]), 
 						master_type == 'Customer' and 'customer_name' or 'supplier_name')
 			
 			if account_type in ['Bank', 'Cash']:
-				company_currency = get_company_currency(self.doc.company)
+				company_currency = get_company_currency(self.company)
 				amt = flt(d.debit) and d.debit or d.credit	
-				self.doc.total_amount = company_currency + ' ' + cstr(amt)
+				self.total_amount = company_currency + ' ' + cstr(amt)
 				from frappe.utils import money_in_words
-				self.doc.total_amount_in_words = money_in_words(amt, company_currency)
+				self.total_amount_in_words = money_in_words(amt, company_currency)
 
 	def check_credit_days(self):
 		date_diff = 0
-		if self.doc.cheque_date:
-			date_diff = (getdate(self.doc.cheque_date)-getdate(self.doc.posting_date)).days
+		if self.cheque_date:
+			date_diff = (getdate(self.cheque_date)-getdate(self.posting_date)).days
 		
 		if date_diff <= 0: return
 		
@@ -204,7 +204,7 @@ class JournalVoucher(AccountsController):
 		if not self.credit_days_for[ac]:
 			if self.credit_days_global==-1:
 				self.credit_days_global = cint(frappe.db.get_value("Company", 
-					self.doc.company, "credit_days"))
+					self.company, "credit_days"))
 					
 			return self.credit_days_global
 		else:
@@ -255,7 +255,7 @@ class JournalVoucher(AccountsController):
 							or (d.against_invoice and "Sales Invoice") 
 							or (d.against_jv and "Journal Voucher")),
 						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv,
-						"remarks": self.doc.remark,
+						"remarks": self.remark,
 						"cost_center": d.cost_center
 					})
 				)
@@ -273,8 +273,8 @@ class JournalVoucher(AccountsController):
 		if not self.get('entries'):
 			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
 		else:
-			flag, self.doc.total_debit, self.doc.total_credit = 0, 0, 0
-			diff = flt(self.doc.difference, 2)
+			flag, self.total_debit, self.total_credit = 0, 0, 0
+			diff = flt(self.difference, 2)
 			
 			# If any row without amount, set the diff on that row
 			for d in self.get('entries'):
@@ -287,7 +287,7 @@ class JournalVoucher(AccountsController):
 					
 			# Set the diff in a new row
 			if flag == 0 and diff != 0:
-				jd = self.doc.append('entries', {})
+				jd = self.append('entries', {})
 				if diff>0:
 					jd.credit = abs(diff)
 				elif diff<0:
@@ -295,43 +295,43 @@ class JournalVoucher(AccountsController):
 					
 			# Set the total debit, total credit and difference
 			for d in self.get('entries'):
-				self.doc.total_debit += flt(d.debit, 2)
-				self.doc.total_credit += flt(d.credit, 2)
+				self.total_debit += flt(d.debit, 2)
+				self.total_credit += flt(d.credit, 2)
 
-			self.doc.difference = flt(self.doc.total_debit, 2) - flt(self.doc.total_credit, 2)
+			self.difference = flt(self.total_debit, 2) - flt(self.total_credit, 2)
 
 	def get_outstanding_invoices(self):
 		self.set('entries', [])
 		total = 0
 		for d in self.get_values():
 			total += flt(d[2])
-			jd = self.doc.append('entries', {})
+			jd = self.append('entries', {})
 			jd.account = cstr(d[1])
-			if self.doc.write_off_based_on == 'Accounts Receivable':
+			if self.write_off_based_on == 'Accounts Receivable':
 				jd.credit = flt(d[2])
 				jd.against_invoice = cstr(d[0])
-			elif self.doc.write_off_based_on == 'Accounts Payable':
+			elif self.write_off_based_on == 'Accounts Payable':
 				jd.debit = flt(d[2])
 				jd.against_voucher = cstr(d[0])
 			jd.save(1)
-		jd = self.doc.append('entries', {})
-		if self.doc.write_off_based_on == 'Accounts Receivable':
+		jd = self.append('entries', {})
+		if self.write_off_based_on == 'Accounts Receivable':
 			jd.debit = total
-		elif self.doc.write_off_based_on == 'Accounts Payable':
+		elif self.write_off_based_on == 'Accounts Payable':
 			jd.credit = total
 		jd.save(1)
 
 	def get_values(self):
-		cond = (flt(self.doc.write_off_amount) > 0) and \
-			' and outstanding_amount <= '+ self.doc.write_off_amount or ''
-		if self.doc.write_off_based_on == 'Accounts Receivable':
+		cond = (flt(self.write_off_amount) > 0) and \
+			' and outstanding_amount <= '+ self.write_off_amount or ''
+		if self.write_off_based_on == 'Accounts Receivable':
 			return frappe.db.sql("""select name, debit_to, outstanding_amount 
 				from `tabSales Invoice` where docstatus = 1 and company = %s 
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
-		elif self.doc.write_off_based_on == 'Accounts Payable':
+				and outstanding_amount > 0 %s""" % ('%s', cond), self.company)
+		elif self.write_off_based_on == 'Accounts Payable':
 			return frappe.db.sql("""select name, credit_to, outstanding_amount 
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s 
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.doc.company)
+				and outstanding_amount > 0 %s""" % ('%s', cond), self.company)
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
@@ -349,16 +349,16 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	from erpnext.accounts.utils import get_balance_on
 	si = frappe.bean("Sales Invoice", sales_invoice)
 	jv = get_payment_entry(si.doc)
-	jv.doc.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.doc.fields
+	jv.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.fields
 
 	# credit customer
-	jv.doclist[1].account = si.doc.debit_to
-	jv.doclist[1].balance = get_balance_on(si.doc.debit_to)
-	jv.doclist[1].credit = si.doc.outstanding_amount
-	jv.doclist[1].against_invoice = si.doc.name
+	jv.doclist[1].account = si.debit_to
+	jv.doclist[1].balance = get_balance_on(si.debit_to)
+	jv.doclist[1].credit = si.outstanding_amount
+	jv.doclist[1].against_invoice = si.name
 
 	# debit bank
-	jv.doclist[2].debit = si.doc.outstanding_amount
+	jv.doclist[2].debit = si.outstanding_amount
 	
 	return [d.fields for d in jv.doclist]
 
@@ -367,16 +367,16 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	from erpnext.accounts.utils import get_balance_on
 	pi = frappe.bean("Purchase Invoice", purchase_invoice)
 	jv = get_payment_entry(pi.doc)
-	jv.doc.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.doc.fields
+	jv.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.fields
 	
 	# credit supplier
-	jv.doclist[1].account = pi.doc.credit_to
-	jv.doclist[1].balance = get_balance_on(pi.doc.credit_to)
-	jv.doclist[1].debit = pi.doc.outstanding_amount
-	jv.doclist[1].against_voucher = pi.doc.name
+	jv.doclist[1].account = pi.credit_to
+	jv.doclist[1].balance = get_balance_on(pi.credit_to)
+	jv.doclist[1].debit = pi.outstanding_amount
+	jv.doclist[1].against_voucher = pi.name
 
 	# credit bank
-	jv.doclist[2].credit = pi.doc.outstanding_amount
+	jv.doclist[2].credit = pi.outstanding_amount
 	
 	return [d.fields for d in jv.doclist]
 
@@ -384,10 +384,10 @@ def get_payment_entry(doc):
 	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher")
 	
 	jv = frappe.new_bean('Journal Voucher')
-	jv.doc.voucher_type = 'Bank Voucher'
+	jv.voucher_type = 'Bank Voucher'
 
-	jv.doc.company = doc.company
-	jv.doc.fiscal_year = doc.fiscal_year
+	jv.company = doc.company
+	jv.fiscal_year = doc.fiscal_year
 
 	d1 = jv.append("entries")
 	d2 = jv.append("entries")

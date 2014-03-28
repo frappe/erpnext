@@ -7,6 +7,6 @@ def execute():
 		address = frappe.doc("Address", address)
 		contact = frappe.bean("Contact Us Settings", "Contact Us Settings")
 		for f in ("address_title", "address_line1", "address_line2", "city", "state", "country", "pincode"):
-			contact.doc.fields[f] = address.get(f)
+			contact.set(f, address.get(f))
 		
 		contact.save()

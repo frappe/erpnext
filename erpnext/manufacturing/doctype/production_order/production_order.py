@@ -15,11 +15,11 @@ from frappe.model.document import Document
 class ProductionOrder(Document):
 
 	def validate(self):
-		if self.doc.docstatus == 0:
-			self.doc.status = "Draft"
+		if self.docstatus == 0:
+			self.status = "Draft"
 			
 		from erpnext.utilities import validate_status
-		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		validate_status(self.status, ["Draft", "Submitted", "Stopped", 
 			"In Process", "Completed", "Cancelled"])
 
 		self.validate_bom_no()
@@ -30,64 +30,64 @@ class ProductionOrder(Document):
 		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
 		
 	def validate_bom_no(self):
-		if self.doc.bom_no:
+		if self.bom_no:
 			bom = frappe.db.sql("""select name from `tabBOM` where name=%s and docstatus=1 
 				and is_active=1 and item=%s"""
-				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
+				, (self.bom_no, self.production_item), as_dict =1)
 			if not bom:
 				frappe.throw("""Incorrect BOM: %s entered. 
 					May be BOM not exists or inactive or not submitted 
-					or for some other item.""" % cstr(self.doc.bom_no))
+					or for some other item.""" % cstr(self.bom_no))
 					
 	def validate_sales_order(self):
-		if self.doc.sales_order:
+		if self.sales_order:
 			so = frappe.db.sql("""select name, delivery_date from `tabSales Order` 
-				where name=%s and docstatus = 1""", self.doc.sales_order, as_dict=1)[0]
+				where name=%s and docstatus = 1""", self.sales_order, as_dict=1)[0]
 
 			if not so.name:
-				frappe.throw("Sales Order: %s is not valid" % self.doc.sales_order)
+				frappe.throw("Sales Order: %s is not valid" % self.sales_order)
 
-			if not self.doc.expected_delivery_date:
-				self.doc.expected_delivery_date = so.delivery_date
+			if not self.expected_delivery_date:
+				self.expected_delivery_date = so.delivery_date
 			
 			self.validate_production_order_against_so()
 			
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
 		
-		for w in [self.doc.fg_warehouse, self.doc.wip_warehouse]:
-			validate_warehouse_company(w, self.doc.company)
+		for w in [self.fg_warehouse, self.wip_warehouse]:
+			validate_warehouse_company(w, self.company)
 	
 	def validate_production_order_against_so(self):
 		# already ordered qty
 		ordered_qty_against_so = frappe.db.sql("""select sum(qty) from `tabProduction Order`
 			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""", 
-			(self.doc.production_item, self.doc.sales_order, self.doc.name))[0][0]
+			(self.production_item, self.sales_order, self.name))[0][0]
 
-		total_qty = flt(ordered_qty_against_so) + flt(self.doc.qty)
+		total_qty = flt(ordered_qty_against_so) + flt(self.qty)
 		
 		# get qty from Sales Order Item table
 		so_item_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item` 
 			where parent = %s and item_code = %s""", 
-			(self.doc.sales_order, self.doc.production_item))[0][0]
+			(self.sales_order, self.production_item))[0][0]
 		# get qty from Packing Item table
 		dnpi_qty = frappe.db.sql("""select sum(qty) from `tabPacked Item` 
 			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
-			(self.doc.sales_order, self.doc.production_item))[0][0]
+			(self.sales_order, self.production_item))[0][0]
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 				
 		if total_qty > so_qty:
 			frappe.throw(_("Total production order qty for item") + ": " + 
-				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
-				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
+				cstr(self.production_item) + _(" against sales order") + ": " + 
+				cstr(self.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
 				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
 				_("Please reduce qty."), exc=OverProductionError)
 
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
 		self.update_status(status)
-		qty = (flt(self.doc.qty)-flt(self.doc.produced_qty)) * ((status == 'Stopped') and -1 or 1)
+		qty = (flt(self.qty)-flt(self.produced_qty)) * ((status == 'Stopped') and -1 or 1)
 		self.update_planned_qty(qty)
 		msgprint("Production Order has been %s" % status)
 
@@ -96,37 +96,37 @@ class ProductionOrder(Document):
 		if status == 'Stopped':
 			frappe.db.set(self.doc, 'status', cstr(status))
 		else:
-			if flt(self.doc.qty) == flt(self.doc.produced_qty):
+			if flt(self.qty) == flt(self.produced_qty):
 				frappe.db.set(self.doc, 'status', 'Completed')
-			if flt(self.doc.qty) > flt(self.doc.produced_qty):
+			if flt(self.qty) > flt(self.produced_qty):
 				frappe.db.set(self.doc, 'status', 'In Process')
-			if flt(self.doc.produced_qty) == 0:
+			if flt(self.produced_qty) == 0:
 				frappe.db.set(self.doc, 'status', 'Submitted')
 
 
 	def on_submit(self):
-		if not self.doc.wip_warehouse:
+		if not self.wip_warehouse:
 			frappe.throw(_("WIP Warehouse required before Submit"))
 		frappe.db.set(self.doc,'status', 'Submitted')
-		self.update_planned_qty(self.doc.qty)
+		self.update_planned_qty(self.qty)
 		
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry` 
-			where production_order = %s and docstatus = 1""", self.doc.name)
+			where production_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
 			frappe.throw("""Submitted Stock Entry %s exists against this production order. 
 				Hence can not be cancelled.""" % stock_entry[0][0])
 
 		frappe.db.set(self.doc,'status', 'Cancelled')
-		self.update_planned_qty(-self.doc.qty)
+		self.update_planned_qty(-self.qty)
 
 	def update_planned_qty(self, qty):
 		"""update planned qty in bin"""
 		args = {
-			"item_code": self.doc.production_item,
-			"warehouse": self.doc.fg_warehouse,
+			"item_code": self.production_item,
+			"warehouse": self.fg_warehouse,
 			"posting_date": nowdate(),
 			"planned_qty": flt(qty)
 		}
@@ -155,18 +155,18 @@ def make_stock_entry(production_order_id, purpose):
 	production_order = frappe.bean("Production Order", production_order_id)
 		
 	stock_entry = frappe.new_bean("Stock Entry")
-	stock_entry.doc.purpose = purpose
-	stock_entry.doc.production_order = production_order_id
-	stock_entry.doc.company = production_order.doc.company
-	stock_entry.doc.bom_no = production_order.doc.bom_no
-	stock_entry.doc.use_multi_level_bom = production_order.doc.use_multi_level_bom
-	stock_entry.doc.fg_completed_qty = flt(production_order.doc.qty) - flt(production_order.doc.produced_qty)
+	stock_entry.purpose = purpose
+	stock_entry.production_order = production_order_id
+	stock_entry.company = production_order.company
+	stock_entry.bom_no = production_order.bom_no
+	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
+	stock_entry.fg_completed_qty = flt(production_order.qty) - flt(production_order.produced_qty)
 	
 	if purpose=="Material Transfer":
-		stock_entry.doc.to_warehouse = production_order.doc.wip_warehouse
+		stock_entry.to_warehouse = production_order.wip_warehouse
 	else:
-		stock_entry.doc.from_warehouse = production_order.doc.wip_warehouse
-		stock_entry.doc.to_warehouse = production_order.doc.fg_warehouse
+		stock_entry.from_warehouse = production_order.wip_warehouse
+		stock_entry.to_warehouse = production_order.fg_warehouse
 		
 	stock_entry.run_method("get_items")
 	return [d.fields for d in stock_entry.doclist]

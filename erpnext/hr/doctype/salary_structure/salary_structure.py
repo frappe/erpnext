@@ -13,12 +13,12 @@ from frappe.model.document import Document
 
 class SalaryStructure(Document):
 	def autoname(self):
-		self.doc.name = make_autoname(self.doc.employee + '/.SST' + '/.#####')
+		self.name = make_autoname(self.employee + '/.SST' + '/.#####')
 
 	def get_employee_details(self):
 		ret = {}
 		det = frappe.db.sql("""select employee_name, branch, designation, department, grade 
-			from `tabEmployee` where name = %s""", self.doc.employee)
+			from `tabEmployee` where name = %s""", self.employee)
 		if det:
 			ret = {
 				'employee_name': cstr(det[0][0]),
@@ -26,7 +26,7 @@ class SalaryStructure(Document):
 				'designation': cstr(det[0][2]),
 				'department': cstr(det[0][3]),
 				'grade': cstr(det[0][4]),
-				'backup_employee': cstr(self.doc.employee)
+				'backup_employee': cstr(self.employee)
 			}
 		return ret
 
@@ -42,7 +42,7 @@ class SalaryStructure(Document):
 	def make_table(self, doct_name, tab_fname, tab_name):
 		list1 = frappe.db.sql("select name from `tab%s` where docstatus != 2" % doct_name)
 		for li in list1:
-			child = self.doc.append(tab_fname, {})
+			child = self.append(tab_fname, {})
 			if(tab_fname == 'earning_details'):
 				child.e_type = cstr(li[0])
 				child.modified_value = 0
@@ -56,13 +56,13 @@ class SalaryStructure(Document):
 
 	def check_existing(self):
 		ret = frappe.db.sql("""select name from `tabSalary Structure` where is_active = 'Yes' 
-			and employee = %s and name!=%s""", (self.doc.employee,self.doc.name))
-		if ret and self.doc.is_active=='Yes':
+			and employee = %s and name!=%s""", (self.employee,self.name))
+		if ret and self.is_active=='Yes':
 			msgprint(_("""Another Salary Structure '%s' is active for employee '%s'. Please make its status 'Inactive' to proceed.""") % 
-				(cstr(ret), self.doc.employee), raise_exception=1)
+				(cstr(ret), self.employee), raise_exception=1)
 
 	def validate_amount(self):
-		if flt(self.doc.net_pay) < 0:
+		if flt(self.net_pay) < 0:
 			msgprint(_("Net pay can not be negative"), raise_exception=1)
 
 	def validate(self):	 

@@ -24,7 +24,7 @@ class MaintenanceSchedule(TransactionBase):
 	def generate_schedule(self):
 		self.set('maintenance_schedule_detail', [])
 		frappe.db.sql("""delete from `tabMaintenance Schedule Detail` 
-			where parent=%s""", (self.doc.name))
+			where parent=%s""", (self.name))
 		count = 1
 		for d in self.get('item_maintenance_detail'):
 			self.validate_maintenance_detail()
@@ -63,21 +63,21 @@ class MaintenanceSchedule(TransactionBase):
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from 
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and 
-				parent=%s""", (d.sales_person, d.item_code, self.doc.name), as_dict=1)
+				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
 				if email_map[d.sales_person]:
 					description = "Reference: %s, Item Code: %s and Customer: %s" % \
-						(self.doc.name, d.item_code, self.doc.customer)
+						(self.name, d.item_code, self.customer)
 					frappe.bean({
 						"doctype": "Event",
-						"owner": email_map[d.sales_person] or self.doc.owner,
+						"owner": email_map[d.sales_person] or self.owner,
 						"subject": description,
 						"description": description,
 						"starts_on": key["scheduled_date"] + " 10:00:00",
 						"event_type": "Private",
-						"ref_type": self.doc.doctype,
-						"ref_name": self.doc.name
+						"ref_type": self.doctype,
+						"ref_name": self.name
 					}).insert(ignore_permissions=1)
 
 		frappe.db.set(self.doc, 'status', 'Submitted')		
@@ -204,7 +204,7 @@ class MaintenanceSchedule(TransactionBase):
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
 			serial_no_bean = frappe.bean("Serial No", serial_no)
-			serial_no_bean.doc.amc_expiry_date = amc_expiry_date
+			serial_no_bean.amc_expiry_date = amc_expiry_date
 			serial_no_bean.save()
 
 	def validate_serial_no(self, serial_nos, amc_start_date):
@@ -262,10 +262,10 @@ class MaintenanceSchedule(TransactionBase):
 				serial_nos = get_valid_serial_nos(d.serial_no)
 				self.update_amc_date(serial_nos)
 		frappe.db.set(self.doc, 'status', 'Cancelled')
-		delete_events(self.doc.doctype, self.doc.name)
+		delete_events(self.doctype, self.name)
 
 	def on_trash(self):
-		delete_events(self.doc.doctype, self.doc.name)
+		delete_events(self.doctype, self.name)
 
 @frappe.whitelist()
 def make_maintenance_visit(source_name, target_doclist=None):

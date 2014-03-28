@@ -16,13 +16,13 @@ class Bom(Document):
 
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM` 
-			where name like "BOM/%s/%%" """ % cstr(self.doc.item).replace('"', '\\"'))
+			where name like "BOM/%s/%%" """ % cstr(self.item).replace('"', '\\"'))
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
 			
 		else:
 			idx = 1
-		self.doc.name = 'BOM/' + self.doc.item + ('/%.3i' % idx)
+		self.name = 'BOM/' + self.item + ('/%.3i' % idx)
 	
 	def validate(self):
 		self.clear_operations()
@@ -39,7 +39,7 @@ class Bom(Document):
 	def on_update(self):
 		self.check_recursion()
 		self.update_exploded_items()
-		self.doc.save()
+		self.save()
 	
 	def on_submit(self):
 		self.manage_default_bom()
@@ -65,7 +65,7 @@ class Bom(Document):
 		return item
 		
 	def validate_rm_item(self, item):
-		if item[0]['name'] == self.doc.item:
+		if item[0]['name'] == self.item:
 			msgprint("Item_code: %s in materials tab cannot be same as FG Item", 
 				item[0]['name'], raise_exception=1)
 		
@@ -78,8 +78,8 @@ class Bom(Document):
 				"qty": item.qty})
 
 			for r in ret:
-				if not item.fields.get(r):
-					item.fields[r] = ret[r]
+				if not item.get(r):
+					item.set(r, ret[r])
 		
 	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
@@ -111,16 +111,16 @@ class Bom(Document):
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
 		elif arg and (arg['is_purchase_item'] == 'Yes' or arg['is_sub_contracted_item'] == 'Yes'):
-			if self.doc.rm_cost_as_per == 'Valuation Rate':
+			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
-			elif self.doc.rm_cost_as_per == 'Last Purchase Rate':
+			elif self.rm_cost_as_per == 'Last Purchase Rate':
 				rate = arg['last_purchase_rate']
-			elif self.doc.rm_cost_as_per == "Price List":
-				if not self.doc.buying_price_list:
+			elif self.rm_cost_as_per == "Price List":
+				if not self.buying_price_list:
 					frappe.throw(_("Please select Price List"))
-				rate = frappe.db.get_value("Item Price", {"price_list": self.doc.buying_price_list, 
+				rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list, 
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
-			elif self.doc.rm_cost_as_per == 'Standard Rate':
+			elif self.rm_cost_as_per == 'Standard Rate':
 				rate = arg['standard_rate']
 
 		return rate
@@ -133,9 +133,9 @@ class Bom(Document):
 				'qty': d.qty
 			})["rate"]
 		
-		if self.doc.docstatus == 0:
+		if self.docstatus == 0:
 			frappe.bean(self.doclist).save()
-		elif self.doc.docstatus == 1:
+		elif self.docstatus == 1:
 			self.calculate_cost()
 			self.update_exploded_items()
 			frappe.bean(self.doclist).update_after_submit()
@@ -151,8 +151,8 @@ class Bom(Document):
 			as on costing date	
 		"""
 		from erpnext.stock.utils import get_incoming_rate
-		dt = self.doc.costing_date or nowdate()
-		time = self.doc.costing_date == nowdate() and now().split()[1] or '23:59'
+		dt = self.costing_date or nowdate()
+		time = self.costing_date == nowdate() and now().split()[1] or '23:59'
 		warehouse = frappe.db.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
 		rate = []
 		for wh in warehouse:
@@ -172,38 +172,38 @@ class Bom(Document):
 		""" Uncheck others if current one is selected as default, 
 			update default bom in item master
 		"""
-		if self.doc.is_default and self.doc.is_active:
+		if self.is_default and self.is_active:
 			from frappe.model.utils import set_default
 			set_default(self.doc, "item")
-			frappe.db.set_value("Item", self.doc.item, "default_bom", self.doc.name)
+			frappe.db.set_value("Item", self.item, "default_bom", self.name)
 		
 		else:
-			if not self.doc.is_active:
+			if not self.is_active:
 				frappe.db.set(self.doc, "is_default", 0)
 			
 			frappe.db.sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s", 
-				 (self.doc.item, self.doc.name))
+				 (self.item, self.name))
 
 	def clear_operations(self):
-		if not self.doc.with_operations:
+		if not self.with_operations:
 			self.set('bom_operations', [])
 			for d in self.get("bom_materials"):
 				d.operation_no = None
 
 	def validate_main_item(self):
 		""" Validate main FG item"""
-		item = self.get_item_det(self.doc.item)
+		item = self.get_item_det(self.item)
 		if not item:
 			msgprint("Item %s does not exists in the system or expired." % 
-				self.doc.item, raise_exception = 1)
+				self.item, raise_exception = 1)
 		elif item[0]['is_manufactured_item'] != 'Yes' \
 				and item[0]['is_sub_contracted_item'] != 'Yes':
 			msgprint("""As Item: %s is not a manufactured / sub-contracted item, \
-				you can not make BOM for it""" % self.doc.item, raise_exception = 1)
+				you can not make BOM for it""" % self.item, raise_exception = 1)
 		else:
-			ret = frappe.db.get_value("Item", self.doc.item, ["description", "stock_uom"])
-			self.doc.description = ret[0]
-			self.doc.uom = ret[1]
+			ret = frappe.db.get_value("Item", self.item, ["description", "stock_uom"])
+			self.description = ret[0]
+			self.uom = ret[1]
 
 	def validate_operations(self):
 		""" Check duplicate operation no"""
@@ -221,7 +221,7 @@ class Bom(Document):
 		check_list = []
 		for m in self.get('bom_materials'):
 			# check if operation no not in op table
-			if self.doc.with_operations and cstr(m.operation_no) not in self.op:
+			if self.with_operations and cstr(m.operation_no) not in self.op:
 				msgprint("""Operation no: %s against item: %s at row no: %s \
 					is not present at Operations table""" % 
 					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
@@ -267,15 +267,15 @@ class Bom(Document):
 
 		check_list = [['parent', 'bom_no', 'parent'], ['bom_no', 'parent', 'child']]
 		for d in check_list:
-			bom_list, count = [self.doc.name], 0
+			bom_list, count = [self.name], 0
 			while (len(bom_list) > count ):
 				boms = frappe.db.sql(" select %s from `tabBOM Item` where %s = %s " % 
 					(d[0], d[1], '%s'), cstr(bom_list[count]))
 				count = count + 1
 				for b in boms:
-					if b[0] == self.doc.name:
+					if b[0] == self.name:
 						msgprint("""Recursion Occured => '%s' cannot be '%s' of '%s'.
-							""" % (cstr(b[0]), cstr(d[2]), self.doc.name), raise_exception = 1)
+							""" % (cstr(b[0]), cstr(d[2]), self.name), raise_exception = 1)
 					if b[0]:
 						bom_list.append(b[0])
 	
@@ -293,8 +293,8 @@ class Bom(Document):
 				where parent = %s and ifnull(bom_no, '') != ''""", bom_no)]
 				
 		count = 0
-		if self.doc.name not in bom_list:
-			bom_list.append(self.doc.name)
+		if self.name not in bom_list:
+			bom_list.append(self.name)
 		
 		while(count < len(bom_list)):
 			for child_bom in _get_children(bom_list[count]):
@@ -308,7 +308,7 @@ class Bom(Document):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
-		self.doc.total_cost = self.doc.raw_material_cost + self.doc.operating_cost
+		self.total_cost = self.raw_material_cost + self.operating_cost
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
@@ -319,7 +319,7 @@ class Bom(Document):
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
 			total_op_cost += flt(d.operating_cost)
-		self.doc.operating_cost = total_op_cost
+		self.operating_cost = total_op_cost
 		
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
@@ -328,10 +328,10 @@ class Bom(Document):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
 			d.amount = flt(d.rate) * flt(d.qty)
-			d.qty_consumed_per_unit = flt(d.qty) / flt(self.doc.quantity)
+			d.qty_consumed_per_unit = flt(d.qty) / flt(self.quantity)
 			total_rm_cost += d.amount
 			
-		self.doc.raw_material_cost = total_rm_cost
+		self.raw_material_cost = total_rm_cost
 
 	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
@@ -379,23 +379,23 @@ class Bom(Document):
 		"Add items to Flat BOM table"
 		self.set('flat_bom_details', [])
 		for d in self.cur_exploded_items:
-			ch = self.doc.append('flat_bom_details', {})
+			ch = self.append('flat_bom_details', {})
 			for i in self.cur_exploded_items[d].keys():
-				ch.fields[i] = self.cur_exploded_items[d][i]
+				ch.set(i, self.cur_exploded_items[d][i])
 			ch.amount = flt(ch.qty) * flt(ch.rate)
-			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.doc.quantity)
-			ch.docstatus = self.doc.docstatus
+			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.quantity)
+			ch.docstatus = self.docstatus
 			ch.save(1)
 
 	def validate_bom_links(self):
-		if not self.doc.is_active:
+		if not self.is_active:
 			act_pbom = frappe.db.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
 				where bom_item.bom_no = %s and bom_item.docstatus = 1
 				and exists (select * from `tabBOM` where name = bom_item.parent
-					and docstatus = 1 and is_active = 1)""", self.doc.name)
+					and docstatus = 1 and is_active = 1)""", self.name)
 
 			if act_pbom and act_pbom[0][0]:
-				action = self.doc.docstatus < 2 and _("deactivate") or _("cancel")
+				action = self.docstatus < 2 and _("deactivate") or _("cancel")
 				msgprint(_("Cannot ") + action + _(": It is linked to other active BOM(s)"),
 					raise_exception=1)
 

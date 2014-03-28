@@ -14,19 +14,19 @@ class WarehouseNotSet(Exception): pass
 
 class Item(DocListController):
 	def onload(self):
-		self.doc.fields["__sle_exists"] = self.check_if_sle_exists()
+		self.set("__sle_exists", self.check_if_sle_exists())
 	
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
 			from frappe.model.naming import make_autoname
-			self.doc.item_code = make_autoname(self.doc.naming_series+'.#####')
-		elif not self.doc.item_code:
+			self.item_code = make_autoname(self.naming_series+'.#####')
+		elif not self.item_code:
 			msgprint(_("Item Code (item_code) is mandatory because Item naming is not sequential."), raise_exception=1)
 			
-		self.doc.name = self.doc.item_code
+		self.name = self.item_code
 			
 	def validate(self):
-		if not self.doc.stock_uom:
+		if not self.stock_uom:
 			msgprint(_("Please enter Default Unit of Measure"), raise_exception=1)
 		
 		self.check_warehouse_is_set_for_stock_item()
@@ -41,53 +41,53 @@ class Item(DocListController):
 		self.cant_change()
 		self.validate_item_type_for_reorder()
 		
-		if not self.doc.parent_website_route:
-			self.doc.parent_website_route = frappe.get_website_route("Item Group", self.doc.item_group)
+		if not self.parent_website_route:
+			self.parent_website_route = frappe.get_website_route("Item Group", self.item_group)
 
-		if self.doc.name:
-			self.old_page_name = frappe.db.get_value('Item', self.doc.name, 'page_name')
+		if self.name:
+			self.old_page_name = frappe.db.get_value('Item', self.name, 'page_name')
 			
 	def on_update(self):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 
 	def check_warehouse_is_set_for_stock_item(self):
-		if self.doc.is_stock_item=="Yes" and not self.doc.default_warehouse:
+		if self.is_stock_item=="Yes" and not self.default_warehouse:
 			frappe.msgprint(_("Default Warehouse is mandatory for Stock Item."),
 				raise_exception=WarehouseNotSet)
 			
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uom_conversion_details")]
-		if self.doc.stock_uom not in uom_conv_list:
-			ch = self.doc.append('uom_conversion_details', {})
-			ch.uom = self.doc.stock_uom
+		if self.stock_uom not in uom_conv_list:
+			ch = self.append('uom_conversion_details', {})
+			ch.uom = self.stock_uom
 			ch.conversion_factor = 1
 			
 		for d in self.get("uom_conversion_details"):
-			if d.conversion_factor == 1 and d.uom != self.doc.stock_uom:
+			if d.conversion_factor == 1 and d.uom != self.stock_uom:
 				self.doclist.remove(d)
 				
 
 	def check_stock_uom_with_bin(self):
-		if not self.doc.fields.get("__islocal"):
+		if not self.get("__islocal"):
 			matched=True
 			ref_uom = frappe.db.get_value("Stock Ledger Entry", 
-				{"item_code": self.doc.name}, "stock_uom")
+				{"item_code": self.name}, "stock_uom")
 			if ref_uom:
-				if cstr(ref_uom) != cstr(self.doc.stock_uom):
+				if cstr(ref_uom) != cstr(self.stock_uom):
 					matched = False
 			else:
 				bin_list = frappe.db.sql("select * from tabBin where item_code=%s", 
-					self.doc.item_code, as_dict=1)
+					self.item_code, as_dict=1)
 				for bin in bin_list:
 					if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
-						or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(self.doc.stock_uom):
+						or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(self.stock_uom):
 							matched = False
 							break
 						
 				if matched and bin_list:
 					frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""",
-						(self.doc.stock_uom, self.doc.name))
+						(self.stock_uom, self.name))
 				
 			if not matched:
 				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
@@ -101,38 +101,38 @@ class Item(DocListController):
 			else:
 				check_list.append(cstr(d.uom))
 
-			if d.uom and cstr(d.uom) == cstr(self.doc.stock_uom) and flt(d.conversion_factor) != 1:
+			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
 					msgprint(_("""Conversion Factor of UOM: %s should be equal to 1. As UOM: %s is Stock UOM of Item: %s.""" % 
-						(d.uom, d.uom, self.doc.name)), raise_exception=1)
-			elif d.uom and cstr(d.uom)!= self.doc.stock_uom and flt(d.conversion_factor) == 1:
+						(d.uom, d.uom, self.name)), raise_exception=1)
+			elif d.uom and cstr(d.uom)!= self.stock_uom and flt(d.conversion_factor) == 1:
 				msgprint(_("""Conversion Factor of UOM: %s should not be equal to 1. As UOM: %s is not Stock UOM of Item: %s""" % 
-					(d.uom, d.uom, self.doc.name)), raise_exception=1)
+					(d.uom, d.uom, self.name)), raise_exception=1)
 					
 	def validate_item_type(self):
-		if cstr(self.doc.is_manufactured_item) == "No":
-			self.doc.is_pro_applicable = "No"
+		if cstr(self.is_manufactured_item) == "No":
+			self.is_pro_applicable = "No"
 
-		if self.doc.is_pro_applicable == 'Yes' and self.doc.is_stock_item == 'No':
+		if self.is_pro_applicable == 'Yes' and self.is_stock_item == 'No':
 			frappe.throw(_("As Production Order can be made for this item, \
 				it must be a stock item."))
 
-		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
+		if self.has_serial_no == 'Yes' and self.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
 			
 	def check_for_active_boms(self):
-		if self.doc.is_purchase_item != "Yes":
+		if self.is_purchase_item != "Yes":
 			bom_mat = frappe.db.sql("""select distinct t1.parent 
 				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent 
 				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1 
-				and t2.docstatus = 1 and t1.docstatus =1 """, self.doc.name)
+				and t2.docstatus = 1 and t1.docstatus =1 """, self.name)
 				
 			if bom_mat and bom_mat[0][0]:
 				frappe.throw(_("Item must be a purchase item, \
 					as it is present in one or many Active BOMs"))
 					
-		if self.doc.is_manufactured_item != "Yes":
+		if self.is_manufactured_item != "Yes":
 			bom = frappe.db.sql("""select name from `tabBOM` where item = %s 
-				and is_active = 1""", (self.doc.name,))
+				and is_active = 1""", (self.name,))
 			if bom and bom[0][0]:
 				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many \
 					active BOMs present for this item"""))
@@ -142,7 +142,7 @@ class Item(DocListController):
 		cust_code=[]
 		for d in self.get('item_customer_details'):
 			cust_code.append(d.ref_code)
-		self.doc.customer_code=','.join(cust_code)
+		self.customer_code=','.join(cust_code)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
@@ -160,53 +160,53 @@ class Item(DocListController):
 						check_list.append(d.tax_type)
 						
 	def validate_barcode(self):
-		if self.doc.barcode:
+		if self.barcode:
 			duplicate = frappe.db.sql("""select name from tabItem where barcode = %s 
-				and name != %s""", (self.doc.barcode, self.doc.name))
+				and name != %s""", (self.barcode, self.name))
 			if duplicate:
 				msgprint("Barcode: %s already used in item: %s" % 
-					(self.doc.barcode, cstr(duplicate[0][0])), raise_exception = 1)
+					(self.barcode, cstr(duplicate[0][0])), raise_exception = 1)
 
 	def cant_change(self):
-		if not self.doc.fields.get("__islocal"):
-			vals = frappe.db.get_value("Item", self.doc.name, 
+		if not self.get("__islocal"):
+			vals = frappe.db.get_value("Item", self.name, 
 				["has_serial_no", "is_stock_item", "valuation_method"], as_dict=True)
 			
-			if vals and ((self.doc.is_stock_item == "No" and vals.is_stock_item == "Yes") or 
-				vals.has_serial_no != self.doc.has_serial_no or 
-				cstr(vals.valuation_method) != cstr(self.doc.valuation_method)):
+			if vals and ((self.is_stock_item == "No" and vals.is_stock_item == "Yes") or 
+				vals.has_serial_no != self.has_serial_no or 
+				cstr(vals.valuation_method) != cstr(self.valuation_method)):
 					if self.check_if_sle_exists() == "exists":
 						frappe.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'"))
 							
 	def validate_item_type_for_reorder(self):
-		if self.doc.re_order_level or len(self.doclist.get({"parentfield": "item_reorder", 
+		if self.re_order_level or len(self.doclist.get({"parentfield": "item_reorder", 
 				"material_request_type": "Purchase"})):
-			if not self.doc.is_purchase_item:
+			if not self.is_purchase_item:
 				frappe.msgprint(_("""To set reorder level, item must be Purchase Item"""), 
 					raise_exception=1)
 	
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry` 
-			where item_code = %s""", self.doc.name)
+			where item_code = %s""", self.name)
 		return sle and 'exists' or 'not exists'
 
 	def validate_name_with_item_group(self):
 		# causes problem with tree build
-		if frappe.db.exists("Item Group", self.doc.name):
+		if frappe.db.exists("Item Group", self.name):
 			frappe.msgprint("An item group exists with same name (%s), \
 				please change the item name or rename the item group" % 
-				self.doc.name, raise_exception=1)
+				self.name, raise_exception=1)
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s, 
 			item_description=%s, modified=NOW() where item_code=%s""",
-			(self.doc.item_name, self.doc.description, self.doc.name))
+			(self.item_name, self.description, self.name))
 
 	def get_page_title(self):
-		if self.doc.name==self.doc.item_name:
-			page_name_from = self.doc.name
+		if self.name==self.item_name:
+			page_name_from = self.name
 		else:
-			page_name_from = self.doc.name + " " + self.doc.item_name
+			page_name_from = self.name + " " + self.item_name
 		
 		return page_name_from
 		
@@ -223,7 +223,7 @@ class Item(DocListController):
 		return ret
 		
 	def on_trash(self):
-		frappe.db.sql("""delete from tabBin where item_code=%s""", self.doc.item_code)
+		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
@@ -233,7 +233,7 @@ class Item(DocListController):
 			
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
 			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]
-			if new_properties != [cstr(self.doc.fields[fld]) for fld in field_list]:
+			if new_properties != [cstr(self.fields[fld]) for fld in field_list]:
 				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 

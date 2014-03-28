@@ -178,4 +178,4 @@ def create_party_account(party, party_type, company):
 			"report_type": "Balance Sheet"
 		}).insert(ignore_permissions=True)
 		
-		frappe.msgprint(_("Account Created") + ": " + account.doc.name)
+		frappe.msgprint(_("Account Created") + ": " + account.name)

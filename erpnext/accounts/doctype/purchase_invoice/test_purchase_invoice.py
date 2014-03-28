@@ -51,7 +51,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.doc.name, as_dict=1)
+			order by account asc""", pi.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
 		expected_values = sorted([
@@ -83,7 +83,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.doc.name, as_dict=1)
+			order by account asc""", pi.name, as_dict=1)
 		self.assertTrue(gl_entries)
 		
 		expected_values = sorted([
@@ -175,28 +175,28 @@ class TestPurchaseInvoice(unittest.TestCase):
 		
 		pi = frappe.bean(copy=test_records[0])
 		pi.append("advance_allocation_details", {
-			"journal_voucher": jv.doc.name,
+			"journal_voucher": jv.name,
 			"jv_detail_no": jv.doclist[1].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
-			"remarks": jv.doc.remark
+			"remarks": jv.remark
 		})
 		pi.insert()
 		pi.submit()
 		pi.load_from_db()
 		
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_voucher=%s""", pi.doc.name))
+			where against_voucher=%s""", pi.name))
 		
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_voucher=%s and debit=300""", pi.doc.name))
+			where against_voucher=%s and debit=300""", pi.name))
 			
-		self.assertEqual(pi.doc.outstanding_amount, 1212.30)
+		self.assertEqual(pi.outstanding_amount, 1212.30)
 		
 		pi.cancel()
 		
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_voucher=%s""", pi.doc.name))
+			where against_voucher=%s""", pi.name))
 	
 test_records = [
 	[

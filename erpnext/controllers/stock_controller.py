@@ -12,19 +12,19 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries
 
 class StockController(AccountsController):
 	def make_gl_entries(self, repost_future_gle=True):
-		if self.doc.docstatus == 2:
-			delete_gl_entries(voucher_type=self.doc.doctype, voucher_no=self.doc.name)
+		if self.docstatus == 2:
+			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 			
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			warehouse_account = self.get_warehouse_account()
 		
-			if self.doc.docstatus==1:
+			if self.docstatus==1:
 				gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries)
 
 			if repost_future_gle:
 				items, warehouse_account = self.get_items_and_warehouse_accounts(warehouse_account)
-				update_gl_entries_after(self.doc.posting_date, self.doc.posting_time, 
+				update_gl_entries_after(self.posting_date, self.posting_time, 
 					warehouse_account, items)
 	
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
@@ -49,7 +49,7 @@ class StockController(AccountsController):
 							"account": warehouse_account[sle.warehouse],
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock",
+							"remarks": self.remarks or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2)
 						}))
 
@@ -58,7 +58,7 @@ class StockController(AccountsController):
 							"account": detail.expense_account,
 							"against": warehouse_account[sle.warehouse],
 							"cost_center": detail.cost_center,
-							"remarks": self.doc.remarks or "Accounting Entry for Stock",
+							"remarks": self.remarks or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2)
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
@@ -91,10 +91,10 @@ class StockController(AccountsController):
 		
 		if hasattr(self, "fname"):
 			item_doclist = self.doclist.get({"parentfield": self.fname})
-		elif self.doc.doctype == "Stock Reconciliation":
+		elif self.doctype == "Stock Reconciliation":
 			import json
 			item_doclist = []
-			data = json.loads(self.doc.reconciliation_json)
+			data = json.loads(self.reconciliation_json)
 			for row in data[data.index(self.head_row)+1:]:
 				d = frappe._dict(zip(["item_code", "warehouse", "qty", "valuation_rate"], row))
 				item_doclist.append(d)
@@ -115,7 +115,7 @@ class StockController(AccountsController):
 		stock_ledger = {}
 		for sle in frappe.db.sql("""select warehouse, stock_value_difference, voucher_detail_no
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
-			(self.doc.doctype, self.doc.name), as_dict=True):
+			(self.doctype, self.name), as_dict=True):
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
 		
@@ -167,7 +167,7 @@ class StockController(AccountsController):
 			from `tabStock Ledger Entry` sle
 			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
 			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" % 
-			('%s', '%s', condition), (self.doc.posting_date, self.doc.posting_time), 
+			('%s', '%s', condition), (self.posting_date, self.posting_time), 
 			as_dict=True):
 				future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 		
@@ -179,7 +179,7 @@ class StockController(AccountsController):
 			for d in frappe.db.sql("""select * from `tabGL Entry` 
 				where posting_date >= %s and voucher_no in (%s)""" % 
 				('%s', ', '.join(['%s']*len(future_stock_vouchers))), 
-				tuple([self.doc.posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
+				tuple([self.posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
 					gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 		
 		return gl_entries
@@ -235,20 +235,20 @@ class StockController(AccountsController):
 		sl_dict = {
 			"item_code": d.item_code,
 			"warehouse": d.warehouse,
-			"posting_date": self.doc.posting_date,
-			"posting_time": self.doc.posting_time,
-			"voucher_type": self.doc.doctype,
-			"voucher_no": self.doc.name,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
-			"actual_qty": (self.doc.docstatus==1 and 1 or -1)*flt(d.stock_qty),
+			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.stock_qty),
 			"stock_uom": d.stock_uom,
 			"incoming_rate": 0,
-			"company": self.doc.company,
-			"fiscal_year": self.doc.fiscal_year,
+			"company": self.company,
+			"fiscal_year": self.fiscal_year,
 			"batch_no": cstr(d.batch_no).strip(),
 			"serial_no": d.serial_no,
 			"project": d.project_name,
-			"is_cancelled": self.doc.docstatus==2 and "Yes" or "No"
+			"is_cancelled": self.docstatus==2 and "Yes" or "No"
 		}
 		
 		sl_dict.update(args)
@@ -260,7 +260,7 @@ class StockController(AccountsController):
 		
 	def make_cancel_gl_entries(self):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s 
-			and voucher_no=%s""", (self.doc.doctype, self.doc.name)):
+			and voucher_no=%s""", (self.doctype, self.name)):
 				self.make_gl_entries()
 				
 def update_gl_entries_after(posting_date, posting_time, warehouse_account=None, for_items=None):

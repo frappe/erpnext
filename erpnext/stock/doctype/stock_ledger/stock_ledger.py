@@ -45,7 +45,7 @@ class StockLedger(Document):
 		sle = frappe.bean([args])
 		sle.ignore_permissions = 1
 		sle.insert()
-		return sle.doc.name
+		return sle.name
 	
 	def repost(self):
 		"""

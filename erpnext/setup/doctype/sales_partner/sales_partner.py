@@ -8,8 +8,8 @@ from frappe.model.document import Document
 
 class SalesPartner(Document):
 	def validate(self):
-		if self.doc.partner_website and not self.doc.partner_website.startswith("http"):
-			self.doc.partner_website = "http://" + self.doc.partner_website
+		if self.partner_website and not self.partner_website.startswith("http"):
+			self.partner_website = "http://" + self.partner_website
 
 	def get_contacts(self, nm):
 		if nm:
@@ -21,4 +21,4 @@ class SalesPartner(Document):
 			return ''
 
 	def get_page_title(self):
-		return self.doc.partner_name
+		return self.partner_name

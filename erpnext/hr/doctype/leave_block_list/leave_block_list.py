@@ -16,7 +16,7 @@ class LeaveBlockList(Document):
 		dates = []
 		for d in self.doclist.get({"doctype":"Leave Block List Date"}):
 			# validate fiscal year
-			validate_fiscal_year(d.block_date, self.doc.year, _("Block Date"))
+			validate_fiscal_year(d.block_date, self.year, _("Block Date"))
 			
 			# date is not repeated
 			if d.block_date in dates:

@@ -24,10 +24,10 @@ class AccountsController(TransactionBase):
 		
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
-			if not self.doc.fields.get(fieldname) and self.meta.get_field(fieldname):
-				self.doc.fields[fieldname] = today()
-				if not self.doc.fiscal_year:
-					self.doc.fiscal_year = get_fiscal_year(self.doc.fields[fieldname])[0]
+			if not self.get(fieldname) and self.meta.get_field(fieldname):
+				self.set(fieldname, today())
+				if not self.fiscal_year:
+					self.fiscal_year = get_fiscal_year(self.fields[fieldname])[0]
 					
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year") :
@@ -37,16 +37,16 @@ class AccountsController(TransactionBase):
 			elif self.meta.get_field("transaction_date"):
 				date_field = "transaction_date"
 				
-			if date_field and self.doc.fields[date_field]:
-				validate_fiscal_year(self.doc.fields[date_field], self.doc.fiscal_year, 
+			if date_field and self.fields[date_field]:
+				validate_fiscal_year(self.fields[date_field], self.fiscal_year, 
 					label=self.meta.get_label(date_field))
 					
 	def validate_for_freezed_account(self):
 		for fieldname in ["customer", "supplier"]:
-			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
+			if self.meta.get_field(fieldname) and self.get(fieldname):
 				accounts = frappe.db.get_values("Account", 
-					{"master_type": fieldname.title(), "master_name": self.doc.fields[fieldname], 
-					"company": self.doc.company}, "name")
+					{"master_type": fieldname.title(), "master_name": self.fields[fieldname], 
+					"company": self.company}, "name")
 				if accounts:
 					from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
 					for account in accounts:						
@@ -54,30 +54,30 @@ class AccountsController(TransactionBase):
 			
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
-			company_currency = get_company_currency(self.doc.company)
+			company_currency = get_company_currency(self.company)
 			
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
 				else "buying_price_list"
-			if self.meta.get_field(fieldname) and self.doc.fields.get(fieldname):
-				self.doc.price_list_currency = frappe.db.get_value("Price List",
-					self.doc.fields.get(fieldname), "currency")
+			if self.meta.get_field(fieldname) and self.get(fieldname):
+				self.price_list_currency = frappe.db.get_value("Price List",
+					self.get(fieldname), "currency")
 				
-				if self.doc.price_list_currency == company_currency:
-					self.doc.plc_conversion_rate = 1.0
+				if self.price_list_currency == company_currency:
+					self.plc_conversion_rate = 1.0
 
-				elif not self.doc.plc_conversion_rate:
-					self.doc.plc_conversion_rate = self.get_exchange_rate(
-						self.doc.price_list_currency, company_currency)
+				elif not self.plc_conversion_rate:
+					self.plc_conversion_rate = self.get_exchange_rate(
+						self.price_list_currency, company_currency)
 			
 			# currency
-			if not self.doc.currency:
-				self.doc.currency = self.doc.price_list_currency
-				self.doc.conversion_rate = self.doc.plc_conversion_rate
-			elif self.doc.currency == company_currency:
-				self.doc.conversion_rate = 1.0
-			elif not self.doc.conversion_rate:
-				self.doc.conversion_rate = self.get_exchange_rate(self.doc.currency,
+			if not self.currency:
+				self.currency = self.price_list_currency
+				self.conversion_rate = self.plc_conversion_rate
+			elif self.currency == company_currency:
+				self.conversion_rate = 1.0
+			elif not self.conversion_rate:
+				self.conversion_rate = self.get_exchange_rate(self.currency,
 					company_currency)
 
 	def get_exchange_rate(self, from_currency, to_currency):
@@ -88,14 +88,14 @@ class AccountsController(TransactionBase):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 		for item in self.get(self.fname):
-			if item.fields.get("item_code"):
+			if item.get("item_code"):
 				args = item.fields.copy()
-				args.update(self.doc.fields)
+				args.update(self.fields)
 				ret = get_item_details(args)
 				for fieldname, value in ret.items():
 					if self.meta.get_field(fieldname, parentfield=self.fname) and \
-						item.fields.get(fieldname) is None and value is not None:
-							item.fields[fieldname] = value
+						item.get(fieldname) is None and value is not None:
+							item.set(fieldname, value)
 							
 	def set_taxes(self, tax_parentfield, tax_master_field):
 		if not self.meta.get_field(tax_parentfield):
@@ -104,22 +104,21 @@ class AccountsController(TransactionBase):
 		tax_master_doctype = self.meta.get_field(tax_master_field).options
 			
 		if not self.get(tax_parentfield):
-			if not self.doc.fields.get(tax_master_field):
+			if not self.get(tax_master_field):
 				# get the default tax master
-				self.doc.fields[tax_master_field] = \
-					frappe.db.get_value(tax_master_doctype, {"is_default": 1})
+				self.set(tax_master_field, frappe.db.get_value(tax_master_doctype, {"is_default": 1}))
 					
 			self.append_taxes_from_master(tax_parentfield, tax_master_field, tax_master_doctype)
 				
 	def append_taxes_from_master(self, tax_parentfield, tax_master_field, tax_master_doctype=None):
-		if self.doc.fields.get(tax_master_field):
+		if self.get(tax_master_field):
 			if not tax_master_doctype:
 				tax_master_doctype = self.meta.get_field(tax_master_field).options
 			
 			tax_doctype = self.meta.get_field(tax_parentfield).options
 			
 			from frappe.model import default_fields
-			tax_master = frappe.bean(tax_master_doctype, self.doc.fields.get(tax_master_field))
+			tax_master = frappe.bean(tax_master_doctype, self.get(tax_master_field))
 			
 			for i, tax in enumerate(tax_master.get(tax_parentfield)):
 				for fieldname in default_fields:
@@ -140,16 +139,16 @@ class AccountsController(TransactionBase):
 
 	def _calculate_taxes_and_totals(self):
 		# validate conversion rate
-		company_currency = get_company_currency(self.doc.company)
-		if not self.doc.currency or self.doc.currency == company_currency:
-			self.doc.currency = company_currency
-			self.doc.conversion_rate = 1.0
+		company_currency = get_company_currency(self.company)
+		if not self.currency or self.currency == company_currency:
+			self.currency = company_currency
+			self.conversion_rate = 1.0
 		else:
 			from erpnext.setup.doctype.currency.currency import validate_conversion_rate
-			validate_conversion_rate(self.doc.currency, self.doc.conversion_rate,
-				self.meta.get_label("conversion_rate"), self.doc.company)
+			validate_conversion_rate(self.currency, self.conversion_rate,
+				self.meta.get_label("conversion_rate"), self.company)
 
-		self.doc.conversion_rate = flt(self.doc.conversion_rate)
+		self.conversion_rate = flt(self.conversion_rate)
 		self.item_doclist = self.get(self.fname)
 		self.tax_doclist = self.get(self.other_fname)
 		
@@ -175,7 +174,7 @@ class AccountsController(TransactionBase):
 				tax_fields.append("tax_amount")
 
 			for fieldname in tax_fields:
-				tax.fields[fieldname] = 0.0
+				tax.set(fieldname, 0.0)
 
 			self.validate_on_previous_row(tax)
 			self.validate_inclusive_tax(tax)
@@ -297,7 +296,7 @@ class AccountsController(TransactionBase):
 			self.precision("tax_amount", tax))
 
 	def adjust_discount_amount_loss(self, tax):
-		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total
+		discount_amount_loss = self.grand_total - flt(self.discount_amount) - tax.total
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount + 
 			discount_amount_loss, self.precision("tax_amount", tax))
 		tax.total = flt(tax.total + discount_amount_loss, self.precision("total", tax))
@@ -309,8 +308,8 @@ class AccountsController(TransactionBase):
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.rate, self.precision("tax_amount", tax))
-			current_tax_amount = (self.doc.net_total
-				and ((item.base_amount / self.doc.net_total) * actual)
+			current_tax_amount = (self.net_total
+				and ((item.base_amount / self.net_total) * actual)
 				or 0)
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.base_amount
@@ -355,32 +354,32 @@ class AccountsController(TransactionBase):
 			
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""
-		item.fields[base_field] = flt((flt(item.fields[print_field],
-			self.precision(print_field, item)) * self.doc.conversion_rate),
+		item.set(base_field, flt((flt(item.fields[print_field],)
+			self.precision(print_field, item)) * self.conversion_rate),
 			self.precision(base_field, item))
 			
 	def calculate_total_advance(self, parenttype, advance_parentfield):
-		if self.doc.doctype == parenttype and self.doc.docstatus < 2:
+		if self.doctype == parenttype and self.docstatus < 2:
 			sum_of_allocated_amount = sum([flt(adv.allocated_amount, self.precision("allocated_amount", adv)) 
 				for adv in self.get(advance_parentfield)])
 
-			self.doc.total_advance = flt(sum_of_allocated_amount, self.precision("total_advance"))
+			self.total_advance = flt(sum_of_allocated_amount, self.precision("total_advance"))
 			
 			self.calculate_outstanding_amount()
 
 	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""
 		gl_dict = frappe._dict({
-			'company': self.doc.company, 
-			'posting_date': self.doc.posting_date,
-			'voucher_type': self.doc.doctype,
-			'voucher_no': self.doc.name,
-			'aging_date': self.doc.fields.get("aging_date") or self.doc.posting_date,
-			'remarks': self.doc.remarks,
-			'fiscal_year': self.doc.fiscal_year,
+			'company': self.company, 
+			'posting_date': self.posting_date,
+			'voucher_type': self.doctype,
+			'voucher_no': self.name,
+			'aging_date': self.get("aging_date") or self.posting_date,
+			'remarks': self.remarks,
+			'fiscal_year': self.fiscal_year,
 			'debit': 0,
 			'credit': 0,
-			'is_opening': self.doc.fields.get("is_opening") or "No",
+			'is_opening': self.get("is_opening") or "No",
 		})
 		gl_dict.update(args)
 		return gl_dict
@@ -389,7 +388,7 @@ class AccountsController(TransactionBase):
 		self.doclist.remove_items({"parentfield": parentfield, "allocated_amount": ["in", [0, None, ""]]})
 			
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s 
-			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.doc.name))
+			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 		
 	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr):
 		res = frappe.db.sql("""select t1.name as jv_no, t1.remark, 
@@ -419,7 +418,7 @@ class AccountsController(TransactionBase):
 		global_tolerance = None
 		
 		for item in self.get("entries"):
-			if item.fields.get(item_ref_dn):
+			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item", 
 					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
 				if not ref_amt:
@@ -429,7 +428,7 @@ class AccountsController(TransactionBase):
 					already_billed = frappe.db.sql("""select sum(%s) from `tab%s` 
 						where %s=%s and docstatus=1 and parent != %s""" % 
 						(based_on, self.tname, item_ref_dn, '%s', '%s'), 
-						(item.fields[item_ref_dn], self.doc.name))[0][0]
+						(item.fields[item_ref_dn], self.name))[0][0]
 				
 					total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
 						self.precision(based_on, item))
@@ -455,7 +454,7 @@ class AccountsController(TransactionBase):
 				
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
-		return get_company_default(self.doc.company, fieldname)
+		return get_company_default(self.company, fieldname)
 		
 	def get_stock_items(self):
 		stock_items = []
@@ -471,7 +470,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("Company", self.doc.company, "abbr")
+			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
 			
 		return self._abbr
 

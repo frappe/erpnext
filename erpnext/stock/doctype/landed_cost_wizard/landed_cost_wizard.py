@@ -38,7 +38,7 @@ class LandedCostWizard(Document):
 			pr_items = pr_bean.get("purchase_tax_details")
 			
 			for lc in self.get("landed_cost_details"):
-				amt = flt(lc.amount) * flt(pr_bean.doc.net_total)/ flt(total_amt)
+				amt = flt(lc.amount) * flt(pr_bean.net_total)/ flt(total_amt)
 				
 				matched_row = pr_bean.doclist.get({
 					"parentfield": "other_charges", 

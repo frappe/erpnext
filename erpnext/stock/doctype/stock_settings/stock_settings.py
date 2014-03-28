@@ -14,14 +14,14 @@ class StockSettings(Document):
 	def validate(self):
 		for key in ["item_naming_by", "item_group", "stock_uom",
 			"allow_negative_stock"]:
-			frappe.db.set_default(key, self.doc.fields.get(key, ""))
+			frappe.db.set_default(key, self.get(key, ""))
 			
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code", 
-			self.doc.get("item_naming_by")=="Naming Series", hide_name_field=True)
+			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
 
 		stock_frozen_limit = 356
-		submitted_stock_frozen = self.doc.stock_frozen_upto_days
+		submitted_stock_frozen = self.stock_frozen_upto_days
 		if submitted_stock_frozen > stock_frozen_limit:
-			self.doc.stock_frozen_upto_days = stock_frozen_limit
+			self.stock_frozen_upto_days = stock_frozen_limit
 			frappe.msgprint (_("`Freeze Stocks Older Than` should be smaller than %d days.") %stock_frozen_limit)

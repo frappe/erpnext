@@ -14,12 +14,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, 
-			po.doc.name)
+			po.name)
 
-		po = frappe.bean("Purchase Order", po.doc.name)
+		po = frappe.bean("Purchase Order", po.name)
 		po.submit()
 		
-		pr = make_purchase_receipt(po.doc.name)
+		pr = make_purchase_receipt(po.name)
 		pr[0]["supplier_warehouse"] = "_Test Warehouse 1 - _TC"
 		pr[0]["posting_date"] = "2013-05-12"
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
@@ -37,17 +37,17 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, 
-			po.doc.name)
+			po.name)
 
-		po = frappe.bean("Purchase Order", po.doc.name)
-		po.doc.is_subcontracted = "No"
+		po = frappe.bean("Purchase Order", po.name)
+		po.is_subcontracted = "No"
 		po.doclist[1].item_code = "_Test Item"
 		po.submit()
 		
 		self.assertEquals(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty"), 10)
 		
-		pr = make_purchase_receipt(po.doc.name)
+		pr = make_purchase_receipt(po.name)
 		
 		self.assertEquals(pr[0]["doctype"], "Purchase Receipt")
 		self.assertEquals(len(pr), len(test_records[0]))
@@ -63,7 +63,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
 			
-		pr1 = make_purchase_receipt(po.doc.name)
+		pr1 = make_purchase_receipt(po.name)
 		pr1[0]["naming_series"] = "_T-Purchase Receipt-"
 		pr1[0]["posting_date"] = "2013-05-12"
 		pr1[1]["qty"] = 8
@@ -80,11 +80,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
-			po.doc.name)
+			po.name)
 
-		po = frappe.bean("Purchase Order", po.doc.name)
+		po = frappe.bean("Purchase Order", po.name)
 		po.submit()
-		pi = make_purchase_invoice(po.doc.name)
+		pi = make_purchase_invoice(po.name)
 		
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(test_records[0]))
@@ -100,8 +100,8 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
 		po = frappe.bean(copy=test_records[0])
-		po.doc.company = "_Test Company 1"
-		po.doc.conversion_rate = 0.0167
+		po.company = "_Test Company 1"
+		po.conversion_rate = 0.0167
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
 	def test_uom_integer_validation(self):

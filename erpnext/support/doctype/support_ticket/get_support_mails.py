@@ -19,7 +19,7 @@ class SupportMailbox(POP3Mailbox):
 		})
 		
 	def process_message(self, mail):
-		if mail.from_email == self.email_settings.fields.get('support_email'):
+		if mail.from_email == self.email_settings.get('support_email'):
 			return
 		thread_id = mail.get_thread_id()
 		new_ticket = False
@@ -35,8 +35,8 @@ class SupportMailbox(POP3Mailbox):
 				self.send_auto_reply(ticket.doc)
 
 	def send_auto_reply(self, d):
-		signature = self.email_settings.fields.get('support_signature') or ''
-		response = self.email_settings.fields.get('support_autoreply') or ("""
+		signature = self.email_settings.get('support_signature') or ''
+		response = self.email_settings.get('support_autoreply') or ("""
 A new Ticket has been raised for your query. If you have any additional information, please
 reply back to this mail.
 		
@@ -48,7 +48,7 @@ Original Query:
 
 		sendmail(\
 			recipients = [cstr(d.raised_by)], \
-			sender = cstr(self.email_settings.fields.get('support_email')), \
+			sender = cstr(self.email_settings.get('support_email')), \
 			subject = '['+cstr(d.name)+'] ' + cstr(d.subject), \
 			msg = cstr(response))
 		
@@ -59,9 +59,9 @@ def get_support_mails():
 def add_support_communication(subject, content, sender, docname=None, mail=None):
 	if docname:
 		ticket = frappe.bean("Support Ticket", docname)
-		ticket.doc.status = 'Open'
+		ticket.status = 'Open'
 		ticket.ignore_permissions = True
-		ticket.doc.save()
+		ticket.save()
 	else:
 		ticket = frappe.bean([decode_dict({
 			"doctype":"Support Ticket",
@@ -76,7 +76,7 @@ def add_support_communication(subject, content, sender, docname=None, mail=None)
 		ticket.insert()
 	
 	_make(content=content, sender=sender, subject = subject,
-		doctype="Support Ticket", name=ticket.doc.name,
+		doctype="Support Ticket", name=ticket.name,
 		date=mail.date if mail else today(), sent_or_received="Received")
 
 	if mail:

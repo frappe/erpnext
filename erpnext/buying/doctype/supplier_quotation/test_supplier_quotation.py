@@ -14,11 +14,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		sq = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, 
-			sq.doc.name)
+			sq.name)
 
-		sq = frappe.bean("Supplier Quotation", sq.doc.name)
+		sq = frappe.bean("Supplier Quotation", sq.name)
 		sq.submit()
-		po = make_purchase_order(sq.doc.name)
+		po = make_purchase_order(sq.name)
 		
 		self.assertEquals(po[0]["doctype"], "Purchase Order")
 		self.assertEquals(len(po), len(sq.doclist))

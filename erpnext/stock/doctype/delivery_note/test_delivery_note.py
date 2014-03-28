@@ -28,11 +28,11 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = frappe.bean(copy=test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
-			dn.doc.name)
+			dn.name)
 
-		dn = frappe.bean("Delivery Note", dn.doc.name)
+		dn = frappe.bean("Delivery Note", dn.name)
 		dn.submit()
-		si = make_sales_invoice(dn.doc.name)
+		si = make_sales_invoice(dn.name)
 		
 		self.assertEquals(len(si), len(dn.doclist))
 		
@@ -53,12 +53,12 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.submit()
 		
 		stock_value, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
-			{"voucher_type": "Delivery Note", "voucher_no": dn.doc.name, 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
 				"item_code": "_Test Item"}, ["stock_value", "stock_value_difference"])
 		self.assertEqual(stock_value, 0)
 		self.assertEqual(stock_value_difference, -375)
 			
-		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
+		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 		
 	def test_delivery_note_gl_entry(self):
 		self.clear_stock_account_balance()
@@ -76,12 +76,12 @@ class TestDeliveryNote(unittest.TestCase):
 			{"master_name": dn.doclist[1].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
-		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
+		prev_bal = get_balance_on(stock_in_hand_account, dn.posting_date)
 
 		dn.insert()
 		dn.submit()
 		
-		gl_entries = get_gl_entries("Delivery Note", dn.doc.name)
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
 		expected_values = {
 			stock_in_hand_account: [0.0, 375.0],
@@ -91,19 +91,19 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
 		
 		# check stock in hand balance
-		bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
+		bal = get_balance_on(stock_in_hand_account, dn.posting_date)
 		self.assertEquals(bal, prev_bal - 375.0)
 				
 		# back dated purchase receipt
 		pr = frappe.bean(copy=pr_test_records[0])
-		pr.doc.posting_date = "2013-01-01"
+		pr.posting_date = "2013-01-01"
 		pr.doclist[1].rate = 100
 		pr.doclist[1].base_amount = 100
 		
 		pr.insert()
 		pr.submit()
 		
-		gl_entries = get_gl_entries("Delivery Note", dn.doc.name)
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
 		expected_values = {
 			stock_in_hand_account: [0.0, 666.67],
@@ -113,7 +113,7 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
 					
 		dn.cancel()
-		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
+		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 		set_perpetual_inventory(0)
 			
 	def test_delivery_note_gl_entry_packing_item(self):
@@ -131,12 +131,12 @@ class TestDeliveryNote(unittest.TestCase):
 			{"master_name": dn.doclist[1].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
-		prev_bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
+		prev_bal = get_balance_on(stock_in_hand_account, dn.posting_date)
 	
 		dn.insert()
 		dn.submit()
 		
-		gl_entries = get_gl_entries("Delivery Note", dn.doc.name)
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
 		
 		expected_values = {
@@ -147,11 +147,11 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
 					
 		# check stock in hand balance
-		bal = get_balance_on(stock_in_hand_account, dn.doc.posting_date)
+		bal = get_balance_on(stock_in_hand_account, dn.posting_date)
 		self.assertEquals(bal, prev_bal - 525.0)
 		
 		dn.cancel()
-		self.assertFalse(get_gl_entries("Delivery Note", dn.doc.name))
+		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 		
 		set_perpetual_inventory(0)
 		
@@ -172,7 +172,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Delivered")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], 
-			"delivery_document_no"), dn.doc.name)
+			"delivery_document_no"), dn.name)
 			
 		return dn
 			
@@ -196,7 +196,7 @@ class TestDeliveryNote(unittest.TestCase):
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
 		sr = frappe.bean("Serial No", serial_nos[0])
-		sr.doc.status = "Not Available"
+		sr.status = "Not Available"
 		sr.save()
 		
 		dn = frappe.bean(copy=test_records[0])

@@ -20,42 +20,42 @@ class GlEntry(Document):
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
-		validate_frozen_account(self.doc.account, adv_adj)
-		check_freezing_date(self.doc.posting_date, adv_adj)
-		validate_balance_type(self.doc.account, adv_adj)
+		validate_frozen_account(self.account, adv_adj)
+		check_freezing_date(self.posting_date, adv_adj)
+		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
-		if self.doc.against_voucher and self.doc.against_voucher_type != "POS" \
+		if self.against_voucher and self.against_voucher_type != "POS" \
 			and update_outstanding == 'Yes':
-				update_outstanding_amt(self.doc.account, self.doc.against_voucher_type, 
-					self.doc.against_voucher)
+				update_outstanding_amt(self.account, self.against_voucher_type, 
+					self.against_voucher)
 
 	def check_mandatory(self):
 		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
 		for k in mandatory:
-			if not self.doc.fields.get(k):
+			if not self.get(k):
 				frappe.throw(k + _(" is mandatory for GL Entry"))
 
 		# Zero value transaction is not allowed
-		if not (flt(self.doc.debit) or flt(self.doc.credit)):
+		if not (flt(self.debit) or flt(self.credit)):
 			frappe.throw(_("GL Entry: Debit or Credit amount is mandatory for ") + 
-				self.doc.account)
+				self.account)
 			
 	def pl_must_have_cost_center(self):
-		if frappe.db.get_value("Account", self.doc.account, "report_type") == "Profit and Loss":
-			if not self.doc.cost_center and self.doc.voucher_type != 'Period Closing Voucher':
+		if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss":
+			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
 				frappe.throw(_("Cost Center must be specified for Profit and Loss type account: ") 
-					+ self.doc.account)
-		elif self.doc.cost_center:
-			self.doc.cost_center = None
+					+ self.account)
+		elif self.cost_center:
+			self.cost_center = None
 		
 	def validate_posting_date(self):
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
+		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
 
 	def check_pl_account(self):
-		if self.doc.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.doc.account, "report_type")=="Profit and Loss":
+		if self.is_opening=='Yes' and \
+				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":
 			frappe.throw(_("For opening balance entry, account can not be \
 				a Profit and Loss type account"))			
 
@@ -63,32 +63,32 @@ class GlEntry(Document):
 		"""Account must be ledger, active and not freezed"""
 		
 		ret = frappe.db.sql("""select group_or_ledger, docstatus, company 
-			from tabAccount where name=%s""", self.doc.account, as_dict=1)[0]
+			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 		
 		if ret.group_or_ledger=='Group':
-			frappe.throw(_("Account") + ": " + self.doc.account + _(" is not a ledger"))
+			frappe.throw(_("Account") + ": " + self.account + _(" is not a ledger"))
 
 		if ret.docstatus==2:
-			frappe.throw(_("Account") + ": " + self.doc.account + _(" is not active"))
+			frappe.throw(_("Account") + ": " + self.account + _(" is not active"))
 			
-		if ret.company != self.doc.company:
-			frappe.throw(_("Account") + ": " + self.doc.account + 
-				_(" does not belong to the company") + ": " + self.doc.company)
+		if ret.company != self.company:
+			frappe.throw(_("Account") + ": " + self.account + 
+				_(" does not belong to the company") + ": " + self.company)
 				
 	def validate_cost_center(self):
 		if not hasattr(self, "cost_center_company"):
 			self.cost_center_company = {}
 		
 		def _get_cost_center_company():
-			if not self.cost_center_company.get(self.doc.cost_center):
-				self.cost_center_company[self.doc.cost_center] = frappe.db.get_value(
-					"Cost Center", self.doc.cost_center, "company")
+			if not self.cost_center_company.get(self.cost_center):
+				self.cost_center_company[self.cost_center] = frappe.db.get_value(
+					"Cost Center", self.cost_center, "company")
 			
-			return self.cost_center_company[self.doc.cost_center]
+			return self.cost_center_company[self.cost_center]
 			
-		if self.doc.cost_center and _get_cost_center_company() != self.doc.company:
-				frappe.throw(_("Cost Center") + ": " + self.doc.cost_center + 
-					_(" does not belong to the company") + ": " + self.doc.company)
+		if self.cost_center and _get_cost_center_company() != self.company:
+				frappe.throw(_("Cost Center") + ": " + self.cost_center + 
+					_(" does not belong to the company") + ": " + self.company)
 						
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

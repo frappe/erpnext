@@ -39,18 +39,18 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
 		prule = frappe.bean(copy=test_record)
-		prule.doc.applicable_for = "Customer"
+		prule.applicable_for = "Customer"
 		self.assertRaises(MandatoryError, prule.insert)
-		prule.doc.customer = "_Test Customer"
-		prule.doc.discount_percentage = 20
+		prule.customer = "_Test Customer"
+		prule.discount_percentage = 20
 		prule.insert()
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 20)
 		
 		prule = frappe.bean(copy=test_record)
-		prule.doc.apply_on = "Item Group"
-		prule.doc.item_group = "All Item Groups"
-		prule.doc.discount_percentage = 15
+		prule.apply_on = "Item Group"
+		prule.item_group = "All Item Groups"
+		prule.discount_percentage = 15
 		prule.insert()
 		
 		args.customer = None
@@ -58,10 +58,10 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
 		prule = frappe.bean(copy=test_record)
-		prule.doc.applicable_for = "Campaign"
-		prule.doc.campaign = "_Test Campaign"
-		prule.doc.discount_percentage = 5
-		prule.doc.priority = 8
+		prule.applicable_for = "Campaign"
+		prule.campaign = "_Test Campaign"
+		prule.discount_percentage = 5
+		prule.priority = 8
 		prule.insert()
 		
 		args.campaign = "_Test Campaign"

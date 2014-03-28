@@ -14,11 +14,11 @@ class SupplierQuotation(BuyingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
-		if not self.doc.status:
-			self.doc.status = "Draft"
+		if not self.status:
+			self.status = "Draft"
 
 		from erpnext.utilities import validate_status
-		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		validate_status(self.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 		
 		self.validate_common()

@@ -25,7 +25,7 @@ def map_outgoing_email_settings(email_settings):
 		else:
 			from_fieldname = to_fieldname = fieldname
 
-		outgoing_email_settings.doc.fields[to_fieldname] = email_settings.doc.fields.get(from_fieldname)
+		outgoing_email_settings.set(to_fieldname, email_settings.get(from_fieldname))
 
 	outgoing_email_settings.save()
 	
@@ -44,7 +44,7 @@ def map_support_email_settings(email_settings):
 		else:
 			from_fieldname = to_fieldname = fieldname
 	
-		support_email_settings.doc.fields[to_fieldname] = email_settings.doc.fields.get(from_fieldname)
+		support_email_settings.set(to_fieldname, email_settings.get(from_fieldname))
 	
 	support_email_settings.save()
 	

@@ -17,11 +17,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = frappe.bean(copy=test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
-			pr.doc.name)
+			pr.name)
 
-		pr = frappe.bean("Purchase Receipt", pr.doc.name)
+		pr = frappe.bean("Purchase Receipt", pr.name)
 		pr.submit()
-		pi = make_purchase_invoice(pr.doc.name)
+		pi = make_purchase_invoice(pr.name)
 		
 		self.assertEquals(pi[0]["doctype"], "Purchase Invoice")
 		self.assertEquals(len(pi), len(pr.doclist))
@@ -38,7 +38,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.submit()
 		
 		stock_value, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
-			{"voucher_type": "Purchase Receipt", "voucher_no": pr.doc.name, 
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name, 
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
 			["stock_value", "stock_value_difference"])
 		self.assertEqual(stock_value, 375)
@@ -48,7 +48,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
 		self.assertEqual(bin_stock_value, 375)
 		
-		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
+		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 		
 	def test_purchase_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
@@ -60,7 +60,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 		
-		gl_entries = get_gl_entries("Purchase Receipt", pr.doc.name)
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 		
 		self.assertTrue(gl_entries)
 		
@@ -80,7 +80,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
 			
 		pr.cancel()
-		self.assertFalse(get_gl_entries("Purchase Receipt", pr.doc.name))
+		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 		
 		set_perpetual_inventory(0)
 		
@@ -106,7 +106,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.submit()
 		
 		self.assertEquals(frappe.db.get_value("Serial No", pr.doclist[1].serial_no, 
-			"supplier"), pr.doc.supplier)
+			"supplier"), pr.supplier)
 			
 		return pr
 	
@@ -124,7 +124,7 @@ def get_gl_entries(voucher_type, voucher_no):
 		
 def set_perpetual_inventory(enable=1):
 	accounts_settings = frappe.bean("Accounts Settings")
-	accounts_settings.doc.auto_accounting_for_stock = enable
+	accounts_settings.auto_accounting_for_stock = enable
 	accounts_settings.save()
 	
 		

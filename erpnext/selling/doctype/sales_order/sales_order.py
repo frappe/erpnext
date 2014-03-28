@@ -26,21 +26,21 @@ class SalesOrder(SellingController):
 	
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
-		if self.doc.delivery_date:
-			if getdate(self.doc.transaction_date) > getdate(self.doc.delivery_date):
+		if self.delivery_date:
+			if getdate(self.transaction_date) > getdate(self.delivery_date):
 				msgprint("Expected Delivery Date cannot be before Sales Order Date")
 				raise Exception
 	
 	def validate_po(self):
 		# validate p.o date v/s delivery date
-		if self.doc.po_date and self.doc.delivery_date and getdate(self.doc.po_date) > getdate(self.doc.delivery_date):
+		if self.po_date and self.delivery_date and getdate(self.po_date) > getdate(self.delivery_date):
 			msgprint("Expected Delivery Date cannot be before Purchase Order Date")
 			raise Exception	
 		
-		if self.doc.po_no and self.doc.customer:
+		if self.po_no and self.customer:
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
-				and customer = %s", (self.doc.po_no, self.doc.name, self.doc.customer))
+				and customer = %s", (self.po_no, self.name, self.customer))
 			if so and so[0][0]:
 				msgprint("""Another Sales Order (%s) exists against same PO No and Customer. 
 					Please be sure, you are not making duplicate entry.""" % so[0][0])
@@ -68,7 +68,7 @@ class SalesOrder(SellingController):
 					chk_dupl_itm.append(f)
 
 			# used for production plan
-			d.transaction_date = self.doc.transaction_date
+			d.transaction_date = self.transaction_date
 			
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
@@ -77,28 +77,28 @@ class SalesOrder(SellingController):
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('sales_order_details'):
 			if d.prevdoc_docname:
-				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.doc.order_type))
+				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.order_type))
 				if not res:
 					msgprint("""Order Type (%s) should be same in Quotation: %s \
-						and current Sales Order""" % (self.doc.order_type, d.prevdoc_docname))
+						and current Sales Order""" % (self.order_type, d.prevdoc_docname))
 
 	def validate_order_type(self):
 		super(DocType, self).validate_order_type()
 		
 	def validate_delivery_date(self):
-		if self.doc.order_type == 'Sales' and not self.doc.delivery_date:
+		if self.order_type == 'Sales' and not self.delivery_date:
 			msgprint("Please enter 'Expected Delivery Date'")
 			raise Exception
 		
 		self.validate_sales_mntc_quotation()
 
 	def validate_proj_cust(self):
-		if self.doc.project_name and self.doc.customer_name:
+		if self.project_name and self.customer_name:
 			res = frappe.db.sql("""select name from `tabProject` where name = %s 
 				and (customer = %s or ifnull(customer,'')='')""", 
-					(self.doc.project_name, self.doc.customer))
+					(self.project_name, self.customer))
 			if not res:
-				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.doc.customer,self.doc.project_name,self.doc.project_name))
+				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.customer,self.project_name,self.project_name))
 				raise Exception
 	
 	def validate(self):
@@ -119,15 +119,15 @@ class SalesOrder(SellingController):
 		
 		self.validate_with_previous_doc()
 		
-		if not self.doc.status:
-			self.doc.status = "Draft"
+		if not self.status:
+			self.status = "Draft"
 
 		from erpnext.utilities import validate_status
-		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		validate_status(self.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
-		if not self.doc.billing_status: self.doc.billing_status = 'Not Billed'
-		if not self.doc.delivery_status: self.doc.delivery_status = 'Not Delivered'		
+		if not self.billing_status: self.billing_status = 'Not Billed'
+		if not self.delivery_status: self.delivery_status = 'Not Delivered'		
 		
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
@@ -136,7 +136,7 @@ class SalesOrder(SellingController):
 			self.doclist.get({"doctype": self.tname}) if d.warehouse]))
 				
 		for w in warehouses:
-			validate_warehouse_company(w, self.doc.company)
+			validate_warehouse_company(w, self.company)
 		
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -155,7 +155,7 @@ class SalesOrder(SellingController):
 	def update_prevdoc_status(self, flag):				
 		for quotation in self.doclist.get_distinct_values("prevdoc_docname"):
 			bean = frappe.bean("Quotation", quotation)
-			if bean.doc.docstatus==2:
+			if bean.docstatus==2:
 				frappe.throw(quotation + ": " + frappe._("Quotation is cancelled."))
 				
 			bean.get_controller().set_status(update=True)
@@ -163,17 +163,17 @@ class SalesOrder(SellingController):
 	def on_submit(self):
 		self.update_stock_ledger(update_stock = 1)
 
-		self.check_credit(self.doc.grand_total)
+		self.check_credit(self.grand_total)
 		
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.grand_total, self)
+		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
 		
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self.doc, 'status', 'Submitted')
 	
 	def on_cancel(self):
 		# Cannot cancel stopped SO
-		if self.doc.status == 'Stopped':
-			msgprint("Sales Order : '%s' cannot be cancelled as it is Stopped. Unstop it for any further transactions" %(self.doc.name))
+		if self.status == 'Stopped':
+			msgprint("Sales Order : '%s' cannot be cancelled as it is Stopped. Unstop it for any further transactions" %(self.name))
 			raise Exception
 		self.check_nextdoc_docstatus()
 		self.update_stock_ledger(update_stock = -1)
@@ -184,55 +184,55 @@ class SalesOrder(SellingController):
 		
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = frappe.db.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1", self.doc.name)
+		submit_dn = frappe.db.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1", self.name)
 		if submit_dn:
-			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doc.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
 			
 		# Checks Sales Invoice
 		submit_rv = frappe.db.sql("""select t1.name 
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2 
 			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""", 
-			self.doc.name)
+			self.name)
 		if submit_rv:
-			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
 			
 		#check maintenance schedule
-		submit_ms = frappe.db.sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
+		submit_ms = frappe.db.sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.name)
 		if submit_ms:
-			msgprint("Maintenance Schedule : " + cstr(submit_ms[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Schedule : "+ cstr(submit_ms[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			msgprint("Maintenance Schedule : " + cstr(submit_ms[0][0]) + " has already been submitted against " +cstr(self.doctype)+ ". Please cancel Maintenance Schedule : "+ cstr(submit_ms[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
 			
 		# check maintenance visit
-		submit_mv = frappe.db.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.doc.name)
+		submit_mv = frappe.db.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.name)
 		if submit_mv:
-			msgprint("Maintenance Visit : " + cstr(submit_mv[0][0]) + " has already been submitted against " +cstr(self.doc.doctype)+ ". Please cancel Maintenance Visit : " + cstr(submit_mv[0][0]) + " first and then cancel "+ cstr(self.doc.doctype), raise_exception = 1)
+			msgprint("Maintenance Visit : " + cstr(submit_mv[0][0]) + " has already been submitted against " +cstr(self.doctype)+ ". Please cancel Maintenance Visit : " + cstr(submit_mv[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
 		
 		# check production order
-		pro_order = frappe.db.sql("""select name from `tabProduction Order` where sales_order = %s and docstatus = 1""", self.doc.name)
+		pro_order = frappe.db.sql("""select name from `tabProduction Order` where sales_order = %s and docstatus = 1""", self.name)
 		if pro_order:
 			msgprint("""Production Order: %s exists against this sales order. 
 				Please cancel production order first and then cancel this sales order""" % 
 				pro_order[0][0], raise_exception=1)
 
 	def check_modified_date(self):
-		mod_db = frappe.db.get_value("Sales Order", self.doc.name, "modified")
+		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % 
-			( mod_db, cstr(self.doc.modified)))
+			( mod_db, cstr(self.modified)))
 		if date_diff and date_diff[0][0]:
 			msgprint("%s: %s has been modified after you have opened. Please Refresh"
-				% (self.doc.doctype, self.doc.name), raise_exception=1)
+				% (self.doctype, self.name), raise_exception=1)
 
 	def stop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(-1)
 		frappe.db.set(self.doc, 'status', 'Stopped')
 		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order 
-			you need to Unstop it.""" % (self.doc.doctype, self.doc.name))
+			you need to Unstop it.""" % (self.doctype, self.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(1)
 		frappe.db.set(self.doc, 'status', 'Submitted')
-		msgprint("%s: %s has been Unstopped" % (self.doc.doctype, self.doc.name))
+		msgprint("%s: %s has been Unstopped" % (self.doctype, self.name))
 
 
 	def update_stock_ledger(self, update_stock):
@@ -243,10 +243,10 @@ class SalesOrder(SellingController):
 					"item_code": d['item_code'],
 					"warehouse": d['reserved_warehouse'], 
 					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
-					"posting_date": self.doc.transaction_date,
-					"voucher_type": self.doc.doctype,
-					"voucher_no": self.doc.name,
-					"is_amended": self.doc.amended_from and 'Yes' or 'No'
+					"posting_date": self.transaction_date,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"is_amended": self.amended_from and 'Yes' or 'No'
 				}
 				update_bin(args)
 
@@ -254,7 +254,7 @@ class SalesOrder(SellingController):
 		pass
 		
 	def get_portal_page(self):
-		return "order" if self.doc.docstatus==1 else None
+		return "order" if self.docstatus==1 else None
 		
 def set_missing_values(source, target):
 	bean = frappe.bean(target)
@@ -327,7 +327,7 @@ def make_delivery_note(source_name, target_doclist=None):
 def make_sales_invoice(source_name, target_doclist=None):
 	def set_missing_values(source, target):
 		bean = frappe.bean(target)
-		bean.doc.is_pos = 0
+		bean.is_pos = 0
 		bean.run_method("onload_post_render")
 		
 	def update_item(obj, target, source_parent):

@@ -31,21 +31,21 @@ class TestProductionOrder(unittest.TestCase):
 		mr2.insert()
 		mr2.submit()
 		
-		stock_entry = make_stock_entry(pro_bean.doc.name, "Manufacture/Repack")
+		stock_entry = make_stock_entry(pro_bean.name, "Manufacture/Repack")
 		stock_entry = frappe.bean(stock_entry)
-		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.doc.fg_completed_qty = 4
-		stock_entry.doc.posting_date = "2013-05-12"
-		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
+		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
+		stock_entry.fg_completed_qty = 4
+		stock_entry.posting_date = "2013-05-12"
+		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.run_method("get_items")
 		stock_entry.submit()
 		
-		self.assertEqual(frappe.db.get_value("Production Order", pro_bean.doc.name, 
+		self.assertEqual(frappe.db.get_value("Production Order", pro_bean.name, 
 			"produced_qty"), 4)
 		self.assertEqual(frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"), 6)
 			
-		return pro_bean.doc.name
+		return pro_bean.name
 			
 	def test_over_production(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverProductionError
@@ -53,9 +53,9 @@ class TestProductionOrder(unittest.TestCase):
 		
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")
 		stock_entry = frappe.bean(stock_entry)
-		stock_entry.doc.posting_date = "2013-05-12"
-		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.doc.fg_completed_qty = 15
+		stock_entry.posting_date = "2013-05-12"
+		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
+		stock_entry.fg_completed_qty = 15
 		stock_entry.run_method("get_items")
 		stock_entry.insert()
 		

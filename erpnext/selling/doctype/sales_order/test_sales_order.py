@@ -15,11 +15,11 @@ class TestSalesOrder(unittest.TestCase):
 		so = frappe.bean(copy=test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_material_request, 
-			so.doc.name)
+			so.name)
 
-		sales_order = frappe.bean("Sales Order", so.doc.name)
+		sales_order = frappe.bean("Sales Order", so.name)
 		sales_order.submit()
-		mr = make_material_request(so.doc.name)
+		mr = make_material_request(so.name)
 		
 		self.assertEquals(mr[0]["material_request_type"], "Purchase")
 		self.assertEquals(len(mr), len(sales_order.doclist))
@@ -30,11 +30,11 @@ class TestSalesOrder(unittest.TestCase):
 		so = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_delivery_note, 
-			so.doc.name)
+			so.name)
 
-		sales_order = frappe.bean("Sales Order", so.doc.name)
+		sales_order = frappe.bean("Sales Order", so.name)
 		sales_order.submit()
-		dn = make_delivery_note(so.doc.name)
+		dn = make_delivery_note(so.name)
 		
 		self.assertEquals(dn[0]["doctype"], "Delivery Note")
 		self.assertEquals(len(dn), len(sales_order.doclist))
@@ -45,22 +45,22 @@ class TestSalesOrder(unittest.TestCase):
 		so = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
-			so.doc.name)
+			so.name)
 
-		sales_order = frappe.bean("Sales Order", so.doc.name)
+		sales_order = frappe.bean("Sales Order", so.name)
 		sales_order.submit()
-		si = make_sales_invoice(so.doc.name)
+		si = make_sales_invoice(so.name)
 		
 		self.assertEquals(si[0]["doctype"], "Sales Invoice")
 		self.assertEquals(len(si), len(sales_order.doclist))
 		self.assertEquals(len([d for d in si if d["doctype"]=="Sales Invoice Item"]), 1)
 		
 		si = frappe.bean(si)
-		si.doc.posting_date = "2013-10-10"
+		si.posting_date = "2013-10-10"
 		si.insert()
 		si.submit()
 
-		si1 = make_sales_invoice(so.doc.name)
+		si1 = make_sales_invoice(so.name)
 		self.assertEquals(len([d for d in si1 if d["doctype"]=="Sales Invoice Item"]), 0)
 		
 
@@ -82,7 +82,7 @@ class TestSalesOrder(unittest.TestCase):
 		
 		dn = frappe.bean(frappe.copy_doc(dn_test_records[0]))
 		dn.doclist[1].item_code = so.doclist[1].item_code
-		dn.doclist[1].against_sales_order = so.doc.name
+		dn.doclist[1].against_sales_order = so.name
 		dn.doclist[1].prevdoc_detail_docname = so.doclist[1].name
 		if delivered_qty:
 			dn.doclist[1].qty = delivered_qty
@@ -291,9 +291,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		from frappe.model.bean import BeanPermissionError
 		so = frappe.bean(copy = test_records[0])
-		so.doc.company = "_Test Company 1"
-		so.doc.conversion_rate = 0.02
-		so.doc.plc_conversion_rate = 0.02
+		so.company = "_Test Company 1"
+		so.conversion_rate = 0.02
+		so.plc_conversion_rate = 0.02
 		so.doclist[1].warehouse = "_Test Warehouse 2 - _TC1"
 		self.assertRaises(BeanPermissionError, so.insert)
 

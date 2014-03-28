@@ -15,7 +15,7 @@ class Quotation(SellingController):
 		self.fname = 'quotation_details'
 
 	def has_sales_order(self):
-		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
 
 	def validate_for_items(self):
 		chk_dupl_itm = []
@@ -29,7 +29,7 @@ class Quotation(SellingController):
 	def validate_order_type(self):
 		super(DocType, self).validate_order_type()
 		
-		if self.doc.order_type in ['Maintenance', 'Service']:
+		if self.order_type in ['Maintenance', 'Service']:
 			for d in self.get('quotation_details'):
 				is_service_item = frappe.db.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
@@ -74,7 +74,7 @@ class Quotation(SellingController):
 		self.check_item_table()
 		
 		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
+		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
 			
 		#update enquiry status
 		self.update_opportunity()
@@ -105,8 +105,8 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 	
 	def set_missing_values(source, target):
 		if customer:
-			target[0].customer = customer.doc.name
-			target[0].customer_name = customer.doc.customer_name
+			target[0].customer = customer.name
+			target[0].customer_name = customer.customer_name
 			
 		si = frappe.bean(target)
 		si.ignore_permissions = ignore_permissions
@@ -150,7 +150,7 @@ def _make_customer(source_name, ignore_permissions=False):
 			customer = frappe.bean(customer_doclist)
 			customer.ignore_permissions = ignore_permissions
 			if quotation[1] == "Shopping Cart":
-				customer.doc.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
+				customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
 					"default_customer_group")
 			
 			try:
@@ -159,7 +159,7 @@ def _make_customer(source_name, ignore_permissions=False):
 			except NameError:
 				if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
 					customer.run_method("autoname")
-					customer.doc.name += "-" + lead_name
+					customer.name += "-" + lead_name
 					customer.insert()
 					return customer
 				else:

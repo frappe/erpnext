@@ -74,7 +74,7 @@ class ShippingRule(DocListController):
 						overlaps.append([d1, d2])
 		
 		if overlaps:
-			company_currency = get_company_currency(self.doc.company)
+			company_currency = get_company_currency(self.company)
 			msgprint(_("Error") + ": " + _("Overlapping Conditions found between") + ":")
 			messages = []
 			for d1, d2 in overlaps:

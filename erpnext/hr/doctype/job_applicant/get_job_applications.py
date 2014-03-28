@@ -19,10 +19,10 @@ class JobsMailbox(POP3Mailbox):
 			"name")
 		if name:
 			applicant = frappe.bean("Job Applicant", name)
-			if applicant.doc.status!="Rejected":
-				applicant.doc.status = "Open"
+			if applicant.status!="Rejected":
+				applicant.status = "Open"
 			applicant.ignore_permissions = True
-			applicant.doc.save()
+			applicant.save()
 		else:
 			name = (mail.from_real_name and (mail.from_real_name + " - ") or "") \
 				+ mail.from_email
@@ -40,7 +40,7 @@ class JobsMailbox(POP3Mailbox):
 		mail.save_attachments_in_doc(applicant.doc)
 				
 		_make(content=mail.content, sender=mail.from_email, subject=mail.subject or "No Subject",
-			doctype="Job Applicant", name=applicant.doc.name, sent_or_received="Received")
+			doctype="Job Applicant", name=applicant.name, sent_or_received="Received")
 
 def get_job_applications():
 	if cint(frappe.db.get_value('Jobs Email Settings', None, 'extract_emails')):

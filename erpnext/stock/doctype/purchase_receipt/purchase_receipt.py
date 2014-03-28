@@ -30,21 +30,21 @@ class PurchaseReceipt(BuyingController):
 		
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
-			where purchase_receipt=%s""", self.doc.name)
+			where purchase_receipt=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("purchase_receipt_details")))
-			self.doc.fields["__billing_complete"] = billed_qty[0][0] == total_qty
+			self.set("__billing_complete", billed_qty[0][0] == total_qty)
 
 	def validate(self):
 		super(DocType, self).validate()
 		
 		self.po_required()
 
-		if not self.doc.status:
-			self.doc.status = "Draft"
+		if not self.status:
+			self.status = "Draft"
 
 		from erpnext.utilities import validate_status
-		validate_status(self.doc.status, ["Draft", "Submitted", "Cancelled"])
+		validate_status(self.status, ["Draft", "Submitted", "Cancelled"])
 
 		self.validate_with_previous_doc()
 		self.validate_rejected_warehouse()
@@ -67,7 +67,7 @@ class PurchaseReceipt(BuyingController):
 	def validate_rejected_warehouse(self):
 		for d in self.get("purchase_receipt_details"):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
-				d.rejected_warehouse = self.doc.rejected_warehouse
+				d.rejected_warehouse = self.rejected_warehouse
 				if not d.rejected_warehouse:
 					frappe.throw(_("Rejected Warehouse is mandatory against regected item"))		
 
@@ -92,11 +92,11 @@ class PurchaseReceipt(BuyingController):
 
 	def validate_challan_no(self):
 		"Validate if same challan no exists for same supplier in a submitted purchase receipt"
-		if self.doc.challan_no:
+		if self.challan_no:
 			exists = frappe.db.sql("""
 			SELECT name FROM `tabPurchase Receipt`
 			WHERE name!=%s AND supplier=%s AND challan_no=%s
-		AND docstatus=1""", (self.doc.name, self.doc.supplier, self.doc.challan_no))
+		AND docstatus=1""", (self.name, self.supplier, self.challan_no))
 			if exists:
 				frappe.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
 			Please enter a valid Challan No.", raise_exception=1)
@@ -178,15 +178,15 @@ class PurchaseReceipt(BuyingController):
 				update_bin({
 					"item_code": d.item_code,
 					"warehouse": ordered_warehouse,
-					"posting_date": self.doc.posting_date,
-					"ordered_qty": flt(ordered_qty) if self.doc.docstatus==1 else -flt(ordered_qty)
+					"posting_date": self.posting_date,
+					"ordered_qty": flt(ordered_qty) if self.docstatus==1 else -flt(ordered_qty)
 				})
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item` 
 			where prevdoc_detail_docname = %s and docstatus = 1 
 			and prevdoc_doctype='Purchase Order' and prevdoc_docname=%s 
-			and parent != %s""", (po_detail, po, self.doc.name))
+			and parent != %s""", (po_detail, po, self.name))
 		return qty and flt(qty[0][0]) or 0.0
 		
 	def get_po_qty_and_warehouse(self, po_detail):
@@ -200,7 +200,7 @@ class PurchaseReceipt(BuyingController):
 			# when PR is submitted and it has to be increased when PR is cancelled
 			sl_entries.append(self.get_sl_entries(d, {
 				"item_code": d.rm_item_code,
-				"warehouse": self.doc.supplier_warehouse,
+				"warehouse": self.supplier_warehouse,
 				"actual_qty": -1*flt(d.consumed_qty),
 				"incoming_rate": 0
 			}))
@@ -226,7 +226,7 @@ class PurchaseReceipt(BuyingController):
 		purchase_controller = frappe.get_obj("Purchase Common")
 
 		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total)
+		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total)
 
 		# Set status as Submitted
 		frappe.db.set(self.doc, 'status', 'Submitted')
@@ -248,7 +248,7 @@ class PurchaseReceipt(BuyingController):
 		submit_rv = frappe.db.sql("""select t1.name 
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 
 			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""", 
-			(self.doc.name))
+			(self.name))
 		if submit_rv:
 			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
@@ -262,7 +262,7 @@ class PurchaseReceipt(BuyingController):
 		submitted = frappe.db.sql("""select t1.name 
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 
 			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""", 
-			self.doc.name)
+			self.name)
 		if submitted:
 			frappe.throw("Purchase Invoice : " + cstr(submitted[0][0]) + 
 				" has already been submitted !")
@@ -280,8 +280,8 @@ class PurchaseReceipt(BuyingController):
 			
 	def get_current_stock(self):
 		for d in self.get('pr_raw_material_details'):
-			if self.doc.supplier_warehouse:
-				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.doc.supplier_warehouse), as_dict = 1)
+			if self.supplier_warehouse:
+				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.rm_item_code, self.supplier_warehouse), as_dict = 1)
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 	def get_rate(self,arg):

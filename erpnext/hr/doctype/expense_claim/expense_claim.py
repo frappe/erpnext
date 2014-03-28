@@ -16,13 +16,13 @@ class ExpenseClaim(Document):
 		self.validate_exp_details()
 			
 	def on_submit(self):
-		if self.doc.approval_status=="Draft":
+		if self.approval_status=="Draft":
 			frappe.msgprint("""Please set Approval Status to 'Approved' or \
 				'Rejected' before submitting""", raise_exception=1)
 	
 	def validate_fiscal_year(self):
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.doc.posting_date, self.doc.fiscal_year, "Posting Date")
+		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
 			
 	def validate_exp_details(self):
 		if not self.get('expense_voucher_details'):

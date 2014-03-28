@@ -15,13 +15,13 @@ class PaymentToInvoiceMatchingTool(Document):
 		total_amount = frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 			from `tabGL Entry` 
 			where voucher_type = %s and voucher_no = %s 
-			and account = %s""", (self.doc.voucher_type, self.doc.voucher_no, self.doc.account))
+			and account = %s""", (self.voucher_type, self.voucher_no, self.account))
 			
 		total_amount = total_amount and flt(total_amount[0][0]) or 0
 		reconciled_payment = frappe.db.sql("""
 			select abs(sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))) from `tabGL Entry` where 
 			against_voucher = %s and voucher_no != %s
-			and account = %s""", (self.doc.voucher_no, self.doc.voucher_no, self.doc.account))
+			and account = %s""", (self.voucher_no, self.voucher_no, self.account))
 			
 		reconciled_payment = reconciled_payment and flt(reconciled_payment[0][0]) or 0
 		ret = {
@@ -44,15 +44,15 @@ class PaymentToInvoiceMatchingTool(Document):
 	def get_gl_entries(self):
 		self.validate_mandatory()
 		
-		cond = self.doc.from_date and " and t1.posting_date >= '" + self.doc.from_date + "'" or ""
-		cond += self.doc.to_date and " and t1.posting_date <= '" + self.doc.to_date + "'"or ""
+		cond = self.from_date and " and t1.posting_date >= '" + self.from_date + "'" or ""
+		cond += self.to_date and " and t1.posting_date <= '" + self.to_date + "'"or ""
 		
-		if self.doc.amt_greater_than:
+		if self.amt_greater_than:
 			cond += ' and abs(ifnull(t2.debit, 0) - ifnull(t2.credit, 0)) >= ' + \
-				self.doc.amt_greater_than
-		if self.doc.amt_less_than:
+				self.amt_greater_than
+		if self.amt_less_than:
 			cond += ' and abs(ifnull(t2.debit, 0) - ifnull(t2.credit, 0)) >= ' + \
-				self.doc.amt_less_than
+				self.amt_less_than
 
 		gle = frappe.db.sql("""
 			select t1.name as voucher_no, t1.posting_date, t1.total_debit as total_amt, 
@@ -62,13 +62,13 @@ class PaymentToInvoiceMatchingTool(Document):
 			where t1.name = t2.parent and t1.docstatus = 1 and t2.account = %s
 			and ifnull(t2.against_voucher, '')='' and ifnull(t2.against_invoice, '')='' 
 			and ifnull(t2.against_jv, '')='' and t1.name != %s %s group by t1.name, t2.name """ % 
-			('%s', '%s', cond), (self.doc.account, self.doc.voucher_no), as_dict=1)
+			('%s', '%s', cond), (self.account, self.voucher_no), as_dict=1)
 
 		return gle
 
 	def create_payment_table(self, gle):
 		for d in gle:
-			ch = self.doc.append('ir_payment_details', {})
+			ch = self.append('ir_payment_details', {})
 			ch.voucher_no = d.get('voucher_no')
 			ch.posting_date = d.get('posting_date')
 			ch.amt_due =  flt(d.get('amt_due'))
@@ -78,7 +78,7 @@ class PaymentToInvoiceMatchingTool(Document):
 			ch.voucher_detail_no = d.get('voucher_detail_no')
 			
 	def validate_mandatory(self):
-		if not self.doc.account:
+		if not self.account:
 			msgprint("Please select Account first", raise_exception=1)
 	
 	def reconcile(self):
@@ -88,8 +88,8 @@ class PaymentToInvoiceMatchingTool(Document):
 			2. split into multiple rows if partially adjusted, assign against voucher
 			3. submit payment voucher
 		"""
-		if not self.doc.voucher_no or not frappe.db.sql("""select name from `tab%s` 
-				where name = %s""" % (self.doc.voucher_type, '%s'), self.doc.voucher_no):
+		if not self.voucher_no or not frappe.db.sql("""select name from `tab%s` 
+				where name = %s""" % (self.voucher_type, '%s'), self.voucher_no):
 			frappe.throw(_("Please select valid Voucher No to proceed"))
 		
 		lst = []
@@ -98,11 +98,11 @@ class PaymentToInvoiceMatchingTool(Document):
 				args = {
 					'voucher_no' : d.voucher_no,
 					'voucher_detail_no' : d.voucher_detail_no, 
-					'against_voucher_type' : self.doc.voucher_type, 
-					'against_voucher'  : self.doc.voucher_no,
-					'account' : self.doc.account, 
+					'against_voucher_type' : self.voucher_type, 
+					'against_voucher'  : self.voucher_no,
+					'account' : self.account, 
 					'is_advance' : 'No', 
-					# 'dr_or_cr' :  self.doc.account_type=='debit' and 'credit' or 'debit', 
+					# 'dr_or_cr' :  self.account_type=='debit' and 'credit' or 'debit', 
 					'unadjusted_amt' : flt(d.amt_due),
 					'allocated_amt' : flt(d.amt_to_be_reconciled)
 				}

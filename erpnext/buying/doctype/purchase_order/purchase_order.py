@@ -29,11 +29,11 @@ class PurchaseOrder(BuyingController):
 	def validate(self):
 		super(DocType, self).validate()
 		
-		if not self.doc.status:
-			self.doc.status = "Draft"
+		if not self.status:
+			self.status = "Draft"
 
 		from erpnext.utilities import validate_status
-		validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		validate_status(self.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
 		pc_obj = get_obj(dt='Purchase Common')
@@ -99,7 +99,7 @@ class PurchaseOrder(BuyingController):
 					# get qty and pending_qty of prevdoc 
 					curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
 					 	d.prevdoc_detail_docname, 'Material Request Item', 
-						'Material Request - Purchase Order', self.doc.name)
+						'Material Request - Purchase Order', self.name)
 					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
 					 	flt(curr_ref_qty.split('~~~')[0]), 0
 					
@@ -119,17 +119,17 @@ class PurchaseOrder(BuyingController):
 					"warehouse": d.warehouse,
 					"ordered_qty": (is_submit and 1 or -1) * flt(po_qty),
 					"indented_qty": (is_submit and 1 or -1) * flt(ind_qty),
-					"posting_date": self.doc.transaction_date
+					"posting_date": self.transaction_date
 				}
 				update_bin(args)
 				
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s", 
-			self.doc.name)
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
+			self.name)
+		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
 		
 		if date_diff and date_diff[0][0]:
-			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
+			msgprint(cstr(self.doctype) +" => "+ cstr(self.name) +" has been modified. Please Refresh. ")
 			raise Exception
 
 	def update_status(self, status):
@@ -141,7 +141,7 @@ class PurchaseOrder(BuyingController):
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
 
 		# step 3:=> Acknowledge user
-		msgprint(self.doc.doctype + ": " + self.doc.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
+		msgprint(self.doctype + ": " + self.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
 
 	def on_submit(self):
 		purchase_controller = frappe.get_obj("Purchase Common")
@@ -149,8 +149,8 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 		self.update_bin(is_submit = 1, is_stopped = 0)
 		
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
-			self.doc.company, self.doc.grand_total)
+		get_obj('Authorization Control').validate_approving_authority(self.doctype, 
+			self.company, self.grand_total)
 		
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 		
@@ -161,13 +161,13 @@ class PurchaseOrder(BuyingController):
 		self.check_for_stopped_status(pc_obj)
 		
 		# Check if Purchase Receipt has been submitted against current Purchase Order
-		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.doc.name, detail_doctype = 'Purchase Receipt Item')
+		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')
 
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name 
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2 
 			where t1.name = t2.parent and t2.purchase_order = %s and t1.docstatus = 1""",  
-			self.doc.name)
+			self.name)
 		if submitted:
 			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
 			raise Exception

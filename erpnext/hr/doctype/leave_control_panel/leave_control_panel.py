@@ -20,7 +20,7 @@ class LeaveControlPanel(Document):
 	
 
 	def get_employees(self):		
-		lst1 = [[self.doc.employee_type,"employment_type"],[self.doc.branch,"branch"],[self.doc.designation,"designation"],[self.doc.department, "department"],[self.doc.grade,"grade"]]
+		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"],[self.grade,"grade"]]
 		condition = "where "
 		flag = 0
 		for l in lst1:
@@ -54,11 +54,11 @@ class LeaveControlPanel(Document):
 				la.set("__islocal", 1)
 				la.employee = cstr(d[0])
 				la.employee_name = frappe.db.get_value('Employee',cstr(d[0]),'employee_name')
-				la.leave_type = self.doc.leave_type
-				la.fiscal_year = self.doc.fiscal_year
+				la.leave_type = self.leave_type
+				la.fiscal_year = self.fiscal_year
 				la.posting_date = nowdate()
-				la.carry_forward = cint(self.doc.carry_forward)
-				la.new_leaves_allocated = flt(self.doc.no_of_days)
+				la.carry_forward = cint(self.carry_forward)
+				la.new_leaves_allocated = flt(self.no_of_days)
 				la.docstatus = 1
 				la.save()
 				leave_allocated_for.append(d[0])

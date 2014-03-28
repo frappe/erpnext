@@ -14,24 +14,24 @@ class TestJournalVoucher(unittest.TestCase):
 		jv_invoice.submit()
 		
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s""", jv_invoice.doc.name))
+			where against_jv=%s""", jv_invoice.name))
 		
 		jv_payment = frappe.bean(copy=test_records[0])
-		jv_payment.doclist[1].against_jv = jv_invoice.doc.name
+		jv_payment.doclist[1].against_jv = jv_invoice.name
 		jv_payment.insert()
 		jv_payment.submit()
 		
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s""", jv_invoice.doc.name))
+			where against_jv=%s""", jv_invoice.name))
 			
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s and credit=400""", jv_invoice.doc.name))
+			where against_jv=%s and credit=400""", jv_invoice.name))
 		
 		# cancel jv_invoice
 		jv_invoice.cancel()
 		
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s""", jv_invoice.doc.name))
+			where against_jv=%s""", jv_invoice.name))
 	
 	def test_jv_against_stock_account(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
@@ -58,7 +58,7 @@ class TestJournalVoucher(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 		self.assertTrue(frappe.db.get_value("GL Entry", 
-			{"voucher_type": "Journal Voucher", "voucher_no": jv.doc.name}))
+			{"voucher_type": "Journal Voucher", "voucher_no": jv.name}))
 			
 	def test_monthly_budget_crossed_stop(self):
 		from erpnext.accounts.utils import BudgetError
@@ -84,7 +84,7 @@ class TestJournalVoucher(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
 		
 		jv = frappe.bean(copy=test_records[0])
-		jv.doc.posting_date = "2013-08-12"
+		jv.posting_date = "2013-08-12"
 		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
 		jv.doclist[2].debit = 150000.0
@@ -108,7 +108,7 @@ class TestJournalVoucher(unittest.TestCase):
 		jv.submit()
 		
 		self.assertTrue(frappe.db.get_value("GL Entry", 
-			{"voucher_type": "Journal Voucher", "voucher_no": jv.doc.name}))
+			{"voucher_type": "Journal Voucher", "voucher_no": jv.name}))
 		
 		jv1 = frappe.bean(copy=test_records[0])
 		jv1.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
@@ -118,7 +118,7 @@ class TestJournalVoucher(unittest.TestCase):
 		jv1.submit()
 		
 		self.assertTrue(frappe.db.get_value("GL Entry", 
-			{"voucher_type": "Journal Voucher", "voucher_no": jv1.doc.name}))
+			{"voucher_type": "Journal Voucher", "voucher_no": jv1.name}))
 		
 		self.assertRaises(BudgetError, jv.cancel)
 		

@@ -28,7 +28,7 @@ class CForm(Document):
 					frappe.msgprint("C-form is not applicable for Invoice: %s" % 
 						d.invoice_no, raise_exception=1)
 					
-				elif inv[0][1] and inv[0][1] != self.doc.name:
+				elif inv[0][1] and inv[0][1] != self.name:
 					frappe.msgprint("""Invoice %s is tagged in another C-form: %s.
 						If you want to change C-form no for this invoice,
 						please remove invoice no from the previous c-form and then try again""" % 
@@ -44,19 +44,19 @@ class CForm(Document):
 	def before_cancel(self):
 		# remove cform reference
 		frappe.db.sql("""update `tabSales Invoice` set c_form_no=null
-			where c_form_no=%s""", self.doc.name)
+			where c_form_no=%s""", self.name)
 		
 	def set_cform_in_sales_invoices(self):
 		inv = [d.invoice_no for d in self.get('invoice_details')]
 		if inv:
 			frappe.db.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s 
 				where name in (%s)""" % ('%s', '%s', ', '.join(['%s'] * len(inv))), 
-				tuple([self.doc.name, self.doc.modified] + inv))
+				tuple([self.name, self.modified] + inv))
 				
 			frappe.db.sql("""update `tabSales Invoice` set c_form_no = null, modified = %s 
 				where name not in (%s) and ifnull(c_form_no, '') = %s""" % 
 				('%s', ', '.join(['%s']*len(inv)), '%s'),
-				tuple([self.doc.modified] + inv + [self.doc.name]))
+				tuple([self.modified] + inv + [self.name]))
 		else:
 			frappe.msgprint("Please enter atleast 1 invoice in the table", raise_exception=1)
 

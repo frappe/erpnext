@@ -18,11 +18,11 @@ class TestMaterialRequest(unittest.TestCase):
 		mr = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, 
-			mr.doc.name)
+			mr.name)
 
-		mr = frappe.bean("Material Request", mr.doc.name)
+		mr = frappe.bean("Material Request", mr.name)
 		mr.submit()
-		po = make_purchase_order(mr.doc.name)
+		po = make_purchase_order(mr.name)
 		
 		self.assertEquals(po[0]["doctype"], "Purchase Order")
 		self.assertEquals(len(po), len(mr.doclist))
@@ -33,11 +33,11 @@ class TestMaterialRequest(unittest.TestCase):
 		mr = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_supplier_quotation, 
-			mr.doc.name)
+			mr.name)
 
-		mr = frappe.bean("Material Request", mr.doc.name)
+		mr = frappe.bean("Material Request", mr.name)
 		mr.submit()
-		sq = make_supplier_quotation(mr.doc.name)
+		sq = make_supplier_quotation(mr.name)
 		
 		self.assertEquals(sq[0]["doctype"], "Supplier Quotation")
 		self.assertEquals(len(sq), len(mr.doclist))
@@ -49,12 +49,12 @@ class TestMaterialRequest(unittest.TestCase):
 		mr = frappe.bean(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, 
-			mr.doc.name)
+			mr.name)
 
-		mr = frappe.bean("Material Request", mr.doc.name)
-		mr.doc.material_request_type = "Transfer"
+		mr = frappe.bean("Material Request", mr.name)
+		mr.material_request_type = "Transfer"
 		mr.submit()
-		se = make_stock_entry(mr.doc.name)
+		se = make_stock_entry(mr.name)
 		
 		self.assertEquals(se[0]["doctype"], "Stock Entry")
 		self.assertEquals(len(se), len(mr.doclist))
@@ -62,7 +62,7 @@ class TestMaterialRequest(unittest.TestCase):
 	def _test_expected(self, doclist, expected_values):
 		for i, expected in enumerate(expected_values):
 			for fieldname, val in expected.items():
-				self.assertEquals(val, doclist[i].fields.get(fieldname))
+				self.assertEquals(val, doclist[i].get(fieldname))
 				
 	def _test_requested_qty(self, qty1, qty2):
 		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
@@ -123,7 +123,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 		# map a purchase order
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-		po_doclist = make_purchase_order(mr.doc.name)
+		po_doclist = make_purchase_order(mr.name)
 		po_doclist[0]["supplier"] = "_Test Supplier"
 		po_doclist[0]["transaction_date"] = "2013-07-07"
 		po_doclist[1]["qty"] = 27.0
@@ -161,7 +161,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 		# submit material request of type Purchase
 		mr = frappe.bean(copy=test_records[0])
-		mr.doc.material_request_type = "Transfer"
+		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
 
@@ -173,7 +173,7 @@ class TestMaterialRequest(unittest.TestCase):
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 				
 		# map a stock entry
-		se_doclist = make_stock_entry(mr.doc.name)
+		se_doclist = make_stock_entry(mr.name)
 		se_doclist[0].update({
 			"posting_date": "2013-03-01",
 			"posting_time": "01:00",
@@ -224,7 +224,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 		# submit material request of type Purchase
 		mr = frappe.bean(copy=test_records[0])
-		mr.doc.material_request_type = "Transfer"
+		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
 
@@ -236,7 +236,7 @@ class TestMaterialRequest(unittest.TestCase):
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
-		se_doclist = make_stock_entry(mr.doc.name)
+		se_doclist = make_stock_entry(mr.name)
 		se_doclist[0].update({
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00",
@@ -284,14 +284,14 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Purchase
 		mr = frappe.bean(copy=test_records[0])
-		mr.doc.material_request_type = "Transfer"
+		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
 
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		
-		se_doclist = make_stock_entry(mr.doc.name)
+		se_doclist = make_stock_entry(mr.name)
 		se_doclist[0].update({
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00",
@@ -318,7 +318,7 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
 		mr = frappe.bean(copy=test_records[0])
-		mr.doc.company = "_Test Company 1"
+		mr.company = "_Test Company 1"
 		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 
 test_dependencies = ["Currency Exchange"]

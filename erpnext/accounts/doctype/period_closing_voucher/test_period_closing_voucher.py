@@ -29,7 +29,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Period Closing Voucher' and voucher_no=%s
-			order by account asc, debit asc""", pcv.doc.name, as_dict=1)
+			order by account asc, debit asc""", pcv.name, as_dict=1)
 
 		self.assertTrue(gl_entries)
 		

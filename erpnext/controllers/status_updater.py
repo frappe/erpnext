@@ -25,27 +25,27 @@ status_map = {
 	],
 	"Opportunity": [
 		["Draft", None],
-		["Submitted", "eval:self.doc.docstatus==1"],
-		["Lost", "eval:self.doc.status=='Lost'"],
+		["Submitted", "eval:self.docstatus==1"],
+		["Lost", "eval:self.status=='Lost'"],
 		["Quotation", "has_quotation"],
 		["Replied", "communication_sent"],
-		["Cancelled", "eval:self.doc.docstatus==2"],
+		["Cancelled", "eval:self.docstatus==2"],
 		["Open", "communication_received"],
 	],
 	"Quotation": [
 		["Draft", None],
-		["Submitted", "eval:self.doc.docstatus==1"],
-		["Lost", "eval:self.doc.status=='Lost'"],
+		["Submitted", "eval:self.docstatus==1"],
+		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
 		["Replied", "communication_sent"],
-		["Cancelled", "eval:self.doc.docstatus==2"],
+		["Cancelled", "eval:self.docstatus==2"],
 		["Open", "communication_received"],
 	],
 	"Sales Order": [
 		["Draft", None],
-		["Submitted", "eval:self.doc.docstatus==1"],
-		["Stopped", "eval:self.doc.status=='Stopped'"],
-		["Cancelled", "eval:self.doc.docstatus==2"],
+		["Submitted", "eval:self.docstatus==1"],
+		["Stopped", "eval:self.status=='Stopped'"],
+		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Support Ticket": [
 		["Replied", "communication_sent"],
@@ -66,26 +66,26 @@ class StatusUpdater(DocListController):
 		self.validate_qty()
 	
 	def set_status(self, update=False):
-		if self.doc.get("__islocal"):
+		if self.get("__islocal"):
 			return
 			
-		if self.doc.doctype in status_map:
-			sl = status_map[self.doc.doctype][:]
+		if self.doctype in status_map:
+			sl = status_map[self.doctype][:]
 			sl.reverse()
 			for s in sl:
 				if not s[1]:
-					self.doc.status = s[0]
+					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
 					if eval(s[1][5:]):
-						self.doc.status = s[0]
+						self.status = s[0]
 						break
 				elif getattr(self, s[1])():
-					self.doc.status = s[0]
+					self.status = s[0]
 					break
 		
 			if update:
-				frappe.db.set_value(self.doc.doctype, self.doc.name, "status", self.doc.status)
+				frappe.db.set_value(self.doctype, self.name, "status", self.status)
 	
 	def on_communication(self):
 		self.communication_set = True
@@ -114,7 +114,7 @@ class StatusUpdater(DocListController):
 		for args in self.status_updater:
 			# get unique transactions to update
 			for d in self.doclist:
-				if d.doctype == args['source_dt'] and d.fields.get(args["join_field"]):
+				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.fields[args['join_field']]
 
 					# get all qty where qty > target_field
@@ -181,10 +181,10 @@ class StatusUpdater(DocListController):
 		"""
 		for args in self.status_updater:
 			# condition to include current record (if submit or no if cancel)
-			if self.doc.docstatus == 1:
-				args['cond'] = ' or parent="%s"' % self.doc.name.replace('"', '\"')
+			if self.docstatus == 1:
+				args['cond'] = ' or parent="%s"' % self.name.replace('"', '\"')
 			else:
-				args['cond'] = ' and parent!="%s"' % self.doc.name.replace('"', '\"')
+				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 			
 			args['modified_cond'] = ''
 			if change_modified:
@@ -194,7 +194,7 @@ class StatusUpdater(DocListController):
 			for d in self.doclist:
 				if d.doctype == args['source_dt']:
 					# updates qty in the child table
-					args['detail_id'] = d.fields.get(args['join_field'])
+					args['detail_id'] = d.get(args['join_field'])
 					
 					args['second_source_condition'] = ""
 					if args.get('second_source_dt') and args.get('second_source_field') \
@@ -212,7 +212,7 @@ class StatusUpdater(DocListController):
 							where name='%(detail_id)s'""" % args)
 		
 			# get unique transactions to update
-			for name in set([d.fields.get(args['percent_join_field']) for d in self.doclist 
+			for name in set([d.get(args['percent_join_field']) for d in self.doclist 
 					if d.doctype == args['source_dt']]):
 				if name:
 					args['name'] = name
@@ -241,9 +241,9 @@ class StatusUpdater(DocListController):
 			where docstatus=1 and net_total = 0""" % ref_dt)
 	
 		for item in self.get("entries"):
-			if item.fields.get(ref_fieldname) \
-				and item.fields.get(ref_fieldname) in all_zero_amount_refdoc \
-				and item.fields.get(ref_fieldname) not in zero_amount_refdoc:
+			if item.get(ref_fieldname) \
+				and item.get(ref_fieldname) in all_zero_amount_refdoc \
+				and item.get(ref_fieldname) not in zero_amount_refdoc:
 					zero_amount_refdoc.append(item.fields[ref_fieldname])
 		
 		if zero_amount_refdoc:
@@ -256,7 +256,7 @@ class StatusUpdater(DocListController):
 			
 			billed_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0)) 
 				from `tab%s Item` where %s=%s and docstatus=1""" % 
-				(self.doc.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
+				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 			
 			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
 				/ ref_doc_qty)*100

@@ -18,7 +18,7 @@ class NotificationControl(Document):
 		return v and v[0][0] or ''
 
 	def set_message(self, arg = ''):
-		fn = self.doc.select_transaction.lower().replace(' ', '_') + '_message'
-		frappe.db.set(self.doc, fn, self.doc.custom_message)
-		msgprint("Custom Message for %s updated!" % self.doc.select_transaction)
+		fn = self.select_transaction.lower().replace(' ', '_') + '_message'
+		frappe.db.set(self.doc, fn, self.custom_message)
+		msgprint("Custom Message for %s updated!" % self.select_transaction)
 

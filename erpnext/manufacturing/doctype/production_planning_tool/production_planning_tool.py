@@ -43,21 +43,21 @@ class ProductionPlanningTool(Document):
 		self.set('pp_details', [])
 		
 	def validate_company(self):
-		if not self.doc.company:
+		if not self.company:
 			frappe.throw(_("Please enter Company"))
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
 		so_filter = item_filter = ""
-		if self.doc.from_date:
-			so_filter += ' and so.transaction_date >= "' + self.doc.from_date + '"'
-		if self.doc.to_date:
-			so_filter += ' and so.transaction_date <= "' + self.doc.to_date + '"'
-		if self.doc.customer:
-			so_filter += ' and so.customer = "' + self.doc.customer + '"'
+		if self.from_date:
+			so_filter += ' and so.transaction_date >= "' + self.from_date + '"'
+		if self.to_date:
+			so_filter += ' and so.transaction_date <= "' + self.to_date + '"'
+		if self.customer:
+			so_filter += ' and so.customer = "' + self.customer + '"'
 			
-		if self.doc.fg_item:
-			item_filter += ' and item.name = "' + self.doc.fg_item + '"'
+		if self.fg_item:
+			item_filter += ' and item.name = "' + self.fg_item + '"'
 		
 		open_so = frappe.db.sql("""
 			select distinct so.name, so.transaction_date, so.customer, so.grand_total
@@ -74,7 +74,7 @@ class ProductionPlanningTool(Document):
 							and exists (select name from `tabItem` item where item.name=pi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 									or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)))
-			""" % ('%s', so_filter, item_filter, item_filter), self.doc.company, as_dict=1)
+			""" % ('%s', so_filter, item_filter, item_filter), self.company, as_dict=1)
 		
 		self.add_so_in_table(open_so)
 
@@ -85,7 +85,7 @@ class ProductionPlanningTool(Document):
 		so_list = [d.sales_order for d in self.get('pp_so_details')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = self.doc.append('pp_so_details', {})
+				pp_so = self.append('pp_so_details', {})
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
@@ -135,7 +135,7 @@ class ProductionPlanningTool(Document):
 		for p in items:
 			item_details = frappe.db.sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
-			pi = self.doc.append('pp_details', {})
+			pi = self.append('pp_details', {})
 			pi.sales_order				= p['parent']
 			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
@@ -200,7 +200,7 @@ class ProductionPlanningTool(Document):
 				"bom_no"			: d.bom_no,
 				"description"		: d.description,
 				"stock_uom"			: d.stock_uom,
-				"company"			: self.doc.company,
+				"company"			: self.company,
 				"wip_warehouse"		: "",
 				"fg_warehouse"		: d.warehouse,
 				"status"			: "Draft",
@@ -214,12 +214,12 @@ class ProductionPlanningTool(Document):
 		pro_list = []
 		for key in items:
 			pro = frappe.new_bean("Production Order")
-			pro.doc.fields.update(items[key])
+			pro.update(items[key])
 			
 			frappe.flags.mute_messages = True
 			try:
 				pro.insert()
-				pro_list.append(pro.doc.name)
+				pro_list.append(pro.name)
 			except OverProductionError, e:
 				pass
 				
@@ -244,7 +244,7 @@ class ProductionPlanningTool(Document):
 		
 		for bom, so_wise_qty in bom_dict.items():
 			bom_wise_item_details = {}
-			if self.doc.use_multi_level_bom:
+			if self.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
 				for d in frappe.db.sql("""select fb.item_code, 
 					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty, 
@@ -303,7 +303,7 @@ class ProductionPlanningTool(Document):
 			Requested qty should be shortage qty considering minimum order qty
 		"""
 		self.validate_data()
-		if not self.doc.purchase_request_for_warehouse:
+		if not self.purchase_request_for_warehouse:
 			frappe.throw(_("Please enter Warehouse for which Material Request will be raised"))
 			
 		bom_dict = self.get_distinct_items_and_boms()[0]		
@@ -372,7 +372,7 @@ class ProductionPlanningTool(Document):
 					"naming_series": "IDT",
 					"transaction_date": nowdate(),
 					"status": "Draft",
-					"company": self.doc.company,
+					"company": self.company,
 					"fiscal_year": fiscal_year,
 					"requested_by": frappe.session.user,
 					"material_request_type": "Purchase"
@@ -382,14 +382,14 @@ class ProductionPlanningTool(Document):
 						"doctype": "Material Request Item",
 						"__islocal": 1,
 						"item_code": item,
-						"item_name": item_wrapper.doc.item_name,
-						"description": item_wrapper.doc.description,
-						"uom": item_wrapper.doc.stock_uom,
-						"item_group": item_wrapper.doc.item_group,
-						"brand": item_wrapper.doc.brand,
+						"item_name": item_wrapper.item_name,
+						"description": item_wrapper.description,
+						"uom": item_wrapper.stock_uom,
+						"item_group": item_wrapper.item_group,
+						"brand": item_wrapper.brand,
 						"qty": requested_qty,
-						"schedule_date": add_days(nowdate(), cint(item_wrapper.doc.lead_time_days)),
-						"warehouse": self.doc.purchase_request_for_warehouse,
+						"schedule_date": add_days(nowdate(), cint(item_wrapper.lead_time_days)),
+						"warehouse": self.purchase_request_for_warehouse,
 						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
 					})
 

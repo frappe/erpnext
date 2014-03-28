@@ -128,11 +128,11 @@ class TestItem(unittest.TestCase):
 			
 	def test_recursion(self):
 		group_b = frappe.bean("Item Group", "_Test Item Group B")
-		group_b.doc.parent_item_group = "_Test Item Group B - 3"
+		group_b.parent_item_group = "_Test Item Group B - 3"
 		self.assertRaises(NestedSetRecursionError, group_b.save)
 		
 		# cleanup
-		group_b.doc.parent_item_group = "All Item Groups"
+		group_b.parent_item_group = "All Item Groups"
 		group_b.save()
 	
 	def test_rebuild_tree(self):
@@ -141,7 +141,7 @@ class TestItem(unittest.TestCase):
 		
 	def move_it_back(self):
 		group_b = frappe.bean("Item Group", "_Test Item Group B")
-		group_b.doc.parent_item_group = "All Item Groups"
+		group_b.parent_item_group = "All Item Groups"
 		group_b.save()
 		self.test_basic_tree()
 		
@@ -151,9 +151,9 @@ class TestItem(unittest.TestCase):
 		
 		# put B under C
 		group_b = frappe.bean("Item Group", "_Test Item Group B")
-		lft, rgt = group_b.doc.lft, group_b.doc.rgt
+		lft, rgt = group_b.lft, group_b.rgt
 		
-		group_b.doc.parent_item_group = "_Test Item Group C"
+		group_b.parent_item_group = "_Test Item Group C"
 		group_b.save()
 		self.test_basic_tree()
 		
@@ -170,7 +170,7 @@ class TestItem(unittest.TestCase):
 		
 	def test_move_group_into_root(self):
 		group_b = frappe.bean("Item Group", "_Test Item Group B")
-		group_b.doc.parent_item_group = ""
+		group_b.parent_item_group = ""
 		self.assertRaises(NestedSetMultipleRootsError, group_b.save)
 
 		# trick! works because it hasn't been rolled back :D
@@ -187,10 +187,10 @@ class TestItem(unittest.TestCase):
 		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
-		lft, rgt = group_b_3.doc.lft, group_b_3.doc.rgt
+		lft, rgt = group_b_3.lft, group_b_3.rgt
 		
 		# child of right sibling is moved into it
-		group_b_3.doc.parent_item_group = "_Test Item Group C"
+		group_b_3.parent_item_group = "_Test Item Group C"
 		group_b_3.save()
 		self.test_basic_tree()
 		
@@ -204,7 +204,7 @@ class TestItem(unittest.TestCase):
 		
 		# move it back
 		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
-		group_b_3.doc.parent_item_group = "_Test Item Group B"
+		group_b_3.parent_item_group = "_Test Item Group B"
 		group_b_3.save()
 		self.test_basic_tree()
 		
@@ -251,7 +251,7 @@ class TestItem(unittest.TestCase):
 			where parent_item_group='_Test Item Group C'"""):
 			
 			bean = frappe.bean("Item Group", name)
-			bean.doc.parent_item_group = "_Test Item Group B"
+			bean.parent_item_group = "_Test Item Group B"
 			bean.save()
 
 		self.test_basic_tree()
