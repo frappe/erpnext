@@ -218,7 +218,7 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 		})
 
 def set_missing_values(source, target_doc):
-	po = frappe.bean(target_doc)
+	po = frappe.get_doc(target_doc)
 	po.run_method("set_missing_values")
 	
 def update_item(obj, target, source_parent):
@@ -343,7 +343,7 @@ def make_stock_entry(source_name, target_doc=None):
 	
 	def set_missing_values(source, target):
 		target[0].purpose = "Material Transfer"
-		se = frappe.bean(target)
+		se = frappe.get_doc(target)
 		se.run_method("get_stock_and_rate")
 
 	doclist = get_mapped_doc("Material Request", source_name, {

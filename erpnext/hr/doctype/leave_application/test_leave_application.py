@@ -23,7 +23,7 @@ class TestLeaveApplication(unittest.TestCase):
 	def _add_employee_leave_approver(self, employee, leave_approver):
 		temp_session_user = frappe.session.user
 		frappe.set_user("Administrator")
-		employee = frappe.bean("Employee", employee)
+		employee = frappe.get_doc("Employee", employee)
 		employee.append("employee_leave_approvers", {
 			"doctype": "Employee Leave Approver",
 			"leave_approver": leave_approver
@@ -31,8 +31,8 @@ class TestLeaveApplication(unittest.TestCase):
 		employee.save()
 		frappe.set_user(temp_session_user)
 	
-	def get_application(self, doclist):
-		application = frappe.bean(copy=doclist)
+	def get_application(self, doc):
+		application = frappe.copy_doc(doc)
 		application.from_date = "2013-01-01"
 		application.to_date = "2013-01-05"
 		return application

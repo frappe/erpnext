@@ -34,7 +34,7 @@ class LandedCostWizard(Document):
 		total_amt = self.get_total_pr_amt(purchase_receipts)
 		
 		for pr in purchase_receipts:
-			pr_bean = frappe.bean('Purchase Receipt', pr)
+			pr_bean = frappe.get_doc('Purchase Receipt', pr)
 			pr_items = pr_bean.get("purchase_tax_details")
 			
 			for lc in self.get("landed_cost_details"):
@@ -76,7 +76,7 @@ class LandedCostWizard(Document):
 			
 	def cancel_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
-			pr_bean = frappe.bean("Purchase Receipt", pr)
+			pr_bean = frappe.get_doc("Purchase Receipt", pr)
 			
 			pr_bean.run_method("update_ordered_qty")
 			
@@ -87,7 +87,7 @@ class LandedCostWizard(Document):
 			
 	def submit_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
-			pr_bean = frappe.bean("Purchase Receipt", pr)
+			pr_bean = frappe.get_doc("Purchase Receipt", pr)
 			pr_bean.run_method("update_ordered_qty")
 			pr_bean.run_method("update_stock")
 			pr_bean.run_method("make_gl_entries")

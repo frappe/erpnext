@@ -44,7 +44,7 @@ class Task(Document):
 	def on_update(self):
 		"""update percent complete in project"""
 		if self.project:
-			project = frappe.bean("Project", self.project)
+			project = frappe.get_doc("Project", self.project)
 			project.run_method("update_percent_complete")
 
 @frappe.whitelist()

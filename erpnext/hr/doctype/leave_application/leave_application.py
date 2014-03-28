@@ -18,7 +18,7 @@ from frappe.model.controller import DocListController
 class LeaveApplication(DocListController):
 	def setup(self):
 		if frappe.db.exists(self.doctype, self.name):
-			self.previous_doc = frappe.doc(self.doctype, self.name)
+			self.previous_doc = frappe.get_doc(self.doctype, self.name)
 		else:
 			self.previous_doc = None
 		
@@ -147,7 +147,7 @@ class LeaveApplication(DocListController):
 				(self.leave_type, max_days))
 			
 	def validate_leave_approver(self):
-		employee = frappe.bean("Employee", self.employee)
+		employee = frappe.get_doc("Employee", self.employee)
 		leave_approvers = [l.leave_approver for l in 
 			employee.get("employee_leave_approvers")]
 			
@@ -166,7 +166,7 @@ class LeaveApplication(DocListController):
 				raise_exception=LeaveApproverIdentityError)
 			
 	def notify_employee(self, status):
-		employee = frappe.doc("Employee", self.employee)
+		employee = frappe.get_doc("Employee", self.employee)
 		if not employee.user_id:
 			return
 			
@@ -186,7 +186,7 @@ class LeaveApplication(DocListController):
 		})
 		
 	def notify_leave_approver(self):
-		employee = frappe.doc("Employee", self.employee)
+		employee = frappe.get_doc("Employee", self.employee)
 		
 		def _get_message(url=False):
 			name = self.name

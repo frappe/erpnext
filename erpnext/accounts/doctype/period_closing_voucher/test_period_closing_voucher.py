@@ -12,18 +12,18 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher import test_records as jv_records
-		jv = frappe.bean(copy=jv_records[2])
+		jv = frappe.get_doc(copy=jv_records[2])
 		jv.insert()
 		jv.submit()
 		
-		jv1 = frappe.bean(copy=jv_records[0])
+		jv1 = frappe.get_doc(copy=jv_records[0])
 		jv1.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv1.doclist[2].debit = 600.0
 		jv1.doclist[1].credit = 600.0
 		jv1.insert()
 		jv1.submit()
 		
-		pcv = frappe.bean(copy=test_record)
+		pcv = frappe.get_doc(copy=test_record)
 		pcv.insert()
 		pcv.submit()
 		

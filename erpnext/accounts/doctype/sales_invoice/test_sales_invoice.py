@@ -10,29 +10,29 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
-		w = frappe.bean(copy=test_records[0])
+		w = frappe.get_doc(copy=test_records[0])
 		w.is_pos = 0
 		w.insert()
 		w.submit()
 		return w
 		
 	def test_double_submission(self):
-		w = frappe.bean(copy=test_records[0])
+		w = frappe.get_doc(copy=test_records[0])
 		w.docstatus = '0'
 		w.insert()
 		
 		w2 = [d for d in w.doclist]
 		w.submit()
 		
-		w = frappe.bean(w2)
+		w = frappe.get_doc(w2)
 		self.assertRaises(DocstatusTransitionError, w.submit)
 		
 	def test_timestamp_change(self):
-		w = frappe.bean(copy=test_records[0])
+		w = frappe.get_doc(copy=test_records[0])
 		w.docstatus = '0'
 		w.insert()
 
-		w2 = frappe.bean([d.fields.copy() for d in w.doclist])
+		w2 = frappe.get_doc([d.fields.copy() for d in w.doclist])
 		
 		import time
 		time.sleep(1)
@@ -43,7 +43,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(TimestampMismatchError, w2.save)
 		
 	def test_sales_invoice_calculation_base_currency(self):
-		si = frappe.bean(copy=test_records[2])
+		si = frappe.get_doc(copy=test_records[2])
 		si.insert()
 		
 		expected_values = {
@@ -87,7 +87,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.grand_total_export, 1627.05)
 		
 	def test_sales_invoice_calculation_export_currency(self):
-		si = frappe.bean(copy=test_records[2])
+		si = frappe.get_doc(copy=test_records[2])
 		si.currency = "USD"
 		si.conversion_rate = 50
 		si.doclist[1].rate = 1
@@ -137,7 +137,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.grand_total_export, 32.54)
 
 	def test_sales_invoice_discount_amount(self):
-		si = frappe.bean(copy=test_records[3])
+		si = frappe.get_doc(copy=test_records[3])
 		si.discount_amount = 104.95
 		si.append("other_charges", {
 			"doctype": "Sales Taxes and Charges",
@@ -192,7 +192,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.grand_total_export, 1500)
 
 	def test_discount_amount_gl_entry(self):
-		si = frappe.bean(copy=test_records[3])
+		si = frappe.get_doc(copy=test_records[3])
 		si.discount_amount = 104.95
 		si.append("other_charges", {
 			"doctype": "Sales Taxes and Charges",
@@ -240,7 +240,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 
 	def test_inclusive_rate_validations(self):
-		si = frappe.bean(copy=test_records[2])
+		si = frappe.get_doc(copy=test_records[2])
 		for i, tax in enumerate(si.get("other_charges")):
 			tax.idx = i+1
 		
@@ -258,7 +258,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 	def test_sales_invoice_calculation_base_currency_with_tax_inclusive_price(self):
 		# prepare
-		si = frappe.bean(copy=test_records[3])
+		si = frappe.get_doc(copy=test_records[3])
 		si.insert()
 		
 		expected_values = {
@@ -303,7 +303,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
-		si = frappe.bean(copy=test_records[3])
+		si = frappe.get_doc(copy=test_records[3])
 		si.currency = "USD"
 		si.conversion_rate = 50
 		si.doclist[1].price_list_rate = 55.56
@@ -365,7 +365,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = frappe.bean(frappe.copy_doc(jv_test_records[0]))
+		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
 		jv.doclist[1].against_invoice = w.name
 		jv.insert()
 		jv.submit()
@@ -378,10 +378,10 @@ class TestSalesInvoice(unittest.TestCase):
 			561.8)
 			
 	def test_time_log_batch(self):
-		tlb = frappe.bean("Time Log Batch", "_T-Time Log Batch-00001")
+		tlb = frappe.get_doc("Time Log Batch", "_T-Time Log Batch-00001")
 		tlb.submit()
 		
-		si = frappe.bean(frappe.copy_doc(test_records[0]))
+		si = frappe.get_doc(frappe.copy_doc(test_records[0]))
 		si.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
 		si.insert()
 		si.submit()
@@ -403,7 +403,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_gl_entry_without_aii(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		si = frappe.bean(copy=test_records[1])
+		si = frappe.get_doc(copy=test_records[1])
 		si.insert()
 		si.submit()
 		
@@ -447,7 +447,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos[0]["cash_bank_account"] = "_Test Account Bank Account - _TC"
 		pos[0]["paid_amount"] = 600.0
 
-		si = frappe.bean(copy=pos)
+		si = frappe.get_doc(copy=pos)
 		si.insert()
 		si.submit()
 		
@@ -500,7 +500,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# insert purchase receipt
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
-		pr = frappe.bean(copy=pr_test_records[0])
+		pr = frappe.get_doc(copy=pr_test_records[0])
 		pr.naming_series = "_T-Purchase Receipt-"
 		pr.doclist[1].warehouse = "_Test Warehouse No Account - _TC"
 		pr.insert()
@@ -511,7 +511,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si_doclist[0]["posting_time"] = "12:05"
 		si_doclist[1]["warehouse"] = "_Test Warehouse No Account - _TC"
 
-		si = frappe.bean(copy=si_doclist)
+		si = frappe.get_doc(copy=si_doclist)
 		si.insert()
 		si.submit()
 		
@@ -553,7 +553,7 @@ class TestSalesInvoice(unittest.TestCase):
 				
 		si_copy = frappe.copy_doc(test_records[1])
 		si_copy[1]["item_code"] = None
-		si = frappe.bean(si_copy)		
+		si = frappe.get_doc(si_copy)		
 		si.insert()
 		si.submit()
 		
@@ -580,7 +580,7 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory()
 		si_copy = frappe.copy_doc(test_records[1])
 		si_copy[1]["item_code"] = "_Test Non Stock Item"
-		si = frappe.bean(si_copy)
+		si = frappe.get_doc(si_copy)
 		si.insert()
 		si.submit()
 		
@@ -605,7 +605,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def _insert_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
 			as pr_test_records
-		pr = frappe.bean(copy=pr_test_records[0])
+		pr = frappe.get_doc(copy=pr_test_records[0])
 		pr.naming_series = "_T-Purchase Receipt-"
 		pr.insert()
 		pr.submit()
@@ -613,7 +613,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def _insert_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records \
 			as dn_test_records
-		dn = frappe.bean(copy=dn_test_records[0])
+		dn = frappe.get_doc(copy=dn_test_records[0])
 		dn.naming_series = "_T-Delivery Note-"
 		dn.insert()
 		dn.submit()
@@ -624,18 +624,18 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as pos_setting_test_records
 		frappe.db.sql("""delete from `tabPOS Setting`""")
 		
-		ps = frappe.bean(copy=pos_setting_test_records[0])
+		ps = frappe.get_doc(copy=pos_setting_test_records[0])
 		ps.insert()
 		
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = frappe.bean(copy=jv_test_records[0])
+		jv = frappe.get_doc(copy=jv_test_records[0])
 		jv.insert()
 		jv.submit()
 		
-		si = frappe.bean(copy=test_records[0])
+		si = frappe.get_doc(copy=test_records[0])
 		si.append("advance_adjustment_details", {
 			"doctype": "Sales Invoice Advance",
 			"journal_voucher": jv.name,
@@ -665,7 +665,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
 		from erpnext.accounts.utils import get_fiscal_year
 		today = nowdate()
-		base_si = frappe.bean(copy=test_records[0])
+		base_si = frappe.get_doc(copy=test_records[0])
 		base_si.update({
 			"convert_into_recurring_invoice": 1,
 			"recurring_type": "Monthly",
@@ -678,13 +678,13 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		
 		# monthly
-		si1 = frappe.bean(copy=base_si.doclist)
+		si1 = frappe.get_doc(copy=base_si.doclist)
 		si1.insert()
 		si1.submit()
 		self._test_recurring_invoice(si1, True)
 		
 		# monthly without a first and last day period
-		si2 = frappe.bean(copy=base_si.doclist)
+		si2 = frappe.get_doc(copy=base_si.doclist)
 		si2.update({
 			"invoice_period_from_date": today,
 			"invoice_period_to_date": add_to_date(today, days=30)
@@ -694,7 +694,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si2, False)
 		
 		# quarterly
-		si3 = frappe.bean(copy=base_si.doclist)
+		si3 = frappe.get_doc(copy=base_si.doclist)
 		si3.update({
 			"recurring_type": "Quarterly",
 			"invoice_period_from_date": get_first_day(today),
@@ -705,7 +705,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si3, True)
 		
 		# quarterly without a first and last day period
-		si4 = frappe.bean(copy=base_si.doclist)
+		si4 = frappe.get_doc(copy=base_si.doclist)
 		si4.update({
 			"recurring_type": "Quarterly",
 			"invoice_period_from_date": today,
@@ -716,7 +716,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si4, False)
 		
 		# yearly
-		si5 = frappe.bean(copy=base_si.doclist)
+		si5 = frappe.get_doc(copy=base_si.doclist)
 		si5.update({
 			"recurring_type": "Yearly",
 			"invoice_period_from_date": get_first_day(today),
@@ -727,7 +727,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si5, True)
 		
 		# yearly without a first and last day period
-		si6 = frappe.bean(copy=base_si.doclist)
+		si6 = frappe.get_doc(copy=base_si.doclist)
 		si6.update({
 			"recurring_type": "Yearly",
 			"invoice_period_from_date": today,
@@ -738,7 +738,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self._test_recurring_invoice(si6, False)
 		
 		# change posting date but keep recuring day to be today
-		si7 = frappe.bean(copy=base_si.doclist)
+		si7 = frappe.get_doc(copy=base_si.doclist)
 		si7.update({
 			"posting_date": add_to_date(today, days=-1)
 		})
@@ -771,7 +771,7 @@ class TestSalesInvoice(unittest.TestCase):
 			
 			self.assertEquals(i+2, len(recurred_invoices))
 			
-			new_si = frappe.bean("Sales Invoice", recurred_invoices[0][0])
+			new_si = frappe.get_doc("Sales Invoice", recurred_invoices[0][0])
 			
 			for fieldname in ["convert_into_recurring_invoice", "recurring_type",
 				"repeat_on_day_of_month", "notification_email_address"]:
@@ -811,7 +811,7 @@ class TestSalesInvoice(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		si = frappe.bean(copy=test_records[0])
+		si = frappe.get_doc(copy=test_records[0])
 		si.update_stock = 1
 		si.doclist[1].item_code = "_Test Serialized Item With Series"
 		si.doclist[1].qty = 1
@@ -845,11 +845,11 @@ class TestSalesInvoice(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		sr = frappe.bean("Serial No", serial_nos[0])
+		sr = frappe.get_doc("Serial No", serial_nos[0])
 		sr.status = "Not Available"
 		sr.save()
 		
-		si = frappe.bean(copy=test_records[0])
+		si = frappe.get_doc(copy=test_records[0])
 		si.update_stock = 1
 		si.doclist[1].item_code = "_Test Serialized Item With Series"
 		si.doclist[1].qty = 1

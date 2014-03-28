@@ -19,7 +19,7 @@ def boot_session(bootinfo):
 		load_country_and_currency(bootinfo)
 		
 		import frappe.model.doctype
-		bootinfo['notification_settings'] = frappe.doc("Notification Control", 
+		bootinfo['notification_settings'] = frappe.get_doc("Notification Control", 
 			"Notification Control").get_values()
 				
 		# if no company, show a dialog box to create a new company
@@ -35,7 +35,7 @@ def boot_session(bootinfo):
 def load_country_and_currency(bootinfo):
 	if bootinfo.control_panel.country and \
 		frappe.db.exists("Country", bootinfo.control_panel.country):
-		bootinfo["docs"] += [frappe.doc("Country", bootinfo.control_panel.country)]
+		bootinfo["docs"] += [frappe.get_doc("Country", bootinfo.control_panel.country)]
 		
 	bootinfo["docs"] += frappe.db.sql("""select * from tabCurrency
 		where ifnull(enabled,0)=1""", as_dict=1, update={"doctype":":Currency"})

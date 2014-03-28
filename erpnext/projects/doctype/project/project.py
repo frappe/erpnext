@@ -47,7 +47,7 @@ class Project(Document):
 		for milestone in self.get("project_milestones"):
 			if milestone.milestone_date:
 				description = (milestone.milestone or "Milestone") + " for " + self.name
-				frappe.bean({
+				frappe.get_doc({
 					"doctype": "Event",
 					"owner": self.owner,
 					"subject": description,

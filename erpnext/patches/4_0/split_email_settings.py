@@ -8,13 +8,13 @@ def execute():
 	frappe.reload_doc("core", "doctype", "outgoing_email_settings")
 	frappe.reload_doc("support", "doctype", "support_email_settings")
 	
-	email_settings = frappe.bean("Email Settings")
+	email_settings = frappe.get_doc("Email Settings")
 	map_outgoing_email_settings(email_settings)
 	map_support_email_settings(email_settings)
 	frappe.delete_doc("Doctype", "Email Settings")
 	
 def map_outgoing_email_settings(email_settings):
-	outgoing_email_settings = frappe.bean("Outgoing Email Settings")
+	outgoing_email_settings = frappe.get_doc("Outgoing Email Settings")
 	for fieldname in (("outgoing_mail_server", "mail_server"), 
 		"use_ssl", "mail_port", "mail_login", "mail_password",
 		"always_use_login_id_as_sender",
@@ -30,7 +30,7 @@ def map_outgoing_email_settings(email_settings):
 	outgoing_email_settings.save()
 	
 def map_support_email_settings(email_settings):
-	support_email_settings = frappe.bean("Support Email Settings")
+	support_email_settings = frappe.get_doc("Support Email Settings")
 	
 	for fieldname in ("sync_support_mails", "support_email", 
 		("support_host", "mail_server"), 

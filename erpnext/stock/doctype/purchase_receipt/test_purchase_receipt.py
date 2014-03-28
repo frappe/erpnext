@@ -14,12 +14,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
-		pr = frappe.bean(copy=test_records[0]).insert()
+		pr = frappe.get_doc(copy=test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
 			pr.name)
 
-		pr = frappe.bean("Purchase Receipt", pr.name)
+		pr = frappe.get_doc("Purchase Receipt", pr.name)
 		pr.submit()
 		pi = make_purchase_invoice(pr.name)
 		
@@ -28,12 +28,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		# modify rate
 		pi[1]["rate"] = 200
-		self.assertRaises(frappe.ValidationError, frappe.bean(pi).submit)
+		self.assertRaises(frappe.ValidationError, frappe.get_doc(pi).submit)
 		
 	def test_purchase_receipt_no_gl_entry(self):
 		self._clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		pr = frappe.bean(copy=test_records[0])
+		pr = frappe.get_doc(copy=test_records[0])
 		pr.insert()
 		pr.submit()
 		
@@ -56,7 +56,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pr = frappe.bean(copy=test_records[0])
+		pr = frappe.get_doc(copy=test_records[0])
 		pr.insert()
 		pr.submit()
 		
@@ -90,7 +90,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 	def test_subcontracting(self):
-		pr = frappe.bean(copy=test_records[1])
+		pr = frappe.get_doc(copy=test_records[1])
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		
@@ -98,7 +98,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(len(pr.get("pr_raw_material_details")), 2)
 		
 	def test_serial_no_supplier(self):
-		pr = frappe.bean(copy=test_records[0])
+		pr = frappe.get_doc(copy=test_records[0])
 		pr.doclist[1].item_code = "_Test Serialized Item With Series"
 		pr.doclist[1].qty = 1
 		pr.doclist[1].received_qty = 1
@@ -123,7 +123,7 @@ def get_gl_entries(voucher_type, voucher_no):
 		order by account desc""", (voucher_type, voucher_no), as_dict=1)
 		
 def set_perpetual_inventory(enable=1):
-	accounts_settings = frappe.bean("Accounts Settings")
+	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = enable
 	accounts_settings.save()
 	

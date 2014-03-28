@@ -66,7 +66,7 @@ class SerialNo(StockController):
 		"""
 			Validate whether serial no is required for this item
 		"""
-		item = frappe.doc("Item", self.item_code)
+		item = frappe.get_doc("Item", self.item_code)
 		if item.has_serial_no!="Yes":
 			frappe.throw(_("Item must have 'Has Serial No' as 'Yes'") + ": " + self.item_code)
 			
@@ -223,7 +223,7 @@ def validate_serial_no(sle, item_det):
 			
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
-					sr = frappe.bean("Serial No", serial_no)
+					sr = frappe.get_doc("Serial No", serial_no)
 					
 					if sr.item_code!=sle.item_code:
 						frappe.throw(_("Serial No does not belong to Item") + 
@@ -263,7 +263,7 @@ def update_serial_nos(sle, item_det):
 		serial_nos = get_serial_nos(sle.serial_no)
 		for serial_no in serial_nos:
 			if frappe.db.exists("Serial No", serial_no):
-				sr = frappe.bean("Serial No", serial_no)
+				sr = frappe.get_doc("Serial No", serial_no)
 				sr.make_controller().via_stock_ledger = True
 				sr.warehouse = sle.warehouse if sle.actual_qty > 0 else None
 				sr.save()

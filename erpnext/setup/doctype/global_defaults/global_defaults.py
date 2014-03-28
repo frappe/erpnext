@@ -60,7 +60,7 @@ class GlobalDefaults(Document):
 					raise_exception=1)
 
 	def update_control_panel(self):
-		cp_bean = frappe.bean("Control Panel")
+		cp_bean = frappe.get_doc("Control Panel")
 		if self.country:
 			cp_bean.country = self.country
 		if self.time_zone:

@@ -289,7 +289,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	
 	def update_accounts(source, target):
-		si = frappe.bean(target)
+		si = frappe.get_doc(target)
 		si.is_pos = 0
 		si.run_method("onload_post_render")
 		

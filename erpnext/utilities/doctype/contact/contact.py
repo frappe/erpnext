@@ -56,7 +56,7 @@ class Contact(StatusUpdater):
 
 @frappe.whitelist()
 def get_contact_details(contact):
-	contact = frappe.doc("Contact", contact)
+	contact = frappe.get_doc("Contact", contact)
 	out = {
 		"contact_person": contact.get("name"),
 		"contact_display": " ".join(filter(None, 

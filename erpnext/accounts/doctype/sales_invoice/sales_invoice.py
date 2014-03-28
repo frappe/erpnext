@@ -156,7 +156,7 @@ class SalesInvoice(SellingController):
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
 			if d.time_log_batch:
-				tlb = frappe.bean("Time Log Batch", d.time_log_batch)
+				tlb = frappe.get_doc("Time Log Batch", d.time_log_batch)
 				tlb.sales_invoice = sales_invoice
 				tlb.update_after_submit()
 
@@ -672,7 +672,7 @@ def manage_recurring_invoices(next_date=None, commit=True):
 				where posting_date=%s and recurring_id=%s and docstatus=1""",
 				(next_date, recurring_id)):
 			try:
-				ref_wrapper = frappe.bean('Sales Invoice', ref_invoice)
+				ref_wrapper = frappe.get_doc('Sales Invoice', ref_invoice)
 				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
 				send_notification(new_invoice_wrapper)
 				if commit:
@@ -798,7 +798,7 @@ def make_delivery_note(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		bean = frappe.bean(target)
+		bean = frappe.get_doc(target)
 		bean.run_method("onload_post_render")
 		
 	def update_item(source_doc, target_doc, source_parent):

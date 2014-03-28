@@ -152,7 +152,7 @@ def get_item_details(item):
 
 @frappe.whitelist()
 def make_stock_entry(production_order_id, purpose):
-	production_order = frappe.bean("Production Order", production_order_id)
+	production_order = frappe.get_doc("Production Order", production_order_id)
 		
 	stock_entry = frappe.new_bean("Stock Entry")
 	stock_entry.purpose = purpose

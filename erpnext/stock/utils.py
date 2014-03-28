@@ -40,7 +40,7 @@ def get_latest_stock_balance():
 def get_bin(item_code, warehouse):
 	bin = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
-		bin_wrapper = frappe.bean([{
+		bin_wrapper = frappe.get_doc([{
 			"doctype": "Bin",
 			"item_code": item_code,
 			"warehouse": warehouse,
@@ -246,7 +246,7 @@ def create_material_request(material_requests):
 				}]
 			
 				for d in items:
-					item = frappe.doc("Item", d.item_code)
+					item = frappe.get_doc("Item", d.item_code)
 					mr.append({
 						"doctype": "Material Request Item",
 						"parenttype": "Material Request",
@@ -262,7 +262,7 @@ def create_material_request(material_requests):
 						"brand": item.brand,
 					})
 			
-				mr_bean = frappe.bean(mr)
+				mr_bean = frappe.get_doc(mr)
 				mr_bean.insert()
 				mr_bean.submit()
 				mr_list.append(mr_bean)

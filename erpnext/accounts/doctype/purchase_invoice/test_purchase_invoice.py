@@ -19,7 +19,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 		self.assertTrue(not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")))
 		
-		wrapper = frappe.bean(copy=test_records[0])
+		wrapper = frappe.get_doc(copy=test_records[0])
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -45,7 +45,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(1)
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pi = frappe.bean(copy=test_records[1])
+		pi = frappe.get_doc(copy=test_records[1])
 		pi.insert()
 		pi.submit()
 		
@@ -73,7 +73,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pi = frappe.bean(copy=test_records[1])
+		pi = frappe.get_doc(copy=test_records[1])
 		pi.doclist[1].item_code = "_Test Non Stock Item"
 		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
@@ -99,7 +99,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 			
 	def test_purchase_invoice_calculation(self):
-		wrapper = frappe.bean(copy=test_records[0])
+		wrapper = frappe.get_doc(copy=test_records[0])
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -132,7 +132,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 			
 	def test_purchase_invoice_with_subcontracted_item(self):
-		wrapper = frappe.bean(copy=test_records[0])
+		wrapper = frappe.get_doc(copy=test_records[0])
 		wrapper.doclist[1].item_code = "_Test FG Item"
 		wrapper.insert()
 		wrapper.load_from_db()
@@ -169,11 +169,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = frappe.bean(copy=jv_test_records[1])
+		jv = frappe.get_doc(copy=jv_test_records[1])
 		jv.insert()
 		jv.submit()
 		
-		pi = frappe.bean(copy=test_records[0])
+		pi = frappe.get_doc(copy=test_records[0])
 		pi.append("advance_allocation_details", {
 			"journal_voucher": jv.name,
 			"jv_detail_no": jv.doclist[1].name,

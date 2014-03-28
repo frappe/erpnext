@@ -9,7 +9,6 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 class Attendance(Document):
-	
 	def validate_duplicate_record(self):	 
 		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and att_date = %s 
 			and name != %s and docstatus = 1""", 

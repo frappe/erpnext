@@ -61,7 +61,7 @@ class Company(Document):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock", 
 					"group_or_ledger": "Group"})
 				if stock_group:
-					frappe.bean({
+					frappe.get_doc({
 						"doctype":"Warehouse",
 						"warehouse_name": whname,
 						"company": self.name,
@@ -73,7 +73,7 @@ class Company(Document):
 				not frappe.db.sql("select name from tabCompany where name!=%s", self.name):
 			import os
 			with open(os.path.join(os.path.dirname(__file__), "sample_home_page.html"), "r") as webfile:
-				webpage = frappe.bean({
+				webpage = frappe.get_doc({
 					"doctype": "Web Page",
 					"title": self.name + " Home",
 					"published": 1,
@@ -82,7 +82,7 @@ class Company(Document):
 				}).insert()
 			
 				# update in home page in settings
-				website_settings = frappe.bean("Website Settings", "Website Settings")
+				website_settings = frappe.get_doc("Website Settings", "Website Settings")
 				website_settings.home_page = webpage.name
 				website_settings.brand_html = self.name
 				website_settings.copyright = self.name
@@ -97,7 +97,7 @@ class Company(Document):
 					"url": "blog"
 				})
 				website_settings.save()
-				style_settings = frappe.bean("Style Settings", "Style Settings")
+				style_settings = frappe.get_doc("Style Settings", "Style Settings")
 				style_settings.top_bar_background = "F2F2F2"
 				style_settings.font_size = "15px"
 				style_settings.save()
@@ -111,11 +111,11 @@ class Company(Document):
 			frappe.db.set(self, "payables_group", "Accounts Payable - " + self.abbr)
 			
 	def import_chart_of_account(self):
-		chart = frappe.bean("Chart of Accounts", self.chart_of_accounts)
+		chart = frappe.get_doc("Chart of Accounts", self.chart_of_accounts)
 		chart.make_controller().create_accounts(self.name)
 
 	def add_acc(self,lst):
-		account = frappe.bean({
+		account = frappe.get_doc({
 			"doctype": "Account",
 			"freeze_account": "No",
 			"master_type": "",
@@ -163,7 +163,7 @@ class Company(Document):
 		]
 		for cc in cc_list:
 			cc.update({"doctype": "Cost Center"})
-			cc_bean = frappe.bean(cc)
+			cc_bean = frappe.get_doc(cc)
 			cc_bean.ignore_permissions = True
 		
 			if cc.get("cost_center_name") == self.name:

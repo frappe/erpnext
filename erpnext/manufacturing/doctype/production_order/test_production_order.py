@@ -17,22 +17,22 @@ class TestProductionOrder(unittest.TestCase):
 		frappe.db.sql("""delete from `tabBin`""")
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
-		pro_bean = frappe.bean(copy = test_records[0])
+		pro_bean = frappe.get_doc(copy = test_records[0])
 		pro_bean.insert()
 		pro_bean.submit()
 		
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
-		mr1 = frappe.bean(copy = se_test_records[0])
+		mr1 = frappe.get_doc(copy = se_test_records[0])
 		mr1.insert()
 		mr1.submit()
 		
-		mr2 = frappe.bean(copy = se_test_records[0])
+		mr2 = frappe.get_doc(copy = se_test_records[0])
 		mr2.doclist[1].item_code = "_Test Item Home Desktop 100"
 		mr2.insert()
 		mr2.submit()
 		
 		stock_entry = make_stock_entry(pro_bean.name, "Manufacture/Repack")
-		stock_entry = frappe.bean(stock_entry)
+		stock_entry = frappe.get_doc(stock_entry)
 		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.fg_completed_qty = 4
 		stock_entry.posting_date = "2013-05-12"
@@ -52,7 +52,7 @@ class TestProductionOrder(unittest.TestCase):
 		pro_order = self.test_planned_qty()
 		
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")
-		stock_entry = frappe.bean(stock_entry)
+		stock_entry = frappe.get_doc(stock_entry)
 		stock_entry.posting_date = "2013-05-12"
 		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.fg_completed_qty = 15

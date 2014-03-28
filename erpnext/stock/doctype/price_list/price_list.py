@@ -44,7 +44,7 @@ class PriceList(DocListController):
 
 	def on_trash(self):
 		def _update_default_price_list(module):
-			b = frappe.bean(module + " Settings")
+			b = frappe.get_doc(module + " Settings")
 			price_list_fieldname = module.lower() + "_price_list"
 
 			if self.name == b.fields[price_list_fieldname]:

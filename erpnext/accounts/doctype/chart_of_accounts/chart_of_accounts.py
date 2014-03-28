@@ -31,7 +31,7 @@ class ChartOfAccounts(Document):
 
 					child.update(account_properties.get(chart.get("name"), {}).get(account_name, {}))
 					
-					account = frappe.new_doc({
+					account = frappe.get_doc({
 						"doctype": "Account",
 						"account_name": account_name,
 						"company": company,

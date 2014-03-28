@@ -58,7 +58,7 @@ class MaintenanceSchedule(TransactionBase):
 				self.update_amc_date(serial_nos, d.end_date)
 
 			if d.sales_person not in email_map:
-				sp = frappe.bean("Sales Person", d.sales_person).make_controller()
+				sp = frappe.get_doc("Sales Person", d.sales_person).make_controller()
 				email_map[d.sales_person] = sp.get_email_id()
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from 
@@ -69,7 +69,7 @@ class MaintenanceSchedule(TransactionBase):
 				if email_map[d.sales_person]:
 					description = "Reference: %s, Item Code: %s and Customer: %s" % \
 						(self.name, d.item_code, self.customer)
-					frappe.bean({
+					frappe.get_doc({
 						"doctype": "Event",
 						"owner": email_map[d.sales_person] or self.owner,
 						"subject": description,
@@ -203,7 +203,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
-			serial_no_bean = frappe.bean("Serial No", serial_no)
+			serial_no_bean = frappe.get_doc("Serial No", serial_no)
 			serial_no_bean.amc_expiry_date = amc_expiry_date
 			serial_no_bean.save()
 

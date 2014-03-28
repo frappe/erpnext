@@ -365,7 +365,7 @@ class ProductionPlanningTool(Document):
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
-				item_wrapper = frappe.bean("Item", item)
+				item_wrapper = frappe.get_doc("Item", item)
 				pr_doc = frappe.get_doc({
 					"doctype": "Material Request",
 					"__islocal": 1,

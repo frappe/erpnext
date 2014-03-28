@@ -127,7 +127,7 @@ class TestItem(unittest.TestCase):
 		return get_no_of_children([item_group], 0)
 			
 	def test_recursion(self):
-		group_b = frappe.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
 		group_b.parent_item_group = "_Test Item Group B - 3"
 		self.assertRaises(NestedSetRecursionError, group_b.save)
 		
@@ -140,7 +140,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 		
 	def move_it_back(self):
-		group_b = frappe.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
 		group_b.parent_item_group = "All Item Groups"
 		group_b.save()
 		self.test_basic_tree()
@@ -150,7 +150,7 @@ class TestItem(unittest.TestCase):
 		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
 		# put B under C
-		group_b = frappe.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
 		lft, rgt = group_b.lft, group_b.rgt
 		
 		group_b.parent_item_group = "_Test Item Group C"
@@ -169,7 +169,7 @@ class TestItem(unittest.TestCase):
 		self.move_it_back()
 		
 	def test_move_group_into_root(self):
-		group_b = frappe.bean("Item Group", "_Test Item Group B")
+		group_b = frappe.get_doc("Item Group", "_Test Item Group B")
 		group_b.parent_item_group = ""
 		self.assertRaises(NestedSetMultipleRootsError, group_b.save)
 
@@ -186,7 +186,7 @@ class TestItem(unittest.TestCase):
 		# before move
 		old_lft, old_rgt = frappe.db.get_value("Item Group", "_Test Item Group C", ["lft", "rgt"])
 		
-		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
+		group_b_3 = frappe.get_doc("Item Group", "_Test Item Group B - 3")
 		lft, rgt = group_b_3.lft, group_b_3.rgt
 		
 		# child of right sibling is moved into it
@@ -203,7 +203,7 @@ class TestItem(unittest.TestCase):
 		self.assertEquals(new_rgt - old_rgt, rgt - lft + 1)
 		
 		# move it back
-		group_b_3 = frappe.bean("Item Group", "_Test Item Group B - 3")
+		group_b_3 = frappe.get_doc("Item Group", "_Test Item Group B - 3")
 		group_b_3.parent_item_group = "_Test Item Group B"
 		group_b_3.save()
 		self.test_basic_tree()
@@ -228,7 +228,7 @@ class TestItem(unittest.TestCase):
 			self.assertEquals(new_rgt, item_group.rgt - 2)
 		
 		# insert it back
-		frappe.bean(copy=test_records[6]).insert()
+		frappe.get_doc(copy=test_records[6]).insert()
 		
 		self.test_basic_tree()
 		
@@ -243,14 +243,14 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree(records=records_to_test)
 		
 		# insert Group B back
-		frappe.bean(copy=test_records[3]).insert()
+		frappe.get_doc(copy=test_records[3]).insert()
 		self.test_basic_tree()
 		
 		# move its children back
 		for name in frappe.db.sql_list("""select name from `tabItem Group`
 			where parent_item_group='_Test Item Group C'"""):
 			
-			bean = frappe.bean("Item Group", name)
+			bean = frappe.get_doc("Item Group", name)
 			bean.parent_item_group = "_Test Item Group B"
 			bean.save()
 
@@ -263,7 +263,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree(records=records_to_test)
 		
 		# insert Group B - 2back
-		frappe.bean(copy=test_records[5]).insert()
+		frappe.get_doc(copy=test_records[5]).insert()
 		self.test_basic_tree()
 		
 	def test_merge_leaf_into_group(self):

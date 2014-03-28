@@ -3,10 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-
-
 from frappe import msgprint
-
 from frappe.model.document import Document
 
 class ExpenseClaim(Document):

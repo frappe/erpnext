@@ -28,7 +28,7 @@ class Warehouse(Document):
 					{"account_type": "Warehouse", "company": self.company, 
 					"master_name": self.name}, ["name", "parent_account"])
 				if warehouse_account and warehouse_account[1] != self.create_account_under:
-					acc_bean = frappe.bean("Account", warehouse_account[0])
+					acc_bean = frappe.get_doc("Account", warehouse_account[0])
 					acc_bean.parent_account = self.create_account_under
 					acc_bean.save()
 				
@@ -43,7 +43,7 @@ class Warehouse(Document):
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
 					self.validate_parent_account()
-					ac_bean = frappe.bean({
+					ac_bean = frappe.get_doc({
 						"doctype": "Account",
 						'account_name': self.warehouse_name, 
 						'parent_account': self.create_account_under, 
