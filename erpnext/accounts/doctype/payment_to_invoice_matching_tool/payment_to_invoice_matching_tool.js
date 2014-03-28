@@ -1,9 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Booking Entry Id
-// --------------------
-
 cur_frm.add_fetch("account", "company", "company")
 
 cur_frm.cscript.onload_post_render = function(doc) {
@@ -25,26 +22,15 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	else {
 		return {
 			doctype: doc.voucher_type,
-			query: "accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.gl_entry_details",
+			query: "erpnext.accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.gl_entry_details",
 			filters: {
 				"dt": doc.voucher_type,
-				"acc": doc.account,
-				"account_type": doc.account_type 
+				"acc": doc.account
 			}
 		}		
 	}
 }
 
-cur_frm.cscript.voucher_no  =function(doc, cdt, cdn) {
+cur_frm.cscript.voucher_no  = function(doc, cdt, cdn) {
 	return get_server_fields('get_voucher_details', '', '', doc, cdt, cdn, 1)
-}
-
-cur_frm.cscript.account = function(doc, cdt, cdn) {
-	return frappe.call({
-		doc: this.frm.doc,
-		method: "set_account_type",
-		callback: function(r) {
-			if(!r.exc) refresh_field("account_type");
-		}
-	});
 }

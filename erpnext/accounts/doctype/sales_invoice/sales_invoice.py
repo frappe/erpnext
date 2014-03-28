@@ -8,7 +8,7 @@ import frappe.defaults
 from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
 	get_first_day, get_last_day
 
-from frappe.utils import comma_and, get_url
+from frappe.utils import comma_and
 from frappe.model.naming import make_autoname
 from frappe.model.bean import getlist
 from frappe.model.code import get_obj
@@ -459,7 +459,7 @@ class SalesInvoice(SellingController):
 		
 		self.make_sl_entries(sl_entries)
 		
-	def make_gl_entries(self, update_gl_entries_after=True):
+	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
 		
 		if gl_entries:
@@ -469,10 +469,13 @@ class SalesInvoice(SellingController):
 				and 'No' or 'Yes'
 			make_gl_entries(gl_entries, cancel=(self.doc.docstatus == 2), 
 				update_outstanding=update_outstanding, merge_entries=False)
-			
-			if update_gl_entries_after and cint(self.doc.update_stock) \
+
+			if repost_future_gle and cint(self.doc.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-					self.update_gl_entries_after()
+					items, warehouse_account = self.get_items_and_warehouse_accounts()
+					from controllers.stock_controller import update_gl_entries_after
+					update_gl_entries_after(self.doc.posting_date, self.doc.posting_time, 
+						warehouse_account, items)
 				
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries
@@ -738,8 +741,9 @@ def send_notification(new_rv):
 		
 def notify_errors(inv, customer, owner):
 	from frappe.utils.user import get_system_managers
+	recipients=get_system_managers()
 	
-	frappe.sendmail(recipients=get_system_managers() + [frappe.db.get_value("User", owner, "email")],
+	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
 		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
 		message = frappe.get_template("template/emails/recurring_invoice_failed.html").render({
 			"name": inv,
