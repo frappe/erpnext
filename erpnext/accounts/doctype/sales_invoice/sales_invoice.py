@@ -10,7 +10,7 @@ from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate,
 
 from frappe.utils import comma_and
 from frappe.model.naming import make_autoname
-from frappe.model.bean import getlist
+
 from frappe.model.code import get_obj
 from frappe import _, msgprint
 

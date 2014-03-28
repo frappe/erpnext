@@ -6,7 +6,7 @@ import frappe
 import frappe.defaults
 
 from frappe.utils import cstr, cint, flt, comma_or, nowdate
-from frappe.model.bean import getlist
+
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 from erpnext.stock.utils import get_incoming_rate

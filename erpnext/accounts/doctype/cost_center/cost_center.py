@@ -3,19 +3,17 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.bean import getlist
+
 from frappe import msgprint, _
 
 from frappe.utils.nestedset import DocTypeNestedSet
 
 class CostCenter(DocTypeNestedSet):
-
-		self.nsm_parent_field = 'parent_cost_center'
-				
+	nsm_parent_field = 'parent_cost_center'
+	
 	def autoname(self):
-		company_abbr = frappe.db.sql("select abbr from tabCompany where name=%s", 
-			self.company)[0][0]
-		self.name = self.cost_center_name.strip() + ' - ' + company_abbr
+		self.name = self.cost_center_name.strip() + ' - ' + \
+			frappe.get_value("Company", self.company, "abbr")
 		
 	def validate_mandatory(self):
 		if not self.group_or_ledger:
@@ -78,7 +76,7 @@ class CostCenter(DocTypeNestedSet):
 		new_cost_center = get_name_with_abbr(newdn, self.company)
 		
 		# Validate properties before merging
-		super(DocType, self).before_rename(olddn, new_cost_center, merge, "group_or_ledger")
+		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "group_or_ledger")
 		
 		return new_cost_center
 		
@@ -87,5 +85,5 @@ class CostCenter(DocTypeNestedSet):
 			frappe.db.set_value("Cost Center", newdn, "cost_center_name", 
 				" - ".join(newdn.split(" - ")[:-1]))
 		else:
-			super(DocType, self).after_rename(olddn, newdn, merge)
+			super(CostCenter, self).after_rename(olddn, newdn, merge)
 			

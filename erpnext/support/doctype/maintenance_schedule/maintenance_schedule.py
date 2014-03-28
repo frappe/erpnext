@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, cstr, getdate, cint
-from frappe.model.bean import getlist
+
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos

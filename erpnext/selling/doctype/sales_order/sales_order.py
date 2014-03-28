@@ -6,7 +6,7 @@ import frappe
 import frappe.utils
 
 from frappe.utils import cstr, flt, getdate
-from frappe.model.bean import getlist
+
 from frappe.model.code import get_obj
 from frappe import msgprint
 from frappe.model.mapper import get_mapped_doc

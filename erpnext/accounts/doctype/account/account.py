@@ -3,12 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe.utils import flt, fmt_money, cstr, cint
 from frappe import msgprint, throw, _
-
-get_value = frappe.db.get_value
-
 from frappe.model.document import Document
 
 class Account(Document):
@@ -19,10 +15,7 @@ class Account(Document):
 			frappe.db.get_value("Company", self.company, "abbr")
 
 	def get_address(self):
-		return {
-			'address': frappe.db.get_value(self.master_type, 
-				self.master_name, "address")
-		}
+		return {'address': frappe.db.get_value(self.master_type, self.master_name, "address")}
 		
 	def validate(self): 
 		self.validate_master_name()
@@ -32,24 +25,19 @@ class Account(Document):
 		self.validate_mandatory()
 		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
-	
-		if not self.parent_account:
-			self.parent_account = ''
 		
 	def validate_master_name(self):
-		"""Remind to add master name"""
 		if self.master_type in ('Customer', 'Supplier') or self.account_type == "Warehouse":
 			if not self.master_name:
 				msgprint(_("Please enter Master Name once the account is created."))
-			elif not frappe.db.exists(self.master_type or self.account_type, 
-					self.master_name):
+			elif not frappe.db.exists(self.master_type or self.account_type, self.master_name):
 				throw(_("Invalid Master Name"))
 			
 	def validate_parent(self):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.parent_account:
-			par = frappe.db.sql("""select name, group_or_ledger, report_type 
-				from tabAccount where name =%s""", self.parent_account, as_dict=1)
+			par = frappe.db.get_value("Account", self.parent_account, 
+				["name", "group_or_ledger", "report_type"], as_dict=1)
 			if not par:
 				throw(_("Parent account does not exists"))
 			elif par[0]["name"] == self.name:
@@ -63,14 +51,13 @@ class Account(Document):
 	def validate_duplicate_account(self):
 		if self.get('__islocal') or not self.name:
 			company_abbr = frappe.db.get_value("Company", self.company, "abbr")
-			if frappe.db.sql("""select name from tabAccount where name=%s""", 
-				(self.account_name + " - " + company_abbr)):
-					throw("{name}: {acc_name} {exist}, {rename}".format(**{
-						"name": _("Account Name"),
-						"acc_name": self.account_name,
-						"exist": _("already exists"),
-						"rename": _("please rename")
-					}))
+			if frappe.db.exists("Account", (self.account_name + " - " + company_abbr)):
+				throw("{name}: {acc_name} {exist}, {rename}".format(**{
+					"name": _("Account Name"),
+					"acc_name": self.account_name,
+					"exist": _("already exists"),
+					"rename": _("please rename")
+				}))
 				
 	def validate_root_details(self):
 		#does not exists parent

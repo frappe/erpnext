@@ -35,12 +35,12 @@ def _make_test_records(verbose):
 	]
 
 	for company, abbr in [["_Test Company", "_TC"], ["_Test Company 1", "_TC1"]]:
-		test_objects = make_test_objects("Account", [[{
+		test_objects = make_test_objects("Account", [{
 				"doctype": "Account",
 				"account_name": account_name,
 				"parent_account": parent_account + " - " + abbr,
 				"company": company,
 				"group_or_ledger": group_or_ledger
-			}] for account_name, parent_account, group_or_ledger in accounts])
+			} for account_name, parent_account, group_or_ledger in accounts])
 	
 	return test_objects

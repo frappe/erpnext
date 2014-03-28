@@ -7,7 +7,7 @@ import frappe, json
 from frappe.utils import nowdate, cstr
 from frappe.model.code import get_obj
 from frappe import msgprint, throw, _
-from frappe.model.bean import getlist
+
 
 from frappe.model.document import Document
 

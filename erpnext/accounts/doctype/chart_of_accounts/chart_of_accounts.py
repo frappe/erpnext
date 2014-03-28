@@ -5,25 +5,21 @@ from __future__ import unicode_literals
 import frappe, os, json
 from frappe.utils import cstr
 from unidecode import unidecode
-
-
 from frappe.model.document import Document
 
 class ChartOfAccounts(Document):
-		self.no_report_type = False
+	no_report_type = False
 		
 	def create_accounts(self, company):
 		chart = {}
-		with open(os.path.join(os.path.dirname(__file__), "charts", 
-			self.source_file), "r") as f:
+		with open(os.path.join(os.path.dirname(__file__), "charts", self.source_file), "r") as f:
 			chart = json.loads(f.read())
 			
-		from erpnext.accounts.doctype.chart_of_accounts.charts.account_properties \
-			import account_properties
+		from erpnext.accounts.doctype.chart_of_accounts.charts.account_properties import account_properties
 			
 		if chart:
 			accounts = []
-						
+			
 			def _import_accounts(children, parent):
 				for child in children:
 					account_name = child.get("name")
@@ -33,10 +29,9 @@ class ChartOfAccounts(Document):
 						count = accounts.count(account_name_in_db)
 						account_name = account_name + " " + cstr(count)
 
-					child.update(account_properties.get(chart.get("name"), {})\
-						.get(account_name, {}))
+					child.update(account_properties.get(chart.get("name"), {}).get(account_name, {}))
 					
-					account = frappe.bean({
+					account = frappe.new_doc({
 						"doctype": "Account",
 						"account_name": account_name,
 						"company": company,
@@ -63,5 +58,5 @@ class ChartOfAccounts(Document):
 			
 @frappe.whitelist()
 def get_charts_for_country(country):
-	return frappe.db.sql_list("select chart_name from `tabChart of Accounts` where country=%s", 
-		country)
+	return frappe.db.sql_list("""select chart_name from `tabChart of Accounts` 
+		where country=%s""", country)

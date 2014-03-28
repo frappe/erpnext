@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt, getdate
-from frappe.model.bean import getlist
+
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document

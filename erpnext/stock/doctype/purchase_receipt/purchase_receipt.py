@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt, cint
-from frappe.model.bean import getlist
+
 from frappe.model.code import get_obj
 from frappe import msgprint, _
 import frappe.defaults

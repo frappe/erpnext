@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.model.bean import getlist
+
 from frappe.utils import flt
 
 from frappe.utils.nestedset import DocTypeNestedSet

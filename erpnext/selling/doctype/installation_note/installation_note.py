@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, getdate
-from frappe.model.bean import getlist
+
 from frappe import msgprint
 from erpnext.stock.utils import get_valid_serial_nos	
 

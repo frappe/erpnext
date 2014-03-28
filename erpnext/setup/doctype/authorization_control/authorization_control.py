@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt, has_common, make_esc
-from frappe.model.bean import getlist
+
 from frappe import session, msgprint
 from erpnext.setup.utils import get_company_currency
 
