@@ -175,7 +175,7 @@ class TestStockReconciliation(unittest.TestCase):
 		frappe.db.sql("delete from `tabGL Entry`")
 						
 	def submit_stock_reconciliation(self, qty, rate, posting_date, posting_time):
-		stock_reco = frappe.bean([{
+		stock_reco = frappe.get_doc([{
 			"doctype": "Stock Reconciliation",
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -221,11 +221,11 @@ class TestStockReconciliation(unittest.TestCase):
 			}, 
 		]
 			
-		pr = frappe.bean(copy=stock_entry)
+		pr = frappe.get_doc(copy=stock_entry)
 		pr.insert()
 		pr.submit()
 		
-		pr1 = frappe.bean(copy=stock_entry)
+		pr1 = frappe.get_doc(copy=stock_entry)
 		pr1.posting_date = "2012-12-15"
 		pr1.posting_time = "02:00"
 		pr1.doclist[1].qty = 10
@@ -234,7 +234,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr1.insert()
 		pr1.submit()
 		
-		pr2 = frappe.bean(copy=stock_entry)
+		pr2 = frappe.get_doc(copy=stock_entry)
 		pr2.posting_date = "2012-12-25"
 		pr2.posting_time = "03:00"
 		pr2.purpose = "Material Issue"
@@ -246,7 +246,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr2.insert()
 		pr2.submit()
 		
-		pr3 = frappe.bean(copy=stock_entry)
+		pr3 = frappe.get_doc(copy=stock_entry)
 		pr3.posting_date = "2012-12-31"
 		pr3.posting_time = "08:00"
 		pr3.purpose = "Material Issue"
@@ -259,7 +259,7 @@ class TestStockReconciliation(unittest.TestCase):
 		pr3.submit()
 		
 		
-		pr4 = frappe.bean(copy=stock_entry)
+		pr4 = frappe.get_doc(copy=stock_entry)
 		pr4.posting_date = "2013-01-05"
 		pr4.fiscal_year = "_Test Fiscal Year 2013"
 		pr4.posting_time = "07:00"

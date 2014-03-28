@@ -57,7 +57,7 @@ class SupportTicket(TransactionBase):
 
 @frappe.whitelist()
 def set_status(name, status):
-	st = frappe.bean("Support Ticket", name)
+	st = frappe.get_doc("Support Ticket", name)
 	st.status = status
 	st.save()
 		

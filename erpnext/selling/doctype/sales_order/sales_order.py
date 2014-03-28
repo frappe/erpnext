@@ -150,11 +150,11 @@ class SalesOrder(SellingController):
 
 	def update_prevdoc_status(self, flag):				
 		for quotation in self.doclist.get_distinct_values("prevdoc_docname"):
-			bean = frappe.bean("Quotation", quotation)
+			bean = frappe.get_doc("Quotation", quotation)
 			if bean.docstatus==2:
 				frappe.throw(quotation + ": " + frappe._("Quotation is cancelled."))
 				
-			bean.get_controller().set_status(update=True)
+			bean.set_status(update=True)
 
 	def on_submit(self):
 		self.update_stock_ledger(update_stock = 1)
@@ -253,7 +253,7 @@ class SalesOrder(SellingController):
 		return "order" if self.docstatus==1 else None
 		
 def set_missing_values(source, target):
-	bean = frappe.bean(target)
+	bean = frappe.get_doc(target)
 	bean.run_method("onload_post_render")
 	
 @frappe.whitelist()
@@ -322,7 +322,7 @@ def make_delivery_note(source_name, target_doc=None):
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		bean = frappe.bean(target)
+		bean = frappe.get_doc(target)
 		bean.is_pos = 0
 		bean.run_method("onload_post_render")
 		

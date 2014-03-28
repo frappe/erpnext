@@ -101,7 +101,7 @@ class Employee(DocListController):
 			if not user_wrapper.user_image == self.image:
 				user_wrapper.user_image = self.image
 				try:
-					frappe.doc({
+					frappe.get_doc({
 						"doctype": "File Data",
 						"file_name": self.image,
 						"attached_to_doctype": "User",

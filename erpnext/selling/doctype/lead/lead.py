@@ -127,7 +127,7 @@ def get_lead_details(lead):
 	from erpnext.accounts.party import set_address_details
 	out = frappe._dict()
 	
-	lead_bean = frappe.bean("Lead", lead)
+	lead_bean = frappe.get_doc("Lead", lead)
 	lead = lead_bean.doc
 		
 	out.update({

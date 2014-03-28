@@ -337,7 +337,7 @@ class StockEntry(StockController):
 					self.production_order)
 		
 		if self.production_order:
-			pro_bean = frappe.bean("Production Order", self.production_order)
+			pro_bean = frappe.get_doc("Production Order", self.production_order)
 			_validate_production_order(pro_bean)
 			self.update_produced_qty(pro_bean)
 			if self.purpose == "Manufacture/Repack":
@@ -749,7 +749,7 @@ return_map = {
 
 @frappe.whitelist()
 def make_return_jv(stock_entry):
-	se = frappe.bean("Stock Entry", stock_entry)
+	se = frappe.get_doc("Stock Entry", stock_entry)
 	if not se.purpose in ["Sales Return", "Purchase Return"]:
 		return
 	
@@ -840,7 +840,7 @@ def make_return_jv_from_delivery_note(se, ref):
 	
 	for se_item in se.get("mtn_details"):
 		for sales_invoice in invoices_against_delivery:
-			si = frappe.bean("Sales Invoice", sales_invoice)
+			si = frappe.get_doc("Sales Invoice", sales_invoice)
 			
 			if se_item.item_code in packing_item_parent_map:
 				ref_item = si.doclist.get({"item_code": packing_item_parent_map[se_item.item_code]})
@@ -897,7 +897,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 	
 	for se_item in se.get("mtn_details"):
 		for purchase_invoice in invoice_against_receipt:
-			pi = frappe.bean("Purchase Invoice", purchase_invoice)
+			pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
 			ref_item = pi.doclist.get({"item_code": se_item.item_code})
 			
 			if not ref_item:

@@ -35,7 +35,7 @@ class SellingController(StockController):
 		if self.customer:
 			from erpnext.accounts.party import _get_party_details
 			self.update_if_missing(_get_party_details(self.customer,
-				ignore_permissions=self.bean.ignore_permissions))
+				ignore_permissions=self.ignore_permissions))
 		
 		elif self.lead:
 			from erpnext.selling.doctype.lead.lead import get_lead_details
@@ -47,7 +47,7 @@ class SellingController(StockController):
 										
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
-			shipping_rule = frappe.bean("Shipping Rule", self.shipping_rule)
+			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
 			value = self.net_total
 			
 			# TODO
@@ -274,7 +274,7 @@ class SellingController(StockController):
 			total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 			
 			outstanding_including_current = flt(total_outstanding) + flt(grand_total)
-			frappe.bean('Account', customer_account).run_method("check_credit_limit", 
+			frappe.get_doc('Account', customer_account).run_method("check_credit_limit", 
 				outstanding_including_current)
 				
 	def validate_max_discount(self):

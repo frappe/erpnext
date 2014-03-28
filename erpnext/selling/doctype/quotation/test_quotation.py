@@ -11,7 +11,7 @@ class TestQuotation(unittest.TestCase):
 	def test_make_sales_order(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		
-		quotation = frappe.bean(copy=test_records[0])
+		quotation = frappe.get_doc(copy=test_records[0])
 		quotation.insert()
 		
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
@@ -29,7 +29,7 @@ class TestQuotation(unittest.TestCase):
 		sales_order[0]["delivery_date"] = "2014-01-01"
 		sales_order[0]["naming_series"] = "_T-Quotation-"
 		sales_order[0]["transaction_date"] = "2013-05-12"
-		frappe.bean(sales_order).insert()
+		frappe.get_doc(sales_order).insert()
 
 
 test_records = [

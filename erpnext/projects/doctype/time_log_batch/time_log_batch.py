@@ -15,7 +15,7 @@ class TimeLogBatch(Document):
 		self.set_status()
 		self.total_hours = 0.0
 		for d in self.doclist.get({"doctype":"Time Log Batch Detail"}):
-			tl = frappe.doc("Time Log", d.time_log)
+			tl = frappe.get_doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)
 			self.validate_time_log_is_submitted(tl)
 			self.total_hours += float(tl.hours or 0.0)
@@ -54,7 +54,7 @@ class TimeLogBatch(Document):
 	def update_status(self, time_log_batch):
 		self.set_status()
 		for d in self.doclist.get({"doctype":"Time Log Batch Detail"}):
-			tl = frappe.bean("Time Log", d.time_log)
+			tl = frappe.get_doc("Time Log", d.time_log)
 			tl.time_log_batch = time_log_batch
 			tl.sales_invoice = self.sales_invoice
 			tl.update_after_submit()

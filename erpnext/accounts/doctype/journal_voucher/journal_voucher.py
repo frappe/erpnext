@@ -347,7 +347,7 @@ def get_default_bank_cash_account(company, voucher_type):
 @frappe.whitelist()
 def get_payment_entry_from_sales_invoice(sales_invoice):
 	from erpnext.accounts.utils import get_balance_on
-	si = frappe.bean("Sales Invoice", sales_invoice)
+	si = frappe.get_doc("Sales Invoice", sales_invoice)
 	jv = get_payment_entry(si.doc)
 	jv.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.fields
 
@@ -365,7 +365,7 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 @frappe.whitelist()
 def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	from erpnext.accounts.utils import get_balance_on
-	pi = frappe.bean("Purchase Invoice", purchase_invoice)
+	pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
 	jv = get_payment_entry(pi.doc)
 	jv.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.fields
 	

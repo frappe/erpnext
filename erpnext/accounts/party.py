@@ -25,7 +25,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
 		frappe.throw("Not Permitted", frappe.PermissionError)
 
-	party_bean = frappe.bean(party_type, party)
+	party_bean = frappe.get_doc(party_type, party)
 	party = party_bean.doc
 
 	set_address_details(out, party, party_type)
@@ -166,7 +166,7 @@ def create_party_account(party, party_type, company):
 			frappe.throw(_("Please enter Account Receivable/Payable group in company master"))
 		
 		# create
-		account = frappe.bean({
+		account = frappe.get_doc({
 			"doctype": "Account",
 			'account_name': party,
 			'parent_account': parent_account, 

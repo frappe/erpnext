@@ -34,7 +34,7 @@ class StockUomReplaceUtility(Document):
 			raise Exception
 			
 	def update_item_master(self):
-		item_bean = frappe.bean("Item", self.item_code)
+		item_bean = frappe.get_doc("Item", self.item_code)
 		item_bean.stock_uom = self.new_stock_uom
 		item_bean.save()
 		

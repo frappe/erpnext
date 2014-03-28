@@ -7,12 +7,12 @@ from erpnext.accounts.doctype.shipping_rule.shipping_rule import FromGreaterThan
 
 class TestShippingRule(unittest.TestCase):
 	def test_from_greater_than_to(self):
-		shipping_rule = frappe.bean(copy=test_records[0])
+		shipping_rule = frappe.get_doc(copy=test_records[0])
 		shipping_rule.doclist[1].from_value = 101
 		self.assertRaises(FromGreaterThanToError, shipping_rule.insert)
 		
 	def test_many_zero_to_values(self):
-		shipping_rule = frappe.bean(copy=test_records[0])
+		shipping_rule = frappe.get_doc(copy=test_records[0])
 		shipping_rule.doclist[1].to_value = 0
 		self.assertRaises(ManyBlankToValuesError, shipping_rule.insert)
 		
@@ -24,7 +24,7 @@ class TestShippingRule(unittest.TestCase):
 			((50, 150), (25, 175)),
 			((50, 150), (50, 150)),
 		]:
-			shipping_rule = frappe.bean(copy=test_records[0])
+			shipping_rule = frappe.get_doc(copy=test_records[0])
 			shipping_rule.doclist[1].from_value = range_a[0]
 			shipping_rule.doclist[1].to_value = range_a[1]
 			shipping_rule.doclist[2].from_value = range_b[0]

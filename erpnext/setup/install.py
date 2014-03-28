@@ -24,7 +24,7 @@ def import_country_and_currency():
 	for name in data:
 		country = frappe._dict(data[name])
 		if not frappe.db.exists("Country", name):
-			frappe.doc({
+			frappe.get_doc({
 				"doctype": "Country",
 				"country_name": name,
 				"code": country.code,
@@ -33,7 +33,7 @@ def import_country_and_currency():
 			}).insert()
 		
 		if country.currency and not frappe.db.exists("Currency", country.currency):
-			frappe.doc({
+			frappe.get_doc({
 				"doctype": "Currency",
 				"currency_name": country.currency,
 				"fraction": country.currency_fraction,
@@ -111,7 +111,7 @@ def import_defaults():
 	
 	from frappe.modules import scrub
 	for r in records:
-		bean = frappe.bean(r)
+		bean = frappe.get_doc(r)
 		
 		# ignore mandatory for root
 		parent_link_field = ("parent_" + scrub(bean.doctype))
@@ -122,7 +122,7 @@ def import_defaults():
 		
 def feature_setup():
 	"""save global defaults and features setup"""
-	bean = frappe.bean("Features Setup", "Features Setup")
+	bean = frappe.get_doc("Features Setup", "Features Setup")
 	bean.ignore_permissions = True
 
 	# store value as 1 for all these fields
@@ -142,7 +142,7 @@ def set_single_defaults():
 			where parent=%s""", dt, as_dict=True)
 		if default_values:
 			try:
-				b = frappe.bean(dt, dt)
+				b = frappe.get_doc(dt, dt)
 				for fieldname, value in default_values:
 					b.set(fieldname, value)
 				b.save()

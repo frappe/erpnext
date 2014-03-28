@@ -11,12 +11,12 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
-		sq = frappe.bean(copy=test_records[0]).insert()
+		sq = frappe.get_doc(copy=test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, 
 			sq.name)
 
-		sq = frappe.bean("Supplier Quotation", sq.name)
+		sq = frappe.get_doc("Supplier Quotation", sq.name)
 		sq.submit()
 		po = make_purchase_order(sq.name)
 		
@@ -29,7 +29,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			if doc.get("item_code"):
 				doc["schedule_date"] = "2013-04-12"
 
-		frappe.bean(po).insert()
+		frappe.get_doc(po).insert()
 		
 test_records = [
 	[

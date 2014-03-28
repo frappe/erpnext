@@ -77,7 +77,7 @@ def get_mapped_doc(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def postprocess(source, target):
-		sal_slip = frappe.bean(target)
+		sal_slip = frappe.get_doc(target)
 		sal_slip.run_method("pull_emp_details")
 		sal_slip.run_method("get_leave_details")
 		sal_slip.run_method("calculate_net_pay")

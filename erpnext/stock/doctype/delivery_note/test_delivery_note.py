@@ -13,7 +13,7 @@ def _insert_purchase_receipt(item_code=None):
 	if not item_code:
 		item_code = pr_test_records[0][1]["item_code"]
 	
-	pr = frappe.bean(copy=pr_test_records[0])
+	pr = frappe.get_doc(copy=pr_test_records[0])
 	pr.doclist[1].item_code = item_code
 	pr.insert()
 	pr.submit()
@@ -25,12 +25,12 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		_insert_purchase_receipt()
-		dn = frappe.bean(copy=test_records[0]).insert()
+		dn = frappe.get_doc(copy=test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
 			dn.name)
 
-		dn = frappe.bean("Delivery Note", dn.name)
+		dn = frappe.get_doc("Delivery Note", dn.name)
 		dn.submit()
 		si = make_sales_invoice(dn.name)
 		
@@ -38,7 +38,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		# modify amount
 		si[1]["rate"] = 200
-		self.assertRaises(frappe.ValidationError, frappe.bean(si).insert)
+		self.assertRaises(frappe.ValidationError, frappe.get_doc(si).insert)
 		
 	
 	def test_delivery_note_no_gl_entry(self):
@@ -48,7 +48,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		_insert_purchase_receipt()
 		
-		dn = frappe.bean(copy=test_records[0])
+		dn = frappe.get_doc(copy=test_records[0])
 		dn.insert()
 		dn.submit()
 		
@@ -68,7 +68,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		_insert_purchase_receipt()
 		
-		dn = frappe.bean(copy=test_records[0])
+		dn = frappe.get_doc(copy=test_records[0])
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
 		dn.doclist[1].cost_center = "Main - _TC"
 
@@ -95,7 +95,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(bal, prev_bal - 375.0)
 				
 		# back dated purchase receipt
-		pr = frappe.bean(copy=pr_test_records[0])
+		pr = frappe.get_doc(copy=pr_test_records[0])
 		pr.posting_date = "2013-01-01"
 		pr.doclist[1].rate = 100
 		pr.doclist[1].base_amount = 100
@@ -123,7 +123,7 @@ class TestDeliveryNote(unittest.TestCase):
 		_insert_purchase_receipt()
 		_insert_purchase_receipt("_Test Item Home Desktop 100")
 		
-		dn = frappe.bean(copy=test_records[0])
+		dn = frappe.get_doc(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Sales BOM Item"
 		dn.doclist[1].qty = 1
 	
@@ -162,7 +162,7 @@ class TestDeliveryNote(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		dn = frappe.bean(copy=test_records[0])
+		dn = frappe.get_doc(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Serialized Item With Series"
 		dn.doclist[1].qty = 1
 		dn.doclist[1].serial_no = serial_nos[0]
@@ -195,11 +195,11 @@ class TestDeliveryNote(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		sr = frappe.bean("Serial No", serial_nos[0])
+		sr = frappe.get_doc("Serial No", serial_nos[0])
 		sr.status = "Not Available"
 		sr.save()
 		
-		dn = frappe.bean(copy=test_records[0])
+		dn = frappe.get_doc(copy=test_records[0])
 		dn.doclist[1].item_code = "_Test Serialized Item With Series"
 		dn.doclist[1].qty = 1
 		dn.doclist[1].serial_no = serial_nos[0]

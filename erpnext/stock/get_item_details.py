@@ -47,7 +47,7 @@ def get_item_details(args):
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
 	
-	item_bean = frappe.bean("Item", args.item_code)
+	item_bean = frappe.get_doc("Item", args.item_code)
 	item = item_bean.doc
 
 	validate_item_details(args, item)

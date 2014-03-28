@@ -103,7 +103,7 @@ def add_ac(args=None):
 		args = frappe.local.form_dict
 		args.pop("cmd")
 		
-	ac = frappe.bean(args)
+	ac = frappe.get_doc(args)
 	ac.doctype = "Account"
 	ac.old_parent = ""
 	ac.freeze_account = "No"
@@ -116,7 +116,7 @@ def add_cc(args=None):
 		args = frappe.local.form_dict
 		args.pop("cmd")
 		
-	cc = frappe.bean(args)
+	cc = frappe.get_doc(args)
 	cc.doctype = "Cost Center"
 	cc.old_parent = ""
 	cc.insert()

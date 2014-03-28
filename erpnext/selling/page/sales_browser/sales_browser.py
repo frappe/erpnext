@@ -35,4 +35,4 @@ def add_node():
 	if ctype == "Sales Person":
 		doclist[0]["employee"] = frappe.form_dict.get('employee')
 		
-	frappe.bean(doclist).save()
+	frappe.get_doc(doclist).save()

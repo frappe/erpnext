@@ -118,7 +118,7 @@ class AccountsController(TransactionBase):
 			tax_doctype = self.meta.get_field(tax_parentfield).options
 			
 			from frappe.model import default_fields
-			tax_master = frappe.bean(tax_master_doctype, self.get(tax_master_field))
+			tax_master = frappe.get_doc(tax_master_doctype, self.get(tax_master_field))
 			
 			for i, tax in enumerate(tax_master.get(tax_parentfield)):
 				for fieldname in default_fields:

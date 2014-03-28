@@ -17,7 +17,7 @@ def execute():
 			else:
 				item_group = d.item_group
 				
-			frappe.bean([{
+			frappe.get_doc([{
 				"doctype": "Pricing Rule",
 				"apply_on": "Item Group",
 				"item_group": item_group,

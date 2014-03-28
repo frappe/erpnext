@@ -9,7 +9,7 @@ from frappe.core.doctype.communication.communication import _make
 
 class JobsMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.settings = args or frappe.doc("Jobs Email Settings", "Jobs Email Settings")
+		self.settings = args or frappe.get_doc("Jobs Email Settings", "Jobs Email Settings")
 		
 	def process_message(self, mail):
 		if mail.from_email == self.settings.email_id:
@@ -18,7 +18,7 @@ class JobsMailbox(POP3Mailbox):
 		name = frappe.db.get_value("Job Applicant", {"email_id": mail.from_email}, 
 			"name")
 		if name:
-			applicant = frappe.bean("Job Applicant", name)
+			applicant = frappe.get_doc("Job Applicant", name)
 			if applicant.status!="Rejected":
 				applicant.status = "Open"
 			applicant.ignore_permissions = True
@@ -26,7 +26,7 @@ class JobsMailbox(POP3Mailbox):
 		else:
 			name = (mail.from_real_name and (mail.from_real_name + " - ") or "") \
 				+ mail.from_email
-			applicant = frappe.bean({
+			applicant = frappe.get_doc({
 				"creation": mail.date,
 				"doctype":"Job Applicant",
 				"applicant_name": name,

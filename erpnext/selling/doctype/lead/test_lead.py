@@ -28,5 +28,5 @@ class TestLead(unittest.TestCase):
 		
 		customer[0]["company"] = "_Test Company"
 		customer[0]["customer_group"] = "_Test Customer Group"
-		frappe.bean(customer).insert()
+		frappe.get_doc(customer).insert()
 		

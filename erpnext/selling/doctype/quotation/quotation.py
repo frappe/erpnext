@@ -55,7 +55,7 @@ class Quotation(SellingController):
 
 	def update_opportunity(self):
 		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
-			frappe.bean("Opportunity", opportunity).get_controller().set_status(update=True)
+			frappe.get_doc("Opportunity", opportunity).set_status(update=True)
 	
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
@@ -108,7 +108,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			target[0].customer = customer.name
 			target[0].customer_name = customer.customer_name
 			
-		si = frappe.bean(target)
+		si = frappe.get_doc(target)
 		si.ignore_permissions = ignore_permissions
 		si.run_method("onload_post_render")
 			
@@ -147,7 +147,7 @@ def _make_customer(source_name, ignore_permissions=False):
 		if not customer_name:
 			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
-			customer = frappe.bean(customer_doclist)
+			customer = frappe.get_doc(customer_doclist)
 			customer.ignore_permissions = ignore_permissions
 			if quotation[1] == "Shopping Cart":
 				customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,

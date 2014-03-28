@@ -13,7 +13,7 @@ class TestCompany(unittest.TestCase):
 				print "Country: ", country
 				print "Chart Name: ", chart_name
 				
-				company_bean = frappe.bean({
+				company_bean = frappe.get_doc({
 					"doctype": "Company",
 					"company_name": "_Test Company 2",
 					"abbr": "_TC2",

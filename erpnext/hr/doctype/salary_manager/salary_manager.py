@@ -86,7 +86,7 @@ class SalaryManager(Document):
 			if not frappe.db.sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
 					""", (emp[0], self.month, self.fiscal_year, self.company)):
-				ss = frappe.bean({
+				ss = frappe.get_doc({
 					"doctype": "Salary Slip",
 					"fiscal_year": self.fiscal_year,
 					"employee": emp[0],

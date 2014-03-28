@@ -13,7 +13,7 @@ def import_charts():
 				chart = json.loads(f.read())
 				country = frappe.db.get_value("Country", {"code": fname.split("_", 1)[0]})
 				if country:
-					bean = frappe.bean({
+					bean = frappe.get_doc({
 						"doctype":"Chart of Accounts",
 						"chart_name": chart.get("name"),
 						"source_file": fname,

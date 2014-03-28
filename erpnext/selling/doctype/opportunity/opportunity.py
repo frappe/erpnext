@@ -109,7 +109,7 @@ class Opportunity(TransactionBase):
 
 	def on_submit(self):
 		if self.lead:
-			frappe.bean("Lead", self.lead).get_controller().set_status(update=True)
+			frappe.get_doc("Lead", self.lead).set_status(update=True)
 	
 	def on_cancel(self):
 		if self.has_quotation():
@@ -134,7 +134,7 @@ def make_quotation(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		quotation = frappe.bean(target)
+		quotation = frappe.get_doc(target)
 		quotation.run_method("onload_post_render")
 		quotation.run_method("calculate_taxes_and_totals")
 	

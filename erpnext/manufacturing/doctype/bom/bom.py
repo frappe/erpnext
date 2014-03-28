@@ -134,11 +134,11 @@ class Bom(Document):
 			})["rate"]
 		
 		if self.docstatus == 0:
-			frappe.bean(self.doclist).save()
+			frappe.get_doc(self.doclist).save()
 		elif self.docstatus == 1:
 			self.calculate_cost()
 			self.update_exploded_items()
-			frappe.bean(self.doclist).update_after_submit()
+			frappe.get_doc(self.doclist).update_after_submit()
 
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`

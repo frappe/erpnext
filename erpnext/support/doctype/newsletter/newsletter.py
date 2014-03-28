@@ -130,7 +130,7 @@ def create_lead(email_id):
 	if frappe.db.get_value("Lead", {"email_id": email_id}):
 		return
 	
-	lead = frappe.bean({
+	lead = frappe.get_doc({
 		"doctype": "Lead",
 		"email_id": email_id,
 		"lead_name": real_name or email_id,

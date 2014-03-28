@@ -13,7 +13,7 @@ test_dependencies = ["Warehouse"]
 class TestItem(unittest.TestCase):
 	def test_default_warehouse(self):
 		from erpnext.stock.doctype.item.item import WarehouseNotSet
-		item = frappe.bean(copy=test_records[0])
+		item = frappe.get_doc(copy=test_records[0])
 		item.is_stock_item = "Yes"
 		item.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)

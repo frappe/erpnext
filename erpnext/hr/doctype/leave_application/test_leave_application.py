@@ -23,7 +23,7 @@ class TestLeaveApplication(unittest.TestCase):
 	def _add_employee_leave_approver(self, employee, leave_approver):
 		temp_session_user = frappe.session.user
 		frappe.set_user("Administrator")
-		employee = frappe.bean("Employee", employee)
+		employee = frappe.get_doc("Employee", employee)
 		employee.append("employee_leave_approvers", {
 			"doctype": "Employee Leave Approver",
 			"leave_approver": leave_approver

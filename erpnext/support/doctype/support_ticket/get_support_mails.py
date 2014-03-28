@@ -10,7 +10,7 @@ from frappe.core.doctype.communication.communication import _make
 
 class SupportMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.email_settings = frappe.doc("Support Email Settings", "Support Email Settings")
+		self.email_settings = frappe.get_doc("Support Email Settings", "Support Email Settings")
 		self.settings = args or frappe._dict({
 			"use_ssl": self.email_settings.use_ssl,
 			"host": self.email_settings.mail_server,
@@ -58,12 +58,12 @@ def get_support_mails():
 		
 def add_support_communication(subject, content, sender, docname=None, mail=None):
 	if docname:
-		ticket = frappe.bean("Support Ticket", docname)
+		ticket = frappe.get_doc("Support Ticket", docname)
 		ticket.status = 'Open'
 		ticket.ignore_permissions = True
 		ticket.save()
 	else:
-		ticket = frappe.bean([decode_dict({
+		ticket = frappe.get_doc([decode_dict({
 			"doctype":"Support Ticket",
 			"description": content,
 			"subject": subject,
