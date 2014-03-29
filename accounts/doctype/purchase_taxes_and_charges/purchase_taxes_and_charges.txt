@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:04", 
   "docstatus": 0, 
-  "modified": "2013-07-10 14:54:18", 
+  "modified": "2014-03-29 15:54:52", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -123,7 +123,7 @@
  {
   "doctype": "DocField", 
   "fieldname": "row_id", 
-  "fieldtype": "Data", 
+  "fieldtype": "Int", 
   "hidden": 0, 
   "label": "Enter Row", 
   "oldfieldname": "row_id", 
