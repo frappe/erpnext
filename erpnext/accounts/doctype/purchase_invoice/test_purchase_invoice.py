@@ -19,7 +19,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 		self.assertTrue(not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")))
 		
-		wrapper = frappe.get_doc(copy=test_records[0])
+		wrapper = frappe.copy_doc(test_records[0])
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
@@ -45,7 +45,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(1)
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pi = frappe.get_doc(copy=test_records[1])
+		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
 		pi.submit()
 		
@@ -73,7 +73,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pi = frappe.get_doc(copy=test_records[1])
+		pi = frappe.copy_doc(test_records[1])
 		pi.doclist[1].item_code = "_Test Non Stock Item"
 		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
@@ -99,7 +99,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		set_perpetual_inventory(0)
 			
 	def test_purchase_invoice_calculation(self):
-		wrapper = frappe.get_doc(copy=test_records[0])
+		wrapper = frappe.copy_doc(test_records[0])
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -132,7 +132,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 			
 	def test_purchase_invoice_with_subcontracted_item(self):
-		wrapper = frappe.get_doc(copy=test_records[0])
+		wrapper = frappe.copy_doc(test_records[0])
 		wrapper.doclist[1].item_code = "_Test FG Item"
 		wrapper.insert()
 		wrapper.load_from_db()
@@ -169,11 +169,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
 			
-		jv = frappe.get_doc(copy=jv_test_records[1])
+		jv = frappe.copy_doc(jv_test_records[1])
 		jv.insert()
 		jv.submit()
 		
-		pi = frappe.get_doc(copy=test_records[0])
+		pi = frappe.copy_doc(test_records[0])
 		pi.append("advance_allocation_details", {
 			"journal_voucher": jv.name,
 			"jv_detail_no": jv.doclist[1].name,
@@ -198,212 +198,4 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_voucher=%s""", pi.name))
 	
-test_records = [
-	[
-		# parent
-		{
-			"doctype": "Purchase Invoice",
-			"naming_series": "BILL",
-			"supplier_name": "_Test Supplier",
-			"credit_to": "_Test Supplier - _TC",
-			"bill_no": "NA",
-			"posting_date": "2013-02-03",
-			"fiscal_year": "_Test Fiscal Year 2013",
-			"company": "_Test Company",
-			"currency": "INR",
-			"conversion_rate": 1,
-			"grand_total_import": 0, # for feed
-			"buying_price_list": "_Test Price List"
-		},
-		# items
-		{
-			"doctype": "Purchase Invoice Item",
-			"parentfield": "entries",
-			"item_code": "_Test Item Home Desktop 100",
-			"item_name": "_Test Item Home Desktop 100",
-			"qty": 10,
-			"rate": 50,
-			"amount": 500,
-			"base_rate": 50,
-			"base_amount": 500,
-			"uom": "_Test UOM",
-			"item_tax_rate": json.dumps({"_Test Account Excise Duty - _TC": 10}),
-			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"conversion_factor": 1.0,
-		
-		},
-		{
-			"doctype": "Purchase Invoice Item",
-			"parentfield": "entries",
-			"item_code": "_Test Item Home Desktop 200",
-			"item_name": "_Test Item Home Desktop 200",
-			"qty": 5,
-			"rate": 150,
-			"amount": 750,
-			"base_rate": 150,
-			"base_amount": 750,
-			"uom": "_Test UOM",
-			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"conversion_factor": 1.0,
-		},
-		# taxes
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "Actual",
-			"account_head": "_Test Account Shipping Charges - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Shipping Charges",
-			"category": "Valuation and Total",
-			"add_deduct_tax": "Add",
-			"rate": 100
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Net Total",
-			"account_head": "_Test Account Customs Duty - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Customs Duty",
-			"category": "Valuation",
-			"add_deduct_tax": "Add",
-			"rate": 10
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Net Total",
-			"account_head": "_Test Account Excise Duty - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Excise Duty",
-			"category": "Total",
-			"add_deduct_tax": "Add",
-			"rate": 12
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Previous Row Amount",
-			"account_head": "_Test Account Education Cess - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Education Cess",
-			"category": "Total",
-			"add_deduct_tax": "Add",
-			"rate": 2,
-			"row_id": 3
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Previous Row Amount",
-			"account_head": "_Test Account S&H Education Cess - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "S&H Education Cess",
-			"category": "Total",
-			"add_deduct_tax": "Add",
-			"rate": 1,
-			"row_id": 3
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Previous Row Total",
-			"account_head": "_Test Account CST - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "CST",
-			"category": "Total",
-			"add_deduct_tax": "Add",
-			"rate": 2,
-			"row_id": 5
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Net Total",
-			"account_head": "_Test Account VAT - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "VAT",
-			"category": "Total",
-			"add_deduct_tax": "Add",
-			"rate": 12.5
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "On Previous Row Total",
-			"account_head": "_Test Account Discount - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Discount",
-			"category": "Total",
-			"add_deduct_tax": "Deduct",
-			"rate": 10,
-			"row_id": 7
-		},
-	],
-	[
-		# parent
-		{
-			"doctype": "Purchase Invoice",
-			"naming_series": "_T-Purchase Invoice-",
-			"supplier_name": "_Test Supplier",
-			"credit_to": "_Test Supplier - _TC",
-			"bill_no": "NA",
-			"posting_date": "2013-02-03",
-			"fiscal_year": "_Test Fiscal Year 2013",
-			"company": "_Test Company",
-			"currency": "INR",
-			"conversion_rate": 1.0,
-			"grand_total_import": 0, # for feed
-			"buying_price_list": "_Test Price List"
-		},
-		# items
-		{
-			"doctype": "Purchase Invoice Item",
-			"parentfield": "entries",
-			"item_code": "_Test Item",
-			"item_name": "_Test Item",
-			"qty": 10.0,
-			"rate": 50.0,
-			"uom": "_Test UOM",
-			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"conversion_factor": 1.0,
-		},
-		# taxes
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "Actual",
-			"account_head": "_Test Account Shipping Charges - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Shipping Charges",
-			"category": "Valuation and Total",
-			"add_deduct_tax": "Add",
-			"rate": 100.0
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "Actual",
-			"account_head": "_Test Account VAT - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "VAT",
-			"category": "Total",
-			"add_deduct_tax": "Add",
-			"rate": 120.0
-		},
-		{
-			"doctype": "Purchase Taxes and Charges",
-			"parentfield": "other_charges",
-			"charge_type": "Actual",
-			"account_head": "_Test Account Customs Duty - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "Customs Duty",
-			"category": "Valuation",
-			"add_deduct_tax": "Add",
-			"rate": 150.0
-		},
-	]
-]
+test_records = frappe.get_test_records('Purchase Invoice')

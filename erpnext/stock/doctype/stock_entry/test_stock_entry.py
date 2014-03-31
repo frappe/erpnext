@@ -22,11 +22,11 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", True)
 
-		st1 = frappe.get_doc(copy=test_records[0])
+		st1 = frappe.copy_doc(test_records[0])
 		st1.insert()
 		st1.submit()
 
-		st2 = frappe.get_doc(copy=test_records[1])
+		st2 = frappe.copy_doc(test_records[1])
 		st2.insert()
 		st2.submit()
 				
@@ -45,7 +45,7 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		set_perpetual_inventory()
 
-		mr = frappe.get_doc(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.insert()
 		mr.submit()
 
@@ -77,7 +77,7 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		mi = frappe.get_doc(copy=test_records[1])
+		mi = frappe.copy_doc(test_records[1])
 		mi.insert()
 		mi.submit()
 
@@ -113,7 +113,7 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		mtn = frappe.get_doc(copy=test_records[2])
+		mtn = frappe.copy_doc(test_records[2])
 		mtn.insert()
 		mtn.submit()
 
@@ -149,7 +149,7 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		repack = frappe.get_doc(copy=test_records[3])
+		repack = frappe.copy_doc(test_records[3])
 		repack.insert()
 		repack.submit()
 
@@ -170,7 +170,7 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		repack = frappe.get_doc(copy=test_records[3])
+		repack = frappe.copy_doc(test_records[3])
 		repack.doclist[2].incoming_rate = 6000
 		repack.insert()
 		repack.submit()
@@ -218,11 +218,11 @@ class TestStockEntry(unittest.TestCase):
 
 	def _insert_material_receipt(self):
 		self._clear_stock_account_balance()
-		se1 = frappe.get_doc(copy=test_records[0])
+		se1 = frappe.copy_doc(test_records[0])
 		se1.insert()
 		se1.submit()
 
-		se2 = frappe.get_doc(copy=test_records[0])
+		se2 = frappe.copy_doc(test_records[0])
 		se2.doclist[1].item_code = "_Test Item Home Desktop 100"
 		se2.insert()
 		se2.submit()
@@ -240,11 +240,11 @@ class TestStockEntry(unittest.TestCase):
 			import test_records as sales_invoice_test_records
 
 		# invalid sales invoice as update stock not checked
-		si = frappe.get_doc(copy=sales_invoice_test_records[1])
+		si = frappe.copy_doc(sales_invoice_test_records[1])
 		si.insert()
 		si.submit()
 
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Sales Return"
 		se.sales_invoice_no = si.name
 		se.doclist[1].qty = returned_qty
@@ -257,7 +257,7 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_0 = self._get_actual_qty()
 
 		# insert a pos invoice with update stock
-		si = frappe.get_doc(copy=sales_invoice_test_records[1])
+		si = frappe.copy_doc(sales_invoice_test_records[1])
 		si.is_pos = si.update_stock = 1
 		si.doclist[1].warehouse = "_Test Warehouse - _TC"
 		si.doclist[1].item_code = item_code
@@ -271,7 +271,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
 
 		# check if item is validated
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Sales Return"
 		se.sales_invoice_no = si.name
 		se.posting_date = "2013-03-10"
@@ -284,7 +284,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(frappe.DoesNotExistError, se.insert)
 
 		# try again
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Sales Return"
 		se.posting_date = "2013-03-10"
 		se.fiscal_year = "_Test Fiscal Year 2013"
@@ -321,7 +321,7 @@ class TestStockEntry(unittest.TestCase):
 
 		actual_qty_0 = self._get_actual_qty()
 		# make a delivery note based on this invoice
-		dn = frappe.get_doc(copy=delivery_note_test_records[0])
+		dn = frappe.copy_doc(delivery_note_test_records[0])
 		dn.doclist[1].item_code = item_code
 		dn.insert()
 		dn.submit()
@@ -342,7 +342,7 @@ class TestStockEntry(unittest.TestCase):
 		si.submit()
 
 		# insert and submit stock entry for sales return
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Sales Return"
 		se.delivery_note_no = dn.name
 		se.posting_date = "2013-03-10"
@@ -410,7 +410,7 @@ class TestStockEntry(unittest.TestCase):
 
 		actual_qty_0 = self._get_actual_qty()
 
-		so = frappe.get_doc(copy=sales_order_test_records[0])
+		so = frappe.copy_doc(sales_order_test_records[0])
 		so.doclist[1].item_code = item_code
 		so.doclist[1].qty = 5.0
 		so.insert()
@@ -440,7 +440,7 @@ class TestStockEntry(unittest.TestCase):
 		si.submit()
 
 		# insert and submit stock entry for sales return
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Sales Return"
 		se.delivery_note_no = dn.name
 		se.posting_date = "2013-03-10"
@@ -466,7 +466,7 @@ class TestStockEntry(unittest.TestCase):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 		
 		# submit purchase receipt
-		pr = frappe.get_doc(copy=purchase_receipt_test_records[0])
+		pr = frappe.copy_doc(purchase_receipt_test_records[0])
 		pr.insert()
 		pr.submit()
 
@@ -492,7 +492,7 @@ class TestStockEntry(unittest.TestCase):
 		pi.submit()
 
 		# submit purchase return
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Purchase Return"
 		se.purchase_receipt_no = pr.name
 		se.posting_date = "2013-03-01"
@@ -518,7 +518,7 @@ class TestStockEntry(unittest.TestCase):
 		prev_se, pr_docname = self.test_purchase_receipt_return()
 
 		# submit purchase return - return another 6 qtys so that exception is raised
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Purchase Return"
 		se.purchase_receipt_no = pr_docname
 		se.posting_date = "2013-03-01"
@@ -559,7 +559,7 @@ class TestStockEntry(unittest.TestCase):
 			make_purchase_receipt, make_purchase_invoice
 
 		# submit purchase receipt
-		po = frappe.get_doc(copy=purchase_order_test_records[0])
+		po = frappe.copy_doc(purchase_order_test_records[0])
 		po.is_subcontracted = None
 		po.doclist[1].item_code = "_Test Item"
 		po.doclist[1].rate = 50
@@ -594,7 +594,7 @@ class TestStockEntry(unittest.TestCase):
 		pi.submit()
 
 		# submit purchase return
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Purchase Return"
 		se.purchase_receipt_no = pr.name
 		se.posting_date = "2013-03-01"
@@ -621,13 +621,13 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_default("company", "_Test Company")
 
 	def test_serial_no_not_reqd(self):
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.doclist[1].serial_no = "ABCD"
 		se.insert()
 		self.assertRaises(SerialNoNotRequiredError, se.submit)
 
 	def test_serial_no_reqd(self):
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 2
 		se.doclist[1].transfer_qty = 2
@@ -635,7 +635,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(SerialNoRequiredError, se.submit)
 
 	def test_serial_no_qty_more(self):
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 2
 		se.doclist[1].serial_no = "ABCD\nEFGH\nXYZ"
@@ -644,7 +644,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(SerialNoQtyError, se.submit)
 
 	def test_serial_no_qty_less(self):
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 2
 		se.doclist[1].serial_no = "ABCD"
@@ -654,7 +654,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_no_transfer_in(self):
 		self._clear_stock_account_balance()
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 2
 		se.doclist[1].serial_no = "ABCD\nEFGH"
@@ -670,7 +670,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_no_not_exists(self):
 		self._clear_stock_account_balance()
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Issue"
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 2
@@ -685,7 +685,7 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		self.test_serial_by_series()
 
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.doclist[1].item_code = "_Test Serialized Item With Series"
 		se.doclist[1].qty = 1
 		se.doclist[1].serial_no = "ABCD00001"
@@ -708,7 +708,7 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		self.test_serial_by_series()
 
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
 		se.doclist[1].item_code = "_Test Serialized Item"
 		se.doclist[1].qty = 1
@@ -724,7 +724,7 @@ class TestStockEntry(unittest.TestCase):
 		se = make_serialized_item()
 		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
 
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
 		se.doclist[1].item_code = "_Test Serialized Item With Series"
 		se.doclist[1].qty = 1
@@ -743,7 +743,7 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		make_serialized_item()
 
-		se = frappe.get_doc(copy=test_records[0])
+		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
 		se.doclist[1].item_code = "_Test Serialized Item With Series"
 		se.doclist[1].qty = 1
@@ -770,7 +770,7 @@ class TestStockEntry(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		st1 = frappe.get_doc(copy=test_records[0])
+		st1 = frappe.copy_doc(test_records[0])
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		self.assertRaises(InvalidWarehouseCompany, st1.submit)
@@ -789,13 +789,13 @@ class TestStockEntry(unittest.TestCase):
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
 		frappe.set_user("test@example.com")
-		st1 = frappe.get_doc(copy=test_records[0])
+		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		self.assertRaises(BeanPermissionError, st1.insert)
 
 		frappe.set_user("test2@example.com")
-		st1 = frappe.get_doc(copy=test_records[0])
+		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
@@ -811,18 +811,18 @@ class TestStockEntry(unittest.TestCase):
 		# test freeze_stocks_upto
 		date_newer_than_test_records = add_days(getdate(test_records[0][0]['posting_date']), 5)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", date_newer_than_test_records)
-		se = frappe.get_doc(copy=test_records[0]).insert()
+		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", '')
 
 		# test freeze_stocks_upto_days
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
-		se = frappe.get_doc(copy=test_records[0]).insert()
+		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 def make_serialized_item():
-	se = frappe.get_doc(copy=test_records[0])
+	se = frappe.copy_doc(test_records[0])
 	se.doclist[1].item_code = "_Test Serialized Item With Series"
 	se.doclist[1].qty = 2
 	se.doclist[1].transfer_qty = 2
@@ -830,116 +830,4 @@ def make_serialized_item():
 	se.submit()
 	return se
 
-test_records = [
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-01",
-			"posting_time": "17:14:24",
-			"purpose": "Material Receipt",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 50.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 50.0,
-			"uom": "_Test UOM",
-			"t_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-	],
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-25",
-			"posting_time": "17:15",
-			"purpose": "Material Issue",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 40.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 40.0,
-			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-	],
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-25",
-			"posting_time": "17:14:24",
-			"purpose": "Material Transfer",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 45.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 45.0,
-			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse - _TC",
-			"t_warehouse": "_Test Warehouse 1 - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		}
-	],
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-25",
-			"posting_time": "17:14:24",
-			"purpose": "Manufacture/Repack",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 50.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 50.0,
-			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item Home Desktop 100",
-			"parentfield": "mtn_details",
-			"incoming_rate": 5000,
-			"qty": 1,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 1,
-			"uom": "_Test UOM",
-			"t_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-	],
-]
+test_records = frappe.get_test_records('Stock Entry')

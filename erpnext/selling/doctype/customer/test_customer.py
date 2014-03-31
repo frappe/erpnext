@@ -49,29 +49,4 @@ class TestCustomer(unittest.TestCase):
 
 test_ignore = ["Price List"]
 			
-test_records = [
-	[{
-		"doctype": "Customer",
-		"customer_name": "_Test Customer",
-		"customer_type": "Individual",
-		"customer_group": "_Test Customer Group",
-		"territory": "_Test Territory",
-		"company": "_Test Company"
-	}],
-	[{
-		"doctype": "Customer",
-		"customer_name": "_Test Customer 1",
-		"customer_type": "Individual",
-		"customer_group": "_Test Customer Group",
-		"territory": "_Test Territory",
-		"company": "_Test Company"
-	}],
-	[{
-		"doctype": "Customer",
-		"customer_name": "_Test Customer 2",
-		"customer_type": "Individual",
-		"customer_group": "_Test Customer Group",
-		"territory": "_Test Territory",
-		"company": "_Test Company"
-	}]
-]
+test_records = frappe.get_test_records('Customer')

@@ -6,7 +6,6 @@ import frappe
 
 from frappe.utils import cstr
 from frappe import msgprint, throw, _
-import frappe.model.doctype
 
 from frappe.model.document import Document
 
@@ -96,7 +95,7 @@ class NamingSeries(Document):
 				where dt.name = df.dt and df.fieldname='naming_series' and dt.name != %s""",
 				self.select_doc_for_series)
 			))
-		sr = [[frappe.model.doctype.get_property(p, 'options', 'naming_series'), p] 
+		sr = [[frappe.get_meta(p).get_field("naming_series").options, p] 
 			for p in parent]
 		options = self.scrub_options_list(self.set_options.split("\n"))
 		for series in options:
@@ -120,9 +119,7 @@ class NamingSeries(Document):
 			throw('Special Characters except "-" and "/" not allowed in naming series')
 
 	def get_options(self, arg=''):
-		sr = frappe.model.doctype.get_property(self.select_doc_for_series, 
-			'options', 'naming_series')
-		return sr
+		return frappe.get_meta(self.select_doc_for_series).get_field("naming_series").options
 
 	def get_current(self, arg=None):
 		"""get series current"""
@@ -172,7 +169,6 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 				ifnull({fieldname}, '')=''""".format(doctype=doctype, fieldname=fieldname))
 
 def get_default_naming_series(doctype):
-	from frappe.model.doctype import get_property
-	naming_series = get_property(doctype, "options", "naming_series")
+	naming_series = frappe.model.get_meta(doctype).get_field("naming_series").options or ""
 	naming_series = naming_series.split("\n")
 	return naming_series[0] or naming_series[1]

@@ -6,7 +6,6 @@ import frappe
 
 from frappe.utils import cstr, flt
 
-from frappe.model.code import get_obj
 from frappe import msgprint
 
 	
@@ -36,7 +35,7 @@ class PurchaseOrder(BuyingController):
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
-		pc_obj = get_obj(dt='Purchase Common')
+		pc_obj = frappe.get_doc(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		self.check_for_stopped_status(pc_obj)
 
@@ -68,7 +67,7 @@ class PurchaseOrder(BuyingController):
 						d.prevdoc_detail_docname, "schedule_date")
 	
 	def get_last_purchase_rate(self):
-		get_obj('Purchase Common').get_last_purchase_rate(self)
+		frappe.get_doc('Purchase Common').get_last_purchase_rate(self)
 
 	# Check for Stopped status 
 	def check_for_stopped_status(self, pc_obj):
@@ -81,7 +80,7 @@ class PurchaseOrder(BuyingController):
 		
 	def update_bin(self, is_submit, is_stopped = 0):
 		from erpnext.stock.utils import update_bin
-		pc_obj = get_obj('Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 		for d in self.get('po_details'):
 			#1. Check if is_stock_item == 'Yes'
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
@@ -144,12 +143,12 @@ class PurchaseOrder(BuyingController):
 		msgprint(self.doctype + ": " + self.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
 
 	def on_submit(self):
-		purchase_controller = frappe.get_obj("Purchase Common")
+		purchase_controller = frappe.get_doc("Purchase Common")
 		
 		self.update_prevdoc_status()
 		self.update_bin(is_submit = 1, is_stopped = 0)
 		
-		get_obj('Authorization Control').validate_approving_authority(self.doctype, 
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, 
 			self.company, self.grand_total)
 		
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
@@ -157,7 +156,7 @@ class PurchaseOrder(BuyingController):
 		frappe.db.set(self,'status','Submitted')
 	 
 	def on_cancel(self):
-		pc_obj = get_obj(dt = 'Purchase Common')		
+		pc_obj = frappe.get_doc(dt = 'Purchase Common')		
 		self.check_for_stopped_status(pc_obj)
 		
 		# Check if Purchase Receipt has been submitted against current Purchase Order

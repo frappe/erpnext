@@ -29,19 +29,4 @@ class TestCompany(unittest.TestCase):
 				frappe.delete_doc("Company", "_Test Company 2")
 		
 
-test_records = [
-	[{
-		"doctype": "Company",
-		"company_name": "_Test Company",
-		"abbr": "_TC",
-		"default_currency": "INR",
-		"domain": "Manufacturing"
-	}],
-	[{
-		"doctype": "Company",
-		"company_name": "_Test Company 1",
-		"abbr": "_TC1",
-		"default_currency": "USD",
-		"domain": "Retail"
-	}],
-]
+test_records = frappe.get_test_records('Company')

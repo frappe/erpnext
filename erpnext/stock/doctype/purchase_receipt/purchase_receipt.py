@@ -6,7 +6,6 @@ import frappe
 
 from frappe.utils import cstr, flt, cint
 
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 import frappe.defaults
 from erpnext.stock.utils import update_bin
@@ -54,7 +53,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_challan_no()
 
-		pc_obj = get_obj(dt='Purchase Common')
+		pc_obj = frappe.get_doc(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		self.check_for_stopped_status(pc_obj)
 
@@ -223,10 +222,10 @@ class PurchaseReceipt(BuyingController):
 
 	# on submit
 	def on_submit(self):
-		purchase_controller = frappe.get_obj("Purchase Common")
+		purchase_controller = frappe.get_doc("Purchase Common")
 
 		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total)
 
 		# Set status as Submitted
 		frappe.db.set(self, 'status', 'Submitted')
@@ -255,7 +254,7 @@ class PurchaseReceipt(BuyingController):
 
 
 	def on_cancel(self):
-		pc_obj = get_obj('Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 
 		self.check_for_stopped_status(pc_obj)
 		# Check if Purchase Invoice has been submitted against current Purchase Order
@@ -285,7 +284,7 @@ class PurchaseReceipt(BuyingController):
 				d.current_stock = bin and flt(bin[0]['actual_qty']) or 0
 
 	def get_rate(self,arg):
-		return get_obj('Purchase Common').get_rate(arg,self)
+		return frappe.get_doc('Purchase Common').get_rate(arg,self)
 		
 	def get_gl_entries(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")

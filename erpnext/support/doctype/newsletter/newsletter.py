@@ -124,7 +124,7 @@ def get_lead_options():
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
 	from email.utils import parseaddr
-	from frappe.model.doc import get_default_naming_series
+	from frappe.model.naming import get_default_naming_series
 	real_name, email_id = parseaddr(email_id)
 	
 	if frappe.db.get_value("Lead", {"email_id": email_id}):

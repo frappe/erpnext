@@ -7,7 +7,6 @@ import frappe.utils
 
 from frappe.utils import cstr, flt, getdate
 
-from frappe.model.code import get_obj
 from frappe import msgprint
 from frappe.model.mapper import get_mapped_doc
 
@@ -161,7 +160,7 @@ class SalesOrder(SellingController):
 
 		self.check_credit(self.grand_total)
 		
-		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
 		
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')

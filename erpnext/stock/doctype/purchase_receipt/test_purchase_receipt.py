@@ -14,7 +14,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
-		pr = frappe.get_doc(copy=test_records[0]).insert()
+		pr = frappe.copy_doc(test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
 			pr.name)
@@ -33,7 +33,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def test_purchase_receipt_no_gl_entry(self):
 		self._clear_stock_account_balance()
 		set_perpetual_inventory(0)
-		pr = frappe.get_doc(copy=test_records[0])
+		pr = frappe.copy_doc(test_records[0])
 		pr.insert()
 		pr.submit()
 		
@@ -56,7 +56,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
-		pr = frappe.get_doc(copy=test_records[0])
+		pr = frappe.copy_doc(test_records[0])
 		pr.insert()
 		pr.submit()
 		
@@ -90,7 +90,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 	def test_subcontracting(self):
-		pr = frappe.get_doc(copy=test_records[1])
+		pr = frappe.copy_doc(test_records[1])
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 		
@@ -98,7 +98,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(len(pr.get("pr_raw_material_details")), 2)
 		
 	def test_serial_no_supplier(self):
-		pr = frappe.get_doc(copy=test_records[0])
+		pr = frappe.copy_doc(test_records[0])
 		pr.doclist[1].item_code = "_Test Serialized Item With Series"
 		pr.doclist[1].qty = 1
 		pr.doclist[1].received_qty = 1
@@ -130,119 +130,4 @@ def set_perpetual_inventory(enable=1):
 		
 test_dependencies = ["BOM"]
 
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"conversion_rate": 1.0, 
-			"currency": "INR", 
-			"doctype": "Purchase Receipt", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"posting_date": "2013-02-12", 
-			"posting_time": "15:33:30", 
-			"supplier": "_Test Supplier",
-			"net_total": 500.0, 
-			"grand_total": 720.0,
-			"naming_series": "_T-Purchase Receipt-",
-			"buying_price_list": "_Test Price List"
-		}, 
-		{
-			"conversion_factor": 1.0, 
-			"description": "_Test Item", 
-			"doctype": "Purchase Receipt Item", 
-			"item_code": "_Test Item", 
-			"item_name": "_Test Item", 
-			"parentfield": "purchase_receipt_details", 
-			"received_qty": 5.0,
-			"qty": 5.0,
-			"rejected_qty": 0.0,
-			"rate": 50.0,
-			"base_amount": 250.0,
-			"warehouse": "_Test Warehouse - _TC", 
-			"stock_uom": "Nos", 
-			"uom": "_Test UOM",
-		},
-		{
-			"conversion_factor": 1.0, 
-			"description": "_Test Item", 
-			"doctype": "Purchase Receipt Item", 
-			"item_code": "_Test Item", 
-			"item_name": "_Test Item", 
-			"parentfield": "purchase_receipt_details", 
-			"received_qty": 5.0,
-			"qty": 5.0,
-			"rejected_qty": 0.0,
-			"rate": 50.0,
-			"base_amount": 250.0,
-			"warehouse": "_Test Warehouse 1 - _TC", 
-			"stock_uom": "Nos", 
-			"uom": "_Test UOM",
-		},
-		{
-			"account_head": "_Test Account Shipping Charges - _TC", 
-			"add_deduct_tax": "Add", 
-			"category": "Valuation and Total", 
-			"charge_type": "Actual", 
-			"description": "Shipping Charges", 
-			"doctype": "Purchase Taxes and Charges", 
-			"parentfield": "other_charges",
-			"rate": 100.0,
-			"tax_amount": 100.0,
-		},
-		{
-			"account_head": "_Test Account VAT - _TC", 
-			"add_deduct_tax": "Add", 
-			"category": "Total", 
-			"charge_type": "Actual", 
-			"description": "VAT", 
-			"doctype": "Purchase Taxes and Charges", 
-			"parentfield": "other_charges",
-			"rate": 120.0,
-			"tax_amount": 120.0,
-		},
-		{
-			"account_head": "_Test Account Customs Duty - _TC", 
-			"add_deduct_tax": "Add", 
-			"category": "Valuation", 
-			"charge_type": "Actual", 
-			"description": "Customs Duty", 
-			"doctype": "Purchase Taxes and Charges", 
-			"parentfield": "other_charges",
-			"rate": 150.0,
-			"tax_amount": 150.0,
-		},
-	],
-	[
-		{
-			"company": "_Test Company", 
-			"conversion_rate": 1.0, 
-			"currency": "INR", 
-			"doctype": "Purchase Receipt", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"posting_date": "2013-02-12", 
-			"posting_time": "15:33:30", 
-			"is_subcontracted": "Yes",
-			"supplier_warehouse": "_Test Warehouse - _TC", 
-			"supplier": "_Test Supplier",
-			"net_total": 5000.0, 
-			"grand_total": 5000.0,
-			"buying_price_list": "_Test Price List"
-		}, 
-		{
-			"conversion_factor": 1.0, 
-			"description": "_Test FG Item", 
-			"doctype": "Purchase Receipt Item", 
-			"item_code": "_Test FG Item", 
-			"item_name": "_Test FG Item", 
-			"parentfield": "purchase_receipt_details", 
-			"received_qty": 10.0,
-			"qty": 10.0,
-			"rejected_qty": 0.0,
-			"rate": 500.0,
-			"base_amount": 5000.0,
-			"warehouse": "_Test Warehouse - _TC", 
-			"stock_uom": "Nos", 
-			"uom": "_Test UOM",
-		}
-	],
-]
+test_records = frappe.get_test_records('Purchase Receipt')

@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.code import get_obj
 
 from erpnext.controllers.buying_controller import BuyingController
 class SupplierQuotation(BuyingController):
@@ -48,7 +47,7 @@ class SupplierQuotation(BuyingController):
 
 			
 	def validate_common(self):
-		pc = get_obj('Purchase Common')
+		pc = frappe.get_doc('Purchase Common')
 		pc.validate_for_items(self)
 
 @frappe.whitelist()

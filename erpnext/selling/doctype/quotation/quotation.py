@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr
 
-from frappe.model.code import get_obj
 from frappe import _, msgprint
 
 from erpnext.controllers.selling_controller import SellingController
@@ -74,7 +73,7 @@ class Quotation(SellingController):
 		self.check_item_table()
 		
 		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
 			
 		#update enquiry status
 		self.update_opportunity()

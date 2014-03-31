@@ -7,74 +7,7 @@ import frappe
 from frappe.utils.nestedset import NestedSetRecursionError, NestedSetMultipleRootsError, \
 	NestedSetChildExistsError, NestedSetInvalidMergeError, rebuild_tree, get_ancestors_of
 
-test_records = [
-	[{
-		"doctype": "Item Group",
-		"item_group_name": "_Test Item Group",
-		"parent_item_group": "All Item Groups",
-		"is_group": "No"
-	}],
-	[{
-		"doctype": "Item Group",
-		"item_group_name": "_Test Item Group Desktops",
-		"parent_item_group": "All Item Groups",
-		"is_group": "No"
-	}],
-	[{
-		"doctype": "Item Group",
-		"item_group_name": "_Test Item Group A",
-		"parent_item_group": "All Item Groups",
-		"is_group": "Yes"
-	}],
-	[{
-		"doctype": "Item Group",
-		"item_group_name": "_Test Item Group B",
-		"parent_item_group": "All Item Groups",
-		"is_group": "Yes"
-	}],
-		[{
-			"doctype": "Item Group",
-			"item_group_name": "_Test Item Group B - 1",
-			"parent_item_group": "_Test Item Group B",
-			"is_group": "Yes"
-		}],
-		[{
-			"doctype": "Item Group",
-			"item_group_name": "_Test Item Group B - 2",
-			"parent_item_group": "_Test Item Group B",
-			"is_group": "Yes"
-		}],
-		[{
-			"doctype": "Item Group",
-			"item_group_name": "_Test Item Group B - 3",
-			"parent_item_group": "_Test Item Group B",
-			"is_group": "No"
-		}],
-	[{
-		"doctype": "Item Group",
-		"item_group_name": "_Test Item Group C",
-		"parent_item_group": "All Item Groups",
-		"is_group": "Yes"
-	}],
-		[{
-			"doctype": "Item Group",
-			"item_group_name": "_Test Item Group C - 1",
-			"parent_item_group": "_Test Item Group C",
-			"is_group": "Yes"
-		}],
-		[{
-			"doctype": "Item Group",
-			"item_group_name": "_Test Item Group C - 2",
-			"parent_item_group": "_Test Item Group C",
-			"is_group": "Yes"
-		}],
-	[{
-		"doctype": "Item Group",
-		"item_group_name": "_Test Item Group D",
-		"parent_item_group": "All Item Groups",
-		"is_group": "Yes"
-	}],
-]
+test_records = frappe.get_test_records('Item Group')
 
 class TestItem(unittest.TestCase):
 	def test_basic_tree(self, records=None):
@@ -228,7 +161,7 @@ class TestItem(unittest.TestCase):
 			self.assertEquals(new_rgt, item_group.rgt - 2)
 		
 		# insert it back
-		frappe.get_doc(copy=test_records[6]).insert()
+		frappe.copy_doc(test_records[6]).insert()
 		
 		self.test_basic_tree()
 		
@@ -243,7 +176,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree(records=records_to_test)
 		
 		# insert Group B back
-		frappe.get_doc(copy=test_records[3]).insert()
+		frappe.copy_doc(test_records[3]).insert()
 		self.test_basic_tree()
 		
 		# move its children back
@@ -263,7 +196,7 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree(records=records_to_test)
 		
 		# insert Group B - 2back
-		frappe.get_doc(copy=test_records[5]).insert()
+		frappe.copy_doc(test_records[5]).insert()
 		self.test_basic_tree()
 		
 	def test_merge_leaf_into_group(self):

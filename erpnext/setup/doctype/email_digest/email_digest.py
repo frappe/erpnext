@@ -471,12 +471,11 @@ class EmailDigest(DocListController):
 		self.get_next_sending()
 	
 def send():
-	from frappe.model.code import get_obj
-	from frappe.utils import getdate
+		from frappe.utils import getdate
 	now_date = now_datetime().date()
 	
 	for ed in frappe.db.sql("""select name from `tabEmail Digest`
 			where enabled=1 and docstatus<2""", as_list=1):
-		ed_obj = get_obj('Email Digest', ed[0])
+		ed_obj = frappe.get_doc('Email Digest', ed[0])
 		if (now_date == ed_obj.get_next_sending()):
 			ed_obj.send()

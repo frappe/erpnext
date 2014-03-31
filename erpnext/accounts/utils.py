@@ -138,14 +138,14 @@ def reconcile_against_document(args):
 		d['against_fld'] = against_fld[d['against_voucher_type']]
 
 		# cancel JV
-		jv_obj = frappe.get_obj('Journal Voucher', d['voucher_no'], with_children=1)
+		jv_obj = frappe.get_doc('Journal Voucher', d['voucher_no'])
 		jv_obj.make_gl_entries(cancel=1, adv_adj=1)
 		
 		# update ref in JV Detail
 		update_against_doc(d, jv_obj)
 
 		# re-submit JV
-		jv_obj = frappe.get_obj('Journal Voucher', d['voucher_no'], with_children =1)
+		jv_obj = frappe.get_doc('Journal Voucher', d['voucher_no'])
 		jv_obj.make_gl_entries(cancel = 0, adv_adj =1)
 
 

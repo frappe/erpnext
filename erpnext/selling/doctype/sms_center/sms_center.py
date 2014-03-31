@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 from frappe.model.document import Document
@@ -74,4 +73,4 @@ class SmsCenter(Document):
 		else:
 			receiver_list = self.get_receiver_nos()
 		if receiver_list:
-			msgprint(get_obj('SMS Control', 'SMS Control').send_sms(receiver_list, cstr(self.message)))
+			msgprint(frappe.get_doc('SMS Control', 'SMS Control').send_sms(receiver_list, cstr(self.message)))

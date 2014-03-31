@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt
-from frappe.model.code import get_obj
 from frappe import msgprint
 
 from frappe.model.document import Document
@@ -128,7 +127,7 @@ class SalaryManager(Document):
 		ss_list = self.get_sal_slip_list()		
 		not_submitted_ss = []
 		for ss in ss_list:
-			ss_obj = get_obj("Salary Slip",ss[0],with_children=1)
+			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			try:
 				frappe.db.set(ss_obj.doc, 'email_check', cint(self.send_mail))
 				if cint(self.send_email) == 1:

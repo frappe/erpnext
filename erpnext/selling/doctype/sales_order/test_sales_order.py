@@ -12,7 +12,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_make_material_request(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
 		
-		so = frappe.get_doc(copy=test_records[0]).insert()
+		so = frappe.copy_doc(test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_material_request, 
 			so.name)
@@ -27,7 +27,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_make_delivery_note(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
-		so = frappe.get_doc(copy=test_records[0]).insert()
+		so = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_delivery_note, 
 			so.name)
@@ -42,7 +42,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_make_sales_invoice(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		so = frappe.get_doc(copy=test_records[0]).insert()
+		so = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
 			so.name)
@@ -68,7 +68,7 @@ class TestSalesOrder(unittest.TestCase):
 		if not so_doclist:
 			so_doclist = test_records[0]
 		
-		w = frappe.get_doc(copy=so_doclist)
+		w = frappe.copy_doc(so_doclist)
 		w.insert()
 		w.submit()
 
@@ -290,7 +290,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test@example.com")
 
 		from frappe.model.bean import BeanPermissionError
-		so = frappe.get_doc(copy = test_records[0])
+		so = frappe.copy_doc(test_records[0])
 		so.company = "_Test Company 1"
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
@@ -304,39 +304,4 @@ class TestSalesOrder(unittest.TestCase):
 
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 	
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"conversion_rate": 1.0, 
-			"currency": "INR", 
-			"customer": "_Test Customer", 
-			"customer_name": "_Test Customer",
-			"customer_group": "_Test Customer Group", 
-			"doctype": "Sales Order", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"order_type": "Sales",
-			"delivery_date": "2013-02-23",
-			"plc_conversion_rate": 1.0, 
-			"price_list_currency": "INR", 
-			"selling_price_list": "_Test Price List", 
-			"territory": "_Test Territory", 
-			"transaction_date": "2013-02-21",
-			"grand_total": 1000.0, 
-			"grand_total_export": 1000.0, 
-			"naming_series": "_T-Sales Order-"
-		}, 
-		{
-			"description": "CPU", 
-			"doctype": "Sales Order Item", 
-			"item_code": "_Test Item Home Desktop 100", 
-			"item_name": "CPU", 
-			"parentfield": "sales_order_details", 
-			"qty": 10.0,
-			"base_rate": 100.0,
-			"rate": 100.0,
-			"base_amount": 1000.0,
-			"warehouse": "_Test Warehouse - _TC",
-		}
-	],	
-]
+test_records = frappe.get_test_records('Sales Order')

@@ -17,16 +17,16 @@ class TestProductionOrder(unittest.TestCase):
 		frappe.db.sql("""delete from `tabBin`""")
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
-		pro_bean = frappe.get_doc(copy = test_records[0])
+		pro_bean = frappe.copy_doc(test_records[0])
 		pro_bean.insert()
 		pro_bean.submit()
 		
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
-		mr1 = frappe.get_doc(copy = se_test_records[0])
+		mr1 = frappe.copy_doc(se_test_records[0])
 		mr1.insert()
 		mr1.submit()
 		
-		mr2 = frappe.get_doc(copy = se_test_records[0])
+		mr2 = frappe.copy_doc(se_test_records[0])
 		mr2.doclist[1].item_code = "_Test Item Home Desktop 100"
 		mr2.insert()
 		mr2.submit()
@@ -63,17 +63,4 @@ class TestProductionOrder(unittest.TestCase):
 			
 		
 
-test_records = [
-	[
-		{
-			"bom_no": "BOM/_Test FG Item/001", 
-			"company": "_Test Company", 
-			"doctype": "Production Order", 
-			"production_item": "_Test FG Item", 
-			"qty": 10.0, 
-			"fg_warehouse": "_Test Warehouse 1 - _TC",
-			"wip_warehouse": "_Test Warehouse - _TC",
-			"stock_uom": "Nos"
-		}
-	]
-]
+test_records = frappe.get_test_records('Production Order')

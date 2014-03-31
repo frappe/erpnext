@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days
-from frappe.model.meta import has_field
 import json
 
 @frappe.whitelist()
@@ -36,7 +35,7 @@ def get_item_details(args):
 	args = frappe._dict(args)
 
 	if not args.get("transaction_type"):
-		args.transaction_type = "buying" if has_field(args.get("doctype"), "supplier") \
+		args.transaction_type = "buying" if frappe.get_meta(args.get("doctype")).get_field("supplier") \
 			else "selling"
 		
 	if not args.get("price_list"):

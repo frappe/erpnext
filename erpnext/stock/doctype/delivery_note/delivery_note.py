@@ -6,7 +6,6 @@ import frappe
 
 from frappe.utils import cstr, flt, cint
 
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 import frappe.defaults
 from frappe.model.mapper import get_mapped_doc
@@ -150,7 +149,7 @@ class DeliveryNote(SellingController):
 		self.validate_packed_qty()
 
 		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
 		
 		# update delivered qty in sales order	
 		self.update_prevdoc_status()

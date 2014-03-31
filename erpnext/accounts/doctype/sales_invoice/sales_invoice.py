@@ -11,7 +11,6 @@ from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate,
 from frappe.utils import comma_and
 from frappe.model.naming import make_autoname
 
-from frappe.model.code import get_obj
 from frappe import _, msgprint
 
 from erpnext.accounts.party import get_party_account, get_due_date
@@ -78,7 +77,7 @@ class SalesInvoice(SellingController):
 		else:
 			# Check for Approving Authority
 			if not self.recurring_id:
-				get_obj('Authorization Control').validate_approving_authority(self.doctype, 
+				frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, 
 				 	self.company, self.grand_total, self)
 				
 		self.check_prev_docstatus()

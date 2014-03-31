@@ -12,7 +12,7 @@ class FiscalYear(Document):
 		
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
-		frappe.get_obj("Global Defaults").on_update()
+		frappe.get_doc("Global Defaults").on_update()
 		
 		# clear cache
 		frappe.clear_cache()

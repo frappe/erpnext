@@ -30,6 +30,6 @@ class HrSettings(Document):
 			if not self.stop_birthday_reminders:
 				for employee in frappe.db.sql_list("""select name from `tabEmployee` where status='Active' and 
 					ifnull(date_of_birth, '')!=''"""):
-					frappe.get_obj("Employee", employee).update_dob_event()
+					frappe.get_doc("Employee", employee).update_dob_event()
 					
 			frappe.msgprint(frappe._("Updated Birthday Reminders"))

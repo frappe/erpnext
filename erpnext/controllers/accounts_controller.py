@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, today, cstr
-from frappe.model.code import get_obj
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
@@ -481,7 +480,7 @@ class AccountsController(TransactionBase):
 		
 		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 		if total_outstanding:
-			get_obj('Account', account).check_credit_limit(total_outstanding)
+			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
 
 
 @frappe.whitelist()

@@ -7,7 +7,6 @@ import frappe
 from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, _round
 from frappe.model.naming import make_autoname
 
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 
@@ -52,7 +51,7 @@ class SalarySlip(TransactionBase):
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
 			
-		m = get_obj('Salary Manager').get_month_details(self.fiscal_year, self.month)
+		m = frappe.get_doc('Salary Manager').get_month_details(self.fiscal_year, self.month)
 		holidays = self.get_holidays_for_employee(m)
 		
 		if not cint(frappe.db.get_value("HR Settings", "HR Settings",

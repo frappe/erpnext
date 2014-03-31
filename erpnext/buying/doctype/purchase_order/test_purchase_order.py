@@ -11,7 +11,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):		
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
-		po = frappe.get_doc(copy=test_records[0]).insert()
+		po = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, 
 			po.name)
@@ -34,7 +34,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
-		po = frappe.get_doc(copy=test_records[0]).insert()
+		po = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, 
 			po.name)
@@ -77,7 +77,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_invoice(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
-		po = frappe.get_doc(copy=test_records[0]).insert()
+		po = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, 
 			po.name)
@@ -93,58 +93,24 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.get_doc(pi).insert()
 		
 	def test_subcontracting(self):
-		po = frappe.get_doc(copy=test_records[0])
+		po = frappe.copy_doc(test_records[0])
 		po.insert()
 		self.assertEquals(len(po.get("po_raw_material_details")), 2)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		po = frappe.get_doc(copy=test_records[0])
+		po = frappe.copy_doc(test_records[0])
 		po.company = "_Test Company 1"
 		po.conversion_rate = 0.0167
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
 	def test_uom_integer_validation(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
-		po = frappe.get_doc(copy=test_records[0])
+		po = frappe.copy_doc(test_records[0])
 		po.doclist[1].qty = 3.4
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
 
 test_dependencies = ["BOM"]
 
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"naming_series": "_T-Purchase Order-",
-			"conversion_rate": 1.0, 
-			"currency": "INR", 
-			"doctype": "Purchase Order", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"transaction_date": "2013-02-12", 
-			"is_subcontracted": "Yes",
-			"supplier": "_Test Supplier",
-			"supplier_name": "_Test Supplier",
-			"net_total": 5000.0, 
-			"grand_total": 5000.0,
-			"grand_total_import": 5000.0,
-			"buying_price_list": "_Test Price List"
-		}, 
-		{
-			"conversion_factor": 1.0, 
-			"description": "_Test FG Item", 
-			"doctype": "Purchase Order Item", 
-			"item_code": "_Test FG Item", 
-			"item_name": "_Test FG Item", 
-			"parentfield": "po_details", 
-			"qty": 10.0,
-			"rate": 500.0,
-			"base_amount": 5000.0,
-			"warehouse": "_Test Warehouse - _TC", 
-			"stock_uom": "_Test UOM", 
-			"uom": "_Test UOM",
-			"schedule_date": "2013-03-01"
-		}
-	],
-]
+test_records = frappe.get_test_records('Purchase Order')

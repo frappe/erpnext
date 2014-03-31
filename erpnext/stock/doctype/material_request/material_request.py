@@ -9,7 +9,6 @@ import frappe
 
 from frappe.utils import cstr, flt
 from frappe.model.utils import getlist
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -70,7 +69,7 @@ class MaterialRequest(BuyingController):
 		
 		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
-		pc_obj = get_obj(dt='Purchase Common')
+		pc_obj = frappe.get_doc(dt='Purchase Common')
 		pc_obj.validate_for_items(self)
 		
 		# self.validate_qty_against_so()
@@ -126,7 +125,7 @@ class MaterialRequest(BuyingController):
 
 	def on_cancel(self):
 		# Step 1:=> Get Purchase Common Obj
-		pc_obj = get_obj(dt='Purchase Common')
+		pc_obj = frappe.get_doc(dt='Purchase Common')
 		
 		# Step 2:=> Check for stopped status
 		pc_obj.check_for_stopped_status(self.doctype, self.name)
@@ -176,7 +175,7 @@ def update_completed_qty(bean, method):
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 			
 		for mr_name, mr_items in material_request_map.items():
-			mr_obj = frappe.get_obj("Material Request", mr_name, with_children=1)
+			mr_obj = frappe.get_doc("Material Request", mr_name)
 			mr_doctype = frappe.get_meta("Material Request")
 			
 			if mr_obj.status in ["Stopped", "Cancelled"]:

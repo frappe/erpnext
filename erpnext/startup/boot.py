@@ -8,7 +8,6 @@ import frappe
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
 	import frappe
-	import frappe.model.doc
 	
 	bootinfo['custom_css'] = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
 	bootinfo['website_settings'] = frappe.model.getsingle('Website Settings')
@@ -18,7 +17,6 @@ def boot_session(bootinfo):
 		
 		load_country_and_currency(bootinfo)
 		
-		import frappe.model.doctype
 		bootinfo['notification_settings'] = frappe.get_doc("Notification Control", 
 			"Notification Control").get_values()
 				

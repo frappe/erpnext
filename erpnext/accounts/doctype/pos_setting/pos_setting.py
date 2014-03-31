@@ -10,11 +10,7 @@ from frappe.model.document import Document
 
 class PosSetting(Document):
 	def get_series(self):
-		import frappe.model.doctype
-		docfield = frappe.model.doctype.get('Sales Invoice')
-		series = [d.options for d in docfield 
-			if d.doctype == 'DocField' and d.fieldname == 'naming_series']
-		return series and series[0] or ''
+		frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
 
 	def validate(self):
 		self.check_for_duplicate()

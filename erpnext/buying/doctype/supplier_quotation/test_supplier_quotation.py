@@ -11,7 +11,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
-		sq = frappe.get_doc(copy=test_records[0]).insert()
+		sq = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, 
 			sq.name)
@@ -31,35 +31,4 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		frappe.get_doc(po).insert()
 		
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"conversion_rate": 1.0, 
-			"currency": "INR", 
-			"doctype": "Supplier Quotation", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"transaction_date": "2013-02-12", 
-			"is_subcontracted": "No",
-			"supplier": "_Test Supplier",
-			"supplier_name": "_Test Supplier",
-			"net_total": 5000.0, 
-			"grand_total": 5000.0,
-			"grand_total_import": 5000.0,
-			"naming_series": "_T-Supplier Quotation-",
-			"buying_price_list": "_Test Price List"
-		}, 
-		{
-			"description": "_Test FG Item", 
-			"doctype": "Supplier Quotation Item", 
-			"item_code": "_Test FG Item", 
-			"item_name": "_Test FG Item", 
-			"parentfield": "quotation_items", 
-			"qty": 10.0,
-			"rate": 500.0,
-			"base_amount": 5000.0,
-			"warehouse": "_Test Warehouse - _TC", 
-			"uom": "_Test UOM",
-		}
-	],
-]
+test_records = frappe.get_test_records('Supplier Quotation')

@@ -6,7 +6,6 @@ import frappe
 
 from frappe.utils import add_days, cstr, flt, nowdate, cint, now
 
-from frappe.model.code import get_obj
 from frappe import session, msgprint
 from erpnext.stock.utils import get_valid_serial_nos
 
@@ -37,7 +36,7 @@ class StockLedger(Document):
 				"is_amended": is_amended
 			})
 			
-			get_obj('Warehouse', v["warehouse"]).update_bin(args)
+			frappe.get_doc('Warehouse', v["warehouse"]).update_bin(args)
 
 
 	def make_entry(self, args):
@@ -52,4 +51,4 @@ class StockLedger(Document):
 		Repost everything!
 		"""
 		for wh in frappe.db.sql("select name from tabWarehouse"):
-			get_obj('Warehouse', wh[0]).repost_stock()
+			frappe.get_doc('Warehouse', wh[0]).repost_stock()

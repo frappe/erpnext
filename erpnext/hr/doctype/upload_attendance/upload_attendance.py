@@ -10,9 +10,6 @@ from frappe import msgprint, _
 from frappe.utils.datautils import UnicodeWriter
 from frappe.model.document import Document
 
-# doclist = None
-doclist = frappe.local('uploadattendance_doclist')
-
 class UploadAttendance(Document):
 	pass
 
@@ -22,7 +19,6 @@ def get_template():
 		raise frappe.PermissionError
 	
 	args = frappe.local.form_dict
-	frappe.local.uploadattendance_doclist = frappe.model.doctype.get("Attendance")
 
 	w = UnicodeWriter()
 	w = add_header(w)
@@ -34,13 +30,8 @@ def get_template():
 	frappe.response['type'] = 'csv'
 	frappe.response['doctype'] = "Attendance"
 	
-def getdocfield(fieldname):
-	"""get docfield from doclist of doctype"""
-	l = [d for d in doclist if d.doctype=='DocField' and d.fieldname==fieldname]
-	return l and l[0] or None
-
 def add_header(w):
-	status = ", ".join(getdocfield("status").options.strip().split("\n"))
+	status = ", ".join((frappe.get_meta("Attendance").get_field("status").options or "").strip().split("\n"))
 	w.writerow(["Notes:"])
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
@@ -94,7 +85,7 @@ def get_existing_attendance_records(args):
 	return existing_attendance
 	
 def get_naming_series():
-	series = getdocfield("naming_series").options.strip().split("\n")
+	series = frappe.get_meta("Attendance").get_field("naming_series").options.strip().split("\n")
 	if not series:
 		msgprint("""Please create naming series for Attendance \
 			through Setup -> Numbering Series.""", raise_exception=1)

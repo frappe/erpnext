@@ -3,7 +3,6 @@
 
 test_ignore = ["Leave Block List"]
 
-test_records = [
-	{"doctype":"Department", "department_name":"_Test Department"},
-	{"doctype":"Department", "department_name":"_Test Department 1"}
-]
+
+import frappe
+test_records = frappe.get_test_records('Department')

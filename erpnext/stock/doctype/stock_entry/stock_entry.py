@@ -7,7 +7,6 @@ import frappe.defaults
 
 from frappe.utils import cstr, cint, flt, comma_or, nowdate
 
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
@@ -30,7 +29,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_purpose()
 		pro_obj = self.production_order and \
-			get_obj('Production Order', self.production_order) or None
+			frappe.get_doc('Production Order', self.production_order) or None
 
 		self.validate_item()
 		self.validate_uom_is_integer("uom", "qty")
@@ -139,7 +138,7 @@ class StockEntry(StockController):
 	def validate_production_order(self, pro_obj=None):
 		if not pro_obj:
 			if self.production_order:
-				pro_obj = get_obj('Production Order', self.production_order)
+				pro_obj = frappe.get_doc('Production Order', self.production_order)
 			else:
 				return
 		
@@ -432,7 +431,7 @@ class StockEntry(StockController):
 		pro_obj = None
 		if self.production_order:
 			# common validations
-			pro_obj = get_obj('Production Order', self.production_order)
+			pro_obj = frappe.get_doc('Production Order', self.production_order)
 			if pro_obj:
 				self.validate_production_order(pro_obj)
 				self.bom_no = pro_obj.bom_no

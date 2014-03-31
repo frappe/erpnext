@@ -13,7 +13,7 @@ def _insert_purchase_receipt(item_code=None):
 	if not item_code:
 		item_code = pr_test_records[0][1]["item_code"]
 	
-	pr = frappe.get_doc(copy=pr_test_records[0])
+	pr = frappe.copy_doc(pr_test_records[0])
 	pr.doclist[1].item_code = item_code
 	pr.insert()
 	pr.submit()
@@ -25,7 +25,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 		_insert_purchase_receipt()
-		dn = frappe.get_doc(copy=test_records[0]).insert()
+		dn = frappe.copy_doc(test_records[0]).insert()
 		
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, 
 			dn.name)
@@ -48,7 +48,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		_insert_purchase_receipt()
 		
-		dn = frappe.get_doc(copy=test_records[0])
+		dn = frappe.copy_doc(test_records[0])
 		dn.insert()
 		dn.submit()
 		
@@ -68,7 +68,7 @@ class TestDeliveryNote(unittest.TestCase):
 		
 		_insert_purchase_receipt()
 		
-		dn = frappe.get_doc(copy=test_records[0])
+		dn = frappe.copy_doc(test_records[0])
 		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
 		dn.doclist[1].cost_center = "Main - _TC"
 
@@ -95,7 +95,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(bal, prev_bal - 375.0)
 				
 		# back dated purchase receipt
-		pr = frappe.get_doc(copy=pr_test_records[0])
+		pr = frappe.copy_doc(pr_test_records[0])
 		pr.posting_date = "2013-01-01"
 		pr.doclist[1].rate = 100
 		pr.doclist[1].base_amount = 100
@@ -123,7 +123,7 @@ class TestDeliveryNote(unittest.TestCase):
 		_insert_purchase_receipt()
 		_insert_purchase_receipt("_Test Item Home Desktop 100")
 		
-		dn = frappe.get_doc(copy=test_records[0])
+		dn = frappe.copy_doc(test_records[0])
 		dn.doclist[1].item_code = "_Test Sales BOM Item"
 		dn.doclist[1].qty = 1
 	
@@ -162,7 +162,7 @@ class TestDeliveryNote(unittest.TestCase):
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.doclist[1].serial_no)
 		
-		dn = frappe.get_doc(copy=test_records[0])
+		dn = frappe.copy_doc(test_records[0])
 		dn.doclist[1].item_code = "_Test Serialized Item With Series"
 		dn.doclist[1].qty = 1
 		dn.doclist[1].serial_no = serial_nos[0]
@@ -199,7 +199,7 @@ class TestDeliveryNote(unittest.TestCase):
 		sr.status = "Not Available"
 		sr.save()
 		
-		dn = frappe.get_doc(copy=test_records[0])
+		dn = frappe.copy_doc(test_records[0])
 		dn.doclist[1].item_code = "_Test Serialized Item With Series"
 		dn.doclist[1].qty = 1
 		dn.doclist[1].serial_no = serial_nos[0]
@@ -214,43 +214,4 @@ class TestDeliveryNote(unittest.TestCase):
 
 test_dependencies = ["Sales BOM"]
 
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"conversion_rate": 1.0, 
-			"currency": "INR", 
-			"customer": "_Test Customer", 
-			"customer_name": "_Test Customer",
-			"doctype": "Delivery Note", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"plc_conversion_rate": 1.0, 
-			"posting_date": "2013-02-21", 
-			"posting_time": "9:00:00", 
-			"price_list_currency": "INR", 
-			"selling_price_list": "_Test Price List", 
-			"status": "Draft", 
-			"territory": "_Test Territory",
-			"net_total": 500.0,
-			"grand_total": 500.0, 
-			"grand_total_export": 500.0,
-			"naming_series": "_T-Delivery Note-"
-		}, 
-		{
-			"description": "CPU", 
-			"doctype": "Delivery Note Item", 
-			"item_code": "_Test Item", 
-			"item_name": "_Test Item", 
-			"parentfield": "delivery_note_details", 
-			"qty": 5.0, 
-			"base_rate": 100.0,
-			"rate": 100.0,
-			"base_amount": 500.0,
-			"warehouse": "_Test Warehouse - _TC",
-			"stock_uom": "_Test UOM",
-			"expense_account": "Cost of Goods Sold - _TC",
-			"cost_center": "Main - _TC"
-		}
-	]
-	
-]
+test_records = frappe.get_test_records('Delivery Note')

@@ -49,8 +49,7 @@ def get_bin(item_code, warehouse):
 		bin_wrapper.insert()
 		bin_obj = bin_wrapper.make_controller()
 	else:
-		from frappe.model.code import get_obj
-		bin_obj = get_obj('Bin', bin)
+				bin_obj = frappe.get_doc('Bin', bin)
 	return bin_obj
 
 def update_bin(args):

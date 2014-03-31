@@ -6,7 +6,6 @@ import frappe
 
 from frappe.utils import cint, cstr, flt, formatdate
 
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 
@@ -267,7 +266,7 @@ class PurchaseInvoice(BuyingController):
 	def on_submit(self):
 		self.check_prev_docstatus()
 		
-		get_obj('Authorization Control').validate_approving_authority(self.doctype, 
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, 
 			self.company, self.grand_total)
 		
 		# this sequence because outstanding may get -negative

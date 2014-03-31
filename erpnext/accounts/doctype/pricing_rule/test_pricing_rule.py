@@ -19,7 +19,7 @@ class TestPricingRule(unittest.TestCase):
 			"price": 0, 
 			"discount_percentage": 10, 
 		}]
-		frappe.get_doc(copy=test_record).insert()
+		frappe.copy_doc(test_record).insert()
 		
 		args = frappe._dict({
 			"item_code": "_Test Item",
@@ -38,7 +38,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
-		prule = frappe.get_doc(copy=test_record)
+		prule = frappe.copy_doc(test_record)
 		prule.applicable_for = "Customer"
 		self.assertRaises(MandatoryError, prule.insert)
 		prule.customer = "_Test Customer"
@@ -47,7 +47,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 20)
 		
-		prule = frappe.get_doc(copy=test_record)
+		prule = frappe.copy_doc(test_record)
 		prule.apply_on = "Item Group"
 		prule.item_group = "All Item Groups"
 		prule.discount_percentage = 15
@@ -57,7 +57,7 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 		
-		prule = frappe.get_doc(copy=test_record)
+		prule = frappe.copy_doc(test_record)
 		prule.applicable_for = "Campaign"
 		prule.campaign = "_Test Campaign"
 		prule.discount_percentage = 5

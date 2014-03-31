@@ -9,14 +9,14 @@ import frappe
 class TestJournalVoucher(unittest.TestCase):
 	def test_journal_voucher_with_against_jv(self):
 		self.clear_account_balance()
-		jv_invoice = frappe.get_doc(copy=test_records[2])
+		jv_invoice = frappe.copy_doc(test_records[2])
 		jv_invoice.insert()
 		jv_invoice.submit()
 		
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_jv=%s""", jv_invoice.name))
 		
-		jv_payment = frappe.get_doc(copy=test_records[0])
+		jv_payment = frappe.copy_doc(test_records[0])
 		jv_payment.doclist[1].against_jv = jv_invoice.name
 		jv_payment.insert()
 		jv_payment.submit()
@@ -37,7 +37,7 @@ class TestJournalVoucher(unittest.TestCase):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 		set_perpetual_inventory()
 		
-		jv = frappe.get_doc(copy=test_records[0])
+		jv = frappe.copy_doc(test_records[0])
 		jv.doclist[1].account = "_Test Warehouse - _TC"
 		jv.insert()
 		
@@ -50,7 +50,7 @@ class TestJournalVoucher(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		self.clear_account_balance()
 		
-		jv = frappe.get_doc(copy=test_records[0])
+		jv = frappe.copy_doc(test_records[0])
 		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
 		jv.doclist[2].debit = 20000.0
@@ -65,7 +65,7 @@ class TestJournalVoucher(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		self.clear_account_balance()
 		
-		jv = frappe.get_doc(copy=test_records[0])
+		jv = frappe.copy_doc(test_records[0])
 		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
 		jv.doclist[2].debit = 20000.0
@@ -83,7 +83,7 @@ class TestJournalVoucher(unittest.TestCase):
 		
 		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
 		
-		jv = frappe.get_doc(copy=test_records[0])
+		jv = frappe.copy_doc(test_records[0])
 		jv.posting_date = "2013-08-12"
 		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
@@ -100,7 +100,7 @@ class TestJournalVoucher(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		self.clear_account_balance()
 		
-		jv = frappe.get_doc(copy=test_records[0])
+		jv = frappe.copy_doc(test_records[0])
 		jv.doclist[1].account = "_Test Account Cost for Goods Sold - _TC"
 		jv.doclist[1].cost_center = "_Test Cost Center - _TC"
 		jv.doclist[1].credit = 30000.0
@@ -110,7 +110,7 @@ class TestJournalVoucher(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value("GL Entry", 
 			{"voucher_type": "Journal Voucher", "voucher_no": jv.name}))
 		
-		jv1 = frappe.get_doc(copy=test_records[0])
+		jv1 = frappe.copy_doc(test_records[0])
 		jv1.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
 		jv1.doclist[2].cost_center = "_Test Cost Center - _TC"
 		jv1.doclist[2].debit = 40000.0
@@ -128,81 +128,4 @@ class TestJournalVoucher(unittest.TestCase):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
 
-test_records = [
-	[{
-		"company": "_Test Company", 
-		"doctype": "Journal Voucher", 
-		"fiscal_year": "_Test Fiscal Year 2013", 
-		"naming_series": "_T-Journal Voucher-",
-		"posting_date": "2013-02-14", 
-		"user_remark": "test",
-		"voucher_type": "Bank Voucher",
-		"cheque_no": "33",
-		"cheque_date": "2013-02-14"
-	}, 
-	{
-		"account": "_Test Customer - _TC", 
-		"doctype": "Journal Voucher Detail", 
-		"credit": 400.0,
-		"debit": 0.0,
-		"parentfield": "entries"
-	}, 
-	{
-		"account": "_Test Account Bank Account - _TC", 
-		"doctype": "Journal Voucher Detail", 
-		"debit": 400.0,
-		"credit": 0.0,
-		"parentfield": "entries"
-	}],
-	[{
-		"company": "_Test Company", 
-		"doctype": "Journal Voucher", 
-		"fiscal_year": "_Test Fiscal Year 2013", 
-		"naming_series": "_T-Journal Voucher-",
-		"posting_date": "2013-02-14", 
-		"user_remark": "test",
-		"voucher_type": "Bank Voucher",
-		"cheque_no": "33",
-		"cheque_date": "2013-02-14"
-	}, 
-	{
-		"account": "_Test Supplier - _TC", 
-		"doctype": "Journal Voucher Detail", 
-		"credit": 0.0,
-		"debit": 400.0,
-		"parentfield": "entries"
-	}, 
-	{
-		"account": "_Test Account Bank Account - _TC", 
-		"doctype": "Journal Voucher Detail", 
-		"debit": 0.0,
-		"credit": 400.0,
-		"parentfield": "entries"
-	}],
-	[{
-		"company": "_Test Company", 
-		"doctype": "Journal Voucher", 
-		"fiscal_year": "_Test Fiscal Year 2013", 
-		"naming_series": "_T-Journal Voucher-",
-		"posting_date": "2013-02-14", 
-		"user_remark": "test",
-		"voucher_type": "Bank Voucher",
-		"cheque_no": "33",
-		"cheque_date": "2013-02-14"
-	}, 
-	{
-		"account": "_Test Customer - _TC", 
-		"doctype": "Journal Voucher Detail", 
-		"credit": 0.0,
-		"debit": 400.0,
-		"parentfield": "entries"
-	}, 
-	{
-		"account": "Sales - _TC", 
-		"doctype": "Journal Voucher Detail", 
-		"credit": 400.0,
-		"debit": 0.0,
-		"parentfield": "entries",
-		"cost_center": "_Test Cost Center - _TC"
-	}],
-]
+test_records = frappe.get_test_records('Journal Voucher')

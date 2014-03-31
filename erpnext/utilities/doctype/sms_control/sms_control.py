@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe, json
 
 from frappe.utils import nowdate, cstr
-from frappe.model.code import get_obj
 from frappe import msgprint, throw, _
 
 
@@ -69,7 +68,7 @@ class SmsControl(Document):
 			msgprint(ret)
 
 	def send_via_gateway(self, arg):
-		ss = get_obj('SMS Settings', 'SMS Settings', with_children=1)
+		ss = frappe.get_doc('SMS Settings', 'SMS Settings')
 		args = {ss.message_parameter : arg.get('message')}
 		for d in getlist(ss.doclist, 'static_parameter_details'):
 			args[d.parameter] = d.value

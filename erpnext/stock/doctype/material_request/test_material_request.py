@@ -15,7 +15,7 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_make_purchase_order(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
-		mr = frappe.get_doc(copy=test_records[0]).insert()
+		mr = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order, 
 			mr.name)
@@ -30,7 +30,7 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_make_supplier_quotation(self):
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
-		mr = frappe.get_doc(copy=test_records[0]).insert()
+		mr = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_supplier_quotation, 
 			mr.name)
@@ -46,7 +46,7 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_make_stock_entry(self):
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
-		mr = frappe.get_doc(copy=test_records[0]).insert()
+		mr = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry, 
 			mr.name)
@@ -112,7 +112,7 @@ class TestMaterialRequest(unittest.TestCase):
 		frappe.db.sql("""delete from `tabBin`""")
 		
 		# submit material request of type Purchase
-		mr = frappe.get_doc(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.insert()
 		mr.submit()
 		
@@ -133,14 +133,14 @@ class TestMaterialRequest(unittest.TestCase):
 
 		
 		# check for stopped status of Material Request
-		po = frappe.get_doc(copy=po_doclist)
+		po = frappe.copy_doc(po_doclist)
 		po.insert()
 		mr.obj.update_status('Stopped')
 		self.assertRaises(frappe.ValidationError, po.submit)
 		self.assertRaises(frappe.ValidationError, po.cancel)
 
 		mr.obj.update_status('Submitted')
-		po = frappe.get_doc(copy=po_doclist)
+		po = frappe.copy_doc(po_doclist)
 		po.insert()
 		po.submit()
 		
@@ -160,7 +160,7 @@ class TestMaterialRequest(unittest.TestCase):
 		frappe.db.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
-		mr = frappe.get_doc(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
@@ -196,14 +196,14 @@ class TestMaterialRequest(unittest.TestCase):
 		self._insert_stock_entry(27.0, 1.5)
 		
 		# check for stopped status of Material Request
-		se = frappe.get_doc(copy=se_doclist)
+		se = frappe.copy_doc(se_doclist)
 		se.insert()
 		mr.obj.update_status('Stopped')
 		self.assertRaises(frappe.ValidationError, se.submit)
 		self.assertRaises(frappe.ValidationError, se.cancel)
 		
 		mr.obj.update_status('Submitted')
-		se = frappe.get_doc(copy=se_doclist)
+		se = frappe.copy_doc(se_doclist)
 		se.insert()
 		se.submit()
 		
@@ -223,7 +223,7 @@ class TestMaterialRequest(unittest.TestCase):
 		frappe.db.sql("""delete from `tabStock Ledger Entry`""")
 		
 		# submit material request of type Purchase
-		mr = frappe.get_doc(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
@@ -259,14 +259,14 @@ class TestMaterialRequest(unittest.TestCase):
 		self._insert_stock_entry(60.0, 3.0)
 		
 		# check for stopped status of Material Request
-		se = frappe.get_doc(copy=se_doclist)
+		se = frappe.copy_doc(se_doclist)
 		se.insert()
 		mr.obj.update_status('Stopped')
 		self.assertRaises(frappe.ValidationError, se.submit)
 		self.assertRaises(frappe.ValidationError, se.cancel)
 		
 		mr.obj.update_status('Submitted')
-		se = frappe.get_doc(copy=se_doclist)
+		se = frappe.copy_doc(se_doclist)
 		se.insert()
 		se.submit()
 		
@@ -283,7 +283,7 @@ class TestMaterialRequest(unittest.TestCase):
 		
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Purchase
-		mr = frappe.get_doc(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
@@ -312,47 +312,14 @@ class TestMaterialRequest(unittest.TestCase):
 		})
 		
 		# check for stopped status of Material Request
-		se = frappe.get_doc(copy=se_doclist)
+		se = frappe.copy_doc(se_doclist)
 		self.assertRaises(frappe.MappingMismatchError, se.insert)
 		
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		mr = frappe.get_doc(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.company = "_Test Company 1"
 		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 
 test_dependencies = ["Currency Exchange"]
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"doctype": "Material Request", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"transaction_date": "2013-02-18",
-			"material_request_type": "Purchase",
-			"naming_series": "_T-Material Request-"
-		}, 
-		{
-			"description": "_Test Item Home Desktop 100", 
-			"doctype": "Material Request Item", 
-			"item_code": "_Test Item Home Desktop 100", 
-			"item_name": "_Test Item Home Desktop 100", 
-			"parentfield": "indent_details", 
-			"qty": 54.0, 
-			"schedule_date": "2013-02-18", 
-			"uom": "_Test UOM 1",
-			"warehouse": "_Test Warehouse - _TC"
-		}, 
-		{
-			"description": "_Test Item Home Desktop 200", 
-			"doctype": "Material Request Item", 
-			"item_code": "_Test Item Home Desktop 200", 
-			"item_name": "_Test Item Home Desktop 200", 
-			"parentfield": "indent_details", 
-			"qty": 3.0, 
-			"schedule_date": "2013-02-19", 
-			"uom": "_Test UOM 1",
-			"warehouse": "_Test Warehouse - _TC"
-		}
-	],
-]
+test_records = frappe.get_test_records('Material Request')

@@ -262,8 +262,7 @@ class StatusUpdater(DocListController):
 				/ ref_doc_qty)*100
 			frappe.db.set_value(ref_dt, ref_dn, "per_billed", per_billed)
 			
-			from frappe.model.meta import has_field
-			if has_field(ref_dt, "billing_status"):
+			if frappe.get_meta(ref_dt).get_field("billing_status"):
 				if per_billed < 0.001: billing_status = "Not Billed"
 				elif per_billed >= 99.99: billing_status = "Fully Billed"
 				else: billing_status = "Partly Billed"

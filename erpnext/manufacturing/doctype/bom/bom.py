@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt, now, nowdate
 
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 
@@ -282,7 +281,7 @@ class Bom(Document):
 	def update_cost_and_exploded_items(self, bom_list=[]):
 		bom_list = self.traverse_tree(bom_list)
 		for bom in bom_list:
-			bom_obj = get_obj("BOM", bom, with_children=1)
+			bom_obj = frappe.get_doc("BOM", bom)
 			bom_obj.on_update()
 			
 		return bom_list

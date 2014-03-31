@@ -154,8 +154,7 @@ def reset_global_defaults():
 		'default_price_list_currency': None,
 	}
 
-	from frappe.model.code import get_obj
-	gd = get_obj('Global Defaults', 'Global Defaults')
+		gd = frappe.get_doc('Global Defaults', 'Global Defaults')
 	for d in flds:
 		gd.set(d, flds[d])
 	gd.save()

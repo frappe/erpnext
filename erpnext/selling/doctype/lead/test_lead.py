@@ -3,16 +3,7 @@
 
 from __future__ import unicode_literals
 
-test_records = [
-	[{"doctype":"Lead", "lead_name": "_Test Lead", "status":"Open", 
-		"email_id":"test_lead@example.com", "territory": "_Test Territory"}],
-	[{"doctype":"Lead", "lead_name": "_Test Lead 1", "status":"Open", 
-		"email_id":"test_lead1@example.com"}],
-	[{"doctype":"Lead", "lead_name": "_Test Lead 2", "status":"Contacted", 
-		"email_id":"test_lead2@example.com"}],
-	[{"doctype":"Lead", "lead_name": "_Test Lead 3", "status":"Converted", 
-		"email_id":"test_lead3@example.com"}],
-]
+test_records = frappe.get_test_records('Lead')
 
 import frappe
 import unittest
@@ -29,4 +20,3 @@ class TestLead(unittest.TestCase):
 		customer[0]["company"] = "_Test Company"
 		customer[0]["customer_group"] = "_Test Customer Group"
 		frappe.get_doc(customer).insert()
-		

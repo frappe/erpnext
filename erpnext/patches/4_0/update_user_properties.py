@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.permissions
-import frappe.model.doctype
 import frappe.defaults
 
 def execute():
@@ -79,7 +78,7 @@ def add_employee_restrictions_to_leave_approver():
 	# add restrict rights to HR User and HR Manager
 	frappe.db.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')
 		and role in ('HR User', 'HR Manager') and permlevel=0 and `read`=1""")
-	frappe.model.doctype.clear_cache()
+	frappe.clear_cache()
 	
 	# add Employee restrictions (in on_update method)
 	for employee in frappe.db.sql_list("""select name from `tabEmployee`

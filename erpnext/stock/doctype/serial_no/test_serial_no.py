@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import frappe, unittest
 
 test_dependencies = ["Item"]
-test_records = []
+test_records = frappe.get_test_records('Serial No')
 
 from erpnext.stock.doctype.serial_no.serial_no import *
 

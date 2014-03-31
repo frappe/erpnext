@@ -2,4 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 # pre loaded
-test_records = []
+
+import frappe
+test_records = frappe.get_test_records('Currency')
