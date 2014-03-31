@@ -71,7 +71,7 @@ class SalaryStructure(Document):
 		
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
-	return [d.fields for d in get_mapped_doc(source_name, target_doc)]
+	return get_mapped_doc(source_name, target_doc).as_dict()
 	
 def get_mapped_doc(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc

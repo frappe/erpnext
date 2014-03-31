@@ -161,4 +161,4 @@ def make_quotation(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 		
-	return [d.fields for d in doclist]
+	return doclist.as_dict()

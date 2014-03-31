@@ -14,4 +14,4 @@ class FeaturesSetup(Document):
 		from frappe.utils import set_default
 		for key in self.fields:
 			if key not in default_fields:
-				set_default(key, self.fields[key])
+				set_default(key, self.get(key))

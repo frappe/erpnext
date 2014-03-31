@@ -233,7 +233,7 @@ class Item(DocListController):
 			
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
 			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]
-			if new_properties != [cstr(self.fields[fld]) for fld in field_list]:
+			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
 				frappe.throw(_("To merge, following properties must be same for both items")
 					+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 

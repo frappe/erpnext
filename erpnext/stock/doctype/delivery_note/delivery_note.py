@@ -335,7 +335,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, update_accounts)
 	
-	return [d.fields for d in doclist]
+	return doclist.as_dict()
 	
 @frappe.whitelist()
 def make_installation_note(source_name, target_doc=None):
@@ -362,4 +362,4 @@ def make_installation_note(source_name, target_doc=None):
 		}
 	}, target_doc)
 
-	return [d.fields for d in doclist]
+	return doclist.as_dict()

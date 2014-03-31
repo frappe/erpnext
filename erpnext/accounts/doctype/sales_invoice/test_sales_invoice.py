@@ -32,7 +32,7 @@ class TestSalesInvoice(unittest.TestCase):
 		w.docstatus = '0'
 		w.insert()
 
-		w2 = frappe.get_doc([d.fields.copy() for d in w.doclist])
+		w2 = frappe.copy_doc(w)
 		
 		import time
 		time.sleep(1)

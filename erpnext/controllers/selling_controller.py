@@ -363,11 +363,11 @@ class SellingController(StockController):
 	def check_stop_sales_order(self, ref_fieldname):
 		for d in self.get(self.fname):
 			if d.get(ref_fieldname):
-				status = frappe.db.get_value("Sales Order", d.fields[ref_fieldname], "status")
+				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
 				if status == "Stopped":
 					frappe.throw(self.doctype + 
 						_(" can not be created/modified against stopped Sales Order ") + 
-						d.fields[ref_fieldname])
+						d.get(ref_fieldname))
 		
 def check_active_sales_items(obj):
 	for d in obj.doclist.get({"parentfield": obj.fname}):

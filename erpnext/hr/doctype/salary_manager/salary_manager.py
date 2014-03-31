@@ -51,7 +51,7 @@ class SalaryManager(Document):
 		
 	def check_mandatory(self):
 		for f in ['company', 'month', 'fiscal_year']:
-			if not self.fields[f]:
+			if not self.get(f):
 				msgprint("Please select %s to proceed" % f, raise_exception=1)
 		
 	

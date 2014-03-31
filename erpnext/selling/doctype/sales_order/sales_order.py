@@ -316,7 +316,7 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	
-	return [d.fields for d in doclist]
+	return doclist.as_dict()
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
@@ -356,7 +356,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	
-	return [d.fields for d in doclist]
+	return doclist.as_dict()
 	
 @frappe.whitelist()
 def make_maintenance_schedule(source_name, target_doc=None):
@@ -384,7 +384,7 @@ def make_maintenance_schedule(source_name, target_doc=None):
 			}
 		}, target_doc)
 	
-		return [d.fields for d in doclist]
+		return doclist.as_dict()
 	
 @frappe.whitelist()
 def make_maintenance_visit(source_name, target_doc=None):
@@ -414,4 +414,4 @@ def make_maintenance_visit(source_name, target_doc=None):
 			}
 		}, target_doc)
 	
-		return [d.fields for d in doclist]
+		return doclist.as_dict()

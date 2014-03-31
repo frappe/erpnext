@@ -59,4 +59,4 @@ def make_maintenance_visit(source_name, target_doc=None):
 			}
 		}, target_doc)
 	
-		return [d.fields for d in doclist]
+		return doclist.as_dict()

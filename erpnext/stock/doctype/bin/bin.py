@@ -25,7 +25,7 @@ class Bin(Document):
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
-			if (not self.has_key(f)) or (not self.fields[f]): 
+			if (not self.has_key(f)) or (not self.get(f)): 
 				self.set(f, 0.0)
 		
 	def update_stock(self, args):

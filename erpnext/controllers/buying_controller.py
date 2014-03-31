@@ -152,12 +152,12 @@ class BuyingController(StockController):
 		
 		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
 			for item in self.item_doclist:
-				del item.fields["item_tax_amount"]
+				del item.get("item_tax_amount")
 				
 		if not self.meta.get_field("tax_amount_after_discount_amount", 
 				parentfield=self.other_fname):
 			for tax in self.tax_doclist:
-				del tax.fields["tax_amount_after_discount_amount"]
+				del tax.get("tax_amount_after_discount_amount")
 				
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):

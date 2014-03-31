@@ -10,7 +10,7 @@ def boot_session(bootinfo):
 	import frappe
 	
 	bootinfo['custom_css'] = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
-	bootinfo['website_settings'] = frappe.model.getsingle('Website Settings')
+	bootinfo['website_settings'] = frappe.get_doc('Website Settings')
 
 	if frappe.session['user']!='Guest':
 		bootinfo['letter_heads'] = get_letter_heads()

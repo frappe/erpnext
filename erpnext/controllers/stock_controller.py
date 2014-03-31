@@ -223,11 +223,11 @@ class StockController(AccountsController):
 			make_gl_entries(gl_entries)
 			
 	def check_expense_account(self, item):
-		if item.fields.has_key("expense_account") and not item.expense_account:
+		if item.meta.has_field("expense_account") and not item.expense_account:
 			msgprint(_("""Expense/Difference account is mandatory for item: """) + item.item_code, 
 				raise_exception=1)
 				
-		if item.fields.has_key("expense_account") and not item.cost_center:
+		if item.meta.has_field("expense_account") and not item.cost_center:
 			msgprint(_("""Cost Center is mandatory for item: """) + item.item_code, 
 				raise_exception=1)
 				

@@ -110,8 +110,8 @@ def validate_uom_is_integer(doclist, uom_field, qty_fields):
 		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
 				if d.get(f):
-					if cint(d.fields[f])!=d.fields[f]:
-						frappe.msgprint(_("For UOM") + " '" + d.fields[uom_field] \
+					if cint(d.get(f))!=d.get(f):
+						frappe.msgprint(_("For UOM") + " '" + d.get(uom_field) \
 							+ "': " + _("Quantity cannot be a fraction.") \
 							+ " " + _("In Row") + ": " + str(d.idx),
 							raise_exception=UOMMustBeIntegerError)

@@ -3,7 +3,6 @@ include requirements.txt
 include *.json
 include *.md
 include *.py
-include *.txt
 recursive-include erpnext *.css
 recursive-include erpnext *.csv
 recursive-include erpnext *.html
@@ -14,5 +13,4 @@ recursive-include erpnext *.md
 recursive-include erpnext *.png
 recursive-include erpnext *.py
 recursive-include erpnext *.svg
-recursive-include erpnext *.txt
 recursive-exclude * *.pyc

@@ -98,7 +98,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 		
-	return [d.fields for d in doclist]
+	return doclist.as_dict()
 	
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):

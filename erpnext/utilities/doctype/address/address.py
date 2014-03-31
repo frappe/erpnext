@@ -35,7 +35,7 @@ class Address(Document):
 				if self.get(fieldname):
 					if not frappe.db.sql("""select name from `tabAddress` where is_primary_address=1
 						and `%s`=%s and name!=%s""" % (fieldname, "%s", "%s"), 
-						(self.fields[fieldname], self.name)):
+						(self.get(fieldname), self.name)):
 							self.is_primary_address = 1
 					break
 				
@@ -48,7 +48,7 @@ class Address(Document):
 		for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
 			if self.get(fieldname):
 				frappe.db.sql("""update `tabAddress` set `%s`=0 where `%s`=%s and name!=%s""" %
-					(is_address_type, fieldname, "%s", "%s"), (self.fields[fieldname], self.name))
+					(is_address_type, fieldname, "%s", "%s"), (self.get(fieldname), self.name))
 				break
 
 @frappe.whitelist()

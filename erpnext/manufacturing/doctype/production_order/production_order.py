@@ -168,4 +168,4 @@ def make_stock_entry(production_order_id, purpose):
 		stock_entry.to_warehouse = production_order.fg_warehouse
 		
 	stock_entry.run_method("get_items")
-	return [d.fields for d in stock_entry.doclist]
+	return stock_entry.as_dict()

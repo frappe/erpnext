@@ -115,7 +115,7 @@ class StatusUpdater(DocListController):
 			# get unique transactions to update
 			for d in self.doclist:
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
-					args['name'] = d.fields[args['join_field']]
+					args['name'] = d.get(args['join_field'])
 
 					# get all qty where qty > target_field
 					item = frappe.db.sql("""select item_code, `{target_ref_field}`, 
@@ -244,7 +244,7 @@ class StatusUpdater(DocListController):
 			if item.get(ref_fieldname) \
 				and item.get(ref_fieldname) in all_zero_amount_refdoc \
 				and item.get(ref_fieldname) not in zero_amount_refdoc:
-					zero_amount_refdoc.append(item.fields[ref_fieldname])
+					zero_amount_refdoc.append(item.get(ref_fieldname))
 		
 		if zero_amount_refdoc:
 			self.update_biling_status(zero_amount_refdoc, ref_dt, ref_fieldname)

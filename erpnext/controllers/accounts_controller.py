@@ -26,7 +26,7 @@ class AccountsController(TransactionBase):
 			if not self.get(fieldname) and self.meta.get_field(fieldname):
 				self.set(fieldname, today())
 				if not self.fiscal_year:
-					self.fiscal_year = get_fiscal_year(self.fields[fieldname])[0]
+					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
 					
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year") :
@@ -36,15 +36,15 @@ class AccountsController(TransactionBase):
 			elif self.meta.get_field("transaction_date"):
 				date_field = "transaction_date"
 				
-			if date_field and self.fields[date_field]:
-				validate_fiscal_year(self.fields[date_field], self.fiscal_year, 
+			if date_field and self.get(date_field):
+				validate_fiscal_year(self.get(date_field), self.fiscal_year, 
 					label=self.meta.get_label(date_field))
 					
 	def validate_for_freezed_account(self):
 		for fieldname in ["customer", "supplier"]:
 			if self.meta.get_field(fieldname) and self.get(fieldname):
 				accounts = frappe.db.get_values("Account", 
-					{"master_type": fieldname.title(), "master_name": self.fields[fieldname], 
+					{"master_type": fieldname.title(), "master_name": self.get(fieldname), 
 					"company": self.company}, "name")
 				if accounts:
 					from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
@@ -347,13 +347,13 @@ class AccountsController(TransactionBase):
 				"tax_fraction_for_current_item", 
 				"grand_total_fraction_for_current_item"):
 				if fieldname in tax.fields:
-					del tax.fields[fieldname]
+					del tax.get(fieldname)
 			
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail)
 			
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""
-		item.set(base_field, flt((flt(item.fields[print_field],)
+		item.set(base_field, flt((flt(item.get(print_field),)
 			self.precision(print_field, item)) * self.conversion_rate),
 			self.precision(base_field, item))
 			
@@ -419,7 +419,7 @@ class AccountsController(TransactionBase):
 		for item in self.get("entries"):
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item", 
-					item.fields[item_ref_dn], based_on), self.precision(based_on, item))
+					item.get(item_ref_dn), based_on), self.precision(based_on, item))
 				if not ref_amt:
 					frappe.msgprint(_("As amount for item") + ": " + item.item_code + _(" in ") + 
 						ref_dt + _(" is zero, system will not check for over-billed"))
@@ -427,9 +427,9 @@ class AccountsController(TransactionBase):
 					already_billed = frappe.db.sql("""select sum(%s) from `tab%s` 
 						where %s=%s and docstatus=1 and parent != %s""" % 
 						(based_on, self.tname, item_ref_dn, '%s', '%s'), 
-						(item.fields[item_ref_dn], self.name))[0][0]
+						(item.get(item_ref_dn), self.name))[0][0]
 				
-					total_billed_amt = flt(flt(already_billed) + flt(item.fields[based_on]), 
+					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)), 
 						self.precision(based_on, item))
 				
 					tolerance, item_tolerance, global_tolerance = get_tolerance_for(item.item_code, 
@@ -443,7 +443,7 @@ class AccountsController(TransactionBase):
 						frappe.throw(_("Row #") + cstr(item.idx) + ": " + 
 							_(" Max amount allowed for Item ") + cstr(item.item_code) + 
 							_(" against ") + ref_dt + " " + 
-							cstr(item.fields[ref_dt.lower().replace(" ", "_")]) + _(" is ") + 
+							cstr(item.get(ref_dt.lower().replace(" ", "_"))) + _(" is ") + 
 							cstr(max_allowed_amt) + ". \n" + 
 							_("""If you want to increase your overflow tolerance, please increase \
 							tolerance % in Global Defaults or Item master. 				

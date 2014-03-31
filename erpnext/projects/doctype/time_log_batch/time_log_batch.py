@@ -21,7 +21,7 @@ class TimeLogBatch(Document):
 			self.total_hours += float(tl.hours or 0.0)
 
 	def update_time_log_values(self, d, tl):
-		d.fields.update({
+		d.update({
 			"hours": tl.hours,
 			"activity_type": tl.activity_type,
 			"created_by": tl.owner

@@ -47,7 +47,7 @@ class PriceList(DocListController):
 			b = frappe.get_doc(module + " Settings")
 			price_list_fieldname = module.lower() + "_price_list"
 
-			if self.name == b.fields[price_list_fieldname]:
+			if self.name == b.get(price_list_fieldname):
 				b.set(price_list_fieldname, None)
 				b.save()
 		

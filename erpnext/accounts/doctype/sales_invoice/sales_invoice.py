@@ -326,7 +326,7 @@ class SalesInvoice(SellingController):
 			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
 				for d in self.get('entries'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
-						and not d.fields[i.lower().replace(' ','_')]:
+						and not d.get(i.lower().replace(' ','_')):
 						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
 
 
@@ -836,4 +836,4 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 	
-	return [d.fields for d in doclist]
+	return doclist.as_dict()

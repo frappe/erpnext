@@ -360,7 +360,7 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	# debit bank
 	jv.doclist[2].debit = si.outstanding_amount
 	
-	return [d.fields for d in jv.doclist]
+	return jv.as_dict()
 
 @frappe.whitelist()
 def get_payment_entry_from_purchase_invoice(purchase_invoice):
@@ -378,7 +378,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	# credit bank
 	jv.doclist[2].credit = pi.outstanding_amount
 	
-	return [d.fields for d in jv.doclist]
+	return jv.as_dict()
 
 def get_payment_entry(doc):
 	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher")
