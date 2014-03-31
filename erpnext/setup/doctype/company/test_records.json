@@ -1,0 +1,16 @@
+[
+ {
+  "abbr": "_TC", 
+  "company_name": "_Test Company", 
+  "default_currency": "INR", 
+  "doctype": "Company", 
+  "domain": "Manufacturing"
+ }, 
+ {
+  "abbr": "_TC1", 
+  "company_name": "_Test Company 1", 
+  "default_currency": "USD", 
+  "doctype": "Company", 
+  "domain": "Retail"
+ }
+]

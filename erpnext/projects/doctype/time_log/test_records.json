@@ -1,0 +1,10 @@
+[
+ {
+  "activity_type": "_Test Activity Type", 
+  "docstatus": 1, 
+  "doctype": "Time Log", 
+  "from_time": "2013-01-01 10:00:00.000000", 
+  "note": "_Test Note", 
+  "to_time": "2013-01-01 11:00:00.000000"
+ }
+]

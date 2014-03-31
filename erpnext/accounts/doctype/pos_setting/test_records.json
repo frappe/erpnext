@@ -1,0 +1,16 @@
+[
+ {
+  "cash_bank_account": "_Test Account Bank Account - _TC", 
+  "company": "_Test Company", 
+  "cost_center": "_Test Cost Center - _TC", 
+  "currency": "INR", 
+  "doctype": "POS Setting", 
+  "expense_account": "_Test Account Cost for Goods Sold - _TC", 
+  "income_account": "Sales - _TC", 
+  "name": "_Test POS Setting", 
+  "naming_series": "_T-Sales Invoice-", 
+  "selling_price_list": "_Test Price List", 
+  "territory": "_Test Territory", 
+  "warehouse": "_Test Warehouse - _TC"
+ }
+]

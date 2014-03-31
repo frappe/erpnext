@@ -1,0 +1,26 @@
+[
+ {
+  "doctype": "Newsletter", 
+  "lead_source": "All", 
+  "message": "This is a test newsletter", 
+  "send_from": "admin@example.com", 
+  "send_to_type": "Lead", 
+  "subject": "_Test Newsletter to Lead"
+ }, 
+ {
+  "contact_type": "Customer", 
+  "doctype": "Newsletter", 
+  "message": "This is a test newsletter", 
+  "send_from": "admin@example.com", 
+  "send_to_type": "Contact", 
+  "subject": "_Test Newsletter to Contact"
+ }, 
+ {
+  "doctype": "Newsletter", 
+  "email_list": "test_custom@example.com, test_custom1@example.com, test_custom2@example.com", 
+  "message": "This is a test newsletter", 
+  "send_from": "admin@example.com", 
+  "send_to_type": "Custom", 
+  "subject": "_Test Newsletter to Custom"
+ }
+]

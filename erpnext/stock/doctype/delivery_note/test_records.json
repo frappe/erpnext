@@ -1,0 +1,39 @@
+[
+ {
+  "company": "_Test Company", 
+  "conversion_rate": 1.0, 
+  "currency": "INR", 
+  "customer": "_Test Customer", 
+  "customer_name": "_Test Customer", 
+  "delivery_note_details": [
+   {
+    "base_amount": 500.0, 
+    "base_rate": 100.0, 
+    "cost_center": "Main - _TC", 
+    "description": "CPU", 
+    "doctype": "Delivery Note Item", 
+    "expense_account": "Cost of Goods Sold - _TC", 
+    "item_code": "_Test Item", 
+    "item_name": "_Test Item", 
+    "parentfield": "delivery_note_details", 
+    "qty": 5.0, 
+    "rate": 100.0, 
+    "stock_uom": "_Test UOM", 
+    "warehouse": "_Test Warehouse - _TC"
+   }
+  ], 
+  "doctype": "Delivery Note", 
+  "fiscal_year": "_Test Fiscal Year 2013", 
+  "grand_total": 500.0, 
+  "grand_total_export": 500.0, 
+  "naming_series": "_T-Delivery Note-", 
+  "net_total": 500.0, 
+  "plc_conversion_rate": 1.0, 
+  "posting_date": "2013-02-21", 
+  "posting_time": "9:00:00", 
+  "price_list_currency": "INR", 
+  "selling_price_list": "_Test Price List", 
+  "status": "Draft", 
+  "territory": "_Test Territory"
+ }
+]

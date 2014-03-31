@@ -1,0 +1,44 @@
+[
+ {
+  "company": "_Test Company", 
+  "deduction_details": [
+   {
+    "d_amount": 100, 
+    "d_depends_on_lwp": 0, 
+    "d_type": "_Test Professional Tax", 
+    "doctype": "Salary Slip Deduction", 
+    "parentfield": "deduction_details"
+   }, 
+   {
+    "d_amount": 50, 
+    "d_depends_on_lwp": 1, 
+    "d_type": "_Test TDS", 
+    "doctype": "Salary Slip Deduction", 
+    "parentfield": "deduction_details"
+   }
+  ], 
+  "doctype": "Salary Slip", 
+  "earning_details": [
+   {
+    "doctype": "Salary Slip Earning", 
+    "e_amount": 15000, 
+    "e_depends_on_lwp": 1, 
+    "e_type": "_Test Basic Salary", 
+    "parentfield": "earning_details"
+   }, 
+   {
+    "doctype": "Salary Slip Earning", 
+    "e_amount": 500, 
+    "e_depends_on_lwp": 0, 
+    "e_type": "_Test Allowance", 
+    "parentfield": "earning_details"
+   }
+  ], 
+  "employee": "_T-Employee-0001", 
+  "employee_name": "_Test Employee", 
+  "fiscal_year": "_Test Fiscal Year 2013", 
+  "month": "01", 
+  "payment_days": 31, 
+  "total_days_in_month": 31
+ }
+]
