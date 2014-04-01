@@ -257,7 +257,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 	if target_doc:
 		if isinstance(target_doc, basestring):
 			import json
-			target_doc = frappe.doclist(json.loads(target_doc))
+			target_doc = frappe.get_doc(json.loads(target_doc))
 		target_doc = target_doc.get({"parentfield": ["!=", "po_details"]})
 		
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)

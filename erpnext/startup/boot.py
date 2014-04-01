@@ -18,7 +18,7 @@ def boot_session(bootinfo):
 		load_country_and_currency(bootinfo)
 		
 		bootinfo['notification_settings'] = frappe.get_doc("Notification Control", 
-			"Notification Control").get_values()
+			"Notification Control")
 				
 		# if no company, show a dialog box to create a new company
 		bootinfo["customer_count"] = frappe.db.sql("""select count(*) from tabCustomer""")[0][0]
