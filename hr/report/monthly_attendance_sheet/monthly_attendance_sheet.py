@@ -17,26 +17,27 @@ def execute(filters=None):
 	data = []
 	for emp in sorted(att_map):
 		emp_det = emp_map.get(emp)
-		row = [emp, emp_det.employee_name, emp_det.branch, emp_det.department, emp_det.designation, 
-			emp_det.company]
+		if emp_det:
+			row = [emp, emp_det.employee_name, emp_det.branch, 
+				emp_det.department, emp_det.designation, emp_det.company]
 			
-		total_p = total_a = 0.0
-		for day in range(filters["total_days_in_month"]):
-			status = att_map.get(emp).get(day + 1, "Absent")
-			status_map = {"Present": "P", "Absent": "A", "Half Day": "HD"}
-			row.append(status_map[status])
+			total_p = total_a = 0.0
+			for day in range(filters["total_days_in_month"]):
+				status = att_map.get(emp).get(day + 1, "Absent")
+				status_map = {"Present": "P", "Absent": "A", "Half Day": "HD"}
+				row.append(status_map[status])
 			
-			if status == "Present":
-				total_p += 1
-			elif status == "Absent":
-				total_a += 1
-			elif status == "Half Day":
-				total_p += 0.5
-				total_a += 0.5
+				if status == "Present":
+					total_p += 1
+				elif status == "Absent":
+					total_a += 1
+				elif status == "Half Day":
+					total_p += 0.5
+					total_a += 0.5
 	
-		row += [total_p, total_a]
+			row += [total_p, total_a]
 		
-		data.append(row)
+			data.append(row)
 	
 	return columns, data
 	
@@ -84,11 +85,9 @@ def get_conditions(filters):
 	return conditions, filters
 	
 def get_employee_details():
-	employee = webnotes.conn.sql("""select name, employee_name, designation, department, 
-		branch, company from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
-	
-	emp_map = {}
-	for emp in employee:
-		emp_map[emp.name] = emp
+	emp_map = webnotes._dict()
+	for d in webnotes.conn.sql("""select name, employee_name, designation, department, 
+		branch, company from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1):
+			emp_map.setdefault(d.name, d)
 		
 	return emp_map

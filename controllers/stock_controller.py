@@ -41,6 +41,7 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		for detail in voucher_details:
 			sle_list = stock_ledger.get(detail.name)
+			
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
