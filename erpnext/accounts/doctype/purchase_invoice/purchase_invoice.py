@@ -52,7 +52,6 @@ class PurchaseInvoice(BuyingController):
 		self.set_aging_date()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.update_raw_material_cost()
 		self.update_valuation_rate("entries")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
 			"purchase_receipt_details")
@@ -321,7 +320,7 @@ class PurchaseInvoice(BuyingController):
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 
-					valuation_amt = flt(item.base_amount + item.item_tax_amount + item.rm_supp_cost,
+					valuation_amt = flt(item.base_amount + item.item_tax_amount,
 						self.precision("base_amount", item))
 
 					gl_entries.append(
@@ -389,20 +388,6 @@ class PurchaseInvoice(BuyingController):
 
 	def on_update(self):
 		pass
-
-	def update_raw_material_cost(self):
-		if self.sub_contracted_items:
-			for d in self.get("entries"):
-				rm_cost = frappe.db.sql("""select raw_material_cost / quantity
-					from `tabBOM` where item = %s and is_default = 1 and docstatus = 1
-					and is_active = 1 """, (d.item_code,))
-				rm_cost = rm_cost and flt(rm_cost[0][0]) or 0
-
-				d.conversion_factor = d.conversion_factor or flt(frappe.db.get_value(
-					"UOM Conversion Detail", {"parent": d.item_code, "uom": d.uom},
-					"conversion_factor")) or 1
-
-				d.rm_supp_cost = rm_cost * flt(d.qty) * flt(d.conversion_factor)
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
