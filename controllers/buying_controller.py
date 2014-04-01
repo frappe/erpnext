@@ -224,8 +224,11 @@ class BuyingController(StockController):
 				item.conversion_factor = item.conversion_factor or flt(webnotes.conn.get_value(
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom}, 
 					"conversion_factor")) or 1
+				
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				item.valuation_rate = ((item.amount + item.item_tax_amount + item.rm_supp_cost)
+				rm_supp_cost = item.rm_supp_cost if self.doc.doctype=="Purchase Receipt" else 0.0
+				
+				item.valuation_rate = ((item.amount + item.item_tax_amount + rm_supp_cost)
 					/ qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
@@ -244,8 +247,13 @@ class BuyingController(StockController):
 		self.doclist = self.doc.clear_table(self.doclist, raw_material_table)
 		if self.doc.is_subcontracted=="Yes":
 			for item in self.doclist.get({"parentfield": self.fname}):
+				if self.doc.doctype == "Purchase Receipt":
+					item.rm_supp_cost = 0.0
 				if item.item_code in self.sub_contracted_items:
 					self.add_bom_items(item, raw_material_table)
+		elif self.doc.doctype == "Purchase Receipt":
+			for item in self.doclist.get({"parentfield": self.fname}):
+				item.rm_supp_cost = 0.0
 
 	def add_bom_items(self, d, raw_material_table):
 		bom_items = self.get_items_from_default_bom(d.item_code)
