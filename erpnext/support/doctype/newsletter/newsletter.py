@@ -10,12 +10,11 @@ from frappe import msgprint, throw, _
 from frappe.model.document import Document
 
 class Newsletter(Document):
-		
 	def onload(self):
 		if self.email_sent:
-			self.set("__status_count", dict(frappe.db.sql("""select status, count(*))
+			self.set("__status_count", dict(frappe.db.sql("""select status, count(*)
 				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
-				group by status""", (self.doctype, self.name))) or None
+				group by status""", (self.doctype, self.name))) or None)
 
 	def test_send(self, doctype="Lead"):
 		self.recipients = self.test_email_id.split(",")

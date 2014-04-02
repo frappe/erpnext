@@ -33,7 +33,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.is_opening:
 			self.is_opening = 'No'
 			
-		super(DocType, self).validate()
+		super(PurchaseInvoice, self).validate()
 		
 		self.po_required()
 		self.pr_required()
@@ -61,10 +61,10 @@ class PurchaseInvoice(BuyingController):
 			self.due_date = get_due_date(self.posting_date, self.supplier, "Supplier",
 				self.credit_to, self.company)
 		
-		super(DocType, self).set_missing_values(for_validate)
+		super(PurchaseInvoice, self).set_missing_values(for_validate)
 	
 	def get_advances(self):
-		super(DocType, self).get_advances(self.credit_to, 
+		super(PurchaseInvoice, self).get_advances(self.credit_to, 
 			"Purchase Invoice Advance", "advance_allocation_details", "debit")
 		
 	def check_active_purchase_items(self):
@@ -131,7 +131,7 @@ class PurchaseInvoice(BuyingController):
 					raise Exception
 		
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
+		super(PurchaseInvoice, self).validate_with_previous_doc(self.tname, {
 			"Purchase Order": {
 				"ref_dn_field": "purchase_order",
 				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
@@ -154,7 +154,7 @@ class PurchaseInvoice(BuyingController):
 		})
 		
 		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
-			super(DocType, self).validate_with_previous_doc(self.tname, {
+			super(PurchaseInvoice, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
 					"compare_fields": [["rate", "="]],

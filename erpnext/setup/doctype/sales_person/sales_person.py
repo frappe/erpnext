@@ -8,7 +8,7 @@ from frappe.utils import flt
 from frappe.utils.nestedset import DocTypeNestedSet
 
 class SalesPerson(DocTypeNestedSet):
-		self.nsm_parent_field = 'parent_sales_person';
+	nsm_parent_field = 'parent_sales_person';
 
 	def validate(self): 
 		for d in self.get('target_details'):
@@ -16,7 +16,7 @@ class SalesPerson(DocTypeNestedSet):
 				frappe.throw(_("Either target qty or target amount is mandatory."))
 	
 	def on_update(self):
-		super(DocType, self).on_update()
+		super(SalesPerson, self).on_update()
 		self.validate_one_root()
 	
 	def get_email_id(self):

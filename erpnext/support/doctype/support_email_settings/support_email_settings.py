@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.model.document import Document
+from frappe.utils.email_lib.receive import POP3Mailbox
+import _socket, poplib
 
 class SupportEmailSettings(Document):
 		
@@ -14,10 +16,7 @@ class SupportEmailSettings(Document):
 		"""
 			Checks support ticket email settings
 		"""
-		if self.sync_support_mails and self.mail_server:
-			from frappe.utils.email_lib.receive import POP3Mailbox
-						import _socket, poplib
-			
+		if self.sync_support_mails and self.mail_server:			
 			inc_email = frappe.get_doc('Incoming Email Settings')
 			# inc_email.encode()
 			inc_email.host = self.mail_server

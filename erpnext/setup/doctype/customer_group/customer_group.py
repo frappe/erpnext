@@ -8,7 +8,7 @@ from frappe import msgprint
 	
 from frappe.utils.nestedset import DocTypeNestedSet
 class CustomerGroup(DocTypeNestedSet):
-		self.nsm_parent_field = 'parent_customer_group';
+	nsm_parent_field = 'parent_customer_group';
 
 	def validate(self): 
 		if frappe.db.sql("select name from `tabCustomer Group` where name = %s and docstatus = 2", 
@@ -19,7 +19,7 @@ class CustomerGroup(DocTypeNestedSet):
 
 	def on_update(self):
 		self.validate_name_with_customer()
-		super(DocType, self).on_update()
+		super(CustomerGroup, self).on_update()
 		self.validate_one_root()
 		
 	def validate_name_with_customer(self):
@@ -44,4 +44,4 @@ class CustomerGroup(DocTypeNestedSet):
 				You can not trash/cancel/delete this customer group.", raise_exception=1)
 
 		# rebuild tree
-		super(DocType, self).on_trash()
+		super(CustomerGroup, self).on_trash()

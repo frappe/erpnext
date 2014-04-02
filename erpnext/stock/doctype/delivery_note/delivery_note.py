@@ -13,21 +13,21 @@ from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
 class DeliveryNote(SellingController):
-		self.tname = 'Delivery Note Item'
-		self.fname = 'delivery_note_details'
-		self.status_updater = [{
-			'source_dt': 'Delivery Note Item',
-			'target_dt': 'Sales Order Item',
-			'join_field': 'prevdoc_detail_docname',
-			'target_field': 'delivered_qty',
-			'target_parent_dt': 'Sales Order',
-			'target_parent_field': 'per_delivered',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
-			'percent_join_field': 'against_sales_order',
-			'status_field': 'delivery_status',
-			'keyword': 'Delivered'
-		}]
+	tname = 'Delivery Note Item'
+	fname = 'delivery_note_details'
+	status_updater = [{
+		'source_dt': 'Delivery Note Item',
+		'target_dt': 'Sales Order Item',
+		'join_field': 'prevdoc_detail_docname',
+		'target_field': 'delivered_qty',
+		'target_parent_dt': 'Sales Order',
+		'target_parent_field': 'per_delivered',
+		'target_ref_field': 'qty',
+		'source_field': 'qty',
+		'percent_join_field': 'against_sales_order',
+		'status_field': 'delivery_status',
+		'keyword': 'Delivered'
+	}]
 		
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
@@ -56,7 +56,7 @@ class DeliveryNote(SellingController):
 
 
 	def validate(self):
-		super(DocType, self).validate()
+		super(DeliveryNote, self).validate()
 		
 		from erpnext.utilities import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Cancelled"])
@@ -71,7 +71,7 @@ class DeliveryNote(SellingController):
 		self.validate_with_previous_doc()
 		
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		self.doclist = make_packing_list(self, 'delivery_note_details')
+		make_packing_list(self, 'delivery_note_details')
 		
 		self.status = 'Draft'
 		if not self.installation_status: self.installation_status = 'Not Installed'	
@@ -80,8 +80,8 @@ class DeliveryNote(SellingController):
 		items = self.get("delivery_note_details")
 		
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
-			if items.get_distinct_values(fn[1]):
-				super(DocType, self).validate_with_previous_doc(self.tname, {
+			if filter(None, [(d[fn[1]] or None) for d in self.get(self.fname)]):
+				super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
 					fn[0]: {
 						"ref_dn_field": fn[1],
 						"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
@@ -90,7 +90,7 @@ class DeliveryNote(SellingController):
 				})
 
 				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-					super(DocType, self).validate_with_previous_doc(self.tname, {
+					super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
 						fn[0] + " Item": {
 							"ref_dn_field": "prevdoc_detail_docname",
 							"compare_fields": [["rate", "="]],

@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 
 class RenameTool(Document):
+	pass
 		
 @frappe.whitelist()
 def get_doctypes():

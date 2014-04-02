@@ -22,8 +22,7 @@ class HolidayList(Document):
 		self.validate_values()
 		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
 		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
-		last_idx = max([cint(d.idx) for d in self.doclist.get(
-			{"parentfield": "holiday_list_details"})] or [0,])
+		last_idx = max([cint(d.idx) for d in self.get("holiday_list_details")] or [0,])
 		for i, d in enumerate(date_list):
 			ch = self.append('holiday_list_details', {})
 			ch.description = self.weekly_off

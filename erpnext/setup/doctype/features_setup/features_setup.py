@@ -12,6 +12,6 @@ class FeaturesSetup(Document):
 		"""
 		from frappe.model import default_fields 
 		from frappe.utils import set_default
-		for key in self.fields:
+		for key in self.meta.get_valid_columns():
 			if key not in default_fields:
 				set_default(key, self.get(key))

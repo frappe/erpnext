@@ -26,7 +26,7 @@ class PurchaseOrder(BuyingController):
 	}]
 		
 	def validate(self):
-		super(DocType, self).validate()
+		super(PurchaseOrder, self).validate()
 		
 		if not self.status:
 			self.status = "Draft"
@@ -47,7 +47,7 @@ class PurchaseOrder(BuyingController):
 		self.update_raw_materials_supplied("po_raw_material_details")
 		
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
+		super(PurchaseOrder, self).validate_with_previous_doc(self.tname, {
 			"Supplier Quotation": {
 				"ref_dn_field": "supplier_quotation",
 				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],

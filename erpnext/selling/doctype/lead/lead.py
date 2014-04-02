@@ -38,7 +38,7 @@ class Lead(SellingController):
 		self.add_calendar_event()
 		
 	def add_calendar_event(self, opts=None, force=False):
-		super(DocType, self).add_calendar_event({
+		super(Lead, self).add_calendar_event({
 			"owner": self.lead_owner,
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + \

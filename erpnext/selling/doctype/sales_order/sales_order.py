@@ -78,7 +78,7 @@ class SalesOrder(SellingController):
 						and current Sales Order""" % (self.order_type, d.prevdoc_docname))
 
 	def validate_order_type(self):
-		super(DocType, self).validate_order_type()
+		super(SalesOrder, self).validate_order_type()
 		
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales' and not self.delivery_date:
@@ -97,7 +97,7 @@ class SalesOrder(SellingController):
 				raise Exception
 	
 	def validate(self):
-		super(DocType, self).validate()
+		super(SalesOrder, self).validate()
 		
 		self.validate_order_type()
 		self.validate_delivery_date()
@@ -110,7 +110,7 @@ class SalesOrder(SellingController):
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
-		self.doclist = make_packing_list(self,'sales_order_details')
+		make_packing_list(self,'sales_order_details')
 		
 		self.validate_with_previous_doc()
 		
@@ -128,13 +128,13 @@ class SalesOrder(SellingController):
 		from erpnext.stock.utils import validate_warehouse_company
 		
 		warehouses = list(set([d.warehouse for d in 
-			self.doclist.get({"doctype": self.tname}) if d.warehouse]))
+			self.get(self.fname) if d.warehouse]))
 				
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
 		
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
+		super(SalesOrder, self).validate_with_previous_doc(self.tname, {
 			"Quotation": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["company", "="], ["currency", "="]]
@@ -148,12 +148,13 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag):				
-		for quotation in self.doclist.get_distinct_values("prevdoc_docname"):
-			bean = frappe.get_doc("Quotation", quotation)
-			if bean.docstatus==2:
-				frappe.throw(quotation + ": " + frappe._("Quotation is cancelled."))
+		for quotation in list(set([d.prevdoc_docname for d in self.get(self.fname)])):
+			if quotation:
+				doc = frappe.get_doc("Quotation", quotation)
+				if doc.docstatus==2:
+					frappe.throw(quotation + ": " + frappe._("Quotation is cancelled."))
 				
-			bean.set_status(update=True)
+				doc.set_status(update=True)
 
 	def on_submit(self):
 		self.update_stock_ledger(update_stock = 1)

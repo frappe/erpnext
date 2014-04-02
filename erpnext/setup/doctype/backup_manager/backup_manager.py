@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 
 class BackupManager(Document):
+	pass
 
 def take_backups_daily():
 	take_backups_if("Daily")

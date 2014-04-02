@@ -111,19 +111,19 @@ def import_defaults():
 	
 	from frappe.modules import scrub
 	for r in records:
-		bean = frappe.get_doc(r)
+		doc = frappe.get_doc(r)
 		
 		# ignore mandatory for root
-		parent_link_field = ("parent_" + scrub(bean.doctype))
-		if parent_link_field in bean.fields and not bean.get(parent_link_field):
-			bean.ignore_mandatory = True
+		parent_link_field = ("parent_" + scrub(doc.doctype))
+		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
+			doc.ignore_mandatory = True
 		
-		bean.insert()
+		doc.insert()
 		
 def feature_setup():
 	"""save global defaults and features setup"""
-	bean = frappe.get_doc("Features Setup", "Features Setup")
-	bean.ignore_permissions = True
+	doc = frappe.get_doc("Features Setup", "Features Setup")
+	doc.ignore_permissions = True
 
 	# store value as 1 for all these fields
 	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
@@ -133,8 +133,8 @@ def feature_setup():
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
-	bean.update(dict(zip(flds, [1]*len(flds))))
-	bean.save()
+	doc.update(dict(zip(flds, [1]*len(flds))))
+	doc.save()
 
 def set_single_defaults():
 	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):

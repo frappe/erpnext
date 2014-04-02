@@ -78,7 +78,7 @@ class Opportunity(TransactionBase):
 		if self.to_discuss:
 			opts.description += ' To Discuss : ' + cstr(self.to_discuss)
 		
-		super(DocType, self).add_calendar_event(opts, force)
+		super(Opportunity, self).add_calendar_event(opts, force)
 
 	def validate_item_details(self):
 		if not self.get('enquiry_details'):

@@ -10,7 +10,7 @@ from frappe.utils import cint
 
 from frappe.model.document import Document
 
-class HrSettings(Document):
+class HRSettings(Document):
 		
 	def validate(self):
 		self.update_birthday_reminders()

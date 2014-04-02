@@ -12,20 +12,20 @@ from erpnext.stock.utils import update_bin
 
 from erpnext.controllers.buying_controller import BuyingController
 class PurchaseReceipt(BuyingController):
-		self.tname = 'Purchase Receipt Item'
-		self.fname = 'purchase_receipt_details'
-		self.count = 0
-		self.status_updater = [{
-			'source_dt': 'Purchase Receipt Item',
-			'target_dt': 'Purchase Order Item',
-			'join_field': 'prevdoc_detail_docname',
-			'target_field': 'received_qty',
-			'target_parent_dt': 'Purchase Order',
-			'target_parent_field': 'per_received',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
-		}]
+	tname = 'Purchase Receipt Item'
+	fname = 'purchase_receipt_details'
+	count = 0
+	status_updater = [{
+		'source_dt': 'Purchase Receipt Item',
+		'target_dt': 'Purchase Order Item',
+		'join_field': 'prevdoc_detail_docname',
+		'target_field': 'received_qty',
+		'target_parent_dt': 'Purchase Order',
+		'target_parent_field': 'per_received',
+		'target_ref_field': 'qty',
+		'source_field': 'qty',
+		'percent_join_field': 'prevdoc_docname',
+	}]
 		
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
@@ -35,7 +35,7 @@ class PurchaseReceipt(BuyingController):
 			self.set("__billing_complete", billed_qty[0][0] == total_qty)
 
 	def validate(self):
-		super(DocType, self).validate()
+		super(PurchaseReceipt, self).validate()
 		
 		self.po_required()
 
@@ -101,7 +101,7 @@ class PurchaseReceipt(BuyingController):
 			Please enter a valid Challan No.", raise_exception=1)
 			
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
+		super(PurchaseReceipt, self).validate_with_previous_doc(self.tname, {
 			"Purchase Order": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["supplier", "="], ["company", "="],	["currency", "="]],
@@ -114,7 +114,7 @@ class PurchaseReceipt(BuyingController):
 		})
 		
 		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
-			super(DocType, self).validate_with_previous_doc(self.tname, {
+			super(PurchaseReceipt, self).validate_with_previous_doc(self.tname, {
 				"Purchase Order Item": {
 					"ref_dn_field": "prevdoc_detail_docname",
 					"compare_fields": [["rate", "="]],
@@ -289,7 +289,7 @@ class PurchaseReceipt(BuyingController):
 	def get_gl_entries(self, warehouse_account=None):
 		against_stock_account = self.get_company_default("stock_received_but_not_billed")
 		
-		gl_entries = super(DocType, self).get_gl_entries(warehouse_account, against_stock_account)
+		gl_entries = super(PurchaseReceipt, self).get_gl_entries(warehouse_account, against_stock_account)
 		return gl_entries
 		
 	

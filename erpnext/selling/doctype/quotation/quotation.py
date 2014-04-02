@@ -10,8 +10,8 @@ from frappe import _, msgprint
 from erpnext.controllers.selling_controller import SellingController
 
 class Quotation(SellingController):
-		self.tname = 'Quotation Item'
-		self.fname = 'quotation_details'
+	tname = 'Quotation Item'
+	fname = 'quotation_details'
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
@@ -26,7 +26,7 @@ class Quotation(SellingController):
 				chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
 	def validate_order_type(self):
-		super(DocType, self).validate_order_type()
+		super(Quotation, self).validate_order_type()
 		
 		if self.order_type in ['Maintenance', 'Service']:
 			for d in self.get('quotation_details'):
@@ -46,15 +46,16 @@ class Quotation(SellingController):
 					raise Exception
 	
 	def validate(self):
-		super(DocType, self).validate()
+		super(Quotation, self).validate()
 		self.set_status()
 		self.validate_order_type()
 		self.validate_for_items()
 		self.validate_uom_is_integer("stock_uom", "qty")
 
 	def update_opportunity(self):
-		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
-			frappe.get_doc("Opportunity", opportunity).set_status(update=True)
+		for opportunity in list(set([d.prevdoc_docname for d in self.get("quotation_details")])):
+			if opportunity:
+				frappe.get_doc("Opportunity", opportunity).set_status(update=True)
 	
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():

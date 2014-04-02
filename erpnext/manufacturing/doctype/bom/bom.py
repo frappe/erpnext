@@ -11,7 +11,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 
-class Bom(Document):
+class BOM(Document):
 
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM` 
@@ -28,7 +28,7 @@ class Bom(Document):
 		self.validate_main_item()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "stock_uom", "qty")
+		validate_uom_is_integer(self, "stock_uom", "qty")
 
 		self.validate_operations()
 		self.validate_materials()
@@ -133,11 +133,11 @@ class Bom(Document):
 			})["rate"]
 		
 		if self.docstatus == 0:
-			frappe.get_doc(self.doclist).save()
+			self.save()
 		elif self.docstatus == 1:
 			self.calculate_cost()
 			self.update_exploded_items()
-			frappe.get_doc(self.doclist).update_after_submit()
+			self.update_after_submit()
 
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`

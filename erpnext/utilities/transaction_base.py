@@ -63,7 +63,7 @@ class TransactionBase(StatusUpdater):
 			is_child = val.get("is_child_table")
 			ref_doc = {}
 			item_ref_dn = []
-			for d in self.doclist.get({"doctype": source_dt}):
+			for d in self.get_all_children(source_dt):
 				ref_dn = d.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:
@@ -96,17 +96,18 @@ def delete_events(ref_type, ref_name):
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
-def validate_uom_is_integer(doclist, uom_field, qty_fields):
+def validate_uom_is_integer(doc, uom_field, qty_fields):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
 	
+	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
 	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom, 
-		"must_be_whole_number") or None, doclist.get_distinct_values(uom_field))
+		"must_be_whole_number") or None, distinct_uoms)
 		
 	if not integer_uoms:
 		return
 
-	for d in doclist:
+	for d in doc.get_all_children():
 		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
 				if d.get(f):

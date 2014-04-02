@@ -9,7 +9,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 
-class SmsCenter(Document):
+class SMSCenter(Document):
 
 	def create_receiver_list(self):
 		rec, where_clause = '', ''

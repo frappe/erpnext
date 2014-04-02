@@ -179,8 +179,7 @@ class Item(DocListController):
 						frappe.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'"))
 							
 	def validate_item_type_for_reorder(self):
-		if self.re_order_level or len(self.doclist.get({"parentfield": "item_reorder", 
-				"material_request_type": "Purchase"})):
+		if self.re_order_level or len(self.get("item_reorder", {"material_request_type": "Purchase"})):
 			if not self.is_purchase_item:
 				frappe.msgprint(_("""To set reorder level, item must be Purchase Item"""), 
 					raise_exception=1)

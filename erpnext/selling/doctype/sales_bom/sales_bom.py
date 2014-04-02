@@ -6,7 +6,7 @@ import frappe
 
 from frappe.model.document import Document
 
-class SalesBom(Document):
+class SalesBOM(Document):
 
 
 	def autoname(self):
@@ -16,7 +16,7 @@ class SalesBom(Document):
 		self.validate_main_item()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "uom", "qty")
+		validate_uom_is_integer(self, "uom", "qty")
 
 	def validate_main_item(self):
 		"""main item must have Is Stock Item as No and Is Sales Item as Yes"""

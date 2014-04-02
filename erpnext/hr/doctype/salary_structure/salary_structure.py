@@ -82,7 +82,7 @@ def get_mapped_doc(source_name, target_doc=None):
 		sal_slip.run_method("get_leave_details")
 		sal_slip.run_method("calculate_net_pay")
 
-	doclist = get_mapped_doc("Salary Structure", source_name, {
+	doc = get_mapped_doc("Salary Structure", source_name, {
 		"Salary Structure": {
 			"doctype": "Salary Slip", 
 			"field_map": {
@@ -109,4 +109,4 @@ def get_mapped_doc(source_name, target_doc=None):
 		}
 	}, target_doc, postprocess)
 
-	return doclist
+	return doc

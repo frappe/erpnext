@@ -279,10 +279,9 @@ class StockReconciliation(StockController):
 		if not self.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 			
-		return super(DocType, self).get_gl_entries(warehouse_account, 		
+		return super(StockReconciliation, self).get_gl_entries(warehouse_account, 		
 			self.expense_account, self.cost_center)
 		
-			
 	def validate_expense_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return

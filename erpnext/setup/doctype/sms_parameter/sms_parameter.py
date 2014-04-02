@@ -6,5 +6,5 @@ import frappe
 
 from frappe.model.document import Document
 
-class SmsParameter(Document):
+class SMSParameter(Document):
 	pass

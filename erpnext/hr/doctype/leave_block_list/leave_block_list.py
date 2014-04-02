@@ -14,7 +14,7 @@ class LeaveBlockList(Document):
 		
 	def validate(self):
 		dates = []
-		for d in self.doclist.get({"doctype":"Leave Block List Date"}):
+		for d in self.get("leave_block_list_dates"):
 			# validate fiscal year
 			validate_fiscal_year(d.block_date, self.year, _("Block Date"))
 			

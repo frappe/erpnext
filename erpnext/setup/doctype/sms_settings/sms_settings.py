@@ -6,5 +6,5 @@ import frappe
 
 from frappe.model.document import Document
 
-class SmsSettings(Document):
+class SMSSettings(Document):
 	pass

@@ -55,7 +55,7 @@ class NamingSeries(Document):
 			default = options[0]
 
 		# update in property setter
-				prop_dict = {'options': "\n".join(options), 'default': default}
+		prop_dict = {'options': "\n".join(options), 'default': default}
 		for prop in prop_dict:
 			ps_exists = frappe.db.sql("""SELECT name FROM `tabProperty Setter`
 					WHERE doc_type = %s AND field_name = 'naming_series'

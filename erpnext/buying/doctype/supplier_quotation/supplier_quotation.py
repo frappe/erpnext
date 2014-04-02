@@ -10,7 +10,7 @@ class SupplierQuotation(BuyingController):
 	fname = "quotation_items"
 	
 	def validate(self):
-		super(DocType, self).validate()
+		super(SupplierQuotation, self).validate()
 		
 		if not self.status:
 			self.status = "Draft"
@@ -33,7 +33,7 @@ class SupplierQuotation(BuyingController):
 		pass
 			
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
+		super(SupplierQuotation, self).validate_with_previous_doc(self.tname, {
 			"Material Request": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["company", "="]],

@@ -94,13 +94,13 @@ class StatusUpdater(DocListController):
 	
 	def communication_received(self):
 		if getattr(self, "communication_set", False):
-			last_comm = self.doclist.get({"doctype":"Communication"})
+			last_comm = self.get("communications")
 			if last_comm:
 				return last_comm[-1].sent_or_received == "Received"
 
 	def communication_sent(self):
 		if getattr(self, "communication_set", False):
-			last_comm = self.doclist.get({"doctype":"Communication"})
+			last_comm = self.get("communications")
 			if last_comm:
 				return last_comm[-1].sent_or_received == "Sent"
 			
@@ -113,7 +113,7 @@ class StatusUpdater(DocListController):
 		
 		for args in self.status_updater:
 			# get unique transactions to update
-			for d in self.doclist:
+			for d in self.get_all_children():
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
@@ -191,7 +191,7 @@ class StatusUpdater(DocListController):
 				args['modified_cond'] = ', modified = now()'
 		
 			# update quantities in child table
-			for d in self.doclist:
+			for d in self.get_all_children():
 				if d.doctype == args['source_dt']:
 					# updates qty in the child table
 					args['detail_id'] = d.get(args['join_field'])
@@ -212,8 +212,7 @@ class StatusUpdater(DocListController):
 							where name='%(detail_id)s'""" % args)
 		
 			# get unique transactions to update
-			for name in set([d.get(args['percent_join_field']) for d in self.doclist 
-					if d.doctype == args['source_dt']]):
+			for name in set([d.get(args['percent_join_field']) for d in self.get_all_children(args['source_dt'])]):
 				if name:
 					args['name'] = name
 				

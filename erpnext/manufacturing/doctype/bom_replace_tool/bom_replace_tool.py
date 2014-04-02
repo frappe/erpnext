@@ -8,7 +8,7 @@ from frappe import msgprint, _
 	
 from frappe.model.document import Document
 
-class BomReplaceTool(Document):
+class BOMReplaceTool(Document):
 	def replace_bom(self):
 		self.validate_bom()
 		self.update_new_bom()

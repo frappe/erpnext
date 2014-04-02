@@ -9,7 +9,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 
-class StockUomReplaceUtility(Document):
+class StockUOMReplaceUtility(Document):
 	def validate_mandatory(self):
 		if not cstr(self.item_code):
 			msgprint("Please Enter an Item.")

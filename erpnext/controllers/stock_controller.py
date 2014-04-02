@@ -90,7 +90,7 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 		
 		if hasattr(self, "fname"):
-			item_doclist = self.doclist.get({"parentfield": self.fname})
+			item_doclist = self.get(self.fname)
 		elif self.doctype == "Stock Reconciliation":
 			import json
 			item_doclist = []

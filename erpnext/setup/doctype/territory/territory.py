@@ -19,5 +19,5 @@ class Territory(DocTypeNestedSet):
 				raise Exception
 
 	def on_update(self):
-		super(DocType, self).on_update()
+		super(Territory, self).on_update()
 		self.validate_one_root()

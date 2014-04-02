@@ -11,6 +11,7 @@ from frappe.utils import cstr, flt
 from frappe.model.document import Document
 
 class PackedItem(Document):
+	pass
 		
 def get_sales_bom_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom 
@@ -62,7 +63,7 @@ def make_packing_list(obj, item_table_fieldname):
 	"""make packing list for sales bom item"""
 	packing_list_idx = 0
 	parent_items = []
-	for d in obj.doclist.get({"parentfield": item_table_fieldname}):
+	for d in obj.get(item_table_fieldname):
 		warehouse = (item_table_fieldname == "sales_order_details") \
 			and d.warehouse or d.warehouse
 		if frappe.db.get_value("Sales BOM", {"new_item_code": d.item_code}):
@@ -73,23 +74,22 @@ def make_packing_list(obj, item_table_fieldname):
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])
 			
-	obj.doclist = cleanup_packing_list(obj, parent_items)
-	
-	return obj.doclist
-	
+	cleanup_packing_list(obj, parent_items)
+		
 def cleanup_packing_list(obj, parent_items):
 	"""Remove all those child items which are no longer present in main item table"""
 	delete_list = []
 	for d in obj.get("packing_details"):
 		if [d.parent_item, d.parent_detail_docname] not in parent_items:
 			# mark for deletion from doclist
-			delete_list.append([d.parent_item, d.parent_detail_docname])
+			delete_list.append(d)
 
 	if not delete_list:
-		return obj.doclist
+		return obj
 	
-	# delete from doclist
-	obj.doclist = frappe.doclist(filter(lambda d: [d.parent_item, d.parent_detail_docname] 
-		not in delete_list, obj.doclist))
-		
-	return obj.doclist
+	packing_details = obj.get("packing_details")
+	obj.set("packing_details", [])
+	for d in packing_details:
+		if d not in delete_list:
+			obj.append("packing_details", d)
+	

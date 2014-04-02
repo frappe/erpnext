@@ -24,7 +24,7 @@ class JournalVoucher(AccountsController):
 			
 		self.clearance_date = None
 		
-		super(DocType, self).validate_date_with_fiscal_year()
+		super(JournalVoucher, self).validate_date_with_fiscal_year()
 		
 		self.validate_debit_credit()
 		self.validate_cheque_info()
@@ -268,7 +268,7 @@ class JournalVoucher(AccountsController):
 			master_type, master_name = frappe.db.get_value("Account", d.account, 
 				["master_type", "master_name"])
 			if master_type == "Customer" and master_name:
-				super(DocType, self).check_credit_limit(d.account)
+				super(JournalVoucher, self).check_credit_limit(d.account)
 
 	def get_balance(self):
 		if not self.get('entries'):

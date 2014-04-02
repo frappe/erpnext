@@ -378,8 +378,8 @@ class AccountsController(TransactionBase):
 		return gl_dict
 				
 	def clear_unallocated_advances(self, childtype, parentfield):
-		self.doclist.remove_items({"parentfield": parentfield, "allocated_amount": ["in", [0, None, ""]]})
-			
+		self.set(parentfield, self.get(parentfield, {"allocated_amount": ["not in", [0, None, ""]]}))
+
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s 
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 		

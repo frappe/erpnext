@@ -12,8 +12,8 @@ from frappe import msgprint, _
 
 from erpnext.controllers.buying_controller import BuyingController
 class MaterialRequest(BuyingController):
-		self.tname = 'Material Request Item'
-		self.fname = 'indent_details'
+	tname = 'Material Request Item'
+	fname = 'indent_details'
 
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in self.get('indent_details')]
@@ -55,7 +55,7 @@ class MaterialRequest(BuyingController):
 	# Validate
 	# ---------------------
 	def validate(self):
-		super(DocType, self).validate()
+		super(MaterialRequest, self).validate()
 		
 		self.validate_schedule_date()
 		self.validate_uom_is_integer("uom", "qty")

@@ -38,7 +38,7 @@ class SalesInvoice(SellingController):
 	}]
 
 	def validate(self):
-		super(DocType, self).validate()
+		super(SalesInvoice, self).validate()
 		self.validate_posting_time()
 		self.so_dn_required()
 		self.validate_proj_cust()
@@ -150,17 +150,17 @@ class SalesInvoice(SellingController):
 			self.due_date = get_due_date(self.posting_date, self.customer, "Customer",
 				self.debit_to, self.company)
 		
-		super(DocType, self).set_missing_values(for_validate)
+		super(SalesInvoice, self).set_missing_values(for_validate)
 					
 	def update_time_log_batch(self, sales_invoice):
-		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
+		for d in self.get(self.fname):
 			if d.time_log_batch:
 				tlb = frappe.get_doc("Time Log Batch", d.time_log_batch)
 				tlb.sales_invoice = sales_invoice
 				tlb.update_after_submit()
 
 	def validate_time_logs_are_submitted(self):
-		for d in self.doclist.get({"doctype":"Sales Invoice Item"}):
+		for d in self.get(self.fname):
 			if d.time_log_batch:
 				status = frappe.db.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
@@ -206,7 +206,7 @@ class SalesInvoice(SellingController):
 				self.set_taxes("other_charges", "taxes_and_charges")
 	
 	def get_advances(self):
-		super(DocType, self).get_advances(self.debit_to, 
+		super(SalesInvoice, self).get_advances(self.debit_to, 
 			"Sales Invoice Advance", "advance_adjustment_details", "credit")
 		
 	def get_company_abbr(self):
@@ -269,7 +269,7 @@ class SalesInvoice(SellingController):
 				msgprint("Please select income head with account type 'Fixed Asset' as Item %s is an asset item" % d.item_code, raise_exception=True)				
 		
 	def validate_with_previous_doc(self):
-		super(DocType, self).validate_with_previous_doc(self.tname, {
+		super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
 				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
@@ -283,7 +283,7 @@ class SalesInvoice(SellingController):
 		})
 		
 		if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-			super(DocType, self).validate_with_previous_doc(self.tname, {
+			super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
 					"compare_fields": [["rate", "="]],
@@ -537,7 +537,7 @@ class SalesInvoice(SellingController):
 		# expense account gl entries
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.update_stock):
-			gl_entries += super(DocType, self).get_gl_entries()
+			gl_entries += super(SalesInvoice, self).get_gl_entries()
 				
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos) and self.cash_bank_account and self.paid_amount:

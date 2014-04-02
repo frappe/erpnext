@@ -34,7 +34,7 @@ class SalarySlip(TransactionBase):
 
 	def pull_sal_struct(self, struct):
 		from erpnext.hr.doctype.salary_structure.salary_structure import get_mapped_doc
-		self.doclist = get_mapped_doc(struct, self.doclist)
+		self.update(get_mapped_doc(struct, self))
 		
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee, 

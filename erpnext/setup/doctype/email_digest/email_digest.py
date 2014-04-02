@@ -471,7 +471,6 @@ class EmailDigest(DocListController):
 		self.get_next_sending()
 	
 def send():
-		from frappe.utils import getdate
 	now_date = now_datetime().date()
 	
 	for ed in frappe.db.sql("""select name from `tabEmail Digest`

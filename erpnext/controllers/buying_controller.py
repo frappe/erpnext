@@ -40,7 +40,7 @@ class BuyingController(StockController):
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
-			for d in self.doclist.get({"doctype": self.tname}):
+			for d in self.get(self.fname):
 				supplier = frappe.db.get_value("Item", d.item_code, "default_supplier")
 				if supplier:
 					self.supplier = supplier
@@ -50,7 +50,7 @@ class BuyingController(StockController):
 		from erpnext.stock.utils import validate_warehouse_company
 		
 		warehouses = list(set([d.warehouse for d in 
-			self.doclist.get({"doctype": self.tname}) if d.warehouse]))
+			self.get(self.fname) if d.warehouse]))
 				
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)

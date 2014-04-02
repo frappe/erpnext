@@ -23,7 +23,7 @@ class StockOverProductionError(frappe.ValidationError): pass
 from erpnext.controllers.stock_controller import StockController
 
 class StockEntry(StockController):
-		self.fname = 'mtn_details' 
+	fname = 'mtn_details' 
 		
 	def validate(self):
 		self.validate_posting_time()
@@ -83,8 +83,7 @@ class StockEntry(StockController):
 		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return"]
 		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return"]
 		
-		validate_for_manufacture_repack = any([d.bom_no for d in self.doclist.get(
-			{"parentfield": "mtn_details"})])
+		validate_for_manufacture_repack = any([d.bom_no for d in self.get("mtn_details")])
 
 		if self.purpose in source_mandatory and self.purpose not in target_mandatory:
 			self.to_warehouse = None

@@ -10,7 +10,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 
-class PaymentToInvoiceMatchingTool(Document):
+class PaymenttoInvoiceMatchingTool(Document):
 	def get_voucher_details(self):
 		total_amount = frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0)) 
 			from `tabGL Entry` 
