@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-24 19:29:05", 
   "docstatus": 0, 
-  "modified": "2014-01-16 15:36:16", 
+  "modified": "2014-04-02 15:36:16", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -644,7 +644,8 @@
   "oldfieldtype": "Currency", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
-  "read_only": 0
+  "read_only": 0,
+  "no_copy": 1
  }, 
  {
   "depends_on": "is_pos", 
@@ -683,7 +684,8 @@
   "label": "Write Off Amount", 
   "options": "Company:company:default_currency", 
   "print_hide": 1, 
-  "read_only": 0
+  "read_only": 0, 
+  "no_copy": 1
  }, 
  {
   "depends_on": "is_pos", 
