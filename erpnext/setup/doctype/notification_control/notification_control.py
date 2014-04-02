@@ -10,8 +10,6 @@ from frappe import msgprint
 from frappe.model.document import Document
 
 class NotificationControl(Document):
-
-
 	def get_message(self, arg):
 		fn = arg.lower().replace(' ', '_') + '_message'
 		v = frappe.db.sql("select value from tabSingles where field=%s and doctype=%s", (fn, 'Notification Control'))
