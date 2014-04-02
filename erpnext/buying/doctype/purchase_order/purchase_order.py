@@ -11,19 +11,19 @@ from frappe import msgprint
 	
 from erpnext.controllers.buying_controller import BuyingController
 class PurchaseOrder(BuyingController):
-		self.tname = 'Purchase Order Item'
-		self.fname = 'po_details'
-		self.status_updater = [{
-			'source_dt': 'Purchase Order Item',
-			'target_dt': 'Material Request Item',
-			'join_field': 'prevdoc_detail_docname',
-			'target_field': 'ordered_qty',
-			'target_parent_dt': 'Material Request',
-			'target_parent_field': 'per_ordered',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
-		}]
+	tname = 'Purchase Order Item'
+	fname = 'po_details'
+	status_updater = [{
+		'source_dt': 'Purchase Order Item',
+		'target_dt': 'Material Request Item',
+		'join_field': 'prevdoc_detail_docname',
+		'target_field': 'ordered_qty',
+		'target_parent_dt': 'Material Request',
+		'target_parent_field': 'per_ordered',
+		'target_ref_field': 'qty',
+		'source_field': 'qty',
+		'percent_join_field': 'prevdoc_docname',
+	}]
 		
 	def validate(self):
 		super(DocType, self).validate()

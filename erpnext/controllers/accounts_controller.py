@@ -342,20 +342,14 @@ class AccountsController(TransactionBase):
 	
 	def _cleanup(self):
 		for tax in self.tax_doclist:
-			for fieldname in ("grand_total_for_current_item",
-				"tax_amount_for_current_item",
-				"tax_fraction_for_current_item", 
-				"grand_total_fraction_for_current_item"):
-				if fieldname in tax.fields:
-					del tax.get(fieldname)
-			
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail)
 			
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""
-		item.set(base_field, flt((flt(item.get(print_field),)
-			self.precision(print_field, item)) * self.conversion_rate),
+		value_in_company_currency = flt(self.conversion_rate * 
+			flt(item.get(print_field), self.precision(print_field, item)),
 			self.precision(base_field, item))
+		item.set(base_field, value_in_company_currency)
 			
 	def calculate_total_advance(self, parenttype, advance_parentfield):
 		if self.doctype == parenttype and self.docstatus < 2:

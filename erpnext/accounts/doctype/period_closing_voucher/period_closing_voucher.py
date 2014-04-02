@@ -8,8 +8,6 @@ from frappe import _
 from erpnext.controllers.accounts_controller import AccountsController
 
 class PeriodClosingVoucher(AccountsController):
-		self.year_start_date = ''
-
 	def validate(self):
 		self.validate_account_head()
 		self.validate_posting_date()
@@ -47,7 +45,7 @@ class PeriodClosingVoucher(AccountsController):
 			and t2.docstatus < 2 and t2.company = %s 
 			and t1.posting_date between %s and %s 
 			group by t1.account
-		""", (self.company, self.year_start_date, self.posting_date), as_dict=1)
+		""", (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
 	 
 	def make_gl_entries(self):
 		gl_entries = []

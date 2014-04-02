@@ -147,18 +147,6 @@ class BuyingController(StockController):
 			self.outstanding_amount = flt(self.total_amount_to_pay - self.total_advance,
 				self.precision("outstanding_amount"))
 			
-	def _cleanup(self):
-		super(BuyingController, self)._cleanup()
-		
-		if not self.meta.get_field("item_tax_amount", parentfield=self.fname):
-			for item in self.item_doclist:
-				del item.get("item_tax_amount")
-				
-		if not self.meta.get_field("tax_amount_after_discount_amount", 
-				parentfield=self.other_fname):
-			for tax in self.tax_doclist:
-				del tax.get("tax_amount_after_discount_amount")
-				
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
 		"""

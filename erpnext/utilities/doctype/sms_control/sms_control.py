@@ -70,7 +70,7 @@ class SmsControl(Document):
 	def send_via_gateway(self, arg):
 		ss = frappe.get_doc('SMS Settings', 'SMS Settings')
 		args = {ss.message_parameter : arg.get('message')}
-		for d in getlist(ss.doclist, 'static_parameter_details'):
+		for d in ss.get("static_parameter_details"):
 			args[d.parameter] = d.value
 		
 		resp = []

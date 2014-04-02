@@ -10,6 +10,8 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 class ProductionPlanningTool(Document):
+	def __init__(self, arg1, arg2=None):
+		super(ProductionPlanningTool, self).__init__(arg1, arg2)
 		self.item_dict = {}
 
 	def get_so_details(self, so):

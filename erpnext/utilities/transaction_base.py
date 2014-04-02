@@ -13,8 +13,8 @@ class TransactionBase(StatusUpdater):
 	def load_notification_message(self):
 		dt = self.doctype.lower().replace(" ", "_")
 		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
-			self.set("__notification_message", \)
-				frappe.db.get_value("Notification Control", None, dt + "_message")
+			self.set("__notification_message",
+				frappe.db.get_value("Notification Control", None, dt + "_message"))
 							
 	def validate_posting_time(self):
 		if not self.posting_time:

@@ -11,7 +11,8 @@ from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import AccountsController
 
 class JournalVoucher(AccountsController):
-
+	def __init__(self, arg1, arg2=None):
+		super(JournalVoucher, self).__init__(arg1, arg2)
 		self.master_type = {}
 		self.credit_days_for = {}
 		self.credit_days_global = -1

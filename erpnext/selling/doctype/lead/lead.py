@@ -11,20 +11,19 @@ from frappe import session
 from erpnext.controllers.selling_controller import SellingController
 
 class Lead(SellingController):
-
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if \
-				(not cint(self.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if \
-				(not cint(self.get("__islocal"))) else None,
-		})
-
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		if customer:
 			self.set("__is_customer", customer)
 	
 	def validate(self):
+		self._prev = frappe._dict({
+			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if \
+				(not cint(self.get("__islocal"))) else None,
+			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if \
+				(not cint(self.get("__islocal"))) else None,
+		})
+		
 		self.set_status()
 		
 		if self.source == 'Campaign' and not self.campaign_name and session['user'] != 'Guest':

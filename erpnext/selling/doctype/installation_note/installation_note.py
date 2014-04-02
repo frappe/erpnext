@@ -12,21 +12,21 @@ from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
 
 class InstallationNote(TransactionBase):
-		self.tname = 'Installation Note Item'
-		self.fname = 'installed_item_details'
-		self.status_updater = [{
-			'source_dt': 'Installation Note Item',
-			'target_dt': 'Delivery Note Item',
-			'target_field': 'installed_qty',
-			'target_ref_field': 'qty',
-			'join_field': 'prevdoc_detail_docname',
-			'target_parent_dt': 'Delivery Note',
-			'target_parent_field': 'per_installed',
-			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
-			'status_field': 'installation_status',
-			'keyword': 'Installed'
-		}]
+	tname = 'Installation Note Item'
+	fname = 'installed_item_details'
+	status_updater = [{
+		'source_dt': 'Installation Note Item',
+		'target_dt': 'Delivery Note Item',
+		'target_field': 'installed_qty',
+		'target_ref_field': 'qty',
+		'join_field': 'prevdoc_detail_docname',
+		'target_parent_dt': 'Delivery Note',
+		'target_parent_field': 'per_installed',
+		'source_field': 'qty',
+		'percent_join_field': 'prevdoc_docname',
+		'status_field': 'installation_status',
+		'keyword': 'Installed'
+	}]
 
 	def validate(self):
 		self.validate_fiscal_year()

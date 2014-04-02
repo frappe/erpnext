@@ -7,7 +7,7 @@ import frappe
 from frappe.utils.nestedset import DocTypeNestedSet
 
 class ItemGroup(DocTypeNestedSet):
-		self.nsm_parent_field = 'parent_item_group'
+	nsm_parent_field = 'parent_item_group'
 	
 	def validate(self):
 		if not self.parent_website_route:

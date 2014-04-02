@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt
-from frappe.model.utils import getlist
 from frappe import msgprint, _
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -19,7 +18,7 @@ class PurchaseCommon(BuyingController):
 		import frappe.utils
 		this_purchase_date = frappe.utils.getdate(obj.get('posting_date') or obj.get('transaction_date'))
 		
-		for d in getlist(obj.doclist,obj.fname):
+		for d in obj.get(obj.fname):
 			# get last purchase details
 			last_purchase_details = get_last_purchase_details(d.item_code, obj.name)
 
@@ -47,7 +46,7 @@ class PurchaseCommon(BuyingController):
 		doc_name = obj.name
 		conversion_rate = flt(obj.get('conversion_rate')) or 1.0
 		
-		for d in getlist(obj.doclist, obj.fname):
+		for d in obj.get(obj.fname):
 			if d.item_code:
 				last_purchase_details = get_last_purchase_details(d.item_code, doc_name)
 
@@ -69,7 +68,7 @@ class PurchaseCommon(BuyingController):
 			
 	def validate_for_items(self, obj):
 		check_list, chk_dupl_itm=[],[]
-		for d in getlist( obj.doclist, obj.fname):
+		for d in obj.get(obj.fname):
 			# validation for valid qty	
 			if flt(d.qty) < 0 or (d.parenttype != 'Purchase Receipt' and not flt(d.qty)):
 				frappe.throw("Please enter valid qty for item %s" % cstr(d.item_code))

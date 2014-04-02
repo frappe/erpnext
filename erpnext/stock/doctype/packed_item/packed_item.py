@@ -32,7 +32,7 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 
 	# check if exists
 	exists = 0
-	for d in getlist(obj.doclist, 'packing_details'):
+	for d in obj.get("packing_details"):
 		if d.parent_item == line.item_code and d.item_code == packing_item_code and d.parent_detail_docname == line.name:
 			pi, exists = d, 1
 			break
