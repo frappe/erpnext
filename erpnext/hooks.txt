@@ -25,12 +25,12 @@ on_session_creation = erpnext.startup.event_handlers.on_session_creation
 # Bean Events
 # -------------------------
 
-bean_event:*:on_update = erpnext.home.update_feed
-bean_event:*:on_submit = erpnext.home.update_feed
-bean_event:Comment:on_update = erpnext.home.make_comment_feed
+doc_event:*:on_update = erpnext.home.update_feed
+doc_event:*:on_submit = erpnext.home.update_feed
+doc_event:Comment:on_update = erpnext.home.make_comment_feed
 
-bean_event:Stock Entry:on_submit = erpnext.stock.doctype.material_request.material_request.update_completed_qty
-bean_event:Stock Entry:on_cancel = erpnext.stock.doctype.material_request.material_request.update_completed_qty
+doc_event:Stock Entry:on_submit = erpnext.stock.doctype.material_request.material_request.update_completed_qty
+doc_event:Stock Entry:on_cancel = erpnext.stock.doctype.material_request.material_request.update_completed_qty
 
 standard_queries = Customer:erpnext.selling.doctype.customer.customer.get_customer_list
 
