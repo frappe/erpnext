@@ -241,23 +241,23 @@ class StockEntry(StockController):
 						
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
-		ref = get_return_doclist_and_details(self.fields)
+		ref = get_return_doc_and_details(self)
 		
-		if ref.doclist:
+		if ref.doc:
 			# validate docstatus
-			if ref.doclist[0].docstatus != 1:
-				frappe.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
+			if ref.doc.docstatus != 1:
+				frappe.msgprint(_(ref.doc.doctype) + ' "' + ref.doc.name + '": ' 
 					+ _("Status should be Submitted"), raise_exception=frappe.InvalidStatusError)
 			
 			# update stock check
-			if ref.doclist[0].doctype == "Sales Invoice" and cint(ref.doclist[0].update_stock) != 1:
-				frappe.msgprint(_(ref.doclist[0].doctype) + ' "' + ref.doclist[0].name + '": ' 
+			if ref.doc.doctype == "Sales Invoice" and cint(ref.doc.update_stock) != 1:
+				frappe.msgprint(_(ref.doc.doctype) + ' "' + ref.doc.name + '": ' 
 					+ _("Update Stock should be checked."), 
 					raise_exception=NotUpdateStockError)
 			
 			# posting date check
-			ref_posting_datetime = "%s %s" % (cstr(ref.doclist[0].posting_date), 
-				cstr(ref.doclist[0].posting_time) or "00:00:00")
+			ref_posting_datetime = "%s %s" % (cstr(ref.doc.posting_date), 
+				cstr(ref.doc.posting_time) or "00:00:00")
 			this_posting_datetime = "%s %s" % (cstr(self.posting_date), 
 				cstr(self.posting_time))
 			if this_posting_datetime < ref_posting_datetime:
@@ -266,18 +266,18 @@ class StockEntry(StockController):
 					+ ": " + datetime_in_user_format(ref_posting_datetime),
 					raise_exception=True)
 			
-			stock_items = get_stock_items_for_return(ref.doclist, ref.parentfields)
+			stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
 			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)
 			
 			for item in self.get("mtn_details"):
-				# validate if item exists in the ref doclist and that it is a stock item
+				# validate if item exists in the ref doc and that it is a stock item
 				if item.item_code not in stock_items:
 					msgprint(_("Item") + ': "' + item.item_code + _("\" does not exist in ") +
-						ref.doclist[0].doctype + ": " + ref.doclist[0].name, 
+						ref.doc.doctype + ": " + ref.doc.name, 
 						raise_exception=frappe.DoesNotExistError)
 				
 				# validate quantity <= ref item's qty - qty already returned
-				ref_item = ref.doclist.getone({"item_code": item.item_code})
+				ref_item = ref.getone({"item_code": item.item_code})
 				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
 					frappe.throw("{item}: {item_code} {returned}".format(
@@ -638,13 +638,13 @@ def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filter
 def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 	txt = txt.replace("%", "")
 
-	ref = get_return_doclist_and_details(filters)
+	ref = get_return_doc_and_details(filters)
 			
-	stock_items = get_stock_items_for_return(ref.doclist, ref.parentfields)
+	stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
 	
 	result = []
-	for item in ref.doclist.get({"parentfield": ["in", ref.parentfields]}):
-		if item.item_code in stock_items:
+	for item in ref.doc.get_all_children():
+		if getattr(item, "item_code", None) in stock_items:
 			item.item_name = cstr(item.item_name)
 			item.description = cstr(item.description)
 			if (txt in item.item_code) or (txt in item.item_name) or (txt in item.description):
@@ -704,28 +704,28 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			limit %(start)s, %(page_len)s
 		""" % args)
 
-def get_stock_items_for_return(ref_doclist, parentfields):
-	"""return item codes filtered from doclist, which are stock items"""
+def get_stock_items_for_return(ref_doc, parentfields):
+	"""return item codes filtered from doc, which are stock items"""
 	if isinstance(parentfields, basestring):
 		parentfields = [parentfields]
 	
 	all_items = list(set([d.item_code for d in 
-		ref_doclist.get({"parentfield": ["in", parentfields]})]))
+		ref_doc.get_all_children() if d.item_code]))
 	stock_items = frappe.db.sql_list("""select name from `tabItem`
 		where is_stock_item='Yes' and name in (%s)""" % (", ".join(["%s"] * len(all_items))),
 		tuple(all_items))
 
 	return stock_items
 	
-def get_return_doclist_and_details(args):
+def get_return_doc_and_details(args):
 	ref = frappe._dict()
 	
-	# get ref_doclist
+	# get ref_doc
 	if args["purpose"] in return_map:
 		for fieldname, val in return_map[args["purpose"]].items():
 			if args.get(fieldname):
 				ref.fieldname = fieldname
-				ref.doclist = frappe.get_doclist(val[0], args[fieldname])
+				ref.doc = frappe.get_doc(val[0], args[fieldname])
 				ref.parentfields = val[1]
 				break
 				
@@ -748,16 +748,16 @@ def make_return_jv(stock_entry):
 	if not se.purpose in ["Sales Return", "Purchase Return"]:
 		return
 	
-	ref = get_return_doclist_and_details(se.fields)
+	ref = get_return_doc_and_details(se.fields)
 	
-	if ref.doclist[0].doctype == "Delivery Note":
+	if ref.doc.doctype == "Delivery Note":
 		result = make_return_jv_from_delivery_note(se, ref)
-	elif ref.doclist[0].doctype == "Sales Invoice":
+	elif ref.doc.doctype == "Sales Invoice":
 		result = make_return_jv_from_sales_invoice(se, ref)
-	elif ref.doclist[0].doctype == "Purchase Receipt":
+	elif ref.doc.doctype == "Purchase Receipt":
 		result = make_return_jv_from_purchase_receipt(se, ref)
 	
-	# create jv doclist and fetch balance for each unique row item
+	# create jv doc and fetch balance for each unique row item
 	jv_list = [{
 		"__islocal": 1,
 		"doctype": "Journal Voucher",
@@ -785,28 +785,28 @@ def make_return_jv(stock_entry):
 def make_return_jv_from_sales_invoice(se, ref):
 	# customer account entry
 	parent = {
-		"account": ref.doclist[0].debit_to,
-		"against_invoice": ref.doclist[0].name,
+		"account": ref.doc.debit_to,
+		"against_invoice": ref.doc.name,
 	}
 	
 	# income account entries
 	children = []
 	for se_item in se.get("mtn_details"):
-		# find item in ref.doclist
-		ref_item = ref.doclist.getone({"item_code": se_item.item_code})
+		# find item in ref.doc
+		ref_item = ref.doc.get({"item_code": se_item.item_code})[0]
 		
-		account = get_sales_account_from_item(ref.doclist, ref_item)
+		account = get_sales_account_from_item(ref.doc, ref_item)
 		
 		if account not in children:
 			children.append(account)
 			
 	return [parent] + [{"account": account} for account in children]
 	
-def get_sales_account_from_item(doclist, ref_item):
+def get_sales_account_from_item(doc, ref_item):
 	account = None
 	if not ref_item.income_account:
 		if ref_item.parent_item:
-			parent_item = doclist.getone({"item_code": ref_item.parent_item})
+			parent_item = doc.get({"item_code": ref_item.parent_item})[0]
 			account = parent_item.income_account
 	else:
 		account = ref_item.income_account
@@ -815,10 +815,10 @@ def get_sales_account_from_item(doclist, ref_item):
 	
 def make_return_jv_from_delivery_note(se, ref):
 	invoices_against_delivery = get_invoice_list("Sales Invoice Item", "delivery_note",
-		ref.doclist[0].name)
+		ref.doc.name)
 	
 	if not invoices_against_delivery:
-		sales_orders_against_delivery = [d.against_sales_order for d in ref.doclist if d.against_sales_order]
+		sales_orders_against_delivery = [d.against_sales_order for d in ref.doc.get_all_children() if d.against_sales_order]
 		
 		if sales_orders_against_delivery:
 			invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",
@@ -827,8 +827,7 @@ def make_return_jv_from_delivery_note(se, ref):
 	if not invoices_against_delivery:
 		return []
 		
-	packing_item_parent_map = dict([[d.item_code, d.parent_item] for d in ref.doclist.get(
-		{"parentfield": ref.parentfields[1]})])
+	packing_item_parent_map = dict([[d.item_code, d.parent_item] for d in ref.doc.get(ref.parentfields[1])])
 	
 	parent = {}
 	children = []
@@ -838,16 +837,16 @@ def make_return_jv_from_delivery_note(se, ref):
 			si = frappe.get_doc("Sales Invoice", sales_invoice)
 			
 			if se_item.item_code in packing_item_parent_map:
-				ref_item = si.doclist.get({"item_code": packing_item_parent_map[se_item.item_code]})
+				ref_item = si.get({"item_code": packing_item_parent_map[se_item.item_code]})
 			else:
-				ref_item = si.doclist.get({"item_code": se_item.item_code})
+				ref_item = si.get({"item_code": se_item.item_code})
 			
 			if not ref_item:
 				continue
 				
 			ref_item = ref_item[0]
 			
-			account = get_sales_account_from_item(si.doclist, ref_item)
+			account = get_sales_account_from_item(si, ref_item)
 			
 			if account not in children:
 				children.append(account)
@@ -874,11 +873,11 @@ def get_invoice_list(doctype, link_field, value):
 			
 def make_return_jv_from_purchase_receipt(se, ref):
 	invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_receipt",
-		ref.doclist[0].name)
+		ref.doc.name)
 	
 	if not invoice_against_receipt:
 		purchase_orders_against_receipt = [d.prevdoc_docname for d in 
-			ref.doclist.get({"prevdoc_doctype": "Purchase Order"}) if d.prevdoc_docname]
+			ref.get({"prevdoc_doctype": "Purchase Order"}) if d.prevdoc_docname]
 		
 		if purchase_orders_against_receipt:
 			invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_order",
@@ -893,7 +892,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 	for se_item in se.get("mtn_details"):
 		for purchase_invoice in invoice_against_receipt:
 			pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
-			ref_item = pi.doclist.get({"item_code": se_item.item_code})
+			ref_item = pi.get({"item_code": se_item.item_code})
 			
 			if not ref_item:
 				continue

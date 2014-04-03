@@ -370,7 +370,7 @@ class SellingController(StockController):
 						d.get(ref_fieldname))
 		
 def check_active_sales_items(obj):
-	for d in obj.doclist.get({"parentfield": obj.fname}):
+	for d in obj.get(obj.fname):
 		if d.item_code:
 			item = frappe.db.sql("""select docstatus, is_sales_item, 
 				is_service_item, income_account from tabItem where name = %s""", 

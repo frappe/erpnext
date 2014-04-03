@@ -736,7 +736,7 @@ def send_notification(new_rv):
 	from frappe.core.doctype.print_format.print_format import get_html
 	frappe.sendmail(new_rv.notification_email_address, 
 		subject="New Invoice : " + new_rv.name, 
-		message = get_html(new_rv.doc, new_rv.doclist, "SalesInvoice"))
+		message = get_html(new_rv.doc, new_rv, "SalesInvoice"))
 		
 def notify_errors(inv, customer, owner):
 	from frappe.utils.user import get_system_managers

@@ -41,7 +41,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		out["sales_team"] = [{
 			"sales_person": d.sales_person, 
 			"sales_designation": d.sales_designation
-		} for d in party_bean.doclist.get({"doctype":"Sales Team"})]
+		} for d in party_bean.get("sales_team")]
 	
 	return out
 

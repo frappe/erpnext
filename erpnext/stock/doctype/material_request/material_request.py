@@ -191,29 +191,32 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 	"""update requested qty (before ordered_qty is updated)"""
 	from erpnext.stock.utils import update_bin
 	for mr_item_name in mr_items:
-		mr_item = mr_obj.doclist.getone({"parentfield": "indent_details", "name": mr_item_name})
-		se_detail = bean.doclist.getone({"parentfield": "mtn_details",
-			"material_request": mr_obj.name, "material_request_item": mr_item_name})
+		mr_item = mr_obj.get("indent_details", {"name": mr_item_name})
+		se_detail = bean.get("mtn_details", {"material_request": mr_obj.name, 
+			"material_request_item": mr_item_name})
 	
-		mr_item.ordered_qty = flt(mr_item.ordered_qty)
-		mr_item.qty = flt(mr_item.qty)
-		se_detail.transfer_qty = flt(se_detail.transfer_qty)
+		if mr_item and se_detail:
+			mr_item = mr_item[0]
+			se_detail = se_detail[0]
+			mr_item.ordered_qty = flt(mr_item.ordered_qty)
+			mr_item.qty = flt(mr_item.qty)
+			se_detail.transfer_qty = flt(se_detail.transfer_qty)
 	
-		if se_detail.docstatus == 2 and mr_item.ordered_qty > mr_item.qty \
-				and se_detail.transfer_qty == mr_item.ordered_qty:
-			add_indented_qty = mr_item.qty
-		elif se_detail.docstatus == 1 and \
-				mr_item.ordered_qty + se_detail.transfer_qty > mr_item.qty:
-			add_indented_qty = mr_item.qty - mr_item.ordered_qty
-		else:
-			add_indented_qty = se_detail.transfer_qty
+			if se_detail.docstatus == 2 and mr_item.ordered_qty > mr_item.qty \
+					and se_detail.transfer_qty == mr_item.ordered_qty:
+				add_indented_qty = mr_item.qty
+			elif se_detail.docstatus == 1 and \
+					mr_item.ordered_qty + se_detail.transfer_qty > mr_item.qty:
+				add_indented_qty = mr_item.qty - mr_item.ordered_qty
+			else:
+				add_indented_qty = se_detail.transfer_qty
 	
-		update_bin({
-			"item_code": se_detail.item_code,
-			"warehouse": se_detail.t_warehouse,
-			"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
-			"posting_date": bean.posting_date,
-		})
+			update_bin({
+				"item_code": se_detail.item_code,
+				"warehouse": se_detail.t_warehouse,
+				"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
+				"posting_date": bean.posting_date,
+			})
 
 def set_missing_values(source, target_doc):
 	po = frappe.get_doc(target_doc)

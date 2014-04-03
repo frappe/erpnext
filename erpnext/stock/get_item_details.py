@@ -209,12 +209,10 @@ def validate_conversion_rate(args, meta):
 	
 def get_party_item_code(args, item_bean, out):
 	if args.transaction_type == "selling":
-		customer_item_code = item_bean.doclist.get({"parentfield": "item_customer_details",
-			"customer_name": args.customer})
+		customer_item_code = item_bean.get("item_customer_details", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
 	else:
-		item_supplier = item_bean.doclist.get({"parentfield": "item_supplier_details",
-			"supplier": args.supplier})
+		item_supplier = item_bean.get({"item_supplier_details", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 		
 

@@ -299,7 +299,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 		
 	if not stock_ledger_entries: return
 
-	for d in controller.doclist.get({"parentfield": parentfield}):
+	for d in controller.get(parentfield):
 		serial_no = None
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:

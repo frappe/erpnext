@@ -40,8 +40,7 @@ class LandedCostWizard(Document):
 			for lc in self.get("landed_cost_details"):
 				amt = flt(lc.amount) * flt(pr_bean.net_total)/ flt(total_amt)
 				
-				matched_row = pr_bean.doclist.get({
-					"parentfield": "other_charges", 
+				matched_row = pr_bean.get("other_charges", {
 					"category": "Valuation",
 					"add_deduct_tax": "Add",
 					"charge_type": "Actual",
@@ -66,8 +65,8 @@ class LandedCostWizard(Document):
 					matched_row[0].cost_center = lc.cost_center
 					
 			pr_bean.run_method("validate")
-			for d in pr_bean.doclist:
-				d.save()
+			for d in pr_bean.get_all_children():
+				d.db_update()
 	
 	def get_total_pr_amt(self, purchase_receipts):
 		return frappe.db.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt` 

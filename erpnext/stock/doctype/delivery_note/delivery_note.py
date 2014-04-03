@@ -289,20 +289,15 @@ def make_sales_invoice(source_name, target_doc=None):
 		si = frappe.get_doc(target)
 		si.is_pos = 0
 		si.run_method("onload_post_render")
-		
-		si.set_doclist(si.doclist.get({"parentfield": ["!=", "entries"]}) +
-			si.doclist.get({"parentfield": "entries", "qty": [">", 0]}))
-		
-		if len(si.get("entries")) == 0:
-			frappe.msgprint(_("Hey! All these items have already been invoiced."),
-				raise_exception=True)
 				
-		return si.doclist
+		if len(si.get("entries")) == 0:
+			frappe.msgprint(_("All these items have already been invoiced."),
+				raise_exception=True)
 		
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
 	
-	doclist = get_mapped_doc("Delivery Note", source_name, 	{
+	doc = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
 			"doctype": "Sales Invoice", 
 			"validation": {
@@ -318,7 +313,8 @@ def make_sales_invoice(source_name, target_doc=None):
 				"against_sales_order": "sales_order", 
 				"serial_no": "serial_no"
 			},
-			"postprocess": update_item
+			"postprocess": update_item,
+			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)==0 
 		}, 
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges", 
@@ -333,7 +329,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, update_accounts)
 	
-	return doclist.as_dict()
+	return doc.as_dict()
 	
 @frappe.whitelist()
 def make_installation_note(source_name, target_doc=None):
