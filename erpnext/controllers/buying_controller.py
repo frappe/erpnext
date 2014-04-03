@@ -17,7 +17,7 @@ class BuyingController(StockController):
 	
 	def validate(self):
 		super(BuyingController, self).validate()
-		if self.supplier and not self.supplier_name:
+		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", 
 				self.supplier, "supplier_name")
 		self.is_item_table_empty()
@@ -31,7 +31,7 @@ class BuyingController(StockController):
 		self.set_price_list_currency("Buying")
 		
 		# set contact and address details for supplier, if they are not mentioned
-		if self.supplier:
+		if getattr(self, "supplier", None):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier"))
 
 		self.set_missing_item_details()

@@ -384,7 +384,7 @@ class BOM(Document):
 			ch.amount = flt(ch.qty) * flt(ch.rate)
 			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.quantity)
 			ch.docstatus = self.docstatus
-			ch.save(1)
+			ch.db_update()
 
 	def validate_bom_links(self):
 		if not self.is_active:

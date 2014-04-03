@@ -216,7 +216,7 @@ class PurchaseReceipt(BuyingController):
 	def check_for_stopped_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('purchase_receipt_details'):
-			if d.meta.has_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
+			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 

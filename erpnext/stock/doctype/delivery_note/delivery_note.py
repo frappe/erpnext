@@ -80,7 +80,7 @@ class DeliveryNote(SellingController):
 		items = self.get("delivery_note_details")
 		
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
-			if filter(None, [(d[fn[1]] or None) for d in self.get(self.fname)]):
+			if filter(None, [getattr(d, fn[1], None) for d in items]):
 				super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
 					fn[0]: {
 						"ref_dn_field": fn[1],

@@ -93,7 +93,7 @@ class AccountsController(TransactionBase):
 					args.update(self.as_dict())
 					ret = get_item_details(args)
 					for fieldname, value in ret.items():
-						if self.meta.get_field(fieldname, parentfield=self.fname) and \
+						if item.meta.get_field(fieldname) and \
 							item.get(fieldname) is None and value is not None:
 								item.set(fieldname, value)
 							

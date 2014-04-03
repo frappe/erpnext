@@ -68,7 +68,7 @@ class MaterialRequest(BuyingController):
 		
 		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
 
-		pc_obj = frappe.get_doc(dt='Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 		
 		# self.validate_qty_against_so()

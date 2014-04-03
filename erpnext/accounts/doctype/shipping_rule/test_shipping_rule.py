@@ -5,6 +5,8 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.shipping_rule.shipping_rule import FromGreaterThanToError, ManyBlankToValuesError, OverlappingConditionError
 
+test_records = frappe.get_test_records('Shipping Rule')
+
 class TestShippingRule(unittest.TestCase):
 	def test_from_greater_than_to(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
@@ -30,5 +32,3 @@ class TestShippingRule(unittest.TestCase):
 			shipping_rule.doclist[2].from_value = range_b[0]
 			shipping_rule.doclist[2].to_value = range_b[1]
 			self.assertRaises(OverlappingConditionError, shipping_rule.insert)
-
-test_records = frappe.get_test_records('Shipping Rule')

@@ -35,7 +35,7 @@ class SellingController(StockController):
 		if getattr(self, "customer", None):
 			from erpnext.accounts.party import _get_party_details
 			self.update_if_missing(_get_party_details(self.customer,
-				ignore_permissions=self.ignore_permissions))
+				ignore_permissions=getattr(self, "ignore_permissions", None)))
 		
 		elif getattr(self, "lead", None):
 			from erpnext.selling.doctype.lead.lead import get_lead_details
@@ -377,6 +377,6 @@ def check_active_sales_items(obj):
 				d.item_code, as_dict=True)[0]
 			if item.is_sales_item == 'No' and item.is_service_item == 'No':
 				frappe.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
-			if d.income_account and not item.income_account:
+			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account", 
 					d.income_account)
