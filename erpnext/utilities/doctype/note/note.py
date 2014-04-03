@@ -17,7 +17,7 @@ class Note(Document):
 		
 	def onload(self):
 		if not self.public and frappe.session.user != self.owner:
-			if frappe.session.user not in [d.user for d in self.doclist if d.doctype=="Note User"]:
+			if frappe.session.user not in [d.user for d in self.get("share_with")]:
 				frappe.msgprint("You are not authorized to read this record.", raise_exception=True)
 	
 	def validate(self):

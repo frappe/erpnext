@@ -62,10 +62,13 @@ class Item(DocListController):
 			ch = self.append('uom_conversion_details', {})
 			ch.uom = self.stock_uom
 			ch.conversion_factor = 1
-			
+		
+		to_remove = []
 		for d in self.get("uom_conversion_details"):
 			if d.conversion_factor == 1 and d.uom != self.stock_uom:
-				self.doclist.remove(d)
+				to_remove.append(d)
+				
+		[self.remove(d) for d in to_remove]
 				
 
 	def check_stock_uom_with_bin(self):

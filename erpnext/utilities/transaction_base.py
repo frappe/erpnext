@@ -56,7 +56,7 @@ class TransactionBase(StatusUpdater):
 			event_doclist.insert()
 			
 	def validate_uom_is_integer(self, uom_field, qty_fields):
-		validate_uom_is_integer(self.doclist, uom_field, qty_fields)
+		validate_uom_is_integer(self, uom_field, qty_fields)
 			
 	def validate_with_previous_doc(self, source_dt, ref):
 		for key, val in ref.items():

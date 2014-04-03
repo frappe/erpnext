@@ -423,10 +423,7 @@ class StockEntry(StockController):
 			}
 		return ret
 		
-	def get_items(self):
-		self.doclist = filter(lambda d: d.parentfield!="mtn_details", self.doclist)
-		# self.set('mtn_details', [])
-		
+	def get_items(self):		
 		pro_obj = None
 		if self.production_order:
 			# common validations

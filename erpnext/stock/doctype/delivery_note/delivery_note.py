@@ -182,12 +182,10 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.doclist if
-				d.doctype=='Delivery Note Item']):
+		if not any([flt(d.get('packed_qty')) for d in self.get(self.fname)]):
 			return
 		packing_error_list = []
-		for d in self.doclist:
-			if d.doctype != 'Delivery Note Item': continue
+		for d in self.get(self.fname):
 			if flt(d.get('qty')) != flt(d.get('packed_qty')):
 				packing_error_list.append([
 					d.get('item_code', ''),

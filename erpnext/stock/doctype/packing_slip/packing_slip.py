@@ -24,8 +24,8 @@ class PackingSlip(Document):
 		self.validate_qty()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "stock_uom", "qty")
-		validate_uom_is_integer(self.doclist, "weight_uom", "net_weight")
+		validate_uom_is_integer(self, "stock_uom", "qty")
+		validate_uom_is_integer(self, "weight_uom", "net_weight")
 
 	def validate_delivery_note(self):
 		"""
@@ -104,7 +104,7 @@ class PackingSlip(Document):
 			group by item_code""" % ("%s", condition),
 			tuple([self.delivery_note] + rows), as_dict=1)
 
-		ps_item_qty = dict([[d.item_code, d.qty] for d in self.doclist])
+		ps_item_qty = dict([[d.item_code, d.qty] for d in self.get("item_details")])
 		no_of_cases = cint(self.to_case_no) - cint(self.from_case_no) + 1
 
 		return res, ps_item_qty, no_of_cases
