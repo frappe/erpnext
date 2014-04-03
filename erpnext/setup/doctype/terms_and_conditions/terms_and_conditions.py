@@ -6,5 +6,5 @@ import frappe
 
 from frappe.model.document import Document
 
-class TermsAndConditions(Document):
+class TermsandConditions(Document):
 	pass

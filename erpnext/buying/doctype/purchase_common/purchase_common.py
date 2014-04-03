@@ -81,7 +81,7 @@ class PurchaseCommon(BuyingController):
 			if d.doctype == 'Purchase Receipt Item':
 				f_lst.pop('received_qty')
 			for x in f_lst :
-				if d.meta.has_field(x):
+				if d.meta.get_field(x):
 					d.set(x, f_lst[x])
 			
 			item = frappe.db.sql("""select is_stock_item, is_purchase_item, 
@@ -101,13 +101,13 @@ class PurchaseCommon(BuyingController):
 				frappe.throw("Item %s is not a purchase item or sub-contracted item. Please check" % (d.item_code))
 			
 			# list criteria that should not repeat if item is stock item
-			e = [d.schedule_date, d.item_code, d.description, d.warehouse, d.uom, 
-				d.meta.has_field('prevdoc_docname') and d.prevdoc_docname or d.meta.has_field('sales_order_no') and d.sales_order_no or '', 
-				d.meta.has_field('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', 
-				d.meta.has_field('batch_no') and d.batch_no or '']
+			e = [getattr(d, "schedule_date", None), d.item_code, d.description, d.warehouse, d.uom, 
+				d.meta.get_field('prevdoc_docname') and d.prevdoc_docname or d.meta.get_field('sales_order_no') and d.sales_order_no or '', 
+				d.meta.get_field('prevdoc_detail_docname') and d.prevdoc_detail_docname or '', 
+				d.meta.get_field('batch_no') and d.batch_no or '']
 			
 			# if is not stock item
-			f = [d.schedule_date, d.item_code, d.description]
+			f = [getattr(d, "schedule_date", None), d.item_code, d.description]
 			
 			ch = frappe.db.sql("""select is_stock_item from `tabItem` where name = %s""", d.item_code)
 			

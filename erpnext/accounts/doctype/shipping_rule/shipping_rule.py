@@ -26,14 +26,14 @@ class ShippingRule(DocListController):
 	def validate_from_to_values(self):
 		zero_to_values = []
 		
-		for d in self.shipping_rule_conditions:
+		for d in self.get("shipping_rule_conditions"):
 			self.round_floats_in(d)
 			
 			# values cannot be negative
 			self.validate_value("from_value", ">=", 0.0, d)
 			self.validate_value("to_value", ">=", 0.0, d)
 			
-			if d.to_value == 0:
+			if not d.to_value:
 				zero_to_values.append(d)
 			elif d.from_value >= d.to_value:
 				msgprint(_("Error") + ": " + _("Row") + " # %d: " % d.idx + 
