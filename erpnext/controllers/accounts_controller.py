@@ -86,15 +86,16 @@ class AccountsController(TransactionBase):
 	def set_missing_item_details(self):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
-		for item in self.get(self.fname):
-			if item.get("item_code"):
-				args = item.fields.copy()
-				args.update(self.fields)
-				ret = get_item_details(args)
-				for fieldname, value in ret.items():
-					if self.meta.get_field(fieldname, parentfield=self.fname) and \
-						item.get(fieldname) is None and value is not None:
-							item.set(fieldname, value)
+		if hasattr(self, "fname"):
+			for item in self.get(self.fname):
+				if item.get("item_code"):
+					args = item.as_dict()
+					args.update(self.as_dict())
+					ret = get_item_details(args)
+					for fieldname, value in ret.items():
+						if self.meta.get_field(fieldname, parentfield=self.fname) and \
+							item.get(fieldname) is None and value is not None:
+								item.set(fieldname, value)
 							
 	def set_taxes(self, tax_parentfield, tax_master_field):
 		if not self.meta.get_field(tax_parentfield):

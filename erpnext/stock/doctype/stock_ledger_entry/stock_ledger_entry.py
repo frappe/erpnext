@@ -47,7 +47,7 @@ class StockLedgerEntry(DocListController):
 				frappe.throw("""Not enough quantity (requested: %(actual_qty)s, \
 					current: %(batch_bal)s in Batch <b>%(batch_no)s</b> for Item \
 					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
-					as on %(posting_date)s %(posting_time)s""" % self.fields)
+					as on %(posting_date)s %(posting_time)s""" % self.as_dict())
 
 				self.pop('batch_bal')
 

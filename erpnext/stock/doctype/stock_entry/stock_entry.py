@@ -325,41 +325,41 @@ class StockEntry(StockController):
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 
 	def update_production_order(self):
-		def _validate_production_order(pro_bean):
-			if flt(pro_bean.docstatus) != 1:
+		def _validate_production_order(pro_doc):
+			if flt(pro_doc.docstatus) != 1:
 				frappe.throw(_("Production Order must be submitted") + ": " + 
 					self.production_order)
 					
-			if pro_bean.status == 'Stopped':
+			if pro_doc.status == 'Stopped':
 				msgprint(_("Transaction not allowed against stopped Production Order") + ": " + 
 					self.production_order)
 		
 		if self.production_order:
-			pro_bean = frappe.get_doc("Production Order", self.production_order)
-			_validate_production_order(pro_bean)
-			self.update_produced_qty(pro_bean)
+			pro_doc = frappe.get_doc("Production Order", self.production_order)
+			_validate_production_order(pro_doc)
+			self.update_produced_qty(pro_doc)
 			if self.purpose == "Manufacture/Repack":
-				self.update_planned_qty(pro_bean)
+				self.update_planned_qty(pro_doc)
 			
-	def update_produced_qty(self, pro_bean):
+	def update_produced_qty(self, pro_doc):
 		if self.purpose == "Manufacture/Repack":
-			produced_qty = flt(pro_bean.produced_qty) + \
+			produced_qty = flt(pro_doc.produced_qty) + \
 				(self.docstatus==1 and 1 or -1 ) * flt(self.fg_completed_qty)
 				
-			if produced_qty > flt(pro_bean.qty):
+			if produced_qty > flt(pro_doc.qty):
 				frappe.throw(_("Production Order") + ": " + self.production_order + "\n" +
 					_("Total Manufactured Qty can not be greater than Planned qty to manufacture") 
-					+ "(%s/%s)" % (produced_qty, flt(pro_bean.qty)), StockOverProductionError)
+					+ "(%s/%s)" % (produced_qty, flt(pro_doc.qty)), StockOverProductionError)
 					
-			status = 'Completed' if flt(produced_qty) >= flt(pro_bean.qty) else 'In Process'
+			status = 'Completed' if flt(produced_qty) >= flt(pro_doc.qty) else 'In Process'
 			frappe.db.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
 				where name=%s""", (status, produced_qty, self.production_order))
 			
-	def update_planned_qty(self, pro_bean):
+	def update_planned_qty(self, pro_doc):
 		from erpnext.stock.utils import update_bin
 		update_bin({
-			"item_code": pro_bean.production_item,
-			"warehouse": pro_bean.fg_warehouse,
+			"item_code": pro_doc.production_item,
+			"warehouse": pro_doc.fg_warehouse,
 			"posting_date": self.posting_date,
 			"planned_qty": (self.docstatus==1 and -1 or 1 ) * flt(self.fg_completed_qty)
 		})
@@ -725,7 +725,7 @@ def get_return_doc_and_details(args):
 		for fieldname, val in return_map[args["purpose"]].items():
 			if args.get(fieldname):
 				ref.fieldname = fieldname
-				ref.doc = frappe.get_doc(val[0], args[fieldname])
+				ref.doc = frappe.get_doc(val[0], args.get(fieldname))
 				ref.parentfields = val[1]
 				break
 				
@@ -748,7 +748,7 @@ def make_return_jv(stock_entry):
 	if not se.purpose in ["Sales Return", "Purchase Return"]:
 		return
 	
-	ref = get_return_doc_and_details(se.fields)
+	ref = get_return_doc_and_details(se)
 	
 	if ref.doc.doctype == "Delivery Note":
 		result = make_return_jv_from_delivery_note(se, ref)

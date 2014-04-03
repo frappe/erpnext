@@ -32,7 +32,7 @@ class SupportMailbox(POP3Mailbox):
 			
 		if new_ticket and cint(self.email_settings.send_autoreply) and \
 			"mailer-daemon" not in mail.from_email.lower():
-				self.send_auto_reply(ticket.doc)
+				self.send_auto_reply(ticket)
 
 	def send_auto_reply(self, d):
 		signature = self.email_settings.get('support_signature') or ''
@@ -80,6 +80,6 @@ def add_support_communication(subject, content, sender, docname=None, mail=None)
 		date=mail.date if mail else today(), sent_or_received="Received")
 
 	if mail:
-		mail.save_attachments_in_doc(ticket.doc)
+		mail.save_attachments_in_doc(ticket)
 		
 	return ticket

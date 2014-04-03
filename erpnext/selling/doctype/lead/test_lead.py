@@ -3,10 +3,10 @@
 
 from __future__ import unicode_literals
 
-test_records = frappe.get_test_records('Lead')
-
 import frappe
 import unittest
+
+test_records = frappe.get_test_records('Lead')
 
 class TestLead(unittest.TestCase):
 	def test_make_customer(self):

@@ -6,5 +6,5 @@ import frappe
 
 from frappe.model.document import Document
 
-class PurchaseTaxesAndCharges(Document):
+class PurchaseTaxesandCharges(Document):
 	pass

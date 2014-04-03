@@ -165,11 +165,11 @@ class MaterialRequest(BuyingController):
 		self.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
 		frappe.db.set_value(self.doctype, self.name, "per_ordered", self.per_ordered)
 		
-def update_completed_qty(bean, method):
-	if bean.doctype == "Stock Entry":
+def update_completed_qty(doc, method):
+	if doc.doctype == "Stock Entry":
 		material_request_map = {}
 		
-		for d in bean.get("mtn_details"):
+		for d in doc.get("mtn_details"):
 			if d.material_request:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 			
@@ -182,17 +182,17 @@ def update_completed_qty(bean, method):
 					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.status)
 					+ _("Cannot continue."), exc=frappe.InvalidStatusError)
 				
-			_update_requested_qty(bean, mr_obj, mr_items)
+			_update_requested_qty(doc, mr_obj, mr_items)
 			
 			# update ordered percentage and qty
 			mr_obj.update_completed_qty(mr_items)
 			
-def _update_requested_qty(bean, mr_obj, mr_items):
+def _update_requested_qty(doc, mr_obj, mr_items):
 	"""update requested qty (before ordered_qty is updated)"""
 	from erpnext.stock.utils import update_bin
 	for mr_item_name in mr_items:
 		mr_item = mr_obj.get("indent_details", {"name": mr_item_name})
-		se_detail = bean.get("mtn_details", {"material_request": mr_obj.name, 
+		se_detail = doc.get("mtn_details", {"material_request": mr_obj.name, 
 			"material_request_item": mr_item_name})
 	
 		if mr_item and se_detail:
@@ -215,7 +215,7 @@ def _update_requested_qty(bean, mr_obj, mr_items):
 				"item_code": se_detail.item_code,
 				"warehouse": se_detail.t_warehouse,
 				"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
-				"posting_date": bean.posting_date,
+				"posting_date": doc.posting_date,
 			})
 
 def set_missing_values(source, target_doc):

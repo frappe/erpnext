@@ -139,7 +139,7 @@ def feature_setup():
 def set_single_defaults():
 	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):
 		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
-			where parent=%s""", dt, as_dict=True)
+			where parent=%s""", dt)
 		if default_values:
 			try:
 				b = frappe.get_doc(dt, dt)

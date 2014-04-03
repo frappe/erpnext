@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cint
 from frappe.model.controller import DocListController
 
-class SalesTaxesAndChargesMaster(DocListController):		
+class SalesTaxesandChargesMaster(DocListController):		
 	def validate(self):
 		if self.is_default == 1:
 			frappe.db.sql("""update `tabSales Taxes and Charges Master` set is_default = 0 

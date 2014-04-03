@@ -78,7 +78,7 @@ class Company(Document):
 					"title": self.name + " Home",
 					"published": 1,
 					"description": "Standard Home Page for " + self.name,
-					"main_section": webfile.read() % self.fields
+					"main_section": webfile.read() % self.as_dict()
 				}).insert()
 			
 				# update in home page in settings
@@ -163,12 +163,12 @@ class Company(Document):
 		]
 		for cc in cc_list:
 			cc.update({"doctype": "Cost Center"})
-			cc_bean = frappe.get_doc(cc)
-			cc_bean.ignore_permissions = True
+			cc_doc = frappe.get_doc(cc)
+			cc_doc.ignore_permissions = True
 		
 			if cc.get("cost_center_name") == self.name:
-				cc_bean.ignore_mandatory = True
-			cc_bean.insert()
+				cc_doc.ignore_mandatory = True
+			cc_doc.insert()
 			
 		frappe.db.set(self, "cost_center", "Main - " + self.abbr)
 

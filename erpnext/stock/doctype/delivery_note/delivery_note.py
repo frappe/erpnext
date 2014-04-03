@@ -222,9 +222,8 @@ class DeliveryNote(SellingController):
 			AND docstatus = 1""", self.name)
 
 		if res:
-			from frappe.model.bean import Bean
 			for r in res:
-				ps = Bean(dt='Packing Slip', dn=r[0])
+				ps = frappe.get_doc('Packing Slip', r[0])
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) Cancelled"))
 

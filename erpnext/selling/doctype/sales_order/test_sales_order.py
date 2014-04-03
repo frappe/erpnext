@@ -281,21 +281,20 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_warehouse_user(self):
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
-		frappe.get_doc("User", "test@example.com").get_controller()\
+		frappe.get_doc("User", "test@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 			
-		frappe.get_doc("User", "test2@example.com").get_controller()\
+		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		
 		frappe.set_user("test@example.com")
 
-		from frappe.model.bean import BeanPermissionError
 		so = frappe.copy_doc(test_records[0])
 		so.company = "_Test Company 1"
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
 		so.doclist[1].warehouse = "_Test Warehouse 2 - _TC1"
-		self.assertRaises(BeanPermissionError, so.insert)
+		self.assertRaises(frappe.PermissionError, so.insert)
 
 		frappe.set_user("test2@example.com")
 		so.insert()

@@ -34,8 +34,8 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 	
 	if mail:
 		# save attachments to parent if from mail
-		bean = frappe.get_doc(parent_doctype, parent_name)
-		mail.save_attachments_in_doc(bean.doc)
+		doc = frappe.get_doc(parent_doctype, parent_name)
+		mail.save_attachments_in_doc(doc)
 
 class SalesMailbox(POP3Mailbox):	
 	def setup(self, args=None):

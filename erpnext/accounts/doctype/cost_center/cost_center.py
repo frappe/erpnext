@@ -13,7 +13,7 @@ class CostCenter(DocTypeNestedSet):
 	
 	def autoname(self):
 		self.name = self.cost_center_name.strip() + ' - ' + \
-			frappe.get_value("Company", self.company, "abbr")
+			frappe.db.get_value("Company", self.company, "abbr")
 		
 	def validate_mandatory(self):
 		if not self.group_or_ledger:

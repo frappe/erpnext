@@ -25,8 +25,8 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
 		frappe.throw("Not Permitted", frappe.PermissionError)
 
-	party_bean = frappe.get_doc(party_type, party)
-	party = party_bean.doc
+	party_doc = frappe.get_doc(party_type, party)
+	party = party_doc
 
 	set_address_details(out, party, party_type)
 	set_contact_details(out, party, party_type)
@@ -41,7 +41,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		out["sales_team"] = [{
 			"sales_person": d.sales_person, 
 			"sales_designation": d.sales_designation
-		} for d in party_bean.get("sales_team")]
+		} for d in party_doc.get("sales_team")]
 	
 	return out
 

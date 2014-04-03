@@ -34,13 +34,13 @@ class LandedCostWizard(Document):
 		total_amt = self.get_total_pr_amt(purchase_receipts)
 		
 		for pr in purchase_receipts:
-			pr_bean = frappe.get_doc('Purchase Receipt', pr)
-			pr_items = pr_bean.get("purchase_tax_details")
+			pr_doc = frappe.get_doc('Purchase Receipt', pr)
+			pr_items = pr_doc.get("purchase_tax_details")
 			
 			for lc in self.get("landed_cost_details"):
-				amt = flt(lc.amount) * flt(pr_bean.net_total)/ flt(total_amt)
+				amt = flt(lc.amount) * flt(pr_doc.net_total)/ flt(total_amt)
 				
-				matched_row = pr_bean.get("other_charges", {
+				matched_row = pr_doc.get("other_charges", {
 					"category": "Valuation",
 					"add_deduct_tax": "Add",
 					"charge_type": "Actual",
@@ -48,7 +48,7 @@ class LandedCostWizard(Document):
 				})
 				
 				if not matched_row:	# add if not exists
-					ch = pr_bean.append("other_charges")
+					ch = pr_doc.append("other_charges")
 					ch.category = 'Valuation'
 					ch.add_deduct_tax = 'Add'
 					ch.charge_type = 'Actual'
@@ -64,8 +64,8 @@ class LandedCostWizard(Document):
 					matched_row[0].tax_amount = amt
 					matched_row[0].cost_center = lc.cost_center
 					
-			pr_bean.run_method("validate")
-			for d in pr_bean.get_all_children():
+			pr_doc.run_method("validate")
+			for d in pr_doc.get_all_children():
 				d.db_update()
 	
 	def get_total_pr_amt(self, purchase_receipts):
@@ -75,9 +75,9 @@ class LandedCostWizard(Document):
 			
 	def cancel_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
-			pr_bean = frappe.get_doc("Purchase Receipt", pr)
+			pr_doc = frappe.get_doc("Purchase Receipt", pr)
 			
-			pr_bean.run_method("update_ordered_qty")
+			pr_doc.run_method("update_ordered_qty")
 			
 			frappe.db.sql("""delete from `tabStock Ledger Entry` 
 				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr)
@@ -86,7 +86,7 @@ class LandedCostWizard(Document):
 			
 	def submit_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
-			pr_bean = frappe.get_doc("Purchase Receipt", pr)
-			pr_bean.run_method("update_ordered_qty")
-			pr_bean.run_method("update_stock")
-			pr_bean.run_method("make_gl_entries")
+			pr_doc = frappe.get_doc("Purchase Receipt", pr)
+			pr_doc.run_method("update_ordered_qty")
+			pr_doc.run_method("update_stock")
+			pr_doc.run_method("make_gl_entries")

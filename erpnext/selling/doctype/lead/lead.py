@@ -42,8 +42,7 @@ class Lead(SellingController):
 			"owner": self.lead_owner,
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + \
-				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '') + \
-				(self.remark and ('.To Discuss : ' + cstr(self.remark)) or '')
+				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
 		}, force)
 
 	def check_email_id_is_unique(self):
@@ -117,7 +116,7 @@ def make_opportunity(source_name, target_doc=None):
 			}
 		}}, target_doc)
 		
-	return [d if isinstance(d, dict) else d.fields for d in doclist]
+	return doclist
 	
 @frappe.whitelist()
 def get_lead_details(lead):
@@ -126,8 +125,8 @@ def get_lead_details(lead):
 	from erpnext.accounts.party import set_address_details
 	out = frappe._dict()
 	
-	lead_bean = frappe.get_doc("Lead", lead)
-	lead = lead_bean.doc
+	lead_doc = frappe.get_doc("Lead", lead)
+	lead = lead_doc
 		
 	out.update({
 		"territory": lead.territory,

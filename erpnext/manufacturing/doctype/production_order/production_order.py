@@ -153,7 +153,7 @@ def get_item_details(item):
 def make_stock_entry(production_order_id, purpose):
 	production_order = frappe.get_doc("Production Order", production_order_id)
 		
-	stock_entry = frappe.new_bean("Stock Entry")
+	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.purpose = purpose
 	stock_entry.production_order = production_order_id
 	stock_entry.company = production_order.company

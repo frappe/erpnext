@@ -26,8 +26,8 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(pr), len(test_records[0]))
 		
 		pr[0]["naming_series"] = "_T-Purchase Receipt-"
-		pr_bean = frappe.get_doc(pr)
-		pr_bean.insert()
+		pr_doc = frappe.get_doc(pr)
+		pr_doc.insert()
 			
 	def test_ordered_qty(self):
 		frappe.db.sql("delete from tabBin")
@@ -54,9 +54,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr[0]["posting_date"] = "2013-05-12"
 		pr[0]["naming_series"] = "_T-Purchase Receipt-"
 		pr[1]["qty"] = 4.0
-		pr_bean = frappe.get_doc(pr)
-		pr_bean.insert()
-		pr_bean.submit()
+		pr_doc = frappe.get_doc(pr)
+		pr_doc.insert()
+		pr_doc.submit()
 		
 		self.assertEquals(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 6.0)
@@ -67,9 +67,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr1[0]["naming_series"] = "_T-Purchase Receipt-"
 		pr1[0]["posting_date"] = "2013-05-12"
 		pr1[1]["qty"] = 8
-		pr1_bean = frappe.get_doc(pr1)
-		pr1_bean.insert()
-		pr1_bean.submit()
+		pr1_doc = frappe.get_doc(pr1)
+		pr1_doc.insert()
+		pr1_doc.submit()
 		
 		self.assertEquals(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
 			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)

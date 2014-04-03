@@ -136,7 +136,7 @@ class LeaveApplication(DocListController):
 			and (from_date between %(from_date)s and %(to_date)s 
 				or to_date between %(from_date)s and %(to_date)s
 				or %(from_date)s between from_date and to_date)
-			and name != %(name)s""", self.fields, as_dict = 1):
+			and name != %(name)s""", self.as_dict(), as_dict = 1):
  
 			msgprint("Employee : %s has already applied for %s between %s and %s on %s. Please refer Leave Application : <a href=\"#Form/Leave Application/%s\">%s</a>" % (self.employee, cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date']), formatdate(d['posting_date']), d['name'], d['name']), raise_exception = OverlapError)
 

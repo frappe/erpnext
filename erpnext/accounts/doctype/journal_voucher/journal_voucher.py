@@ -349,8 +349,8 @@ def get_default_bank_cash_account(company, voucher_type):
 def get_payment_entry_from_sales_invoice(sales_invoice):
 	from erpnext.accounts.utils import get_balance_on
 	si = frappe.get_doc("Sales Invoice", sales_invoice)
-	jv = get_payment_entry(si.doc)
-	jv.remark = 'Payment received against Sales Invoice %(name)s. %(remarks)s' % si.fields
+	jv = get_payment_entry(si)
+	jv.remark = 'Payment received against Sales Invoice {0}. {1}'.format(si.name, si.remarks)
 
 	# credit customer
 	jv.doclist[1].account = si.debit_to
@@ -367,8 +367,8 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	from erpnext.accounts.utils import get_balance_on
 	pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
-	jv = get_payment_entry(pi.doc)
-	jv.remark = 'Payment against Purchase Invoice %(name)s. %(remarks)s' % pi.fields
+	jv = get_payment_entry(pi)
+	jv.remark = 'Payment against Purchase Invoice {0}. {1}'.format(pi.name, pi.remarks)
 	
 	# credit supplier
 	jv.doclist[1].account = pi.credit_to
@@ -384,7 +384,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 def get_payment_entry(doc):
 	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher")
 	
-	jv = frappe.new_bean('Journal Voucher')
+	jv = frappe.new_doc('Journal Voucher')
 	jv.voucher_type = 'Bank Voucher'
 
 	jv.company = doc.company

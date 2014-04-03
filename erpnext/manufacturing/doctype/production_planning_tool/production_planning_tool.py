@@ -214,7 +214,7 @@ class ProductionPlanningTool(Document):
 
 		pro_list = []
 		for key in items:
-			pro = frappe.new_bean("Production Order")
+			pro = frappe.new_doc("Production Order")
 			pro.update(items[key])
 			
 			frappe.flags.mute_messages = True

@@ -66,7 +66,7 @@ class ShippingRule(DocListController):
 		for i in xrange(0, len(self.shipping_rule_conditions)):
 			for j in xrange(i+1, len(self.shipping_rule_conditions)):
 				d1, d2 = self.shipping_rule_conditions[i], self.shipping_rule_conditions[j]
-				if d1.fields != d2.fields:
+				if d1.as_dict() != d2.as_dict():
 					# in our case, to_value can be zero, hence pass the from_value if so
 					range_a = (d1.from_value, d1.to_value or d1.from_value)
 					range_b = (d2.from_value, d2.to_value or d2.from_value)

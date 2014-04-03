@@ -4,7 +4,7 @@
 import frappe
 import unittest, json
 from frappe.utils import flt
-from frappe.model.bean import DocstatusTransitionError, TimestampMismatchError
+from frappe.model.doc import DocstatusTransitionError, TimestampMismatchError
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 

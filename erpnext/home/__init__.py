@@ -86,7 +86,7 @@ def update_feed(doc, method=None):
 	if method in ['on_update', 'on_submit']:
 		subject, color = feed_dict.get(doc.doctype, [None, None])
 		if subject:
-			make_feed('', doc.doctype, doc.name, doc.owner, subject % doc.fields, color)
+			make_feed('', doc.doctype, doc.name, doc.owner, subject % doc.as_dict(), color)
 
 def make_comment_feed(doc, method):
 	"""add comment to feed"""

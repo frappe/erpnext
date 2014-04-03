@@ -57,7 +57,7 @@ class PackingSlip(Document):
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
 			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
 			OR %(from_case_no)s BETWEEN from_case_no AND to_case_no)
-			""", self.fields)
+			""", self.as_dict())
 
 		if res:
 			frappe.msgprint(_("""Case No(s) already in use. Please rectify and try again.
@@ -145,7 +145,7 @@ class PackingSlip(Document):
 			note
 		"""
 		recommended_case_no = frappe.db.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
-			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.fields)
+			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.as_dict())
 		
 		return cint(recommended_case_no[0][0]) + 1
 		

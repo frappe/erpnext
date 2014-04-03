@@ -202,7 +202,7 @@ def create_email_digest():
 	
 	# scheduler errors digest
 	if companies:
-		edigest = frappe.new_bean("Email Digest")
+		edigest = frappe.new_doc("Email Digest")
 		edigest.update({
 			"name": "Scheduler Errors",
 			"company": companies[0],

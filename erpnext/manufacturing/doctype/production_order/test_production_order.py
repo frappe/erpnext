@@ -17,9 +17,9 @@ class TestProductionOrder(unittest.TestCase):
 		frappe.db.sql("""delete from `tabBin`""")
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		
-		pro_bean = frappe.copy_doc(test_records[0])
-		pro_bean.insert()
-		pro_bean.submit()
+		pro_doc = frappe.copy_doc(test_records[0])
+		pro_doc.insert()
+		pro_doc.submit()
 		
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
 		mr1 = frappe.copy_doc(se_test_records[0])
@@ -31,7 +31,7 @@ class TestProductionOrder(unittest.TestCase):
 		mr2.insert()
 		mr2.submit()
 		
-		stock_entry = make_stock_entry(pro_bean.name, "Manufacture/Repack")
+		stock_entry = make_stock_entry(pro_doc.name, "Manufacture/Repack")
 		stock_entry = frappe.get_doc(stock_entry)
 		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
 		stock_entry.fg_completed_qty = 4
@@ -40,12 +40,12 @@ class TestProductionOrder(unittest.TestCase):
 		stock_entry.run_method("get_items")
 		stock_entry.submit()
 		
-		self.assertEqual(frappe.db.get_value("Production Order", pro_bean.name, 
+		self.assertEqual(frappe.db.get_value("Production Order", pro_doc.name, 
 			"produced_qty"), 4)
 		self.assertEqual(frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"), 6)
 			
-		return pro_bean.name
+		return pro_doc.name
 			
 	def test_over_production(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverProductionError

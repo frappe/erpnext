@@ -765,7 +765,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_company_validation(self):
 		set_perpetual_inventory(0)
 		self._clear_stock_account_balance()
-		frappe.get_doc("User", "test2@example.com").get_controller()\
+		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		frappe.set_user("test2@example.com")
 
@@ -778,21 +778,20 @@ class TestStockEntry(unittest.TestCase):
 	# permission tests
 	def test_warehouse_user(self):
 		import frappe.defaults
-		from frappe.model.bean import BeanPermissionError
 		set_perpetual_inventory(0)
 		
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "Restriction")
-		frappe.get_doc("User", "test@example.com").get_controller()\
+		frappe.get_doc("User", "test@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-		frappe.get_doc("User", "test2@example.com").get_controller()\
+		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
 		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
-		self.assertRaises(BeanPermissionError, st1.insert)
+		self.assertRaises(frappe.PermissionError, st1.insert)
 
 		frappe.set_user("test2@example.com")
 		st1 = frappe.copy_doc(test_records[0])

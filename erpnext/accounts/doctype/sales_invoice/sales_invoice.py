@@ -192,7 +192,7 @@ class SalesInvoice(SellingController):
 			for item in self.get("entries"):
 				if item.get('item_code'):
 					for fname, val in get_pos_settings_item_details(pos, 
-						frappe._dict(item.fields), pos).items():
+						frappe._dict(item.as_dict()), pos).items():
 						
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -696,7 +696,7 @@ def manage_recurring_invoices(next_date=None, commit=True):
 		raise Exception, exception_message
 
 def make_new_invoice(ref_wrapper, posting_date):
-	from frappe.model.bean import clone
+	from frappe.model.doc import clone
 	from erpnext.accounts.utils import get_fiscal_year
 	new_invoice = clone(ref_wrapper)
 	
@@ -736,7 +736,7 @@ def send_notification(new_rv):
 	from frappe.core.doctype.print_format.print_format import get_html
 	frappe.sendmail(new_rv.notification_email_address, 
 		subject="New Invoice : " + new_rv.name, 
-		message = get_html(new_rv.doc, new_rv, "SalesInvoice"))
+		message = get_html(new_rv, new_rv, "SalesInvoice"))
 		
 def notify_errors(inv, customer, owner):
 	from frappe.utils.user import get_system_managers
@@ -797,8 +797,8 @@ def make_delivery_note(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		bean = frappe.get_doc(target)
-		bean.run_method("onload_post_render")
+		doc = frappe.get_doc(target)
+		doc.run_method("onload_post_render")
 		
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.base_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \

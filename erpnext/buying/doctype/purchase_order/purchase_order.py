@@ -184,8 +184,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		bean = frappe.get_doc(target)
-		bean.run_method("set_missing_values")
+		doc = frappe.get_doc(target)
+		doc.run_method("set_missing_values")
 
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
@@ -223,8 +223,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		bean = frappe.get_doc(target)
-		bean.run_method("set_missing_values")
+		doc = frappe.get_doc(target)
+		doc.run_method("set_missing_values")
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)

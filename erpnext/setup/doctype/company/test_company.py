@@ -13,7 +13,7 @@ class TestCompany(unittest.TestCase):
 				print "Country: ", country
 				print "Chart Name: ", chart_name
 				
-				company_bean = frappe.get_doc({
+				company_doc = frappe.get_doc({
 					"doctype": "Company",
 					"company_name": "_Test Company 2",
 					"abbr": "_TC2",
@@ -22,7 +22,7 @@ class TestCompany(unittest.TestCase):
 					"chart_of_accounts": chart_name
 				})
 
-				company_bean.insert()
+				company_doc.insert()
 				self.assertTrue(frappe.db.sql("""select count(*) from tabAccount 
 					where company='_Test Company 2'""")[0][0] > 10)
 				

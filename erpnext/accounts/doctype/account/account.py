@@ -40,13 +40,13 @@ class Account(Document):
 				["name", "group_or_ledger", "report_type"], as_dict=1)
 			if not par:
 				throw(_("Parent account does not exists"))
-			elif par[0]["name"] == self.name:
+			elif par["name"] == self.name:
 				throw(_("You can not assign itself as parent account"))
-			elif par[0]["group_or_ledger"] != 'Group':
+			elif par["group_or_ledger"] != 'Group':
 				throw(_("Parent account can not be a ledger"))
 				
-			if par[0]["report_type"]:
-				self.report_type = par[0]["report_type"]
+			if par["report_type"]:
+				self.report_type = par["report_type"]
 	
 	def validate_duplicate_account(self):
 		if self.get('__islocal') or not self.name:

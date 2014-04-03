@@ -25,5 +25,5 @@ class AccountsSettings(Document):
 				frappe.throw(_("Company is missing in following warehouses") + ": \n" + 
 					"\n".join(warehouse_with_no_company))
 			for wh in warehouse_list:
-				wh_bean = frappe.get_doc("Warehouse", wh.name)
-				wh_bean.save()
+				wh_doc = frappe.get_doc("Warehouse", wh.name)
+				wh_doc.save()

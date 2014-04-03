@@ -8,7 +8,7 @@ import frappe
 class TestItem(unittest.TestCase):
 	def test_duplicate_item(self):
 		from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
-		bean = frappe.copy_doc(test_records[0])
-		self.assertRaises(ItemPriceDuplicateItem, bean.insert)
+		doc = frappe.copy_doc(test_records[0])
+		self.assertRaises(ItemPriceDuplicateItem, doc.insert)
 
 test_records = frappe.get_test_records('Item Price')

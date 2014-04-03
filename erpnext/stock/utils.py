@@ -261,10 +261,10 @@ def create_material_request(material_requests):
 						"brand": item.brand,
 					})
 			
-				mr_bean = frappe.get_doc(mr)
-				mr_bean.insert()
-				mr_bean.submit()
-				mr_list.append(mr_bean)
+				mr_doc = frappe.get_doc(mr)
+				mr_doc.insert()
+				mr_doc.submit()
+				mr_list.append(mr_doc)
 
 			except:
 				if frappe.local.message_log:

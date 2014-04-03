@@ -298,8 +298,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		bean = frappe.get_doc(target)
-		bean.run_method("set_missing_values")
+		doc = frappe.get_doc(target)
+		doc.run_method("set_missing_values")
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {

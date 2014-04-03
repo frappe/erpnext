@@ -14,7 +14,7 @@ from erpnext.stock.doctype.serial_no.serial_no import *
 
 class TestSerialNo(unittest.TestCase):
 	def test_cannot_create_direct(self):
-		sr = frappe.new_bean("Serial No")
+		sr = frappe.new_doc("Serial No")
 		sr.item_code = "_Test Serialized Item"
 		sr.warehouse = "_Test Warehouse - _TC"
 		sr.serial_no = "_TCSER0001"

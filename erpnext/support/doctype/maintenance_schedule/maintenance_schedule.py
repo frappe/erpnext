@@ -203,9 +203,9 @@ class MaintenanceSchedule(TransactionBase):
 
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
-			serial_no_bean = frappe.get_doc("Serial No", serial_no)
-			serial_no_bean.amc_expiry_date = amc_expiry_date
-			serial_no_bean.save()
+			serial_no_doc = frappe.get_doc("Serial No", serial_no)
+			serial_no_doc.amc_expiry_date = amc_expiry_date
+			serial_no_doc.save()
 
 	def validate_serial_no(self, serial_nos, amc_start_date):
 		for serial_no in serial_nos:

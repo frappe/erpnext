@@ -280,7 +280,7 @@ def get_serial_nos(serial_no):
 		if s.strip()]
 
 def make_serial_no(serial_no, sle):
-	sr = frappe.new_bean("Serial No")
+	sr = frappe.new_doc("Serial No")
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
 	sr.warehouse = None

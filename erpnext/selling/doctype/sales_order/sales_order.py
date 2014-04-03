@@ -253,8 +253,8 @@ class SalesOrder(SellingController):
 		return "order" if self.docstatus==1 else None
 		
 def set_missing_values(source, target):
-	bean = frappe.get_doc(target)
-	bean.run_method("onload_post_render")
+	doc = frappe.get_doc(target)
+	doc.run_method("onload_post_render")
 	
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):	
@@ -277,7 +277,7 @@ def make_material_request(source_name, target_doc=None):
 		}
 	}, target_doc, postprocess)
 	
-	return [(d if isinstance(d, dict) else d.fields) for d in doclist]
+	return doclist
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):	
@@ -322,9 +322,9 @@ def make_delivery_note(source_name, target_doc=None):
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		bean = frappe.get_doc(target)
-		bean.is_pos = 0
-		bean.run_method("onload_post_render")
+		doc = frappe.get_doc(target)
+		doc.is_pos = 0
+		doc.run_method("onload_post_render")
 		
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)

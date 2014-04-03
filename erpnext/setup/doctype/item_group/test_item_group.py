@@ -183,9 +183,9 @@ class TestItem(unittest.TestCase):
 		for name in frappe.db.sql_list("""select name from `tabItem Group`
 			where parent_item_group='_Test Item Group C'"""):
 			
-			bean = frappe.get_doc("Item Group", name)
-			bean.parent_item_group = "_Test Item Group B"
-			bean.save()
+			doc = frappe.get_doc("Item Group", name)
+			doc.parent_item_group = "_Test Item Group B"
+			doc.save()
 
 		self.test_basic_tree()
 		
