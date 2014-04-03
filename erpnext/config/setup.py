@@ -16,6 +16,27 @@ data = [
 		]
 	},
 	{
+		"label": _("Printing and Branding"),
+		"icon": "icon-print",
+		"items": [
+			{
+				"type": "doctype",
+				"name": "Letter Head",
+				"description": _("Letter Heads for print templates.")
+			},
+			{
+				"type": "doctype",
+				"name": "Print Heading",
+				"description": _("Titles for print templates e.g. Proforma Invoice.")
+			},
+			{
+				"type": "doctype",
+				"name": "Terms and Conditions",
+				"description": _("Standard contract terms for Sales or Purchase.")
+			},
+		]
+	},
+	{
 		"label": _("Customize"),
 		"icon": "icon-glass",
 		"items": [
