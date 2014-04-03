@@ -8,6 +8,9 @@ import unittest
 
 from frappe.test_runner import make_test_records
 
+test_ignore = ["Price List"]
+			
+test_records = frappe.get_test_records('Customer')
 
 class TestCustomer(unittest.TestCase):
 	def test_party_details(self):
@@ -47,6 +50,3 @@ class TestCustomer(unittest.TestCase):
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 		
 
-test_ignore = ["Price List"]
-			
-test_records = frappe.get_test_records('Customer')

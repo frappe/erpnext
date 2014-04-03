@@ -791,7 +791,7 @@ class TestStockEntry(unittest.TestCase):
 		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
 		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
-		self.assertRaises(frappe.PermissionError, st1.insert)
+		self.assertRaises(frappe.PermissionErrorp, st1.insert)
 
 		frappe.set_user("test2@example.com")
 		st1 = frappe.copy_doc(test_records[0])
