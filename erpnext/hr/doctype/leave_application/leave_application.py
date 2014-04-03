@@ -17,8 +17,8 @@ class LeaveApproverIdentityError(frappe.ValidationError): pass
 from frappe.model.controller import DocListController
 class LeaveApplication(DocListController):
 	def setup(self):
-		if frappe.db.exists(self.doctype, self.name):
-			self.previous_doc = frappe.get_doc(self.doctype, self.name)
+		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
+			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
 		else:
 			self.previous_doc = None
 		
