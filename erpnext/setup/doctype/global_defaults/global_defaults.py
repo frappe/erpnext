@@ -29,7 +29,7 @@ class GlobalDefaults(Document):
 	def on_update(self):
 		"""update defaults"""
 		self.validate_session_expiry()
-		self.update_control_panel()
+		self.set_country_and_timezone()
 		
 		for key in keydict:
 			frappe.db.set_default(key, self.get(keydict[key], ''))
@@ -59,14 +59,9 @@ class GlobalDefaults(Document):
 				frappe.msgprint("""Session Expiry must be in format hh:mm""",
 					raise_exception=1)
 
-	def update_control_panel(self):
-		cp_doc = frappe.get_doc("Control Panel")
-		if self.country:
-			cp_doc.country = self.country
-		if self.time_zone:
-			cp_doc.time_zone = self.time_zone
-		cp_doc.ignore_permissions = True
-		cp_doc.save()
+	def set_country_and_timezone(self):
+		frappe.db.set_default("country", self.country)
+		frappe.db.set_default("time_zone", self.time_zone)
 
 	def get_defaults(self):
 		return frappe.defaults.get_defaults()

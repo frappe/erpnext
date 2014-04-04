@@ -192,7 +192,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	add_excise_button: function() {
-		if(frappe.boot.control_panel.country === "India")
+		if(frappe.boot.sysdefaults.country === "India")
 			this.frm.add_custom_button(frappe._("Make Excise Invoice"), function() {
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Voucher');
 				excise = locals['Journal Voucher'][excise];

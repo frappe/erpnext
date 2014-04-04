@@ -106,7 +106,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						var parts = slide.get_input("company_name").val().split(" ");
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
 						slide.get_input("company_abbr").val(abbr.toUpperCase());
-					}).val(frappe.boot.control_panel.company_name || "").trigger("change");
+					}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
 
 					slide.get_input("fy_start_date").on("change", function() {
 						var year_end_date = 

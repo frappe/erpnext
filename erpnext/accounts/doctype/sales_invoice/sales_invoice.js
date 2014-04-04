@@ -245,8 +245,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 		(cint(doc.update_stock)==1 ? true : false));
 	
 	// India related fields
-	var cp = frappe.control_panel;
-	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
+	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
 	
 	cur_frm.refresh_fields();

@@ -10,7 +10,7 @@ def after_install():
 	import_country_and_currency()
 	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
 	import_charts()
-	frappe.db.set_value('Control Panel', None, 'home_page', 'setup-wizard')
+	frappe.db.set_default('desktop:home_page', 'setup-wizard')
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
@@ -138,7 +138,7 @@ def feature_setup():
 
 def set_single_defaults():
 	for dt in frappe.db.sql_list("""select name from `tabDocType` 
-		where issingle=1 and paent != 'Control Panel'"""):
+		where issingle=1 and parent != '__default'"""):
 		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
 			where parent=%s""", dt)
 		if default_values:

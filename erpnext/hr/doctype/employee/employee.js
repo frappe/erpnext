@@ -13,7 +13,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	onload: function() {
 		this.setup_leave_approver_select();
 		this.frm.toggle_display(["esic_card_no", "gratuity_lic_id", "pan_number", "pf_number"],
-			frappe.control_panel.country==="India");
+			frappe.boot.sysdefaults.country==="India");
 		if(this.frm.doc.__islocal) this.frm.set_value("employee_name", "");
 	},
 	

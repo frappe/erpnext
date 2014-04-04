@@ -31,7 +31,7 @@ def setup_account(args=None):
 	create_items(args)
 	create_customers(args)
 	create_suppliers(args)
-	frappe.db.set_value('Control Panel', None, 'home_page', 'desktop')
+	frappe.db.set_default('desktop:home_page', 'desktop')
 
 	frappe.clear_cache()
 	frappe.db.commit()
@@ -166,10 +166,8 @@ def set_defaults(args):
 	email_settings.send_print_in_body_and_attachment = 1
 	email_settings.save()
 
-	# control panel
-	cp = frappe.get_doc("Control Panel", "Control Panel")
-	cp.company_name = args["company_name"]
-	cp.save()
+	# default
+	frappe.db.set_default("company_name", args["company_name"])
 			
 def create_feed_and_todo():
 	"""update activty feed and create todo for creation of item, customer, vendor"""
@@ -345,7 +343,7 @@ def add_all_roles_to(name):
 def create_territories():
 	"""create two default territories, one for home country and one named Rest of the World"""
 	from frappe.utils.nestedset import get_root_of
-	country = frappe.db.get_value("Control Panel", None, "country")
+	country = frappe.db.get_default("country")
 	root_territory = get_root_of("Territory")
 	for name in (country, "Rest Of The World"):
 		if name and not frappe.db.exists("Territory", name):

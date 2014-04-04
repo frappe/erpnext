@@ -41,7 +41,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				});
 		}
 
-		if(frappe.boot.control_panel.country == 'India') {
+		if(frappe.boot.sysdefaults.country == 'India') {
 			unhide_field(['challan_no', 'challan_date']);
 		}
 	},

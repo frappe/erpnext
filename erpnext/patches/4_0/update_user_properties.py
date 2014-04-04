@@ -20,7 +20,7 @@ def update_user_properties():
 	frappe.reload_doc("core", "doctype", "docfield")
 	
 	for d in frappe.db.sql("""select parent, defkey, defvalue from tabDefaultValue
-		where parent not in ('__global', 'Control Panel')""", as_dict=True):
+		where parent not in ('__global', '__default')""", as_dict=True):
 		df = frappe.db.sql("""select options from tabDocField
 			where fieldname=%s and fieldtype='Link'""", d.defkey, as_dict=True)
 		
@@ -28,7 +28,7 @@ def update_user_properties():
 			frappe.db.sql("""update tabDefaultValue
 				set defkey=%s, parenttype='Restriction'
 				where defkey=%s and
-				parent not in ('__global', 'Control Panel')""", (df[0].options, d.defkey))
+				parent not in ('__global', '__default')""", (df[0].options, d.defkey))
 
 def update_user_match():
 	import frappe.defaults
@@ -97,7 +97,7 @@ def remove_duplicate_restrictions():
 	# remove duplicate restrictions (if they exist)
 	for d in frappe.db.sql("""select parent, defkey, defvalue,
 		count(*) as cnt from tabDefaultValue
-		where parent not in ('__global', 'Control Panel')
+		where parent not in ('__global', '__default')
 		group by parent, defkey, defvalue""", as_dict=1):
 		if d.cnt > 1:
 			# order by parenttype so that restriction does not get removed!

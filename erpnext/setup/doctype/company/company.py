@@ -332,8 +332,7 @@ class Company(Document):
 		for d in acc_list_common:
 			self.add_acc(d)
 
-		country = frappe.db.sql("select value from tabSingles where field = 'country' and doctype = 'Control Panel'")
-		country = country and cstr(country[0][0]) or ''
+		country = frappe.db.get_default("country")
 
 		# load taxes (only for India)
 		if country == 'India':

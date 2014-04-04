@@ -33,7 +33,7 @@ class SMSControl(Document):
 		sender_name = frappe.db.get_value('Global Defaults', None, 'sms_sender_name') or \
 			'ERPNXT'
 		if len(sender_name) > 6 and \
-				frappe.db.get_value("Control Panel", None, "country") == "India":
+				frappe.db.get_default("country") == "India":
 			throw(_("""
 				As per TRAI rule, sender name must be exactly 6 characters.
 				Kindly change sender name in Setup --> Global Defaults.
