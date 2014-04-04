@@ -4,7 +4,6 @@
 import frappe
 import unittest, json
 from frappe.utils import flt
-from frappe.model.doc import DocstatusTransitionError, TimestampMismatchError
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
@@ -25,7 +24,7 @@ class TestSalesInvoice(unittest.TestCase):
 		w.submit()
 		
 		w = frappe.get_doc(w2)
-		self.assertRaises(DocstatusTransitionError, w.submit)
+		self.assertRaises(frappe.DocstatusTransitionError, w.submit)
 		
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])
@@ -40,7 +39,7 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		import time
 		time.sleep(1)
-		self.assertRaises(TimestampMismatchError, w2.save)
+		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 		
 	def test_sales_invoice_calculation_base_currency(self):
 		si = frappe.copy_doc(test_records[2])

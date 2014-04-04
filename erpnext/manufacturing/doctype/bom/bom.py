@@ -38,7 +38,7 @@ class BOM(Document):
 	def on_update(self):
 		self.check_recursion()
 		self.update_exploded_items()
-		self.save()
+		self.db_update()
 	
 	def on_submit(self):
 		self.manage_default_bom()

@@ -35,7 +35,7 @@ class PurchaseOrder(BuyingController):
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", 
 			"Cancelled"])
 
-		pc_obj = frappe.get_doc(dt='Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 		self.check_for_stopped_status(pc_obj)
 

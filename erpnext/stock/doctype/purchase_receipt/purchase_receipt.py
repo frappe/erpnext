@@ -53,7 +53,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_challan_no()
 
-		pc_obj = frappe.get_doc(dt='Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 		self.check_for_stopped_status(pc_obj)
 

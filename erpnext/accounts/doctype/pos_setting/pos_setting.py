@@ -8,7 +8,7 @@ from frappe.utils import cint
 
 from frappe.model.document import Document
 
-class PosSetting(Document):
+class POSSetting(Document):
 	def get_series(self):
 		frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
 

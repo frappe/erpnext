@@ -721,7 +721,7 @@ def get_return_doc_and_details(args):
 	ref = frappe._dict()
 	
 	# get ref_doc
-	if args["purpose"] in return_map:
+	if args.get("purpose") in return_map:
 		for fieldname, val in return_map[args["purpose"]].items():
 			if args.get(fieldname):
 				ref.fieldname = fieldname

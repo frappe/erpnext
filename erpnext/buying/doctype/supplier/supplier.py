@@ -16,7 +16,6 @@ class Supplier(TransactionBase):
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
-		
 		if supp_master_name == 'Supplier Name':
 			if frappe.db.exists("Customer", self.supplier_name):
 				frappe.msgprint(_("A Customer exists with same name"), raise_exception=1)

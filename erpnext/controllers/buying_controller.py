@@ -50,7 +50,7 @@ class BuyingController(StockController):
 		from erpnext.stock.utils import validate_warehouse_company
 		
 		warehouses = list(set([d.warehouse for d in 
-			self.get(self.fname) if d.warehouse]))
+			self.get(self.fname) if getattr(d, "warehouse", None)]))
 				
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)

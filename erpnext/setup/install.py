@@ -137,7 +137,8 @@ def feature_setup():
 	doc.save()
 
 def set_single_defaults():
-	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):
+	for dt in frappe.db.sql_list("""select name from `tabDocType` 
+		where issingle=1 and paent != 'Control Panel'"""):
 		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
 			where parent=%s""", dt)
 		if default_values:

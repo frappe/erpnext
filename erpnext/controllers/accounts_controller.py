@@ -210,7 +210,7 @@ class AccountsController(TransactionBase):
 					"row_range": row_range
 				})
 		
-		if cint(tax.included_in_print_rate):
+		if cint(getattr(tax, "included_in_print_rate", None)):
 			if tax.charge_type == "Actual":
 				# inclusive tax cannot be of type Actual
 				throw((_("Row") 
@@ -259,7 +259,7 @@ class AccountsController(TransactionBase):
 
 				tax.tax_amount_after_discount_amount += current_tax_amount
 				
-				if tax.category:
+				if getattr(tax, "category", None):
 					# if just for valuation, do not add the tax amount in total
 					# hence, setting it as 0 for further steps
 					current_tax_amount = 0.0 if (tax.category == "Valuation") \

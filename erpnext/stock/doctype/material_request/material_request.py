@@ -124,7 +124,7 @@ class MaterialRequest(BuyingController):
 
 	def on_cancel(self):
 		# Step 1:=> Get Purchase Common Obj
-		pc_obj = frappe.get_doc(dt='Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 		
 		# Step 2:=> Check for stopped status
 		pc_obj.check_for_stopped_status(self.doctype, self.name)
