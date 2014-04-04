@@ -264,7 +264,7 @@ def update_serial_nos(sle, item_det):
 		for serial_no in serial_nos:
 			if frappe.db.exists("Serial No", serial_no):
 				sr = frappe.get_doc("Serial No", serial_no)
-				sr.make_controller().via_stock_ledger = True
+				sr.via_stock_ledger = True
 				sr.warehouse = sle.warehouse if sle.actual_qty > 0 else None
 				sr.save()
 			elif sle.actual_qty > 0:
@@ -284,7 +284,7 @@ def make_serial_no(serial_no, sle):
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
 	sr.warehouse = None
-	sr.make_controller().via_stock_ledger = True
+	sr.via_stock_ledger = True
 	sr.insert()
 	sr.warehouse = sle.warehouse
 	sr.status = "Available"

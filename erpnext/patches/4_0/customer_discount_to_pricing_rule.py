@@ -17,7 +17,7 @@ def execute():
 			else:
 				item_group = d.item_group
 				
-			frappe.get_doc([{
+			frappe.get_doc({
 				"doctype": "Pricing Rule",
 				"apply_on": "Item Group",
 				"item_group": item_group,
@@ -25,7 +25,7 @@ def execute():
 				"customer": d.parent,
 				"price_or_discount": "Discount",
 				"discount_percentage": d.discount
-			}]).insert()
+			}).insert()
 	
 	frappe.db.auto_commit_on_many_writes = False		
 	

@@ -41,7 +41,7 @@ class StockLedger(Document):
 
 	def make_entry(self, args):
 		args.update({"doctype": "Stock Ledger Entry"})
-		sle = frappe.get_doc([args])
+		sle = frappe.get_doc(args)
 		sle.ignore_permissions = 1
 		sle.insert()
 		return sle.name

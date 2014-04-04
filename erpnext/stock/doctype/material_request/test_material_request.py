@@ -71,39 +71,40 @@ class TestMaterialRequest(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty2)
 			
 	def _insert_stock_entry(self, qty1, qty2):
-		se = frappe.get_doc([
-			{
+		se = frappe.get_doc({
 				"company": "_Test Company", 
 				"doctype": "Stock Entry", 
 				"posting_date": "2013-03-01", 
 				"posting_time": "00:00:00", 
 				"purpose": "Material Receipt",
 				"fiscal_year": "_Test Fiscal Year 2013",
+				"mtn_details": [
+					{
+						"conversion_factor": 1.0, 
+						"doctype": "Stock Entry Detail", 
+						"item_code": "_Test Item Home Desktop 100",
+						"parentfield": "mtn_details", 
+						"incoming_rate": 100,
+						"qty": qty1, 
+						"stock_uom": "_Test UOM 1", 
+						"transfer_qty": qty1, 
+						"uom": "_Test UOM 1",
+						"t_warehouse": "_Test Warehouse 1 - _TC",
+					},
+					{
+						"conversion_factor": 1.0, 
+						"doctype": "Stock Entry Detail", 
+						"item_code": "_Test Item Home Desktop 200",
+						"parentfield": "mtn_details", 
+						"incoming_rate": 100,
+						"qty": qty2, 
+						"stock_uom": "_Test UOM 1", 
+						"transfer_qty": qty2, 
+						"uom": "_Test UOM 1",
+						"t_warehouse": "_Test Warehouse 1 - _TC",
+					}
+				]
 			}, 
-			{
-				"conversion_factor": 1.0, 
-				"doctype": "Stock Entry Detail", 
-				"item_code": "_Test Item Home Desktop 100",
-				"parentfield": "mtn_details", 
-				"incoming_rate": 100,
-				"qty": qty1, 
-				"stock_uom": "_Test UOM 1", 
-				"transfer_qty": qty1, 
-				"uom": "_Test UOM 1",
-				"t_warehouse": "_Test Warehouse 1 - _TC",
-			},
-			{
-				"conversion_factor": 1.0, 
-				"doctype": "Stock Entry Detail", 
-				"item_code": "_Test Item Home Desktop 200",
-				"parentfield": "mtn_details", 
-				"incoming_rate": 100,
-				"qty": qty2, 
-				"stock_uom": "_Test UOM 1", 
-				"transfer_qty": qty2, 
-				"uom": "_Test UOM 1",
-				"t_warehouse": "_Test Warehouse 1 - _TC",
-			},
 		])
 		se.insert()
 		se.submit()

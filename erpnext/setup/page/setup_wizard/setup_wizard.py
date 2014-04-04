@@ -73,16 +73,16 @@ def update_user_name(args):
 	
 def create_fiscal_year_and_company(args):
 	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
-	frappe.get_doc([{
+	frappe.get_doc({
 		"doctype":"Fiscal Year",
 		'year': curr_fiscal_year,
 		'year_start_date': args.get('fy_start_date'),
 		'year_end_date': args.get('fy_end_date'),
-	}]).insert()
+	}).insert()
 
 	print args
 	# Company
-	frappe.get_doc([{
+	frappe.get_doc({
 		"doctype":"Company",
 		'domain': args.get("industry"),
 		'company_name':args.get('company_name'),
@@ -90,27 +90,23 @@ def create_fiscal_year_and_company(args):
 		'default_currency':args.get('currency'),
 		'country': args.get('country'),
 		'chart_of_accounts': args.get(('chart_of_accounts')),
-	}]).insert()
+	}).insert()
 	
 	args["curr_fiscal_year"] = curr_fiscal_year
 	
 def create_price_lists(args):
 	for pl_type in ["Selling", "Buying"]:
-		frappe.get_doc([
-			{
+		frappe.get_doc({
 				"doctype": "Price List",
 				"price_list_name": "Standard " + pl_type,
 				"enabled": 1,
 				"buying": 1 if pl_type == "Buying" else 0,
 				"selling": 1 if pl_type == "Selling" else 0,
-				"currency": args["currency"]
-			},
-			{
-				"doctype": "Applicable Territory",
-				"parentfield": "valid_for_territories",
-				"territory": "All Territories"
-			}
-		]).insert()
+				"currency": args["currency"],
+				"valid_for_territories": {
+					"territory": "All Territories"
+				}
+			}).insert()
 	
 def set_defaults(args):
 	# enable default currency

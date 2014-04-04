@@ -49,7 +49,7 @@ def set_as_cancel(voucher_type, voucher_no):
 		
 def make_entry(args):
 	args.update({"doctype": "Stock Ledger Entry"})
-	sle = frappe.get_doc([args])
+	sle = frappe.get_doc(args)
 	sle.ignore_permissions = 1
 	sle.insert()
 	sle.submit()
@@ -137,11 +137,11 @@ def update_entries_after(args, verbose=1):
 	# update bin
 	if not frappe.db.exists({"doctype": "Bin", "item_code": args["item_code"], 
 			"warehouse": args["warehouse"]}):
-		bin_wrapper = frappe.get_doc([{
+		bin_wrapper = frappe.get_doc({
 			"doctype": "Bin",
 			"item_code": args["item_code"],
 			"warehouse": args["warehouse"],
-		}])
+		})
 		bin_wrapper.ignore_permissions = 1
 		bin_wrapper.insert()
 	

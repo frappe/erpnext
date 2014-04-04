@@ -112,7 +112,7 @@ class Company(Document):
 			
 	def import_chart_of_account(self):
 		chart = frappe.get_doc("Chart of Accounts", self.chart_of_accounts)
-		chart.make_controller().create_accounts(self.name)
+		chart.create_accounts(self.name)
 
 	def add_acc(self,lst):
 		account = frappe.get_doc({

@@ -63,14 +63,14 @@ def add_support_communication(subject, content, sender, docname=None, mail=None)
 		ticket.ignore_permissions = True
 		ticket.save()
 	else:
-		ticket = frappe.get_doc([decode_dict({
+		ticket = frappe.get_doc(decode_dict({
 			"doctype":"Support Ticket",
 			"description": content,
 			"subject": subject,
 			"raised_by": sender,
 			"content_type": mail.content_type if mail else None,
 			"status": "Open",
-		})])
+		}))
 		ticket.ignore_permissions = True
 		ticket.ignore_mandatory = True
 		ticket.insert()

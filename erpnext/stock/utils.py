@@ -40,16 +40,15 @@ def get_latest_stock_balance():
 def get_bin(item_code, warehouse):
 	bin = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
-		bin_wrapper = frappe.get_doc([{
+		bin_obj = frappe.get_doc({
 			"doctype": "Bin",
 			"item_code": item_code,
 			"warehouse": warehouse,
-		}])
-		bin_wrapper.ignore_permissions = 1
-		bin_wrapper.insert()
-		bin_obj = bin_wrapper.make_controller()
+		})
+		bin_obj.ignore_permissions = 1
+		bin_obj.insert()
 	else:
-				bin_obj = frappe.get_doc('Bin', bin)
+		bin_obj = frappe.get_doc('Bin', bin)
 	return bin_obj
 
 def update_bin(args):

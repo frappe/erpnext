@@ -58,7 +58,7 @@ class MaintenanceSchedule(TransactionBase):
 				self.update_amc_date(serial_nos, d.end_date)
 
 			if d.sales_person not in email_map:
-				sp = frappe.get_doc("Sales Person", d.sales_person).make_controller()
+				sp = frappe.get_doc("Sales Person", d.sales_person)
 				email_map[d.sales_person] = sp.get_email_id()
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from 

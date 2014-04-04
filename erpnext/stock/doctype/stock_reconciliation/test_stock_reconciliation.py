@@ -175,7 +175,7 @@ class TestStockReconciliation(unittest.TestCase):
 		frappe.db.sql("delete from `tabGL Entry`")
 						
 	def submit_stock_reconciliation(self, qty, rate, posting_date, posting_time):
-		stock_reco = frappe.get_doc([{
+		stock_reco = frappe.get_doc({
 			"doctype": "Stock Reconciliation",
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -187,7 +187,7 @@ class TestStockReconciliation(unittest.TestCase):
 				["Item Code", "Warehouse", "Quantity", "Valuation Rate"],
 				["_Test Item", "_Test Warehouse - _TC", qty, rate]
 			]),
-		}])
+		})
 		stock_reco.insert()
 		stock_reco.submit()
 		return stock_reco
