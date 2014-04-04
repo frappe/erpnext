@@ -9,7 +9,7 @@ import frappe
 class TestJournalVoucher(unittest.TestCase):
 	def test_journal_voucher_with_against_jv(self):
 		self.clear_account_balance()
-		jv_invoice = frappe.copy_doc(test_records[2])
+		jv_invoice = frappe.copy_doc(test_records[1])
 		jv_invoice.insert()
 		jv_invoice.submit()
 		
@@ -17,7 +17,7 @@ class TestJournalVoucher(unittest.TestCase):
 			where against_jv=%s""", jv_invoice.name))
 		
 		jv_payment = frappe.copy_doc(test_records[0])
-		jv_payment.doclist[1].against_jv = jv_invoice.name
+		jv_payment["entries"][0].against_jv = jv_invoice.name
 		jv_payment.insert()
 		jv_payment.submit()
 		
@@ -38,7 +38,7 @@ class TestJournalVoucher(unittest.TestCase):
 		set_perpetual_inventory()
 		
 		jv = frappe.copy_doc(test_records[0])
-		jv.doclist[1].account = "_Test Warehouse - _TC"
+		jv["entries"][0].account = "_Test Warehouse - _TC"
 		jv.insert()
 		
 		from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
@@ -51,10 +51,10 @@ class TestJournalVoucher(unittest.TestCase):
 		self.clear_account_balance()
 		
 		jv = frappe.copy_doc(test_records[0])
-		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
-		jv.doclist[2].debit = 20000.0
-		jv.doclist[1].credit = 20000.0
+		jv["entries"][1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv["entries"][1].cost_center = "_Test Cost Center - _TC"
+		jv["entries"][1].debit = 20000.0
+		jv["entries"][0].credit = 20000.0
 		jv.insert()
 		jv.submit()
 		self.assertTrue(frappe.db.get_value("GL Entry", 
@@ -66,10 +66,10 @@ class TestJournalVoucher(unittest.TestCase):
 		self.clear_account_balance()
 		
 		jv = frappe.copy_doc(test_records[0])
-		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
-		jv.doclist[2].debit = 20000.0
-		jv.doclist[1].credit = 20000.0
+		jv["entries"][1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv["entries"][1].cost_center = "_Test Cost Center - _TC"
+		jv["entries"][1].debit = 20000.0
+		jv["entries"][0].credit = 20000.0
 		jv.insert()
 		
 		self.assertRaises(BudgetError, jv.submit)
@@ -85,10 +85,10 @@ class TestJournalVoucher(unittest.TestCase):
 		
 		jv = frappe.copy_doc(test_records[0])
 		jv.posting_date = "2013-08-12"
-		jv.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.doclist[2].cost_center = "_Test Cost Center - _TC"
-		jv.doclist[2].debit = 150000.0
-		jv.doclist[1].credit = 150000.0
+		jv["entries"][1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv["entries"][1].cost_center = "_Test Cost Center - _TC"
+		jv["entries"][1].debit = 150000.0
+		jv["entries"][0].credit = 150000.0
 		jv.insert()
 		
 		self.assertRaises(BudgetError, jv.submit)
@@ -101,20 +101,20 @@ class TestJournalVoucher(unittest.TestCase):
 		self.clear_account_balance()
 		
 		jv = frappe.copy_doc(test_records[0])
-		jv.doclist[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.doclist[1].cost_center = "_Test Cost Center - _TC"
-		jv.doclist[1].credit = 30000.0
-		jv.doclist[2].debit = 30000.0
+		jv["entries"][0].account = "_Test Account Cost for Goods Sold - _TC"
+		jv["entries"][0].cost_center = "_Test Cost Center - _TC"
+		jv["entries"][0].credit = 30000.0
+		jv["entries"][1].debit = 30000.0
 		jv.submit()
 		
 		self.assertTrue(frappe.db.get_value("GL Entry", 
 			{"voucher_type": "Journal Voucher", "voucher_no": jv.name}))
 		
 		jv1 = frappe.copy_doc(test_records[0])
-		jv1.doclist[2].account = "_Test Account Cost for Goods Sold - _TC"
-		jv1.doclist[2].cost_center = "_Test Cost Center - _TC"
-		jv1.doclist[2].debit = 40000.0
-		jv1.doclist[1].credit = 40000.0
+		jv1["entries"][1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv1["entries"][1].cost_center = "_Test Cost Center - _TC"
+		jv1["entries"][1].debit = 40000.0
+		jv1["entries"][0].credit = 40000.0
 		jv1.submit()
 		
 		self.assertTrue(frappe.db.get_value("GL Entry", 

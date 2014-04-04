@@ -17,7 +17,7 @@ class TimeLogBatchTest(unittest.TestCase):
 		
 		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Submitted")
 		tlb = frappe.copy_doc(test_records[0])
-		tlb.doclist[1].time_log = time_log.name
+		tlb["time_log_batch_details"][0].time_log = time_log.name
 		tlb.insert()
 		tlb.submit()
 

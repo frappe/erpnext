@@ -104,8 +104,7 @@ class TestMaterialRequest(unittest.TestCase):
 						"t_warehouse": "_Test Warehouse 1 - _TC",
 					}
 				]
-			}, 
-		])
+			})
 		se.insert()
 		se.submit()
 				

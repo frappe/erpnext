@@ -89,10 +89,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(test_records[2])
 		si.currency = "USD"
 		si.conversion_rate = 50
-		si.doclist[1].rate = 1
-		si.doclist[1].price_list_rate = 1
-		si.doclist[2].rate = 3
-		si.doclist[2].price_list_rate = 3
+		si["entries"][0].rate = 1
+		si["entries"][0].price_list_rate = 1
+		si["entries"][1].rate = 3
+		si["entries"][1].price_list_rate = 3
 		si.insert()
 		
 		expected_values = {
@@ -243,8 +243,8 @@ class TestSalesInvoice(unittest.TestCase):
 		for i, tax in enumerate(si.get("other_charges")):
 			tax.idx = i+1
 		
-		si.doclist[1].price_list_rate = 62.5
-		si.doclist[1].price_list_rate = 191
+		si["entries"][0].price_list_rate = 62.5
+		si["entries"][0].price_list_rate = 191
 		for i in [3, 5, 6, 7, 8, 9]:
 			si.doclist[i].included_in_print_rate = 1
 		
@@ -305,10 +305,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(test_records[3])
 		si.currency = "USD"
 		si.conversion_rate = 50
-		si.doclist[1].price_list_rate = 55.56
-		si.doclist[1].discount_percentage = 10
-		si.doclist[2].price_list_rate = 187.5
-		si.doclist[2].discount_percentage = 20
+		si["entries"][0].price_list_rate = 55.56
+		si["entries"][0].discount_percentage = 10
+		si["entries"][1].price_list_rate = 187.5
+		si["entries"][1].discount_percentage = 20
 		si.doclist[9].rate = 5000
 		
 		si.insert()
@@ -365,7 +365,7 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 			
 		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
-		jv.doclist[1].against_invoice = w.name
+		jv["entries"][0].against_invoice = w.name
 		jv.insert()
 		jv.submit()
 		
@@ -381,7 +381,7 @@ class TestSalesInvoice(unittest.TestCase):
 		tlb.submit()
 		
 		si = frappe.get_doc(frappe.copy_doc(test_records[0]))
-		si.doclist[1].time_log_batch = "_T-Time Log Batch-00001"
+		si["entries"][0].time_log_batch = "_T-Time Log Batch-00001"
 		si.insert()
 		si.submit()
 		
@@ -501,7 +501,7 @@ class TestSalesInvoice(unittest.TestCase):
 			as pr_test_records
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.naming_series = "_T-Purchase Receipt-"
-		pr.doclist[1].warehouse = "_Test Warehouse No Account - _TC"
+		pr["entries"][0].warehouse = "_Test Warehouse No Account - _TC"
 		pr.insert()
 		pr.submit()
 		
@@ -638,7 +638,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.append("advance_adjustment_details", {
 			"doctype": "Sales Invoice Advance",
 			"journal_voucher": jv.name,
-			"jv_detail_no": jv.doclist[1].name,
+			"jv_detail_no": jv["entries"][0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -808,13 +808,13 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		
 		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		serial_nos = get_serial_nos(se["entries"][0].serial_no)
 		
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
-		si.doclist[1].item_code = "_Test Serialized Item With Series"
-		si.doclist[1].qty = 1
-		si.doclist[1].serial_no = serial_nos[0]
+		si["entries"][0].item_code = "_Test Serialized Item With Series"
+		si["entries"][0].qty = 1
+		si["entries"][0].serial_no = serial_nos[0]
 		si.insert()
 		si.submit()
 		
@@ -830,7 +830,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si = self.test_serialized()
 		si.cancel()
 
-		serial_nos = get_serial_nos(si.doclist[1].serial_no)
+		serial_nos = get_serial_nos(si["entries"][0].serial_no)
 
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
@@ -842,7 +842,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		
 		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		serial_nos = get_serial_nos(se["entries"][0].serial_no)
 		
 		sr = frappe.get_doc("Serial No", serial_nos[0])
 		sr.status = "Not Available"
@@ -850,9 +850,9 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
-		si.doclist[1].item_code = "_Test Serialized Item With Series"
-		si.doclist[1].qty = 1
-		si.doclist[1].serial_no = serial_nos[0]
+		si["entries"][0].item_code = "_Test Serialized Item With Series"
+		si["entries"][0].qty = 1
+		si["entries"][0].serial_no = serial_nos[0]
 		si.insert()
 
 		self.assertRaises(SerialNoStatusError, si.submit)

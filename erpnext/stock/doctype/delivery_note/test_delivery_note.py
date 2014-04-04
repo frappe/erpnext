@@ -14,7 +14,7 @@ def _insert_purchase_receipt(item_code=None):
 		item_code = pr_test_records[0][1]["item_code"]
 	
 	pr = frappe.copy_doc(pr_test_records[0])
-	pr.doclist[1].item_code = item_code
+	pr["purchase_receipt_details"][0].item_code = item_code
 	pr.insert()
 	pr.submit()
 	
@@ -69,11 +69,11 @@ class TestDeliveryNote(unittest.TestCase):
 		_insert_purchase_receipt()
 		
 		dn = frappe.copy_doc(test_records[0])
-		dn.doclist[1].expense_account = "Cost of Goods Sold - _TC"
-		dn.doclist[1].cost_center = "Main - _TC"
+		dn["delivery_note_details"][0].expense_account = "Cost of Goods Sold - _TC"
+		dn["delivery_note_details"][0].cost_center = "Main - _TC"
 
 		stock_in_hand_account = frappe.db.get_value("Account", 
-			{"master_name": dn.doclist[1].warehouse})
+			{"master_name": dn["delivery_note_details"][0].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.posting_date)
@@ -97,8 +97,8 @@ class TestDeliveryNote(unittest.TestCase):
 		# back dated purchase receipt
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.posting_date = "2013-01-01"
-		pr.doclist[1].rate = 100
-		pr.doclist[1].base_amount = 100
+		pr["purchase_receipt_details"][0].rate = 100
+		pr["purchase_receipt_details"][0].base_amount = 100
 		
 		pr.insert()
 		pr.submit()
@@ -124,11 +124,11 @@ class TestDeliveryNote(unittest.TestCase):
 		_insert_purchase_receipt("_Test Item Home Desktop 100")
 		
 		dn = frappe.copy_doc(test_records[0])
-		dn.doclist[1].item_code = "_Test Sales BOM Item"
-		dn.doclist[1].qty = 1
+		dn["delivery_note_details"][0].item_code = "_Test Sales BOM Item"
+		dn["delivery_note_details"][0].qty = 1
 	
 		stock_in_hand_account = frappe.db.get_value("Account", 
-			{"master_name": dn.doclist[1].warehouse})
+			{"master_name": dn["delivery_note_details"][0].warehouse})
 		
 		from erpnext.accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.posting_date)
@@ -160,12 +160,12 @@ class TestDeliveryNote(unittest.TestCase):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		
 		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		serial_nos = get_serial_nos(se["mtn_details"][0].serial_no)
 		
 		dn = frappe.copy_doc(test_records[0])
-		dn.doclist[1].item_code = "_Test Serialized Item With Series"
-		dn.doclist[1].qty = 1
-		dn.doclist[1].serial_no = serial_nos[0]
+		dn["delivery_note_details"][0].item_code = "_Test Serialized Item With Series"
+		dn["delivery_note_details"][0].qty = 1
+		dn["delivery_note_details"][0].serial_no = serial_nos[0]
 		dn.insert()
 		dn.submit()
 		
@@ -181,7 +181,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = self.test_serialized()
 		dn.cancel()
 
-		serial_nos = get_serial_nos(dn.doclist[1].serial_no)
+		serial_nos = get_serial_nos(dn["delivery_note_details"][0].serial_no)
 
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
@@ -193,16 +193,16 @@ class TestDeliveryNote(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		
 		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		serial_nos = get_serial_nos(se["mtn_details"][0].serial_no)
 		
 		sr = frappe.get_doc("Serial No", serial_nos[0])
 		sr.status = "Not Available"
 		sr.save()
 		
 		dn = frappe.copy_doc(test_records[0])
-		dn.doclist[1].item_code = "_Test Serialized Item With Series"
-		dn.doclist[1].qty = 1
-		dn.doclist[1].serial_no = serial_nos[0]
+		dn["delivery_note_details"][0].item_code = "_Test Serialized Item With Series"
+		dn["delivery_note_details"][0].qty = 1
+		dn["delivery_note_details"][0].serial_no = serial_nos[0]
 		dn.insert()
 
 		self.assertRaises(SerialNoStatusError, dn.submit)

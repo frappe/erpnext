@@ -74,8 +74,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		pi = frappe.copy_doc(test_records[1])
-		pi.doclist[1].item_code = "_Test Non Stock Item"
-		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
+		pi["entries"][0].item_code = "_Test Non Stock Item"
+		pi["entries"][0].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.doclist.pop(2)
 		pi.doclist.pop(3)
 		pi.insert()
@@ -133,7 +133,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			
 	def test_purchase_invoice_with_subcontracted_item(self):
 		wrapper = frappe.copy_doc(test_records[0])
-		wrapper.doclist[1].item_code = "_Test FG Item"
+		wrapper["entries"][0].item_code = "_Test FG Item"
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -176,7 +176,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = frappe.copy_doc(test_records[0])
 		pi.append("advance_allocation_details", {
 			"journal_voucher": jv.name,
-			"jv_detail_no": jv.doclist[1].name,
+			"jv_detail_no": jv["entries"][0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark

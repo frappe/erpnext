@@ -10,12 +10,12 @@ test_records = frappe.get_test_records('Shipping Rule')
 class TestShippingRule(unittest.TestCase):
 	def test_from_greater_than_to(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
-		shipping_rule.doclist[1].from_value = 101
+		shipping_rule["shipping_rule_conditions"][0].from_value = 101
 		self.assertRaises(FromGreaterThanToError, shipping_rule.insert)
 		
 	def test_many_zero_to_values(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
-		shipping_rule.doclist[1].to_value = 0
+		shipping_rule["shipping_rule_conditions"][0].to_value = 0
 		self.assertRaises(ManyBlankToValuesError, shipping_rule.insert)
 		
 	def test_overlapping_conditions(self):
@@ -27,8 +27,8 @@ class TestShippingRule(unittest.TestCase):
 			((50, 150), (50, 150)),
 		]:
 			shipping_rule = frappe.copy_doc(test_records[0])
-			shipping_rule.doclist[1].from_value = range_a[0]
-			shipping_rule.doclist[1].to_value = range_a[1]
-			shipping_rule.doclist[2].from_value = range_b[0]
-			shipping_rule.doclist[2].to_value = range_b[1]
+			shipping_rule["shipping_rule_conditions"][0].from_value = range_a[0]
+			shipping_rule["shipping_rule_conditions"][0].to_value = range_a[1]
+			shipping_rule["shipping_rule_conditions"][1].from_value = range_b[0]
+			shipping_rule["shipping_rule_conditions"][1].to_value = range_b[1]
 			self.assertRaises(OverlappingConditionError, shipping_rule.insert)
