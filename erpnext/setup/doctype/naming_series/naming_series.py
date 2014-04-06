@@ -108,7 +108,7 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[a-zA-Z0-9-/.#]*$", n):
+		if not re.match("^[a-zA-Z0-9- /.#]*$", n):
 			throw(_('Special Characters except "-" and "/" not allowed in naming series'))
 
 	def get_options(self, arg=''):
