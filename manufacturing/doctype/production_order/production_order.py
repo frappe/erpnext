@@ -105,7 +105,7 @@ class DocType:
 			status = "Submitted"
 			if stock_entries:
 				status = "In Process"
-				produced_qty = stock_entries["Manufacture/Repack"]
+				produced_qty = stock_entries.get("Manufacture/Repack")
 				if flt(produced_qty) == flt(self.doc.qty):
 					status = "Completed"
 				elif flt(produced_qty) > flt(self.doc.qty):
