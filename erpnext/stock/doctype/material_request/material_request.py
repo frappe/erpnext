@@ -112,15 +112,9 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		# Step 1:=> Update Bin
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
-
-		# Step 2:=> Set status
 		frappe.db.set(self, 'status', cstr(status))
-
-		# Step 3:=> Acknowledge User
 		msgprint(self.doctype + ": " + self.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
-
 
 	def on_cancel(self):
 		# Step 1:=> Get Purchase Common Obj

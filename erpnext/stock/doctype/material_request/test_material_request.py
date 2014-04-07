@@ -24,23 +24,22 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		po = make_purchase_order(mr.name)
 
-		self.assertEquals(po[0]["doctype"], "Purchase Order")
-		self.assertEquals(len(po), len(mr))
+		self.assertEquals(po["doctype"], "Purchase Order")
+		self.assertEquals(len(po.get("po_details")), len(mr.get("indent_details")))
 
 	def test_make_supplier_quotation(self):
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
 		mr = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_supplier_quotation,
-			mr.name)
+		self.assertRaises(frappe.ValidationError, make_supplier_quotation, mr.name)
 
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
 		sq = make_supplier_quotation(mr.name)
 
-		self.assertEquals(sq[0]["doctype"], "Supplier Quotation")
-		self.assertEquals(len(sq), len(mr))
+		self.assertEquals(sq["doctype"], "Supplier Quotation")
+		self.assertEquals(len(sq.get("quotation_items")), len(mr.get("indent_details")))
 
 
 	def test_make_stock_entry(self):
@@ -56,8 +55,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
-		self.assertEquals(se[0]["doctype"], "Stock Entry")
-		self.assertEquals(len(se), len(mr))
+		self.assertEquals(se["doctype"], "Stock Entry")
+		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
 
 	def _test_expected(self, doc, expected_values):
 		for i, expected in enumerate(expected_values):
