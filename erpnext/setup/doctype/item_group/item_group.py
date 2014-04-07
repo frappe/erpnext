@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import NestedSet
 
-class ItemGroup(DocTypeNestedSet):
+class ItemGroup(NestedSet):
 	nsm_parent_field = 'parent_item_group'
 	
 	def validate(self):
@@ -15,7 +15,7 @@ class ItemGroup(DocTypeNestedSet):
 				self.parent_item_group)
 		
 	def on_update(self):
-		DocTypeNestedSet.on_update(self)
+		NestedSet.on_update(self)
 		
 		self.validate_name_with_item()
 		

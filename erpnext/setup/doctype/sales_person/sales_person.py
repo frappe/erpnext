@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import flt
-from frappe.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import NestedSet
 
-class SalesPerson(DocTypeNestedSet):
+class SalesPerson(NestedSet):
 	nsm_parent_field = 'parent_sales_person';
 
 	def validate(self): 

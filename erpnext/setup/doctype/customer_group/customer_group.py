@@ -6,8 +6,8 @@ import frappe
 from frappe import msgprint
 
 	
-from frappe.utils.nestedset import DocTypeNestedSet
-class CustomerGroup(DocTypeNestedSet):
+from frappe.utils.nestedset import NestedSet
+class CustomerGroup(NestedSet):
 	nsm_parent_field = 'parent_customer_group';
 
 	def validate(self): 

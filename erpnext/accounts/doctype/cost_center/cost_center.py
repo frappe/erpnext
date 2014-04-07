@@ -6,9 +6,9 @@ import frappe
 
 from frappe import msgprint, _
 
-from frappe.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import NestedSet
 
-class CostCenter(DocTypeNestedSet):
+class CostCenter(NestedSet):
 	nsm_parent_field = 'parent_cost_center'
 	
 	def autoname(self):

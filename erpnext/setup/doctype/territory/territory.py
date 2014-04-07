@@ -7,9 +7,9 @@ import frappe
 
 from frappe.utils import flt
 
-from frappe.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import NestedSet
 	
-class Territory(DocTypeNestedSet):
+class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'
 
 	def validate(self): 

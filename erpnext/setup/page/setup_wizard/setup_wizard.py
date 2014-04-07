@@ -12,13 +12,13 @@ from frappe.utils.file_manager import save_file
 def setup_account(args=None):
 	# if frappe.db.sql("select name from tabCompany"):
 	# 	frappe.throw(_("Setup Already Complete!!"))
-		
+
 	if not args:
 		args = frappe.local.form_dict
 	if isinstance(args, basestring):
 		args = json.loads(args)
 	args = frappe._dict(args)
-	
+
 	update_user_name(args)
 	create_fiscal_year_and_company(args)
 	set_defaults(args)
@@ -35,12 +35,12 @@ def setup_account(args=None):
 
 	frappe.clear_cache()
 	frappe.db.commit()
-	
+
 	# suppress msgprints
 	frappe.local.message_log = []
 
 	return "okay"
-	
+
 def update_user_name(args):
 	if args.get("email"):
 		args['name'] = args.get("email")
@@ -59,18 +59,18 @@ def update_user_name(args):
 		args['name'] = frappe.session.user
 
 		# Update User
-		if not args.get('last_name') or args.get('last_name')=='None': 
+		if not args.get('last_name') or args.get('last_name')=='None':
 				args['last_name'] = None
 		frappe.db.sql("""update `tabUser` SET first_name=%(first_name)s,
 			last_name=%(last_name)s WHERE name=%(name)s""", args)
-		
+
 	if args.get("attach_user"):
 		filename, filetype, content = args.get("attach_user").split(",")
 		fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_name
 		frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
-		
+
 	add_all_roles_to(args.get("name"))
-	
+
 def create_fiscal_year_and_company(args):
 	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
 	frappe.get_doc({
@@ -91,9 +91,9 @@ def create_fiscal_year_and_company(args):
 		'country': args.get('country'),
 		'chart_of_accounts': args.get(('chart_of_accounts')),
 	}).insert()
-	
+
 	args["curr_fiscal_year"] = curr_fiscal_year
-	
+
 def create_price_lists(args):
 	for pl_type in ["Selling", "Buying"]:
 		frappe.get_doc({
@@ -107,11 +107,11 @@ def create_price_lists(args):
 					"territory": "All Territories"
 				}
 			}).insert()
-	
+
 def set_defaults(args):
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
-	
+
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
 	global_defaults.update({
 		'current_fiscal_year': args.curr_fiscal_year,
@@ -123,7 +123,7 @@ def set_defaults(args):
 		"time_zone": args.get("time_zone")
 	})
 	global_defaults.save()
-	
+
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1
 	accounts_settings.save()
@@ -134,7 +134,7 @@ def set_defaults(args):
 	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.save()
-	
+
 	selling_settings = frappe.get_doc("Selling Settings")
 	selling_settings.cust_master_name = "Customer Name"
 	selling_settings.so_required = "No"
@@ -164,7 +164,7 @@ def set_defaults(args):
 
 	# default
 	frappe.db.set_default("company_name", args["company_name"])
-			
+
 def create_feed_and_todo():
 	"""update activty feed and create todo for creation of item, customer, vendor"""
 	from erpnext.home import make_feed
@@ -174,9 +174,9 @@ def create_feed_and_todo():
 def create_email_digest():
 	from frappe.utils.user import get_system_managers
 	system_managers = get_system_managers(only_name=True)
-	if not system_managers: 
+	if not system_managers:
 		return
-	
+
 	companies = frappe.db.sql_list("select name FROM `tabCompany`")
 	for company in companies:
 		if not frappe.db.exists("Email Digest", "Default Weekly Digest - " + company):
@@ -188,12 +188,12 @@ def create_email_digest():
 				"recipient_list": "\n".join(system_managers)
 			})
 
-			for fieldname in edigest.meta.get_fieldnames({"fieldtype": "Check"}):
+			for fieldname in edigest.meta.get("fields", {"fieldtype": "Check"}):
 				if fieldname != "scheduler_errors":
 					edigest.set(fieldname, 1)
-		
+
 			edigest.insert()
-	
+
 	# scheduler errors digest
 	if companies:
 		edigest = frappe.new_doc("Email Digest")
@@ -206,7 +206,7 @@ def create_email_digest():
 			"enabled": 1
 		})
 		edigest.insert()
-	
+
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year
 	if start_year == getdate(fy_end_date).year:
@@ -245,12 +245,12 @@ def create_items(args):
 				"stock_uom": args.get("item_uom_" + str(i)),
 				"default_warehouse": item_group!="Service" and ("Finished Goods - " + args.get("company_abbr")) or ""
 			}).insert()
-			
+
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
 				fileurl = save_file(filename, content, "Item", item, decode=True).file_name
 				frappe.db.set_value("Item", item, "image", fileurl)
-					
+
 	for i in xrange(1,6):
 		item = args.get("item_buy_" + str(i))
 		if item:
@@ -266,7 +266,7 @@ def create_items(args):
 				"stock_uom": args.get("item_buy_uom_" + str(i)),
 				"default_warehouse": item_group!="Service" and ("Stores - " + args.get("company_abbr")) or ""
 			}).insert()
-			
+
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
 				fileurl = save_file(filename, content, "Item", item, decode=True).file_name
@@ -285,7 +285,7 @@ def create_customers(args):
 				"territory": args.get("country"),
 				"company": args.get("company_name")
 			}).insert()
-			
+
 			if args.get("customer_contact_" + str(i)):
 				contact = args.get("customer_contact_" + str(i)).split(" ")
 				frappe.get_doc({
@@ -294,7 +294,7 @@ def create_customers(args):
 					"first_name":contact[0],
 					"last_name": len(contact) > 1 and contact[1] or ""
 				}).insert()
-			
+
 def create_suppliers(args):
 	for i in xrange(1,6):
 		supplier = args.get("supplier_" + str(i))
@@ -323,11 +323,11 @@ def create_letter_head(args):
 			"letter_head_name": "Standard",
 			"is_default": 1
 		}).insert()
-		
+
 		filename, filetype, content = args.get("attach_letterhead").split(",")
 		fileurl = save_file(filename, content, "Letter Head", "Standard", decode=True).file_name
 		frappe.db.set_value("Letter Head", "Standard", "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
-		
+
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
 	for role in frappe.db.sql("""select name from tabRole"""):
