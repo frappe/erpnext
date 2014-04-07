@@ -105,8 +105,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	
 	def set_missing_values(source, target):
 		if customer:
-			target[0].customer = customer.name
-			target[0].customer_name = customer.customer_name
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
 			
 		si = frappe.get_doc(target)
 		si.ignore_permissions = ignore_permissions

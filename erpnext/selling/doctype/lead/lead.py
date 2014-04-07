@@ -77,13 +77,13 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 	
 	def set_missing_values(source, target):
 		if source.company_name:
-			target[0].customer_type = "Company"
-			target[0].customer_name = source.company_name
+			target.customer_type = "Company"
+			target.customer_name = source.company_name
 		else:
-			target[0].customer_type = "Individual"
-			target[0].customer_name = source.lead_name
+			target.customer_type = "Individual"
+			target.customer_name = source.lead_name
 			
-		target[0].customer_group = frappe.db.get_default("customer_group")
+		target.customer_group = frappe.db.get_default("customer_group")
 			
 	doclist = get_mapped_doc("Lead", source_name, 
 		{"Lead": {
