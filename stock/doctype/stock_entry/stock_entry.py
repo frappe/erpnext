@@ -344,7 +344,7 @@ class DocType(StockController):
 		if self.doc.production_order:
 			pro_bean = webnotes.bean("Production Order", self.doc.production_order)
 			_validate_production_order(pro_bean)
-			pro_bean.update_status()
+			pro_bean.run_method("update_status")
 			if self.doc.purpose == "Manufacture/Repack":
 				self.update_planned_qty(pro_bean)
 			
