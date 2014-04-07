@@ -3,16 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import add_days, cint,flt, nowdate, get_url_to_form, formatdate
-from frappe import msgprint, _
-
+from frappe.utils import flt, nowdate
 import frappe.defaults
-
-
 from frappe.model.document import Document
 
-class Bin(Document):	
-		
+class Bin(Document):
 	def validate(self):
 		if self.get("__islocal") or not self.stock_uom:
 			self.stock_uom = frappe.db.get_value('Item', self.item_code, 'stock_uom')
@@ -25,7 +20,7 @@ class Bin(Document):
 	def validate_mandatory(self):
 		qf = ['actual_qty', 'reserved_qty', 'ordered_qty', 'indented_qty']
 		for f in qf:
-			if (not self.has_key(f)) or (not self.get(f)): 
+			if (not getattr(self, f, None)) or (not self.get(f)): 
 				self.set(f, 0.0)
 		
 	def update_stock(self, args):
@@ -47,6 +42,7 @@ class Bin(Document):
 			
 	def update_qty(self, args):
 		# update the stock values (for current quantities)
+		
 		self.actual_qty = flt(self.actual_qty) + flt(args.get("actual_qty"))
 		self.ordered_qty = flt(self.ordered_qty) + flt(args.get("ordered_qty"))
 		self.reserved_qty = flt(self.reserved_qty) + flt(args.get("reserved_qty"))

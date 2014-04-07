@@ -277,7 +277,7 @@ class StockEntry(StockController):
 						raise_exception=frappe.DoesNotExistError)
 				
 				# validate quantity <= ref item's qty - qty already returned
-				ref_item = ref.getone({"item_code": item.item_code})
+				ref_item = ref.doc.getone({"item_code": item.item_code})
 				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
 					frappe.throw("{item}: {item_code} {returned}".format(
@@ -710,7 +710,7 @@ def get_stock_items_for_return(ref_doc, parentfields):
 		parentfields = [parentfields]
 	
 	all_items = list(set([d.item_code for d in 
-		ref_doc.get_all_children() if d.item_code]))
+		ref_doc.get_all_children() if d.get("item_code")]))
 	stock_items = frappe.db.sql_list("""select name from `tabItem`
 		where is_stock_item='Yes' and name in (%s)""" % (", ".join(["%s"] * len(all_items))),
 		tuple(all_items))
@@ -720,9 +720,9 @@ def get_stock_items_for_return(ref_doc, parentfields):
 def get_return_doc_and_details(args):
 	ref = frappe._dict()
 	
-	# get ref_doc
+	# get ref_doc	
 	if args.get("purpose") in return_map:
-		for fieldname, val in return_map[args["purpose"]].items():
+		for fieldname, val in return_map[args.get("purpose")].items():
 			if args.get(fieldname):
 				ref.fieldname = fieldname
 				ref.doc = frappe.get_doc(val[0], args.get(fieldname))

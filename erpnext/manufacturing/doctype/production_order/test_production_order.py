@@ -27,7 +27,7 @@ class TestProductionOrder(unittest.TestCase):
 		mr1.submit()
 		
 		mr2 = frappe.copy_doc(se_test_records[0])
-		mr2["mtn_details"][0].item_code = "_Test Item Home Desktop 100"
+		mr2.get("mtn_details")[0].item_code = "_Test Item Home Desktop 100"
 		mr2.insert()
 		mr2.submit()
 		

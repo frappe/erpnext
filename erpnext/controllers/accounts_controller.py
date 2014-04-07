@@ -369,7 +369,7 @@ class AccountsController(TransactionBase):
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
 			'aging_date': self.get("aging_date") or self.posting_date,
-			'remarks': self.remarks,
+			'remarks': self.get("remarks"),
 			'fiscal_year': self.fiscal_year,
 			'debit': 0,
 			'credit': 0,

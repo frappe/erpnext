@@ -22,7 +22,7 @@ class TestSalesOrder(unittest.TestCase):
 		mr = make_material_request(so.name)
 		
 		self.assertEquals(mr[0]["material_request_type"], "Purchase")
-		self.assertEquals(len(mr), len(sales_order.doclist))
+		self.assertEquals(len(mr), len(sales_order))
 
 	def test_make_delivery_note(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -37,7 +37,7 @@ class TestSalesOrder(unittest.TestCase):
 		dn = make_delivery_note(so.name)
 		
 		self.assertEquals(dn[0]["doctype"], "Delivery Note")
-		self.assertEquals(len(dn), len(sales_order.doclist))
+		self.assertEquals(len(dn), len(sales_order))
 
 	def test_make_sales_invoice(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -52,7 +52,7 @@ class TestSalesOrder(unittest.TestCase):
 		si = make_sales_invoice(so.name)
 		
 		self.assertEquals(si[0]["doctype"], "Sales Invoice")
-		self.assertEquals(len(si), len(sales_order.doclist))
+		self.assertEquals(len(si), len(sales_order))
 		self.assertEquals(len([d for d in si if d["doctype"]=="Sales Invoice Item"]), 1)
 		
 		si = frappe.get_doc(si)
@@ -64,11 +64,11 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len([d for d in si1 if d["doctype"]=="Sales Invoice Item"]), 0)
 		
 
-	def create_so(self, so_doclist = None):
-		if not so_doclist:
-			so_doclist = test_records[0]
+	def create_so(self, so_doc = None):
+		if not so_doc:
+			so_doc = test_records[0]
 		
-		w = frappe.copy_doc(so_doclist)
+		w = frappe.copy_doc(so_doc)
 		w.insert()
 		w.submit()
 
@@ -78,14 +78,14 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import test_records as dn_test_records
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import _insert_purchase_receipt
 
-		_insert_purchase_receipt(so["sales_order_details"][0].item_code)
+		_insert_purchase_receipt(so.get("sales_order_details")[0].item_code)
 		
 		dn = frappe.get_doc(frappe.copy_doc(dn_test_records[0]))
-		dn["delivery_note_details"][0].item_code = so["sales_order_details"][0].item_code
-		dn["delivery_note_details"][0].against_sales_order = so.name
-		dn["delivery_note_details"][0].prevdoc_detail_docname = so["sales_order_details"][0].name
+		dn.get("delivery_note_details")[0].item_code = so.get("sales_order_details")[0].item_code
+		dn.get("delivery_note_details")[0].against_sales_order = so.name
+		dn.get("delivery_note_details")[0].prevdoc_detail_docname = so.get("sales_order_details")[0].name
 		if delivered_qty:
-			dn["delivery_note_details"][0].qty = delivered_qty
+			dn.get("delivery_note_details")[0].qty = delivered_qty
 		dn.insert()
 		dn.submit()
 		return dn
@@ -110,11 +110,11 @@ class TestSalesOrder(unittest.TestCase):
 		
 		# submit
 		so = self.create_so()
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 10.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 10.0)
 		
 		# cancel
 		so.cancel()
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 0.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 0.0)
 		
 	
 	def test_reserved_qty_for_partial_delivery(self):
@@ -130,21 +130,21 @@ class TestSalesOrder(unittest.TestCase):
 		# submit dn
 		dn = self.create_dn_against_so(so)
 		
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 5.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 5.0)
 		
 		# stop so
 		so.load_from_db()
 		so.obj.stop_sales_order()
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 0.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 0.0)
 		
 		# unstop so
 		so.load_from_db()
 		so.obj.unstop_sales_order()
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 5.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 5.0)
 		
 		# cancel dn
 		dn.cancel()
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 10.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 10.0)
 		
 	def test_reserved_qty_for_over_delivery(self):
 		# reset bin
@@ -157,15 +157,15 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_default("allow_negative_stock", 1)
 		
 		# set over-delivery tolerance
-		frappe.db.set_value('Item', so["sales_order_details"][0].item_code, 'tolerance', 50)
+		frappe.db.set_value('Item', so.get("sales_order_details")[0].item_code, 'tolerance', 50)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 0.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 0.0)
 
 		# cancel dn
 		dn.cancel()
-		self.check_reserved_qty(so["sales_order_details"][0].item_code, so["sales_order_details"][0].warehouse, 10.0)
+		self.check_reserved_qty(so.get("sales_order_details")[0].item_code, so.get("sales_order_details")[0].warehouse, 10.0)
 		
 	def test_reserved_qty_for_so_with_packing_list(self):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
@@ -183,16 +183,16 @@ class TestSalesOrder(unittest.TestCase):
 		
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 50.0)
+			so.get("sales_order_details")[0].warehouse, 50.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 20.0)
+			so.get("sales_order_details")[0].warehouse, 20.0)
 		
 		# cancel
 		so.cancel()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 0.0)
+			so.get("sales_order_details")[0].warehouse, 0.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 0.0)
+			so.get("sales_order_details")[0].warehouse, 0.0)
 			
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
@@ -216,33 +216,33 @@ class TestSalesOrder(unittest.TestCase):
 		dn = self.create_dn_against_so(so)
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 25.0)
+			so.get("sales_order_details")[0].warehouse, 25.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 10.0)
+			so.get("sales_order_details")[0].warehouse, 10.0)
 				
 		# stop so
 		so.load_from_db()
 		so.obj.stop_sales_order()
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 0.0)
+			so.get("sales_order_details")[0].warehouse, 0.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 0.0)
+			so.get("sales_order_details")[0].warehouse, 0.0)
 		
 		# unstop so
 		so.load_from_db()
 		so.obj.unstop_sales_order()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 25.0)
+			so.get("sales_order_details")[0].warehouse, 25.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 10.0)
+			so.get("sales_order_details")[0].warehouse, 10.0)
 		
 		# cancel dn
 		dn.cancel()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 50.0)
+			so.get("sales_order_details")[0].warehouse, 50.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 20.0)
+			so.get("sales_order_details")[0].warehouse, 20.0)
 			
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
 		from erpnext.selling.doctype.sales_bom.test_sales_bom import test_records as sbom_test_records
@@ -262,22 +262,22 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_default("allow_negative_stock", 1)
 		
 		# set over-delivery tolerance
-		frappe.db.set_value('Item', so["sales_order_details"][0].item_code, 'tolerance', 50)
+		frappe.db.set_value('Item', so.get("sales_order_details")[0].item_code, 'tolerance', 50)
 		
 		# submit dn
 		dn = self.create_dn_against_so(so, 15)
 		
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 0.0)
+			so.get("sales_order_details")[0].warehouse, 0.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 0.0)
+			so.get("sales_order_details")[0].warehouse, 0.0)
 
 		# cancel dn
 		dn.cancel()
 		self.check_reserved_qty(sbom_test_records[0][1]["item_code"], 
-			so["sales_order_details"][0].warehouse, 50.0)
+			so.get("sales_order_details")[0].warehouse, 50.0)
 		self.check_reserved_qty(sbom_test_records[0][2]["item_code"], 
-			so["sales_order_details"][0].warehouse, 20.0)
+			so.get("sales_order_details")[0].warehouse, 20.0)
 
 	def test_warehouse_user(self):
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
@@ -293,7 +293,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.company = "_Test Company 1"
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
-		so["sales_order_details"][0].warehouse = "_Test Warehouse 2 - _TC1"
+		so.get("sales_order_details")[0].warehouse = "_Test Warehouse 2 - _TC1"
 		self.assertRaises(frappe.PermissionError, so.insert)
 
 		frappe.set_user("test2@example.com")
