@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, unittest
+import frappe.defaults
 from frappe.utils import flt, getdate
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
@@ -31,15 +32,12 @@ class TestStockEntry(unittest.TestCase):
 		st2.submit()
 
 		from erpnext.stock.utils import reorder_item
-
 		reorder_item()
 
 		mr_name = frappe.db.sql("""select parent from `tabMaterial Request Item`
 			where item_code='_Test Item'""")
 
 		self.assertTrue(mr_name)
-
-		frappe.db.set_default("company", self.old_default_company)
 
 	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
@@ -367,14 +365,14 @@ class TestStockEntry(unittest.TestCase):
 
 	def _test_sales_return_jv(self, se):
 		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
-		jv_list = make_return_jv(se.name)
+		jv = make_return_jv(se.name)
 
-		self.assertEqual(len(jv_list), 3)
-		self.assertEqual(jv_list[0].get("voucher_type"), "Credit Note")
-		self.assertEqual(jv_list[0].get("posting_date"), se.posting_date)
-		self.assertEqual(jv_list[1].get("account"), "_Test Customer - _TC")
-		self.assertEqual(jv_list[2].get("account"), "Sales - _TC")
-		self.assertTrue(jv_list[1].get("against_invoice"))
+		self.assertEqual(len(jv.get("entries")), 2)
+		self.assertEqual(jv.get("voucher_type"), "Credit Note")
+		self.assertEqual(jv.get("posting_date"), se.posting_date)
+		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Customer - _TC")
+		self.assertEqual(jv.get("entries")[1].get("account"), "Sales - _TC")
+		self.assertTrue(jv.get("entries")[0].get("against_invoice"))
 
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
 		self._clear_stock_account_balance()
@@ -527,14 +525,14 @@ class TestStockEntry(unittest.TestCase):
 
 	def _test_purchase_return_jv(self, se):
 		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
-		jv_list = make_return_jv(se.name)
+		jv = make_return_jv(se.name)
 
-		self.assertEqual(len(jv_list), 3)
-		self.assertEqual(jv_list[0].get("voucher_type"), "Debit Note")
-		self.assertEqual(jv_list[0].get("posting_date"), se.posting_date)
-		self.assertEqual(jv_list[1].get("account"), "_Test Supplier - _TC")
-		self.assertEqual(jv_list[2].get("account"), "_Test Account Cost for Goods Sold - _TC")
-		self.assertTrue(jv_list[1].get("against_voucher"))
+		self.assertEqual(len(jv.get("entries")), 2)
+		self.assertEqual(jv.get("voucher_type"), "Debit Note")
+		self.assertEqual(jv.get("posting_date"), se.posting_date)
+		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Supplier - _TC")
+		self.assertEqual(jv.get("entries")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
+		self.assertTrue(jv.get("entries")[0].get("against_voucher"))
 
 	def test_make_return_jv_for_purchase_receipt(self):
 		self._clear_stock_account_balance()
@@ -774,10 +772,9 @@ class TestStockEntry(unittest.TestCase):
 
 	# permission tests
 	def test_warehouse_user(self):
-		import frappe.defaults
 		set_perpetual_inventory(0)
 
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "Restriction")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "Restriction")
 		frappe.get_doc("User", "test@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
@@ -797,15 +794,17 @@ class TestStockEntry(unittest.TestCase):
 		st1.insert()
 		st1.submit()
 
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", parenttype="Restriction")
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC",
+			"test@example.com", parenttype="Restriction")
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1",
+			"test2@example.com", parenttype="Restriction")
 
 	def test_freeze_stocks (self):
 		self._clear_stock_account_balance()
 		frappe.db.set_value('Stock Settings', None,'stock_auth_role', '')
 
 		# test freeze_stocks_upto
-		date_newer_than_test_records = add_days(getdate(test_records[0][0]['posting_date']), 5)
+		date_newer_than_test_records = add_days(getdate(test_records[0]['posting_date']), 5)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", date_newer_than_test_records)
 		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)

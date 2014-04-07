@@ -169,9 +169,13 @@ def get_sle_before_datetime(args, for_update=False):
 def get_sle_after_datetime(args, for_update=False):
 	"""get Stock Ledger Entries after a particular datetime, for reposting"""
 	# NOTE: using for update of
-	return get_stock_ledger_entries(args,
-		["timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)"],
-		"asc", for_update=for_update)
+	conditions = ["timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)"]
+
+	# Excluding name: Workaround for MariaDB timestamp() floating microsecond issue
+	if args.get("name"):
+		conditions.append("name!=%(name)s")
+
+	return get_stock_ledger_entries(args, conditions, "asc", for_update=for_update)
 
 def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, for_update=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
@@ -180,7 +184,7 @@ def get_stock_ledger_entries(args, conditions=None, order="desc", limit=None, fo
 	if not args.get("posting_time"):
 		args["posting_time"] = "00:00"
 
-	return frappe.db.sql("""select * from `tabStock Ledger Entry`
+	return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
 		and warehouse = %%(warehouse)s
 		and ifnull(is_cancelled, 'No')='No'

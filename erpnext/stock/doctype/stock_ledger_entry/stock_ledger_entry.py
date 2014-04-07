@@ -19,15 +19,15 @@ class StockLedgerEntry(DocListController):
 		self.validate_item()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
-		
+
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, 
+		validate_fiscal_year(self.posting_date, self.fiscal_year,
 			self.meta.get_label("posting_date"))
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
-		
+
 		from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 		process_serial_no(self)
 
@@ -58,7 +58,7 @@ class StockLedgerEntry(DocListController):
 				msgprint("Stock Ledger Entry: '%s' is mandatory" % k, raise_exception = 1)
 			elif k == 'warehouse':
 				if not frappe.db.exists("Warehouse", self.get(k)):
-					msgprint("Warehouse: '%s' does not exist in the system. Please check." % 
+					msgprint("Warehouse: '%s' does not exist in the system. Please check." %
 						self.get(k), raise_exception = 1)
 
 	def validate_item(self):
@@ -76,9 +76,9 @@ class StockLedgerEntry(DocListController):
 				frappe.throw("Batch number is mandatory for Item '%s'" % self.item_code)
 
 			# check if batch belongs to item
-			if not frappe.db.get_value("Batch", 
+			if not frappe.db.get_value("Batch",
 					{"item": self.item_code, "name": self.batch_no}):
-				frappe.throw("'%s' is not a valid Batch Number for Item '%s'" % 
+				frappe.throw("'%s' is not a valid Batch Number for Item '%s'" %
 					(self.batch_no, self.item_code))
 
 		if not self.stock_uom:
