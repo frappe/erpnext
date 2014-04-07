@@ -20,7 +20,6 @@ class NotUpdateStockError(webnotes.ValidationError): pass
 class StockOverReturnError(webnotes.ValidationError): pass
 class IncorrectValuationRateError(webnotes.ValidationError): pass
 class DuplicateEntryForProductionOrderError(webnotes.ValidationError): pass
-class StockOverProductionError(webnotes.ValidationError): pass
 	
 from controllers.stock_controller import StockController
 
@@ -345,23 +344,9 @@ class DocType(StockController):
 		if self.doc.production_order:
 			pro_bean = webnotes.bean("Production Order", self.doc.production_order)
 			_validate_production_order(pro_bean)
-			self.update_produced_qty(pro_bean)
+			pro_bean.update_status()
 			if self.doc.purpose == "Manufacture/Repack":
 				self.update_planned_qty(pro_bean)
-			
-	def update_produced_qty(self, pro_bean):
-		if self.doc.purpose == "Manufacture/Repack":
-			produced_qty = flt(pro_bean.doc.produced_qty) + \
-				(self.doc.docstatus==1 and 1 or -1 ) * flt(self.doc.fg_completed_qty)
-				
-			if produced_qty > flt(pro_bean.doc.qty):
-				webnotes.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
-					_("Total Manufactured Qty can not be greater than Planned qty to manufacture") 
-					+ "(%s/%s)" % (produced_qty, flt(pro_bean.doc.qty)), StockOverProductionError)
-					
-			status = 'Completed' if flt(produced_qty) >= flt(pro_bean.doc.qty) else 'In Process'
-			webnotes.conn.sql("""update `tabProduction Order` set status=%s, produced_qty=%s 
-				where name=%s""", (status, produced_qty, self.doc.production_order))
 			
 	def update_planned_qty(self, pro_bean):
 		from stock.utils import update_bin
