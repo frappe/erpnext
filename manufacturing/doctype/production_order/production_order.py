@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import webnotes
 
 from webnotes.utils import cstr, flt, nowdate
-from webnotes.model.code import get_obj
 from webnotes import msgprint, _
 
 class OverProductionError(webnotes.ValidationError): pass
+class StockOverProductionError(webnotes.ValidationError): pass
 
 class DocType:
 	def __init__(self, doc, doclist=[]):
@@ -94,16 +94,26 @@ class DocType:
 		msgprint("Production Order has been %s" % status)
 
 
-	def update_status(self, status):
-		if status == 'Stopped':
-			webnotes.conn.set(self.doc, 'status', cstr(status))
-		else:
-			if flt(self.doc.qty) == flt(self.doc.produced_qty):
-				webnotes.conn.set(self.doc, 'status', 'Completed')
-			if flt(self.doc.qty) > flt(self.doc.produced_qty):
-				webnotes.conn.set(self.doc, 'status', 'In Process')
-			if flt(self.doc.produced_qty) == 0:
-				webnotes.conn.set(self.doc, 'status', 'Submitted')
+	def update_status(self, status=None):
+		if status != 'Stopped':
+			stock_entries = webnotes._dict()
+			for se in webnotes.conn.sql("""select purpose, sum(fg_completed_qty) as qty
+				from `tabStock Entry` where production_order=%s and docstatus=1
+				group by purpose""", self.doc.name, as_dict=1):
+					stock_entries.setdefault(se.purpose, se.qty)
+			
+			status = "Submitted"
+			if stock_entries:
+				status = "In Process"
+				produced_qty = stock_entries["Manufacture/Repack"]
+				if flt(produced_qty) == flt(self.doc.qty):
+					status = "Completed"
+				elif flt(produced_qty) > flt(self.doc.qty):
+					webnotes.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
+						_("Total Manufactured Qty can not be greater than Planned qty to manufacture") 
+						+ "(%s/%s)" % (produced_qty, flt(self.doc.qty)), StockOverProductionError)
+		
+		webnotes.conn.set(self.doc, 'status', status)			
 
 
 	def on_submit(self):

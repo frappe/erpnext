@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import webnotes
 
-from webnotes.utils import flt
+from webnotes.utils import flt, nowdate, nowtime
 
 
 def repost(allow_negative_stock=False):
@@ -129,3 +129,69 @@ def update_bin(item_code, warehouse, qty_dict=None):
 			flt(bin.doc.indented_qty) + flt(bin.doc.planned_qty) - flt(bin.doc.reserved_qty)
 	
 		bin.doc.save()
+		
+def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, posting_time=None,
+	 	fiscal_year=None):
+	from webnotes.utils import flt, cstr
+	from webnotes.model.doc import Document
+	from stock.utils import update_bin
+	from stock.stock_ledger import update_entries_after
+	from accounts.utils import get_fiscal_year
+	
+	if not posting_date: posting_date = nowdate()
+	if not posting_time: posting_time = nowtime()
+	if not fiscal_year: fiscal_year = get_fiscal_year(posting_date)[0]
+	
+	condition = " and item.name='%s'" % item_code.replace("'", "\'") if item_code else ""
+		
+	bin = webnotes.conn.sql("""select bin.item_code, bin.warehouse, bin.actual_qty, item.stock_uom 
+		from `tabBin` bin, tabItem item 
+		where bin.item_code = item.name and item.has_serial_no = 'Yes' %s""" % condition)
+
+	for d in bin:
+		serial_nos = webnotes.conn.sql("""select count(name) from `tabSerial No` 
+			where item_code=%s and warehouse=%s and status = 'Available' and docstatus < 2""", (d[0], d[1]))
+
+		if serial_nos and flt(serial_nos[0][0]) != flt(d[2]):
+			print d[0], d[1], d[2], serial_nos[0][0]
+
+		sle = webnotes.conn.sql("""select valuation_rate, company from `tabStock Ledger Entry`
+			where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No' 
+			order by posting_date desc limit 1""", (d[0], d[1]))
+
+		sl_entries = {
+			'doctype'					: 'Stock Ledger Entry',
+			'item_code'					: d[0],
+			'warehouse'					: d[1],
+			'transaction_date'	 		: nowdate(),
+			'posting_date'				: posting_date,
+			'posting_time'			 	: posting_time,
+			'voucher_type'			 	: 'Stock Reconciliation (Manual)',
+			'voucher_no'				: '',
+			'voucher_detail_no'			: '',
+			'actual_qty'				: flt(serial_nos[0][0]) - flt(d[2]),
+			'stock_uom'					: d[3],
+			'incoming_rate'				: sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
+			'company'					: sle and cstr(sle[0][1]) or 0,
+			'fiscal_year'				: fiscal_year,
+			'is_cancelled'			 	: 'No',
+			'batch_no'					: '',
+			'serial_no'					: ''
+		}
+		
+		sle = Document(fielddata=sl_entries)
+		sle = sle.insert()
+		
+		args = sl_entries.copy()
+		args.update({
+			"sle_id": sle.name,
+			"is_amended": 'No'
+		})
+		
+		update_bin(args)
+		update_entries_after({
+			"item_code": d[0],
+			"warehouse": d[1],
+			"posting_date": posting_date,
+			"posting_time": posting_time
+		})
