@@ -21,7 +21,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = make_purchase_order(sq.name)
 		
 		self.assertEquals(po[0]["doctype"], "Purchase Order")
-		self.assertEquals(len(po), len(sq.doclist))
+		self.assertEquals(len(po), len(sq))
 		
 		po[0]["naming_series"] = "_T-Purchase Order-"
 

@@ -23,7 +23,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		wrapper.insert()
 		wrapper.submit()
 		wrapper.load_from_db()
-		dl = wrapper.doclist
+		dl = wrapper
 		
 		expected_gl_entries = {
 			"_Test Supplier - _TC": [0, 1512.30],
@@ -37,7 +37,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"_Test Account Discount - _TC": [0, 168.03],
 		}
 		gl_entries = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
-			where voucher_type = 'Purchase Invoice' and voucher_no = %s""", dl[0].name, as_dict=1)
+			where voucher_type = 'Purchase Invoice' and voucher_no = %s""", dl.name, as_dict=1)
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 			
@@ -74,10 +74,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		
 		pi = frappe.copy_doc(test_records[1])
-		pi.doclist[1].item_code = "_Test Non Stock Item"
-		pi.doclist[1].expense_account = "_Test Account Cost for Goods Sold - _TC"
-		pi.doclist.pop(2)
-		pi.doclist.pop(3)
+		pi.get("entries")[0].item_code = "_Test Non Stock Item"
+		pi.get("entries")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
+		pi.get("entries").pop(2)
+		pi.get("entries").pop(1)
 		pi.insert()
 		pi.submit()
 		
@@ -112,7 +112,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
 			
-		self.assertEqual(wrapper.doclist[0].net_total, 1250)
+		self.assertEqual(wrapper.net_total, 1250)
 		
 		# tax amounts
 		expected_values = [
@@ -133,7 +133,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			
 	def test_purchase_invoice_with_subcontracted_item(self):
 		wrapper = frappe.copy_doc(test_records[0])
-		wrapper.doclist[1].item_code = "_Test FG Item"
+		wrapper.get("entries")[0].item_code = "_Test FG Item"
 		wrapper.insert()
 		wrapper.load_from_db()
 		
@@ -146,7 +146,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
 		
-		self.assertEqual(wrapper.doclist[0].net_total, 1250)
+		self.assertEqual(wrapper.net_total, 1250)
 
 		# tax amounts
 		expected_values = [
@@ -176,7 +176,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = frappe.copy_doc(test_records[0])
 		pi.append("advance_allocation_details", {
 			"journal_voucher": jv.name,
-			"jv_detail_no": jv.doclist[1].name,
+			"jv_detail_no": jv.get("entries")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark

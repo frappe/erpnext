@@ -53,7 +53,7 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 	if not pi.warehouse:
 		pi.warehouse = warehouse
 	if not pi.batch_no:
-		pi.batch_no = cstr(line.batch_no)
+		pi.batch_no = cstr(line.get("batch_no"))
 	pi.idx = packing_list_idx
 	
 	packing_list_idx += 1

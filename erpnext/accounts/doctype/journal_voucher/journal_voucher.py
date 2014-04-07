@@ -353,13 +353,13 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	jv.remark = 'Payment received against Sales Invoice {0}. {1}'.format(si.name, si.remarks)
 
 	# credit customer
-	jv.doclist[1].account = si.debit_to
-	jv.doclist[1].balance = get_balance_on(si.debit_to)
-	jv.doclist[1].credit = si.outstanding_amount
-	jv.doclist[1].against_invoice = si.name
+	jv.get("entries")[0].account = si.debit_to
+	jv.get("entries")[0].balance = get_balance_on(si.debit_to)
+	jv.get("entries")[0].credit = si.outstanding_amount
+	jv.get("entries")[0].against_invoice = si.name
 
 	# debit bank
-	jv.doclist[2].debit = si.outstanding_amount
+	jv.get("entries")[1].debit = si.outstanding_amount
 	
 	return jv.as_dict()
 
@@ -371,13 +371,13 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	jv.remark = 'Payment against Purchase Invoice {0}. {1}'.format(pi.name, pi.remarks)
 	
 	# credit supplier
-	jv.doclist[1].account = pi.credit_to
-	jv.doclist[1].balance = get_balance_on(pi.credit_to)
-	jv.doclist[1].debit = pi.outstanding_amount
-	jv.doclist[1].against_voucher = pi.name
+	jv.get("entries")[0].account = pi.credit_to
+	jv.get("entries")[0].balance = get_balance_on(pi.credit_to)
+	jv.get("entries")[0].debit = pi.outstanding_amount
+	jv.get("entries")[0].against_voucher = pi.name
 
 	# credit bank
-	jv.doclist[2].credit = pi.outstanding_amount
+	jv.get("entries")[1].credit = pi.outstanding_amount
 	
 	return jv.as_dict()
 

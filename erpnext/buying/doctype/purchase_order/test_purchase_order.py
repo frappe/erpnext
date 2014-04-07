@@ -41,7 +41,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po = frappe.get_doc("Purchase Order", po.name)
 		po.is_subcontracted = "No"
-		po.doclist[1].item_code = "_Test Item"
+		po.get("po_details")[0].item_code = "_Test Item"
 		po.submit()
 		
 		self.assertEquals(frappe.db.get_value("Bin", {"item_code": "_Test Item", 
@@ -107,7 +107,7 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_uom_integer_validation(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
 		po = frappe.copy_doc(test_records[0])
-		po.doclist[1].qty = 3.4
+		po.get("po_details")[0].qty = 3.4
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
 

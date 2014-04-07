@@ -49,7 +49,7 @@ class StockController(AccountsController):
 							"account": warehouse_account[sle.warehouse],
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
-							"remarks": self.remarks or "Accounting Entry for Stock",
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2)
 						}))
 
@@ -58,7 +58,7 @@ class StockController(AccountsController):
 							"account": detail.expense_account,
 							"against": warehouse_account[sle.warehouse],
 							"cost_center": detail.cost_center,
-							"remarks": self.remarks or "Accounting Entry for Stock",
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, 2)
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
@@ -103,8 +103,15 @@ class StockController(AccountsController):
 			for d in item_doclist:
 				if d.item_code and d.item_code not in items:
 					items.append(d.item_code)
-				if d.warehouse and d.warehouse not in warehouses:
+				
+				if d.get("warehouse") and d.warehouse not in warehouses:
 					warehouses.append(d.warehouse)
+				
+				if self.doctype == "Stock Entry":
+					if d.get("s_warehouse") and d.s_warehouse not in warehouses:
+						warehouses.append(d.s_warehouse)
+					if d.get("t_warehouse") and d.t_warehouse not in warehouses:
+						warehouses.append(d.t_warehouse)
 
 			warehouse_account = {wh: warehouse_account[wh] for wh in warehouses 
 				if warehouse_account.get(wh)}
@@ -234,20 +241,20 @@ class StockController(AccountsController):
 	def get_sl_entries(self, d, args):		
 		sl_dict = {
 			"item_code": d.item_code,
-			"warehouse": d.warehouse,
+			"warehouse": d.get("warehouse", None),
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
-			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.stock_qty),
+			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.get("stock_qty")),
 			"stock_uom": d.stock_uom,
 			"incoming_rate": 0,
 			"company": self.company,
 			"fiscal_year": self.fiscal_year,
 			"batch_no": cstr(d.batch_no).strip(),
 			"serial_no": d.serial_no,
-			"project": d.project_name,
+			"project": d.get("project_name"),
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"
 		}
 		

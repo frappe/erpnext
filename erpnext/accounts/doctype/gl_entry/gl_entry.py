@@ -9,7 +9,7 @@ from frappe import _
 	
 from frappe.model.document import Document
 
-class GlEntry(Document):
+class GLEntry(Document):
 
 	def validate(self):
 		self.check_mandatory()

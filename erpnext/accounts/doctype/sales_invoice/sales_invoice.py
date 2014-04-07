@@ -202,7 +202,7 @@ class SalesInvoice(SellingController):
 				self.terms = frappe.db.get_value("Terms and Conditions", self.tc_name, "terms")
 			
 			# fetch charges
-			if self.charge and not len(self.get("other_charges")):
+			if self.taxes_and_charges and not len(self.get("other_charges")):
 				self.set_taxes("other_charges", "taxes_and_charges")
 	
 	def get_advances(self):
