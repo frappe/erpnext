@@ -9,3 +9,4 @@ setup
 stock
 support
 utilities
+contacts
