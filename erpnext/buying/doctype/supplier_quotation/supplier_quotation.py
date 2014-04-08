@@ -88,4 +88,4 @@ def make_purchase_order(source_name, target_doc=None):
 		},
 	}, target_doc, set_missing_values)
 
-	return doclist.as_dict()
+	return doclist

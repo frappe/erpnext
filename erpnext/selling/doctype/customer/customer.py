@@ -12,7 +12,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import create_party_account
 
 class Customer(TransactionBase):
-				
+
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
@@ -24,7 +24,7 @@ class Customer(TransactionBase):
 
 	def get_company_abbr(self):
 		return frappe.db.get_value('Company', self.company, 'abbr')
-	
+
 	def validate_values(self):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
 			frappe.throw("Series is Mandatory.", frappe.MandatoryError)
@@ -37,28 +37,27 @@ class Customer(TransactionBase):
 			frappe.db.sql("update `tabLead` set status='Converted' where name = %s", self.lead_name)
 
 	def update_address(self):
-		frappe.db.sql("""update `tabAddress` set customer_name=%s, modified=NOW() 
+		frappe.db.sql("""update `tabAddress` set customer_name=%s, modified=NOW()
 			where customer=%s""", (self.customer_name, self.name))
 
 	def update_contact(self):
-		frappe.db.sql("""update `tabContact` set customer_name=%s, modified=NOW() 
+		frappe.db.sql("""update `tabContact` set customer_name=%s, modified=NOW()
 			where customer=%s""", (self.customer_name, self.name))
 
 	def update_credit_days_limit(self):
-		frappe.db.sql("""update tabAccount set credit_days = %s, credit_limit = %s 
-			where master_type='Customer' and master_name = %s""", 
+		frappe.db.sql("""update tabAccount set credit_days = %s, credit_limit = %s
+			where master_type='Customer' and master_name = %s""",
 			(self.credit_days or 0, self.credit_limit or 0, self.name))
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
-			if not frappe.db.get_value("Address", {"lead": self.lead_name, "customer": self.customer}):
-				frappe.db.sql("""update `tabAddress` set customer=%s, customer_name=%s where lead=%s""", 
+			if not frappe.db.get_value("Address", {"lead": self.lead_name, "customer": self.name}):
+				frappe.db.sql("""update `tabAddress` set customer=%s, customer_name=%s where lead=%s""",
 					(self.name, self.customer_name, self.lead_name))
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
-			c = frappe.get_doc('Contact')
-			c.set("__islocal", 1)
-			c.first_name = lead.lead_name 
+			c = frappe.new_doc('Contact')
+			c.first_name = lead.lead_name
 			c.email_id = lead.email_id
 			c.phone = lead.phone
 			c.mobile_no = lead.mobile_no
@@ -72,7 +71,7 @@ class Customer(TransactionBase):
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
-		
+
 		self.update_lead_status()
 		self.update_address()
 		self.update_contact()
@@ -84,29 +83,29 @@ class Customer(TransactionBase):
 		self.update_credit_days_limit()
 		#create address and contact from lead
 		self.create_lead_address_contact()
-		
+
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
 			frappe.msgprint("An Customer Group exists with same name (%s), \
-				please change the Customer name or rename the Customer Group" % 
+				please change the Customer name or rename the Customer Group" %
 				self.name, raise_exception=1)
 
 	def delete_customer_address(self):
 		addresses = frappe.db.sql("""select name, lead from `tabAddress`
 			where customer=%s""", (self.name,))
-		
+
 		for name, lead in addresses:
 			if lead:
 				frappe.db.sql("""update `tabAddress` set customer=null, customer_name=null
 					where name=%s""", name)
 			else:
 				frappe.db.sql("""delete from `tabAddress` where name=%s""", name)
-	
+
 	def delete_customer_contact(self):
-		for contact in frappe.db.sql_list("""select name from `tabContact` 
+		for contact in frappe.db.sql_list("""select name from `tabContact`
 			where customer=%s""", self.name):
 				frappe.delete_doc("Contact", contact)
-	
+
 	def delete_customer_account(self):
 		"""delete customer's ledger if exist and check balance before deletion"""
 		acc = frappe.db.sql("select name from `tabAccount` where master_type = 'Customer' \
@@ -120,7 +119,7 @@ class Customer(TransactionBase):
 		self.delete_customer_account()
 		if self.lead_name:
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s",self.lead_name)
-			
+
 	def before_rename(self, olddn, newdn, merge=False):
 		from erpnext.accounts.utils import rename_account_for
 		rename_account_for("Customer", olddn, newdn, merge, self.company)
@@ -134,7 +133,7 @@ class Customer(TransactionBase):
 		self.update_customer_address(newdn, set_field)
 
 	def update_customer_address(self, newdn, set_field):
-		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s 
+		frappe.db.sql("""update `tabAddress` set address_title=%(newdn)s
 			{set_field} where customer=%(newdn)s"""\
 			.format(set_field=set_field), ({"newdn": newdn}))
 
@@ -142,21 +141,21 @@ class Customer(TransactionBase):
 def get_dashboard_info(customer):
 	if not frappe.has_permission("Customer", "read", customer):
 		frappe.msgprint("No Permission", raise_exception=True)
-	
+
 	out = {}
 	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
-		out[doctype] = frappe.db.get_value(doctype, 
+		out[doctype] = frappe.db.get_value(doctype,
 			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
-	
-	billing = frappe.db.sql("""select sum(grand_total), sum(outstanding_amount) 
-		from `tabSales Invoice` 
-		where customer=%s 
+
+	billing = frappe.db.sql("""select sum(grand_total), sum(outstanding_amount)
+		from `tabSales Invoice`
+		where customer=%s
 			and docstatus = 1
 			and fiscal_year = %s""", (customer, frappe.db.get_default("fiscal_year")))
-	
+
 	out["total_billing"] = billing[0][0]
 	out["total_unpaid"] = billing[0][1]
-	
+
 	return out
 
 
@@ -165,11 +164,11 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 		fields = ["name", "customer_group", "territory"]
 	else:
 		fields = ["name", "customer_name", "customer_group", "territory"]
-		
-	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2 
-		and (%s like %s or customer_name like %s) order by 
+
+	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2
+		and (%s like %s or customer_name like %s) order by
 		case when name like %s then 0 else 1 end,
 		case when customer_name like %s then 0 else 1 end,
-		name, customer_name limit %s, %s""" % 
-		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"), 
+		name, customer_name limit %s, %s""" %
+		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))

@@ -31,17 +31,17 @@ class TimeLogBatch(Document):
 		if tl.status != "Submitted" and self.docstatus == 0:
 			frappe.msgprint(_("Time Log must have status 'Submitted'") + \
 				" :" + tl.name + " (" + _(tl.status) + ")", raise_exception=True)
-	
+
 	def set_status(self):
 		self.status = {
 			"0": "Draft",
 			"1": "Submitted",
 			"2": "Cancelled"
 		}[str(self.docstatus or 0)]
-		
+
 		if self.sales_invoice:
 			self.status = "Billed"
-	
+
 	def on_submit(self):
 		self.update_status(self.name)
 
@@ -57,4 +57,4 @@ class TimeLogBatch(Document):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			tl.time_log_batch = time_log_batch
 			tl.sales_invoice = self.sales_invoice
-			tl.update_after_submit()
+			tl.save()

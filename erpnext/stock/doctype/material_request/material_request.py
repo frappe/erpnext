@@ -245,7 +245,7 @@ def make_purchase_order(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	return doclist.as_dict()
+	return doclist
 
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None):
@@ -325,7 +325,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	return doclist.as_dict()
+	return doclist
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
@@ -361,4 +361,4 @@ def make_stock_entry(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	return doclist.as_dict()
+	return doclist

@@ -13,9 +13,9 @@ class TestLead(unittest.TestCase):
 		from erpnext.selling.doctype.lead.lead import make_customer
 
 		customer = make_customer("_T-Lead-00001")
-		self.assertEquals(customer[0]["doctype"], "Customer")
-		self.assertEquals(customer[0]["lead_name"], "_T-Lead-00001")
+		self.assertEquals(customer.doctype, "Customer")
+		self.assertEquals(customer.lead_name, "_T-Lead-00001")
 
-		customer[0]["company"] = "_Test Company"
-		customer[0]["customer_group"] = "_Test Customer Group"
-		frappe.get_doc(customer).insert()
+		customer.company = "_Test Company"
+		customer.customer_group = "_Test Customer Group"
+		customer.insert()

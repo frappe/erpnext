@@ -14,10 +14,10 @@ class TimeLogBatchTest(unittest.TestCase):
 		})
 		time_log.insert()
 		time_log.submit()
-		
+
 		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Submitted")
 		tlb = frappe.copy_doc(test_records[0])
-		tlb["time_log_batch_details"][0].time_log = time_log.name
+		tlb.get("time_log_batch_details")[0].time_log = time_log.name
 		tlb.insert()
 		tlb.submit()
 
@@ -26,3 +26,5 @@ class TimeLogBatchTest(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Submitted")
 
 test_records = frappe.get_test_records('Time Log Batch')
+test_dependencies = ["Time Log"]
+test_ignore = ["Sales Invoice"]

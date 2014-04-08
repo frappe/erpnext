@@ -28,21 +28,21 @@ class DeliveryNote(SellingController):
 		'status_field': 'delivery_status',
 		'keyword': 'Delivered'
 	}]
-		
+
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
 			self.set("__billing_complete", billed_qty[0][0] == total_qty)
-			
+
 	def get_portal_page(self):
 		return "shipment" if self.docstatus==1 else None
 
 	def set_actual_qty(self):
 		for d in self.get('delivery_note_details'):
 			if d.item_code and d.warehouse:
-				actual_qty = frappe.db.sql("""select actual_qty from `tabBin` 
+				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
 					where item_code = %s and warehouse = %s""", (d.item_code, d.warehouse))
 				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
 
@@ -57,7 +57,7 @@ class DeliveryNote(SellingController):
 
 	def validate(self):
 		super(DeliveryNote, self).validate()
-		
+
 		from erpnext.utilities import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Cancelled"])
 
@@ -67,18 +67,18 @@ class DeliveryNote(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.update_current_stock()		
+		self.update_current_stock()
 		self.validate_with_previous_doc()
-		
+
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self, 'delivery_note_details')
-		
+
 		self.status = 'Draft'
-		if not self.installation_status: self.installation_status = 'Not Installed'	
-		
+		if not self.installation_status: self.installation_status = 'Not Installed'
+
 	def validate_with_previous_doc(self):
 		items = self.get("delivery_note_details")
-		
+
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
 			if filter(None, [getattr(d, fn[1], None) for d in items]):
 				super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
@@ -97,12 +97,12 @@ class DeliveryNote(SellingController):
 							"is_child_table": True
 						}
 					})
-						
+
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.project_name and self.customer:
-			res = frappe.db.sql("""select name from `tabProject` 
-				where name = %s and (customer = %s or 
+			res = frappe.db.sql("""select name from `tabProject`
+				where name = %s and (customer = %s or
 					ifnull(customer,'')='')""", (self.project_name, self.customer))
 			if not res:
 				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.customer,self.project_name,self.project_name))
@@ -116,13 +116,13 @@ class DeliveryNote(SellingController):
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if e in check_list:
-					msgprint("Please check whether item %s has been entered twice wrongly." 
+					msgprint("Please check whether item %s has been entered twice wrongly."
 						% d.item_code)
 				else:
 					check_list.append(e)
 			else:
 				if f in chk_dupl_itm:
-					msgprint("Please check whether item %s has been entered twice wrongly." 
+					msgprint("Please check whether item %s has been entered twice wrongly."
 						% d.item_code)
 				else:
 					chk_dupl_itm.append(f)
@@ -133,7 +133,7 @@ class DeliveryNote(SellingController):
 				if not d['warehouse']:
 					msgprint("Please enter Warehouse for item %s as it is stock item"
 						% d['item_code'], raise_exception=1)
-				
+
 
 	def update_current_stock(self):
 		for d in self.get('delivery_note_details'):
@@ -150,15 +150,15 @@ class DeliveryNote(SellingController):
 
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
-		
-		# update delivered qty in sales order	
+
+		# update delivered qty in sales order
 		self.update_prevdoc_status()
-		
+
 		# create stock ledger entry
 		self.update_stock_ledger()
 
 		self.credit_limit()
-		
+
 		self.make_gl_entries()
 
 		# set DN status
@@ -168,14 +168,14 @@ class DeliveryNote(SellingController):
 	def on_cancel(self):
 		self.check_stop_sales_order("against_sales_order")
 		self.check_next_docstatus()
-				
+
 		self.update_prevdoc_status()
-		
+
 		self.update_stock_ledger()
 
 		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_packing_slips()
-		
+
 		self.make_cancel_gl_entries()
 
 	def validate_packed_qty(self):
@@ -198,17 +198,17 @@ class DeliveryNote(SellingController):
 			frappe.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql("""select t1.name 
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2 
-			where t1.name = t2.parent and t2.delivery_note = %s and t1.docstatus = 1""", 
+		submit_rv = frappe.db.sql("""select t1.name
+			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
+			where t1.name = t2.parent and t2.delivery_note = %s and t1.docstatus = 1""",
 			(self.name))
 		if submit_rv:
 			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted !")
 			raise Exception , "Validation Error."
 
-		submit_in = frappe.db.sql("""select t1.name 
-			from `tabInstallation Note` t1, `tabInstallation Note Item` t2 
-			where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1""", 
+		submit_in = frappe.db.sql("""select t1.name
+			from `tabInstallation Note` t1, `tabInstallation Note Item` t2
+			where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1""",
 			(self.name))
 		if submit_in:
 			msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
@@ -218,7 +218,7 @@ class DeliveryNote(SellingController):
 		"""
 			Cancel submitted packing slips related to this delivery note
 		"""
-		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s 
+		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s
 			AND docstatus = 1""", self.name)
 
 		if res:
@@ -234,19 +234,19 @@ class DeliveryNote(SellingController):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				self.update_reserved_qty(d)
-										
+
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d['qty']),
 				}))
-					
+
 		self.make_sl_entries(sl_entries)
-			
+
 	def update_reserved_qty(self, d):
 		if d['reserved_qty'] < 0 :
 			# Reduce reserved qty from reserved warehouse mentioned in so
 			if not d["reserved_warehouse"]:
 				frappe.throw(_("Reserved Warehouse is missing in Sales Order"))
-				
+
 			args = {
 				"item_code": d['item_code'],
 				"warehouse": d["reserved_warehouse"],
@@ -271,88 +271,88 @@ class DeliveryNote(SellingController):
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
 	invoiced_qty_map = {}
-	
+
 	for dn_detail, qty in frappe.db.sql("""select dn_detail, qty from `tabSales Invoice Item`
 		where delivery_note=%s and docstatus=1""", delivery_note):
 			if not invoiced_qty_map.get(dn_detail):
 				invoiced_qty_map[dn_detail] = 0
 			invoiced_qty_map[dn_detail] += qty
-	
+
 	return invoiced_qty_map
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
-	
+
 	def update_accounts(source, target):
 		si = frappe.get_doc(target)
 		si.is_pos = 0
 		si.run_method("onload_post_render")
-				
+
 		if len(si.get("entries")) == 0:
 			frappe.msgprint(_("All these items have already been invoiced."),
 				raise_exception=True)
-		
+
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
-	
+
 	doc = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
-			"doctype": "Sales Invoice", 
+			"doctype": "Sales Invoice",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
-		}, 
+		},
 		"Delivery Note Item": {
-			"doctype": "Sales Invoice Item", 
+			"doctype": "Sales Invoice Item",
 			"field_map": {
-				"name": "dn_detail", 
-				"parent": "delivery_note", 
-				"prevdoc_detail_docname": "so_detail", 
-				"against_sales_order": "sales_order", 
+				"name": "dn_detail",
+				"parent": "delivery_note",
+				"prevdoc_detail_docname": "so_detail",
+				"against_sales_order": "sales_order",
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0 
-		}, 
+			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0
+		},
 		"Sales Taxes and Charges": {
-			"doctype": "Sales Taxes and Charges", 
+			"doctype": "Sales Taxes and Charges",
 			"add_if_empty": True
-		}, 
+		},
 		"Sales Team": {
-			"doctype": "Sales Team", 
+			"doctype": "Sales Team",
 			"field_map": {
 				"incentives": "incentives"
 			},
 			"add_if_empty": True
 		}
 	}, target_doc, update_accounts)
-	
-	return doc.as_dict()
-	
+
+	return doc
+
 @frappe.whitelist()
 def make_installation_note(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
-	
+
 	doclist = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
-			"doctype": "Installation Note", 
+			"doctype": "Installation Note",
 			"validation": {
 				"docstatus": ["=", 1]
 			}
-		}, 
+		},
 		"Delivery Note Item": {
-			"doctype": "Installation Note Item", 
+			"doctype": "Installation Note Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype", 
+				"name": "prevdoc_detail_docname",
+				"parent": "prevdoc_docname",
+				"parenttype": "prevdoc_doctype",
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.installed_qty < doc.qty
 		}
 	}, target_doc)
 
-	return doclist.as_dict()
+	return doclist

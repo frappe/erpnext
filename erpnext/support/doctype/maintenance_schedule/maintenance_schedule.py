@@ -295,4 +295,4 @@ def make_maintenance_visit(source_name, target_doc=None):
 		}
 	}, target_doc)
 
-	return doclist.as_dict()
+	return doclist

@@ -234,6 +234,7 @@ class StockEntry(StockController):
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
+		import json
 		for d in self.get('mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
 				msgprint(_("Row #") + " %s: " % d.idx

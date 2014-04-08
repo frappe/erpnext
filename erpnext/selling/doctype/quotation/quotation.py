@@ -137,7 +137,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		
 	# postprocess: fetch shipping address, set missing values
 		
-	return doclist.as_dict()
+	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type"])
