@@ -4,8 +4,12 @@
 import webnotes
 
 def execute():
+	from manufacturing.doctype.production_order.production_order import StockOverProductionError
 	pro_orders = webnotes.conn.sql("""select name from `tabProduction Order`
 		where docstatus=1 and status!='Stopped'""")
 
 	for p in pro_orders:
-		webnotes.bean("Production Order", p[0]).run_method("update_status")
+		try:
+			webnotes.bean("Production Order", p[0]).run_method("update_status")
+		except StockOverProductionError:
+			pass
