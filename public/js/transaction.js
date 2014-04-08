@@ -655,8 +655,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.total_advance = flt(wn.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));
-
-			this.calculate_outstanding_amount();
+			this.calculate_outstanding_amount(false);
 		}
 	},
 
