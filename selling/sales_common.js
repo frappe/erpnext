@@ -298,9 +298,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_taxes_and_totals: function() {
+	calculate_taxes_and_totals: function(update_paid_amount) {
 		this._super();
-		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
+		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details", update_paid_amount);
 		this.calculate_commission();
 		this.calculate_contribution();
 
