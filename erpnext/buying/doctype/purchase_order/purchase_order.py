@@ -3,27 +3,27 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe.utils import cstr, flt
-
 from frappe import msgprint
-
-
 from erpnext.controllers.buying_controller import BuyingController
+
 class PurchaseOrder(BuyingController):
 	tname = 'Purchase Order Item'
 	fname = 'po_details'
-	status_updater = [{
-		'source_dt': 'Purchase Order Item',
-		'target_dt': 'Material Request Item',
-		'join_field': 'prevdoc_detail_docname',
-		'target_field': 'ordered_qty',
-		'target_parent_dt': 'Material Request',
-		'target_parent_field': 'per_ordered',
-		'target_ref_field': 'qty',
-		'source_field': 'qty',
-		'percent_join_field': 'prevdoc_docname',
-	}]
+
+	def __init__(self, arg1, arg2=None):
+		super(PurchaseOrder, self).__init__(arg1, arg2)
+		self.status_updater = [{
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Material Request Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'ordered_qty',
+			'target_parent_dt': 'Material Request',
+			'target_parent_field': 'per_ordered',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'prevdoc_docname',
+		}]
 
 	def validate(self):
 		super(PurchaseOrder, self).validate()
@@ -156,7 +156,7 @@ class PurchaseOrder(BuyingController):
 		frappe.db.set(self,'status','Submitted')
 
 	def on_cancel(self):
-		pc_obj = frappe.get_doc(dt = 'Purchase Common')
+		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_stopped_status(pc_obj)
 
 		# Check if Purchase Receipt has been submitted against current Purchase Order

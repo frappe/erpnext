@@ -17,17 +17,20 @@ from erpnext.accounts.party import get_party_account, get_due_date
 class PurchaseInvoice(BuyingController):
 	tname = 'Purchase Invoice Item'
 	fname = 'entries'
-	status_updater = [{
-		'source_dt': 'Purchase Invoice Item',
-		'target_dt': 'Purchase Order Item',
-		'join_field': 'po_detail',
-		'target_field': 'billed_amt',
-		'target_parent_dt': 'Purchase Order',
-		'target_parent_field': 'per_billed',
-		'target_ref_field': 'amount',
-		'source_field': 'amount',
-		'percent_join_field': 'purchase_order',
-	}]
+
+	def __init__(self, arg1, arg2=None):
+		super(PurchaseInvoice, self).__init__(arg1, arg2)
+		self.status_updater = [{
+			'source_dt': 'Purchase Invoice Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'po_detail',
+			'target_field': 'billed_amt',
+			'target_parent_dt': 'Purchase Order',
+			'target_parent_field': 'per_billed',
+			'target_ref_field': 'amount',
+			'source_field': 'amount',
+			'percent_join_field': 'purchase_order',
+		}]
 
 	def validate(self):
 		if not self.is_opening:

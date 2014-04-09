@@ -281,10 +281,10 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
-		target.base_amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.base_rate)
-		target.amount = (flt(obj.qty) - flt(obj.delivered_qty)) * flt(obj.rate)
-		target.qty = flt(obj.qty) - flt(obj.delivered_qty)
+	def update_item(source, target, source_parent):
+		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -326,10 +326,10 @@ def make_sales_invoice(source_name, target_doc=None):
 		doc.is_pos = 0
 		doc.run_method("onload_post_render")
 
-	def update_item(obj, target, source_parent):
-		target.amount = flt(obj.amount) - flt(obj.billed_amt)
+	def update_item(source, target, source_parent):
+		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = obj.rate and target.amount / flt(obj.rate) or obj.qty
+		target.qty = source.rate and target.amount / flt(source.rate) or obj.qty
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {

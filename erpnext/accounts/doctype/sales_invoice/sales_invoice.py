@@ -20,20 +20,23 @@ from erpnext.controllers.selling_controller import SellingController
 class SalesInvoice(SellingController):
 	tname = 'Sales Invoice Item'
 	fname = 'entries'
-	status_updater = [{
-		'source_dt': 'Sales Invoice Item',
-		'target_field': 'billed_amt',
-		'target_ref_field': 'amount',
-		'target_dt': 'Sales Order Item',
-		'join_field': 'so_detail',
-		'target_parent_dt': 'Sales Order',
-		'target_parent_field': 'per_billed',
-		'source_field': 'amount',
-		'join_field': 'so_detail',
-		'percent_join_field': 'sales_order',
-		'status_field': 'billing_status',
-		'keyword': 'Billed'
-	}]
+
+	def __init__(self, arg1, arg2=None):
+		super(SalesInvoice, self).__init__(arg1, arg2)
+		self.status_updater = [{
+			'source_dt': 'Sales Invoice Item',
+			'target_field': 'billed_amt',
+			'target_ref_field': 'amount',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_billed',
+			'source_field': 'amount',
+			'join_field': 'so_detail',
+			'percent_join_field': 'sales_order',
+			'status_field': 'billing_status',
+			'keyword': 'Billed'
+		}]
 
 	def validate(self):
 		super(SalesInvoice, self).validate()

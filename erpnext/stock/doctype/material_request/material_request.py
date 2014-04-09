@@ -169,11 +169,10 @@ def update_completed_qty(doc, method):
 
 		for mr_name, mr_items in material_request_map.items():
 			mr_obj = frappe.get_doc("Material Request", mr_name)
-			mr_doctype = frappe.get_meta("Material Request")
 
 			if mr_obj.status in ["Stopped", "Cancelled"]:
 				frappe.throw(_("Material Request") + ": %s, " % mr_obj.name
-					+ _(mr_doctype.get_label("status")) + " = %s. " % _(mr_obj.status)
+					+ _(mr_obj.meta.get_label("status")) + " = %s. " % _(mr_obj.status)
 					+ _("Cannot continue."), exc=frappe.InvalidStatusError)
 
 			_update_requested_qty(doc, mr_obj, mr_items)

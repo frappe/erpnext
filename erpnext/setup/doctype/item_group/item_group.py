@@ -5,22 +5,33 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils.nestedset import NestedSet
+from frappe.website.website_generator import WebsiteGenerator
 
-class ItemGroup(NestedSet):
+class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
-	
+
+	def autoname(self):
+		self.name = self.item_group_name
+
 	def validate(self):
 		if not self.parent_website_route:
-			self.parent_website_route = frappe.get_website_route("Item Group", 
+			self.parent_website_route = frappe.get_website_route("Item Group",
 				self.parent_item_group)
-		
+
 	def on_update(self):
 		NestedSet.on_update(self)
-		
+		WebsiteGenerator.on_update(self)
 		self.validate_name_with_item()
-		
 		self.validate_one_root()
-		
+
+	def after_rename(self, olddn, newdn, merge=False):
+		NestedSet.after_rename(self, olddn, newdn, merge)
+		WebsiteGenerator.after_rename(self, olddn, newdn, merge)
+
+	def on_trash(self):
+		NestedSet.on_trash(self)
+		WebsiteGenerator.on_trash(self)
+
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
 			frappe.msgprint("An item exists with same name (%s), please change the \

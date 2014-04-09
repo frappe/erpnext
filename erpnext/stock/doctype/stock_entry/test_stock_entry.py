@@ -407,14 +407,14 @@ class TestStockEntry(unittest.TestCase):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice, make_delivery_note
 
 		actual_qty_0 = self._get_actual_qty()
+
 		so = frappe.copy_doc(sales_order_test_records[0])
 		so.get("sales_order_details")[0].item_code = item_code
 		so.get("sales_order_details")[0].qty = 5.0
 		so.insert()
 		so.submit()
-		dn_doc = make_delivery_note(so.name)
 
-		dn = frappe.get_doc(dn_doc)
+		dn = make_delivery_note(so.name)
 		dn.status = "Draft"
 		dn.posting_date = so.delivery_date
 		dn.insert()
@@ -423,9 +423,7 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_1 = self._get_actual_qty()
 		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
 
-		si_doc = make_sales_invoice(so.name)
-
-		si = frappe.get_doc(si_doc)
+		si = make_sales_invoice(so.name)
 		si.posting_date = dn.posting_date
 		si.debit_to = "_Test Customer - _TC"
 		for d in si.get("entries"):

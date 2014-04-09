@@ -106,7 +106,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_so(self):
 		# reset bin
-		so_item = test_records[0]["sales_order_details"][0]
+		so_item = test_records[0]["sales_order_details"][0].copy()
 		self.delete_bin(so_item["item_code"], so_item["warehouse"])
 
 		# submit
@@ -120,7 +120,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_partial_delivery(self):
 		# reset bin
-		so_item = test_records[0]["sales_order_details"][0]
+		so_item = test_records[0]["sales_order_details"][0].copy()
 		self.delete_bin(so_item["item_code"], so_item["warehouse"])
 
 		# submit so
@@ -150,7 +150,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_over_delivery(self):
 		# reset bin
-		so_item = test_records[0]["sales_order_details"][0]
+		so_item = test_records[0]["sales_order_details"][0].copy()
 		self.delete_bin(so_item["item_code"], so_item["warehouse"])
 
 		# submit so

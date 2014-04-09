@@ -15,19 +15,22 @@ from erpnext.controllers.selling_controller import SellingController
 class DeliveryNote(SellingController):
 	tname = 'Delivery Note Item'
 	fname = 'delivery_note_details'
-	status_updater = [{
-		'source_dt': 'Delivery Note Item',
-		'target_dt': 'Sales Order Item',
-		'join_field': 'prevdoc_detail_docname',
-		'target_field': 'delivered_qty',
-		'target_parent_dt': 'Sales Order',
-		'target_parent_field': 'per_delivered',
-		'target_ref_field': 'qty',
-		'source_field': 'qty',
-		'percent_join_field': 'against_sales_order',
-		'status_field': 'delivery_status',
-		'keyword': 'Delivered'
-	}]
+
+	def __init__(self, arg1, arg2=None):
+		super(DeliveryNote, self).__init__(arg1, arg2)
+		self.status_updater = [{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'delivered_qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': 'per_delivered',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'against_sales_order',
+			'status_field': 'delivery_status',
+			'keyword': 'Delivered'
+		}]
 
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`

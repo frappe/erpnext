@@ -24,7 +24,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		po = make_purchase_order(mr.name)
 
-		self.assertEquals(po["doctype"], "Purchase Order")
+		self.assertEquals(po.doctype, "Purchase Order")
 		self.assertEquals(len(po.get("po_details")), len(mr.get("indent_details")))
 
 	def test_make_supplier_quotation(self):
@@ -38,7 +38,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		sq = make_supplier_quotation(mr.name)
 
-		self.assertEquals(sq["doctype"], "Supplier Quotation")
+		self.assertEquals(sq.doctype, "Supplier Quotation")
 		self.assertEquals(len(sq.get("quotation_items")), len(mr.get("indent_details")))
 
 
@@ -55,13 +55,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
-		self.assertEquals(se["doctype"], "Stock Entry")
+		self.assertEquals(se.doctype, "Stock Entry")
 		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
-
-	def _test_expected(self, doc, expected_values):
-		for i, expected in enumerate(expected_values):
-			for fieldname, val in expected.items():
-				self.assertEquals(val, doc.get(fieldname))
 
 	def _test_requested_qty(self, qty1, qty2):
 		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
@@ -116,28 +111,34 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# check if per complete is None
-		self._test_expected(mr, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
 
 		self._test_requested_qty(54.0, 3.0)
 
 		# map a purchase order
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		po_doc = make_purchase_order(mr.name)
-		po_doc["supplier"] = "_Test Supplier"
-		po_doc["transaction_date"] = "2013-07-07"
-		po_doc.get("po_details")[0]["qty"] = 27.0
-		po_doc.get("po_details")[1]["qty"] = 1.5
-		po_doc.get("po_details")[0]["schedule_date"] = "2013-07-09"
-		po_doc.get("po_details")[1]["schedule_date"] = "2013-07-09"
+		po_doc.supplier = "_Test Supplier"
+		po_doc.transaction_date = "2013-07-07"
+		po_doc.get("po_details")[0].qty = 27.0
+		po_doc.get("po_details")[1].qty = 1.5
+		po_doc.get("po_details")[0].schedule_date = "2013-07-09"
+		po_doc.get("po_details")[1].schedule_date = "2013-07-09"
 
 
 		# check for stopped status of Material Request
 		po = frappe.copy_doc(po_doc)
 		po.insert()
+		po.load_from_db()
 		mr.update_status('Stopped')
-		self.assertRaises(frappe.ValidationError, po.submit)
-		self.assertRaises(frappe.ValidationError, po.cancel)
+		self.assertRaises(frappe.InvalidStatusError, po.submit)
+		frappe.db.set(po, "docstatus", 1)
+		self.assertRaises(frappe.InvalidStatusError, po.cancel)
 
+		# resubmit and check for per complete
+		mr.load_from_db()
 		mr.update_status('Submitted')
 		po = frappe.copy_doc(po_doc)
 		po.insert()
@@ -145,13 +146,18 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr, [{"per_ordered": 50}, {"ordered_qty": 27.0}, {"ordered_qty": 1.5}])
+		self.assertEquals(mr.per_ordered, 50)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 27.0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 1.5)
 		self._test_requested_qty(27.0, 1.5)
 
 		po.cancel()
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, None)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, None)
+
 		self._test_requested_qty(54.0, 3.0)
 
 	def test_completed_qty_for_transfer(self):
@@ -165,7 +171,9 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# check if per complete is None
-		self._test_expected(mr, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
 
 		self._test_requested_qty(54.0, 3.0)
 
@@ -198,8 +206,12 @@ class TestMaterialRequest(unittest.TestCase):
 		se = frappe.copy_doc(se_doc)
 		se.insert()
 		mr.update_status('Stopped')
-		self.assertRaises(frappe.ValidationError, se.submit)
-		self.assertRaises(frappe.ValidationError, se.cancel)
+		self.assertRaises(frappe.InvalidStatusError, se.submit)
+
+		mr.update_status('Submitted')
+		se.submit()
+		mr.update_status('Stopped')
+		self.assertRaises(frappe.InvalidStatusError, se.cancel)
 
 		mr.update_status('Submitted')
 		se = frappe.copy_doc(se_doc)
@@ -208,13 +220,19 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr, [{"per_ordered": 50}, {"ordered_qty": 27.0}, {"ordered_qty": 1.5}])
+		self.assertEquals(mr.per_ordered, 50)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 27.0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 1.5)
+
 		self._test_requested_qty(27.0, 1.5)
 
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
 		mr.load_from_db()
-		self._test_expected(mr, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
+		self.assertEquals(mr.per_ordered, 0)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
 
 	def test_completed_qty_for_over_transfer(self):
@@ -228,7 +246,9 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# check if per complete is None
-		self._test_expected(mr, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
 
 		self._test_requested_qty(54.0, 3.0)
 
@@ -261,8 +281,8 @@ class TestMaterialRequest(unittest.TestCase):
 		se = frappe.copy_doc(se_doc)
 		se.insert()
 		mr.update_status('Stopped')
-		self.assertRaises(frappe.ValidationError, se.submit)
-		self.assertRaises(frappe.ValidationError, se.cancel)
+		self.assertRaises(frappe.InvalidStatusError, se.submit)
+		self.assertRaises(frappe.InvalidStatusError, se.cancel)
 
 		mr.update_status('Submitted')
 		se = frappe.copy_doc(se_doc)
@@ -271,13 +291,19 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr, [{"per_ordered": 100}, {"ordered_qty": 60.0}, {"ordered_qty": 3.0}])
+
+		self.assertEquals(mr.per_ordered, 100)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 60.0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 3.0)
 		self._test_requested_qty(0.0, 0.0)
 
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
 		mr.load_from_db()
-		self._test_expected(mr, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
+		self.assertEquals(mr.per_ordered, 0)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
 
 	def test_incorrect_mapping_of_stock_entry(self):
