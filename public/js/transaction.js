@@ -146,7 +146,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	validate: function() {
-		this.calculate_taxes_and_totals();
+		this.calculate_taxes_and_totals(false);
 	},
 
 	set_default_values: function() {
@@ -648,14 +648,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		});
 	},
 
-	calculate_total_advance: function(parenttype, advance_parentfield) {
+	calculate_total_advance: function(parenttype, advance_parentfield, update_paid_amount) {
 		if(this.frm.doc.doctype == parenttype && this.frm.doc.docstatus < 2) {
 			var advance_doclist = wn.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
 				{parentfield: advance_parentfield});
 			this.frm.doc.total_advance = flt(wn.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));
-			this.calculate_outstanding_amount(false);
+			this.calculate_outstanding_amount(update_paid_amount);
 		}
 	},
 
