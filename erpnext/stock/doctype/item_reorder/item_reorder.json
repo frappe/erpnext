@@ -1,0 +1,53 @@
+{
+ "autoname": "REORD-.#####", 
+ "creation": "2013-03-07 11:42:59.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "warehouse", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Warehouse", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "warehouse_reorder_level", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Re-order Level", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "warehouse_reorder_qty", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Re-order Qty", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "material_request_type", 
+   "fieldtype": "Select", 
+   "in_list_view": 1, 
+   "label": "Material Request Type", 
+   "options": "Purchase\nTransfer", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "in_create": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:16.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Item Reorder", 
+ "owner": "Administrator"
+}

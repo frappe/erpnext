@@ -1,0 +1,67 @@
+[
+ {
+  "buying": 1, 
+  "currency": "INR", 
+  "doctype": "Price List", 
+  "enabled": 1, 
+  "price_list_name": "_Test Price List", 
+  "selling": 1, 
+  "valid_for_territories": [
+   {
+    "doctype": "Applicable Territory", 
+    "parentfield": "valid_for_territories", 
+    "territory": "All Territories"
+   }
+  ]
+ }, 
+ {
+  "buying": 1, 
+  "currency": "INR", 
+  "doctype": "Price List", 
+  "enabled": 1, 
+  "price_list_name": "_Test Price List 2", 
+  "selling": 1, 
+  "valid_for_territories": [
+   {
+    "doctype": "Applicable Territory", 
+    "parentfield": "valid_for_territories", 
+    "territory": "_Test Territory Rest Of The World"
+   }
+  ]
+ }, 
+ {
+  "buying": 1, 
+  "currency": "INR", 
+  "doctype": "Price List", 
+  "enabled": 1, 
+  "price_list_name": "_Test Price List India", 
+  "selling": 1, 
+  "valid_for_territories": [
+   {
+    "doctype": "Applicable Territory", 
+    "parentfield": "valid_for_territories", 
+    "territory": "_Test Territory India"
+   }
+  ]
+ }, 
+ {
+  "buying": 1, 
+  "currency": "USD", 
+  "doctype": "Price List", 
+  "enabled": 1, 
+  "price_list_name": "_Test Price List Rest of the World", 
+  "selling": 1, 
+  "valid_for_territories": [
+   {
+    "doctype": "Applicable Territory", 
+    "parentfield": "valid_for_territories", 
+    "territory": "_Test Territory Rest Of The World"
+   }, 
+   {
+    "doctype": "Applicable Territory", 
+    "parentfield": "valid_for_territories", 
+    "territory": "_Test Territory United States"
+   }
+  ]
+ }
+]

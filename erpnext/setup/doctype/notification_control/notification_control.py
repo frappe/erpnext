@@ -7,17 +7,16 @@ import frappe
 from frappe import msgprint
 
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
 
+class NotificationControl(Document):
 	def get_message(self, arg):
 		fn = arg.lower().replace(' ', '_') + '_message'
 		v = frappe.db.sql("select value from tabSingles where field=%s and doctype=%s", (fn, 'Notification Control'))
 		return v and v[0][0] or ''
 
 	def set_message(self, arg = ''):
-		fn = self.doc.select_transaction.lower().replace(' ', '_') + '_message'
-		frappe.db.set(self.doc, fn, self.doc.custom_message)
-		msgprint("Custom Message for %s updated!" % self.doc.select_transaction)
+		fn = self.select_transaction.lower().replace(' ', '_') + '_message'
+		frappe.db.set(self, fn, self.custom_message)
+		msgprint("Custom Message for %s updated!" % self.select_transaction)
 

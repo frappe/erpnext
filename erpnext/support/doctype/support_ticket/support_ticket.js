@@ -34,7 +34,7 @@ $.extend(cur_frm.cscript, {
 	make_listing: function(doc) {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
 		
-		var comm_list = frappe.model.get("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
+		var comm_list = frappe.get_list("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
 		
 		if(!comm_list.length) {
 			comm_list.push({

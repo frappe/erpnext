@@ -1,0 +1,23 @@
+{
+ "creation": "2012-12-31 10:52:14.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "icon-table", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:44:21.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "stock-level", 
+ "owner": "Administrator", 
+ "page_name": "stock-level", 
+ "roles": [
+  {
+   "role": "Material Manager"
+  }, 
+  {
+   "role": "Analytics"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Stock Level"
+}

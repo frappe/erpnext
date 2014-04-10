@@ -23,7 +23,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 				"Installation Note", "Opportunity", "Customer Issue", "Maintenance Visit",
 				"Maintenance Schedule"]
 				.indexOf(doctype)!==-1) {
-				var refdoc = frappe.model.get_doc(doctype, docname);
+				var refdoc = frappe.get_doc(doctype, docname);
 
 				if(refdoc.doctype == "Quotation" ? refdoc.quotation_to=="Customer" : true) {
 					cur_frm.set_value("customer", refdoc.customer || refdoc.name);
@@ -34,7 +34,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 			}
 			if(["Supplier", "Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 				.indexOf(doctype)!==-1) {
-				var refdoc = frappe.model.get_doc(doctype, docname);
+				var refdoc = frappe.get_doc(doctype, docname);
 				cur_frm.set_value("supplier", refdoc.supplier || refdoc.name);
 				cur_frm.set_value("supplier_name", refdoc.supplier_name);
 				if(cur_frm.doc.doctype==="Address")
@@ -42,7 +42,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 			}
 			if(["Lead", "Quotation"]
 				.indexOf(doctype)!==-1) {
-				var refdoc = frappe.model.get_doc(doctype, docname);
+				var refdoc = frappe.get_doc(doctype, docname);
 				
 				if(refdoc.doctype == "Quotation" ? refdoc.quotation_to=="Lead" : true) {
 					cur_frm.set_value("lead", refdoc.lead || refdoc.name);

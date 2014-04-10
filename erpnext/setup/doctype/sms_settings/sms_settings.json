@@ -1,0 +1,75 @@
+{
+ "allow_copy": 1, 
+ "allow_email": 1, 
+ "allow_print": 1, 
+ "creation": "2013-01-10 16:34:24.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "description": "Eg. smsgateway.com/api/send_sms.cgi", 
+   "fieldname": "sms_gateway_url", 
+   "fieldtype": "Data", 
+   "label": "SMS Gateway URL", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "description": "Enter url parameter for message", 
+   "fieldname": "message_parameter", 
+   "fieldtype": "Data", 
+   "label": "Message Parameter", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "description": "Enter url parameter for receiver nos", 
+   "fieldname": "receiver_parameter", 
+   "fieldtype": "Data", 
+   "label": "Receiver Parameter", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "static_parameters", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "description": "Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)", 
+   "fieldname": "static_parameter_details", 
+   "fieldtype": "Table", 
+   "label": "Static Parameters", 
+   "options": "SMS Parameter", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-cog", 
+ "idx": 1, 
+ "in_create": 0, 
+ "issingle": 1, 
+ "modified": "2013-09-10 17:20:25.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "SMS Settings", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 0, 
+   "role": "System Manager", 
+   "submit": 0, 
+   "write": 1
+  }
+ ], 
+ "read_only": 0
+}

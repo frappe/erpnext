@@ -7,20 +7,17 @@ from frappe.utils import cstr, extract_email_id
 
 from erpnext.controllers.status_updater import StatusUpdater
 
-class DocType(StatusUpdater):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class Contact(StatusUpdater):
 
 	def autoname(self):
 		# concat first and last name
-		self.doc.name = " ".join(filter(None, 
-			[cstr(self.doc.fields.get(f)).strip() for f in ["first_name", "last_name"]]))
+		self.name = " ".join(filter(None, 
+			[cstr(self.get(f)).strip() for f in ["first_name", "last_name"]]))
 		
 		# concat party name if reqd
 		for fieldname in ("customer", "supplier", "sales_partner"):
-			if self.doc.fields.get(fieldname):
-				self.doc.name = self.doc.name + "-" + cstr(self.doc.fields.get(fieldname)).strip()
+			if self.get(fieldname):
+				self.name = self.name + "-" + cstr(self.get(fieldname)).strip()
 				break
 		
 	def validate(self):
@@ -28,38 +25,38 @@ class DocType(StatusUpdater):
 		self.validate_primary_contact()
 
 	def validate_primary_contact(self):
-		if self.doc.is_primary_contact == 1:
-			if self.doc.customer:
+		if self.is_primary_contact == 1:
+			if self.customer:
 				frappe.db.sql("update tabContact set is_primary_contact=0 where customer = %s", 
-					(self.doc.customer))
-			elif self.doc.supplier:
+					(self.customer))
+			elif self.supplier:
 				frappe.db.sql("update tabContact set is_primary_contact=0 where supplier = %s", 
-					 (self.doc.supplier))	
-			elif self.doc.sales_partner:
+					 (self.supplier))	
+			elif self.sales_partner:
 				frappe.db.sql("""update tabContact set is_primary_contact=0 
-					where sales_partner = %s""", (self.doc.sales_partner))
+					where sales_partner = %s""", (self.sales_partner))
 		else:
-			if self.doc.customer:
+			if self.customer:
 				if not frappe.db.sql("select name from tabContact \
-						where is_primary_contact=1 and customer = %s", (self.doc.customer)):
-					self.doc.is_primary_contact = 1
-			elif self.doc.supplier:
+						where is_primary_contact=1 and customer = %s", (self.customer)):
+					self.is_primary_contact = 1
+			elif self.supplier:
 				if not frappe.db.sql("select name from tabContact \
-						where is_primary_contact=1 and supplier = %s", (self.doc.supplier)):
-					self.doc.is_primary_contact = 1
-			elif self.doc.sales_partner:
+						where is_primary_contact=1 and supplier = %s", (self.supplier)):
+					self.is_primary_contact = 1
+			elif self.sales_partner:
 				if not frappe.db.sql("select name from tabContact \
 						where is_primary_contact=1 and sales_partner = %s", 
-						self.doc.sales_partner):
-					self.doc.is_primary_contact = 1
+						self.sales_partner):
+					self.is_primary_contact = 1
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
-			self.doc.name)
+			self.name)
 
 @frappe.whitelist()
 def get_contact_details(contact):
-	contact = frappe.doc("Contact", contact)
+	contact = frappe.get_doc("Contact", contact)
 	out = {
 		"contact_person": contact.get("name"),
 		"contact_display": " ".join(filter(None, 

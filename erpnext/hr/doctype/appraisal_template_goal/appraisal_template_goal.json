@@ -1,0 +1,40 @@
+{
+ "autoname": "KSHEET.#####", 
+ "creation": "2013-02-22 01:27:44.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "description": "Key Performance Area", 
+   "fieldname": "kra", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 1, 
+   "label": "KRA", 
+   "oldfieldname": "kra", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "print_width": "200px", 
+   "reqd": 1, 
+   "width": "200px"
+  }, 
+  {
+   "fieldname": "per_weightage", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Weightage (%)", 
+   "oldfieldname": "per_weightage", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "print_width": "100px", 
+   "reqd": 1, 
+   "width": "100px"
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:22:54.000000", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Appraisal Template Goal", 
+ "owner": "ashwini@webnotestech.com"
+}

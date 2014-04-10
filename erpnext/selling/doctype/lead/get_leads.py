@@ -14,7 +14,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 
 	if not (lead_name or contact_name):
 		# none, create a new Lead
-		lead = frappe.bean({
+		lead = frappe.get_doc({
 			"doctype":"Lead",
 			"lead_name": real_name or sender,
 			"email_id": sender,
@@ -24,7 +24,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 		lead.ignore_permissions = True
 		lead.ignore_mandatory = True
 		lead.insert()
-		lead_name = lead.doc.name
+		lead_name = lead.name
 
 	parent_doctype = "Contact" if contact_name else "Lead"
 	parent_name = contact_name or lead_name
@@ -34,12 +34,12 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 	
 	if mail:
 		# save attachments to parent if from mail
-		bean = frappe.bean(parent_doctype, parent_name)
-		mail.save_attachments_in_doc(bean.doc)
+		doc = frappe.get_doc(parent_doctype, parent_name)
+		mail.save_attachments_in_doc(doc)
 
 class SalesMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.settings = args or frappe.doc("Sales Email Settings", "Sales Email Settings")
+		self.settings = args or frappe.get_doc("Sales Email Settings", "Sales Email Settings")
 		
 	def process_message(self, mail):
 		if mail.from_email == self.settings.email_id:

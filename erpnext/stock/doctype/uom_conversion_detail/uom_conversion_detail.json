@@ -1,0 +1,34 @@
+{
+ "autoname": "UCDD/.#####", 
+ "creation": "2013-02-22 01:28:04.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "uom", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "UOM", 
+   "oldfieldname": "uom", 
+   "oldfieldtype": "Link", 
+   "options": "UOM", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "conversion_factor", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Conversion Factor", 
+   "oldfieldname": "conversion_factor", 
+   "oldfieldtype": "Float", 
+   "permlevel": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:21:53.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "UOM Conversion Detail", 
+ "owner": "Administrator"
+}

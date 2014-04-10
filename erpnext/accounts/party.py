@@ -25,13 +25,12 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
 		frappe.throw("Not Permitted", frappe.PermissionError)
 
-	party_bean = frappe.bean(party_type, party)
-	party = party_bean.doc
+	party = frappe.get_doc(party_type, party)
 
 	set_address_details(out, party, party_type)
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
-	set_price_list(out, party, price_list)
+	set_price_list(out, party, party_type, price_list)
 	
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -41,7 +40,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		out["sales_team"] = [{
 			"sales_person": d.sales_person, 
 			"sales_designation": d.sales_designation
-		} for d in party_bean.doclist.get({"doctype":"Sales Team"})]
+		} for d in party.get("sales_team")]
 	
 	return out
 
@@ -81,7 +80,7 @@ def set_other_values(out, party, party_type):
 		if party.get("default_" + f):
 			out[f] = party.get("default_" + f)
 
-def set_price_list(out, party, given_price_list):
+def set_price_list(out, party, party_type, given_price_list):
 	# price list	
 	price_list = get_restrictions().get("Price List")
 	if isinstance(price_list, list):
@@ -90,7 +89,7 @@ def set_price_list(out, party, given_price_list):
 	if not price_list:
 		price_list = party.default_price_list
 		
-	if not price_list and party.party_type=="Customer":
+	if not price_list and party_type=="Customer":
 		price_list =  frappe.db.get_value("Customer Group", 
 			party.customer_group, "default_price_list")
 
@@ -166,7 +165,7 @@ def create_party_account(party, party_type, company):
 			frappe.throw(_("Please enter Account Receivable/Payable group in company master"))
 		
 		# create
-		account = frappe.bean({
+		account = frappe.get_doc({
 			"doctype": "Account",
 			'account_name': party,
 			'parent_account': parent_account, 
@@ -178,4 +177,4 @@ def create_party_account(party, party_type, company):
 			"report_type": "Balance Sheet"
 		}).insert(ignore_permissions=True)
 		
-		frappe.msgprint(_("Account Created") + ": " + account.doc.name)
+		frappe.msgprint(_("Account Created") + ": " + account.name)

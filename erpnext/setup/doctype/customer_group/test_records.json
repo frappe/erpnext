@@ -1,0 +1,8 @@
+[
+ {
+  "customer_group_name": "_Test Customer Group", 
+  "doctype": "Customer Group", 
+  "is_group": "No", 
+  "parent_customer_group": "All Customer Groups"
+ }
+]

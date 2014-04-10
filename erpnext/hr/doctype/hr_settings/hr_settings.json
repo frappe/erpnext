@@ -1,0 +1,62 @@
+{
+ "creation": "2013-08-02 13:45:23.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Other", 
+ "fields": [
+  {
+   "fieldname": "employee_settings", 
+   "fieldtype": "Section Break", 
+   "label": "Employee Settings", 
+   "permlevel": 0
+  }, 
+  {
+   "default": "Naming Series", 
+   "description": "Employee record is created using selected field. ", 
+   "fieldname": "emp_created_by", 
+   "fieldtype": "Select", 
+   "label": "Employee Records to be created by", 
+   "options": "Naming Series\nEmployee Number", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Don't send Employee Birthday Reminders", 
+   "fieldname": "stop_birthday_reminders", 
+   "fieldtype": "Check", 
+   "label": "Stop Birthday Reminders", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "payroll_settings", 
+   "fieldtype": "Section Break", 
+   "label": "Payroll Settings", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day", 
+   "fieldname": "include_holidays_in_total_working_days", 
+   "fieldtype": "Check", 
+   "label": "Include holidays in Total no. of Working Days", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-cog", 
+ "idx": 1, 
+ "issingle": 1, 
+ "modified": "2014-02-19 17:40:18.000001", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "HR Settings", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "role": "System Manager", 
+   "write": 1
+  }
+ ]
+}

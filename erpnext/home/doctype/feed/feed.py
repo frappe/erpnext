@@ -4,15 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
+from frappe.model.document import Document
 
-	
-
-
-class DocType:
-  def __init__(self,d,dl):
-    self.doc, self.doclist = d, dl
+class Feed(Document):
+	pass
 	
 def on_doctype_update():
 	if not frappe.db.sql("""show index from `tabFeed` 

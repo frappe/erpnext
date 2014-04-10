@@ -10,7 +10,7 @@ from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 
-class DocType(StockController):
+class StockReconciliation(StockController):
 	def setup(self):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 		self.entries = []
@@ -28,10 +28,10 @@ class DocType(StockController):
 		self.make_cancel_gl_entries()
 		
 	def validate_data(self):
-		if not self.doc.reconciliation_json:
+		if not self.reconciliation_json:
 			return
 			
-		data = json.loads(self.doc.reconciliation_json)
+		data = json.loads(self.reconciliation_json)
 		
 		# strip out extra columns (if any)
 		data = [row[:4] for row in data]
@@ -45,7 +45,7 @@ class DocType(StockController):
 		if data.index(self.head_row) != 0:
 			head_row_no = data.index(self.head_row)
 			data = data[head_row_no:]
-			self.doc.reconciliation_json = json.dumps(data)
+			self.reconciliation_json = json.dumps(data)
 				
 		def _get_msg(row_num, msg):
 			return _("Row # ") + ("%d: " % (row_num+head_row_no+2)) + _(msg)
@@ -97,7 +97,7 @@ class DocType(StockController):
 		# using try except to catch all validation msgs and display together
 		
 		try:
-			item = frappe.doc("Item", item_code)
+			item = frappe.get_doc("Item", item_code)
 			
 			# end of life and stock item
 			validate_end_of_life(item_code, item.end_of_life, verbose=0)
@@ -124,18 +124,18 @@ class DocType(StockController):
 			
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
 		
-		if not self.doc.reconciliation_json:
+		if not self.reconciliation_json:
 			msgprint(_("""Stock Reconciliation file not uploaded"""), raise_exception=1)
 		
-		data = json.loads(self.doc.reconciliation_json)
+		data = json.loads(self.reconciliation_json)
 		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
 			row = frappe._dict(zip(row_template, row))
 			row["row_num"] = row_num
 			previous_sle = get_previous_sle({
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
-				"posting_date": self.doc.posting_date,
-				"posting_time": self.doc.posting_time
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time
 			})
 
 			# check valuation rate mandatory
@@ -238,14 +238,14 @@ class DocType(StockController):
 			"doctype": "Stock Ledger Entry",
 			"item_code": row.item_code,
 			"warehouse": row.warehouse,
-			"posting_date": self.doc.posting_date,
-			"posting_time": self.doc.posting_time,
-			"voucher_type": self.doc.doctype,
-			"voucher_no": self.doc.name,
-			"company": self.doc.company,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"voucher_detail_no": row.voucher_detail_no,
-			"fiscal_year": self.doc.fiscal_year,
+			"fiscal_year": self.fiscal_year,
 			"is_cancelled": "No"
 		})
 		args.update(opts)
@@ -260,37 +260,36 @@ class DocType(StockController):
 				
 		existing_entries = frappe.db.sql("""select distinct item_code, warehouse 
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""", 
-			(self.doc.doctype, self.doc.name), as_dict=1)
+			(self.doctype, self.name), as_dict=1)
 				
 		# delete entries
 		frappe.db.sql("""delete from `tabStock Ledger Entry` 
-			where voucher_type=%s and voucher_no=%s""", (self.doc.doctype, self.doc.name))
+			where voucher_type=%s and voucher_no=%s""", (self.doctype, self.name))
 		
 		# repost future entries for selected item_code, warehouse
 		for entries in existing_entries:
 			update_entries_after({
 				"item_code": entries.item_code,
 				"warehouse": entries.warehouse,
-				"posting_date": self.doc.posting_date,
-				"posting_time": self.doc.posting_time
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time
 			})
 			
 	def get_gl_entries(self, warehouse_account=None):
-		if not self.doc.cost_center:
+		if not self.cost_center:
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 			
-		return super(DocType, self).get_gl_entries(warehouse_account, 		
-			self.doc.expense_account, self.doc.cost_center)
+		return super(StockReconciliation, self).get_gl_entries(warehouse_account, 		
+			self.expense_account, self.cost_center)
 		
-			
 	def validate_expense_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			return
 			
-		if not self.doc.expense_account:
+		if not self.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
 		elif not frappe.db.sql("""select * from `tabStock Ledger Entry`"""):
-			if frappe.db.get_value("Account", self.doc.expense_account, 
+			if frappe.db.get_value("Account", self.expense_account, 
 					"report_type") == "Profit and Loss":
 				msgprint(_("""Expense Account can not be a PL Account, as this stock \
 					reconciliation is an opening entry. \

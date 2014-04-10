@@ -7,18 +7,16 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint
+from frappe.model.document import Document
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
-
+class AccountsSettings(Document):
 	def on_update(self):
-		frappe.db.set_default("auto_accounting_for_stock", self.doc.auto_accounting_for_stock)
+		frappe.db.set_default("auto_accounting_for_stock", self.auto_accounting_for_stock)
 		
-		if cint(self.doc.auto_accounting_for_stock):
+		if cint(self.auto_accounting_for_stock):
 			# set default perpetual account in company
 			for company in frappe.db.sql("select name from tabCompany"):
-				frappe.bean("Company", company[0]).save()
+				frappe.get_doc("Company", company[0]).save()
 			
 			# Create account head for warehouses
 			warehouse_list = frappe.db.sql("select name, company from tabWarehouse", as_dict=1)
@@ -27,5 +25,5 @@ class DocType:
 				frappe.throw(_("Company is missing in following warehouses") + ": \n" + 
 					"\n".join(warehouse_with_no_company))
 			for wh in warehouse_list:
-				wh_bean = frappe.bean("Warehouse", wh.name)
-				wh_bean.save()
+				wh_doc = frappe.get_doc("Warehouse", wh.name)
+				wh_doc.save()

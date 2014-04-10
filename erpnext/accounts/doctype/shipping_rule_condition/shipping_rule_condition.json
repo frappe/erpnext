@@ -1,0 +1,40 @@
+{
+ "creation": "2013-06-25 11:54:50.000000", 
+ "description": "A condition for a Shipping Rule", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "from_value", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "From Value", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "to_value", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "To Value", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "shipping_amount", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Shipping Amount", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:21:46.000000", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Shipping Rule Condition", 
+ "owner": "Administrator"
+}

@@ -1,0 +1,12 @@
+{
+ "creation": "2012-03-27 14:36:18.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "idx": 1, 
+ "issingle": 1, 
+ "modified": "2013-12-20 19:22:54.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Authorization Control", 
+ "owner": "Administrator"
+}

@@ -1,0 +1,15 @@
+{
+ "creation": "2013-11-29 17:08:23.000000", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-03-07 15:30:27.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Stock Ledger", 
+ "owner": "Administrator", 
+ "ref_doctype": "Stock Ledger Entry", 
+ "report_name": "Stock Ledger", 
+ "report_type": "Script Report"
+}

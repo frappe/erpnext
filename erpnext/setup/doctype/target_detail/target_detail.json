@@ -1,0 +1,62 @@
+{
+ "creation": "2013-02-22 01:27:58.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "fieldname": "item_group", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Item Group", 
+   "oldfieldname": "item_group", 
+   "oldfieldtype": "Link", 
+   "options": "Item Group", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Fiscal Year", 
+   "oldfieldname": "fiscal_year", 
+   "oldfieldtype": "Select", 
+   "options": "link:Fiscal Year", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "target_qty", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Target Qty", 
+   "oldfieldname": "target_qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "target_amount", 
+   "fieldtype": "Float", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Target  Amount", 
+   "oldfieldname": "target_amount", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:21:51.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Target Detail", 
+ "owner": "Administrator"
+}

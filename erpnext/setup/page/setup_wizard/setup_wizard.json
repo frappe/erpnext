@@ -1,0 +1,19 @@
+{
+ "creation": "2013-10-04 13:49:33.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 1, 
+ "modified": "2013-10-04 13:49:33.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "setup-wizard", 
+ "owner": "Administrator", 
+ "page_name": "setup-wizard", 
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Setup Wizard"
+}

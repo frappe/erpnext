@@ -5,22 +5,20 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt
-from frappe.model.doc import addchild, make_autoname
+from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
 
+class SalaryStructure(Document):
 	def autoname(self):
-		self.doc.name = make_autoname(self.doc.employee + '/.SST' + '/.#####')
+		self.name = make_autoname(self.employee + '/.SST' + '/.#####')
 
 	def get_employee_details(self):
 		ret = {}
 		det = frappe.db.sql("""select employee_name, branch, designation, department, grade 
-			from `tabEmployee` where name = %s""", self.doc.employee)
+			from `tabEmployee` where name = %s""", self.employee)
 		if det:
 			ret = {
 				'employee_name': cstr(det[0][0]),
@@ -28,7 +26,7 @@ class DocType:
 				'designation': cstr(det[0][2]),
 				'department': cstr(det[0][3]),
 				'grade': cstr(det[0][4]),
-				'backup_employee': cstr(self.doc.employee)
+				'backup_employee': cstr(self.employee)
 			}
 		return ret
 
@@ -44,7 +42,7 @@ class DocType:
 	def make_table(self, doct_name, tab_fname, tab_name):
 		list1 = frappe.db.sql("select name from `tab%s` where docstatus != 2" % doct_name)
 		for li in list1:
-			child = addchild(self.doc, tab_fname, tab_name, self.doclist)
+			child = self.append(tab_fname, {})
 			if(tab_fname == 'earning_details'):
 				child.e_type = cstr(li[0])
 				child.modified_value = 0
@@ -58,13 +56,13 @@ class DocType:
 
 	def check_existing(self):
 		ret = frappe.db.sql("""select name from `tabSalary Structure` where is_active = 'Yes' 
-			and employee = %s and name!=%s""", (self.doc.employee,self.doc.name))
-		if ret and self.doc.is_active=='Yes':
+			and employee = %s and name!=%s""", (self.employee,self.name))
+		if ret and self.is_active=='Yes':
 			msgprint(_("""Another Salary Structure '%s' is active for employee '%s'. Please make its status 'Inactive' to proceed.""") % 
-				(cstr(ret), self.doc.employee), raise_exception=1)
+				(cstr(ret), self.employee), raise_exception=1)
 
 	def validate_amount(self):
-		if flt(self.doc.net_pay) < 0:
+		if flt(self.net_pay) < 0:
 			msgprint(_("Net pay can not be negative"), raise_exception=1)
 
 	def validate(self):	 
@@ -72,19 +70,19 @@ class DocType:
 		self.validate_amount()
 		
 @frappe.whitelist()
-def make_salary_slip(source_name, target_doclist=None):
-	return [d.fields for d in get_mapped_doclist(source_name, target_doclist)]
+def make_salary_slip(source_name, target_doc=None):
+	return get_mapped_doc(source_name, target_doc).as_dict()
 	
-def get_mapped_doclist(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def get_mapped_doc(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def postprocess(source, target):
-		sal_slip = frappe.bean(target)
+		sal_slip = frappe.get_doc(target)
 		sal_slip.run_method("pull_emp_details")
 		sal_slip.run_method("get_leave_details")
 		sal_slip.run_method("calculate_net_pay")
 
-	doclist = get_mapped_doclist("Salary Structure", source_name, {
+	doc = get_mapped_doc("Salary Structure", source_name, {
 		"Salary Structure": {
 			"doctype": "Salary Slip", 
 			"field_map": {
@@ -109,6 +107,6 @@ def get_mapped_doclist(source_name, target_doclist=None):
 			],
 			"add_if_empty": True
 		}
-	}, target_doclist, postprocess)
+	}, target_doc, postprocess)
 
-	return doclist
+	return doc

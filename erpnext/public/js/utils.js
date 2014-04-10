@@ -7,7 +7,7 @@ $.extend(erpnext, {
 		if(!company && cur_frm)
 			company = cur_frm.doc.company;
 		if(company)
-			return frappe.model.get_doc(":Company", company).default_currency || frappe.boot.sysdefaults.currency;
+			return frappe.get_doc(":Company", company).default_currency || frappe.boot.sysdefaults.currency;
 		else
 			return frappe.boot.sysdefaults.currency;
 	},
@@ -29,8 +29,7 @@ $.extend(erpnext, {
 	},
 	
 	add_applicable_territory: function() {
-		if(cur_frm.doc.__islocal && 
-			frappe.model.get_doclist(cur_frm.doc.doctype, cur_frm.doc.name).length === 1) {
+		if(cur_frm.doc.__islocal && (cur_frm.doc.valid_for_territories || []).length===0) {
 				var default_territory = frappe.defaults.get_user_default("territory");
 				if(default_territory) {
 					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory", 

@@ -1,0 +1,31 @@
+{
+ "creation": "2013-02-22 01:28:01.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "supplier", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Supplier", 
+   "options": "Supplier", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "supplier_part_no", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Supplier Part Number", 
+   "permlevel": 0, 
+   "print_width": "200px", 
+   "width": "200px"
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:16.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Item Supplier", 
+ "owner": "Administrator"
+}

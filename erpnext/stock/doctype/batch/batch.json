@@ -1,0 +1,90 @@
+{
+ "allow_attach": 1, 
+ "allow_import": 1, 
+ "autoname": "field:batch_id", 
+ "creation": "2013-03-05 14:50:38.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Master", 
+ "fields": [
+  {
+   "fieldname": "batch_id", 
+   "fieldtype": "Data", 
+   "label": "Batch ID", 
+   "no_copy": 1, 
+   "oldfieldname": "batch_id", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "item", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Item", 
+   "oldfieldname": "item", 
+   "oldfieldtype": "Link", 
+   "options": "Item", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 1, 
+   "label": "Description", 
+   "oldfieldname": "description", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "expiry_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Expiry Date", 
+   "oldfieldname": "expiry_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "start_date", 
+   "fieldtype": "Date", 
+   "label": "Batch Started Date", 
+   "oldfieldname": "start_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "finished_date", 
+   "fieldtype": "Date", 
+   "label": "Batch Finished Date", 
+   "oldfieldname": "finished_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-archive", 
+ "idx": 1, 
+ "max_attachments": 5, 
+ "modified": "2014-01-20 17:48:24.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Batch", 
+ "owner": "harshada@webnotestech.com", 
+ "permissions": [
+  {
+   "cancel": 0, 
+   "create": 1, 
+   "delete": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Material Master Manager", 
+   "submit": 0, 
+   "write": 1
+  }
+ ]
+}

@@ -30,7 +30,7 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 
 		if(!this.frm.doc.__islocal) {
 			cur_frm.communication_view = new frappe.views.CommunicationList({
-				list: frappe.model.get("Communication", {"opportunity": this.frm.doc.name}),
+				list: frappe.get_list("Communication", {"opportunity": this.frm.doc.name}),
 				parent: cur_frm.fields_dict.communication_html.wrapper,
 				doc: this.frm.doc,
 				recipients: this.frm.doc.contact_email

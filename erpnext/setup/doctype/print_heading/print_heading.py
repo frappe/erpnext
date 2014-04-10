@@ -4,12 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.model import db_exists
-from frappe.model.bean import copy_doclist
+from frappe.model.document import Document
 
-	
-
-
-class DocType:
-  def __init__(self,doc,doclist=[]):
-    self.doc, self.doclist = doc,doclist
+class PrintHeading(Document):
+	pass

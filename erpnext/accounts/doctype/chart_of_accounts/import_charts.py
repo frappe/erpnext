@@ -13,13 +13,13 @@ def import_charts():
 				chart = json.loads(f.read())
 				country = frappe.db.get_value("Country", {"code": fname.split("_", 1)[0]})
 				if country:
-					bean = frappe.bean({
+					doc = frappe.get_doc({
 						"doctype":"Chart of Accounts",
 						"chart_name": chart.get("name"),
 						"source_file": fname,
 						"country": country
 					}).insert()
-					print bean.doc.name.encode("utf-8")
+					print doc.name.encode("utf-8")
 				else:
 					print "No chart for: " + chart.get("name").encode("utf-8")
 				

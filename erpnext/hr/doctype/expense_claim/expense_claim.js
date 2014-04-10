@@ -69,8 +69,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
-	var val = getchildren('Expense Claim Detail', doc.name, 
-		'expense_voucher_details', doc.doctype);
+	var val = doc.expense_voucher_details || [];
 	for(var i = 0; i<val.length; i++){
 		val[i].sanctioned_amount ='';
 	}
@@ -125,7 +124,7 @@ cur_frm.cscript.validate = function(doc) {
 cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 	doc.total_claimed_amount = 0;
 	doc.total_sanctioned_amount = 0;
-	$.each(frappe.model.get("Expense Claim Detail", {parent:doc.name}), function(i, d) {
+	$.each((doc.expense_voucher_details || []), function(i, d) {
 		doc.total_claimed_amount += d.claim_amount;
 		if(d.sanctioned_amount==null) {
 			d.sanctioned_amount = d.claim_amount;

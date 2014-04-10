@@ -41,7 +41,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 		
 		cur_frm.communication_view = new frappe.views.CommunicationList({
-			list: frappe.model.get("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
+			list: frappe.get_list("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
 			parent: this.frm.fields_dict.communication_html.wrapper,
 			doc: this.frm.doc,
 			recipients: this.frm.doc.email_id

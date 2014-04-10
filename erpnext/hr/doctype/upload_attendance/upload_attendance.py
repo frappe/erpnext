@@ -8,14 +8,10 @@ import frappe
 from frappe.utils import cstr, add_days, date_diff
 from frappe import msgprint, _
 from frappe.utils.datautils import UnicodeWriter
+from frappe.model.document import Document
 
-# doclist = None
-doclist = frappe.local('uploadattendance_doclist')
-
-class DocType():
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+class UploadAttendance(Document):
+	pass
 
 @frappe.whitelist()
 def get_template():
@@ -23,7 +19,6 @@ def get_template():
 		raise frappe.PermissionError
 	
 	args = frappe.local.form_dict
-	frappe.local.uploadattendance_doclist = frappe.model.doctype.get("Attendance")
 
 	w = UnicodeWriter()
 	w = add_header(w)
@@ -35,13 +30,8 @@ def get_template():
 	frappe.response['type'] = 'csv'
 	frappe.response['doctype'] = "Attendance"
 	
-def getdocfield(fieldname):
-	"""get docfield from doclist of doctype"""
-	l = [d for d in doclist if d.doctype=='DocField' and d.fieldname==fieldname]
-	return l and l[0] or None
-
 def add_header(w):
-	status = ", ".join(getdocfield("status").options.strip().split("\n"))
+	status = ", ".join((frappe.get_meta("Attendance").get_field("status").options or "").strip().split("\n"))
 	w.writerow(["Notes:"])
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
@@ -95,7 +85,7 @@ def get_existing_attendance_records(args):
 	return existing_attendance
 	
 def get_naming_series():
-	series = getdocfield("naming_series").options.strip().split("\n")
+	series = frappe.get_meta("Attendance").get_field("naming_series").options.strip().split("\n")
 	if not series:
 		msgprint("""Please create naming series for Attendance \
 			through Setup -> Numbering Series.""", raise_exception=1)
@@ -121,7 +111,7 @@ def upload():
 	error = False
 	
 	from frappe.utils.datautils import check_record, import_doc
-	doctype_dl = frappe.get_doctype("Attendance")
+	doctype_dl = frappe.get_meta("Attendance")
 	
 	for i, row in enumerate(rows[5:]):
 		if not row: continue
@@ -132,7 +122,7 @@ def upload():
 			d["docstatus"] = frappe.db.get_value("Attendance", d.name, "docstatus")
 			
 		try:
-			check_record(d, doctype_dl=doctype_dl)
+			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
 		except Exception, e:
 			error = True

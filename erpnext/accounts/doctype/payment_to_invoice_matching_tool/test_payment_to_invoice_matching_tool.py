@@ -5,4 +5,4 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 
-test_records = []
+test_records = frappe.get_test_records('Payment To Invoice Matching Tool')

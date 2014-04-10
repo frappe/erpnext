@@ -1,0 +1,15 @@
+{
+ "creation": "2013-06-07 12:27:07.000000", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-03-07 15:30:27.000000", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Customers Not Buying Since Long Time", 
+ "owner": "Administrator", 
+ "ref_doctype": "Sales Order", 
+ "report_name": "Customers Not Buying Since Long Time ", 
+ "report_type": "Script Report"
+}

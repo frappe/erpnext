@@ -108,7 +108,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 	
 	entries_add: function(doc, cdt, cdn) {
-		var row = frappe.model.get_doc(cdt, cdn);
+		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_account", "cost_center"]);
 	}
 });
@@ -184,7 +184,7 @@ cur_frm.set_query("expense_account", "entries", function(doc) {
 cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && d.expense_account){
-		var cl = getchildren('Purchase Invoice Item', doc.name, 'entries', doc.doctype);
+		var cl = doc.entries || [];
 		for(var i = 0; i < cl.length; i++){
 			if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
 		}
@@ -205,7 +205,7 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && d.cost_center){
-		var cl = getchildren('Purchase Invoice Item', doc.name, 'entries', doc.doctype);
+		var cl = doc.entries || [];
 		for(var i = 0; i < cl.length; i++){
 			if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
 		}

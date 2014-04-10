@@ -5,19 +5,15 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, add_years, cint, getdate
-from frappe.model import db_exists
-from frappe.model.doc import addchild, make_autoname
-from frappe.model.bean import copy_doclist
+from frappe.model.naming import make_autoname
 from frappe import msgprint, throw, _
 import datetime
 
-class DocType:
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
 
+class HolidayList(Document):
 	def autoname(self):
-		self.doc.name = make_autoname(self.doc.fiscal_year + "/" + self.doc.holiday_list_name + "/.###")
+		self.name = make_autoname(self.fiscal_year + "/" + self.holiday_list_name + "/.###")
 		
 	def validate(self):
 		self.update_default_holiday_list()
@@ -26,23 +22,22 @@ class DocType:
 		self.validate_values()
 		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
 		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
-		last_idx = max([cint(d.idx) for d in self.doclist.get(
-			{"parentfield": "holiday_list_details"})] or [0,])
+		last_idx = max([cint(d.idx) for d in self.get("holiday_list_details")] or [0,])
 		for i, d in enumerate(date_list):
-			ch = addchild(self.doc, 'holiday_list_details', 'Holiday', self.doclist)
-			ch.description = self.doc.weekly_off
+			ch = self.append('holiday_list_details', {})
+			ch.description = self.weekly_off
 			ch.holiday_date = d
 			ch.idx = last_idx + i + 1
 
 	def validate_values(self):
-		if not self.doc.fiscal_year:
+		if not self.fiscal_year:
 			throw(_("Please select Fiscal Year"))
-		if not self.doc.weekly_off:
+		if not self.weekly_off:
 			throw(_("Please select weekly off day"))
 
 	def get_fy_start_end_dates(self):
 		return frappe.db.sql("""select year_start_date, year_end_date
-			from `tabFiscal Year` where name=%s""", (self.doc.fiscal_year,))[0]
+			from `tabFiscal Year` where name=%s""", (self.fiscal_year,))[0]
 
 	def get_weekly_off_date_list(self, year_start_date, year_end_date):
 		from frappe.utils import getdate
@@ -53,7 +48,7 @@ class DocType:
 		import calendar
 		
 		date_list = []
-		weekday = getattr(calendar, (self.doc.weekly_off).upper())
+		weekday = getattr(calendar, (self.weekly_off).upper())
 		reference_date = year_start_date + relativedelta.relativedelta(weekday=weekday)
 			
 		while reference_date <= year_end_date:
@@ -63,8 +58,8 @@ class DocType:
 		return date_list
 	
 	def clear_table(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'holiday_list_details')
+		self.set('holiday_list_details', [])
 
 	def update_default_holiday_list(self):
 		frappe.db.sql("""update `tabHoliday List` set is_default = 0 
-			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.doc.fiscal_year,))
+			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.fiscal_year,))

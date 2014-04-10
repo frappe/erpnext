@@ -4,23 +4,20 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.model.bean import getlist
+
 from frappe.utils import flt
 
-from frappe.utils.nestedset import DocTypeNestedSet
+from frappe.utils.nestedset import NestedSet
 	
-class DocType(DocTypeNestedSet):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		self.nsm_parent_field = 'parent_territory'
+class Territory(NestedSet):
+	nsm_parent_field = 'parent_territory'
 
 	def validate(self): 
-		for d in getlist(self.doclist, 'target_details'):
+		for d in self.get('target_details'):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				msgprint("Either target qty or target amount is mandatory.")
 				raise Exception
 
 	def on_update(self):
-		super(DocType, self).on_update()
+		super(Territory, self).on_update()
 		self.validate_one_root()

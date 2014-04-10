@@ -5,25 +5,20 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, _round
-from frappe.model.doc import make_autoname
-from frappe.model.bean import getlist
-from frappe.model.code import get_obj
+from frappe.model.naming import make_autoname
+
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 
 	
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self,doc,doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		
+class SalarySlip(TransactionBase):
 	def autoname(self):
-		self.doc.name = make_autoname('Sal Slip/' +self.doc.employee + '/.#####') 
+		self.name = make_autoname('Sal Slip/' +self.employee + '/.#####') 
 
 	def get_emp_and_leave_details(self):
-		if self.doc.employee:
+		if self.employee:
 			self.get_leave_details()
 			struct = self.check_sal_struct()
 			if struct:
@@ -31,32 +26,32 @@ class DocType(TransactionBase):
 
 	def check_sal_struct(self):
 		struct = frappe.db.sql("""select name from `tabSalary Structure` 
-			where employee=%s and is_active = 'Yes'""", self.doc.employee)
+			where employee=%s and is_active = 'Yes'""", self.employee)
 		if not struct:
-			msgprint("Please create Salary Structure for employee '%s'" % self.doc.employee)
-			self.doc.employee = None
+			msgprint("Please create Salary Structure for employee '%s'" % self.employee)
+			self.employee = None
 		return struct and struct[0][0] or ''
 
 	def pull_sal_struct(self, struct):
-		from erpnext.hr.doctype.salary_structure.salary_structure import get_mapped_doclist
-		self.doclist = get_mapped_doclist(struct, self.doclist)
+		from erpnext.hr.doctype.salary_structure.salary_structure import get_mapped_doc
+		self.update(get_mapped_doc(struct, self))
 		
 	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.doc.employee, 
+		emp = frappe.db.get_value("Employee", self.employee, 
 			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
 		if emp:
-			self.doc.bank_name = emp.bank_name
-			self.doc.bank_account_no = emp.bank_ac_no
-			self.doc.esic_no = emp.esic_card_no
-			self.doc.pf_no = emp.pf_number
+			self.bank_name = emp.bank_name
+			self.bank_account_no = emp.bank_ac_no
+			self.esic_no = emp.esic_card_no
+			self.pf_no = emp.pf_number
 
 	def get_leave_details(self, lwp=None):
-		if not self.doc.fiscal_year:
-			self.doc.fiscal_year = frappe.get_default("fiscal_year")
-		if not self.doc.month:
-			self.doc.month = "%02d" % getdate(nowdate()).month
+		if not self.fiscal_year:
+			self.fiscal_year = frappe.get_default("fiscal_year")
+		if not self.month:
+			self.month = "%02d" % getdate(nowdate()).month
 			
-		m = get_obj('Salary Manager').get_month_details(self.doc.fiscal_year, self.doc.month)
+		m = frappe.get_doc('Salary Manager').get_month_details(self.fiscal_year, self.month)
 		holidays = self.get_holidays_for_employee(m)
 		
 		if not cint(frappe.db.get_value("HR Settings", "HR Settings",
@@ -68,16 +63,16 @@ class DocType(TransactionBase):
 			
 		if not lwp:
 			lwp = self.calculate_lwp(holidays, m)
-		self.doc.total_days_in_month = m['month_days']
-		self.doc.leave_without_pay = lwp
+		self.total_days_in_month = m['month_days']
+		self.leave_without_pay = lwp
 		payment_days = flt(self.get_payment_days(m)) - flt(lwp)
-		self.doc.payment_days = payment_days > 0 and payment_days or 0
+		self.payment_days = payment_days > 0 and payment_days or 0
 		
 
 	def get_payment_days(self, m):
 		payment_days = m['month_days']
 		emp = frappe.db.sql("select date_of_joining, relieving_date from `tabEmployee` \
-			where name = %s", self.doc.employee, as_dict=1)[0]
+			where name = %s", self.employee, as_dict=1)[0]
 			
 		if emp['relieving_date']:
 			if getdate(emp['relieving_date']) > m['month_start_date'] and \
@@ -102,13 +97,13 @@ class DocType(TransactionBase):
 			from `tabHoliday` t1, tabEmployee t2 
 			where t1.parent = t2.holiday_list and t2.name = %s 
 			and t1.holiday_date between %s and %s""", 
-			(self.doc.employee, m['month_start_date'], m['month_end_date']))
+			(self.employee, m['month_start_date'], m['month_end_date']))
 		if not holidays:
 			holidays = frappe.db.sql("""select t1.holiday_date 
 				from `tabHoliday` t1, `tabHoliday List` t2 
 				where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1 
 				and t2.fiscal_year = %s
-				and t1.holiday_date between %s and %s""", (self.doc.fiscal_year, 
+				and t1.holiday_date between %s and %s""", (self.fiscal_year, 
 					m['month_start_date'], m['month_end_date']))
 		holidays = [cstr(i[0]) for i in holidays]
 		return holidays
@@ -126,7 +121,7 @@ class DocType(TransactionBase):
 					and t1.docstatus = 1 
 					and t1.employee = %s
 					and %s between from_date and to_date
-				""", (self.doc.employee, dt))
+				""", (self.employee, dt))
 				if leave:
 					lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 		return lwp
@@ -135,74 +130,74 @@ class DocType(TransactionBase):
 		ret_exist = frappe.db.sql("""select name from `tabSalary Slip` 
 			where month = %s and fiscal_year = %s and docstatus != 2 
 			and employee = %s and name != %s""", 
-			(self.doc.month, self.doc.fiscal_year, self.doc.employee, self.doc.name))
+			(self.month, self.fiscal_year, self.employee, self.name))
 		if ret_exist:
-			self.doc.employee = ''
+			self.employee = ''
 			msgprint("Salary Slip of employee '%s' already created for this month" 
-				% self.doc.employee, raise_exception=1)
+				% self.employee, raise_exception=1)
 
 
 	def validate(self):
 		from frappe.utils import money_in_words
 		self.check_existing()
 		
-		if not (len(self.doclist.get({"parentfield": "earning_details"})) or 
-			len(self.doclist.get({"parentfield": "deduction_details"}))):
+		if not (len(self.get("earning_details")) or 
+			len(self.get("deduction_details"))):
 				self.get_emp_and_leave_details()
 		else:
-			self.get_leave_details(self.doc.leave_without_pay)
+			self.get_leave_details(self.leave_without_pay)
 
-		if not self.doc.net_pay:
+		if not self.net_pay:
 			self.calculate_net_pay()
 			
-		company_currency = get_company_currency(self.doc.company)
-		self.doc.total_in_words = money_in_words(self.doc.rounded_total, company_currency)
+		company_currency = get_company_currency(self.company)
+		self.total_in_words = money_in_words(self.rounded_total, company_currency)
 
 	def calculate_earning_total(self):
-		self.doc.gross_pay = flt(self.doc.arrear_amount) + flt(self.doc.leave_encashment_amount)
-		for d in self.doclist.get({"parentfield": "earning_details"}):
+		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
+		for d in self.get("earning_details"):
 			if cint(d.e_depends_on_lwp) == 1:
-				d.e_modified_amount = _round(flt(d.e_amount) * flt(self.doc.payment_days)
-					/ cint(self.doc.total_days_in_month), 2)
-			elif not self.doc.payment_days:
+				d.e_modified_amount = _round(flt(d.e_amount) * flt(self.payment_days)
+					/ cint(self.total_days_in_month), 2)
+			elif not self.payment_days:
 				d.e_modified_amount = 0
 			else:
 				d.e_modified_amount = d.e_amount
-			self.doc.gross_pay += flt(d.e_modified_amount)
+			self.gross_pay += flt(d.e_modified_amount)
 	
 	def calculate_ded_total(self):
-		self.doc.total_deduction = 0
-		for d in getlist(self.doclist, 'deduction_details'):
+		self.total_deduction = 0
+		for d in self.get('deduction_details'):
 			if cint(d.d_depends_on_lwp) == 1:
-				d.d_modified_amount = _round(flt(d.d_amount) * flt(self.doc.payment_days) 
-					/ cint(self.doc.total_days_in_month), 2)
-			elif not self.doc.payment_days:
+				d.d_modified_amount = _round(flt(d.d_amount) * flt(self.payment_days) 
+					/ cint(self.total_days_in_month), 2)
+			elif not self.payment_days:
 				d.d_modified_amount = 0
 			else:
 				d.d_modified_amount = d.d_amount
 			
-			self.doc.total_deduction += flt(d.d_modified_amount)
+			self.total_deduction += flt(d.d_modified_amount)
 				
 	def calculate_net_pay(self):
 		self.calculate_earning_total()
 		self.calculate_ded_total()
-		self.doc.net_pay = flt(self.doc.gross_pay) - flt(self.doc.total_deduction)
-		self.doc.rounded_total = _round(self.doc.net_pay)		
+		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
+		self.rounded_total = _round(self.net_pay)		
 
 	def on_submit(self):
-		if(self.doc.email_check == 1):			
+		if(self.email_check == 1):			
 			self.send_mail_funct()
 			
 
 	def send_mail_funct(self):	 
 		from frappe.utils.email_lib import sendmail
-		receiver = frappe.db.get_value("Employee", self.doc.employee, "company_email")
+		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
 		if receiver:
-			subj = 'Salary Slip - ' + cstr(self.doc.month) +'/'+cstr(self.doc.fiscal_year)
+			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
 			earn_ret=frappe.db.sql("""select e_type, e_modified_amount from `tabSalary Slip Earning` 
-				where parent = %s""", self.doc.name)
+				where parent = %s""", self.name)
 			ded_ret=frappe.db.sql("""select d_type, d_modified_amount from `tabSalary Slip Deduction` 
-				where parent = %s""", self.doc.name)
+				where parent = %s""", self.name)
 		 
 			earn_table = ''
 			ded_table = ''
@@ -292,13 +287,13 @@ class DocType(TransactionBase):
 					<td width='25%%'><b>Net Pay(in words) : </td>
 					<td colspan = '3' width = '50%%'>%s</b></td>
 				</tr>
-			</table></div>''' % (cstr(letter_head), cstr(self.doc.employee), 
-				cstr(self.doc.employee_name), cstr(self.doc.month), cstr(self.doc.fiscal_year), 
-				cstr(self.doc.department), cstr(self.doc.branch), cstr(self.doc.designation), 
-				cstr(self.doc.grade), cstr(self.doc.bank_account_no), cstr(self.doc.bank_name), 
-				cstr(self.doc.arrear_amount), cstr(self.doc.payment_days), earn_table, ded_table, 
-				cstr(flt(self.doc.gross_pay)), cstr(flt(self.doc.total_deduction)), 
-				cstr(flt(self.doc.net_pay)), cstr(self.doc.total_in_words))
+			</table></div>''' % (cstr(letter_head), cstr(self.employee), 
+				cstr(self.employee_name), cstr(self.month), cstr(self.fiscal_year), 
+				cstr(self.department), cstr(self.branch), cstr(self.designation), 
+				cstr(self.grade), cstr(self.bank_account_no), cstr(self.bank_name), 
+				cstr(self.arrear_amount), cstr(self.payment_days), earn_table, ded_table, 
+				cstr(flt(self.gross_pay)), cstr(flt(self.total_deduction)), 
+				cstr(flt(self.net_pay)), cstr(self.total_in_words))
 
 			sendmail([receiver], subject=subj, msg = msg)
 		else:

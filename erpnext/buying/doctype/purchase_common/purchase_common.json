@@ -1,0 +1,12 @@
+{
+ "creation": "2012-03-27 14:35:51.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "idx": 1, 
+ "issingle": 1, 
+ "modified": "2013-12-20 19:23:27.000000", 
+ "modified_by": "Administrator", 
+ "module": "Buying", 
+ "name": "Purchase Common", 
+ "owner": "Administrator"
+}

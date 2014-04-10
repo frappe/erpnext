@@ -40,7 +40,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 		title: frappe._("ERPNext Setup Guide"),
 		welcome_html: '<h1 class="text-muted text-center"><i class="icon-magic"></i></h1>\
 			<h2 class="text-center">'+frappe._('ERPNext Setup')+'</h2>\
-			<p class="text-center">' + 
+			<p class="text-center" style="margin: 0px 100px">' + 
 			frappe._('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') + 
 			'</p>',
 		working_html: '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
@@ -106,7 +106,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						var parts = slide.get_input("company_name").val().split(" ");
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
 						slide.get_input("company_abbr").val(abbr.toUpperCase());
-					}).val(frappe.boot.control_panel.company_name || "").trigger("change");
+					}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
 
 					slide.get_input("fy_start_date").on("change", function() {
 						var year_end_date = 

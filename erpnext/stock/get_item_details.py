@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, add_days
-from frappe.model.meta import has_field
 import json
 
 @frappe.whitelist()
@@ -36,7 +35,7 @@ def get_item_details(args):
 	args = frappe._dict(args)
 
 	if not args.get("transaction_type"):
-		args.transaction_type = "buying" if has_field(args.get("doctype"), "supplier") \
+		args.transaction_type = "buying" if frappe.get_meta(args.get("doctype")).get_field("supplier") \
 			else "selling"
 		
 	if not args.get("price_list"):
@@ -47,20 +46,20 @@ def get_item_details(args):
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
 	
-	item_bean = frappe.bean("Item", args.item_code)
-	item = item_bean.doc
+	item_doc = frappe.get_doc("Item", args.item_code)
+	item = item_doc
 
 	validate_item_details(args, item)
 		
-	out = get_basic_details(args, item_bean)
+	out = get_basic_details(args, item_doc)
 	
-	get_party_item_code(args, item_bean, out)
+	get_party_item_code(args, item_doc, out)
 
 	if out.get("warehouse"):
 		out.update(get_available_qty(args.item_code, out.warehouse))
 		out.update(get_projected_qty(item.name, out.warehouse))
 	
-	get_price_list_rate(args, item_bean, out)
+	get_price_list_rate(args, item_doc, out)
 
 	if args.transaction_type == "selling" and cint(args.is_pos):
 		out.update(get_pos_settings_item_details(args.company, args))
@@ -68,8 +67,8 @@ def get_item_details(args):
 	apply_pricing_rule(out, args)
 		
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
-		if item_bean.doc.has_serial_no == "Yes" and not args.serial_no:
-			out.serial_no = get_serial_nos_by_fifo(args, item_bean)
+		if item_doc.has_serial_no == "Yes" and not args.serial_no:
+			out.serial_no = get_serial_nos_by_fifo(args, item_doc)
 			
 	if args.transaction_date and item.lead_time_days:
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
@@ -117,8 +116,8 @@ def validate_item_details(args, item):
 				_("not a sub-contracted item.") +
 				_("Please select a sub-contracted item or do not sub-contract the transaction."))
 			
-def get_basic_details(args, item_bean):
-	item = item_bean.doc
+def get_basic_details(args, item_doc):
+	item = item_doc
 	
 	from frappe.defaults import get_user_default_as_list
 	user_default_warehouse_list = get_user_default_as_list('warehouse')
@@ -138,7 +137,7 @@ def get_basic_details(args, item_bean):
 			if args.transaction_type == "selling" else item.buying_cost_center,
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in 
-			item_bean.doclist.get({"parentfield": "item_tax"})))),
+			item_doc.get("item_tax")))),
 		"uom": item.stock_uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"conversion_factor": 1.0,
@@ -153,12 +152,12 @@ def get_basic_details(args, item_bean):
 	})
 	
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
-		out[fieldname] = item.fields.get(fieldname)
+		out[fieldname] = item.get(fieldname)
 			
 	return out
 	
-def get_price_list_rate(args, item_bean, out):
-	meta = frappe.get_doctype(args.doctype)
+def get_price_list_rate(args, item_doc, out):
+	meta = frappe.get_meta(args.doctype)
 
 	if meta.get_field("currency"):
 		validate_price_list(args)
@@ -174,7 +173,7 @@ def get_price_list_rate(args, item_bean, out):
 		
 		if not out.price_list_rate and args.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
-			out.update(get_last_purchase_details(item_bean.doc.name, 
+			out.update(get_last_purchase_details(item_doc.name, 
 				args.docname, args.conversion_rate))
 			
 def validate_price_list(args):
@@ -208,14 +207,12 @@ def validate_conversion_rate(args, meta):
 			get_field_precision(meta.get_field("plc_conversion_rate"), 
 			frappe._dict({"fields": args})))
 	
-def get_party_item_code(args, item_bean, out):
+def get_party_item_code(args, item_doc, out):
 	if args.transaction_type == "selling":
-		customer_item_code = item_bean.doclist.get({"parentfield": "item_customer_details",
-			"customer_name": args.customer})
+		customer_item_code = item_doc.get("item_customer_details", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
 	else:
-		item_supplier = item_bean.doclist.get({"parentfield": "item_supplier_details",
-			"supplier": args.supplier})
+		item_supplier = item_doc.get("item_supplier_details", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 		
 
@@ -354,7 +351,7 @@ def apply_internal_priority(pricing_rules, field_set, args_dict):
 
 	return filtered_rules or pricing_rules
 
-def get_serial_nos_by_fifo(args, item_bean):
+def get_serial_nos_by_fifo(args, item_doc):
 	return "\n".join(frappe.db.sql_list("""select name from `tabSerial No` 
 		where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available' 
 		order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {

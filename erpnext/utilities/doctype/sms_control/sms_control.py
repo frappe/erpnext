@@ -5,15 +5,12 @@ from __future__ import unicode_literals
 import frappe, json
 
 from frappe.utils import nowdate, cstr
-from frappe.model.code import get_obj
-from frappe.model.doc import Document
 from frappe import msgprint, throw, _
-from frappe.model.bean import getlist
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+
+from frappe.model.document import Document
+
+class SMSControl(Document):
 
 	def validate_receiver_nos(self,receiver_list):
 		validated_receiver_list = []
@@ -36,7 +33,7 @@ class DocType:
 		sender_name = frappe.db.get_value('Global Defaults', None, 'sms_sender_name') or \
 			'ERPNXT'
 		if len(sender_name) > 6 and \
-				frappe.db.get_value("Control Panel", None, "country") == "India":
+				frappe.db.get_default("country") == "India":
 			throw(_("""
 				As per TRAI rule, sender name must be exactly 6 characters.
 				Kindly change sender name in Setup --> Global Defaults.
@@ -71,15 +68,15 @@ class DocType:
 			msgprint(ret)
 
 	def send_via_gateway(self, arg):
-		ss = get_obj('SMS Settings', 'SMS Settings', with_children=1)
-		args = {ss.doc.message_parameter : arg.get('message')}
-		for d in getlist(ss.doclist, 'static_parameter_details'):
+		ss = frappe.get_doc('SMS Settings', 'SMS Settings')
+		args = {ss.message_parameter : arg.get('message')}
+		for d in ss.get("static_parameter_details"):
 			args[d.parameter] = d.value
 		
 		resp = []
 		for d in arg.get('receiver_list'):
-			args[ss.doc.receiver_parameter] = d
-			resp.append(self.send_request(ss.doc.sms_gateway_url, args))
+			args[ss.receiver_parameter] = d
+			resp.append(self.send_request(ss.sms_gateway_url, args))
 
 		return resp
 
@@ -110,11 +107,11 @@ class DocType:
 	# Create SMS Log
 	# =========================================================
 	def create_sms_log(self, arg, sent_sms):
-		sl = Document('SMS Log')
+		sl = frappe.get_doc('SMS Log')
 		sl.sender_name = arg['sender_name']
 		sl.sent_on = nowdate()
 		sl.receiver_list = cstr(arg['receiver_list'])
 		sl.message = arg['message']
 		sl.no_of_requested_sms = len(arg['receiver_list'])
 		sl.no_of_sent_sms = sent_sms
-		sl.save(new=1)
+		sl.save()

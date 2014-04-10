@@ -1,0 +1,87 @@
+{
+ "allow_import": 1, 
+ "autoname": "field:leave_block_list_name", 
+ "creation": "2013-02-18 17:43:12.000000", 
+ "description": "Block Holidays on important days.", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Master", 
+ "fields": [
+  {
+   "fieldname": "leave_block_list_name", 
+   "fieldtype": "Data", 
+   "label": "Leave Block List Name", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "year", 
+   "fieldtype": "Link", 
+   "label": "Year", 
+   "options": "Fiscal Year", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "description": "If not checked, the list will have to be added to each Department where it has to be applied.", 
+   "fieldname": "applies_to_all_departments", 
+   "fieldtype": "Check", 
+   "label": "Applies to Company", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Stop users from making Leave Applications on following days.", 
+   "fieldname": "block_days", 
+   "fieldtype": "Section Break", 
+   "label": "Block Days", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "leave_block_list_dates", 
+   "fieldtype": "Table", 
+   "label": "Leave Block List Dates", 
+   "options": "Leave Block List Date", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Allow the following users to approve Leave Applications for block days.", 
+   "fieldname": "allow_list", 
+   "fieldtype": "Section Break", 
+   "label": "Allow Users", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "leave_block_list_allowed", 
+   "fieldtype": "Table", 
+   "label": "Leave Block List Allowed", 
+   "options": "Leave Block List Allow", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-calendar", 
+ "idx": 1, 
+ "modified": "2013-12-20 19:24:13.000000", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Leave Block List", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "role": "HR User", 
+   "write": 1
+  }
+ ]
+}

@@ -1,0 +1,147 @@
+{
+ "allow_import": 1, 
+ "autoname": "AR.####", 
+ "creation": "2013-01-10 16:34:22.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Master", 
+ "fields": [
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "oldfieldname": "company", 
+   "oldfieldtype": "Link", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "transaction", 
+   "fieldtype": "Select", 
+   "label": "Transaction", 
+   "oldfieldname": "transaction", 
+   "oldfieldtype": "Select", 
+   "options": "\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nAppraisal", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "based_on", 
+   "fieldtype": "Select", 
+   "label": "Based On", 
+   "oldfieldname": "based_on", 
+   "oldfieldtype": "Select", 
+   "options": "\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nNot Applicable", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "master_name", 
+   "fieldtype": "Link", 
+   "label": "Customer / Item Name", 
+   "oldfieldname": "master_name", 
+   "oldfieldtype": "Link", 
+   "options": "[Select]", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "system_role", 
+   "fieldtype": "Link", 
+   "label": "Applicable To (Role)", 
+   "oldfieldname": "system_role", 
+   "oldfieldtype": "Link", 
+   "options": "Role", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "system_user", 
+   "fieldtype": "Link", 
+   "label": "Applicable To (User)", 
+   "oldfieldname": "system_user", 
+   "oldfieldtype": "Link", 
+   "options": "User", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "This will be used for setting rule in HR module", 
+   "fieldname": "to_emp", 
+   "fieldtype": "Link", 
+   "label": "Applicable To (Employee)", 
+   "oldfieldname": "to_emp", 
+   "oldfieldtype": "Link", 
+   "options": "Employee", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "description": "This will be used for setting rule in HR module", 
+   "fieldname": "to_designation", 
+   "fieldtype": "Link", 
+   "label": "Applicable To (Designation)", 
+   "oldfieldname": "to_designation", 
+   "oldfieldtype": "Link", 
+   "options": "Designation", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "approving_role", 
+   "fieldtype": "Link", 
+   "label": "Approving Role", 
+   "oldfieldname": "approving_role", 
+   "oldfieldtype": "Link", 
+   "options": "Role", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "approving_user", 
+   "fieldtype": "Link", 
+   "label": "Approving User", 
+   "oldfieldname": "approving_user", 
+   "oldfieldtype": "Link", 
+   "options": "User", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "value", 
+   "fieldtype": "Float", 
+   "label": "Above Value", 
+   "oldfieldname": "value", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "trash_reason", 
+   "fieldtype": "Small Text", 
+   "label": "Trash Reason", 
+   "oldfieldname": "trash_reason", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-shield", 
+ "idx": 1, 
+ "modified": "2014-01-20 17:48:25.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Authorization Rule", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "cancel": 0, 
+   "create": 1, 
+   "delete": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "System Manager", 
+   "submit": 0, 
+   "write": 1
+  }
+ ], 
+ "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role"
+}

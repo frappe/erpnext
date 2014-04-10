@@ -5,21 +5,16 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cint, cstr, flt, nowdate
-from frappe.model.doc import Document
-from frappe.model.code import get_obj
 from frappe import msgprint, _
 
 	
 
 
-class DocType:
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist	 
-	
+from frappe.model.document import Document
 
+class LeaveControlPanel(Document):
 	def get_employees(self):		
-		lst1 = [[self.doc.employee_type,"employment_type"],[self.doc.branch,"branch"],[self.doc.designation,"designation"],[self.doc.department, "department"],[self.doc.grade,"grade"]]
+		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"],[self.grade,"grade"]]
 		condition = "where "
 		flag = 0
 		for l in lst1:
@@ -36,10 +31,9 @@ class DocType:
 		return e
 
 	def validate_values(self):
-		meta = frappe.get_doctype(self.doc.doctype)
 		for f in ["fiscal_year", "leave_type", "no_of_days"]:
-			if not self.doc.fields[f]:
-				frappe.throw(_(meta.get_label(f)) + _(" is mandatory"))
+			if not self.get(f):
+				frappe.throw(_(self.meta.get_label(f)) + _(" is mandatory"))
 
 	def allocate_leave(self):
 		self.validate_values()
@@ -50,19 +44,17 @@ class DocType:
 			
 		for d in self.get_employees():
 			try:
-				la = Document('Leave Allocation')
+				la = frappe.get_doc('Leave Allocation')
+				la.set("__islocal", 1)
 				la.employee = cstr(d[0])
 				la.employee_name = frappe.db.get_value('Employee',cstr(d[0]),'employee_name')
-				la.leave_type = self.doc.leave_type
-				la.fiscal_year = self.doc.fiscal_year
+				la.leave_type = self.leave_type
+				la.fiscal_year = self.fiscal_year
 				la.posting_date = nowdate()
-				la.carry_forward = cint(self.doc.carry_forward)
-				la.new_leaves_allocated = flt(self.doc.no_of_days)
-				la_obj = get_obj(doc=la)
-				la_obj.doc.docstatus = 1
-				la_obj.validate()
-				la_obj.on_update()
-				la_obj.doc.save(1)
+				la.carry_forward = cint(self.carry_forward)
+				la.new_leaves_allocated = flt(self.no_of_days)
+				la.docstatus = 1
+				la.save()
 				leave_allocated_for.append(d[0])
 			except:
 				pass

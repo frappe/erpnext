@@ -65,7 +65,7 @@
 				<th>Basic Rate</th>
 				<th>Amount</th>
 			</tr>
-			{%- for row in doclist.get({"doctype":"Sales Invoice Item"}) %}
+			{%- for row in doc.get({"doctype":"Sales Invoice Item"}) %}
 			<tr>
 				<td style="width: 3%;">{{ row.idx }}</td>
 				<td style="width: 20%;">{{ row.item_name }}</td>
@@ -106,7 +106,7 @@
 								utils.fmt_money(doc.net_total_export, currency=doc.currency)
 							}}</td>
 						</tr>
-						{%- for charge in doclist.get({"doctype":"Sales Taxes and Charges"}) -%}
+						{%- for charge in doc.get({"doctype":"Sales Taxes and Charges"}) -%}
 						{%- if not charge.included_in_print_rate -%}
 						<tr>
 							<td>{{ charge.description }}</td>

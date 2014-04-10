@@ -46,7 +46,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					freeze: true,
 					callback: function(r) {
 						// remove this call when using client side mapper
-						me.set_default_values();
 						me.set_dynamic_labels();
 						me.calculate_taxes_and_totals();
 					}
@@ -114,7 +113,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				cur_frm.fields_dict[me.frm.cscript.fname].grid.grid_rows[item.idx - 1].remove();
@@ -157,7 +156,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 
 		if (item.serial_no) {
 			if (!item.item_code) {
@@ -192,18 +191,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	validate: function() {
 		this.calculate_taxes_and_totals();
 	},
-	
-	set_default_values: function() {
-		$.each(frappe.model.get_doclist(this.frm.doctype, this.frm.docname), function(i, doc) {
-			var updated = frappe.model.set_default_values(doc);
-			if(doc.parentfield) {
-				refresh_field(doc.parentfield);
-			} else {
-				refresh_field(updated);
-			}
-		});
-	},
-	
+		
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
 			var company_currency = this.get_company_currency();
@@ -274,7 +262,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	get_exchange_rate: function(from_currency, to_currency, callback) {
 		var exchange_name = from_currency + "-" + to_currency;
 		frappe.model.with_doc("Currency Exchange", exchange_name, function(name) {
-			var exchange_doc = frappe.model.get_doc("Currency Exchange", exchange_name);
+			var exchange_doc = frappe.get_doc("Currency Exchange", exchange_name);
 			callback(exchange_doc ? flt(exchange_doc.exchange_rate) : 0);
 		});
 	},
@@ -316,7 +304,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	row_id: function(doc, cdt, cdn) {
-		var tax = frappe.model.get_doc(cdt, cdn);
+		var tax = frappe.get_doc(cdt, cdn);
 		try {
 			this.validate_on_previous_row(tax);
 			this.calculate_taxes_and_totals();
@@ -351,7 +339,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	included_in_print_rate: function(doc, cdt, cdn) {
-		var tax = frappe.model.get_doc(cdt, cdn);
+		var tax = frappe.get_doc(cdt, cdn);
 		try {
 			this.validate_on_previous_row(tax);
 			this.validate_inclusive_tax(tax);
@@ -517,13 +505,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 	
 	get_item_doclist: function() {
-		return frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
-			{parentfield: this.fname});
+		return this.frm.doc[this.fname] || [];
 	},
 	
 	get_tax_doclist: function() {
-		return frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name,
-			{parentfield: this.other_fname});
+		return this.frm.doc[this.other_fname] || [];
 	},
 	
 	validate_conversion_rate: function() {
@@ -716,8 +702,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	calculate_total_advance: function(parenttype, advance_parentfield) {
 		if(this.frm.doc.doctype == parenttype && this.frm.doc.docstatus < 2) {
-			var advance_doclist = frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
-				{parentfield: advance_parentfield});
+			var advance_doclist = this.frm.doc[advance_parentfield] || [];
 			this.frm.doc.total_advance = flt(frappe.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));

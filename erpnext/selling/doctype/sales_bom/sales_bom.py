@@ -4,23 +4,24 @@
 from __future__ import unicode_literals
 import frappe
 
-class DocType:
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
+
+class SalesBOM(Document):
+
 
 	def autoname(self):
-		self.doc.name = self.doc.new_item_code
+		self.name = self.new_item_code
 	
 	def validate(self):
 		self.validate_main_item()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "uom", "qty")
+		validate_uom_is_integer(self, "uom", "qty")
 
 	def validate_main_item(self):
 		"""main item must have Is Stock Item as No and Is Sales Item as Yes"""
 		if not frappe.db.sql("""select name from tabItem where name=%s and
-			ifnull(is_stock_item,'')='No' and ifnull(is_sales_item,'')='Yes'""", self.doc.new_item_code):
+			ifnull(is_stock_item,'')='No' and ifnull(is_sales_item,'')='Yes'""", self.new_item_code):
 			frappe.msgprint("""Parent Item %s is either a Stock Item or a not a Sales Item""",
 				raise_exception=1)
 

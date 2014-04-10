@@ -9,7 +9,7 @@ from frappe.core.doctype.communication.communication import _make
 
 class JobsMailbox(POP3Mailbox):	
 	def setup(self, args=None):
-		self.settings = args or frappe.doc("Jobs Email Settings", "Jobs Email Settings")
+		self.settings = args or frappe.get_doc("Jobs Email Settings", "Jobs Email Settings")
 		
 	def process_message(self, mail):
 		if mail.from_email == self.settings.email_id:
@@ -18,15 +18,15 @@ class JobsMailbox(POP3Mailbox):
 		name = frappe.db.get_value("Job Applicant", {"email_id": mail.from_email}, 
 			"name")
 		if name:
-			applicant = frappe.bean("Job Applicant", name)
-			if applicant.doc.status!="Rejected":
-				applicant.doc.status = "Open"
+			applicant = frappe.get_doc("Job Applicant", name)
+			if applicant.status!="Rejected":
+				applicant.status = "Open"
 			applicant.ignore_permissions = True
-			applicant.doc.save()
+			applicant.save()
 		else:
 			name = (mail.from_real_name and (mail.from_real_name + " - ") or "") \
 				+ mail.from_email
-			applicant = frappe.bean({
+			applicant = frappe.get_doc({
 				"creation": mail.date,
 				"doctype":"Job Applicant",
 				"applicant_name": name,
@@ -37,10 +37,10 @@ class JobsMailbox(POP3Mailbox):
 			applicant.ignore_mandatory = True
 			applicant.insert()
 		
-		mail.save_attachments_in_doc(applicant.doc)
+		mail.save_attachments_in_doc(applicant)
 				
 		_make(content=mail.content, sender=mail.from_email, subject=mail.subject or "No Subject",
-			doctype="Job Applicant", name=applicant.doc.name, sent_or_received="Received")
+			doctype="Job Applicant", name=applicant.name, sent_or_received="Received")
 
 def get_job_applications():
 	if cint(frappe.db.get_value('Jobs Email Settings', None, 'extract_emails')):

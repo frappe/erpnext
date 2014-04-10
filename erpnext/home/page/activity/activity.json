@@ -1,0 +1,20 @@
+{
+ "creation": "2013-04-09 11:45:31.000000", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "icon-play", 
+ "idx": 1, 
+ "modified": "2013-07-11 14:40:20.000000", 
+ "modified_by": "Administrator", 
+ "module": "Home", 
+ "name": "activity", 
+ "owner": "Administrator", 
+ "page_name": "activity", 
+ "roles": [
+  {
+   "role": "All"
+  }
+ ], 
+ "standard": "Yes", 
+ "title": "Activity"
+}

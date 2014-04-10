@@ -5,16 +5,14 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt, has_common, make_esc
-from frappe.model.bean import getlist
+
 from frappe import session, msgprint
 from erpnext.setup.utils import get_company_currency
 
 	
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class AuthorizationControl(TransactionBase):
 
 
 	# Get Names of all Approving Users and Roles
@@ -38,7 +36,7 @@ class DocType(TransactionBase):
 			if not has_common(appr_roles, frappe.user.get_roles()) and not has_common(appr_users, [session['user']]):
 				msg, add_msg = '',''
 				if max_amount:
-					dcc = get_company_currency(self.doc.company)
+					dcc = get_company_currency(self.company)
 					if based_on == 'Grand Total': msg = "since Grand Total exceeds %s. %s" % (dcc, flt(max_amount))
 					elif based_on == 'Itemwise Discount': msg = "since Discount exceeds %s for Item Code : %s" % (cstr(max_amount)+'%', item)
 					elif based_on == 'Average Discount' or based_on == 'Customerwise Discount': msg = "since Discount exceeds %s" % (cstr(max_amount)+'%')
@@ -83,12 +81,12 @@ class DocType(TransactionBase):
 		if based_on == 'Grand Total': auth_value = total
 		elif based_on == 'Customerwise Discount':
 			if doc_obj:
-				if doc_obj.doc.doctype == 'Sales Invoice': customer = doc_obj.doc.customer
-				else: customer = doc_obj.doc.customer_name
+				if doc_obj.doctype == 'Sales Invoice': customer = doc_obj.customer
+				else: customer = doc_obj.customer_name
 				add_cond = " and master_name = '"+make_esc("'")(cstr(customer))+"'"
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
-				for t in getlist(doc_obj.doclist, doc_obj.fname):
+				for t in doc_obj.get(doc_obj.fname):
 					self.validate_auth_rule(doctype_name, t.discount_percentage, based_on, add_cond, company,t.item_code )
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
@@ -100,7 +98,7 @@ class DocType(TransactionBase):
 		av_dis = 0
 		if doc_obj:
 			price_list_rate, base_rate = 0, 0
-			for d in getlist(doc_obj.doclist, doc_obj.fname):
+			for d in doc_obj.get(doc_obj.fname):
 				if d.base_price_list_rate and d.base_rate:
 					price_list_rate += flt(d.base_price_list_rate)
 					base_rate += flt(d.base_rate)
@@ -172,11 +170,11 @@ class DocType(TransactionBase):
 		
 		if doc_obj:
 			if doctype_name == 'Expense Claim':
-				rule = self.get_value_based_rule(doctype_name,doc_obj.doc.employee,doc_obj.doc.total_claimed_amount, doc_obj.doc.company)
+				rule = self.get_value_based_rule(doctype_name,doc_obj.employee,doc_obj.total_claimed_amount, doc_obj.company)
 			elif doctype_name == 'Appraisal':
-				rule = frappe.db.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and company = %s and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee, doc_obj.doc.company),as_dict=1)				
+				rule = frappe.db.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and company = %s and docstatus!=2",(doctype_name,doc_obj.employee, doc_obj.employee, doc_obj.company),as_dict=1)				
 				if not rule:
-					rule = frappe.db.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(company,'') = '' and docstatus!=2",(doctype_name,doc_obj.doc.employee, doc_obj.doc.employee),as_dict=1)				
+					rule = frappe.db.sql("select name, to_emp, to_designation, approving_role, approving_user from `tabAuthorization Rule` where transaction=%s and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s)) and ifnull(company,'') = '' and docstatus!=2",(doctype_name,doc_obj.employee, doc_obj.employee),as_dict=1)				
 			
 			if rule:
 				for m in rule:

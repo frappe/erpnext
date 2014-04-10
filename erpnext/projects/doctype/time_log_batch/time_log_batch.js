@@ -30,9 +30,8 @@ $.extend(cur_frm.cscript, {
 		}
 	},
 	make_invoice: function() {
-		var doc = cur_frm.doc;
 		frappe.model.map({
-			source: frappe.model.get_doclist(doc.doctype, doc.name),
+			source: cur_frm.doc,
 			target: "Sales Invoice"
 		});
 	}

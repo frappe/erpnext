@@ -1,0 +1,52 @@
+{
+ "autoname": "CBD/.######", 
+ "creation": "2013-03-07 11:55:04.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "account", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Account", 
+   "oldfieldname": "account", 
+   "oldfieldtype": "Link", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "budget_allocated", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Budget Allocated", 
+   "oldfieldname": "budget_allocated", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Fiscal Year", 
+   "oldfieldname": "fiscal_year", 
+   "oldfieldtype": "Select", 
+   "options": "link:Fiscal Year", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:22:59.000000", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Budget Detail", 
+ "owner": "Administrator"
+}

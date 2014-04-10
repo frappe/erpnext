@@ -1,0 +1,159 @@
+{
+ "creation": "2013-04-30 12:58:38.000000", 
+ "description": "System for managing Backups", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "System", 
+ "fields": [
+  {
+   "fieldname": "setup", 
+   "fieldtype": "Section Break", 
+   "label": "Setup", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Email ids separated by commas.", 
+   "fieldname": "send_notifications_to", 
+   "fieldtype": "Data", 
+   "label": "Send Notifications To", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "backup_right_now", 
+   "fieldtype": "Button", 
+   "hidden": 1, 
+   "label": "Backup Right Now", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "description": "Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.", 
+   "fieldname": "sync_with_dropbox", 
+   "fieldtype": "Section Break", 
+   "label": "Sync with Dropbox", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "upload_backups_to_dropbox", 
+   "fieldtype": "Select", 
+   "label": "Upload Backups to Dropbox", 
+   "options": "Never\nWeekly\nDaily", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "dropbox_access_key", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Dropbox Access Key", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "dropbox_access_secret", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Dropbox Access Secret", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "dropbox_access_allowed", 
+   "fieldtype": "Check", 
+   "hidden": 1, 
+   "label": "Dropbox Access Allowed", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "allow_dropbox_access", 
+   "fieldtype": "Button", 
+   "label": "Allow Dropbox Access", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.", 
+   "fieldname": "sync_with_gdrive", 
+   "fieldtype": "Section Break", 
+   "hidden": 1, 
+   "label": "Sync with Google Drive", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "upload_backups_to_gdrive", 
+   "fieldtype": "Select", 
+   "label": "Upload Backups to Google Drive", 
+   "options": "Never\nDaily\nWeekly", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "allow_gdrive_access", 
+   "fieldtype": "Button", 
+   "label": "Allow Google Drive Access", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "verification_code", 
+   "fieldtype": "Data", 
+   "label": "Enter Verification Code", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "validate_gdrive", 
+   "fieldtype": "Button", 
+   "label": "Validate", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "gdrive_access_allowed", 
+   "fieldtype": "Check", 
+   "hidden": 1, 
+   "label": "Google Drive Access Allowed", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "gdrive_credentials", 
+   "fieldtype": "Text", 
+   "hidden": 1, 
+   "label": "Credentials", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "database_folder_id", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Database Folder ID", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "files_folder_id", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Files Folder ID", 
+   "permlevel": 0, 
+   "read_only": 1
+  }
+ ], 
+ "icon": "icon-cloud-upload", 
+ "idx": 1, 
+ "issingle": 1, 
+ "modified": "2013-12-20 19:22:55.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Backup Manager", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "role": "System Manager", 
+   "write": 1
+  }
+ ]
+}

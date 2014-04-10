@@ -15,240 +15,259 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_make_purchase_order(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
-		mr = frappe.bean(copy=test_records[0]).insert()
+		mr = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_purchase_order, 
-			mr.doc.name)
+		self.assertRaises(frappe.ValidationError, make_purchase_order,
+			mr.name)
 
-		mr = frappe.bean("Material Request", mr.doc.name)
+		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
-		po = make_purchase_order(mr.doc.name)
-		
-		self.assertEquals(po[0]["doctype"], "Purchase Order")
-		self.assertEquals(len(po), len(mr.doclist))
-		
+		po = make_purchase_order(mr.name)
+
+		self.assertEquals(po.doctype, "Purchase Order")
+		self.assertEquals(len(po.get("po_details")), len(mr.get("indent_details")))
+
 	def test_make_supplier_quotation(self):
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
 
-		mr = frappe.bean(copy=test_records[0]).insert()
+		mr = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_supplier_quotation, 
-			mr.doc.name)
+		self.assertRaises(frappe.ValidationError, make_supplier_quotation, mr.name)
 
-		mr = frappe.bean("Material Request", mr.doc.name)
+		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
-		sq = make_supplier_quotation(mr.doc.name)
-		
-		self.assertEquals(sq[0]["doctype"], "Supplier Quotation")
-		self.assertEquals(len(sq), len(mr.doclist))
-		
-			
+		sq = make_supplier_quotation(mr.name)
+
+		self.assertEquals(sq.doctype, "Supplier Quotation")
+		self.assertEquals(len(sq.get("quotation_items")), len(mr.get("indent_details")))
+
+
 	def test_make_stock_entry(self):
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
-		mr = frappe.bean(copy=test_records[0]).insert()
+		mr = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_stock_entry, 
-			mr.doc.name)
+		self.assertRaises(frappe.ValidationError, make_stock_entry,
+			mr.name)
 
-		mr = frappe.bean("Material Request", mr.doc.name)
-		mr.doc.material_request_type = "Transfer"
+		mr = frappe.get_doc("Material Request", mr.name)
+		mr.material_request_type = "Transfer"
 		mr.submit()
-		se = make_stock_entry(mr.doc.name)
-		
-		self.assertEquals(se[0]["doctype"], "Stock Entry")
-		self.assertEquals(len(se), len(mr.doclist))
-	
-	def _test_expected(self, doclist, expected_values):
-		for i, expected in enumerate(expected_values):
-			for fieldname, val in expected.items():
-				self.assertEquals(val, doclist[i].fields.get(fieldname))
-				
+		se = make_stock_entry(mr.name)
+
+		self.assertEquals(se.doctype, "Stock Entry")
+		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
+
 	def _test_requested_qty(self, qty1, qty2):
 		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty1)
 		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 200",
 			"warehouse": "_Test Warehouse - _TC"}, "indented_qty")), qty2)
-			
+
 	def _insert_stock_entry(self, qty1, qty2):
-		se = frappe.bean([
-			{
-				"company": "_Test Company", 
-				"doctype": "Stock Entry", 
-				"posting_date": "2013-03-01", 
-				"posting_time": "00:00:00", 
+		se = frappe.get_doc({
+				"company": "_Test Company",
+				"doctype": "Stock Entry",
+				"posting_date": "2013-03-01",
+				"posting_time": "00:00:00",
 				"purpose": "Material Receipt",
 				"fiscal_year": "_Test Fiscal Year 2013",
-			}, 
-			{
-				"conversion_factor": 1.0, 
-				"doctype": "Stock Entry Detail", 
-				"item_code": "_Test Item Home Desktop 100",
-				"parentfield": "mtn_details", 
-				"incoming_rate": 100,
-				"qty": qty1, 
-				"stock_uom": "_Test UOM 1", 
-				"transfer_qty": qty1, 
-				"uom": "_Test UOM 1",
-				"t_warehouse": "_Test Warehouse 1 - _TC",
-			},
-			{
-				"conversion_factor": 1.0, 
-				"doctype": "Stock Entry Detail", 
-				"item_code": "_Test Item Home Desktop 200",
-				"parentfield": "mtn_details", 
-				"incoming_rate": 100,
-				"qty": qty2, 
-				"stock_uom": "_Test UOM 1", 
-				"transfer_qty": qty2, 
-				"uom": "_Test UOM 1",
-				"t_warehouse": "_Test Warehouse 1 - _TC",
-			},
-		])
+				"mtn_details": [
+					{
+						"conversion_factor": 1.0,
+						"doctype": "Stock Entry Detail",
+						"item_code": "_Test Item Home Desktop 100",
+						"parentfield": "mtn_details",
+						"incoming_rate": 100,
+						"qty": qty1,
+						"stock_uom": "_Test UOM 1",
+						"transfer_qty": qty1,
+						"uom": "_Test UOM 1",
+						"t_warehouse": "_Test Warehouse 1 - _TC",
+					},
+					{
+						"conversion_factor": 1.0,
+						"doctype": "Stock Entry Detail",
+						"item_code": "_Test Item Home Desktop 200",
+						"parentfield": "mtn_details",
+						"incoming_rate": 100,
+						"qty": qty2,
+						"stock_uom": "_Test UOM 1",
+						"transfer_qty": qty2,
+						"uom": "_Test UOM 1",
+						"t_warehouse": "_Test Warehouse 1 - _TC",
+					}
+				]
+			})
 		se.insert()
 		se.submit()
-				
+
 	def test_completed_qty_for_purchase(self):
 		frappe.db.sql("""delete from `tabBin`""")
-		
+
 		# submit material request of type Purchase
-		mr = frappe.bean(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.insert()
 		mr.submit()
-		
+
 		# check if per complete is None
-		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
-		
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
-		
+
 		# map a purchase order
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-		po_doclist = make_purchase_order(mr.doc.name)
-		po_doclist[0]["supplier"] = "_Test Supplier"
-		po_doclist[0]["transaction_date"] = "2013-07-07"
-		po_doclist[1]["qty"] = 27.0
-		po_doclist[2]["qty"] = 1.5
-		po_doclist[1]["schedule_date"] = "2013-07-09"
-		po_doclist[2]["schedule_date"] = "2013-07-09"
+		po_doc = make_purchase_order(mr.name)
+		po_doc.supplier = "_Test Supplier"
+		po_doc.transaction_date = "2013-07-07"
+		po_doc.get("po_details")[0].qty = 27.0
+		po_doc.get("po_details")[1].qty = 1.5
+		po_doc.get("po_details")[0].schedule_date = "2013-07-09"
+		po_doc.get("po_details")[1].schedule_date = "2013-07-09"
 
-		
+
 		# check for stopped status of Material Request
-		po = frappe.bean(copy=po_doclist)
+		po = frappe.copy_doc(po_doc)
 		po.insert()
-		mr.obj.update_status('Stopped')
-		self.assertRaises(frappe.ValidationError, po.submit)
-		self.assertRaises(frappe.ValidationError, po.cancel)
+		po.load_from_db()
+		mr.update_status('Stopped')
+		self.assertRaises(frappe.InvalidStatusError, po.submit)
+		frappe.db.set(po, "docstatus", 1)
+		self.assertRaises(frappe.InvalidStatusError, po.cancel)
 
-		mr.obj.update_status('Submitted')
-		po = frappe.bean(copy=po_doclist)
+		# resubmit and check for per complete
+		mr.load_from_db()
+		mr.update_status('Submitted')
+		po = frappe.copy_doc(po_doc)
 		po.insert()
 		po.submit()
-		
+
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": 50}, {"ordered_qty": 27.0}, {"ordered_qty": 1.5}])
+		self.assertEquals(mr.per_ordered, 50)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 27.0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 1.5)
 		self._test_requested_qty(27.0, 1.5)
-		
+
 		po.cancel()
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, None)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, None)
+
 		self._test_requested_qty(54.0, 3.0)
-		
+
 	def test_completed_qty_for_transfer(self):
 		frappe.db.sql("""delete from `tabBin`""")
 		frappe.db.sql("""delete from `tabStock Ledger Entry`""")
-		
+
 		# submit material request of type Purchase
-		mr = frappe.bean(copy=test_records[0])
-		mr.doc.material_request_type = "Transfer"
+		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
 
 		# check if per complete is None
-		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
-		
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
 
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
-				
+
 		# map a stock entry
-		se_doclist = make_stock_entry(mr.doc.name)
-		se_doclist[0].update({
+		se_doc = make_stock_entry(mr.name)
+		se_doc.update({
 			"posting_date": "2013-03-01",
 			"posting_time": "01:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doclist[1].update({
+		se_doc.get("mtn_details")[0].update({
 			"qty": 27.0,
 			"transfer_qty": 27.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		se_doclist[2].update({
+		se_doc.get("mtn_details")[1].update({
 			"qty": 1.5,
 			"transfer_qty": 1.5,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		
+
 		# make available the qty in _Test Warehouse 1 before transfer
 		self._insert_stock_entry(27.0, 1.5)
-		
+
 		# check for stopped status of Material Request
-		se = frappe.bean(copy=se_doclist)
+		se = frappe.copy_doc(se_doc)
 		se.insert()
-		mr.obj.update_status('Stopped')
-		self.assertRaises(frappe.ValidationError, se.submit)
-		self.assertRaises(frappe.ValidationError, se.cancel)
-		
-		mr.obj.update_status('Submitted')
-		se = frappe.bean(copy=se_doclist)
+		mr.update_status('Stopped')
+		self.assertRaises(frappe.InvalidStatusError, se.submit)
+
+		mr.update_status('Submitted')
+		se.submit()
+		mr.update_status('Stopped')
+		self.assertRaises(frappe.InvalidStatusError, se.cancel)
+
+		mr.update_status('Submitted')
+		se = frappe.copy_doc(se_doc)
 		se.insert()
 		se.submit()
-		
+
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": 50}, {"ordered_qty": 27.0}, {"ordered_qty": 1.5}])
+		self.assertEquals(mr.per_ordered, 50)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 27.0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 1.5)
+
 		self._test_requested_qty(27.0, 1.5)
-		
+
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
+		self.assertEquals(mr.per_ordered, 0)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
-		
+
 	def test_completed_qty_for_over_transfer(self):
 		frappe.db.sql("""delete from `tabBin`""")
 		frappe.db.sql("""delete from `tabStock Ledger Entry`""")
-		
+
 		# submit material request of type Purchase
-		mr = frappe.bean(copy=test_records[0])
-		mr.doc.material_request_type = "Transfer"
+		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
 
 		# check if per complete is None
-		self._test_expected(mr.doclist, [{"per_ordered": None}, {"ordered_qty": None}, {"ordered_qty": None}])
-		
+		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
-		
+
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
-		se_doclist = make_stock_entry(mr.doc.name)
-		se_doclist[0].update({
+		se_doc = make_stock_entry(mr.name)
+		se_doc.update({
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doclist[1].update({
+		se_doc.get("mtn_details")[0].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		se_doclist[2].update({
+		se_doc.get("mtn_details")[1].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
@@ -257,102 +276,75 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# make available the qty in _Test Warehouse 1 before transfer
 		self._insert_stock_entry(60.0, 3.0)
-		
+
 		# check for stopped status of Material Request
-		se = frappe.bean(copy=se_doclist)
+		se = frappe.copy_doc(se_doc)
 		se.insert()
-		mr.obj.update_status('Stopped')
-		self.assertRaises(frappe.ValidationError, se.submit)
-		self.assertRaises(frappe.ValidationError, se.cancel)
-		
-		mr.obj.update_status('Submitted')
-		se = frappe.bean(copy=se_doclist)
+		mr.update_status('Stopped')
+		self.assertRaises(frappe.InvalidStatusError, se.submit)
+		self.assertRaises(frappe.InvalidStatusError, se.cancel)
+
+		mr.update_status('Submitted')
+		se = frappe.copy_doc(se_doc)
 		se.insert()
 		se.submit()
-		
+
 		# check if per complete is as expected
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": 100}, {"ordered_qty": 60.0}, {"ordered_qty": 3.0}])
+
+		self.assertEquals(mr.per_ordered, 100)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 60.0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 3.0)
 		self._test_requested_qty(0.0, 0.0)
-		
+
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
 		mr.load_from_db()
-		self._test_expected(mr.doclist, [{"per_ordered": 0}, {"ordered_qty": 0}, {"ordered_qty": 0}])
+		self.assertEquals(mr.per_ordered, 0)
+		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+
 		self._test_requested_qty(54.0, 3.0)
-		
+
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Purchase
-		mr = frappe.bean(copy=test_records[0])
-		mr.doc.material_request_type = "Transfer"
+		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = "Transfer"
 		mr.insert()
 		mr.submit()
 
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
-		
-		se_doclist = make_stock_entry(mr.doc.name)
-		se_doclist[0].update({
+
+		se_doc = make_stock_entry(mr.name)
+		se_doc.update({
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doclist[1].update({
+		se_doc.get("mtn_details")[0].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse - _TC",
 			"t_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		se_doclist[2].update({
+		se_doc.get("mtn_details")[1].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		
+
 		# check for stopped status of Material Request
-		se = frappe.bean(copy=se_doclist)
+		se = frappe.copy_doc(se_doc)
 		self.assertRaises(frappe.MappingMismatchError, se.insert)
-		
+
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		mr = frappe.bean(copy=test_records[0])
-		mr.doc.company = "_Test Company 1"
+		mr = frappe.copy_doc(test_records[0])
+		mr.company = "_Test Company 1"
 		self.assertRaises(InvalidWarehouseCompany, mr.insert)
 
 test_dependencies = ["Currency Exchange"]
-test_records = [
-	[
-		{
-			"company": "_Test Company", 
-			"doctype": "Material Request", 
-			"fiscal_year": "_Test Fiscal Year 2013", 
-			"transaction_date": "2013-02-18",
-			"material_request_type": "Purchase",
-			"naming_series": "_T-Material Request-"
-		}, 
-		{
-			"description": "_Test Item Home Desktop 100", 
-			"doctype": "Material Request Item", 
-			"item_code": "_Test Item Home Desktop 100", 
-			"item_name": "_Test Item Home Desktop 100", 
-			"parentfield": "indent_details", 
-			"qty": 54.0, 
-			"schedule_date": "2013-02-18", 
-			"uom": "_Test UOM 1",
-			"warehouse": "_Test Warehouse - _TC"
-		}, 
-		{
-			"description": "_Test Item Home Desktop 200", 
-			"doctype": "Material Request Item", 
-			"item_code": "_Test Item Home Desktop 200", 
-			"item_name": "_Test Item Home Desktop 200", 
-			"parentfield": "indent_details", 
-			"qty": 3.0, 
-			"schedule_date": "2013-02-19", 
-			"uom": "_Test UOM 1",
-			"warehouse": "_Test Warehouse - _TC"
-		}
-	],
-]
+test_records = frappe.get_test_records('Material Request')

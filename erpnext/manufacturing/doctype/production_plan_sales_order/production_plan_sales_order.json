@@ -1,0 +1,61 @@
+{
+ "autoname": "PP/.SO/.#####", 
+ "creation": "2013-02-22 01:27:49.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "sales_order", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Sales Order", 
+   "oldfieldname": "prevdoc_docname", 
+   "oldfieldtype": "Data", 
+   "options": "Sales Order", 
+   "permlevel": 0, 
+   "print_width": "150px", 
+   "width": "150px"
+  }, 
+  {
+   "fieldname": "sales_order_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "SO Date", 
+   "oldfieldname": "document_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "read_only": 1, 
+   "width": "120px"
+  }, 
+  {
+   "fieldname": "customer", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Customer", 
+   "options": "Customer", 
+   "permlevel": 0, 
+   "print_width": "150px", 
+   "read_only": 1, 
+   "width": "150px"
+  }, 
+  {
+   "fieldname": "grand_total", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Grand Total", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "read_only": 1, 
+   "width": "120px"
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:25.000000", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "Production Plan Sales Order", 
+ "owner": "Administrator"
+}

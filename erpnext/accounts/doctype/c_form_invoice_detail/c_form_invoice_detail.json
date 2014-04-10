@@ -1,0 +1,68 @@
+{
+ "creation": "2013-02-22 01:27:38.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "invoice_no", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Invoice No", 
+   "options": "Sales Invoice", 
+   "permlevel": 0, 
+   "print_width": "160px", 
+   "width": "160px"
+  }, 
+  {
+   "fieldname": "invoice_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Invoice Date", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "read_only": 1, 
+   "width": "120px"
+  }, 
+  {
+   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "fieldname": "territory", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Territory", 
+   "options": "Territory", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "read_only": 1, 
+   "width": "120px"
+  }, 
+  {
+   "fieldname": "net_total", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Net Total", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "read_only": 1, 
+   "width": "120px"
+  }, 
+  {
+   "fieldname": "grand_total", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Grand Total", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "read_only": 1, 
+   "width": "120px"
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:00.000000", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "C-Form Invoice Detail", 
+ "owner": "Administrator"
+}

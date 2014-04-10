@@ -4,25 +4,21 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr
-from frappe.model.bean import getlist
-from frappe.model.code import get_obj
+
 from frappe import _, msgprint
 
 from erpnext.controllers.selling_controller import SellingController
 
-class DocType(SellingController):
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
-		self.tname = 'Quotation Item'
-		self.fname = 'quotation_details'
+class Quotation(SellingController):
+	tname = 'Quotation Item'
+	fname = 'quotation_details'
 
 	def has_sales_order(self):
-		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
 
 	def validate_for_items(self):
 		chk_dupl_itm = []
-		for d in getlist(self.doclist,'quotation_details'):
+		for d in self.get('quotation_details'):
 			if [cstr(d.item_code),cstr(d.description)] in chk_dupl_itm:
 				msgprint("Item %s has been entered twice. Please change description atleast to continue" % d.item_code)
 				raise Exception
@@ -30,10 +26,10 @@ class DocType(SellingController):
 				chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
 	def validate_order_type(self):
-		super(DocType, self).validate_order_type()
+		super(Quotation, self).validate_order_type()
 		
-		if self.doc.order_type in ['Maintenance', 'Service']:
-			for d in getlist(self.doclist, 'quotation_details'):
+		if self.order_type in ['Maintenance', 'Service']:
+			for d in self.get('quotation_details'):
 				is_service_item = frappe.db.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 				
@@ -41,7 +37,7 @@ class DocType(SellingController):
 					msgprint("You can not select non service item "+d.item_code+" in Maintenance Quotation")
 					raise Exception
 		else:
-			for d in getlist(self.doclist, 'quotation_details'):
+			for d in self.get('quotation_details'):
 				is_sales_item = frappe.db.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 				
@@ -50,26 +46,27 @@ class DocType(SellingController):
 					raise Exception
 	
 	def validate(self):
-		super(DocType, self).validate()
+		super(Quotation, self).validate()
 		self.set_status()
 		self.validate_order_type()
 		self.validate_for_items()
 		self.validate_uom_is_integer("stock_uom", "qty")
 
 	def update_opportunity(self):
-		for opportunity in self.doclist.get_distinct_values("prevdoc_docname"):
-			frappe.bean("Opportunity", opportunity).get_controller().set_status(update=True)
+		for opportunity in list(set([d.prevdoc_docname for d in self.get("quotation_details")])):
+			if opportunity:
+				frappe.get_doc("Opportunity", opportunity).set_status(update=True)
 	
 	def declare_order_lost(self, arg):
 		if not self.has_sales_order():
-			frappe.db.set(self.doc, 'status', 'Lost')
-			frappe.db.set(self.doc, 'order_lost_reason', arg)
+			frappe.db.set(self, 'status', 'Lost')
+			frappe.db.set(self, 'order_lost_reason', arg)
 			self.update_opportunity()
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 	
 	def check_item_table(self):
-		if not getlist(self.doclist, 'quotation_details'):
+		if not self.get('quotation_details'):
 			msgprint("Please enter item details")
 			raise Exception
 		
@@ -77,7 +74,7 @@ class DocType(SellingController):
 		self.check_item_table()
 		
 		# Check for Approving Authority
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, self.doc.company, self.doc.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
 			
 		#update enquiry status
 		self.update_opportunity()
@@ -89,7 +86,7 @@ class DocType(SellingController):
 			
 	def print_other_charges(self,docname):
 		print_lst = []
-		for d in getlist(self.doclist,'other_charges'):
+		for d in self.get('other_charges'):
 			lst1 = []
 			lst1.append(d.description)
 			lst1.append(d.total)
@@ -98,24 +95,24 @@ class DocType(SellingController):
 		
 	
 @frappe.whitelist()
-def make_sales_order(source_name, target_doclist=None):
-	return _make_sales_order(source_name, target_doclist)
+def make_sales_order(source_name, target_doc=None):
+	return _make_sales_order(source_name, target_doc)
 	
-def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False):
-	from frappe.model.mapper import get_mapped_doclist
+def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
+	from frappe.model.mapper import get_mapped_doc
 	
 	customer = _make_customer(source_name, ignore_permissions)
 	
 	def set_missing_values(source, target):
 		if customer:
-			target[0].customer = customer.doc.name
-			target[0].customer_name = customer.doc.customer_name
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
 			
-		si = frappe.bean(target)
+		si = frappe.get_doc(target)
 		si.ignore_permissions = ignore_permissions
 		si.run_method("onload_post_render")
 			
-	doclist = get_mapped_doclist("Quotation", source_name, {
+	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order", 
 				"validation": {
@@ -136,11 +133,11 @@ def _make_sales_order(source_name, target_doclist=None, ignore_permissions=False
 				"doctype": "Sales Team",
 				"add_if_empty": True
 			}
-		}, target_doclist, set_missing_values, ignore_permissions=ignore_permissions)
+		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 		
 	# postprocess: fetch shipping address, set missing values
 		
-	return [d.fields for d in doclist]
+	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type"])
@@ -150,10 +147,10 @@ def _make_customer(source_name, ignore_permissions=False):
 		if not customer_name:
 			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
-			customer = frappe.bean(customer_doclist)
+			customer = frappe.get_doc(customer_doclist)
 			customer.ignore_permissions = ignore_permissions
 			if quotation[1] == "Shopping Cart":
-				customer.doc.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
+				customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
 					"default_customer_group")
 			
 			try:
@@ -162,7 +159,7 @@ def _make_customer(source_name, ignore_permissions=False):
 			except NameError:
 				if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
 					customer.run_method("autoname")
-					customer.doc.name += "-" + lead_name
+					customer.name += "-" + lead_name
 					customer.insert()
 					return customer
 				else:

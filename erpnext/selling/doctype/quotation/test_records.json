@@ -1,0 +1,34 @@
+[
+ {
+  "company": "_Test Company", 
+  "conversion_rate": 1.0, 
+  "currency": "INR", 
+  "customer": "_Test Customer", 
+  "customer_group": "_Test Customer Group", 
+  "customer_name": "_Test Customer", 
+  "doctype": "Quotation", 
+  "fiscal_year": "_Test Fiscal Year 2013", 
+  "grand_total": 1000.0, 
+  "grand_total_export": 1000.0, 
+  "order_type": "Sales", 
+  "plc_conversion_rate": 1.0, 
+  "price_list_currency": "INR", 
+  "quotation_details": [
+   {
+    "base_amount": 1000.0, 
+    "base_rate": 100.0, 
+    "description": "CPU", 
+    "doctype": "Quotation Item", 
+    "item_code": "_Test Item Home Desktop 100", 
+    "item_name": "CPU", 
+    "parentfield": "quotation_details", 
+    "qty": 10.0, 
+    "rate": 100.0
+   }
+  ], 
+  "quotation_to": "Customer", 
+  "selling_price_list": "_Test Price List", 
+  "territory": "_Test Territory", 
+  "transaction_date": "2013-02-21"
+ }
+]

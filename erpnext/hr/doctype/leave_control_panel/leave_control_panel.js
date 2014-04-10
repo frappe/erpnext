@@ -9,7 +9,7 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 }
 
 cur_frm.cscript.to_date = function(doc, cdt, cdn) {
-	return $c('runserverobj', args={'method':'to_date_validation','docs':frappe.model.compress(make_doclist(doc.doctype, doc.name))},
+	return $c('runserverobj', args={'method':'to_date_validation','docs':doc},
 		function(r, rt) {
 			var doc = locals[cdt][cdn];
 			if (r.message) {

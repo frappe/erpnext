@@ -20,8 +20,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if(!doc.__billing_complete && doc.docstatus==1) {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
-			from_sales_invoice = cur_frm.get_doclist({parentfield: "delivery_note_details"})
-				.some(function(item) { 
+			from_sales_invoice = cur_frm.doc.delivery_note_details.some(function(item) { 
 					return item.against_sales_invoice ? true : false; 
 				});
 			
@@ -167,7 +166,7 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 
 	out ='';
 	
-	var cl = getchildren('Delivery Note Item',doc.name,'delivery_note_details');
+	var cl = doc.delivery_note_details || [];
 
 	// outer table	
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';
@@ -205,7 +204,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];
 		if(d.expense_account) {
-			var cl = getchildren('Delivery Note Item', doc.name, cur_frm.cscript.fname, doc.doctype);
+			var cl = doc[cur_frm.cscript.fname] || [];
 			for(var i = 0; i < cl.length; i++){
 				if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
 			}
@@ -228,7 +227,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];
 		if(d.cost_center) {
-			var cl = getchildren('Delivery Note Item', doc.name, cur_frm.cscript.fname, doc.doctype);
+			var cl = doc[cur_frm.cscript.fname] || [];
 			for(var i = 0; i < cl.length; i++){
 				if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
 			}

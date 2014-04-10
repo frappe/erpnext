@@ -1,0 +1,308 @@
+{
+ "autoname": "MTND/.######", 
+ "creation": "2013-03-29 18:22:12.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "s_warehouse", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Source Warehouse", 
+   "no_copy": 1, 
+   "oldfieldname": "s_warehouse", 
+   "oldfieldtype": "Link", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "t_warehouse", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Target Warehouse", 
+   "no_copy": 1, 
+   "oldfieldname": "t_warehouse", 
+   "oldfieldtype": "Link", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "sec_break1", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "item_code", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Item Code", 
+   "oldfieldname": "item_code", 
+   "oldfieldtype": "Link", 
+   "options": "Item", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "item_name", 
+   "fieldtype": "Data", 
+   "label": "Item Name", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "col_break2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Text", 
+   "in_list_view": 1, 
+   "label": "Description", 
+   "oldfieldname": "description", 
+   "oldfieldtype": "Text", 
+   "permlevel": 0, 
+   "print_width": "300px", 
+   "read_only": 0, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "quantity_and_rate", 
+   "fieldtype": "Section Break", 
+   "label": "Quantity and Rate", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "qty", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Qty", 
+   "oldfieldname": "qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "uom", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "UOM", 
+   "oldfieldname": "uom", 
+   "oldfieldtype": "Link", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "incoming_rate", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Valuation Rate", 
+   "oldfieldname": "incoming_rate", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "col_break3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "stock_uom", 
+   "fieldtype": "Link", 
+   "in_filter": 0, 
+   "label": "Stock UOM", 
+   "oldfieldname": "stock_uom", 
+   "oldfieldtype": "Link", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "conversion_factor", 
+   "fieldtype": "Float", 
+   "label": "Conversion Factor", 
+   "oldfieldname": "conversion_factor", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "amount", 
+   "fieldtype": "Currency", 
+   "label": "Amount", 
+   "oldfieldname": "amount", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "serial_no_batch", 
+   "fieldtype": "Section Break", 
+   "label": "Serial No / Batch", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "serial_no", 
+   "fieldtype": "Text", 
+   "label": "Serial No", 
+   "no_copy": 1, 
+   "oldfieldname": "serial_no", 
+   "oldfieldtype": "Text", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "col_break4", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "batch_no", 
+   "fieldtype": "Link", 
+   "label": "Batch No", 
+   "oldfieldname": "batch_no", 
+   "oldfieldtype": "Link", 
+   "options": "Batch", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "accounting", 
+   "fieldtype": "Section Break", 
+   "label": "Accounting", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
+   "fieldname": "expense_account", 
+   "fieldtype": "Link", 
+   "label": "Difference Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "col_break5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "default": ":Company", 
+   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "more_info", 
+   "fieldtype": "Section Break", 
+   "label": "More Info", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "actual_qty", 
+   "fieldtype": "Float", 
+   "in_filter": 1, 
+   "label": "Actual Qty (at source/target)", 
+   "no_copy": 1, 
+   "oldfieldname": "actual_qty", 
+   "oldfieldtype": "Read Only", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 0, 
+   "search_index": 1
+  }, 
+  {
+   "description": "BOM No. for a Finished Good Item", 
+   "fieldname": "bom_no", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "label": "BOM No", 
+   "no_copy": 0, 
+   "options": "BOM", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "col_break6", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "transfer_qty", 
+   "fieldtype": "Float", 
+   "label": "Qty as per Stock UOM", 
+   "oldfieldname": "transfer_qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 1
+  }, 
+  {
+   "description": "Material Request used to make this Stock Entry", 
+   "fieldname": "material_request", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "label": "Material Request", 
+   "no_copy": 1, 
+   "options": "Material Request", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "material_request_item", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "label": "Material Request Item", 
+   "no_copy": 1, 
+   "options": "Material Request Item", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2014-02-03 12:59:27.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Stock Entry Detail", 
+ "owner": "Administrator"
+}

@@ -9,9 +9,9 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.sql("""delete from `tabLeave Application`""")
 		frappe.db.sql("""delete from `tabSalary Slip`""")
 		from erpnext.hr.doctype.leave_application.test_leave_application import test_records as leave_applications
-		la = frappe.bean(copy=leave_applications[4])
+		la = frappe.copy_doc(leave_applications[4])
 		la.insert()
-		la.doc.status = "Approved"
+		la.status = "Approved"
 		la.submit()
 		
 	def tearDown(self):
@@ -19,70 +19,29 @@ class TestSalarySlip(unittest.TestCase):
 		
 	def test_salary_slip_with_holidays_included(self):
 		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
-		ss = frappe.bean(copy=test_records[0])
+		ss = frappe.copy_doc(test_records[0])
 		ss.insert()
-		self.assertEquals(ss.doc.total_days_in_month, 31)
-		self.assertEquals(ss.doc.payment_days, 30)
-		self.assertEquals(ss.doclist[1].e_modified_amount, 14516.13)
-		self.assertEquals(ss.doclist[2].e_modified_amount, 500)
-		self.assertEquals(ss.doclist[3].d_modified_amount, 100)
-		self.assertEquals(ss.doclist[4].d_modified_amount, 48.39)
-		self.assertEquals(ss.doc.gross_pay, 15016.13)
-		self.assertEquals(ss.doc.net_pay, 14867.74)
+		self.assertEquals(ss.total_days_in_month, 31)
+		self.assertEquals(ss.payment_days, 30)
+		self.assertEquals(ss.earning_details[0].e_modified_amount, 14516.13)
+		self.assertEquals(ss.earning_details[1].e_modified_amount, 500)
+		self.assertEquals(ss.deduction_details[0].d_modified_amount, 100)
+		self.assertEquals(ss.deduction_details[1].d_modified_amount, 48.39)
+		self.assertEquals(ss.gross_pay, 15016.13)
+		self.assertEquals(ss.net_pay, 14867.74)
 		
 	def test_salary_slip_with_holidays_excluded(self):
-		ss = frappe.bean(copy=test_records[0])
+		ss = frappe.copy_doc(test_records[0])
 		ss.insert()
-		self.assertEquals(ss.doc.total_days_in_month, 30)
-		self.assertEquals(ss.doc.payment_days, 29)
-		self.assertEquals(ss.doclist[1].e_modified_amount, 14500)
-		self.assertEquals(ss.doclist[2].e_modified_amount, 500)
-		self.assertEquals(ss.doclist[3].d_modified_amount, 100)
-		self.assertEquals(ss.doclist[4].d_modified_amount, 48.33)
-		self.assertEquals(ss.doc.gross_pay, 15000)
-		self.assertEquals(ss.doc.net_pay, 14851.67)
+		self.assertEquals(ss.total_days_in_month, 30)
+		self.assertEquals(ss.payment_days, 29)
+		self.assertEquals(ss.earning_details[0].e_modified_amount, 14500)
+		self.assertEquals(ss.earning_details[1].e_modified_amount, 500)
+		self.assertEquals(ss.deduction_details[0].d_modified_amount, 100)
+		self.assertEquals(ss.deduction_details[1].d_modified_amount, 48.33)
+		self.assertEquals(ss.gross_pay, 15000)
+		self.assertEquals(ss.net_pay, 14851.67)
 
 test_dependencies = ["Leave Application"]
 
-test_records = [
-	[
-		{
-			"doctype": "Salary Slip",
-			"employee": "_T-Employee-0001",
-			"employee_name": "_Test Employee",
-			"company": "_Test Company",
-			"fiscal_year": "_Test Fiscal Year 2013",
-			"month": "01",
-			"total_days_in_month": 31,
-			"payment_days": 31
-		},
-		{
-			"doctype": "Salary Slip Earning",
-			"parentfield": "earning_details",
-			"e_type": "_Test Basic Salary",
-			"e_amount": 15000,
-			"e_depends_on_lwp": 1
-		},
-		{
-			"doctype": "Salary Slip Earning",
-			"parentfield": "earning_details",
-			"e_type": "_Test Allowance",
-			"e_amount": 500,
-			"e_depends_on_lwp": 0
-		},
-		{
-			"doctype": "Salary Slip Deduction",
-			"parentfield": "deduction_details",
-			"d_type": "_Test Professional Tax",
-			"d_amount": 100,
-			"d_depends_on_lwp": 0
-		},
-		{
-			"doctype": "Salary Slip Deduction",
-			"parentfield": "deduction_details",
-			"d_type": "_Test TDS",
-			"d_amount": 50,
-			"d_depends_on_lwp": 1
-		},
-	]
-]
+test_records = frappe.get_test_records('Salary Slip')

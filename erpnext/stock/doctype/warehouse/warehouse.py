@@ -6,32 +6,31 @@ import frappe
 from frappe.utils import cint, validate_email_add
 from frappe import throw, msgprint, _
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class Warehouse(Document):
 	
 	def autoname(self):
-		suffix = " - " + frappe.db.get_value("Company", self.doc.company, "abbr")
-		if not self.doc.warehouse_name.endswith(suffix):
-			self.doc.name = self.doc.warehouse_name + suffix
+		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
+		if not self.warehouse_name.endswith(suffix):
+			self.name = self.warehouse_name + suffix
 
 	def validate(self):
-		if self.doc.email_id and not validate_email_add(self.doc.email_id):
+		if self.email_id and not validate_email_add(self.email_id):
 				throw(_("Please enter valid Email Id"))
 				
 		self.update_parent_account()
 				
 	def update_parent_account(self):
-		if not self.doc.__islocal and (self.doc.create_account_under != 
-			frappe.db.get_value("Warehouse", self.doc.name, "create_account_under")):
+		if not getattr(self, "__islocal", None) and (self.create_account_under != 
+			frappe.db.get_value("Warehouse", self.name, "create_account_under")):
 				warehouse_account = frappe.db.get_value("Account", 
-					{"account_type": "Warehouse", "company": self.doc.company, 
-					"master_name": self.doc.name}, ["name", "parent_account"])
-				if warehouse_account and warehouse_account[1] != self.doc.create_account_under:
-					acc_bean = frappe.bean("Account", warehouse_account[0])
-					acc_bean.doc.parent_account = self.doc.create_account_under
-					acc_bean.save()
+					{"account_type": "Warehouse", "company": self.company, 
+					"master_name": self.name}, ["name", "parent_account"])
+				if warehouse_account and warehouse_account[1] != self.create_account_under:
+					acc_doc = frappe.get_doc("Account", warehouse_account[0])
+					acc_doc.parent_account = self.create_account_under
+					acc_doc.save()
 				
 	def on_update(self):
 		self.create_account_head()
@@ -39,74 +38,74 @@ class DocType:
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			if not frappe.db.get_value("Account", {"account_type": "Warehouse", 
-					"master_name": self.doc.name}) and not frappe.db.get_value("Account", 
-					{"account_name": self.doc.warehouse_name}):
-				if self.doc.fields.get("__islocal") or not frappe.db.get_value(
-						"Stock Ledger Entry", {"warehouse": self.doc.name}):
+					"master_name": self.name}) and not frappe.db.get_value("Account", 
+					{"account_name": self.warehouse_name}):
+				if self.get("__islocal") or not frappe.db.get_value(
+						"Stock Ledger Entry", {"warehouse": self.name}):
 					self.validate_parent_account()
-					ac_bean = frappe.bean({
+					ac_doc = frappe.get_doc({
 						"doctype": "Account",
-						'account_name': self.doc.warehouse_name, 
-						'parent_account': self.doc.create_account_under, 
+						'account_name': self.warehouse_name, 
+						'parent_account': self.create_account_under, 
 						'group_or_ledger':'Ledger', 
-						'company':self.doc.company, 
+						'company':self.company, 
 						"account_type": "Warehouse",
-						"master_name": self.doc.name,
+						"master_name": self.name,
 						"freeze_account": "No"
 					})
-					ac_bean.ignore_permissions = True
-					ac_bean.insert()
+					ac_doc.ignore_permissions = True
+					ac_doc.insert()
 					
-					msgprint(_("Account Head") + ": " + ac_bean.doc.name + _(" created"))
+					msgprint(_("Account Head") + ": " + ac_doc.name + _(" created"))
 	
 	def validate_parent_account(self):
-		if not self.doc.create_account_under:
+		if not self.create_account_under:
 			parent_account = frappe.db.get_value("Account", 
-				{"account_name": "Stock Assets", "company": self.doc.company})
+				{"account_name": "Stock Assets", "company": self.company})
 			if parent_account:
-				self.doc.create_account_under = parent_account
+				self.create_account_under = parent_account
 			else:
 				frappe.throw(_("Please enter account group under which account \
-					for warehouse ") + self.doc.name +_(" will be created"))
+					for warehouse ") + self.name +_(" will be created"))
 		
 	def on_trash(self):
 		# delete bin
 		bins = frappe.db.sql("select * from `tabBin` where warehouse = %s", 
-			self.doc.name, as_dict=1)
+			self.name, as_dict=1)
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
 				throw("""Warehouse: %s can not be deleted as qty exists for item: %s""" 
-					% (self.doc.name, d['item_code']))
+					% (self.name, d['item_code']))
 			else:
 				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 				
 		warehouse_account = frappe.db.get_value("Account", 
-			{"account_type": "Warehouse", "master_name": self.doc.name})
+			{"account_type": "Warehouse", "master_name": self.name})
 		if warehouse_account:
 			frappe.delete_doc("Account", warehouse_account)
 				
 		if frappe.db.sql("""select name from `tabStock Ledger Entry` 
-				where warehouse = %s""", self.doc.name):
+				where warehouse = %s""", self.name):
 			throw(_("""Warehouse can not be deleted as stock ledger entry 
 				exists for this warehouse."""))
 			
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		new_warehouse = get_name_with_abbr(newdn, self.doc.company)
+		new_warehouse = get_name_with_abbr(newdn, self.company)
 
 		if merge:
 			if not frappe.db.exists("Warehouse", new_warehouse):
 				frappe.throw(_("Warehouse ") + new_warehouse +_(" does not exists"))
 				
-			if self.doc.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
+			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
 				frappe.throw(_("Both Warehouse must belong to same Company"))
 				
 			frappe.db.sql("delete from `tabBin` where warehouse=%s", olddn)
 			
 		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Warehouse", olddn, newdn, merge, self.doc.company)
+		rename_account_for("Warehouse", olddn, newdn, merge, self.company)
 
 		return new_warehouse
 

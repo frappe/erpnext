@@ -1,0 +1,66 @@
+{
+ "creation": "2013-06-24 15:49:57.000000", 
+ "description": "Settings for Accounts", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "default": "1", 
+   "description": "If enabled, the system will post accounting entries for inventory automatically.", 
+   "fieldname": "auto_accounting_for_stock", 
+   "fieldtype": "Check", 
+   "label": "Make Accounting Entry For Every Stock Movement", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 
+   "fieldname": "acc_frozen_upto", 
+   "fieldtype": "Date", 
+   "label": "Accounts Frozen Upto", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Users with this role are allowed to create / modify accounting entry before frozen date", 
+   "fieldname": "bde_auth_role", 
+   "fieldtype": "Link", 
+   "label": "Allowed Role to Edit Entries Before Frozen Date", 
+   "options": "Role", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts", 
+   "fieldname": "frozen_accounts_modifier", 
+   "fieldtype": "Link", 
+   "label": "Frozen Accounts Modifier", 
+   "options": "Role", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Role that is allowed to submit transactions that exceed credit limits set.", 
+   "fieldname": "credit_controller", 
+   "fieldtype": "Link", 
+   "label": "Credit Controller", 
+   "options": "Role", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-cog", 
+ "idx": 1, 
+ "issingle": 1, 
+ "modified": "2013-12-20 19:22:52.000000", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Accounts Settings", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "role": "Accounts Manager", 
+   "write": 1
+  }
+ ]
+}

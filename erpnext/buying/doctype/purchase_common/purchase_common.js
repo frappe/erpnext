@@ -78,7 +78,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
 		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
@@ -92,7 +92,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	rate: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["rate", "discount_percentage"]);
 		
 		if(item.price_list_rate) {
@@ -107,7 +107,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	
 	uom: function(doc, cdt, cdn) {
 		var me = this;
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.buying.utils.get_conversion_factor",
@@ -132,7 +132,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	
 	conversion_factor: function(doc, cdt, cdn) {
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
-			var item = frappe.model.get_doc(cdt, cdn);
+			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 			refresh_field("stock_qty", item.name, item.parentfield);
@@ -140,7 +140,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.buying.utils.get_projected_qty",
@@ -154,9 +154,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	
 	project_name: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.project_name) {
-			$.each(frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, {parentfield: this.fname}),
+			$.each(this.frm.doc[this.fname],
 				function(i, other_item) { 
 					if(!other_item.project_name) {
 						other_item.project_name = item.project_name;

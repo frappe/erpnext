@@ -4,13 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt
-from frappe.model.code import get_obj
 from frappe import msgprint
 
-class DocType:
-	def __init__(self, doc, doclist):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class SalaryManager(Document):
 		
 	def get_emp_list(self):
 		"""
@@ -36,14 +34,14 @@ class DocType:
 		
 		cond = ''
 		for f in ['company', 'branch', 'department', 'designation', 'grade']:
-			if self.doc.fields.get(f):
-				cond += " and t1." + f + " = '" + self.doc.fields.get(f).replace("'", "\'") + "'"		
+			if self.get(f):
+				cond += " and t1." + f + " = '" + self.get(f).replace("'", "\'") + "'"		
 		
 		return cond
 
 		
 	def get_joining_releiving_condition(self):
-		m = self.get_month_details(self.doc.fiscal_year, self.doc.month)
+		m = self.get_month_details(self.fiscal_year, self.month)
 		cond = """
 			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(month_end_date)s' 
 			and ifnull(t1.relieving_date, '2199-12-31') >= '%(month_start_date)s' 
@@ -53,7 +51,7 @@ class DocType:
 		
 	def check_mandatory(self):
 		for f in ['company', 'month', 'fiscal_year']:
-			if not self.doc.fields[f]:
+			if not self.get(f):
 				msgprint("Please select %s to proceed" % f, raise_exception=1)
 		
 	
@@ -86,17 +84,17 @@ class DocType:
 		for emp in emp_list:
 			if not frappe.db.sql("""select name from `tabSalary Slip` 
 					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
-					""", (emp[0], self.doc.month, self.doc.fiscal_year, self.doc.company)):
-				ss = frappe.bean({
+					""", (emp[0], self.month, self.fiscal_year, self.company)):
+				ss = frappe.get_doc({
 					"doctype": "Salary Slip",
-					"fiscal_year": self.doc.fiscal_year,
+					"fiscal_year": self.fiscal_year,
 					"employee": emp[0],
-					"month": self.doc.month,
-					"email_check": self.doc.send_email,
-					"company": self.doc.company,
+					"month": self.month,
+					"email_check": self.send_email,
+					"company": self.company,
 				})
 				ss.insert()
-				ss_list.append(ss.doc.name)
+				ss_list.append(ss.name)
 		
 		return self.create_log(ss_list)
 	
@@ -118,7 +116,7 @@ class DocType:
 		ss_list = frappe.db.sql("""
 			select t1.name from `tabSalary Slip` t1 
 			where t1.docstatus = 0 and month = %s and fiscal_year = %s %s
-		""" % ('%s', '%s', cond), (self.doc.month, self.doc.fiscal_year))
+		""" % ('%s', '%s', cond), (self.month, self.fiscal_year))
 		return ss_list
 			
 				
@@ -129,13 +127,13 @@ class DocType:
 		ss_list = self.get_sal_slip_list()		
 		not_submitted_ss = []
 		for ss in ss_list:
-			ss_obj = get_obj("Salary Slip",ss[0],with_children=1)
+			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			try:
-				frappe.db.set(ss_obj.doc, 'email_check', cint(self.doc.send_mail))
-				if cint(self.doc.send_email) == 1:
+				frappe.db.set(ss_obj, 'email_check', cint(self.send_mail))
+				if cint(self.send_email) == 1:
 					ss_obj.send_mail_funct()
 					
-				frappe.db.set(ss_obj.doc, 'docstatus', 1)
+				frappe.db.set(ss_obj, 'docstatus', 1)
 			except Exception,e:
 				not_submitted_ss.append(ss[0])
 				msgprint(e)
@@ -153,7 +151,7 @@ class DocType:
 			
 		submitted_ss = list(set(all_ss) - set(not_submitted_ss))		
 		if submitted_ss:
-			mail_sent_msg = self.doc.send_email and " (Mail has been sent to the employee)" or ""
+			mail_sent_msg = self.send_email and " (Mail has been sent to the employee)" or ""
 			log = """
 			<b>Submitted Salary Slips%s:</b>\
 			<br><br> %s <br><br>
@@ -180,7 +178,7 @@ class DocType:
 		tot = frappe.db.sql("""
 			select sum(rounded_total) from `tabSalary Slip` t1 
 			where t1.docstatus = 1 and month = %s and fiscal_year = %s %s
-		""" % ('%s', '%s', cond), (self.doc.month, self.doc.fiscal_year))
+		""" % ('%s', '%s', cond), (self.month, self.fiscal_year))
 		
 		return flt(tot[0][0])
 	
@@ -190,7 +188,7 @@ class DocType:
 			get default bank account,default salary acount from company
 		"""
 		amt = self.get_total_salary()
-		default_bank_account = frappe.db.get_value("Company", self.doc.company, 
+		default_bank_account = frappe.db.get_value("Company", self.company, 
 			"default_bank_account")
 		if not default_bank_account:
 			msgprint("You can set Default Bank Account in Company master.")

@@ -1,0 +1,24 @@
+{
+ "creation": "2013-06-20 12:48:38.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "fieldname": "territory", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Territory", 
+   "options": "Territory", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:22:53.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Applicable Territory", 
+ "owner": "Administrator"
+}

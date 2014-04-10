@@ -3,7 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe, unittest
-from frappe.utils import flt
+import frappe.defaults
+from frappe.utils import flt, getdate
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
@@ -22,16 +23,15 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", True)
 
-		st1 = frappe.bean(copy=test_records[0])
+		st1 = frappe.copy_doc(test_records[0])
 		st1.insert()
 		st1.submit()
 
-		st2 = frappe.bean(copy=test_records[1])
+		st2 = frappe.copy_doc(test_records[1])
 		st2.insert()
 		st2.submit()
-				
-		from erpnext.stock.utils import reorder_item
 
+		from erpnext.stock.utils import reorder_item
 		reorder_item()
 
 		mr_name = frappe.db.sql("""select parent from `tabMaterial Request Item`
@@ -39,23 +39,21 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertTrue(mr_name)
 
-		frappe.db.set_default("company", self.old_default_company)
-
 	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()
 		set_perpetual_inventory()
 
-		mr = frappe.bean(copy=test_records[0])
+		mr = frappe.copy_doc(test_records[0])
 		mr.insert()
 		mr.submit()
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mr.doclist[1].t_warehouse})
+			"master_name": mr.get("mtn_details")[0].t_warehouse})
 
-		self.check_stock_ledger_entries("Stock Entry", mr.doc.name,
+		self.check_stock_ledger_entries("Stock Entry", mr.name,
 			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
 
-		self.check_gl_entries("Stock Entry", mr.doc.name,
+		self.check_gl_entries("Stock Entry", mr.name,
 			sorted([
 				[stock_in_hand_account, 5000.0, 0.0],
 				["Stock Adjustment - _TC", 0.0, 5000.0]
@@ -65,10 +63,10 @@ class TestStockEntry(unittest.TestCase):
 		mr.cancel()
 
 		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mr.doc.name))
+			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
 		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mr.doc.name))
+			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
 
 	def test_material_issue_gl_entry(self):
@@ -77,17 +75,17 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		mi = frappe.bean(copy=test_records[1])
+		mi = frappe.copy_doc(test_records[1])
 		mi.insert()
 		mi.submit()
 
-		self.check_stock_ledger_entries("Stock Entry", mi.doc.name,
+		self.check_stock_ledger_entries("Stock Entry", mi.name,
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mi.doclist[1].s_warehouse})
+			"master_name": mi.get("mtn_details")[0].s_warehouse})
 
-		self.check_gl_entries("Stock Entry", mi.doc.name,
+		self.check_gl_entries("Stock Entry", mi.name,
 			sorted([
 				[stock_in_hand_account, 0.0, 4000.0],
 				["Stock Adjustment - _TC", 4000.0, 0.0]
@@ -96,16 +94,16 @@ class TestStockEntry(unittest.TestCase):
 
 		mi.cancel()
 		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mi.doc.name))
+			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
 
 		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mi.doc.name))
+			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
 
-		self.assertEquals(frappe.db.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse,
-			"item_code": mi.doclist[1].item_code}, "actual_qty"), 50)
+		self.assertEquals(frappe.db.get_value("Bin", {"warehouse": mi.get("mtn_details")[0].s_warehouse,
+			"item_code": mi.get("mtn_details")[0].item_code}, "actual_qty"), 50)
 
-		self.assertEquals(frappe.db.get_value("Bin", {"warehouse": mi.doclist[1].s_warehouse,
-			"item_code": mi.doclist[1].item_code}, "stock_value"), 5000)
+		self.assertEquals(frappe.db.get_value("Bin", {"warehouse": mi.get("mtn_details")[0].s_warehouse,
+			"item_code": mi.get("mtn_details")[0].item_code}, "stock_value"), 5000)
 
 	def test_material_transfer_gl_entry(self):
 		self._clear_stock_account_balance()
@@ -113,21 +111,21 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		mtn = frappe.bean(copy=test_records[2])
+		mtn = frappe.copy_doc(test_records[2])
 		mtn.insert()
 		mtn.submit()
 
-		self.check_stock_ledger_entries("Stock Entry", mtn.doc.name,
+		self.check_stock_ledger_entries("Stock Entry", mtn.name,
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mtn.doclist[1].s_warehouse})
+			"master_name": mtn.get("mtn_details")[0].s_warehouse})
 
 		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mtn.doclist[1].t_warehouse})
+			"master_name": mtn.get("mtn_details")[0].t_warehouse})
 
 
-		self.check_gl_entries("Stock Entry", mtn.doc.name,
+		self.check_gl_entries("Stock Entry", mtn.name,
 			sorted([
 				[stock_in_hand_account, 0.0, 4500.0],
 				[fixed_asset_account, 4500.0, 0.0],
@@ -137,10 +135,10 @@ class TestStockEntry(unittest.TestCase):
 
 		mtn.cancel()
 		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.doc.name))
+			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
 
 		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.doc.name))
+			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
 
 
 	def test_repack_no_change_in_valuation(self):
@@ -149,17 +147,17 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		repack = frappe.bean(copy=test_records[3])
+		repack = frappe.copy_doc(test_records[3])
 		repack.insert()
 		repack.submit()
 
-		self.check_stock_ledger_entries("Stock Entry", repack.doc.name,
+		self.check_stock_ledger_entries("Stock Entry", repack.name,
 			[["_Test Item", "_Test Warehouse - _TC", -50.0],
 				["_Test Item Home Desktop 100", "_Test Warehouse - _TC", 1]])
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
-			order by account desc""", repack.doc.name, as_dict=1)
+			order by account desc""", repack.name, as_dict=1)
 		self.assertFalse(gl_entries)
 
 		set_perpetual_inventory(0)
@@ -170,15 +168,15 @@ class TestStockEntry(unittest.TestCase):
 
 		self._insert_material_receipt()
 
-		repack = frappe.bean(copy=test_records[3])
-		repack.doclist[2].incoming_rate = 6000
+		repack = frappe.copy_doc(test_records[3])
+		repack.get("mtn_details")[1].incoming_rate = 6000
 		repack.insert()
 		repack.submit()
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": repack.doclist[2].t_warehouse})
+			"master_name": repack.get("mtn_details")[1].t_warehouse})
 
-		self.check_gl_entries("Stock Entry", repack.doc.name,
+		self.check_gl_entries("Stock Entry", repack.name,
 			sorted([
 				[stock_in_hand_account, 1000.0, 0.0],
 				["Stock Adjustment - _TC", 0.0, 1000.0],
@@ -218,12 +216,12 @@ class TestStockEntry(unittest.TestCase):
 
 	def _insert_material_receipt(self):
 		self._clear_stock_account_balance()
-		se1 = frappe.bean(copy=test_records[0])
+		se1 = frappe.copy_doc(test_records[0])
 		se1.insert()
 		se1.submit()
 
-		se2 = frappe.bean(copy=test_records[0])
-		se2.doclist[1].item_code = "_Test Item Home Desktop 100"
+		se2 = frappe.copy_doc(test_records[0])
+		se2.get("mtn_details")[0].item_code = "_Test Item Home Desktop 100"
 		se2.insert()
 		se2.submit()
 
@@ -235,20 +233,20 @@ class TestStockEntry(unittest.TestCase):
 
 	def _test_sales_invoice_return(self, item_code, delivered_qty, returned_qty):
 		from erpnext.stock.doctype.stock_entry.stock_entry import NotUpdateStockError
-		
+
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice \
 			import test_records as sales_invoice_test_records
 
 		# invalid sales invoice as update stock not checked
-		si = frappe.bean(copy=sales_invoice_test_records[1])
+		si = frappe.copy_doc(sales_invoice_test_records[1])
 		si.insert()
 		si.submit()
 
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Sales Return"
-		se.doc.sales_invoice_no = si.doc.name
-		se.doclist[1].qty = returned_qty
-		se.doclist[1].transfer_qty = returned_qty
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Sales Return"
+		se.sales_invoice_no = si.name
+		se.get("mtn_details")[0].qty = returned_qty
+		se.get("mtn_details")[0].transfer_qty = returned_qty
 		self.assertRaises(NotUpdateStockError, se.insert)
 
 		self._insert_material_receipt()
@@ -257,11 +255,11 @@ class TestStockEntry(unittest.TestCase):
 		actual_qty_0 = self._get_actual_qty()
 
 		# insert a pos invoice with update stock
-		si = frappe.bean(copy=sales_invoice_test_records[1])
-		si.doc.is_pos = si.doc.update_stock = 1
-		si.doclist[1].warehouse = "_Test Warehouse - _TC"
-		si.doclist[1].item_code = item_code
-		si.doclist[1].qty = 5.0
+		si = frappe.copy_doc(sales_invoice_test_records[1])
+		si.is_pos = si.update_stock = 1
+		si.get("entries")[0].warehouse = "_Test Warehouse - _TC"
+		si.get("entries")[0].item_code = item_code
+		si.get("entries")[0].qty = 5.0
 		si.insert()
 		si.submit()
 
@@ -271,26 +269,26 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
 
 		# check if item is validated
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Sales Return"
-		se.doc.sales_invoice_no = si.doc.name
-		se.doc.posting_date = "2013-03-10"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doclist[1].item_code = "_Test Item Home Desktop 200"
-		se.doclist[1].qty = returned_qty
-		se.doclist[1].transfer_qty = returned_qty
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Sales Return"
+		se.sales_invoice_no = si.name
+		se.posting_date = "2013-03-10"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.get("mtn_details")[0].item_code = "_Test Item Home Desktop 200"
+		se.get("mtn_details")[0].qty = returned_qty
+		se.get("mtn_details")[0].transfer_qty = returned_qty
 
 		# check if stock entry gets submitted
 		self.assertRaises(frappe.DoesNotExistError, se.insert)
 
 		# try again
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Sales Return"
-		se.doc.posting_date = "2013-03-10"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doc.sales_invoice_no = si.doc.name
-		se.doclist[1].qty = returned_qty
-		se.doclist[1].transfer_qty = returned_qty
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Sales Return"
+		se.posting_date = "2013-03-10"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.sales_invoice_no = si.name
+		se.get("mtn_details")[0].qty = returned_qty
+		se.get("mtn_details")[0].transfer_qty = returned_qty
 		# in both cases item code remains _Test Item when returning
 		se.insert()
 
@@ -321,8 +319,8 @@ class TestStockEntry(unittest.TestCase):
 
 		actual_qty_0 = self._get_actual_qty()
 		# make a delivery note based on this invoice
-		dn = frappe.bean(copy=delivery_note_test_records[0])
-		dn.doclist[1].item_code = item_code
+		dn = frappe.copy_doc(delivery_note_test_records[0])
+		dn.get("delivery_note_details")[0].item_code = item_code
 		dn.insert()
 		dn.submit()
 
@@ -330,24 +328,24 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
 
-		si_doclist = make_sales_invoice(dn.doc.name)
+		si_doc = make_sales_invoice(dn.name)
 
-		si = frappe.bean(si_doclist)
-		si.doc.posting_date = dn.doc.posting_date
-		si.doc.debit_to = "_Test Customer - _TC"
-		for d in si.doclist.get({"parentfield": "entries"}):
+		si = frappe.get_doc(si_doc)
+		si.posting_date = dn.posting_date
+		si.debit_to = "_Test Customer - _TC"
+		for d in si.get("entries"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		si.insert()
 		si.submit()
 
 		# insert and submit stock entry for sales return
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Sales Return"
-		se.doc.delivery_note_no = dn.doc.name
-		se.doc.posting_date = "2013-03-10"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doclist[1].qty = se.doclist[1].transfer_qty = returned_qty
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Sales Return"
+		se.delivery_note_no = dn.name
+		se.posting_date = "2013-03-10"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.get("mtn_details")[0].qty = se.get("mtn_details")[0].transfer_qty = returned_qty
 
 		se.insert()
 		se.submit()
@@ -367,14 +365,14 @@ class TestStockEntry(unittest.TestCase):
 
 	def _test_sales_return_jv(self, se):
 		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
-		jv_list = make_return_jv(se.doc.name)
+		jv = make_return_jv(se.name)
 
-		self.assertEqual(len(jv_list), 3)
-		self.assertEqual(jv_list[0].get("voucher_type"), "Credit Note")
-		self.assertEqual(jv_list[0].get("posting_date"), se.doc.posting_date)
-		self.assertEqual(jv_list[1].get("account"), "_Test Customer - _TC")
-		self.assertEqual(jv_list[2].get("account"), "Sales - _TC")
-		self.assertTrue(jv_list[1].get("against_invoice"))
+		self.assertEqual(len(jv.get("entries")), 2)
+		self.assertEqual(jv.get("voucher_type"), "Credit Note")
+		self.assertEqual(jv.get("posting_date"), se.posting_date)
+		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Customer - _TC")
+		self.assertEqual(jv.get("entries")[1].get("account"), "Sales - _TC")
+		self.assertTrue(jv.get("entries")[0].get("against_invoice"))
 
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
 		self._clear_stock_account_balance()
@@ -410,42 +408,37 @@ class TestStockEntry(unittest.TestCase):
 
 		actual_qty_0 = self._get_actual_qty()
 
-		so = frappe.bean(copy=sales_order_test_records[0])
-		so.doclist[1].item_code = item_code
-		so.doclist[1].qty = 5.0
+		so = frappe.copy_doc(sales_order_test_records[0])
+		so.get("sales_order_details")[0].item_code = item_code
+		so.get("sales_order_details")[0].qty = 5.0
 		so.insert()
 		so.submit()
 
-		dn_doclist = make_delivery_note(so.doc.name)
-
-		dn = frappe.bean(dn_doclist)
-		dn.doc.status = "Draft"
-		dn.doc.posting_date = so.doc.delivery_date
+		dn = make_delivery_note(so.name)
+		dn.status = "Draft"
+		dn.posting_date = so.delivery_date
 		dn.insert()
 		dn.submit()
 
 		actual_qty_1 = self._get_actual_qty()
-
 		self.assertEquals(actual_qty_0 - delivered_qty, actual_qty_1)
 
-		si_doclist = make_sales_invoice(so.doc.name)
-
-		si = frappe.bean(si_doclist)
-		si.doc.posting_date = dn.doc.posting_date
-		si.doc.debit_to = "_Test Customer - _TC"
-		for d in si.doclist.get({"parentfield": "entries"}):
+		si = make_sales_invoice(so.name)
+		si.posting_date = dn.posting_date
+		si.debit_to = "_Test Customer - _TC"
+		for d in si.get("entries"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		si.insert()
 		si.submit()
 
 		# insert and submit stock entry for sales return
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Sales Return"
-		se.doc.delivery_note_no = dn.doc.name
-		se.doc.posting_date = "2013-03-10"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doclist[1].qty = se.doclist[1].transfer_qty = returned_qty
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Sales Return"
+		se.delivery_note_no = dn.name
+		se.posting_date = "2013-03-10"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.get("mtn_details")[0].qty = se.get("mtn_details")[0].transfer_qty = returned_qty
 
 		se.insert()
 		se.submit()
@@ -464,9 +457,9 @@ class TestStockEntry(unittest.TestCase):
 			import test_records as purchase_receipt_test_records
 
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
-		
+
 		# submit purchase receipt
-		pr = frappe.bean(copy=purchase_receipt_test_records[0])
+		pr = frappe.copy_doc(purchase_receipt_test_records[0])
 		pr.insert()
 		pr.submit()
 
@@ -474,31 +467,31 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertEquals(actual_qty_0 + 5, actual_qty_1)
 
-		pi_doclist = make_purchase_invoice(pr.doc.name)
+		pi_doc = make_purchase_invoice(pr.name)
 
-		pi = frappe.bean(pi_doclist)
-		pi.doc.posting_date = pr.doc.posting_date
-		pi.doc.credit_to = "_Test Supplier - _TC"
-		for d in pi.doclist.get({"parentfield": "entries"}):
+		pi = frappe.get_doc(pi_doc)
+		pi.posting_date = pr.posting_date
+		pi.credit_to = "_Test Supplier - _TC"
+		for d in pi.get("entries"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 
-		for d in pi.doclist.get({"parentfield": "other_charges"}):
+		for d in pi.get("other_charges"):
 			d.cost_center = "_Test Cost Center - _TC"
 
 		pi.run_method("calculate_taxes_and_totals")
-		pi.doc.bill_no = "NA"
+		pi.bill_no = "NA"
 		pi.insert()
 		pi.submit()
 
 		# submit purchase return
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Purchase Return"
-		se.doc.purchase_receipt_no = pr.doc.name
-		se.doc.posting_date = "2013-03-01"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
-		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Purchase Return"
+		se.purchase_receipt_no = pr.name
+		se.posting_date = "2013-03-01"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.get("mtn_details")[0].qty = se.get("mtn_details")[0].transfer_qty = 5
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
 		se.insert()
 		se.submit()
 
@@ -508,7 +501,7 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_default("company", self.old_default_company)
 
-		return se, pr.doc.name
+		return se, pr.name
 
 	def test_over_stock_return(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverReturnError
@@ -518,26 +511,26 @@ class TestStockEntry(unittest.TestCase):
 		prev_se, pr_docname = self.test_purchase_receipt_return()
 
 		# submit purchase return - return another 6 qtys so that exception is raised
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Purchase Return"
-		se.doc.purchase_receipt_no = pr_docname
-		se.doc.posting_date = "2013-03-01"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doclist[1].qty = se.doclist[1].transfer_qty = 6
-		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Purchase Return"
+		se.purchase_receipt_no = pr_docname
+		se.posting_date = "2013-03-01"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.get("mtn_details")[0].qty = se.get("mtn_details")[0].transfer_qty = 6
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
 
 		self.assertRaises(StockOverReturnError, se.insert)
 
 	def _test_purchase_return_jv(self, se):
 		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
-		jv_list = make_return_jv(se.doc.name)
+		jv = make_return_jv(se.name)
 
-		self.assertEqual(len(jv_list), 3)
-		self.assertEqual(jv_list[0].get("voucher_type"), "Debit Note")
-		self.assertEqual(jv_list[0].get("posting_date"), se.doc.posting_date)
-		self.assertEqual(jv_list[1].get("account"), "_Test Supplier - _TC")
-		self.assertEqual(jv_list[2].get("account"), "_Test Account Cost for Goods Sold - _TC")
-		self.assertTrue(jv_list[1].get("against_voucher"))
+		self.assertEqual(len(jv.get("entries")), 2)
+		self.assertEqual(jv.get("voucher_type"), "Debit Note")
+		self.assertEqual(jv.get("posting_date"), se.posting_date)
+		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Supplier - _TC")
+		self.assertEqual(jv.get("entries")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
+		self.assertTrue(jv.get("entries")[0].get("against_voucher"))
 
 	def test_make_return_jv_for_purchase_receipt(self):
 		self._clear_stock_account_balance()
@@ -551,25 +544,25 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 
 		actual_qty_0 = self._get_actual_qty()
-		
+
 		from erpnext.buying.doctype.purchase_order.test_purchase_order \
 			import test_records as purchase_order_test_records
-		
+
 		from erpnext.buying.doctype.purchase_order.purchase_order import \
 			make_purchase_receipt, make_purchase_invoice
 
 		# submit purchase receipt
-		po = frappe.bean(copy=purchase_order_test_records[0])
-		po.doc.is_subcontracted = None
-		po.doclist[1].item_code = "_Test Item"
-		po.doclist[1].rate = 50
+		po = frappe.copy_doc(purchase_order_test_records[0])
+		po.is_subcontracted = None
+		po.get("po_details")[0].item_code = "_Test Item"
+		po.get("po_details")[0].rate = 50
 		po.insert()
 		po.submit()
 
-		pr_doclist = make_purchase_receipt(po.doc.name)
+		pr_doc = make_purchase_receipt(po.name)
 
-		pr = frappe.bean(pr_doclist)
-		pr.doc.posting_date = po.doc.transaction_date
+		pr = frappe.get_doc(pr_doc)
+		pr.posting_date = po.transaction_date
 		pr.insert()
 		pr.submit()
 
@@ -577,30 +570,30 @@ class TestStockEntry(unittest.TestCase):
 
 		self.assertEquals(actual_qty_0 + 10, actual_qty_1)
 
-		pi_doclist = make_purchase_invoice(po.doc.name)
+		pi_doc = make_purchase_invoice(po.name)
 
-		pi = frappe.bean(pi_doclist)
-		pi.doc.posting_date = pr.doc.posting_date
-		pi.doc.credit_to = "_Test Supplier - _TC"
-		for d in pi.doclist.get({"parentfield": "entries"}):
+		pi = frappe.get_doc(pi_doc)
+		pi.posting_date = pr.posting_date
+		pi.credit_to = "_Test Supplier - _TC"
+		for d in pi.get("entries"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
-		for d in pi.doclist.get({"parentfield": "other_charges"}):
+		for d in pi.get("other_charges"):
 			d.cost_center = "_Test Cost Center - _TC"
 
 		pi.run_method("calculate_taxes_and_totals")
-		pi.doc.bill_no = "NA"
+		pi.bill_no = "NA"
 		pi.insert()
 		pi.submit()
 
 		# submit purchase return
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Purchase Return"
-		se.doc.purchase_receipt_no = pr.doc.name
-		se.doc.posting_date = "2013-03-01"
-		se.doc.fiscal_year = "_Test Fiscal Year 2013"
-		se.doclist[1].qty = se.doclist[1].transfer_qty = 5
-		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Purchase Return"
+		se.purchase_receipt_no = pr.name
+		se.posting_date = "2013-03-01"
+		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.get("mtn_details")[0].qty = se.get("mtn_details")[0].transfer_qty = 5
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
 		se.insert()
 		se.submit()
 
@@ -610,7 +603,7 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_default("company", self.old_default_company)
 
-		return se, pr.doc.name
+		return se, pr.name
 
 	def _clear_stock_account_balance(self):
 		frappe.db.sql("delete from `tabStock Ledger Entry`")
@@ -621,44 +614,44 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_default("company", "_Test Company")
 
 	def test_serial_no_not_reqd(self):
-		se = frappe.bean(copy=test_records[0])
-		se.doclist[1].serial_no = "ABCD"
+		se = frappe.copy_doc(test_records[0])
+		se.get("mtn_details")[0].serial_no = "ABCD"
 		se.insert()
 		self.assertRaises(SerialNoNotRequiredError, se.submit)
 
 	def test_serial_no_reqd(self):
-		se = frappe.bean(copy=test_records[0])
-		se.doclist[1].item_code = "_Test Serialized Item"
-		se.doclist[1].qty = 2
-		se.doclist[1].transfer_qty = 2
+		se = frappe.copy_doc(test_records[0])
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].qty = 2
+		se.get("mtn_details")[0].transfer_qty = 2
 		se.insert()
 		self.assertRaises(SerialNoRequiredError, se.submit)
 
 	def test_serial_no_qty_more(self):
-		se = frappe.bean(copy=test_records[0])
-		se.doclist[1].item_code = "_Test Serialized Item"
-		se.doclist[1].qty = 2
-		se.doclist[1].serial_no = "ABCD\nEFGH\nXYZ"
-		se.doclist[1].transfer_qty = 2
+		se = frappe.copy_doc(test_records[0])
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].qty = 2
+		se.get("mtn_details")[0].serial_no = "ABCD\nEFGH\nXYZ"
+		se.get("mtn_details")[0].transfer_qty = 2
 		se.insert()
 		self.assertRaises(SerialNoQtyError, se.submit)
 
 	def test_serial_no_qty_less(self):
-		se = frappe.bean(copy=test_records[0])
-		se.doclist[1].item_code = "_Test Serialized Item"
-		se.doclist[1].qty = 2
-		se.doclist[1].serial_no = "ABCD"
-		se.doclist[1].transfer_qty = 2
+		se = frappe.copy_doc(test_records[0])
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].qty = 2
+		se.get("mtn_details")[0].serial_no = "ABCD"
+		se.get("mtn_details")[0].transfer_qty = 2
 		se.insert()
 		self.assertRaises(SerialNoQtyError, se.submit)
 
 	def test_serial_no_transfer_in(self):
 		self._clear_stock_account_balance()
-		se = frappe.bean(copy=test_records[0])
-		se.doclist[1].item_code = "_Test Serialized Item"
-		se.doclist[1].qty = 2
-		se.doclist[1].serial_no = "ABCD\nEFGH"
-		se.doclist[1].transfer_qty = 2
+		se = frappe.copy_doc(test_records[0])
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].qty = 2
+		se.get("mtn_details")[0].serial_no = "ABCD\nEFGH"
+		se.get("mtn_details")[0].transfer_qty = 2
 		se.insert()
 		se.submit()
 
@@ -670,14 +663,14 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_no_not_exists(self):
 		self._clear_stock_account_balance()
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Material Issue"
-		se.doclist[1].item_code = "_Test Serialized Item"
-		se.doclist[1].qty = 2
-		se.doclist[1].s_warehouse = "_Test Warehouse 1 - _TC"
-		se.doclist[1].t_warehouse = None
-		se.doclist[1].serial_no = "ABCD\nEFGH"
-		se.doclist[1].transfer_qty = 2
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Material Issue"
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].qty = 2
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse 1 - _TC"
+		se.get("mtn_details")[0].t_warehouse = None
+		se.get("mtn_details")[0].serial_no = "ABCD\nEFGH"
+		se.get("mtn_details")[0].transfer_qty = 2
 		se.insert()
 		self.assertRaises(SerialNoNotExistsError, se.submit)
 
@@ -685,11 +678,11 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		self.test_serial_by_series()
 
-		se = frappe.bean(copy=test_records[0])
-		se.doclist[1].item_code = "_Test Serialized Item With Series"
-		se.doclist[1].qty = 1
-		se.doclist[1].serial_no = "ABCD00001"
-		se.doclist[1].transfer_qty = 1
+		se = frappe.copy_doc(test_records[0])
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
+		se.get("mtn_details")[0].qty = 1
+		se.get("mtn_details")[0].serial_no = "ABCD00001"
+		se.get("mtn_details")[0].transfer_qty = 1
 		se.insert()
 		self.assertRaises(SerialNoDuplicateError, se.submit)
 
@@ -697,7 +690,7 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		se = make_serialized_item()
 
-		serial_nos = get_serial_nos(se.doclist[1].serial_no)
+		serial_nos = get_serial_nos(se.get("mtn_details")[0].serial_no)
 
 		self.assertTrue(frappe.db.exists("Serial No", serial_nos[0]))
 		self.assertTrue(frappe.db.exists("Serial No", serial_nos[1]))
@@ -708,30 +701,30 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		self.test_serial_by_series()
 
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Material Transfer"
-		se.doclist[1].item_code = "_Test Serialized Item"
-		se.doclist[1].qty = 1
-		se.doclist[1].transfer_qty = 1
-		se.doclist[1].serial_no = "ABCD00001"
-		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
-		se.doclist[1].t_warehouse = "_Test Warehouse 1 - _TC"
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Material Transfer"
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].qty = 1
+		se.get("mtn_details")[0].transfer_qty = 1
+		se.get("mtn_details")[0].serial_no = "ABCD00001"
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
+		se.get("mtn_details")[0].t_warehouse = "_Test Warehouse 1 - _TC"
 		se.insert()
 		self.assertRaises(SerialNoItemError, se.submit)
 
 	def test_serial_move(self):
 		self._clear_stock_account_balance()
 		se = make_serialized_item()
-		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
+		serial_no = get_serial_nos(se.get("mtn_details")[0].serial_no)[0]
 
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Material Transfer"
-		se.doclist[1].item_code = "_Test Serialized Item With Series"
-		se.doclist[1].qty = 1
-		se.doclist[1].transfer_qty = 1
-		se.doclist[1].serial_no = serial_no
-		se.doclist[1].s_warehouse = "_Test Warehouse - _TC"
-		se.doclist[1].t_warehouse = "_Test Warehouse 1 - _TC"
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Material Transfer"
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
+		se.get("mtn_details")[0].qty = 1
+		se.get("mtn_details")[0].transfer_qty = 1
+		se.get("mtn_details")[0].serial_no = serial_no
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
+		se.get("mtn_details")[0].t_warehouse = "_Test Warehouse 1 - _TC"
 		se.insert()
 		se.submit()
 		self.assertTrue(frappe.db.get_value("Serial No", serial_no, "warehouse"), "_Test Warehouse 1 - _TC")
@@ -743,14 +736,14 @@ class TestStockEntry(unittest.TestCase):
 		self._clear_stock_account_balance()
 		make_serialized_item()
 
-		se = frappe.bean(copy=test_records[0])
-		se.doc.purpose = "Material Transfer"
-		se.doclist[1].item_code = "_Test Serialized Item With Series"
-		se.doclist[1].qty = 1
-		se.doclist[1].transfer_qty = 1
-		se.doclist[1].serial_no = "ABCD00001"
-		se.doclist[1].s_warehouse = "_Test Warehouse 1 - _TC"
-		se.doclist[1].t_warehouse = "_Test Warehouse - _TC"
+		se = frappe.copy_doc(test_records[0])
+		se.purpose = "Material Transfer"
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
+		se.get("mtn_details")[0].qty = 1
+		se.get("mtn_details")[0].transfer_qty = 1
+		se.get("mtn_details")[0].serial_no = "ABCD00001"
+		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse 1 - _TC"
+		se.get("mtn_details")[0].t_warehouse = "_Test Warehouse - _TC"
 		se.insert()
 		self.assertRaises(SerialNoWarehouseError, se.submit)
 
@@ -759,187 +752,75 @@ class TestStockEntry(unittest.TestCase):
 		se = self.test_serial_by_series()
 		se.cancel()
 
-		serial_no = get_serial_nos(se.doclist[1].serial_no)[0]
+		serial_no = get_serial_nos(se.get("mtn_details")[0].serial_no)[0]
 		self.assertFalse(frappe.db.get_value("Serial No", serial_no, "warehouse"))
-		
+
 	def test_warehouse_company_validation(self):
 		set_perpetual_inventory(0)
 		self._clear_stock_account_balance()
-		frappe.bean("User", "test2@example.com").get_controller()\
+		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		frappe.set_user("test2@example.com")
 
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		st1 = frappe.bean(copy=test_records[0])
-		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1 = frappe.copy_doc(test_records[0])
+		st1.get("mtn_details")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		self.assertRaises(InvalidWarehouseCompany, st1.submit)
-		
+
 	# permission tests
 	def test_warehouse_user(self):
-		import frappe.defaults
-		from frappe.model.bean import BeanPermissionError
 		set_perpetual_inventory(0)
-		
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
+
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "Restriction")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "Restriction")
-		frappe.bean("User", "test@example.com").get_controller()\
+		frappe.get_doc("User", "test@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
-		frappe.bean("User", "test2@example.com").get_controller()\
+		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
 		frappe.set_user("test@example.com")
-		st1 = frappe.bean(copy=test_records[0])
-		st1.doc.company = "_Test Company 1"
-		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
-		self.assertRaises(BeanPermissionError, st1.insert)
+		st1 = frappe.copy_doc(test_records[0])
+		st1.company = "_Test Company 1"
+		st1.get("mtn_details")[0].t_warehouse="_Test Warehouse 2 - _TC1"
+		self.assertRaises(frappe.PermissionError, st1.insert)
 
 		frappe.set_user("test2@example.com")
-		st1 = frappe.bean(copy=test_records[0])
-		st1.doc.company = "_Test Company 1"
-		st1.doclist[1].t_warehouse="_Test Warehouse 2 - _TC1"
+		st1 = frappe.copy_doc(test_records[0])
+		st1.company = "_Test Company 1"
+		st1.get("mtn_details")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		st1.submit()
-		
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", parenttype="Restriction")
-		
+
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC",
+			"test@example.com", parenttype="Restriction")
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1",
+			"test2@example.com", parenttype="Restriction")
+
 	def test_freeze_stocks (self):
 		self._clear_stock_account_balance()
 		frappe.db.set_value('Stock Settings', None,'stock_auth_role', '')
 
 		# test freeze_stocks_upto
-		date_newer_than_test_records = add_days(getdate(test_records[0][0]['posting_date']), 5)
+		date_newer_than_test_records = add_days(getdate(test_records[0]['posting_date']), 5)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", date_newer_than_test_records)
-		se = frappe.bean(copy=test_records[0]).insert()
+		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", '')
 
 		# test freeze_stocks_upto_days
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
-		se = frappe.bean(copy=test_records[0]).insert()
+		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 def make_serialized_item():
-	se = frappe.bean(copy=test_records[0])
-	se.doclist[1].item_code = "_Test Serialized Item With Series"
-	se.doclist[1].qty = 2
-	se.doclist[1].transfer_qty = 2
+	se = frappe.copy_doc(test_records[0])
+	se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
+	se.get("mtn_details")[0].qty = 2
+	se.get("mtn_details")[0].transfer_qty = 2
 	se.insert()
 	se.submit()
 	return se
 
-test_records = [
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-01",
-			"posting_time": "17:14:24",
-			"purpose": "Material Receipt",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 50.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 50.0,
-			"uom": "_Test UOM",
-			"t_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-	],
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-25",
-			"posting_time": "17:15",
-			"purpose": "Material Issue",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 40.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 40.0,
-			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-	],
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-25",
-			"posting_time": "17:14:24",
-			"purpose": "Material Transfer",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 45.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 45.0,
-			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse - _TC",
-			"t_warehouse": "_Test Warehouse 1 - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		}
-	],
-	[
-		{
-			"company": "_Test Company",
-			"doctype": "Stock Entry",
-			"posting_date": "2013-01-25",
-			"posting_time": "17:14:24",
-			"purpose": "Manufacture/Repack",
-			"fiscal_year": "_Test Fiscal Year 2013",
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item",
-			"parentfield": "mtn_details",
-			"incoming_rate": 100,
-			"qty": 50.0,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 50.0,
-			"uom": "_Test UOM",
-			"s_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-		{
-			"conversion_factor": 1.0,
-			"doctype": "Stock Entry Detail",
-			"item_code": "_Test Item Home Desktop 100",
-			"parentfield": "mtn_details",
-			"incoming_rate": 5000,
-			"qty": 1,
-			"stock_uom": "_Test UOM",
-			"transfer_qty": 1,
-			"uom": "_Test UOM",
-			"t_warehouse": "_Test Warehouse - _TC",
-			"expense_account": "Stock Adjustment - _TC",
-			"cost_center": "_Test Cost Center - _TC"
-		},
-	],
-]
+test_records = frappe.get_test_records('Stock Entry')

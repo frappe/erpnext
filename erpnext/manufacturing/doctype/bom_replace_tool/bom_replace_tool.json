@@ -1,0 +1,63 @@
+{
+ "allow_copy": 1, 
+ "allow_email": 1, 
+ "allow_print": 1, 
+ "creation": "2012-12-06 12:10:10.000000", 
+ "description": "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Other", 
+ "fields": [
+  {
+   "description": "The BOM which will be replaced", 
+   "fieldname": "current_bom", 
+   "fieldtype": "Link", 
+   "label": "Current BOM", 
+   "options": "BOM", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "description": "The new BOM after replacement", 
+   "fieldname": "new_bom", 
+   "fieldtype": "Link", 
+   "label": "New BOM", 
+   "options": "BOM", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "replace", 
+   "fieldtype": "Button", 
+   "label": "Replace", 
+   "options": "replace_bom", 
+   "permlevel": 0, 
+   "read_only": 0
+  }
+ ], 
+ "hide_heading": 1, 
+ "hide_toolbar": 1, 
+ "icon": "icon-magic", 
+ "idx": 1, 
+ "in_create": 1, 
+ "issingle": 1, 
+ "modified": "2013-07-05 14:27:52.000000", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "BOM Replace Tool", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 0, 
+   "role": "Manufacturing Manager", 
+   "submit": 0, 
+   "write": 1
+  }
+ ], 
+ "read_only": 1
+}

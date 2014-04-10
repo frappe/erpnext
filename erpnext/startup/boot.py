@@ -8,19 +8,17 @@ import frappe
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
 	import frappe
-	import frappe.model.doc
 	
 	bootinfo['custom_css'] = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
-	bootinfo['website_settings'] = frappe.model.doc.getsingle('Website Settings')
+	bootinfo['website_settings'] = frappe.get_doc('Website Settings')
 
 	if frappe.session['user']!='Guest':
 		bootinfo['letter_heads'] = get_letter_heads()
 		
 		load_country_and_currency(bootinfo)
 		
-		import frappe.model.doctype
-		bootinfo['notification_settings'] = frappe.doc("Notification Control", 
-			"Notification Control").get_values()
+		bootinfo['notification_settings'] = frappe.get_doc("Notification Control", 
+			"Notification Control")
 				
 		# if no company, show a dialog box to create a new company
 		bootinfo["customer_count"] = frappe.db.sql("""select count(*) from tabCustomer""")[0][0]
@@ -33,9 +31,9 @@ def boot_session(bootinfo):
             from `tabCompany`""", as_dict=1, update={"doctype":":Company"})
 
 def load_country_and_currency(bootinfo):
-	if bootinfo.control_panel.country and \
-		frappe.db.exists("Country", bootinfo.control_panel.country):
-		bootinfo["docs"] += [frappe.doc("Country", bootinfo.control_panel.country)]
+	country = frappe.db.get_default("country")
+	if country and frappe.db.exists("Country", country):
+		bootinfo["docs"] += [frappe.get_doc("Country", country)]
 		
 	bootinfo["docs"] += frappe.db.sql("""select * from tabCurrency
 		where ifnull(enabled,0)=1""", as_dict=1, update={"doctype":":Currency"})

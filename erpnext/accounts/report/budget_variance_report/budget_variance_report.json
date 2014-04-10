@@ -1,0 +1,15 @@
+{
+ "creation": "2013-06-18 12:56:36.000000", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-03-07 15:30:27.000000", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Budget Variance Report", 
+ "owner": "Administrator", 
+ "ref_doctype": "Cost Center", 
+ "report_name": "Budget Variance Report", 
+ "report_type": "Script Report"
+}

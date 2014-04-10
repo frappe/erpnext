@@ -1,0 +1,38 @@
+{
+ "autoname": "IISD/.#####", 
+ "creation": "2013-02-22 01:28:01.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "specification", 
+   "fieldtype": "Data", 
+   "in_filter": 0, 
+   "in_list_view": 1, 
+   "label": "Parameter", 
+   "oldfieldname": "specification", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_width": "200px", 
+   "reqd": 1, 
+   "search_index": 0, 
+   "width": "200px"
+  }, 
+  {
+   "fieldname": "value", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Acceptance Criteria", 
+   "oldfieldname": "value", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:16.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Item Quality Inspection Parameter", 
+ "owner": "Administrator"
+}

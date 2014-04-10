@@ -1,0 +1,172 @@
+{
+ "allow_import": 1, 
+ "autoname": "LAL/.#####", 
+ "creation": "2013-02-20 19:10:38.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "employee", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Employee", 
+   "oldfieldname": "employee", 
+   "oldfieldtype": "Link", 
+   "options": "Employee", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "employee_name", 
+   "fieldtype": "Data", 
+   "in_filter": 1, 
+   "label": "Employee Name", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "leave_type", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "label": "Leave Type", 
+   "oldfieldname": "leave_type", 
+   "oldfieldtype": "Link", 
+   "options": "link:Leave Type", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "default": "Today", 
+   "fieldname": "posting_date", 
+   "fieldtype": "Date", 
+   "hidden": 0, 
+   "label": "Posting Date", 
+   "no_copy": 1, 
+   "oldfieldname": "date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "label": "Fiscal Year", 
+   "oldfieldname": "fiscal_year", 
+   "oldfieldtype": "Data", 
+   "options": "link:Fiscal Year", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "hidden": 0, 
+   "label": "Description", 
+   "oldfieldname": "reason", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "carry_forward", 
+   "fieldtype": "Check", 
+   "label": "Carry Forward", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "carry_forward", 
+   "fieldname": "carry_forwarded_leaves", 
+   "fieldtype": "Float", 
+   "label": "Carry Forwarded Leaves", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "fieldname": "new_leaves_allocated", 
+   "fieldtype": "Float", 
+   "label": "New Leaves Allocated", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "total_leaves_allocated", 
+   "fieldtype": "Float", 
+   "label": "Total Leaves Allocated", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "amended_from", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "ignore_restrictions": 1, 
+   "label": "Amended From", 
+   "no_copy": 1, 
+   "oldfieldname": "amended_from", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }
+ ], 
+ "icon": "icon-ok", 
+ "idx": 1, 
+ "is_submittable": 1, 
+ "modified": "2014-01-22 16:05:35.000000", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Leave Allocation", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "amend": 1, 
+   "cancel": 1, 
+   "create": 1, 
+   "delete": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "restricted": 1, 
+   "role": "HR User", 
+   "submit": 1, 
+   "write": 1
+  }, 
+  {
+   "amend": 1, 
+   "cancel": 1, 
+   "create": 1, 
+   "delete": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "HR Manager", 
+   "submit": 1, 
+   "write": 1
+  }
+ ], 
+ "search_fields": "employee,employee_name,leave_type,total_leaves_allocated,fiscal_year"
+}

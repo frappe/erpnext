@@ -17,7 +17,7 @@ cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal && !cint(doc.email_sent) && !doc.__unsaved
 			&& inList(frappe.boot.user.can_write, doc.doctype)) {
 		cur_frm.add_custom_button(frappe._('Send'), function() {
-			return $c_obj(make_doclist(doc.doctype, doc.name), 'send_emails', '', function(r) {
+			return $c_obj(doc, 'send_emails', '', function(r) {
 				cur_frm.refresh();
 			});
 		})

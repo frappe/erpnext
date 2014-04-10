@@ -1,0 +1,81 @@
+{
+ "creation": "2013-02-22 01:27:49.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "operation_no", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Operation No", 
+   "oldfieldname": "operation_no", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "opn_description", 
+   "fieldtype": "Text", 
+   "in_list_view": 1, 
+   "label": "Operation Description", 
+   "oldfieldname": "opn_description", 
+   "oldfieldtype": "Text", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "workstation", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Workstation", 
+   "oldfieldname": "workstation", 
+   "oldfieldtype": "Link", 
+   "options": "Workstation", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "hour_rate", 
+   "fieldtype": "Float", 
+   "in_list_view": 0, 
+   "label": "Hour Rate", 
+   "oldfieldname": "hour_rate", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "time_in_mins", 
+   "fieldtype": "Float", 
+   "in_list_view": 0, 
+   "label": "Operation Time (mins)", 
+   "oldfieldname": "time_in_mins", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "fieldname": "operating_cost", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Operating Cost", 
+   "oldfieldname": "operating_cost", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "reqd": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2014-02-03 12:53:03.000000", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "BOM Operation", 
+ "owner": "Administrator"
+}

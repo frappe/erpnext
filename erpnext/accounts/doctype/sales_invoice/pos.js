@@ -293,8 +293,7 @@ erpnext.POS = Class.extend({
 		
 		// check whether the item is already added
 		if (no_of_items != 0) {
-			$.each(frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
-				this.frm.cscript.fname,	this.frm.doctype), function(i, d) {
+			$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
 				if (d.item_code == item_code) {
 					caught = true;
 					if (serial_no)
@@ -335,8 +334,7 @@ erpnext.POS = Class.extend({
 	},
 	update_qty: function(item_code, qty) {
 		var me = this;
-		$.each(frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
-			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
+		$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
 			if (d.item_code == item_code) {
 				if (qty == 0) {
 					frappe.model.clear_doc(d.doctype, d.name);
@@ -387,8 +385,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		var $items = this.wrapper.find("#cart tbody").empty();
 
-		$.each(frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
-			this.frm.cscript.fname, this.frm.doctype), function(i, d) {
+		$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
@@ -422,8 +419,7 @@ erpnext.POS = Class.extend({
 	},
 	show_taxes: function() {
 		var me = this;
-		var taxes = frappe.model.get_children(this.sales_or_purchase + " Taxes and Charges", 
-			this.frm.doc.name, this.frm.cscript.other_fname, this.frm.doctype);
+		var taxes = this.frm.doc[this.frm.cscript.other_fname] || [];
 		$(this.wrapper).find(".tax-table")
 			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
@@ -544,8 +540,7 @@ erpnext.POS = Class.extend({
 			}
 		}
 
-		var child = frappe.model.get_children(this.frm.doctype + " Item", this.frm.doc.name, 
-			this.frm.cscript.fname, this.frm.doctype);
+		var child = this.frm.doc[this.frm.cscript.fname] || [];
 
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {

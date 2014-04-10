@@ -7,11 +7,7 @@ from frappe.utils import cstr, flt
 from frappe import _
 from erpnext.controllers.accounts_controller import AccountsController
 
-class DocType(AccountsController):
-	def __init__(self,d,dl):
-		self.doc, self.doclist = d, dl
-		self.year_start_date = ''
-
+class PeriodClosingVoucher(AccountsController):
 	def validate(self):
 		self.validate_account_head()
 		self.validate_posting_date()
@@ -21,24 +17,24 @@ class DocType(AccountsController):
 
 	def on_cancel(self):
 		frappe.db.sql("""delete from `tabGL Entry` 
-			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.doc.name)
+			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.name)
 
 	def validate_account_head(self):
-		if frappe.db.get_value("Account", self.doc.closing_account_head, "report_type") \
+		if frappe.db.get_value("Account", self.closing_account_head, "report_type") \
 				!= "Balance Sheet":
-			frappe.throw(_("Account") + ": " + self.doc.closing_account_head + 
+			frappe.throw(_("Account") + ": " + self.closing_account_head + 
 				_("must be a Liability account"))
 
 	def validate_posting_date(self):
 		from erpnext.accounts.utils import get_fiscal_year
-		self.year_start_date = get_fiscal_year(self.doc.posting_date, self.doc.fiscal_year)[1]
+		self.year_start_date = get_fiscal_year(self.posting_date, self.fiscal_year)[1]
 
 		pce = frappe.db.sql("""select name from `tabPeriod Closing Voucher`
 			where posting_date > %s and fiscal_year = %s and docstatus = 1""", 
-			(self.doc.posting_date, self.doc.fiscal_year))
+			(self.posting_date, self.fiscal_year))
 		if pce and pce[0][0]:
 			frappe.throw(_("Another Period Closing Entry") + ": " + cstr(pce[0][0]) + 
-				  _("has been made after posting date") + ": " + self.doc.posting_date)
+				  _("has been made after posting date") + ": " + self.posting_date)
 		
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""
@@ -49,7 +45,7 @@ class DocType(AccountsController):
 			and t2.docstatus < 2 and t2.company = %s 
 			and t1.posting_date between %s and %s 
 			group by t1.account
-		""", (self.doc.company, self.year_start_date, self.doc.posting_date), as_dict=1)
+		""", (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
 	 
 	def make_gl_entries(self):
 		gl_entries = []
@@ -67,7 +63,7 @@ class DocType(AccountsController):
 
 		if net_pl_balance:
 			gl_entries.append(self.get_gl_dict({
-				"account": self.doc.closing_account_head,
+				"account": self.closing_account_head,
 				"debit": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0
 			}))

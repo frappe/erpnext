@@ -1,0 +1,91 @@
+{
+ "autoname": "FBD/.######", 
+ "creation": "2013-03-07 11:42:57.000000", 
+ "default_print_format": "Standard", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "item_code", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Item Code", 
+   "oldfieldname": "item_code", 
+   "oldfieldtype": "Link", 
+   "options": "Item", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Text", 
+   "in_list_view": 1, 
+   "label": "Description", 
+   "oldfieldname": "description", 
+   "oldfieldtype": "Text", 
+   "permlevel": 0, 
+   "print_width": "300px", 
+   "read_only": 1, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "qty", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Qty", 
+   "oldfieldname": "qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "rate", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Rate", 
+   "oldfieldname": "standard_rate", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "amount", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Amount", 
+   "oldfieldname": "amount_as_per_sr", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "stock_uom", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Stock UOM", 
+   "oldfieldname": "stock_uom", 
+   "oldfieldtype": "Link", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "qty_consumed_per_unit", 
+   "fieldtype": "Float", 
+   "hidden": 0, 
+   "in_list_view": 1, 
+   "label": "Qty Consumed Per Unit", 
+   "no_copy": 0, 
+   "permlevel": 0, 
+   "read_only": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:22:57.000000", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "BOM Explosion Item", 
+ "owner": "Administrator", 
+ "read_only": 0
+}

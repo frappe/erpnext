@@ -25,9 +25,9 @@ cur_frm.cscript.item_code = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
-	return $c_obj(make_doclist(cdt, cdn), 'validate_data', '', function(r, rt) {
+	return $c_obj(doc, 'validate_data', '', function(r, rt) {
 		if (!r['exc'])
-			$c_obj_csv(make_doclist(cdt, cdn), 'download_raw_materials', '', '');
+			$c_obj_csv(doc, 'download_raw_materials', '', '');
 	});
 }
 

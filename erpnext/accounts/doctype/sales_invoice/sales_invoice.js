@@ -68,7 +68,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
-				from_delivery_note = cur_frm.get_doclist({parentfield: "entries"})
+				from_delivery_note = cur_frm.doc.entries
 					.some(function(item) { 
 						return item.delivery_note ? true : false; 
 					});
@@ -199,7 +199,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 	
 	entries_add: function(doc, cdt, cdn) {
-		var row = frappe.model.get_doc(cdt, cdn);
+		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
 	},
 	
@@ -245,8 +245,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 		(cint(doc.update_stock)==1 ? true : false));
 	
 	// India related fields
-	var cp = frappe.control_panel;
-	if (cp.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
+	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
 	
 	cur_frm.refresh_fields();

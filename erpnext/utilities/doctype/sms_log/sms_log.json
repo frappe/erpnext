@@ -1,0 +1,75 @@
+{
+ "autoname": "SMSLOG/.########", 
+ "creation": "2012-03-27 14:36:47.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "sender_name", 
+   "fieldtype": "Data", 
+   "label": "Sender Name", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "sent_on", 
+   "fieldtype": "Date", 
+   "label": "Sent On", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "receiver_list", 
+   "fieldtype": "Small Text", 
+   "label": "Receiver List", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "no_of_requested_sms", 
+   "fieldtype": "Int", 
+   "label": "No of Requested SMS", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "no_of_sent_sms", 
+   "fieldtype": "Int", 
+   "label": "No of Sent SMS", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "message", 
+   "fieldtype": "Small Text", 
+   "label": "Message", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-mobile-phone", 
+ "idx": 1, 
+ "modified": "2013-12-20 19:24:35.000000", 
+ "modified_by": "Administrator", 
+ "module": "Utilities", 
+ "name": "SMS Log", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 0, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "System Manager", 
+   "write": 0
+  }
+ ]
+}

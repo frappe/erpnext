@@ -16,64 +16,53 @@ class TestProductionOrder(unittest.TestCase):
 		frappe.db.sql("delete from `tabStock Ledger Entry`")
 		frappe.db.sql("""delete from `tabBin`""")
 		frappe.db.sql("""delete from `tabGL Entry`""")
-		
-		pro_bean = frappe.bean(copy = test_records[0])
-		pro_bean.insert()
-		pro_bean.submit()
-		
+
+		pro_doc = frappe.copy_doc(test_records[0])
+		pro_doc.insert()
+		pro_doc.submit()
+
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
-		mr1 = frappe.bean(copy = se_test_records[0])
+		mr1 = frappe.copy_doc(se_test_records[0])
 		mr1.insert()
 		mr1.submit()
-		
-		mr2 = frappe.bean(copy = se_test_records[0])
-		mr2.doclist[1].item_code = "_Test Item Home Desktop 100"
+
+		mr2 = frappe.copy_doc(se_test_records[0])
+		mr2.get("mtn_details")[0].item_code = "_Test Item Home Desktop 100"
 		mr2.insert()
 		mr2.submit()
-		
-		stock_entry = make_stock_entry(pro_bean.doc.name, "Manufacture/Repack")
-		stock_entry = frappe.bean(stock_entry)
-		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.doc.fg_completed_qty = 4
-		stock_entry.doc.posting_date = "2013-05-12"
-		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
+
+		stock_entry = make_stock_entry(pro_doc.name, "Manufacture/Repack")
+		stock_entry = frappe.get_doc(stock_entry)
+		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
+		stock_entry.fg_completed_qty = 4
+		stock_entry.posting_date = "2013-05-12"
+		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
+		stock_entry.set("mtn_details", [])
 		stock_entry.run_method("get_items")
 		stock_entry.submit()
-		
-		self.assertEqual(frappe.db.get_value("Production Order", pro_bean.doc.name, 
+
+		self.assertEqual(frappe.db.get_value("Production Order", pro_doc.name,
 			"produced_qty"), 4)
-		self.assertEqual(frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
+		self.assertEqual(frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"), 6)
-			
-		return pro_bean.doc.name
-			
+
+		return pro_doc.name
+
 	def test_over_production(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverProductionError
 		pro_order = self.test_planned_qty()
-		
+
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")
-		stock_entry = frappe.bean(stock_entry)
-		stock_entry.doc.posting_date = "2013-05-12"
-		stock_entry.doc.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.doc.fg_completed_qty = 15
+		stock_entry = frappe.get_doc(stock_entry)
+		stock_entry.posting_date = "2013-05-12"
+		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
+		stock_entry.fg_completed_qty = 15
+		stock_entry.set("mtn_details", [])
 		stock_entry.run_method("get_items")
 		stock_entry.insert()
-		
-		self.assertRaises(StockOverProductionError, stock_entry.submit)
-			
-		
 
-test_records = [
-	[
-		{
-			"bom_no": "BOM/_Test FG Item/001", 
-			"company": "_Test Company", 
-			"doctype": "Production Order", 
-			"production_item": "_Test FG Item", 
-			"qty": 10.0, 
-			"fg_warehouse": "_Test Warehouse 1 - _TC",
-			"wip_warehouse": "_Test Warehouse - _TC",
-			"stock_uom": "Nos"
-		}
-	]
-]
+		self.assertRaises(StockOverProductionError, stock_entry.submit)
+
+
+
+test_records = frappe.get_test_records('Production Order')

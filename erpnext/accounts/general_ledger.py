@@ -77,7 +77,7 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 	
 def make_entry(args, adv_adj, update_outstanding):
 	args.update({"doctype": "GL Entry"})
-	gle = frappe.bean([args])
+	gle = frappe.get_doc(args)
 	gle.ignore_permissions = 1
 	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)

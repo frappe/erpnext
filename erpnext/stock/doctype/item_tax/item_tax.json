@@ -1,0 +1,35 @@
+{
+ "creation": "2013-02-22 01:28:01.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "tax_type", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Tax", 
+   "oldfieldname": "tax_type", 
+   "oldfieldtype": "Link", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "tax_rate", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Tax Rate", 
+   "oldfieldname": "tax_rate", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "reqd": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:16.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Item Tax", 
+ "owner": "Administrator"
+}

@@ -1,0 +1,126 @@
+{
+ "allow_attach": 0, 
+ "allow_copy": 0, 
+ "allow_email": 1, 
+ "allow_import": 1, 
+ "allow_print": 1, 
+ "allow_rename": 1, 
+ "autoname": "field:price_list_name", 
+ "creation": "2013-01-25 11:35:09.000000", 
+ "description": "Price List Master", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Master", 
+ "fields": [
+  {
+   "default": "1", 
+   "fieldname": "enabled", 
+   "fieldtype": "Check", 
+   "label": "Enabled", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "sb_1", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "price_list_name", 
+   "fieldtype": "Data", 
+   "label": "Price List Name", 
+   "oldfieldname": "price_list_name", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "currency", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Currency", 
+   "options": "Currency", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "buying", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Buying", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "selling", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Selling", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Specify a list of Territories, for which, this Price List is valid", 
+   "fieldname": "valid_for_territories", 
+   "fieldtype": "Table", 
+   "label": "Valid for Territories", 
+   "options": "Applicable Territory", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "icon": "icon-tags", 
+ "idx": 1, 
+ "max_attachments": 1, 
+ "modified": "2014-01-27 11:11:08.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Price List", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "amend": 0, 
+   "cancel": 0, 
+   "create": 0, 
+   "delete": 0, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Sales User", 
+   "submit": 0, 
+   "write": 0
+  }, 
+  {
+   "amend": 0, 
+   "cancel": 0, 
+   "create": 1, 
+   "delete": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Sales Master Manager", 
+   "submit": 0, 
+   "write": 1
+  }, 
+  {
+   "delete": 0, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Purchase User"
+  }, 
+  {
+   "cancel": 1, 
+   "create": 1, 
+   "delete": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Purchase Master Manager", 
+   "write": 1
+  }
+ ]
+}

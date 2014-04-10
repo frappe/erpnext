@@ -9,7 +9,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.add_custom_button(frappe._('View Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
-			return $c_obj(make_doclist(dt, dn), 'get_digest_msg', '', function(r, rt) {
+			return $c_obj(doc, 'get_digest_msg', '', function(r, rt) {
 				if(r.exc) {
 					msgprint(err_msg);
 					console.log(r.exc);
@@ -32,7 +32,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.add_custom_button(frappe._('Send Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
-			return $c_obj(make_doclist(dt, dn), 'send', '', function(r, rt) {
+			return $c_obj(doc, 'send', '', function(r, rt) {
 				if(r.exc) {
 					msgprint(err_msg);
 					console.log(r.exc);
@@ -49,7 +49,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 	// Get user list
-	return $c_obj(make_doclist(dt, dn), 'get_users', '', function(r, rt) {
+	return $c_obj(doc, 'get_users', '', function(r, rt) {
 		if(r.exc) {
 			msgprint(r.exc);
 		} else {

@@ -14,13 +14,11 @@ class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
 class ManyBlankToValuesError(frappe.ValidationError): pass
 
-class DocType(DocListController):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class ShippingRule(DocListController):
 		
 	def validate(self):
 		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
-		self.shipping_rule_conditions = self.doclist.get({"parentfield": "shipping_rule_conditions"})
+		self.shipping_rule_conditions = self.get("shipping_rule_conditions")
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
@@ -28,14 +26,14 @@ class DocType(DocListController):
 	def validate_from_to_values(self):
 		zero_to_values = []
 		
-		for d in self.shipping_rule_conditions:
+		for d in self.get("shipping_rule_conditions"):
 			self.round_floats_in(d)
 			
 			# values cannot be negative
 			self.validate_value("from_value", ">=", 0.0, d)
 			self.validate_value("to_value", ">=", 0.0, d)
 			
-			if d.to_value == 0:
+			if not d.to_value:
 				zero_to_values.append(d)
 			elif d.from_value >= d.to_value:
 				msgprint(_("Error") + ": " + _("Row") + " # %d: " % d.idx + 
@@ -68,7 +66,7 @@ class DocType(DocListController):
 		for i in xrange(0, len(self.shipping_rule_conditions)):
 			for j in xrange(i+1, len(self.shipping_rule_conditions)):
 				d1, d2 = self.shipping_rule_conditions[i], self.shipping_rule_conditions[j]
-				if d1.fields != d2.fields:
+				if d1.as_dict() != d2.as_dict():
 					# in our case, to_value can be zero, hence pass the from_value if so
 					range_a = (d1.from_value, d1.to_value or d1.from_value)
 					range_b = (d2.from_value, d2.to_value or d2.from_value)
@@ -76,7 +74,7 @@ class DocType(DocListController):
 						overlaps.append([d1, d2])
 		
 		if overlaps:
-			company_currency = get_company_currency(self.doc.company)
+			company_currency = get_company_currency(self.company)
 			msgprint(_("Error") + ": " + _("Overlapping Conditions found between") + ":")
 			messages = []
 			for d1, d2 in overlaps:

@@ -70,7 +70,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		
 		if(this.frm.fields_dict[this.fname].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
-				var item = frappe.model.get_doc(cdt, cdn);
+				var item = frappe.get_doc(cdt, cdn);
 				if(!item.item_code) {
 					frappe.throw(frappe._("Please enter Item Code to get batch no"));
 				} else {
@@ -98,7 +98,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.toggle_display("customer_name", 
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 		if(this.frm.fields_dict.packing_details) {
-			var packing_list_exists = this.frm.get_doclist({parentfield: "packing_details"}).length;
+			var packing_list_exists = (this.frm.doc.packing_details || []).length;
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
 		}
 	},
@@ -128,7 +128,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 		
 		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
@@ -138,7 +138,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	discount_percentage: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(!item.price_list_rate) {
 			item.discount_percentage = 0.0;
 		} else {
@@ -147,7 +147,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	rate: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 		
 		if(item.price_list_rate) {
@@ -188,7 +188,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	allocated_percentage: function(doc, cdt, cdn) {
-		var sales_person = frappe.model.get_doc(cdt, cdn);
+		var sales_person = frappe.get_doc(cdt, cdn);
 		
 		if(sales_person.allocated_percentage) {
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
@@ -203,7 +203,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.selling.utils.get_available_qty",
@@ -434,8 +434,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	
 	calculate_contribution: function() {
 		var me = this;
-		$.each(frappe.model.get_doclist(this.frm.doc.doctype, this.frm.doc.name, 
-			{parentfield: "sales_team"}), function(i, sales_person) {
+		$.each(this.frm.doc.doctype.sales_team || [], function(i, sales_person) {
 				frappe.model.round_floats_in(sales_person);
 				if(sales_person.allocated_percentage) {
 					sales_person.allocated_amount = flt(
@@ -545,8 +544,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
 		var show = (this.frm.doc.currency != company_currency) || 
-			(frappe.model.get_doclist(cur_frm.doctype, cur_frm.docname, 
-				{parentfield: "other_charges", included_in_print_rate: 1}).length);
+			(cur_frm.doc.other_charges.filter(
+					function(d) { return d.included_in_print_rate===1}).length);
 		
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
@@ -566,7 +565,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 // Help for Sales BOM items
 var set_sales_bom_help = function(doc) {
 	if(!cur_frm.fields_dict.packing_list) return;
-	if (getchildren('Packed Item', doc.name, 'packing_details').length) {
+	if ((doc.packing_details || []).length) {
 		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 		
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {

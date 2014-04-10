@@ -80,7 +80,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	schedule_date: function(doc, cdt, cdn) {
 		var val = locals[cdt][cdn].schedule_date;
 		if(val) {
-			$.each(frappe.model.get("Material Request Item", { parent: cur_frm.doc.name }), function(i, d) {
+			$.each((doc.indent_details || []), function(i, d) {
 				if(!d.schedule_date) {
 					d.schedule_date = val;
 				}
@@ -172,7 +172,7 @@ cur_frm.cscript['Stop Material Request'] = function() {
 	var check = confirm(frappe._("Do you really want to STOP this Material Request?"));
 
 	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': frappe.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}
@@ -183,7 +183,7 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 	var check = confirm(frappe._("Do you really want to UNSTOP this Material Request?"));
 	
 	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': frappe.model.compress(make_doclist(doc.doctype, doc.name))}, function(r,rt) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}

@@ -1,0 +1,14 @@
+[
+ {
+  "address_line1": "_Test Address Line 1", 
+  "address_title": "_Test Address", 
+  "address_type": "Office", 
+  "city": "_Test City", 
+  "country": "India", 
+  "customer": "_Test Customer", 
+  "customer_name": "_Test Customer", 
+  "doctype": "Address", 
+  "is_primary_address": 1, 
+  "phone": "+91 0000000000"
+ }
+]

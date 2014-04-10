@@ -13,7 +13,7 @@ class TestCompany(unittest.TestCase):
 				print "Country: ", country
 				print "Chart Name: ", chart_name
 				
-				company_bean = frappe.bean({
+				company_doc = frappe.get_doc({
 					"doctype": "Company",
 					"company_name": "_Test Company 2",
 					"abbr": "_TC2",
@@ -22,26 +22,11 @@ class TestCompany(unittest.TestCase):
 					"chart_of_accounts": chart_name
 				})
 
-				company_bean.insert()
+				company_doc.insert()
 				self.assertTrue(frappe.db.sql("""select count(*) from tabAccount 
 					where company='_Test Company 2'""")[0][0] > 10)
 				
 				frappe.delete_doc("Company", "_Test Company 2")
 		
 
-test_records = [
-	[{
-		"doctype": "Company",
-		"company_name": "_Test Company",
-		"abbr": "_TC",
-		"default_currency": "INR",
-		"domain": "Manufacturing"
-	}],
-	[{
-		"doctype": "Company",
-		"company_name": "_Test Company 1",
-		"abbr": "_TC1",
-		"default_currency": "USD",
-		"domain": "Retail"
-	}],
-]
+test_records = frappe.get_test_records('Company')

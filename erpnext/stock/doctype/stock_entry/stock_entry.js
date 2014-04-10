@@ -105,9 +105,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						for(d in getchildren('Stock Entry Detail', me.frm.doc.name, 'mtn_details')) {
+						$.each(doc.mtn_details || [], function(i, d) {
 							if(!d.expense_account) d.expense_account = r.message;
-						}
+						});
 					}
 				}
 			});
@@ -192,7 +192,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	add_excise_button: function() {
-		if(frappe.boot.control_panel.country === "India")
+		if(frappe.boot.sysdefaults.country === "India")
 			this.frm.add_custom_button(frappe._("Make Excise Invoice"), function() {
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Voucher');
 				excise = locals['Journal Voucher'][excise];
@@ -225,7 +225,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	mtn_details_add: function(doc, cdt, cdn) {
-		var row = frappe.model.get_doc(cdt, cdn);
+		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("mtn_details", row, 
 			["expense_account", "cost_center"]);
 		
@@ -350,7 +350,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			'cost_center'		: d.cost_center,
 			'company'		: cur_frm.doc.company
 		};
-		return get_server_fields('get_item_details', JSON.stringify(args), 
+		return get_server_fields('get_item_details', {arg: JSON.stringify(args)}, 
 			'mtn_details', doc, cdt, cdn, 1);
 	}
 	
@@ -388,7 +388,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.validate_items = function(doc) {
-	cl = getchildren('Stock Entry Detail', doc.name, 'mtn_details');
+	cl = doc.mtn_details || [];
 	if (!cl.length) {
 		msgprint(frappe._("Item table can not be blank"));
 		validated = false;

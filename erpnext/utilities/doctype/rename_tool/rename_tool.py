@@ -7,9 +7,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class RenameTool(Document):
+	pass
 		
 @frappe.whitelist()
 def get_doctypes():

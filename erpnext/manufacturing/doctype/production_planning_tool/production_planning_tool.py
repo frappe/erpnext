@@ -4,15 +4,14 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt, cint, nowdate, add_days
-from frappe.model.doc import addchild, Document
-from frappe.model.bean import getlist
-from frappe.model.code import get_obj
+
 from frappe import msgprint, _
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class ProductionPlanningTool(Document):
+	def __init__(self, arg1, arg2=None):
+		super(ProductionPlanningTool, self).__init__(arg1, arg2)
 		self.item_dict = {}
 
 	def get_so_details(self, so):
@@ -39,27 +38,27 @@ class DocType:
 		return ret
 
 	def clear_so_table(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'pp_so_details')
+		self.set('pp_so_details', [])
 
 	def clear_item_table(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'pp_details')
+		self.set('pp_details', [])
 		
 	def validate_company(self):
-		if not self.doc.company:
+		if not self.company:
 			frappe.throw(_("Please enter Company"))
 
 	def get_open_sales_orders(self):
 		""" Pull sales orders  which are pending to deliver based on criteria selected"""
 		so_filter = item_filter = ""
-		if self.doc.from_date:
-			so_filter += ' and so.transaction_date >= "' + self.doc.from_date + '"'
-		if self.doc.to_date:
-			so_filter += ' and so.transaction_date <= "' + self.doc.to_date + '"'
-		if self.doc.customer:
-			so_filter += ' and so.customer = "' + self.doc.customer + '"'
+		if self.from_date:
+			so_filter += ' and so.transaction_date >= "' + self.from_date + '"'
+		if self.to_date:
+			so_filter += ' and so.transaction_date <= "' + self.to_date + '"'
+		if self.customer:
+			so_filter += ' and so.customer = "' + self.customer + '"'
 			
-		if self.doc.fg_item:
-			item_filter += ' and item.name = "' + self.doc.fg_item + '"'
+		if self.fg_item:
+			item_filter += ' and item.name = "' + self.fg_item + '"'
 		
 		open_so = frappe.db.sql("""
 			select distinct so.name, so.transaction_date, so.customer, so.grand_total
@@ -76,7 +75,7 @@ class DocType:
 							and exists (select name from `tabItem` item where item.name=pi.item_code
 								and (ifnull(item.is_pro_applicable, 'No') = 'Yes' 
 									or ifnull(item.is_sub_contracted_item, 'No') = 'Yes') %s)))
-			""" % ('%s', so_filter, item_filter, item_filter), self.doc.company, as_dict=1)
+			""" % ('%s', so_filter, item_filter, item_filter), self.company, as_dict=1)
 		
 		self.add_so_in_table(open_so)
 
@@ -84,11 +83,10 @@ class DocType:
 		""" Add sales orders in the table"""
 		self.clear_so_table()
 
-		so_list = [d.sales_order for d in getlist(self.doclist, 'pp_so_details')]
+		so_list = [d.sales_order for d in self.get('pp_so_details')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = addchild(self.doc, 'pp_so_details', 
-					'Production Plan Sales Order', self.doclist)
+				pp_so = self.append('pp_so_details', {})
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
@@ -103,7 +101,7 @@ class DocType:
 		self.add_items(items)
 
 	def get_items(self):
-		so_list = filter(None, [d.sales_order for d in getlist(self.doclist, 'pp_so_details')])
+		so_list = filter(None, [d.sales_order for d in self.get('pp_so_details')])
 		if not so_list:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
@@ -138,7 +136,7 @@ class DocType:
 		for p in items:
 			item_details = frappe.db.sql("""select description, stock_uom, default_bom 
 				from tabItem where name=%s""", p['item_code'])
-			pi = addchild(self.doc, 'pp_details', 'Production Plan Item', self.doclist)
+			pi = self.append('pp_details', {})
 			pi.sales_order				= p['parent']
 			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
@@ -151,7 +149,7 @@ class DocType:
 
 	def validate_data(self):
 		self.validate_company()
-		for d in getlist(self.doclist, 'pp_details'):
+		for d in self.get('pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
 				frappe.throw("Please Enter Planned Qty for item: %s at row no: %s" % 
@@ -175,7 +173,7 @@ class DocType:
 		self.validate_data()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self.doclist, "stock_uom", "planned_qty")
+		validate_uom_is_integer(self, "stock_uom", "planned_qty")
 
 		items = self.get_distinct_items_and_boms()[1]
 		pro = self.create_production_order(items)
@@ -193,7 +191,7 @@ class DocType:
 			}
 		"""
 		item_dict, bom_dict = {}, {}
-		for d in self.doclist.get({"parentfield": "pp_details"}):			
+		for d in self.get("pp_details"):			
 			bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
 			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
 				"production_item"	: d.item_code,
@@ -203,7 +201,7 @@ class DocType:
 				"bom_no"			: d.bom_no,
 				"description"		: d.description,
 				"stock_uom"			: d.stock_uom,
-				"company"			: self.doc.company,
+				"company"			: self.company,
 				"wip_warehouse"		: "",
 				"fg_warehouse"		: d.warehouse,
 				"status"			: "Draft",
@@ -216,13 +214,13 @@ class DocType:
 
 		pro_list = []
 		for key in items:
-			pro = frappe.new_bean("Production Order")
-			pro.doc.fields.update(items[key])
+			pro = frappe.new_doc("Production Order")
+			pro.update(items[key])
 			
 			frappe.flags.mute_messages = True
 			try:
 				pro.insert()
-				pro_list.append(pro.doc.name)
+				pro_list.append(pro.name)
 			except OverProductionError, e:
 				pass
 				
@@ -247,7 +245,7 @@ class DocType:
 		
 		for bom, so_wise_qty in bom_dict.items():
 			bom_wise_item_details = {}
-			if self.doc.use_multi_level_bom:
+			if self.use_multi_level_bom:
 				# get all raw materials with sub assembly childs					
 				for d in frappe.db.sql("""select fb.item_code, 
 					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty, 
@@ -306,7 +304,7 @@ class DocType:
 			Requested qty should be shortage qty considering minimum order qty
 		"""
 		self.validate_data()
-		if not self.doc.purchase_request_for_warehouse:
+		if not self.purchase_request_for_warehouse:
 			frappe.throw(_("Please enter Warehouse for which Material Request will be raised"))
 			
 		bom_dict = self.get_distinct_items_and_boms()[0]		
@@ -368,39 +366,37 @@ class DocType:
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
-				item_wrapper = frappe.bean("Item", item)
-				pr_doclist = [{
+				item_wrapper = frappe.get_doc("Item", item)
+				pr_doc = frappe.get_doc({
 					"doctype": "Material Request",
 					"__islocal": 1,
 					"naming_series": "IDT",
 					"transaction_date": nowdate(),
 					"status": "Draft",
-					"company": self.doc.company,
+					"company": self.company,
 					"fiscal_year": fiscal_year,
 					"requested_by": frappe.session.user,
 					"material_request_type": "Purchase"
-				}]
+				})
 				for sales_order, requested_qty in items_to_be_requested[item].items():
-					pr_doclist.append({
+					pr_doc.append("indent_details", {
 						"doctype": "Material Request Item",
 						"__islocal": 1,
-						"parentfield": "indent_details",
 						"item_code": item,
-						"item_name": item_wrapper.doc.item_name,
-						"description": item_wrapper.doc.description,
-						"uom": item_wrapper.doc.stock_uom,
-						"item_group": item_wrapper.doc.item_group,
-						"brand": item_wrapper.doc.brand,
+						"item_name": item_wrapper.item_name,
+						"description": item_wrapper.description,
+						"uom": item_wrapper.stock_uom,
+						"item_group": item_wrapper.item_group,
+						"brand": item_wrapper.brand,
 						"qty": requested_qty,
-						"schedule_date": add_days(nowdate(), cint(item_wrapper.doc.lead_time_days)),
-						"warehouse": self.doc.purchase_request_for_warehouse,
+						"schedule_date": add_days(nowdate(), cint(item_wrapper.lead_time_days)),
+						"warehouse": self.purchase_request_for_warehouse,
 						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
 					})
 
-				pr_wrapper = frappe.bean(pr_doclist)
-				pr_wrapper.ignore_permissions = 1
-				pr_wrapper.submit()
-				purchase_request_list.append(pr_wrapper.doc.name)
+				pr_doc.ignore_permissions = 1
+				pr_doc.submit()
+				purchase_request_list.append(pr_doc.name)
 			
 			if purchase_request_list:
 				pur_req = ["""<a href="#Form/Material Request/%s" target="_blank">%s</a>""" % \

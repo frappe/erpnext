@@ -21,8 +21,7 @@ def get_children():
 		
 @frappe.whitelist()
 def add_node():
-	# from frappe.model.doc import Document
-	ctype = frappe.form_dict.get('ctype')
+	# 	ctype = frappe.form_dict.get('ctype')
 	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
 	name_field = ctype.lower().replace(' ', '_') + '_name'
 	
@@ -36,4 +35,4 @@ def add_node():
 	if ctype == "Sales Person":
 		doclist[0]["employee"] = frappe.form_dict.get('employee')
 		
-	frappe.bean(doclist).save()
+	frappe.get_doc(doclist).save()

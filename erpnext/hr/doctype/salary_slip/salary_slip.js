@@ -21,7 +21,7 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 // Get leave details
 //---------------------------------------------------------------------
 cur_frm.cscript.fiscal_year = function(doc,dt,dn){
-		return $c_obj(make_doclist(doc.doctype,doc.name), 'get_emp_and_leave_details','',function(r, rt) {
+		return $c_obj(doc, 'get_emp_and_leave_details','',function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
 			calculate_all(doc, dt, dn);
@@ -32,7 +32,7 @@ cur_frm.cscript.month = cur_frm.cscript.employee = cur_frm.cscript.fiscal_year;
 
 cur_frm.cscript.leave_without_pay = function(doc,dt,dn){
 	if (doc.employee && doc.fiscal_year && doc.month) {
-		return $c_obj(make_doclist(doc.doctype,doc.name), 'get_leave_details',doc.leave_without_pay,function(r, rt) {
+		return $c_obj(doc, 'get_leave_details',doc.leave_without_pay,function(r, rt) {
 			var doc = locals[dt][dn];
 			cur_frm.refresh();
 			calculate_all(doc, dt, dn);
@@ -65,7 +65,7 @@ cur_frm.cscript.d_depends_on_lwp = cur_frm.cscript.d_modified_amount;
 // Calculate earning total
 // ------------------------------------------------------------------------
 var calculate_earning_total = function(doc, dt, dn) {
-	var tbl = getchildren('Salary Slip Earning', doc.name, 'earning_details', doc.doctype);
+	var tbl = doc.earning_details || [];
 
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
@@ -82,7 +82,7 @@ var calculate_earning_total = function(doc, dt, dn) {
 // Calculate deduction total
 // ------------------------------------------------------------------------
 var calculate_ded_total = function(doc, dt, dn) {
-	var tbl = getchildren('Salary Slip Deduction', doc.name, 'deduction_details', doc.doctype);
+	var tbl = doc.deduction_details || [];
 
 	var total_ded = 0;
 	for(var i = 0; i < tbl.length; i++){

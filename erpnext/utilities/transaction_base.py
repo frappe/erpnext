@@ -11,61 +11,60 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 class TransactionBase(StatusUpdater):
 	def load_notification_message(self):
-		dt = self.doc.doctype.lower().replace(" ", "_")
+		dt = self.doctype.lower().replace(" ", "_")
 		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
-			self.doc.fields["__notification_message"] = \
-				frappe.db.get_value("Notification Control", None, dt + "_message")
+			self.set("__notification_message",
+				frappe.db.get_value("Notification Control", None, dt + "_message"))
 							
 	def validate_posting_time(self):
-		if not self.doc.posting_time:
-			self.doc.posting_time = now_datetime().strftime('%H:%M:%S')
+		if not self.posting_time:
+			self.posting_time = now_datetime().strftime('%H:%M:%S')
 			
 	def add_calendar_event(self, opts, force=False):
-		if self.doc.contact_by != cstr(self._prev.contact_by) or \
-				self.doc.contact_date != cstr(self._prev.contact_date) or force:
+		if self.contact_by != cstr(self._prev.contact_by) or \
+				self.contact_date != cstr(self._prev.contact_date) or force:
 			
 			self.delete_events()
 			self._add_calendar_event(opts)
 			
 	def delete_events(self):
 		frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent` 
-			where ref_type=%s and ref_name=%s""", (self.doc.doctype, self.doc.name)), 
+			where ref_type=%s and ref_name=%s""", (self.doctype, self.name)), 
 			ignore_permissions=True)
 			
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
 		
-		if self.doc.contact_date:
-			event_doclist = [{
+		if self.contact_date:
+			event_doclist = frappe.get_doc({
 				"doctype": "Event",
-				"owner": opts.owner or self.doc.owner,
+				"owner": opts.owner or self.owner,
 				"subject": opts.subject,
 				"description": opts.description,
-				"starts_on": self.doc.contact_date + " 10:00:00",
+				"starts_on": self.contact_date + " 10:00:00",
 				"event_type": "Private",
-				"ref_type": self.doc.doctype,
-				"ref_name": self.doc.name
-			}]
+				"ref_type": self.doctype,
+				"ref_name": self.name
+			})
 			
-			if frappe.db.exists("User", self.doc.contact_by):
-				event_doclist.append({
+			if frappe.db.exists("User", self.contact_by):
+				event_doclist.append("event_individuals", {
 					"doctype": "Event User",
-					"parentfield": "event_individuals",
-					"person": self.doc.contact_by
+					"person": self.contact_by
 				})
 			
-			frappe.bean(event_doclist).insert()
+			event_doclist.insert()
 			
 	def validate_uom_is_integer(self, uom_field, qty_fields):
-		validate_uom_is_integer(self.doclist, uom_field, qty_fields)
+		validate_uom_is_integer(self, uom_field, qty_fields)
 			
 	def validate_with_previous_doc(self, source_dt, ref):
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
 			item_ref_dn = []
-			for d in self.doclist.get({"doctype": source_dt}):
-				ref_dn = d.fields.get(val["ref_dn_field"])
+			for d in self.get_all_children(source_dt):
+				ref_dn = d.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:
 						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
@@ -97,22 +96,23 @@ def delete_events(ref_type, ref_name):
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
-def validate_uom_is_integer(doclist, uom_field, qty_fields):
+def validate_uom_is_integer(doc, uom_field, qty_fields):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
 	
+	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
 	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom, 
-		"must_be_whole_number") or None, doclist.get_distinct_values(uom_field))
+		"must_be_whole_number") or None, distinct_uoms)
 		
 	if not integer_uoms:
 		return
 
-	for d in doclist:
-		if d.fields.get(uom_field) in integer_uoms:
+	for d in doc.get_all_children():
+		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
-				if d.fields.get(f):
-					if cint(d.fields[f])!=d.fields[f]:
-						frappe.msgprint(_("For UOM") + " '" + d.fields[uom_field] \
+				if d.get(f):
+					if cint(d.get(f))!=d.get(f):
+						frappe.msgprint(_("For UOM") + " '" + d.get(uom_field) \
 							+ "': " + _("Quantity cannot be a fraction.") \
 							+ " " + _("In Row") + ": " + str(d.idx),
 							raise_exception=UOMMustBeIntegerError)

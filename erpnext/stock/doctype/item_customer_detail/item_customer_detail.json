@@ -1,0 +1,47 @@
+{
+ "autoname": "ITEMCUST/.#####", 
+ "creation": "2013-03-08 15:37:16.000000", 
+ "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "customer_name", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Customer Name", 
+   "oldfieldname": "price_list_name", 
+   "oldfieldtype": "Select", 
+   "options": "Customer", 
+   "permlevel": 0, 
+   "print_width": "180px", 
+   "reqd": 1, 
+   "search_index": 1, 
+   "width": "180px"
+  }, 
+  {
+   "fieldname": "ref_code", 
+   "fieldtype": "Data", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Ref Code", 
+   "oldfieldname": "ref_rate", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "print_width": "120px", 
+   "reqd": 1, 
+   "search_index": 1, 
+   "width": "120px"
+  }
+ ], 
+ "idx": 1, 
+ "in_create": 0, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:16.000000", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Item Customer Detail", 
+ "owner": "Administrator", 
+ "read_only": 0
+}

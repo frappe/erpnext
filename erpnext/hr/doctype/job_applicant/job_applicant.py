@@ -8,9 +8,7 @@ import frappe
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils import extract_email_id
 
-class DocType(TransactionBase):
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+class JobApplicant(TransactionBase):
 	
 	def get_sender(self, comm):
 		return frappe.db.get_value('Jobs Email Settings',None,'email_id')	

@@ -1,0 +1,92 @@
+{
+ "allow_copy": 1, 
+ "creation": "2014-03-03 19:48:46.000000", 
+ "description": "Email Settings for Outgoing and Incoming Emails.", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "description": "Check this to pull emails from your mailbox", 
+   "fieldname": "sync_support_mails", 
+   "fieldtype": "Check", 
+   "label": "Sync Support Mails", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Your support email id - must be a valid email - this is where your emails will come!", 
+   "fieldname": "support_email", 
+   "fieldtype": "Data", 
+   "label": "Support Email", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "POP3 mail server (e.g. pop.gmail.com)", 
+   "fieldname": "mail_server", 
+   "fieldtype": "Data", 
+   "label": "POP3 Mail Server", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "use_ssl", 
+   "fieldtype": "Check", 
+   "label": "Use SSL", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "mail_login", 
+   "fieldtype": "Data", 
+   "label": "User Name", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "mail_password", 
+   "fieldtype": "Password", 
+   "label": "Support Password", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "cb1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Signature to be appended at the end of every email", 
+   "fieldname": "support_signature", 
+   "fieldtype": "Text", 
+   "label": "Signature", 
+   "permlevel": 0
+  }, 
+  {
+   "default": "1", 
+   "fieldname": "send_autoreply", 
+   "fieldtype": "Check", 
+   "label": "Send Autoreply", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Autoreply when a new mail is received", 
+   "fieldname": "support_autoreply", 
+   "fieldtype": "Text", 
+   "label": "Custom Autoreply Message", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-cog", 
+ "idx": 1, 
+ "in_create": 1, 
+ "issingle": 1, 
+ "modified": "2014-03-03 20:20:34.000000", 
+ "modified_by": "Administrator", 
+ "module": "Support", 
+ "name": "Support Email Settings", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "System Manager", 
+   "write": 1
+  }
+ ]
+}

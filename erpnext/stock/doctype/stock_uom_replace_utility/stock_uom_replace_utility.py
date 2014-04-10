@@ -7,43 +7,42 @@ from frappe.utils import cstr, flt, cint
 from frappe import msgprint, _
 
 
-class DocType:
-	def __init__(self, d, dl=[]):
-		self.doc, self.doclist = d,dl
+from frappe.model.document import Document
 
+class StockUOMReplaceUtility(Document):
 	def validate_mandatory(self):
-		if not cstr(self.doc.item_code):
+		if not cstr(self.item_code):
 			msgprint("Please Enter an Item.")
 			raise Exception
 		
-		if not cstr(self.doc.new_stock_uom):
+		if not cstr(self.new_stock_uom):
 			msgprint("Please Enter New Stock UOM.")
 			raise Exception
 
-		if cstr(self.doc.current_stock_uom) == cstr(self.doc.new_stock_uom):
+		if cstr(self.current_stock_uom) == cstr(self.new_stock_uom):
 			msgprint("Current Stock UOM and Stock UOM are same.")
 			raise Exception 
 	
 		# check conversion factor
-		if not flt(self.doc.conversion_factor):
+		if not flt(self.conversion_factor):
 			msgprint("Please Enter Conversion Factor.")
 			raise Exception
 		
-		stock_uom = frappe.db.get_value("Item", self.doc.item_code, "stock_uom")
-		if cstr(self.doc.new_stock_uom) == cstr(stock_uom):
-			msgprint("Item Master is already updated with New Stock UOM " + cstr(self.doc.new_stock_uom))
+		stock_uom = frappe.db.get_value("Item", self.item_code, "stock_uom")
+		if cstr(self.new_stock_uom) == cstr(stock_uom):
+			msgprint("Item Master is already updated with New Stock UOM " + cstr(self.new_stock_uom))
 			raise Exception
 			
 	def update_item_master(self):
-		item_bean = frappe.bean("Item", self.doc.item_code)
-		item_bean.doc.stock_uom = self.doc.new_stock_uom
-		item_bean.save()
+		item_doc = frappe.get_doc("Item", self.item_code)
+		item_doc.stock_uom = self.new_stock_uom
+		item_doc.save()
 		
-		msgprint(_("Default UOM updated in item ") + self.doc.item_code)
+		msgprint(_("Default UOM updated in item ") + self.item_code)
 		
 	def update_bin(self):
 		# update bin
-		if flt(self.doc.conversion_factor) != flt(1):
+		if flt(self.conversion_factor) != flt(1):
 			frappe.db.sql("""update `tabBin` 
 				set stock_uom = %s, 
 					indented_qty = ifnull(indented_qty,0) * %s, 
@@ -52,12 +51,12 @@ class DocType:
 					planned_qty = ifnull(planned_qty,0) * %s, 
 					projected_qty = actual_qty + ordered_qty + indented_qty + 
 						planned_qty - reserved_qty 
-				where item_code = %s""", (self.doc.new_stock_uom, self.doc.conversion_factor, 
-					self.doc.conversion_factor, self.doc.conversion_factor, 
-					self.doc.conversion_factor, self.doc.item_code))
+				where item_code = %s""", (self.new_stock_uom, self.conversion_factor, 
+					self.conversion_factor, self.conversion_factor, 
+					self.conversion_factor, self.item_code))
 		else:
 			frappe.db.sql("update `tabBin` set stock_uom = %s where item_code = %s", 
-				 (self.doc.new_stock_uom, self.doc.item_code) )
+				 (self.new_stock_uom, self.item_code) )
 
 		# acknowledge user
 		msgprint(" All Bins Updated Successfully.")
@@ -66,23 +65,23 @@ class DocType:
 		# update stock ledger entry
 		from erpnext.stock.stock_ledger import update_entries_after
 		
-		if flt(self.doc.conversion_factor) != flt(1):
+		if flt(self.conversion_factor) != flt(1):
 			frappe.db.sql("""update `tabStock Ledger Entry` 
 				set stock_uom = %s, actual_qty = ifnull(actual_qty,0) * %s 
 				where item_code = %s""", 
-				(self.doc.new_stock_uom, self.doc.conversion_factor, self.doc.item_code))
+				(self.new_stock_uom, self.conversion_factor, self.item_code))
 		else:
 			frappe.db.sql("""update `tabStock Ledger Entry` set stock_uom=%s 
-				where item_code=%s""", (self.doc.new_stock_uom, self.doc.item_code))
+				where item_code=%s""", (self.new_stock_uom, self.item_code))
 		
 		# acknowledge user
 		msgprint("Stock Ledger Entries Updated Successfully.")
 		
 		# update item valuation
-		if flt(self.doc.conversion_factor) != flt(1):
+		if flt(self.conversion_factor) != flt(1):
 			wh = frappe.db.sql("select name from `tabWarehouse`")
 			for w in wh:
-				update_entries_after({"item_code": self.doc.item_code, "warehouse": w[0]})
+				update_entries_after({"item_code": self.item_code, "warehouse": w[0]})
 
 		# acknowledge user
 		msgprint("Item Valuation Updated Successfully.")
@@ -100,8 +99,8 @@ class DocType:
 
 		
 	def validate_uom_integer_type(self):
-		current_is_integer = frappe.db.get_value("UOM", self.doc.current_stock_uom, "must_be_whole_number")
-		new_is_integer = frappe.db.get_value("UOM", self.doc.new_stock_uom, "must_be_whole_number")
+		current_is_integer = frappe.db.get_value("UOM", self.current_stock_uom, "must_be_whole_number")
+		new_is_integer = frappe.db.get_value("UOM", self.new_stock_uom, "must_be_whole_number")
 		
 		if current_is_integer and not new_is_integer:
 			frappe.msgprint("New UOM must be of type Whole Number", raise_exception=True)
@@ -109,7 +108,7 @@ class DocType:
 		if not current_is_integer and new_is_integer:
 			frappe.msgprint("New UOM must NOT be of type Whole Number", raise_exception=True)
 
-		if current_is_integer and new_is_integer and cint(self.doc.conversion_factor)!=self.doc.conversion_factor:
+		if current_is_integer and new_is_integer and cint(self.conversion_factor)!=self.conversion_factor:
 			frappe.msgprint("Conversion Factor cannot be fraction", raise_exception=True)
 
 @frappe.whitelist()

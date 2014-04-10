@@ -5,25 +5,15 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, cint
-from frappe.model.bean import getlist
+
 from frappe import msgprint, _
 
 	
 from erpnext.utilities.transaction_base import TransactionBase
 
-class DocType(TransactionBase):
-	def __init__(self,doc,doclist):
-		self.doc = doc
-		self.doclist = doclist
-		self.fname = 'enq_details'
-		self.tname = 'Opportunity Item'
-		
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Opportunity", self.doc.name, "contact_date") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Opportunity", self.doc.name, "contact_by") if \
-				(not cint(self.doc.fields.get("__islocal"))) else None,
-		})
+class Opportunity(TransactionBase):
+	fname = 'enq_details'
+	tname = 'Opportunity Item'
 		
 	def get_item_details(self, item_code):
 		item = frappe.db.sql("""select item_name, stock_uom, description_html, description, item_group, brand
@@ -71,48 +61,55 @@ class DocType(TransactionBase):
 		
 		opts.description = ""
 		
-		if self.doc.customer:
-			if self.doc.contact_person:
-				opts.description = 'Contact '+cstr(self.doc.contact_person)
+		if self.customer:
+			if self.contact_person:
+				opts.description = 'Contact '+cstr(self.contact_person)
 			else:
-				opts.description = 'Contact customer '+cstr(self.doc.customer)
-		elif self.doc.lead:
-			if self.doc.contact_display:
-				opts.description = 'Contact '+cstr(self.doc.contact_display)
+				opts.description = 'Contact customer '+cstr(self.customer)
+		elif self.lead:
+			if self.contact_display:
+				opts.description = 'Contact '+cstr(self.contact_display)
 			else:
-				opts.description = 'Contact lead '+cstr(self.doc.lead)
+				opts.description = 'Contact lead '+cstr(self.lead)
 				
 		opts.subject = opts.description
-		opts.description += '. By : ' + cstr(self.doc.contact_by)
+		opts.description += '. By : ' + cstr(self.contact_by)
 		
-		if self.doc.to_discuss:
-			opts.description += ' To Discuss : ' + cstr(self.doc.to_discuss)
+		if self.to_discuss:
+			opts.description += ' To Discuss : ' + cstr(self.to_discuss)
 		
-		super(DocType, self).add_calendar_event(opts, force)
+		super(Opportunity, self).add_calendar_event(opts, force)
 
 	def validate_item_details(self):
-		if not getlist(self.doclist, 'enquiry_details'):
+		if not self.get('enquiry_details'):
 			msgprint("Please select items for which enquiry needs to be made")
 			raise Exception
 
 	def validate_lead_cust(self):
-		if self.doc.enquiry_from == 'Lead' and not self.doc.lead:
+		if self.enquiry_from == 'Lead' and not self.lead:
 			msgprint("Lead Id is mandatory if 'Opportunity From' is selected as Lead", raise_exception=1)
-		elif self.doc.enquiry_from == 'Customer' and not self.doc.customer:
+		elif self.enquiry_from == 'Customer' and not self.customer:
 			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 
 	def validate(self):
+		self._prev = frappe._dict({
+			"contact_date": frappe.db.get_value("Opportunity", self.name, "contact_date") if \
+				(not cint(self.get("__islocal"))) else None,
+			"contact_by": frappe.db.get_value("Opportunity", self.name, "contact_by") if \
+				(not cint(self.get("__islocal"))) else None,
+		})
+		
 		self.set_status()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
 		
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.doc.transaction_date, self.doc.fiscal_year, "Opportunity Date")
+		validate_fiscal_year(self.transaction_date, self.fiscal_year, "Opportunity Date")
 
 	def on_submit(self):
-		if self.doc.lead:
-			frappe.bean("Lead", self.doc.lead).get_controller().set_status(update=True)
+		if self.lead:
+			frappe.get_doc("Lead", self.lead).set_status(update=True)
 	
 	def on_cancel(self):
 		if self.has_quotation():
@@ -121,8 +118,8 @@ class DocType(TransactionBase):
 		
 	def declare_enquiry_lost(self,arg):
 		if not self.has_quotation():
-			frappe.db.set(self.doc, 'status', 'Lost')
-			frappe.db.set(self.doc, 'order_lost_reason', arg)
+			frappe.db.set(self, 'status', 'Lost')
+			frappe.db.set(self, 'order_lost_reason', arg)
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
@@ -130,18 +127,18 @@ class DocType(TransactionBase):
 		self.delete_events()
 		
 	def has_quotation(self):
-		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.doc.name, "docstatus": 1})
+		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
 		
 @frappe.whitelist()
-def make_quotation(source_name, target_doclist=None):
-	from frappe.model.mapper import get_mapped_doclist
+def make_quotation(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	
 	def set_missing_values(source, target):
-		quotation = frappe.bean(target)
+		quotation = frappe.get_doc(target)
 		quotation.run_method("onload_post_render")
 		quotation.run_method("calculate_taxes_and_totals")
 	
-	doclist = get_mapped_doclist("Opportunity", source_name, {
+	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Quotation", 
 			"field_map": {
@@ -162,6 +159,6 @@ def make_quotation(source_name, target_doclist=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doclist, set_missing_values)
+	}, target_doc, set_missing_values)
 		
-	return [d.fields for d in doclist]
+	return doclist

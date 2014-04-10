@@ -1,0 +1,108 @@
+{
+ "creation": "2013-02-22 01:27:42.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "reference_name", 
+   "fieldtype": "Data", 
+   "hidden": 0, 
+   "in_filter": 0, 
+   "in_list_view": 1, 
+   "label": "Reference Name", 
+   "oldfieldname": "reference_name", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "bom_detail_no", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "BOM Detail No", 
+   "oldfieldname": "bom_detail_no", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "main_item_code", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Item Code", 
+   "oldfieldname": "main_item_code", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "rm_item_code", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Raw Material Item Code", 
+   "oldfieldname": "rm_item_code", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "required_qty", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Required Qty", 
+   "oldfieldname": "required_qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "rate", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Rate", 
+   "oldfieldname": "rate", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "amount", 
+   "fieldtype": "Currency", 
+   "label": "Amount", 
+   "oldfieldname": "amount", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "conversion_factor", 
+   "fieldtype": "Float", 
+   "hidden": 1, 
+   "label": "Conversion Factor", 
+   "oldfieldname": "conversion_factor", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "stock_uom", 
+   "fieldtype": "Link", 
+   "label": "Stock Uom", 
+   "oldfieldname": "stock_uom", 
+   "oldfieldtype": "Data", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "read_only": 1
+  }
+ ], 
+ "hide_toolbar": 1, 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:33.000000", 
+ "modified_by": "Administrator", 
+ "module": "Buying", 
+ "name": "Purchase Order Item Supplied", 
+ "owner": "dhanalekshmi@webnotestech.com"
+}

@@ -1,0 +1,177 @@
+{
+ "creation": "2013-01-21 12:03:47.000000", 
+ "default_print_format": "Standard", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "description": "Select Sales Orders from which you want to create Production Orders.", 
+   "fieldname": "select_sales_orders", 
+   "fieldtype": "Section Break", 
+   "label": "Select Sales Orders", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "fg_item", 
+   "fieldtype": "Link", 
+   "label": "Filter based on item", 
+   "options": "Item", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "customer", 
+   "fieldtype": "Link", 
+   "label": "Filter based on customer", 
+   "options": "Customer", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "from_date", 
+   "fieldtype": "Date", 
+   "label": "From Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "to_date", 
+   "fieldtype": "Date", 
+   "label": "To Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break1", 
+   "fieldtype": "Section Break", 
+   "options": "Simple", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Pull sales orders (pending to deliver) based on the above criteria", 
+   "fieldname": "get_sales_orders", 
+   "fieldtype": "Button", 
+   "label": "Get Sales Orders", 
+   "options": "get_open_sales_orders", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "pp_so_details", 
+   "fieldtype": "Table", 
+   "label": "Production Plan Sales Orders", 
+   "options": "Production Plan Sales Order", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "items_for_production", 
+   "fieldtype": "Section Break", 
+   "label": "Select Items", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "get_items_from_so", 
+   "fieldtype": "Button", 
+   "label": "Get Items From Sales Orders", 
+   "options": "get_items_from_so", 
+   "permlevel": 0
+  }, 
+  {
+   "default": "1", 
+   "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+   "fieldname": "use_multi_level_bom", 
+   "fieldtype": "Check", 
+   "label": "Use Multi-Level BOM", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "pp_details", 
+   "fieldtype": "Table", 
+   "label": "Production Plan Items", 
+   "options": "Production Plan Item", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.", 
+   "fieldname": "create_production_orders", 
+   "fieldtype": "Section Break", 
+   "label": "Production Orders", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Separate production order will be created for each finished good item.", 
+   "fieldname": "raise_production_order", 
+   "fieldtype": "Button", 
+   "label": "Create Production Orders", 
+   "options": "raise_production_order", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "sb5", 
+   "fieldtype": "Section Break", 
+   "label": "Material Requirement", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "purchase_request_for_warehouse", 
+   "fieldtype": "Link", 
+   "label": "Material Request For Warehouse", 
+   "options": "Warehouse", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Items to be requested which are \"Out of Stock\" considering all warehouses based on projected qty and minimum order qty", 
+   "fieldname": "raise_purchase_request", 
+   "fieldtype": "Button", 
+   "label": "Create Material Requests", 
+   "options": "raise_purchase_request", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Download a report containing all raw materials with their latest inventory status", 
+   "fieldname": "download_materials_required", 
+   "fieldtype": "Button", 
+   "label": "Download Materials Required", 
+   "permlevel": 0
+  }
+ ], 
+ "icon": "icon-calendar", 
+ "idx": 1, 
+ "in_create": 1, 
+ "issingle": 1, 
+ "modified": "2013-12-20 19:23:25.000000", 
+ "modified_by": "Administrator", 
+ "module": "Manufacturing", 
+ "name": "Production Planning Tool", 
+ "owner": "jai@webnotestech.com", 
+ "permissions": [
+  {
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 0, 
+   "role": "Manufacturing User", 
+   "submit": 0, 
+   "write": 1
+  }
+ ], 
+ "read_only": 1
+}

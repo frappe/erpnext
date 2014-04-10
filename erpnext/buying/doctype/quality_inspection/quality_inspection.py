@@ -4,38 +4,36 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.model.doc import addchild
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class QualityInspection(Document):
 
 	def get_item_specification_details(self):
-		self.doclist = self.doc.clear_table(self.doclist, 'qa_specification_details')
+		self.set('qa_specification_details', [])
 		specification = frappe.db.sql("select specification, value from `tabItem Quality Inspection Parameter` \
-			where parent = '%s' order by idx" % (self.doc.item_code))
+			where parent = '%s' order by idx" % (self.item_code))
 		for d in specification:
-			child = addchild(self.doc, 'qa_specification_details', 'Quality Inspection Reading', self.doclist)
+			child = self.append('qa_specification_details', {})
 			child.specification = d[0]
 			child.value = d[1]
 			child.status = 'Accepted'
 
 	def on_submit(self):
-		if self.doc.purchase_receipt_no:
+		if self.purchase_receipt_no:
 			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 
 				set t1.qa_no = %s, t2.modified = %s 
 				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""",  
-				(self.doc.name, self.doc.modified, self.doc.purchase_receipt_no, 
-					self.doc.item_code))
+				(self.name, self.modified, self.purchase_receipt_no, 
+					self.item_code))
 		
 
 	def on_cancel(self):
-		if self.doc.purchase_receipt_no:
+		if self.purchase_receipt_no:
 			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2 
 				set t1.qa_no = '', t2.modified = %s
 				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""", 
-				(self.doc.modified, self.doc.purchase_receipt_no, self.doc.item_code))
+				(self.modified, self.purchase_receipt_no, self.item_code))
 
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):

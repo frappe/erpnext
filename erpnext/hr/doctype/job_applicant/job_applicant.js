@@ -15,7 +15,7 @@ cur_frm.cscript = {
 	},
 	make_listing: function(doc) {
 		cur_frm.communication_view = new frappe.views.CommunicationList({
-			list: frappe.model.get("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
+			list: frappe.get_list("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
 			parent: cur_frm.fields_dict['thread_html'].wrapper,
 			doc: doc,
 			recipients: doc.email_id

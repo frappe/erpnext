@@ -5,25 +5,21 @@ from __future__ import unicode_literals
 import frappe, os, json
 from frappe.utils import cstr
 from unidecode import unidecode
+from frappe.model.document import Document
 
-
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
-		self.no_report_type = False
+class ChartofAccounts(Document):
+	no_report_type = False
 		
 	def create_accounts(self, company):
 		chart = {}
-		with open(os.path.join(os.path.dirname(__file__), "charts", 
-			self.doc.source_file), "r") as f:
+		with open(os.path.join(os.path.dirname(__file__), "charts", self.source_file), "r") as f:
 			chart = json.loads(f.read())
 			
-		from erpnext.accounts.doctype.chart_of_accounts.charts.account_properties \
-			import account_properties
+		from erpnext.accounts.doctype.chart_of_accounts.charts.account_properties import account_properties
 			
 		if chart:
 			accounts = []
-						
+			
 			def _import_accounts(children, parent):
 				for child in children:
 					account_name = child.get("name")
@@ -33,10 +29,9 @@ class DocType:
 						count = accounts.count(account_name_in_db)
 						account_name = account_name + " " + cstr(count)
 
-					child.update(account_properties.get(chart.get("name"), {})\
-						.get(account_name, {}))
+					child.update(account_properties.get(chart.get("name"), {}).get(account_name, {}))
 					
-					account = frappe.bean({
+					account = frappe.get_doc({
 						"doctype": "Account",
 						"account_name": account_name,
 						"company": company,
@@ -49,19 +44,19 @@ class DocType:
 					accounts.append(account_name_in_db)
 					
 					# set report_type for all parents where blank
-					if not account.doc.report_type or account.doc.report_type == 'None':
+					if not account.report_type or account.report_type == 'None':
 						self.no_report_type = True
 					elif self.no_report_type:
 						frappe.db.sql("""update tabAccount set report_type=%s 
 							where lft<=%s and rgt>=%s and ifnull(report_type, '')=''""", 
-							(account.doc.report_type, account.doc.lft, account.doc.rgt))
+							(account.report_type, account.lft, account.rgt))
 					
 					if child.get("children"):
-						_import_accounts(child.get("children"), account.doc.name)
+						_import_accounts(child.get("children"), account.name)
 			
 			_import_accounts(chart.get("root").get("children"), None)
 			
 @frappe.whitelist()
 def get_charts_for_country(country):
-	return frappe.db.sql_list("select chart_name from `tabChart of Accounts` where country=%s", 
-		country)
+	return frappe.db.sql_list("""select chart_name from `tabChart of Accounts` 
+		where country=%s""", country)

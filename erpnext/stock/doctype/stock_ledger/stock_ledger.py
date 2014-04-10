@@ -5,17 +5,14 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import add_days, cstr, flt, nowdate, cint, now
-from frappe.model.doc import Document
-from frappe.model.bean import getlist
-from frappe.model.code import get_obj
+
 from frappe import session, msgprint
 from erpnext.stock.utils import get_valid_serial_nos
 
 
-class DocType:
-	def __init__(self, doc, doclist=[]):
-		self.doc = doc
-		self.doclist = doclist
+from frappe.model.document import Document
+
+class StockLedger(Document):
 		
 	def update_stock(self, values, is_amended = 'No'):
 		for v in values:
@@ -39,19 +36,19 @@ class DocType:
 				"is_amended": is_amended
 			})
 			
-			get_obj('Warehouse', v["warehouse"]).update_bin(args)
+			frappe.get_doc('Warehouse', v["warehouse"]).update_bin(args)
 
 
 	def make_entry(self, args):
 		args.update({"doctype": "Stock Ledger Entry"})
-		sle = frappe.bean([args])
+		sle = frappe.get_doc(args)
 		sle.ignore_permissions = 1
 		sle.insert()
-		return sle.doc.name
+		return sle.name
 	
 	def repost(self):
 		"""
 		Repost everything!
 		"""
 		for wh in frappe.db.sql("select name from tabWarehouse"):
-			get_obj('Warehouse', wh[0]).repost_stock()
+			frappe.get_doc('Warehouse', wh[0]).repost_stock()

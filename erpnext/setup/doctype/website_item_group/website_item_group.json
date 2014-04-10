@@ -1,0 +1,26 @@
+{
+ "creation": "2013-02-22 01:28:09.000000", 
+ "description": "Cross Listing of Item in multiple groups", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Other", 
+ "fields": [
+  {
+   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "fieldname": "item_group", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Item Group", 
+   "options": "Item Group", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2014-02-28 13:00:07.000000", 
+ "modified_by": "Administrator", 
+ "module": "Setup", 
+ "name": "Website Item Group", 
+ "owner": "Administrator"
+}

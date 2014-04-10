@@ -23,19 +23,18 @@ class TestLeaveApplication(unittest.TestCase):
 	def _add_employee_leave_approver(self, employee, leave_approver):
 		temp_session_user = frappe.session.user
 		frappe.set_user("Administrator")
-		employee = frappe.bean("Employee", employee)
-		employee.doclist.append({
+		employee = frappe.get_doc("Employee", employee)
+		employee.append("employee_leave_approvers", {
 			"doctype": "Employee Leave Approver",
-			"parentfield": "employee_leave_approvers",
 			"leave_approver": leave_approver
 		})
 		employee.save()
 		frappe.set_user(temp_session_user)
 	
-	def get_application(self, doclist):
-		application = frappe.bean(copy=doclist)
-		application.doc.from_date = "2013-01-01"
-		application.doc.to_date = "2013-01-05"
+	def get_application(self, doc):
+		application = frappe.copy_doc(doc)
+		application.from_date = "2013-01-01"
+		application.to_date = "2013-01-05"
 		return application
 
 	def test_block_list(self):
@@ -49,7 +48,7 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		application = self.get_application(test_records[1])
 		application.insert()
-		application.doc.status = "Approved"
+		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
 		frappe.set_user("test1@example.com")
@@ -70,11 +69,11 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
-		application.doc.leave_approver = "test2@example.com"
+		application.leave_approver = "test2@example.com"
 		application.insert()
 		
 		application = self.get_application(test_records[1])
-		application.doc.leave_approver = "test2@example.com"
+		application.leave_approver = "test2@example.com"
 		self.assertRaises(OverlapError, application.insert)
 		
 	def test_global_block_list(self):
@@ -85,7 +84,7 @@ class TestLeaveApplication(unittest.TestCase):
 		add_role("test@example.com", "Leave Approver")
 				
 		application = self.get_application(test_records[3])
-		application.doc.leave_approver = "test@example.com"
+		application.leave_approver = "test@example.com"
 		
 		frappe.db.set_value("Leave Block List", "_Test Leave Block List", 
 			"applies_to_all_departments", 1)
@@ -96,7 +95,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.insert()
 		
 		frappe.set_user("test@example.com")
-		application.doc.status = "Approved"
+		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 		
 		frappe.db.set_value("Leave Block List", "_Test Leave Block List", 
@@ -121,14 +120,14 @@ class TestLeaveApplication(unittest.TestCase):
 		# create leave application as Employee
 		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
-		application.doc.leave_approver = "test1@example.com"
+		application.leave_approver = "test1@example.com"
 		application.insert()
 		
 		# submit leave application by Leave Approver
 		frappe.set_user("test1@example.com")
-		application.doc.status = "Approved"
+		application.status = "Approved"
 		application.submit()
-		self.assertEqual(frappe.db.get_value("Leave Application", application.doc.name,
+		self.assertEqual(frappe.db.get_value("Leave Application", application.name,
 			"docstatus"), 1)
 		
 	def _test_leave_approval_invalid_leave_approver_insert(self):
@@ -144,7 +143,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application = self.get_application(test_records[1])
 		frappe.set_user("test@example.com")
 		
-		application.doc.leave_approver = "test1@example.com"
+		application.leave_approver = "test1@example.com"
 		self.assertRaises(InvalidLeaveApproverError, application.insert)
 		
 		frappe.db.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
@@ -158,10 +157,10 @@ class TestLeaveApplication(unittest.TestCase):
 		# but submit as invalid leave approver - should raise exception
 		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
-		application.doc.leave_approver = "test2@example.com"
+		application.leave_approver = "test2@example.com"
 		application.insert()
 		frappe.set_user("test1@example.com")
-		application.doc.status = "Approved"
+		application.status = "Approved"
 		
 		from erpnext.hr.doctype.leave_application.leave_application import LeaveApproverIdentityError
 		self.assertRaises(LeaveApproverIdentityError, application.submit)
@@ -178,14 +177,14 @@ class TestLeaveApplication(unittest.TestCase):
 		
 		frappe.set_user("test@example.com")
 		application = self.get_application(test_records[1])
-		application.doc.leave_approver = "test2@example.com"
+		application.leave_approver = "test2@example.com"
 		application.insert()
 
 		# change to valid leave approver and try to submit leave application
 		frappe.set_user("test2@example.com")
-		application.doc.status = "Approved"
+		application.status = "Approved"
 		application.submit()
-		self.assertEqual(frappe.db.get_value("Leave Application", application.doc.name,
+		self.assertEqual(frappe.db.get_value("Leave Application", application.name,
 			"docstatus"), 1)
 			
 		frappe.db.sql("""delete from `tabEmployee Leave Approver` where parent=%s""",
@@ -195,51 +194,4 @@ class TestLeaveApplication(unittest.TestCase):
 		
 test_dependencies = ["Leave Block List"]		
 
-test_records = [
-	[{
-		"doctype": "Leave Allocation",
-		"leave_type": "_Test Leave Type",
-		"fiscal_year": "_Test Fiscal Year 2013",
-		"employee":"_T-Employee-0001",
-		"new_leaves_allocated": 15,
-		"docstatus": 1
-	}],
-	[{
-		"doctype": "Leave Application",
-		"leave_type": "_Test Leave Type",
-		"from_date": "2013-05-01",
-		"to_date": "2013-05-05",
-		"posting_date": "2013-01-02",
-		"fiscal_year": "_Test Fiscal Year 2013",
-		"employee": "_T-Employee-0001",
-		"company": "_Test Company"
-	}],
-	[{
-		"doctype": "Leave Allocation",
-		"leave_type": "_Test Leave Type",
-		"fiscal_year": "_Test Fiscal Year 2013",
-		"employee":"_T-Employee-0002",
-		"new_leaves_allocated": 15,
-		"docstatus": 1
-	}],
-	[{
-		"doctype": "Leave Application",
-		"leave_type": "_Test Leave Type",
-		"from_date": "2013-05-01",
-		"to_date": "2013-05-05",
-		"posting_date": "2013-01-02",
-		"fiscal_year": "_Test Fiscal Year 2013",
-		"employee": "_T-Employee-0002",
-		"company": "_Test Company"
-	}],
-	[{
-		"doctype": "Leave Application",
-		"leave_type": "_Test Leave Type LWP",
-		"from_date": "2013-01-15",
-		"to_date": "2013-01-15",
-		"posting_date": "2013-01-02",
-		"fiscal_year": "_Test Fiscal Year 2013",
-		"employee": "_T-Employee-0001",
-		"company": "_Test Company",
-	}]
-]
+test_records = frappe.get_test_records('Leave Application')

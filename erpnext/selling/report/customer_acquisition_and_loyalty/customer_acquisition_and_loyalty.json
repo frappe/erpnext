@@ -1,0 +1,16 @@
+{
+ "add_total_row": 1, 
+ "creation": "2013-11-28 14:58:06.000000", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-03-07 15:30:27.000000", 
+ "modified_by": "Administrator", 
+ "module": "Selling", 
+ "name": "Customer Acquisition and Loyalty", 
+ "owner": "Administrator", 
+ "ref_doctype": "Customer", 
+ "report_name": "Customer Acquisition and Loyalty", 
+ "report_type": "Script Report"
+}

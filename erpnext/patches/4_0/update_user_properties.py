@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.permissions
-import frappe.model.doctype
 import frappe.defaults
 
 def execute():
@@ -21,7 +20,7 @@ def update_user_properties():
 	frappe.reload_doc("core", "doctype", "docfield")
 	
 	for d in frappe.db.sql("""select parent, defkey, defvalue from tabDefaultValue
-		where parent not in ('__global', 'Control Panel')""", as_dict=True):
+		where parent not in ('__global', '__default')""", as_dict=True):
 		df = frappe.db.sql("""select options from tabDocField
 			where fieldname=%s and fieldtype='Link'""", d.defkey, as_dict=True)
 		
@@ -29,7 +28,7 @@ def update_user_properties():
 			frappe.db.sql("""update tabDefaultValue
 				set defkey=%s, parenttype='Restriction'
 				where defkey=%s and
-				parent not in ('__global', 'Control Panel')""", (df[0].options, d.defkey))
+				parent not in ('__global', '__default')""", (df[0].options, d.defkey))
 
 def update_user_match():
 	import frappe.defaults
@@ -39,7 +38,7 @@ def update_user_match():
 		doctype_matches.setdefault(doctype, []).append(match)
 	
 	for doctype, user_matches in doctype_matches.items():
-		meta = frappe.get_doctype(doctype)
+		meta = frappe.get_meta(doctype)
 		
 		# for each user with roles of this doctype, check if match condition applies
 		for user in frappe.db.sql_list("""select name from `tabUser`
@@ -79,7 +78,7 @@ def add_employee_restrictions_to_leave_approver():
 	# add restrict rights to HR User and HR Manager
 	frappe.db.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')
 		and role in ('HR User', 'HR Manager') and permlevel=0 and `read`=1""")
-	frappe.model.doctype.clear_cache()
+	frappe.clear_cache()
 	
 	# add Employee restrictions (in on_update method)
 	for employee in frappe.db.sql_list("""select name from `tabEmployee`
@@ -87,7 +86,7 @@ def add_employee_restrictions_to_leave_approver():
 			where `tabEmployee Leave Approver`.parent=`tabEmployee`.name)
 		or ifnull(`reports_to`, '')!=''"""):
 		
-		frappe.bean("Employee", employee).save()
+		frappe.get_doc("Employee", employee).save()
 
 def update_permissions():
 	# clear match conditions other than owner
@@ -98,7 +97,7 @@ def remove_duplicate_restrictions():
 	# remove duplicate restrictions (if they exist)
 	for d in frappe.db.sql("""select parent, defkey, defvalue,
 		count(*) as cnt from tabDefaultValue
-		where parent not in ('__global', 'Control Panel')
+		where parent not in ('__global', '__default')
 		group by parent, defkey, defvalue""", as_dict=1):
 		if d.cnt > 1:
 			# order by parenttype so that restriction does not get removed!

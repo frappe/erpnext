@@ -55,7 +55,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		if (!doc.__islocal) {
 			cur_frm.communication_view = new frappe.views.CommunicationList({
-				list: frappe.model.get("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
+				list: frappe.get_list("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
 				parent: cur_frm.fields_dict.communication_html.wrapper,
 				doc: doc,
 				recipients: doc.contact_email

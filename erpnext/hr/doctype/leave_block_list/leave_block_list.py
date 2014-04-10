@@ -8,15 +8,15 @@ import frappe
 from erpnext.accounts.utils import validate_fiscal_year
 from frappe import _
 
-class DocType:
-	def __init__(self, d, dl):
-		self.doc, self.doclist = d, dl
+from frappe.model.document import Document
+
+class LeaveBlockList(Document):
 		
 	def validate(self):
 		dates = []
-		for d in self.doclist.get({"doctype":"Leave Block List Date"}):
+		for d in self.get("leave_block_list_dates"):
 			# validate fiscal year
-			validate_fiscal_year(d.block_date, self.doc.year, _("Block Date"))
+			validate_fiscal_year(d.block_date, self.year, _("Block Date"))
 			
 			# date is not repeated
 			if d.block_date in dates:

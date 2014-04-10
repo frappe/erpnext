@@ -1,0 +1,109 @@
+{
+ "creation": "2013-02-22 01:27:37.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "voucher_id", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Voucher ID", 
+   "no_copy": 0, 
+   "oldfieldname": "voucher_id", 
+   "oldfieldtype": "Link", 
+   "options": "Journal Voucher", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "against_account", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Against Account", 
+   "no_copy": 0, 
+   "oldfieldname": "against_account", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "posting_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Posting Date", 
+   "no_copy": 0, 
+   "oldfieldname": "posting_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "clearance_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Clearance Date", 
+   "no_copy": 0, 
+   "oldfieldname": "clearance_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "cheque_number", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Cheque Number", 
+   "no_copy": 0, 
+   "oldfieldname": "cheque_number", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "cheque_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Cheque Date", 
+   "no_copy": 0, 
+   "oldfieldname": "cheque_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "debit", 
+   "fieldtype": "Currency", 
+   "label": "Debit", 
+   "no_copy": 0, 
+   "oldfieldname": "debit", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "credit", 
+   "fieldtype": "Currency", 
+   "label": "Credit", 
+   "no_copy": 0, 
+   "oldfieldname": "credit", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:22:55.000000", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Bank Reconciliation Detail", 
+ "owner": "Administrator"
+}

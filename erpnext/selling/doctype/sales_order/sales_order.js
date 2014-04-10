@@ -86,7 +86,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 	
 	warehouse: function(doc, cdt, cdn) {
-		var item = frappe.model.get_doc(cdt, cdn);
+		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.selling.utils.get_available_qty",
@@ -162,7 +162,7 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 	if (check) {
 		return $c('runserverobj', {
 			'method':'stop_sales_order', 
-			'docs': frappe.model.compress(make_doclist(doc.doctype, doc.name))
+			'docs': doc
 			}, function(r,rt) {
 			cur_frm.refresh();
 		});
@@ -177,7 +177,7 @@ cur_frm.cscript['Unstop Sales Order'] = function() {
 	if (check) {
 		return $c('runserverobj', {
 			'method':'unstop_sales_order', 
-			'docs': frappe.model.compress(make_doclist(doc.doctype, doc.name))
+			'docs': doc
 		}, function(r,rt) {
 			cur_frm.refresh();
 		});

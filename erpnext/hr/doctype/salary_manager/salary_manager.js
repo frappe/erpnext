@@ -15,7 +15,7 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 		if (r.message)
 			display_activity_log(r.message);
 	}
-	return $c('runserverobj', args={'method':'create_sal_slip','docs':frappe.model.compress(make_doclist (cdt, cdn))},callback);
+	return $c('runserverobj', args={'method':'create_sal_slip','docs':doc},callback);
 }
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
@@ -25,7 +25,7 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 			if (r.message)
 				display_activity_log(r.message);
 		}
-		return $c('runserverobj', args={'method':'submit_salary_slip','docs':frappe.model.compress(make_doclist (cdt, cdn))},callback);
+		return $c('runserverobj', args={'method':'submit_salary_slip','docs':doc},callback);
 	}
 }
 
@@ -59,5 +59,5 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 
 		loaddoc('Journal Voucher', jv.name);
 	}
-	return $c_obj(make_doclist(dt, dn), 'get_acc_details', '', call_back);
+	return $c_obj(doc, 'get_acc_details', '', call_back);
 }

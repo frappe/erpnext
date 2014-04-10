@@ -1,0 +1,69 @@
+{
+ "creation": "2013-02-22 01:27:45.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "company_name", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Company", 
+   "oldfieldname": "company_name", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "designation", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Designation", 
+   "oldfieldname": "designation", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "salary", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Salary", 
+   "oldfieldname": "salary", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "address", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 1, 
+   "label": "Address", 
+   "oldfieldname": "address", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "contact", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Contact", 
+   "oldfieldname": "contact", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "total_experience", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Total Experience", 
+   "oldfieldname": "total_experience", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:23:12.000000", 
+ "modified_by": "Administrator", 
+ "module": "HR", 
+ "name": "Employee External Work History", 
+ "owner": "Administrator"
+}

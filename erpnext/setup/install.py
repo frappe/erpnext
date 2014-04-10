@@ -10,7 +10,7 @@ def after_install():
 	import_country_and_currency()
 	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
 	import_charts()
-	frappe.db.set_value('Control Panel', None, 'home_page', 'setup-wizard')
+	frappe.db.set_default('desktop:home_page', 'setup-wizard')
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
@@ -24,7 +24,7 @@ def import_country_and_currency():
 	for name in data:
 		country = frappe._dict(data[name])
 		if not frappe.db.exists("Country", name):
-			frappe.doc({
+			frappe.get_doc({
 				"doctype": "Country",
 				"country_name": name,
 				"code": country.code,
@@ -33,7 +33,7 @@ def import_country_and_currency():
 			}).insert()
 		
 		if country.currency and not frappe.db.exists("Currency", country.currency):
-			frappe.doc({
+			frappe.get_doc({
 				"doctype": "Currency",
 				"currency_name": country.currency,
 				"fraction": country.currency_fraction,
@@ -111,19 +111,19 @@ def import_defaults():
 	
 	from frappe.modules import scrub
 	for r in records:
-		bean = frappe.bean(r)
+		doc = frappe.get_doc(r)
 		
 		# ignore mandatory for root
-		parent_link_field = ("parent_" + scrub(bean.doc.doctype))
-		if parent_link_field in bean.doc.fields and not bean.doc.fields.get(parent_link_field):
-			bean.ignore_mandatory = True
+		parent_link_field = ("parent_" + scrub(doc.doctype))
+		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
+			doc.ignore_mandatory = True
 		
-		bean.insert()
+		doc.insert()
 		
 def feature_setup():
 	"""save global defaults and features setup"""
-	bean = frappe.bean("Features Setup", "Features Setup")
-	bean.ignore_permissions = True
+	doc = frappe.get_doc("Features Setup", "Features Setup")
+	doc.ignore_permissions = True
 
 	# store value as 1 for all these fields
 	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
@@ -133,18 +133,18 @@ def feature_setup():
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
-	bean.doc.fields.update(dict(zip(flds, [1]*len(flds))))
-	bean.save()
+	doc.update(dict(zip(flds, [1]*len(flds))))
+	doc.save()
 
 def set_single_defaults():
 	for dt in frappe.db.sql_list("""select name from `tabDocType` where issingle=1"""):
 		default_values = frappe.db.sql("""select fieldname, `default` from `tabDocField`
-			where parent=%s""", dt, as_dict=True)
+			where parent=%s""", dt)
 		if default_values:
 			try:
-				b = frappe.bean(dt, dt)
+				b = frappe.get_doc(dt, dt)
 				for fieldname, value in default_values:
-					b.doc.fields[fieldname] = value
+					b.set(fieldname, value)
 				b.save()
 			except frappe.MandatoryError:
 				pass
