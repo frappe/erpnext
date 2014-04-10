@@ -20,7 +20,7 @@ install:
 script:
     cd ./test_sites/ &&
     frappe --reinstall test_site &&
-    frappe --install_app erpnext test_site --verbose &&
+    frappe --install_app erpnext test_site &&
     frappe --request '?cmd=erpnext.setup.page.setup_wizard.setup_wizard.setup_account&currency=USD&first_name=Test&last_name=User&company_name=Wind+Power+LLC&timezone=America/New_York&company_abbr=WP&industry=Manufacturing&country=United states&fy_start_date=2014-01-01&fy_end_date=2014-12-31' test_site &&
     frappe --run_tests test_site --app erpnext
 
