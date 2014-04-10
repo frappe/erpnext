@@ -12,8 +12,11 @@ class PriceList(DocListController):
 	def validate(self):
 		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
-				
-		if not self.get("valid_for_territories"):
+
+		try:
+			# at least one territory
+			self.validate_table_has_rows("valid_for_territories")
+		except frappe.EmptyTableError:
 			# if no territory, set default territory
 			if frappe.defaults.get_user_default("territory"):
 				self.append("valid_for_territories", {
@@ -21,8 +24,7 @@ class PriceList(DocListController):
 					"territory": frappe.defaults.get_user_default("territory")
 				})
 			else:
-				# at least one territory
-				self.validate_table_has_rows("valid_for_territories")
+				raise
 
 	def on_update(self):
 		self.set_default_if_missing()
@@ -38,8 +40,8 @@ class PriceList(DocListController):
 				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.name)
 
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set currency=%s, 
-			buying=%s, selling=%s, modified=NOW() where price_list=%s""", 
+		frappe.db.sql("""update `tabItem Price` set currency=%s,
+			buying=%s, selling=%s, modified=NOW() where price_list=%s""",
 			(self.currency, cint(self.buying), cint(self.selling), self.name))
 
 	def on_trash(self):
@@ -50,6 +52,6 @@ class PriceList(DocListController):
 			if self.name == b.get(price_list_fieldname):
 				b.set(price_list_fieldname, None)
 				b.save()
-		
+
 		for module in ["Selling", "Buying"]:
 			_update_default_price_list(module)

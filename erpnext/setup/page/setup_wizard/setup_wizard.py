@@ -80,7 +80,6 @@ def create_fiscal_year_and_company(args):
 		'year_end_date': args.get('fy_end_date'),
 	}).insert()
 
-	print args
 	# Company
 	frappe.get_doc({
 		"doctype":"Company",
@@ -97,16 +96,16 @@ def create_fiscal_year_and_company(args):
 def create_price_lists(args):
 	for pl_type in ["Selling", "Buying"]:
 		frappe.get_doc({
-				"doctype": "Price List",
-				"price_list_name": "Standard " + pl_type,
-				"enabled": 1,
-				"buying": 1 if pl_type == "Buying" else 0,
-				"selling": 1 if pl_type == "Selling" else 0,
-				"currency": args["currency"],
-				"valid_for_territories": {
-					"territory": "All Territories"
-				}
-			}).insert()
+			"doctype": "Price List",
+			"price_list_name": "Standard " + pl_type,
+			"enabled": 1,
+			"buying": 1 if pl_type == "Buying" else 0,
+			"selling": 1 if pl_type == "Selling" else 0,
+			"currency": args["currency"],
+			"valid_for_territories": [{
+				"territory": "All Territories"
+			}]
+		}).insert()
 
 def set_defaults(args):
 	# enable default currency
