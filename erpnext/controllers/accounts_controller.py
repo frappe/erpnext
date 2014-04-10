@@ -89,8 +89,8 @@ class AccountsController(TransactionBase):
 		if hasattr(self, "fname"):
 			for item in self.get(self.fname):
 				if item.get("item_code"):
-					args = item.as_dict()
-					args.update(self.as_dict())
+					args = self.as_dict()
+					args.update(item.as_dict())
 					ret = get_item_details(args)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and \
