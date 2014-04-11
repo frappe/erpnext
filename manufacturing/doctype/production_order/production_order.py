@@ -18,31 +18,31 @@ class DocType:
 	def validate(self):
 		if self.doc.docstatus == 0:
 			self.doc.status = "Draft"
-			
+
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped",
 			"In Process", "Completed", "Cancelled"])
 
 		self.validate_bom_no()
 		self.validate_sales_order()
 		self.validate_warehouse()
-		
+
 		from utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self.doclist, "stock_uom", ["qty", "produced_qty"])
-		
+
 	def validate_bom_no(self):
 		if self.doc.bom_no:
-			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1 
+			bom = webnotes.conn.sql("""select name from `tabBOM` where name=%s and docstatus=1
 				and is_active=1 and item=%s"""
 				, (self.doc.bom_no, self.doc.production_item), as_dict =1)
 			if not bom:
-				webnotes.throw("""Incorrect BOM: %s entered. 
-					May be BOM not exists or inactive or not submitted 
+				webnotes.throw("""Incorrect BOM: %s entered.
+					May be BOM not exists or inactive or not submitted
 					or for some other item.""" % cstr(self.doc.bom_no))
-					
+
 	def validate_sales_order(self):
 		if self.doc.sales_order:
-			so = webnotes.conn.sql("""select name, delivery_date from `tabSales Order` 
+			so = webnotes.conn.sql("""select name, delivery_date from `tabSales Order`
 				where name=%s and docstatus = 1""", self.doc.sales_order, as_dict=1)[0]
 
 			if not so.name:
@@ -50,40 +50,40 @@ class DocType:
 
 			if not self.doc.expected_delivery_date:
 				self.doc.expected_delivery_date = so.delivery_date
-			
+
 			self.validate_production_order_against_so()
-			
+
 	def validate_warehouse(self):
 		from stock.utils import validate_warehouse_user, validate_warehouse_company
-		
+
 		for w in [self.doc.fg_warehouse, self.doc.wip_warehouse]:
 			validate_warehouse_user(w)
 			validate_warehouse_company(w, self.doc.company)
-	
+
 	def validate_production_order_against_so(self):
 		# already ordered qty
 		ordered_qty_against_so = webnotes.conn.sql("""select sum(qty) from `tabProduction Order`
-			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""", 
+			where production_item = %s and sales_order = %s and docstatus < 2 and name != %s""",
 			(self.doc.production_item, self.doc.sales_order, self.doc.name))[0][0]
 
 		total_qty = flt(ordered_qty_against_so) + flt(self.doc.qty)
-		
+
 		# get qty from Sales Order Item table
-		so_item_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item` 
-			where parent = %s and item_code = %s""", 
+		so_item_qty = webnotes.conn.sql("""select sum(qty) from `tabSales Order Item`
+			where parent = %s and item_code = %s""",
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# get qty from Packing Item table
-		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabPacked Item` 
-			where parent = %s and parenttype = 'Sales Order' and item_code = %s""", 
+		dnpi_qty = webnotes.conn.sql("""select sum(qty) from `tabPacked Item`
+			where parent = %s and parenttype = 'Sales Order' and item_code = %s""",
 			(self.doc.sales_order, self.doc.production_item))[0][0]
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
-				
+
 		if total_qty > so_qty:
-			webnotes.throw(_("Total production order qty for item") + ": " + 
-				cstr(self.doc.production_item) + _(" against sales order") + ": " + 
-				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " + 
-				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" + 
+			webnotes.throw(_("Total production order qty for item") + ": " +
+				cstr(self.doc.production_item) + _(" against sales order") + ": " +
+				cstr(self.doc.sales_order) + _(" will be ") + cstr(total_qty) + ", " +
+				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" +
 				_("Please reduce qty."), exc=OverProductionError)
 
 	def stop_unstop(self, status):
@@ -96,39 +96,45 @@ class DocType:
 
 	def update_status(self, status=None):
 		if status != 'Stopped':
-			stock_entries = webnotes._dict()
-			for se in webnotes.conn.sql("""select purpose, sum(fg_completed_qty) as qty
+			stock_entries = webnotes._dict(webnotes.conn.sql("""select purpose, sum(fg_completed_qty) as qty
 				from `tabStock Entry` where production_order=%s and docstatus=1
-				group by purpose""", self.doc.name, as_dict=1):
-					stock_entries.setdefault(se.purpose, se.qty)
-			
+				group by purpose""", self.doc.name))
+
 			status = "Submitted"
 			if stock_entries:
 				status = "In Process"
 				produced_qty = stock_entries.get("Manufacture/Repack")
 				if flt(produced_qty) == flt(self.doc.qty):
 					status = "Completed"
-				elif flt(produced_qty) > flt(self.doc.qty):
-					webnotes.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
-						_("Total Manufactured Qty can not be greater than Planned qty to manufacture") 
-						+ "(%s/%s)" % (produced_qty, flt(self.doc.qty)), StockOverProductionError)
-		
-		webnotes.conn.set(self.doc, 'status', status)			
 
+		webnotes.conn.set(self.doc, 'status', status)
+
+	def update_produced_qty(self):
+		produced_qty = webnotes.conn.sql("""select sum(fg_completed_qty)
+			from `tabStock Entry` where production_order=%s and docstatus=1
+			and purpose='Manufacture/Repack'""", self.doc.name)
+		produced_qty = flt(produced_qty[0][0]) if produced_qty else 0
+
+		if produced_qty > self.doc.qty:
+			webnotes.throw(_("Production Order") + ": " + self.doc.production_order + "\n" +
+				_("Total Manufactured Qty can not be greater than Planned qty to manufacture")
+				+ "(%s/%s)" % (produced_qty, flt(self.doc.qty)), StockOverProductionError)
+
+		webnotes.conn.set(self.doc, 'produced_qty', produced_qty)
 
 	def on_submit(self):
 		if not self.doc.wip_warehouse:
 			webnotes.throw(_("WIP Warehouse required before Submit"))
 		webnotes.conn.set(self.doc,'status', 'Submitted')
 		self.update_planned_qty(self.doc.qty)
-		
+
 
 	def on_cancel(self):
 		# Check whether any stock entry exists against this Production Order
-		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry` 
+		stock_entry = webnotes.conn.sql("""select name from `tabStock Entry`
 			where production_order = %s and docstatus = 1""", self.doc.name)
 		if stock_entry:
-			webnotes.throw("""Submitted Stock Entry %s exists against this production order. 
+			webnotes.throw("""Submitted Stock Entry %s exists against this production order.
 				Hence can not be cancelled.""" % stock_entry[0][0])
 
 		webnotes.conn.set(self.doc,'status', 'Cancelled')
@@ -145,27 +151,27 @@ class DocType:
 		from stock.utils import update_bin
 		update_bin(args)
 
-@webnotes.whitelist()	
+@webnotes.whitelist()
 def get_item_details(item):
 	res = webnotes.conn.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
-	
+
 	if not res:
 		return {}
-		
+
 	res = res[0]
-	bom = webnotes.conn.sql("""select name from `tabBOM` where item=%s 
+	bom = webnotes.conn.sql("""select name from `tabBOM` where item=%s
 		and ifnull(is_default, 0)=1""", item)
 	if bom:
 		res.bom_no = bom[0][0]
-		
+
 	return res
 
 @webnotes.whitelist()
 def make_stock_entry(production_order_id, purpose):
 	production_order = webnotes.bean("Production Order", production_order_id)
-		
+
 	stock_entry = webnotes.new_bean("Stock Entry")
 	stock_entry.doc.purpose = purpose
 	stock_entry.doc.production_order = production_order_id
@@ -173,12 +179,12 @@ def make_stock_entry(production_order_id, purpose):
 	stock_entry.doc.bom_no = production_order.doc.bom_no
 	stock_entry.doc.use_multi_level_bom = production_order.doc.use_multi_level_bom
 	stock_entry.doc.fg_completed_qty = flt(production_order.doc.qty) - flt(production_order.doc.produced_qty)
-	
+
 	if purpose=="Material Transfer":
 		stock_entry.doc.to_warehouse = production_order.doc.wip_warehouse
 	else:
 		stock_entry.doc.from_warehouse = production_order.doc.wip_warehouse
 		stock_entry.doc.to_warehouse = production_order.doc.fg_warehouse
-		
+
 	stock_entry.run_method("get_items")
 	return [d.fields for d in stock_entry.doclist]
