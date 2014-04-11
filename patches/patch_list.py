@@ -273,6 +273,6 @@ patch_list = [
 	"patches.1401.delete_duplicate_bins",
 	"patches.1401.repost_stock_for_serialized_item",
 	"patches.1401.repost_gl_entries_for_warehouse",
-	"patches.1401.update_pro_order_status",
+	"patches.1401.update_pro_order_status_and_produced_qty",
 	"patches.1401.fix_pos_outstanding",
 ]

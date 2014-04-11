@@ -10,6 +10,9 @@ def execute():
 
 	for p in pro_orders:
 		try:
-			webnotes.bean("Production Order", p[0]).run_method("update_status")
+			production_order = webnotes.bean("Production Order", p[0])
+			production_order.run_method("update_status")
+			production_order.run_method("update_produced_qty")
+
 		except StockOverProductionError:
 			pass

@@ -346,6 +346,7 @@ class DocType(StockController):
 			_validate_production_order(pro_bean)
 			pro_bean.run_method("update_status")
 			if self.doc.purpose == "Manufacture/Repack":
+				pro_bean.run_method("update_produced_qty")
 				self.update_planned_qty(pro_bean)
 
 	def update_planned_qty(self, pro_bean):
