@@ -1,13 +1,15 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.provide("erpnext.item");
+
 cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
 
 	cur_frm.cscript.make_dashboard()
 	erpnext.hide_naming_series();
-		
+
 	if(!doc.__islocal && doc.show_in_website) {
 		cur_frm.appframe.add_button("View In Website", function() {
 			window.open(doc.page_name);
@@ -19,7 +21,18 @@ cur_frm.cscript.refresh = function(doc) {
 		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
 			doc.__sle_exists=="exists" ? false : true);
 	}
+
+	erpnext.item.toggle_reqd(cur_frm);
 }
+
+erpnext.item.toggle_reqd = function(frm) {
+	frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item==="Yes");
+};
+
+frappe.ui.form.on("Item", "is_stock_item", function(frm) {
+	erpnext.item.toggle_reqd(frm);
+});
+
 
 cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();
@@ -152,7 +165,7 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 cur_frm.cscript.copy_from_item_group = function(doc) {
 	frappe.model.with_doc("Item Group", doc.item_group, function() {
 		$.each((doc.item_website_specifications || []), function(i, d) {
-				var n = frappe.model.add_child(doc, "Item Website Specification", 
+				var n = frappe.model.add_child(doc, "Item Website Specification",
 					"item_website_specifications");
 				n.label = d.label;
 				n.description = d.description;
@@ -164,11 +177,11 @@ cur_frm.cscript.copy_from_item_group = function(doc) {
 
 cur_frm.cscript.image = function() {
 	refresh_field("image_view");
-	
+
 	if(!cur_frm.doc.description_html)
 		cur_frm.cscript.add_image(cur_frm.doc);
 	else {
-		msgprint(frappe._("You may need to update: ") + 
+		msgprint(frappe._("You may need to update: ") +
 			frappe.meta.get_docfield(cur_frm.doc.doctype, "description_html").label);
 	}
 }

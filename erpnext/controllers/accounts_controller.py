@@ -87,7 +87,7 @@ class AccountsController(TransactionBase):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 		if hasattr(self, "fname"):
-			parent_dict = {}
+			parent_dict = {"doctype": self.doctype}
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 

@@ -369,8 +369,8 @@ class StockEntry(StockController):
 		arg = json.loads(arg)
 		item = frappe.db.sql("""select stock_uom, description, item_name,
 			expense_account, buying_cost_center from `tabItem`
-			where name = %s and (ifnull(end_of_life,'')='' or end_of_life ='0000-00-00'
-			or end_of_life > now())""", (arg.get('item_code')), as_dict = 1)
+			where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""",
+			(arg.get('item_code')), as_dict = 1)
 		if not item:
 			msgprint("Item is not active", raise_exception=1)
 

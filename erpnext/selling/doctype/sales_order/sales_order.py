@@ -329,7 +329,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = source.rate and target.amount / flt(source.rate) or obj.qty
+		target.qty = source.rate and target.amount / flt(source.rate) or source.qty
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {

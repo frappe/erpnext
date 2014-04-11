@@ -7,7 +7,7 @@ from frappe import msgprint, _
 from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
 
-class WarehouseNotSet(Exception): pass
+class WarehouseNotSet(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	def onload(self):
