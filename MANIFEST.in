@@ -3,6 +3,9 @@ include requirements.txt
 include *.json
 include *.md
 include *.py
+include *.txt
+include .travis.yml
+recursive-include erpnext *.txt
 recursive-include erpnext *.css
 recursive-include erpnext *.csv
 recursive-include erpnext *.html
