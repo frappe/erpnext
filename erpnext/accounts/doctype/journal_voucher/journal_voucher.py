@@ -113,7 +113,7 @@ class JournalVoucher(AccountsController):
 		r = []
 		if self.cheque_no:
 			if self.cheque_date:
-				r.append(_('Reference #{0} dated {1}').fomrat(self.cheque_no, formatdate(self.cheque_date)))
+				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
 			else :
 				msgprint(_("Please enter Reference date"), raise_exception=1)
 
