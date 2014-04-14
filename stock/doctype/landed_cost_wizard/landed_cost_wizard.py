@@ -11,15 +11,15 @@ class DocType:
 	def __init__(self, doc, doclist=[]):
 		self.doc = doc
 		self.doclist = doclist
-			
+
 	def update_landed_cost(self):
 		"""
-			Add extra cost and recalculate all values in pr, 
+			Add extra cost and recalculate all values in pr,
 			Recalculate valuation rate in all sle after pr posting date
 		"""
-		purchase_receipts = [row.purchase_receipt for row in 
+		purchase_receipts = [row.purchase_receipt for row in
 			self.doclist.get({"parentfield": "lc_pr_details"})]
-			
+
 		self.validate_purchase_receipts(purchase_receipts)
 		self.cancel_pr(purchase_receipts)
 		self.add_charges_in_pr(purchase_receipts)
@@ -34,23 +34,23 @@ class DocType:
 	def add_charges_in_pr(self, purchase_receipts):
 		""" Add additional charges in selected pr proportionately"""
 		total_amt = self.get_total_pr_amt(purchase_receipts)
-		
+
 		for pr in purchase_receipts:
 			pr_bean = webnotes.bean('Purchase Receipt', pr)
 			pr_items = pr_bean.doclist.get({"parentfield": "purchase_tax_details"})
 			idx = max([d.idx for d in pr_items]) if pr_items else 0
-			
+
 			for lc in self.doclist.get({"parentfield": "landed_cost_details"}):
 				amt = flt(lc.amount) * flt(pr_bean.doc.net_total)/ flt(total_amt)
-				
+
 				matched_row = pr_bean.doclist.get({
-					"parentfield": "purchase_tax_details", 
+					"parentfield": "purchase_tax_details",
 					"category": "Valuation",
 					"add_deduct_tax": "Add",
 					"charge_type": "Actual",
 					"account_head": lc.account_head
 				})
-				
+
 				if not matched_row:	# add if not exists
 					ch = addchild(pr_bean.doc, 'purchase_tax_details', 'Purchase Taxes and Charges')
 					ch.category = 'Valuation'
@@ -64,32 +64,34 @@ class DocType:
 					ch.docstatus = 1
 					ch.idx = idx + 1
 					ch.save(1)
+					pr_bean.doclist.append(ch)
 					idx += 1
 				else:	# overwrite if exists
 					matched_row[0].rate = amt
 					matched_row[0].tax_amount = amt
 					matched_row[0].cost_center = lc.cost_center
-					
+
 			pr_bean.run_method("validate")
+			pr_bean.check_mandatory()
 			for d in pr_bean.doclist:
 				d.save()
-	
+
 	def get_total_pr_amt(self, purchase_receipts):
-		return webnotes.conn.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt` 
-			WHERE name in (%s)""" % ', '.join(['%s']*len(purchase_receipts)), 
+		return webnotes.conn.sql("""SELECT SUM(net_total) FROM `tabPurchase Receipt`
+			WHERE name in (%s)""" % ', '.join(['%s']*len(purchase_receipts)),
 			tuple(purchase_receipts))[0][0]
-			
+
 	def cancel_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
 			pr_bean = webnotes.bean("Purchase Receipt", pr)
-			
+
 			pr_bean.run_method("update_ordered_qty")
-			
-			webnotes.conn.sql("""delete from `tabStock Ledger Entry` 
+
+			webnotes.conn.sql("""delete from `tabStock Ledger Entry`
 				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr)
-			webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type='Purchase Receipt' 
+			webnotes.conn.sql("""delete from `tabGL Entry` where voucher_type='Purchase Receipt'
 				and voucher_no=%s""", pr)
-			
+
 	def submit_pr(self, purchase_receipts):
 		for pr in purchase_receipts:
 			pr_bean = webnotes.bean("Purchase Receipt", pr)

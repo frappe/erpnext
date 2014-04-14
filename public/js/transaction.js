@@ -267,7 +267,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	tax_rate: function(doc, cdt, cdn) {
+	// tax rate
+	rate: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
 
