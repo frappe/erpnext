@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import cstr, getdate
 
-from frappe import msgprint
+from frappe import _
 from erpnext.stock.utils import get_valid_serial_nos
 
 from erpnext.utilities.transaction_base import TransactionBase
@@ -46,15 +46,14 @@ class InstallationNote(TransactionBase):
 	def is_serial_no_added(self, item_code, serial_no):
 		ar_required = frappe.db.get_value("Item", item_code, "has_serial_no")
 		if ar_required == 'Yes' and not serial_no:
-			msgprint("Serial No is mandatory for item: " + item_code, raise_exception=1)
+			frappe.throw(_("Serial No is mandatory for Item {0}").format(item_code))
 		elif ar_required != 'Yes' and cstr(serial_no).strip():
-			msgprint("If serial no required, please select 'Yes' in 'Has Serial No' in Item :" +
-				item_code, raise_exception=1)
+			frappe.throw(_("Item {0} is not a serialized Item").format(item_code))
 
 	def is_serial_no_exist(self, item_code, serial_no):
 		for x in serial_no:
 			if not frappe.db.exists("Serial No", x):
-				msgprint("Serial No " + x + " does not exist in the system", raise_exception=1)
+				frappe.throw(_("Serial No {0} does not exist").format(x))
 
 	def is_serial_no_installed(self,cur_s_no,item_code):
 		for x in cur_s_no:
@@ -62,8 +61,7 @@ class InstallationNote(TransactionBase):
 			status = status and status[0][0] or ''
 
 			if status == 'Installed':
-				msgprint("Item "+item_code+" with serial no. " + x + " already installed",
-					raise_exception=1)
+				frappe.throw(_("Item {0} with Serial No {1} is already installed").format(item_code, x))
 
 	def get_prevdoc_serial_no(self, prevdoc_detail_docname):
 		serial_nos = frappe.db.get_value("Delivery Note Item",
@@ -73,8 +71,7 @@ class InstallationNote(TransactionBase):
 	def is_serial_no_match(self, cur_s_no, prevdoc_s_no, prevdoc_docname):
 		for sr in cur_s_no:
 			if sr not in prevdoc_s_no:
-				msgprint("Serial No. " + sr + " is not matching with the Delivery Note " +
-					prevdoc_docname, raise_exception = 1)
+				frappe.throw(_("Serial No {0} does not belong to Delivery Note {1}").format(sr, prevdoc_docname))
 
 	def validate_serial_no(self):
 		cur_s_no, prevdoc_s_no, sr_list = [], [], []
@@ -95,12 +92,11 @@ class InstallationNote(TransactionBase):
 			if d.prevdoc_docname:
 				d_date = frappe.db.get_value("Delivery Note", d.prevdoc_docname, "posting_date")
 				if d_date > getdate(self.inst_date):
-					msgprint("Installation Date can not be before Delivery Date " + cstr(d_date) +
-						" for item "+d.item_code, raise_exception=1)
+					frappe.throw(_("Installation date cannot be before delivery date for Item {0}").format(d.item_code))
 
 	def check_item_table(self):
 		if not(self.get('installed_item_details')):
-			msgprint("Please fetch items from Delivery Note selected", raise_exception=1)
+			frappe.throw(_("Please pull items from Delivery Note"))
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')

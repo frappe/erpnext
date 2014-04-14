@@ -12,8 +12,6 @@ class AppraisalTemplate(Document):
 		self.total_points = 0
 		for d in self.get("kra_sheet"):
 			self.total_points += int(d.per_weightage or 0)
-		
+
 		if int(self.total_points) != 100:
-			frappe.msgprint(_("Total (sum of) points distribution for all goals should be 100.") \
-				+ " " + _("Not") + " " + str(self.total_points),
-				raise_exception=True)
+			frappe.throw(_("Total points for all goals should be 100. It is {0}").format(self.total_points))

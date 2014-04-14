@@ -6,9 +6,9 @@ import frappe
 import frappe.defaults
 
 from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
-	get_first_day, get_last_day, comma_and
+	get_first_day, get_last_day
 from frappe.model.naming import make_autoname
-from frappe import _, msgprint
+from frappe import _, msgprint, throw
 
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -165,8 +165,7 @@ class SalesInvoice(SellingController):
 			if d.time_log_batch:
 				status = frappe.db.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
-					frappe.msgprint(_("Time Log Batch status must be 'Submitted'") + ":" + d.time_log_batch,
-						raise_exception=True)
+					frappe.throw(_("Time Log Batch {0} must be 'Submitted'").format(d.time_log_batch))
 
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from pos settings"""
@@ -263,10 +262,8 @@ class SalesInvoice(SellingController):
 				where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""", d.item_code)
 			acc =	frappe.db.sql("""select account_type from `tabAccount`
 				where name = %s and docstatus != 2""", d.income_account)
-			if not acc:
-				msgprint("Account: "+d.income_account+" does not exist in the system", raise_exception=True)
-			elif item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset':
-				msgprint("Please select income head with account type 'Fixed Asset' as Item %s is an asset item" % d.item_code, raise_exception=True)
+			if item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset':
+				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
@@ -302,7 +299,7 @@ class SalesInvoice(SellingController):
 		if self.is_opening != 'Yes':
 			self.aging_date = self.posting_date
 		elif not self.aging_date:
-			msgprint("Aging Date is mandatory for opening entry")
+			msgprint(_("Ageing Date is mandatory for opening entry"))
 			raise Exception
 
 
@@ -327,7 +324,7 @@ class SalesInvoice(SellingController):
 				for d in self.get('entries'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.get(i.lower().replace(' ','_')):
-						msgprint("%s is mandatory for stock item which is not mentioed against item: %s"%(i,d.item_code), raise_exception=1)
+						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
@@ -337,34 +334,32 @@ class SalesInvoice(SellingController):
 				where name = %s and (customer = %s or
 					ifnull(customer,'')='')""", (self.project_name, self.customer))
 			if not res:
-				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in that project."%(self.customer,self.project_name))
+				msgprint(_("Customer {0} does not belong to project {1}").format(self.customer,self.project_name))
 				raise Exception
 
 	def validate_pos(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
-			msgprint("Cash/Bank Account is mandatory for POS, for making payment entry")
+			msgprint(_("Cash or Bank Account is mandatory for making payment entry"))
 			raise Exception
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
 				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
-			frappe.throw(_("""(Paid amount + Write Off Amount) can not be \
-				greater than Grand Total"""))
+			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 
 	def validate_item_code(self):
 		for d in self.get('entries'):
 			if not d.item_code:
-				msgprint("Please enter Item Code at line no : %s to update stock or remove check from Update Stock in Basic Info Tab." % (d.idx),
-				raise_exception=True)
+				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_delivery_note(self):
 		for d in self.get("entries"):
 			if d.delivery_note:
-				msgprint("""Stock update can not be made against Delivery Note""", raise_exception=1)
+				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
-			msgprint("Please enter Write Off Account", raise_exception=1)
+			msgprint(_("Please enter Write Off Account"), raise_exception=1)
 
 
 	def validate_c_form(self):
@@ -396,9 +391,9 @@ class SalesInvoice(SellingController):
 			ps = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
 				where ifnull(user,'') = '' and company = %s""", self.company)
 			if not ps:
-				msgprint("To make POS entry, please create POS Setting from Accounts --> POS Setting page and refresh the system.", raise_exception=True)
+				msgprint(_("POS Setting required to make POS Entry"), raise_exception=True)
 			elif not ps[0][1]:
-				msgprint("Please enter warehouse in POS Setting")
+				msgprint(_("Warehouse required in POS Setting"))
 			else:
 				w = ps[0][1]
 		return w
@@ -426,7 +421,7 @@ class SalesInvoice(SellingController):
 				else:
 					# show message that the amount is not paid
 					frappe.db.set(self,'paid_amount',0)
-					frappe.msgprint("Note: Payment Entry will not be created since 'Cash/Bank Account' was not specified.")
+					frappe.msgprint(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 		else:
 			frappe.db.set(self,'paid_amount',0)
 
@@ -436,15 +431,15 @@ class SalesInvoice(SellingController):
 				submitted = frappe.db.sql("""select name from `tabSales Order`
 					where docstatus = 1 and name = %s""", d.sales_order)
 				if not submitted:
-					msgprint("Sales Order : "+ cstr(d.sales_order) +" is not submitted")
-					raise Exception , "Validation Error."
+					msgprint(_("Sales Order {0} is not submitted").format(d.sales_order))
+					raise Exception
 
 			if d.delivery_note:
 				submitted = frappe.db.sql("""select name from `tabDelivery Note`
 					where docstatus = 1 and name = %s""", d.delivery_note)
 				if not submitted:
-					msgprint("Delivery Note : "+ cstr(d.delivery_note) +" is not submitted")
-					raise Exception , "Validation Error."
+					msgprint(_("Delivery Note {0} is not submitted").format(d.delivery_note))
+					raise Exception
 
 	def update_stock_ledger(self):
 		sl_entries = []
@@ -594,15 +589,12 @@ class SalesInvoice(SellingController):
 			self.validate_notification_email_id()
 
 			if not self.recurring_type:
-				msgprint(_("Please select: ") + self.meta.get_label("recurring_type"),
+				msgprint(_("Please select {0}").format(self.meta.get_label("recurring_type")),
 				raise_exception=1)
 
 			elif not (self.invoice_period_from_date and \
 					self.invoice_period_to_date):
-				msgprint(comma_and([self.meta.get_label("invoice_period_from_date"),
-					self.meta.get_label("invoice_period_to_date")])
-					+ _(": Mandatory for a Recurring Invoice."),
-					raise_exception=True)
+				throw(_("Invoice Period From and Invoice Period To dates mandatory for recurring invoice"))
 
 	def convert_to_recurring(self):
 		if self.convert_into_recurring_invoice:
@@ -625,20 +617,15 @@ class SalesInvoice(SellingController):
 			from frappe.utils import validate_email_add
 			for email in email_list:
 				if not validate_email_add(email):
-					msgprint(self.meta.get_label("notification_email_address") \
-						+ " - " + _("Invalid Email Address") + ": \"%s\"" % email,
-						raise_exception=1)
+					throw(_("{0} is an invalid email address in 'Notification Email Address'").format(email))
 
 		else:
-			msgprint("Notification Email Addresses not specified for recurring invoice",
-				raise_exception=1)
+			throw(_("'Notification Email Addresses' not specified for recurring invoice"))
 
 	def set_next_date(self):
 		""" Set next date on which auto invoice will be created"""
 		if not self.repeat_on_day_of_month:
-			msgprint("""Please enter 'Repeat on Day of Month' field value.
-				The day of the month on which auto invoice
-				will be generated e.g. 05, 28 etc.""", raise_exception=1)
+			msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
 
 		next_date = get_next_date(self.posting_date,
 			month_map[self.recurring_type], cint(self.repeat_on_day_of_month))
@@ -765,7 +752,7 @@ def assign_task_to_owner(inv, msg, users):
 def get_bank_cash_account(mode_of_payment):
 	val = frappe.db.get_value("Mode of Payment", mode_of_payment, "default_account")
 	if not val:
-		frappe.msgprint("Default Bank / Cash Account not set in Mode of Payment: %s. Please add a Default Account in Mode of Payment master." % mode_of_payment)
+		frappe.msgprint(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
 	return {
 		"cash_bank_account": val
 	}

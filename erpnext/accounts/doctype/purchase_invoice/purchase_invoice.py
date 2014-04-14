@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import cint, cstr, flt, formatdate
 
-from frappe import msgprint, _
+from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
 
 import frappe.defaults
@@ -73,22 +73,15 @@ class PurchaseInvoice(BuyingController):
 	def check_active_purchase_items(self):
 		for d in self.get('entries'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
-				valid_item = frappe.db.sql("select docstatus,is_purchase_item from tabItem where name = %s",d.item_code)
-				if valid_item[0][0] == 2:
-					msgprint("Item : '%s' is Inactive, you can restore it from Trash" %(d.item_code))
-					raise Exception
-				if not valid_item[0][1] == 'Yes':
-					msgprint("Item : '%s' is not Purchase Item"%(d.item_code))
-					raise Exception
+				if frappe.db.get_value("Item", d.item_code, "is_purchase_item") != 'Yes':
+					msgprint(_("Item {0} is not Purchase Item").format(d.item_code), raise_exception=True)
 
 	def check_conversion_rate(self):
 		default_currency = get_company_currency(self.company)
 		if not default_currency:
-			msgprint('Message: Please enter default currency in Company Master')
-			raise Exception
+			throw(_('Please enter default currency in Company Master'))
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
-			msgprint("Message: Please Enter Appropriate Conversion Rate.")
-			raise Exception
+			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_bill_no(self):
 		if self.bill_no and self.bill_no.lower().strip() \
@@ -97,13 +90,12 @@ class PurchaseInvoice(BuyingController):
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""",
 				(self.bill_no, self.credit_to, self.name))
 			if b_no and cstr(b_no[0][2]) == cstr(self.is_opening):
-				msgprint("Please check you have already booked expense against Bill No. %s \
-					in Purchase Invoice %s" % (cstr(b_no[0][0]), cstr(b_no[0][1])),
-					raise_exception=1)
+				throw(_("Bill No {0} already booked in Purchase Invoice {1}").format(cstr(b_no[0][0]),
+					cstr(b_no[0][1])))
 
 			if not self.remarks and self.bill_date:
-				self.remarks = (self.remarks or '') + "\n" + ("Against Bill %s dated %s"
-					% (self.bill_no, formatdate(self.bill_date)))
+				self.remarks = (self.remarks or '') + "\n" \
+					+ _("Against Bill %s dated %s").format(self.bill_no, formatdate(self.bill_date))
 
 		if not self.remarks:
 			self.remarks = "No Remarks"
@@ -130,7 +122,7 @@ class PurchaseInvoice(BuyingController):
 				check_list.append(d.purchase_order)
 				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = %s", d.purchase_order)
 				if stopped:
-					msgprint("One cannot do any transaction against 'Purchase Order' : %s, it's status is 'Stopped'" % (d.purhcase_order))
+					throw(_("Purchase Order {0} is 'Stopped'").format(d.purchase_order))
 					raise Exception
 
 	def validate_with_previous_doc(self):
@@ -176,7 +168,7 @@ class PurchaseInvoice(BuyingController):
 		if self.is_opening != 'Yes':
 			self.aging_date = self.posting_date
 		elif not self.aging_date:
-			msgprint("Aging Date is mandatory for opening entry")
+			msgprint(_("Ageing date is mandatory for opening entry"))
 			raise Exception
 
 	def set_against_expense_account(self):
@@ -199,8 +191,7 @@ class PurchaseInvoice(BuyingController):
 					against_accounts.append(stock_not_billed_account)
 
 			elif not item.expense_account:
-				msgprint(_("Expense account is mandatory for item") + ": " +
-					(item.item_code or item.item_name), raise_exception=1)
+				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
 			elif item.expense_account not in against_accounts:
 				# if no auto_accounting_for_stock or not a stock item
@@ -212,19 +203,18 @@ class PurchaseInvoice(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in self.get('entries'):
 				 if not d.purchase_order:
-					 msgprint("Purchse Order No. required against item %s"%d.item_code)
-					 raise Exception
+					 throw(_("Purchse Order number required for Item {0}").format(d.item_code))
 
 	def pr_required(self):
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			 for d in self.get('entries'):
 				 if not d.purchase_receipt:
-					 msgprint("Purchase Receipt No. required against item %s"%d.item_code)
+					 throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
 					 raise Exception
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
-			msgprint("Please enter Write Off Account", raise_exception=1)
+			throw(_("Please enter Write Off Account"))
 
 	def check_prev_docstatus(self):
 		for d in self.get('entries'):

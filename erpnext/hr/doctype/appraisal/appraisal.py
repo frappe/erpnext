@@ -22,22 +22,22 @@ class Appraisal(Document):
 	def get_employee_name(self):
 		self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 		return self.employee_name
-		
+
 	def validate_dates(self):
 		if getdate(self.start_date) > getdate(self.end_date):
 			frappe.throw(_("End Date can not be less than Start Date"))
-	
+
 	def validate_existing_appraisal(self):
-		chk = frappe.db.sql("""select name from `tabAppraisal` where employee=%s 
-			and (status='Submitted' or status='Completed') 
-			and ((start_date>=%s and start_date<=%s) 
+		chk = frappe.db.sql("""select name from `tabAppraisal` where employee=%s
+			and (status='Submitted' or status='Completed')
+			and ((start_date>=%s and start_date<=%s)
 			or (end_date>=%s and end_date<=%s))""",
 			(self.employee,self.start_date,self.end_date,self.start_date,self.end_date))
 		if chk:
 			frappe.throw("You have already created Appraisal "\
 				+cstr(chk[0][0])+" in the current date range for employee "\
 				+cstr(self.employee_name))
-	
+
 	def calculate_total(self):
 		total, total_w  = 0, 0
 		for d in self.get('appraisal_details'):
@@ -47,29 +47,28 @@ class Appraisal(Document):
 			total_w += flt(d.per_weightage)
 
 		if int(total_w) != 100:
-			msgprint("Total weightage assigned should be 100%. It is :" + str(total_w) + "%", 
-				raise_exception=1)
+			frappe.throw(_("Total weightage assigned should be 100%. It is {0}").format(str(total_w) + "%"))
 
 		if frappe.db.get_value("Employee", self.employee, "user_id") != \
 				frappe.session.user and total == 0:
-			msgprint("Total can't be zero. You must atleast give some points!", raise_exception=1)
+			frappe.throw(_("Total cannot be zero"))
 
 		self.total_score = total
-			
+
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
-	
-	def on_cancel(self): 
+
+	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 @frappe.whitelist()
 def fetch_appraisal_template(source_name, target_doc=None):
 	target_doc = get_mapped_doc("Appraisal Template", source_name, {
 		"Appraisal Template": {
-			"doctype": "Appraisal", 
-		}, 
+			"doctype": "Appraisal",
+		},
 		"Appraisal Template Goal": {
-			"doctype": "Appraisal Goal", 
+			"doctype": "Appraisal Goal",
 		}
 	}, target_doc)
 

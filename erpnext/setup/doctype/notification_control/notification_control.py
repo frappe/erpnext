@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe import msgprint
-
+from frappe import _
 
 from frappe.model.document import Document
 
@@ -18,5 +17,5 @@ class NotificationControl(Document):
 	def set_message(self, arg = ''):
 		fn = self.select_transaction.lower().replace(' ', '_') + '_message'
 		frappe.db.set(self, fn, self.custom_message)
-		msgprint("Custom Message for %s updated!" % self.select_transaction)
+		frappe.msgprint(_("Message updated"))
 

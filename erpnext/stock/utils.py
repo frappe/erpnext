@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe import msgprint, _
+from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, add_days, cint
 from frappe.defaults import get_global_default
@@ -58,8 +58,7 @@ def update_bin(args):
 		bin.update_stock(args)
 		return bin
 	else:
-		msgprint("[Stock Update] Ignored %s since it is not a stock item"
-			% args.get("item_code"))
+		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
@@ -134,22 +133,20 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 		if val:
 			val = val.strip()
 			if val in valid_serial_nos:
-				msgprint("You have entered duplicate serial no: '%s'" % val, raise_exception=1)
+				frappe.throw(_("Serial number {0} entered more than once").format(val))
 			else:
 				valid_serial_nos.append(val)
 
 	if qty and len(valid_serial_nos) != abs(qty):
-		msgprint("Please enter serial nos for "
-			+ cstr(abs(qty)) + " quantity against item code: " + item_code,
-			raise_exception=1)
+		frappe.throw(_("{0} valid serial nos for Item {1}").format(abs(qty), item_code))
 
 	return valid_serial_nos
 
 def validate_warehouse_company(warehouse, company):
 	warehouse_company = frappe.db.get_value("Warehouse", warehouse, "company")
 	if warehouse_company and warehouse_company != company:
-		frappe.msgprint(_("Warehouse does not belong to company.") + " (" + \
-			warehouse + ", " + company +")", raise_exception=InvalidWarehouseCompany)
+		frappe.throw(_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
+			InvalidWarehouseCompany)
 
 def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, voucher_detail_no,
 		stock_ledger_entries, item_sales_bom):

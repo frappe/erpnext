@@ -57,17 +57,16 @@ class JournalVoucher(AccountsController):
 	def validate_debit_credit(self):
 		for d in self.get('entries'):
 			if d.debit and d.credit:
-				msgprint("You cannot credit and debit same account at the same time.",
-				 	raise_exception=1)
+				msgprint(_("You cannot credit and debit same account at the same time."), raise_exception=1)
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Voucher']:
 			if not self.cheque_no or not self.cheque_date:
-				msgprint("Reference No & Reference Date is required for %s" %
-				self.voucher_type, raise_exception=1)
+				msgprint(_("Reference No & Reference Date is required for {0}").format(self.voucher_type),
+					raise_exception=1)
 
 		if self.cheque_date and not self.cheque_no:
-			msgprint("Reference No is mandatory if you entered Reference Date", raise_exception=1)
+			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
 
 	def validate_entries_for_advance(self):
 		for d in self.get('entries'):
@@ -76,19 +75,17 @@ class JournalVoucher(AccountsController):
 				master_type = frappe.db.get_value("Account", d.account, "master_type")
 				if (master_type == 'Customer' and flt(d.credit) > 0) or \
 						(master_type == 'Supplier' and flt(d.debit) > 0):
-					msgprint("Message: Please check Is Advance as 'Yes' against \
-						Account %s if this is an advance entry." % d.account)
+					msgprint(_("Please check 'Is Advance' against Account {0} if this is an advance entry.").format(d.account))
 
 	def validate_against_jv(self):
 		for d in self.get('entries'):
 			if d.against_jv:
 				if d.against_jv == self.name:
-					msgprint("You can not enter current voucher in 'Against JV' column",
-						raise_exception=1)
+					msgprint(_("You can not enter current voucher in 'Against Journal Voucher' column"), raise_exception=1)
 				elif not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 						where account = %s and docstatus = 1 and parent = %s""",
 						(d.account, d.against_jv)):
-					msgprint("Against JV: %s is not valid." % d.against_jv, raise_exception=1)
+					msgprint(_("Journal Voucher {0} does not have account {1}.").format(d.against_jv, d.account), raise_exception=1)
 
 	def set_against_account(self):
 		# Debit = Credit
@@ -104,8 +101,8 @@ class JournalVoucher(AccountsController):
 		self.total_credit = credit
 
 		if abs(self.total_debit-self.total_credit) > 0.001:
-			msgprint("Debit must be equal to Credit. The difference is %s" %
-			 	(self.total_debit-self.total_credit), raise_exception=1)
+			msgprint(_("Debit must equal Credit. The difference is {0}").format(self.total_debit-self.total_credit),
+				raise_exception=1)
 
 		# update against account
 		for d in self.get('entries'):
@@ -116,10 +113,9 @@ class JournalVoucher(AccountsController):
 		r = []
 		if self.cheque_no:
 			if self.cheque_date:
-				r.append('Via Reference #%s dated %s' %
-					(self.cheque_no, formatdate(self.cheque_date)))
+				r.append(_('Reference #{0} dated {1}').fomrat(self.cheque_no, formatdate(self.cheque_date)))
 			else :
-				msgprint("Please enter Reference date", raise_exception=1)
+				msgprint(_("Please enter Reference date"), raise_exception=1)
 
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
@@ -137,12 +133,12 @@ class JournalVoucher(AccountsController):
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d')) or ''))
 
 		if self.user_remark:
-			r.append("User Remark : %s"%self.user_remark)
+			r.append(_("Note: {0}").format(self.user_remark))
 
 		if r:
 			self.remark = ("\n").join(r)
 		else:
-			frappe.msgprint("User Remarks is mandatory", raise_exception=1)
+			frappe.msgprint(_("User Remarks is mandatory"), raise_exception=1)
 
 	def set_aging_date(self):
 		if self.is_opening != 'Yes':
@@ -158,7 +154,7 @@ class JournalVoucher(AccountsController):
 
 			# If customer/supplier account, aging date is mandatory
 			if exists and not self.aging_date:
-				msgprint("Aging Date is mandatory for opening entry", raise_exception=1)
+				msgprint(_("Aging Date is mandatory for opening entry"), raise_exception=1)
 			else:
 				self.aging_date = self.posting_date
 
@@ -195,8 +191,8 @@ class JournalVoucher(AccountsController):
 			credit_days = self.get_credit_days_for(d.account)
 			# Check credit days
 			if credit_days > 0 and not self.get_authorized_user() and cint(date_diff) > credit_days:
-				msgprint("Credit Not Allowed: Cannot allow a check that is dated \
-					more than %s days after the posting date" % credit_days, raise_exception=1)
+				msgprint(_("Maximum allowed credit is {0} days after posting date").format(credit_days),
+					raise_exception=1)
 
 	def get_credit_days_for(self, ac):
 		if not self.credit_days_for.has_key(ac):
@@ -272,7 +268,7 @@ class JournalVoucher(AccountsController):
 
 	def get_balance(self):
 		if not self.get('entries'):
-			msgprint("Please enter atleast 1 entry in 'GL Entries' table")
+			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 		else:
 			flag, self.total_debit, self.total_credit = 0, 0, 0
 			diff = flt(self.difference, 2)
@@ -390,7 +386,7 @@ def get_payment_entry(doc):
 	jv.company = doc.company
 	jv.fiscal_year = doc.fiscal_year
 
-	d1 = jv.append("entries")
+	jv.append("entries")
 	d2 = jv.append("entries")
 
 	if bank_account:

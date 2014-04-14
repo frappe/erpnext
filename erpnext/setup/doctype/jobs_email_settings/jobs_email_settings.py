@@ -11,10 +11,9 @@ from frappe.utils import cint
 from frappe.model.document import Document
 
 class JobsEmailSettings(Document):
-		
+
 	def validate(self):
 		if cint(self.extract_emails) and not (self.email_id and self.host and \
 			self.username and self.password):
-			
-			frappe.msgprint(_("""Host, Email and Password required if emails are to be pulled"""),
-				raise_exception=True)
+
+			frappe.throw(_("""Host, Email and Password required if emails are to be pulled"""))

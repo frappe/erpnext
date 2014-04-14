@@ -6,17 +6,17 @@ import frappe
 
 
 from frappe.utils import flt
+from frappe import _
 
 from frappe.utils.nestedset import NestedSet
-	
+
 class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'
 
-	def validate(self): 
+	def validate(self):
 		for d in self.get('target_details'):
 			if not flt(d.target_qty) and not flt(d.target_amount):
-				msgprint("Either target qty or target amount is mandatory.")
-				raise Exception
+				frappe.throw(_("Either target qty or target amount is mandatory"))
 
 	def on_update(self):
 		super(Territory, self).on_update()

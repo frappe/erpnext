@@ -5,10 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, cstr, flt, now, nowdate
 
-from frappe import msgprint, _
-
-
-
+from frappe import _
 from frappe.model.document import Document
 
 class BOM(Document):
@@ -64,11 +61,7 @@ class BOM(Document):
 
 	def validate_rm_item(self, item):
 		if item[0]['name'] == self.item:
-			msgprint("Item_code: %s in materials tab cannot be same as FG Item",
-				item[0]['name'], raise_exception=1)
-
-		if not item or item[0]['docstatus'] == 2:
-			msgprint("Item %s does not exist in system" % item[0]['item_code'], raise_exception = 1)
+			frappe.throw(_("Raw material cannot be same as main Item"))
 
 	def set_bom_material_details(self):
 		for item in self.get("bom_materials"):
@@ -188,12 +181,10 @@ class BOM(Document):
 		""" Validate main FG item"""
 		item = self.get_item_det(self.item)
 		if not item:
-			msgprint("Item %s does not exists in the system or expired." %
-				self.item, raise_exception = 1)
+			frappe.throw(_("Item {0} does not exists in the system or has expired").format(self.item))
 		elif item[0]['is_manufactured_item'] != 'Yes' \
 				and item[0]['is_sub_contracted_item'] != 'Yes':
-			msgprint("""As Item: %s is not a manufactured / sub-contracted item, \
-				you can not make BOM for it""" % self.item, raise_exception = 1)
+			frappe.throw(_("Item {0} must be manufactured or sub-contracted").format(self.item))
 		else:
 			ret = frappe.db.get_value("Item", self.item, ["description", "stock_uom"])
 			self.description = ret[0]
@@ -204,8 +195,7 @@ class BOM(Document):
 		self.op = []
 		for d in self.get('bom_operations'):
 			if cstr(d.operation_no) in self.op:
-				msgprint("Operation no: %s is repeated in Operations Table" %
-					d.operation_no, raise_exception=1)
+				frappe.throw(_("Operation {0} is repeated in Operations Table").format(d.operation_no))
 			else:
 				# add operation in op list
 				self.op.append(cstr(d.operation_no))
@@ -216,26 +206,20 @@ class BOM(Document):
 		for m in self.get('bom_materials'):
 			# check if operation no not in op table
 			if self.with_operations and cstr(m.operation_no) not in self.op:
-				msgprint("""Operation no: %s against item: %s at row no: %s \
-					is not present at Operations table""" %
-					(m.operation_no, m.item_code, m.idx), raise_exception = 1)
+				frappe.throw(_("Operation {0} not present in Operations Table").format(m.operation_no))
 
 			item = self.get_item_det(m.item_code)
 			if item[0]['is_manufactured_item'] == 'Yes':
 				if not m.bom_no:
-					msgprint("Please enter BOM No aginst item: %s at row no: %s" %
-						(m.item_code, m.idx), raise_exception=1)
+					frappe.throw(_("BOM number is required for manufactured Item {0} in row {1}").format(m.item, m.idx))
 				else:
 					self.validate_bom_no(m.item_code, m.bom_no, m.idx)
 
 			elif m.bom_no:
-				msgprint("""As Item %s is not a manufactured / sub-contracted item, \
-					you can not enter BOM against it (Row No: %s).""" %
-					(m.item_code, m.idx), raise_exception = 1)
+				frappe.throw(_("BOM number not allowed for non-manufactured Item {0} in row {1}").format(m.item_code, m.idx))
 
 			if flt(m.qty) <= 0:
-				msgprint("Please enter qty against raw material: %s at row no: %s" %
-					(m.item_code, m.idx), raise_exception = 1)
+				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 
 			self.check_if_item_repeated(m.item_code, m.operation_no, check_list)
 
@@ -245,14 +229,11 @@ class BOM(Document):
 			and is_active=1 and docstatus=1""",
 			(bom_no, item), as_dict =1)
 		if not bom:
-			msgprint("""Incorrect BOM No: %s against item: %s at row no: %s.
-				It may be inactive or not submitted or does not belong to this item.""" %
-				(bom_no, item, idx), raise_exception = 1)
+			frappe.throw(_("BOM {0} for Item {1} in row {2} is inactive or not submitted").format(bom_no, item, idx))
 
 	def check_if_item_repeated(self, item, op, check_list):
 		if [cstr(item), cstr(op)] in check_list:
-			msgprint(_("Item") + " %s " % (item,) + _("has been entered atleast twice")
-				+ (cstr(op) and _(" against same operation") or ""), raise_exception=1)
+			frappe.throw(_("Item {0} has been entered multiple times against same operation").format(item))
 		else:
 			check_list.append([cstr(item), cstr(op)])
 
@@ -268,8 +249,7 @@ class BOM(Document):
 				count = count + 1
 				for b in boms:
 					if b[0] == self.name:
-						msgprint("""Recursion Occured => '%s' cannot be '%s' of '%s'.
-							""" % (cstr(b[0]), cstr(d[2]), self.name), raise_exception = 1)
+						frappe.throw(_("BOM recursion: {0} cannot be parent or child of {2}").format(b[0], self.name))
 					if b[0]:
 						bom_list.append(b[0])
 
@@ -389,12 +369,9 @@ class BOM(Document):
 					and docstatus = 1 and is_active = 1)""", self.name)
 
 			if act_pbom and act_pbom[0][0]:
-				action = self.docstatus < 2 and _("deactivate") or _("cancel")
-				msgprint(_("Cannot ") + action + _(": It is linked to other active BOM(s)"),
-					raise_exception=1)
+				frappe.throw(_("Cannot deactive or cancle BOM as it is linked with other BOMs"))
 
 def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
-	import json
 	item_dict = {}
 
 	query = """select

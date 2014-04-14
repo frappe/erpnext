@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr
-from frappe import msgprint
+from frappe.utils import flt
+from frappe import msgprint, _, throw
 
 from frappe.model.controller import DocListController
 
@@ -129,19 +129,13 @@ class StatusUpdater(DocListController):
 						item['target_ref_field'] = args['target_ref_field'].replace('_', ' ')
 
 						if not item[args['target_ref_field']]:
-							msgprint("""As %(target_ref_field)s for item: %(item_code)s in \
-							%(parenttype)s: %(parent)s is zero, system will not check \
-							over-delivery or over-billed""" % item)
+							msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
 						elif args.get('no_tolerance'):
 							item['reduce_by'] = item[args['target_field']] - \
 								item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
-								msgprint("""
-									Row #%(idx)s: Max %(target_ref_field)s allowed for <b>Item \
-									%(item_code)s</b> against <b>%(parenttype)s %(parent)s</b> \
-									is <b>""" % item + cstr(item[args['target_ref_field']]) +
-									 """</b>.<br>You must reduce the %(target_ref_field)s by \
-									%(reduce_by)s""" % item, raise_exception=1)
+								msgprint(_("Allowance for over-delivery / over-billing crossed for Item {0}").format(item.item_code))
+								throw(_("{0} must be less than or equal to {1}").format(_(item.target_ref_field), item[args["target_ref_field"]]))
 
 						else:
 							self.check_overflow_with_tolerance(item, args)
@@ -161,18 +155,8 @@ class StatusUpdater(DocListController):
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			msgprint("""
-				Row #%(idx)s: Max %(target_ref_field)s allowed for <b>Item %(item_code)s</b> \
-				against <b>%(parenttype)s %(parent)s</b> is <b>%(max_allowed)s</b>.
-
-				If you want to increase your overflow tolerance, please increase tolerance %% in \
-				Global Defaults or Item master.
-
-				Or, you must reduce the %(target_ref_field)s by %(reduce_by)s
-
-				Also, please check if the order item has already been billed in the Sales Order""" %
-				item, raise_exception=1)
-
+			msgprint(_("Allowance for over-delivery / over-billing crossed for Item {0}").format(item["item_code"]))
+			throw(_("{0} must be less than or equal to {1}").format(_(item["target_ref_field"]), item[args["max_allowed"]]))
 
 	def update_qty(self, change_modified=True):
 		"""

@@ -20,7 +20,7 @@ import mimetypes
 import frappe
 import oauth2client.client
 from frappe.utils import cstr
-from frappe import _, msgprint
+from frappe import _
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
 
@@ -71,17 +71,17 @@ def backup_to_gdrive():
 	backup = new_backup()
 	path = os.path.join(frappe.local.site_path, "public", "backups")
 	filename = os.path.join(path, os.path.basename(backup.backup_path_db))
-	
+
 	# upload files to database folder
-	upload_files(filename, 'application/x-gzip', drive_service, 
+	upload_files(filename, 'application/x-gzip', drive_service,
 		frappe.db.get_value("Backup Manager", None, "database_folder_id"))
-	
+
 	# upload files to files folder
 	did_not_upload = []
 	error_log = []
-	
+
 	files_folder_id = frappe.db.get_value("Backup Manager", None, "files_folder_id")
-	
+
 	frappe.db.close()
 	path = os.path.join(frappe.local.site_path, "public", "files")
 	for filename in os.listdir(path):
@@ -94,7 +94,7 @@ def backup_to_gdrive():
 			mimetype = 'application/x-gzip'
 		else:
 			mimetype = mimetypes.types_map.get("." + ext) or "application/octet-stream"
-		
+
 		#Compare Local File with Server File
 	  	children = drive_service.children().list(folderId=files_folder_id).execute()
 	  	for child in children.get('items', []):
@@ -108,29 +108,28 @@ def backup_to_gdrive():
 			except Exception, e:
 				did_not_upload.append(filename)
 				error_log.append(cstr(e))
-	
+
 	frappe.connect()
 	return did_not_upload, list(set(error_log))
 
 def get_gdrive_flow():
 	from oauth2client.client import OAuth2WebServerFlow
 	from frappe import conf
-	
-	if not "gdrive_client_id" in conf:
-		frappe.msgprint(_("Please set Google Drive access keys in") + " conf.py", 
-		raise_exception=True)
 
-	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret, 
+	if not "gdrive_client_id" in conf:
+		frappe.throw(_("Please set Google Drive access keys in {0}"),format("site_config.json"))
+
+	flow = OAuth2WebServerFlow(conf.gdrive_client_id, conf.gdrive_client_secret,
 		"https://www.googleapis.com/auth/drive", 'urn:ietf:wg:oauth:2.0:oob')
 	return flow
-	
+
 @frappe.whitelist()
 def gdrive_callback(verification_code = None):
 	flow = get_gdrive_flow()
 	if verification_code:
 		credentials = flow.step2_exchange(verification_code)
 		allowed = 1
-		
+
 	# make folders to save id
 	http = httplib2.Http()
 	http = credentials.authorize(http)
@@ -145,7 +144,7 @@ def gdrive_callback(verification_code = None):
 	final_credentials = credentials.to_json()
 	frappe.db.set_value("Backup Manager", "Backup Manager", "gdrive_credentials", final_credentials)
 
-	frappe.msgprint("Updated")
+	frappe.msgprint(_("Updated"))
 
 def create_erpnext_folder(service):
 	if not frappe.db:

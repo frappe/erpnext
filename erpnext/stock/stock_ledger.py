@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import msgprint
+from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
 import json
@@ -309,17 +309,11 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 
 def _raise_exceptions(args, verbose=1):
 	deficiency = min(e["diff"] for e in _exceptions)
-	msg = """Negative stock error:
-		Cannot complete this transaction because stock will start
-		becoming negative (%s) for Item <b>%s</b> in Warehouse
-		<b>%s</b> on <b>%s %s</b> in Transaction %s %s.
-		Total Quantity Deficiency: <b>%s</b>""" % \
-		(_exceptions[0]["diff"], args.get("item_code"), args.get("warehouse"),
-		_exceptions[0]["posting_date"], _exceptions[0]["posting_time"],
-		_exceptions[0]["voucher_type"], _exceptions[0]["voucher_no"],
-		abs(deficiency))
+	msg = _("Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5}").format(args["item_code"],
+		args.get("warehouse"), _exceptions[0]["posting_date"], _exceptions[0]["posting_time"],
+		_(_exceptions[0]["voucher_type"]), _exceptions[0]["voucher_no"], deficiency)
 	if verbose:
-		msgprint(msg, raise_exception=NegativeStockError)
+		frappe.throw(msg, NegativeStockError)
 	else:
 		raise NegativeStockError, msg
 

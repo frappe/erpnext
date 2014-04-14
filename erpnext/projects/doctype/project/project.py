@@ -5,13 +5,13 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import flt, getdate
-from frappe import msgprint
+from frappe import _
 from erpnext.utilities.transaction_base import delete_events
 
 from frappe.model.document import Document
 
 class Project(Document):
-	
+
 	def get_gross_profit(self):
 		pft, per_pft =0, 0
 		pft = flt(self.project_value) - flt(self.est_material_cost)
@@ -19,19 +19,18 @@ class Project(Document):
 		per_pft = (flt(pft) / flt(self.project_value)) * 100
 		ret = {'gross_margin_value': pft, 'per_gross_margin': per_pft}
 		return ret
-		
+
 	def validate(self):
 		"""validate start date before end date"""
 		if self.project_start_date and self.completion_date:
 			if getdate(self.completion_date) < getdate(self.project_start_date):
-				msgprint("Expected Completion Date can not be less than Project Start Date")
-				raise Exception
-				
+				frappe.throw(_("Expected Completion Date can not be less than Project Start Date"))
+
 	def on_update(self):
 		self.add_calendar_event()
-		
+
 	def update_percent_complete(self):
-		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", 
+		total = frappe.db.sql("""select count(*) from tabTask where project=%s""",
 			self.name)[0][0]
 		if total:
 			completed = frappe.db.sql("""select count(*) from tabTask where
@@ -42,7 +41,7 @@ class Project(Document):
 	def add_calendar_event(self):
 		# delete any earlier event for this project
 		delete_events(self.doctype, self.name)
-		
+
 		# add events
 		for milestone in self.get("project_milestones"):
 			if milestone.milestone_date:
@@ -57,6 +56,6 @@ class Project(Document):
 					"ref_type": self.doctype,
 					"ref_name": self.name
 				}).insert()
-	
+
 	def on_trash(self):
 		delete_events(self.doctype, self.name)

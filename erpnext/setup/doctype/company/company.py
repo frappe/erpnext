@@ -3,9 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint
+from frappe import _
 
-from frappe.utils import cstr, cint
+from frappe.utils import cint
 import frappe.defaults
 
 
@@ -13,10 +13,10 @@ from frappe.model.document import Document
 
 class Company(Document):
 
-		
+
 	def onload(self):
 		self.set("__transactions_exist", self.check_if_transactions_exist())
-		
+
 	def check_if_transactions_exist(self):
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
@@ -25,31 +25,30 @@ class Company(Document):
 					limit 1""" % (doctype, "%s"), self.name):
 						exists = True
 						break
-		
+
 		return exists
-		
+
 	def validate(self):
 		if self.get('__islocal') and len(self.abbr) > 5:
-			frappe.msgprint("Abbreviation cannot have more than 5 characters",
-				raise_exception=1)
-				
+			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
+
 		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
 		if self.default_currency and self.previous_default_currency and \
 			self.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
-				msgprint(_("Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency."), raise_exception=True)
+				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
 
 	def on_update(self):
-		if not frappe.db.sql("""select name from tabAccount 
+		if not frappe.db.sql("""select name from tabAccount
 			where company=%s and docstatus<2 limit 1""", self.name):
 			self.create_default_accounts()
 			self.create_default_warehouses()
 			self.create_default_web_page()
-		
-		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger", 
+
+		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger",
 				"company": self.name}):
 			self.create_default_cost_center()
-			
+
 		self.set_default_accounts()
 
 		if self.default_currency:
@@ -58,7 +57,7 @@ class Company(Document):
 	def create_default_warehouses(self):
 		for whname in ("Stores", "Work In Progress", "Finished Goods"):
 			if not frappe.db.exists("Warehouse", whname + " - " + self.abbr):
-				stock_group = frappe.db.get_value("Account", {"account_type": "Stock", 
+				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
 					"group_or_ledger": "Group"})
 				if stock_group:
 					frappe.get_doc({
@@ -67,7 +66,7 @@ class Company(Document):
 						"company": self.name,
 						"create_account_under": stock_group
 					}).insert()
-			
+
 	def create_default_web_page(self):
 		if not frappe.db.get_value("Website Settings", None, "home_page") and \
 				not frappe.db.sql("select name from tabCompany where name!=%s", self.name):
@@ -80,7 +79,7 @@ class Company(Document):
 					"description": "Standard Home Page for " + self.name,
 					"main_section": webfile.read() % self.as_dict()
 				}).insert()
-			
+
 				# update in home page in settings
 				website_settings = frappe.get_doc("Website Settings", "Website Settings")
 				website_settings.home_page = webpage.name
@@ -109,7 +108,7 @@ class Company(Document):
 			self.create_standard_accounts()
 			frappe.db.set(self, "receivables_group", "Accounts Receivable - " + self.abbr)
 			frappe.db.set(self, "payables_group", "Accounts Payable - " + self.abbr)
-			
+
 	def import_chart_of_account(self):
 		chart = frappe.get_doc("Chart of Accounts", self.chart_of_accounts)
 		chart.create_accounts(self.name)
@@ -120,7 +119,7 @@ class Company(Document):
 			"freeze_account": "No",
 			"master_type": "",
 		})
-		
+
 		for d in self.fld_dict.keys():
 			account.set(d, (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.abbr or lst[self.fld_dict[d]])
 		account.insert()
@@ -128,17 +127,17 @@ class Company(Document):
 	def set_default_accounts(self):
 		def _set_default_accounts(accounts):
 			for field, account_type in accounts.items():
-				account = frappe.db.get_value("Account", {"account_type": account_type, 
+				account = frappe.db.get_value("Account", {"account_type": account_type,
 					"group_or_ledger": "Ledger", "company": self.name})
 
 				if account and not self.get(field):
 					frappe.db.set(self, field, account)
-			
+
 		_set_default_accounts({
 			"default_cash_account": "Cash",
 			"default_bank_account": "Bank"
 		})
-		
+
 		if cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
 			_set_default_accounts({
 				"stock_received_but_not_billed": "Stock Received But Not Billed",
@@ -153,9 +152,9 @@ class Company(Document):
 				'company':self.name,
 				'group_or_ledger':'Group',
 				'parent_cost_center':''
-			}, 
+			},
 			{
-				'cost_center_name':'Main', 
+				'cost_center_name':'Main',
 				'company':self.name,
 				'group_or_ledger':'Ledger',
 				'parent_cost_center':self.name + ' - ' + self.abbr
@@ -165,11 +164,11 @@ class Company(Document):
 			cc.update({"doctype": "Cost Center"})
 			cc_doc = frappe.get_doc(cc)
 			cc_doc.ignore_permissions = True
-		
+
 			if cc.get("cost_center_name") == self.name:
 				cc_doc.ignore_mandatory = True
 			cc_doc.insert()
-			
+
 		frappe.db.set(self, "cost_center", "Main - " + self.abbr)
 
 	def on_trash(self):
@@ -180,33 +179,33 @@ class Company(Document):
 		if not rec:
 			#delete tabAccount
 			frappe.db.sql("delete from `tabAccount` where company = %s order by lft desc, rgt desc", self.name)
-			
+
 			#delete cost center child table - budget detail
 			frappe.db.sql("delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc where bd.parent = cc.name and cc.company = %s", self.name)
 			#delete cost center
 			frappe.db.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.name)
-			
+
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
-			
+
 		frappe.defaults.clear_default("company", value=self.name)
-			
+
 		frappe.db.sql("""update `tabSingles` set value=""
-			where doctype='Global Defaults' and field='default_company' 
+			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
-			
+
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
 			frappe.throw(_("Sorry, companies cannot be merged"))
-	
+
 	def after_rename(self, olddn, newdn, merge=False):
 		frappe.db.set(self, "company_name", newdn)
 
-		frappe.db.sql("""update `tabDefaultValue` set defvalue=%s 
+		frappe.db.sql("""update `tabDefaultValue` set defvalue=%s
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
 		frappe.defaults.clear_cache()
-		
+
 	def create_standard_accounts(self):
 		self.fld_dict = {
 			'account_name': 0,
@@ -217,7 +216,7 @@ class Company(Document):
 			'company': 5,
 			'tax_rate': 6
 		}
-		
+
 		acc_list_common = [
 			['Application of Funds (Assets)','','Group','','Balance Sheet',self.name,''],
 				['Current Assets','Application of Funds (Assets)','Group','','Balance Sheet',self.name,''],
@@ -282,7 +281,7 @@ class Company(Document):
 				['Current Liabilities','Source of Funds (Liabilities)','Group','','Balance Sheet',self.name,''],
 					['Accounts Payable','Current Liabilities','Group','','Balance Sheet',self.name,''],
 					['Stock Liabilities','Current Liabilities','Group','','Balance Sheet',self.name,''],
-						['Stock Received But Not Billed', 'Stock Liabilities', 'Ledger', 'Stock Received But Not Billed', 'Balance Sheet', self.name, ''],					
+						['Stock Received But Not Billed', 'Stock Liabilities', 'Ledger', 'Stock Received But Not Billed', 'Balance Sheet', self.name, ''],
 					['Duties and Taxes','Current Liabilities','Group','','Balance Sheet',self.name,''],
 					['Loans (Liabilities)','Current Liabilities','Group','','Balance Sheet',self.name,''],
 						['Secured Loans','Loans (Liabilities)','Group','','Balance Sheet',self.name,''],
@@ -291,7 +290,7 @@ class Company(Document):
 				['Temporary Accounts (Liabilities)','Source of Funds (Liabilities)','Group','','Balance Sheet',self.name,''],
 					['Temporary Account (Liabilities)','Temporary Accounts (Liabilities)','Ledger','','Balance Sheet',self.name,'']
 		]
-		
+
 		acc_list_india = [
 			['CENVAT Capital Goods','Tax Assets','Ledger','Chargeable','Balance Sheet',self.name,''],
 			['CENVAT','Tax Assets','Ledger','Chargeable','Balance Sheet',self.name,''],
@@ -342,23 +341,23 @@ class Company(Document):
 @frappe.whitelist()
 def replace_abbr(company, old, new):
 	frappe.db.set_value("Company", company, "abbr", new)
-	
+
 	def _rename_record(dt):
 		for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
 			parts = d[0].split(" - ")
 			if parts[-1].lower() == old.lower():
 				name_without_abbr = " - ".join(parts[:-1])
 				frappe.rename_doc(dt, d[0], name_without_abbr + " - " + new)
-		
+
 	for dt in ["Account", "Cost Center", "Warehouse"]:
 		_rename_record(dt)
 		frappe.db.commit()
 
 def get_name_with_abbr(name, company):
-	company_abbr = frappe.db.get_value("Company", company, "abbr")		
+	company_abbr = frappe.db.get_value("Company", company, "abbr")
 	parts = name.split(" - ")
 
 	if parts[-1].lower() != company_abbr.lower():
 		parts.append(company_abbr)
-			
+
 	return " - ".join(parts)

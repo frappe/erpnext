@@ -6,7 +6,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, add_days, date_diff
-from frappe import msgprint, _
+from frappe import _
 from frappe.utils.datautils import UnicodeWriter
 from frappe.model.document import Document
 
@@ -17,32 +17,32 @@ class UploadAttendance(Document):
 def get_template():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
-	
+
 	args = frappe.local.form_dict
 
 	w = UnicodeWriter()
 	w = add_header(w)
-	
+
 	w = add_data(w, args)
 
 	# write out response as a type csv
 	frappe.response['result'] = cstr(w.getvalue())
 	frappe.response['type'] = 'csv'
 	frappe.response['doctype'] = "Attendance"
-	
+
 def add_header(w):
 	status = ", ".join((frappe.get_meta("Attendance").get_field("status").options or "").strip().split("\n"))
 	w.writerow(["Notes:"])
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
 	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
-	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status", 
+	w.writerow(["ID", "Employee", "Employee Name", "Date", "Status",
 		"Fiscal Year", "Company", "Naming Series"])
 	return w
-	
+
 def add_data(w, args):
 	from erpnext.accounts.utils import get_fiscal_year
-	
+
 	dates = get_dates(args)
 	employees = get_active_employees()
 	existing_attendance_records = get_existing_attendance_records(args)
@@ -54,9 +54,9 @@ def add_data(w, args):
 					existing_attendance = existing_attendance_records[tuple([date, employee.name])]
 			row = [
 				existing_attendance and existing_attendance.name or "",
-				employee.name, employee.employee_name, date, 
+				employee.name, employee.employee_name, date,
 				existing_attendance and existing_attendance.status or "",
-				get_fiscal_year(date)[0], employee.company, 
+				get_fiscal_year(date)[0], employee.company,
 				existing_attendance and existing_attendance.naming_series or get_naming_series(),
 			]
 			w.writerow(row)
@@ -67,28 +67,27 @@ def get_dates(args):
 	no_of_days = date_diff(add_days(args["to_date"], 1), args["from_date"])
 	dates = [add_days(args["from_date"], i) for i in range(0, no_of_days)]
 	return dates
-	
+
 def get_active_employees():
-	employees = frappe.db.sql("""select name, employee_name, company 
+	employees = frappe.db.sql("""select name, employee_name, company
 		from tabEmployee where docstatus < 2 and status = 'Active'""", as_dict=1)
 	return employees
-	
+
 def get_existing_attendance_records(args):
-	attendance = frappe.db.sql("""select name, att_date, employee, status, naming_series 
-		from `tabAttendance` where att_date between %s and %s and docstatus < 2""", 
+	attendance = frappe.db.sql("""select name, att_date, employee, status, naming_series
+		from `tabAttendance` where att_date between %s and %s and docstatus < 2""",
 		(args["from_date"], args["to_date"]), as_dict=1)
-		
+
 	existing_attendance = {}
 	for att in attendance:
 		existing_attendance[tuple([att.att_date, att.employee])] = att
-	
+
 	return existing_attendance
-	
+
 def get_naming_series():
 	series = frappe.get_meta("Attendance").get_field("naming_series").options.strip().split("\n")
 	if not series:
-		msgprint("""Please create naming series for Attendance \
-			through Setup -> Numbering Series.""", raise_exception=1)
+		frappe.throw(_("Please setup numbering series for Attendance via Setup > Numbering Series"))
 	return series[0]
 
 
@@ -96,10 +95,10 @@ def get_naming_series():
 def upload():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
-	
+
 	from frappe.utils.datautils import read_csv_content_from_uploaded_file
 	from frappe.modules import scrub
-	
+
 	rows = read_csv_content_from_uploaded_file()
 	if not rows:
 		msg = [_("Please select a csv file")]
@@ -109,10 +108,9 @@ def upload():
 	columns[3] = "att_date"
 	ret = []
 	error = False
-	
+
 	from frappe.utils.datautils import check_record, import_doc
-	doctype_dl = frappe.get_meta("Attendance")
-	
+
 	for i, row in enumerate(rows[5:]):
 		if not row: continue
 		row_idx = i + 5
@@ -120,18 +118,18 @@ def upload():
 		d["doctype"] = "Attendance"
 		if d.name:
 			d["docstatus"] = frappe.db.get_value("Attendance", d.name, "docstatus")
-			
+
 		try:
 			check_record(d)
 			ret.append(import_doc(d, "Attendance", 1, row_idx, submit=True))
 		except Exception, e:
 			error = True
-			ret.append('Error for row (#%d) %s : %s' % (row_idx, 
+			ret.append('Error for row (#%d) %s : %s' % (row_idx,
 				len(row)>1 and row[1] or "", cstr(e)))
 			frappe.errprint(frappe.get_traceback())
 
 	if error:
-		frappe.db.rollback()		
+		frappe.db.rollback()
 	else:
 		frappe.db.commit()
 	return {"messages": ret, "error": error}

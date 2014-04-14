@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import cstr, flt, cint
 
-from frappe import msgprint, _
+from frappe import _
 import frappe.defaults
 from erpnext.stock.utils import update_bin
 
@@ -86,21 +86,18 @@ class PurchaseReceipt(BuyingController):
 
 			# Check Received Qty = Accepted Qty + Rejected Qty
 			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
-
-				msgprint("Sum of Accepted Qty and Rejected Qty must be equal to Received quantity. Error for Item: " + cstr(d.item_code))
-				raise Exception
+				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
 
 
 	def validate_challan_no(self):
 		"Validate if same challan no exists for same supplier in a submitted purchase receipt"
 		if self.challan_no:
-			exists = frappe.db.sql("""
+			exists = frappe.db.sql_list("""
 			SELECT name FROM `tabPurchase Receipt`
 			WHERE name!=%s AND supplier=%s AND challan_no=%s
 		AND docstatus=1""", (self.name, self.supplier, self.challan_no))
 			if exists:
-				frappe.msgprint("Another Purchase Receipt using the same Challan No. already exists.\
-			Please enter a valid Challan No.", raise_exception=1)
+				frappe.throw(_("Supplier delivery number duplicate in {0}").format(exists))
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc(self.tname, {
@@ -129,8 +126,7 @@ class PurchaseReceipt(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in self.get('purchase_receipt_details'):
 				 if not d.prevdoc_docname:
-					 msgprint("Purchse Order No. required against item %s"%d.item_code)
-					 raise Exception
+					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
 	def update_stock(self):
 		sl_entries = []
@@ -212,7 +208,7 @@ class PurchaseReceipt(BuyingController):
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
-				msgprint("Item: " + d.item_code + " requires QA Inspection. Please enter QA No or report to authorized person to create Quality Inspection")
+				frappe.throw(_("Quality Inspection required for Item {0}").format(d.item_code))
 
 	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
@@ -251,9 +247,7 @@ class PurchaseReceipt(BuyingController):
 			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
 			(self.name))
 		if submit_rv:
-			msgprint("Purchase Invoice : " + cstr(self.submit_rv[0][0]) + " has already been submitted !")
-			raise Exception , "Validation Error."
-
+			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
 
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')

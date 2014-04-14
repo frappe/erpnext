@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import frappe
 import frappe.utils
 
-from frappe.utils import cstr, flt, getdate
+from frappe.utils import cstr, flt, getdate, comma_and
 
-from frappe import msgprint
+from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -23,22 +23,19 @@ class SalesOrder(SellingController):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
 			if getdate(self.transaction_date) > getdate(self.delivery_date):
-				msgprint("Expected Delivery Date cannot be before Sales Order Date")
-				raise Exception
+				frappe.throw(_("Expected Delivery Date cannot be before Sales Order Date"))
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
 		if self.po_date and self.delivery_date and getdate(self.po_date) > getdate(self.delivery_date):
-			msgprint("Expected Delivery Date cannot be before Purchase Order Date")
-			raise Exception
+			frappe.throw(_("Expected Delivery Date cannot be before Purchase Order Date"))
 
 		if self.po_no and self.customer:
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
 			if so and so[0][0]:
-				msgprint("""Another Sales Order (%s) exists against same PO No and Customer.
-					Please be sure, you are not making duplicate entry.""" % so[0][0])
+				frappe.msgprint(_("Warning: Sales Order {0} already exists against same Purchase Order number").format(so[0][0]))
 
 	def validate_for_items(self):
 		check_list, flag = [], 0
@@ -49,16 +46,15 @@ class SalesOrder(SellingController):
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if not d.warehouse:
-					msgprint("""Please enter Reserved Warehouse for item %s
-						as it is stock Item""" % d.item_code, raise_exception=1)
+					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
 
 				if e in check_list:
-					msgprint("Item %s has been entered twice." % d.item_code)
+					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
 				else:
 					check_list.append(e)
 			else:
 				if f in chk_dupl_itm:
-					msgprint("Item %s has been entered twice." % d.item_code)
+					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
 
@@ -74,16 +70,14 @@ class SalesOrder(SellingController):
 			if d.prevdoc_docname:
 				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.order_type))
 				if not res:
-					msgprint("""Order Type (%s) should be same in Quotation: %s \
-						and current Sales Order""" % (self.order_type, d.prevdoc_docname))
+					frappe.msgprint(_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type))
 
 	def validate_order_type(self):
 		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales' and not self.delivery_date:
-			msgprint("Please enter 'Expected Delivery Date'")
-			raise Exception
+			frappe.throw(_("Please enter 'Expected Delivery Date'"))
 
 		self.validate_sales_mntc_quotation()
 
@@ -93,8 +87,7 @@ class SalesOrder(SellingController):
 				and (customer = %s or ifnull(customer,'')='')""",
 					(self.project_name, self.customer))
 			if not res:
-				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.customer,self.project_name,self.project_name))
-				raise Exception
+				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
 
 	def validate(self):
 		super(SalesOrder, self).validate()
@@ -169,8 +162,8 @@ class SalesOrder(SellingController):
 	def on_cancel(self):
 		# Cannot cancel stopped SO
 		if self.status == 'Stopped':
-			msgprint("Sales Order : '%s' cannot be cancelled as it is Stopped. Unstop it for any further transactions" %(self.name))
-			raise Exception
+			frappe.throw(_("Stopped order cannot be cancelled. Unstop to cancel."))
+
 		self.check_nextdoc_docstatus()
 		self.update_stock_ledger(update_stock = -1)
 
@@ -180,55 +173,56 @@ class SalesOrder(SellingController):
 
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
-		submit_dn = frappe.db.sql("select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2 where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1", self.name)
+		submit_dn = frappe.db.sql_list("""select t1.name from `tabDelivery Note` t1,`tabDelivery Note Item` t2
+			where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1""", self.name)
 		if submit_dn:
-			msgprint("Delivery Note : " + cstr(submit_dn[0][0]) + " has been submitted against " + cstr(self.doctype) + ". Please cancel Delivery Note : " + cstr(submit_dn[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
+			frappe.throw(_("Delivery Notes {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_dn)))
 
 		# Checks Sales Invoice
-		submit_rv = frappe.db.sql("""select t1.name
+		submit_rv = frappe.db.sql_list("""select t1.name
 			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
 			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""",
 			self.name)
 		if submit_rv:
-			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted against " +cstr(self.doctype)+ ". Please cancel Sales Invoice : "+ cstr(submit_rv[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
+			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_rv)))
 
 		#check maintenance schedule
-		submit_ms = frappe.db.sql("select t1.name from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.name)
+		submit_ms = frappe.db.sql_list("""select t1.name from `tabMaintenance Schedule` t1,
+			`tabMaintenance Schedule Item` t2
+			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""", self.name)
 		if submit_ms:
-			msgprint("Maintenance Schedule : " + cstr(submit_ms[0][0]) + " has already been submitted against " +cstr(self.doctype)+ ". Please cancel Maintenance Schedule : "+ cstr(submit_ms[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
+			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_ms)))
 
 		# check maintenance visit
-		submit_mv = frappe.db.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1",self.name)
+		submit_mv = frappe.db.sql_list("""select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
+			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""",self.name)
 		if submit_mv:
-			msgprint("Maintenance Visit : " + cstr(submit_mv[0][0]) + " has already been submitted against " +cstr(self.doctype)+ ". Please cancel Maintenance Visit : " + cstr(submit_mv[0][0]) + " first and then cancel "+ cstr(self.doctype), raise_exception = 1)
+			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order").format(comma_and(submit_mv)))
 
 		# check production order
-		pro_order = frappe.db.sql("""select name from `tabProduction Order` where sales_order = %s and docstatus = 1""", self.name)
+		pro_order = frappe.db.sql_list("""select name from `tabProduction Order`
+			where sales_order = %s and docstatus = 1""", self.name)
 		if pro_order:
-			msgprint("""Production Order: %s exists against this sales order.
-				Please cancel production order first and then cancel this sales order""" %
-				pro_order[0][0], raise_exception=1)
+			frappe.throw(_("Production Order {0} must be cancelled before cancelling this Sales Order").format(comma_and(pro_order)))
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" %
 			( mod_db, cstr(self.modified)))
 		if date_diff and date_diff[0][0]:
-			msgprint("%s: %s has been modified after you have opened. Please Refresh"
-				% (self.doctype, self.name), raise_exception=1)
+			frappe.throw(_("{0} {1} has been modified. Please Refresh").format(self.doctype, self.name))
 
 	def stop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(-1)
 		frappe.db.set(self, 'status', 'Stopped')
-		msgprint("""%s: %s has been Stopped. To make transactions against this Sales Order
-			you need to Unstop it.""" % (self.doctype, self.name))
+		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
 		self.update_stock_ledger(1)
 		frappe.db.set(self, 'status', 'Submitted')
-		msgprint("%s: %s has been Unstopped" % (self.doctype, self.name))
+		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
 
 
 	def update_stock_ledger(self, update_stock):

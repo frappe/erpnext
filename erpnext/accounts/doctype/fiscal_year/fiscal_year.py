@@ -9,19 +9,18 @@ from frappe.utils import getdate
 from frappe.model.document import Document
 
 class FiscalYear(Document):
-		
+
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
 		frappe.get_doc("Global Defaults").on_update()
-		
+
 		# clear cache
 		frappe.clear_cache()
-		
-		msgprint(self.name + _(""" is now the default Fiscal Year. \
-			Please refresh your browser for the change to take effect."""))
+
+		msgprint(_("{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.").format(self.name))
 
 	def validate(self):
-		year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date 
+		year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date
 			from `tabFiscal Year` where name=%s""", (self.name))
 
 		if year_start_end_dates:
@@ -36,7 +35,7 @@ class FiscalYear(Document):
 		if (getdate(self.year_end_date) - getdate(self.year_start_date)).days > 366:
 			frappe.throw(_("Year Start Date and Year End Date are not within Fiscal Year."))
 
-		year_start_end_dates = frappe.db.sql("""select name, year_start_date, year_end_date 
+		year_start_end_dates = frappe.db.sql("""select name, year_start_date, year_end_date
 			from `tabFiscal Year` where name!=%s""", (self.name))
 
 		for fiscal_year, ysd, yed in year_start_end_dates:

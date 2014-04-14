@@ -29,8 +29,7 @@ class TimeLogBatch(Document):
 
 	def validate_time_log_is_submitted(self, tl):
 		if tl.status != "Submitted" and self.docstatus == 0:
-			frappe.msgprint(_("Time Log must have status 'Submitted'") + \
-				" :" + tl.name + " (" + _(tl.status) + ")", raise_exception=True)
+			frappe.throw(_("Time Log {0} must be 'Submitted'").format(tl.name))
 
 	def set_status(self):
 		self.status = {

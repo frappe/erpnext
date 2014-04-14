@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
-from frappe import msgprint, throw, _
+from frappe import throw, _
 from frappe.utils import formatdate
 from erpnext.utilities import build_filter_conditions
 
@@ -29,9 +29,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
 
 	if not fy:
-		error_msg = """%s %s not in any Fiscal Year""" % (label, formatdate(date))
-		error_msg = """{msg}: {date}""".format(msg=_("Fiscal Year does not exist for date"),
-			date=formatdate(date))
+		error_msg = _("""{0} {1} not in any Fiscal Year""").format(label, formatdate(date))
 		if verbose: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 
@@ -40,12 +38,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 def validate_fiscal_year(date, fiscal_year, label="Date"):
 	years = [f[0] for f in get_fiscal_years(date, label=label)]
 	if fiscal_year not in years:
-		throw(("%(label)s '%(posting_date)s': " + _("not within Fiscal Year") + \
-			": '%(fiscal_year)s'") % {
-				"label": label,
-				"posting_date": formatdate(date),
-				"fiscal_year": fiscal_year
-			})
+		throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
 
 @frappe.whitelist()
 def get_balance_on(account=None, date=None):
@@ -62,7 +55,7 @@ def get_balance_on(account=None, date=None):
 
 	try:
 		year_start_date = get_fiscal_year(date, verbose=0)[1]
-	except FiscalYearError, e:
+	except FiscalYearError:
 		if getdate(date) > getdate(nowdate()):
 			# if fiscal year not found and the date is greater than today
 			# get fiscal year for today's date and its corresponding year start date
@@ -232,9 +225,7 @@ def remove_against_link_from_jv(ref_type, ref_no, against_field):
 			and voucher_no != ifnull(against_voucher, '')""",
 			(now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint("{msg} {linked_jv}".format(msg = _("""Following linked Journal Vouchers \
-			made against this transaction has been unlinked. You can link them again with other \
-			transactions via Payment Reconciliation Tool."""), linked_jv="\n".join(linked_jv)))
+		frappe.msgprint(_("Following Journal Vouchers Unlinked: {0}".format("\n".join(linked_jv))))
 
 
 @frappe.whitelist()

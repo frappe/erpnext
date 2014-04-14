@@ -7,7 +7,7 @@ import frappe.defaults
 
 from frappe.utils import cstr, cint, flt, comma_or, nowdate
 
-from frappe import msgprint, _
+from frappe import _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
@@ -67,15 +67,13 @@ class StockEntry(StockController):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
 			"Manufacture/Repack", "Subcontract", "Sales Return", "Purchase Return"]
 		if self.purpose not in valid_purposes:
-			msgprint(_("Purpose must be one of ") + comma_or(valid_purposes),
-				raise_exception=True)
+			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
 		for item in self.get("mtn_details"):
 			if item.item_code not in stock_items:
-				msgprint(_("""Only Stock Items are allowed for Stock Entry"""),
-					raise_exception=True)
+				frappe.throw(_("""Only Stock Items are allowed for Stock Entry"""))
 
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
@@ -100,15 +98,13 @@ class StockEntry(StockController):
 				d.t_warehouse = self.to_warehouse
 
 			if not (d.s_warehouse or d.t_warehouse):
-				msgprint(_("Atleast one warehouse is mandatory"), raise_exception=1)
+				frappe.throw(_("Atleast one warehouse is mandatory"))
 
 			if self.purpose in source_mandatory and not d.s_warehouse:
-				msgprint(_("Row # ") + "%s: " % cint(d.idx)
-					+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
+				frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose in target_mandatory and not d.t_warehouse:
-				msgprint(_("Row # ") + "%s: " % cint(d.idx)
-					+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
+				frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose == "Manufacture/Repack":
 				if validate_for_manufacture_repack:
@@ -116,23 +112,18 @@ class StockEntry(StockController):
 						d.s_warehouse = None
 
 						if not d.t_warehouse:
-							msgprint(_("Row # ") + "%s: " % cint(d.idx)
-								+ _("Target Warehouse") + _(" is mandatory"), raise_exception=1)
+							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 						elif pro_obj and cstr(d.t_warehouse) != pro_obj.fg_warehouse:
-							msgprint(_("Row # ") + "%s: " % cint(d.idx)
-								+ _("Target Warehouse") + _(" should be same as that in ")
-								+ _("Production Order"), raise_exception=1)
+							frappe.throw(_("Target warehouse in row {0} must be same as Production Order").format(d.idx))
 
 					else:
 						d.t_warehouse = None
 						if not d.s_warehouse:
-							msgprint(_("Row # ") + "%s: " % cint(d.idx)
-								+ _("Source Warehouse") + _(" is mandatory"), raise_exception=1)
+							frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
 
 			if cstr(d.s_warehouse) == cstr(d.t_warehouse):
-				msgprint(_("Source and Target Warehouse cannot be same"),
-					raise_exception=1)
+				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
 
 	def validate_production_order(self, pro_obj=None):
 		if not pro_obj:
@@ -228,17 +219,13 @@ class StockEntry(StockController):
 			if d.bom_no and not frappe.db.sql("""select name from `tabBOM`
 					where item = %s and name = %s and docstatus = 1 and is_active = 1""",
 					(d.item_code, d.bom_no)):
-				msgprint(_("Item") + " %s: " % cstr(d.item_code)
-					+ _("does not belong to BOM: ") + cstr(d.bom_no)
-					+ _(" or the BOM is cancelled or inactive"), raise_exception=1)
+				frappe.throw(_("BOM {0} is not submitted or inactive BOM for Item {1}").format(d.bom_no, d.item_code))
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
-		import json
 		for d in self.get('mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
-				msgprint(_("Row #") + " %s: " % d.idx
-					+ _("Quantity should be equal to Manufacturing Quantity. To fetch items again, click on 'Get Items' button or update the Quantity manually."), raise_exception=1)
+				frappe.throw(_("Quantity in row {0} must be same as manufactured quantity").format(d.idx))
 
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
@@ -247,14 +234,12 @@ class StockEntry(StockController):
 		if ref.doc:
 			# validate docstatus
 			if ref.doc.docstatus != 1:
-				frappe.msgprint(_(ref.doc.doctype) + ' "' + ref.doc.name + '": '
-					+ _("Status should be Submitted"), raise_exception=frappe.InvalidStatusError)
+				frappe.throw(_("{0} {1} must be submitted").format(ref.doc.doctype, ref.doc.name),
+					frappe.InvalidStatusError)
 
 			# update stock check
 			if ref.doc.doctype == "Sales Invoice" and cint(ref.doc.update_stock) != 1:
-				frappe.msgprint(_(ref.doc.doctype) + ' "' + ref.doc.name + '": '
-					+ _("Update Stock should be checked."),
-					raise_exception=NotUpdateStockError)
+				frappe.throw(_("'Update Stock' for Sales Invoice {0} must be set").format(ref.doc.name), NotUpdateStockError)
 
 			# posting date check
 			ref_posting_datetime = "%s %s" % (cstr(ref.doc.posting_date),
@@ -263,9 +248,7 @@ class StockEntry(StockController):
 				cstr(self.posting_time))
 			if this_posting_datetime < ref_posting_datetime:
 				from frappe.utils.dateutils import datetime_in_user_format
-				frappe.msgprint(_("Posting Date Time cannot be before")
-					+ ": " + datetime_in_user_format(ref_posting_datetime),
-					raise_exception=True)
+				frappe.throw(_("Posting timestamp must be after {0}").format(datetime_in_user_format(ref_posting_datetime)))
 
 			stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
 			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)
@@ -273,9 +256,8 @@ class StockEntry(StockController):
 			for item in self.get("mtn_details"):
 				# validate if item exists in the ref doc and that it is a stock item
 				if item.item_code not in stock_items:
-					msgprint(_("Item") + ': "' + item.item_code + _("\" does not exist in ") +
-						ref.doc.doctype + ": " + ref.doc.name,
-						raise_exception=frappe.DoesNotExistError)
+					frappe.throw(_("Item {0} does not exist in {1} {2}").format(item.item_code, ref.doc.doctype, ref.doc.name),
+						frappe.DoesNotExistError)
 
 				# validate quantity <= ref item's qty - qty already returned
 				ref_item = ref.doc.getone({"item_code": item.item_code})
@@ -328,12 +310,10 @@ class StockEntry(StockController):
 	def update_production_order(self):
 		def _validate_production_order(pro_doc):
 			if flt(pro_doc.docstatus) != 1:
-				frappe.throw(_("Production Order must be submitted") + ": " +
-					self.production_order)
+				frappe.throw(_("Production Order {0} must be submitted").format(self.production_order))
 
 			if pro_doc.status == 'Stopped':
-				msgprint(_("Transaction not allowed against stopped Production Order") + ": " +
-					self.production_order)
+				frappe.throw(_("Transaction not allowed against stopped Production Order {0}").format(self.production_order))
 
 		if self.production_order:
 			pro_doc = frappe.get_doc("Production Order", self.production_order)
@@ -372,7 +352,7 @@ class StockEntry(StockController):
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""",
 			(arg.get('item_code')), as_dict = 1)
 		if not item:
-			msgprint("Item is not active", raise_exception=1)
+			frappe.throw(_("Item {0} is not active or end of life has been reached").format(arg.get("item_code")))
 
 		ret = {
 			'uom'			      	: item and item[0]['stock_uom'] or '',
@@ -398,8 +378,7 @@ class StockEntry(StockController):
 		uom = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail`
 			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
 		if not uom or not flt(uom[0].conversion_factor):
-			msgprint("There is no Conversion Factor for UOM '%s' in Item '%s'" % (arg['uom'],
-				arg['item_code']))
+			frappe.msgprint(_("UOM coversion factor required for UOM {0} in Item {1}").format(arg["uom"], arg["item_code"]))
 			ret = {'uom' : ''}
 		else:
 			ret = {
@@ -531,12 +510,10 @@ class StockEntry(StockController):
 
 		# show some message
 		if not len(item_dict):
-			frappe.msgprint(_("""All items have already been transferred \
-				for this Production Order."""))
+			frappe.msgprint(_("""All items have already been transferred for this Production Order."""))
 
 		elif only_pending_fetched:
-			frappe.msgprint(_("""Only quantities pending to be transferred \
-				were fetched for the following items:\n""" + "\n".join(only_pending_fetched)))
+			frappe.msgprint(_("Pending Items {0} updated").format(only_pending_fetched))
 
 		return item_dict
 
@@ -589,10 +566,8 @@ class StockEntry(StockController):
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
 				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
-					msgprint(_("Row #") + (" %d: " % item.idx) + _("does not match")
-						+ " " + _("Row #") + (" %d %s " % (mreq_item.idx, _("of")))
-						+ _("Material Request") + (" - %s" % item.material_request),
-						raise_exception=frappe.MappingMismatchError)
+					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
+						frappe.MappingMismatchError)
 
 @frappe.whitelist()
 def get_party_details(ref_dt, ref_dn):

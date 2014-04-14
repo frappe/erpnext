@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt
-from frappe import msgprint
+from frappe import msgprint, _
 from erpnext.controllers.buying_controller import BuyingController
 
 class PurchaseOrder(BuyingController):
@@ -128,8 +128,8 @@ class PurchaseOrder(BuyingController):
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
-			msgprint(cstr(self.doctype) +" => "+ cstr(self.name) +" has been modified. Please Refresh. ")
-			raise Exception
+			msgprint(_("{0} {1} has been modified. Please refresh").format(self.doctype, self.name),
+				raise_exception=True)
 
 	def update_status(self, status):
 		self.check_modified_date()
@@ -140,7 +140,7 @@ class PurchaseOrder(BuyingController):
 		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
 
 		# step 3:=> Acknowledge user
-		msgprint(self.doctype + ": " + self.name + " has been %s." % ((status == 'Submitted') and 'Unstopped' or cstr(status)))
+		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
 
 	def on_submit(self):
 		purchase_controller = frappe.get_doc("Purchase Common")
@@ -163,12 +163,12 @@ class PurchaseOrder(BuyingController):
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')
 
 		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql("""select t1.name
+		submitted = frappe.db.sql_list("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
 			where t1.name = t2.parent and t2.purchase_order = %s and t1.docstatus = 1""",
 			self.name)
 		if submitted:
-			msgprint("Purchase Invoice : " + cstr(submitted[0][0]) + " has already been submitted !")
+			msgprint(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
 			raise Exception
 
 		frappe.db.set(self,'status','Cancelled')

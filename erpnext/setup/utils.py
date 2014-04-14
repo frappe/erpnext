@@ -13,33 +13,29 @@ def get_company_currency(company):
 	if not currency:
 		throw(_('Please specify Default Currency in Company Master \
 			and Global Defaults'))
-		
+
 	return currency
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
-	result = frappe.db.sql_list("""select name from `tab%s` 
-		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" % 
+	result = frappe.db.sql_list("""select name from `tab%s`
+		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" %
 		(doctype, doctype))
 	return result[0] if result else None
-	
+
 def get_ancestors_of(doctype, name):
 	"""Get ancestor elements of a DocType with a tree structure"""
 	lft, rgt = frappe.db.get_value(doctype, name, ["lft", "rgt"])
-	result = frappe.db.sql_list("""select name from `tab%s` 
+	result = frappe.db.sql_list("""select name from `tab%s`
 		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
 	return result or []
 
 @frappe.whitelist()
 def get_price_list_currency(price_list):
-	price_list_currency = frappe.db.get_value("Price List", {"name": price_list, 
+	price_list_currency = frappe.db.get_value("Price List", {"name": price_list,
 		"enabled": 1}, "currency")
 
 	if not price_list_currency:
-		throw("{message}: {price_list} {disabled}".format(**{
-			"message": _("Price List"),
-			"price_list": price_list,
-			"disabled": _("is disabled.")
-		}))
+		throw(_("Price List {0} is disabled").format(price_list))
 	else:
 		return {"price_list_currency": price_list_currency}

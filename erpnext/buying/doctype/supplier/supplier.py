@@ -55,7 +55,7 @@ class Supplier(TransactionBase):
 		#validation for Naming Series mandatory field...
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
-				msgprint("Series is Mandatory.", raise_exception=1)
+				msgprint(_("Series is mandatory"), raise_exception=1)
 
 	def get_contacts(self,nm):
 		if nm:
@@ -106,7 +106,7 @@ class Supplier(TransactionBase):
 @frappe.whitelist()
 def get_dashboard_info(supplier):
 	if not frappe.has_permission("Supplier", "read", supplier):
-		frappe.msgprint("No Permission", raise_exception=True)
+		frappe.throw(_("No permission"))
 
 	out = {}
 	for doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:

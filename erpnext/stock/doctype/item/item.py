@@ -18,13 +18,13 @@ class Item(WebsiteGenerator):
 			from frappe.model.naming import make_autoname
 			self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:
-			msgprint(_("Item Code (item_code) is mandatory because Item naming is not sequential."), raise_exception=1)
+			msgprint(_("Item Code is mandatory because Item is not automatically numbered"), raise_exception=1)
 
 		self.name = self.item_code
 
 	def validate(self):
 		if not self.stock_uom:
-			msgprint(_("Please enter Default Unit of Measure"), raise_exception=1)
+			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
 
 		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
@@ -51,7 +51,7 @@ class Item(WebsiteGenerator):
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.is_stock_item=="Yes" and not self.default_warehouse:
-			frappe.msgprint(_("Default Warehouse is mandatory for Stock Item."),
+			frappe.msgprint(_("Default Warehouse is mandatory for stock Item."),
 				raise_exception=WarehouseNotSet)
 
 	def add_default_uom_in_conversion_factor_table(self):
@@ -97,17 +97,12 @@ class Item(WebsiteGenerator):
 		check_list = []
 		for d in self.get('uom_conversion_details'):
 			if cstr(d.uom) in check_list:
-				msgprint(_("UOM %s has been entered more than once in Conversion Factor Table." %
-				 	cstr(d.uom)), raise_exception=1)
+				frappe.throw(_("Unit of Measure {0} has been entered more than once in Conversion Factor Table").format(d.uom))
 			else:
 				check_list.append(cstr(d.uom))
 
 			if d.uom and cstr(d.uom) == cstr(self.stock_uom) and flt(d.conversion_factor) != 1:
-					msgprint(_("""Conversion Factor of UOM: %s should be equal to 1. As UOM: %s is Stock UOM of Item: %s.""" %
-						(d.uom, d.uom, self.name)), raise_exception=1)
-			elif d.uom and cstr(d.uom)!= self.stock_uom and flt(d.conversion_factor) == 1:
-				msgprint(_("""Conversion Factor of UOM: %s should not be equal to 1. As UOM: %s is not Stock UOM of Item: %s""" %
-					(d.uom, d.uom, self.name)), raise_exception=1)
+				frappe.throw(_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 	def validate_item_type(self):
 		if cstr(self.is_manufactured_item) == "No":
@@ -118,7 +113,7 @@ class Item(WebsiteGenerator):
 				it must be a stock item."))
 
 		if self.has_serial_no == 'Yes' and self.is_stock_item == 'No':
-			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
+			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
 	def check_for_active_boms(self):
 		if self.is_purchase_item != "Yes":
@@ -153,10 +148,10 @@ class Item(WebsiteGenerator):
 				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
 
 				if account_type not in ['Tax', 'Chargeable', 'Income Account', 'Expense Account']:
-					msgprint("'%s' is not Tax / Chargeable / Income / Expense Account" % d.tax_type, raise_exception=1)
+					frappe.throw(_("Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable").format(d.idx))
 				else:
 					if d.tax_type in check_list:
-						msgprint("Rate is entered twice for: '%s'" % d.tax_type, raise_exception=1)
+						frappe.throw(_("{0} entered twice in Item Tax").format(d.tax_type))
 					else:
 						check_list.append(d.tax_type)
 
@@ -165,8 +160,7 @@ class Item(WebsiteGenerator):
 			duplicate = frappe.db.sql("""select name from tabItem where barcode = %s
 				and name != %s""", (self.barcode, self.name))
 			if duplicate:
-				msgprint("Barcode: %s already used in item: %s" %
-					(self.barcode, cstr(duplicate[0][0])), raise_exception = 1)
+				frappe.throw(_("Barcode {0} already used in Item {1}").format(self.barcode, duplicate[0][0]))
 
 	def cant_change(self):
 		if not self.get("__islocal"):
@@ -182,8 +176,7 @@ class Item(WebsiteGenerator):
 	def validate_item_type_for_reorder(self):
 		if self.re_order_level or len(self.get("item_reorder", {"material_request_type": "Purchase"})):
 			if not self.is_purchase_item:
-				frappe.msgprint(_("""To set reorder level, item must be Purchase Item"""),
-					raise_exception=1)
+				frappe.throw(_("""To set reorder level, item must be Purchase Item"""))
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
@@ -193,9 +186,7 @@ class Item(WebsiteGenerator):
 	def validate_name_with_item_group(self):
 		# causes problem with tree build
 		if frappe.db.exists("Item Group", self.name):
-			frappe.msgprint("An item group exists with same name (%s), \
-				please change the item name or rename the item group" %
-				self.name, raise_exception=1)
+			frappe.throw(_("An Item Group exists with same name, please change the item name or rename the item group"))
 
 	def update_item_price(self):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s,
@@ -269,14 +260,7 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
 
 	if end_of_life and getdate(end_of_life) <= now_datetime().date():
-		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
-			" %(date)s. " + _("Please check") + ": %(end_of_life_label)s " + \
-			"in Item master") % {
-				"item_code": item_code,
-				"date": formatdate(end_of_life),
-				"end_of_life_label": frappe.get_meta("Item").get_label("end_of_life")
-			}
-
+		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
 		_msgprint(msg, verbose)
 
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
@@ -284,9 +268,7 @@ def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 		is_stock_item = frappe.db.get_value("Item", item_code, "is_stock_item")
 
 	if is_stock_item != "Yes":
-		msg = (_("Item") + " %(item_code)s: " + _("is not a Stock Item")) % {
-			"item_code": item_code,
-		}
+		msg = _("Item {0} is not a stock Item").format(item_code)
 
 		_msgprint(msg, verbose)
 
@@ -295,10 +277,7 @@ def validate_cancelled_item(item_code, docstatus=None, verbose=1):
 		docstatus = frappe.db.get_value("Item", item_code, "docstatus")
 
 	if docstatus == 2:
-		msg = (_("Item") + " %(item_code)s: " + _("is a cancelled Item")) % {
-			"item_code": item_code,
-		}
-
+		msg = _("Item {0} is cancelled").format(item_code)
 		_msgprint(msg, verbose)
 
 def _msgprint(msg, verbose):

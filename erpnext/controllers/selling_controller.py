@@ -3,9 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, comma_or, _round, cstr
+from frappe.utils import cint, flt, _round, cstr
 from erpnext.setup.utils import get_company_currency
-from frappe import msgprint, _
+from frappe import _, throw
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -233,8 +233,7 @@ class SellingController(StockController):
 		if self.meta.get_field("commission_rate"):
 			self.round_floats_in(self, ["net_total", "commission_rate"])
 			if self.commission_rate > 100.0:
-				msgprint(_(self.meta.get_label("commission_rate")) + " " +
-					_("cannot be greater than 100"), raise_exception=True)
+				throw(_("Commission rate cannot be greater than 100"))
 
 			self.total_commission = flt(self.net_total * self.commission_rate / 100.0,
 				self.precision("total_commission"))
@@ -252,17 +251,14 @@ class SellingController(StockController):
 			total += sales_person.allocated_percentage
 
 		if sales_team and total != 100.0:
-			msgprint(_("Total") + " " +
-				_(self.meta.get_label("allocated_percentage", parentfield="sales_team")) +
-				" " + _("should be 100%"), raise_exception=True)
+			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_order_type(self):
 		valid_types = ["Sales", "Maintenance", "Shopping Cart"]
 		if not self.order_type:
 			self.order_type = "Sales"
 		elif self.order_type not in valid_types:
-			msgprint(_(self.meta.get_label("order_type")) + " " +
-				_("must be one of") + ": " + comma_or(valid_types), raise_exception=True)
+			throw(_("Order Type must be one of {1}").comma_or(valid_types))
 
 	def check_credit(self, grand_total):
 		customer_account = frappe.db.get_value("Account", {"company": self.company,

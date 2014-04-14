@@ -5,7 +5,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
 from frappe.model.controller import DocListController
 from erpnext.setup.utils import get_company_currency
@@ -15,36 +15,34 @@ class FromGreaterThanToError(frappe.ValidationError): pass
 class ManyBlankToValuesError(frappe.ValidationError): pass
 
 class ShippingRule(DocListController):
-		
+
 	def validate(self):
 		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
 		self.shipping_rule_conditions = self.get("shipping_rule_conditions")
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
-		
+
 	def validate_from_to_values(self):
 		zero_to_values = []
-		
+
 		for d in self.get("shipping_rule_conditions"):
 			self.round_floats_in(d)
-			
+
 			# values cannot be negative
 			self.validate_value("from_value", ">=", 0.0, d)
 			self.validate_value("to_value", ">=", 0.0, d)
-			
+
 			if not d.to_value:
 				zero_to_values.append(d)
 			elif d.from_value >= d.to_value:
-				msgprint(_("Error") + ": " + _("Row") + " # %d: " % d.idx + 
-					_("From Value should be less than To Value"),
-					raise_exception=FromGreaterThanToError)
-		
+				throw(_("From value must be less than to value in row {0}").format(d.idx), FromGreaterThanToError)
+
 		# check if more than two or more rows has To Value = 0
 		if len(zero_to_values) >= 2:
-			msgprint(_('''There can only be one Shipping Rule Condition with 0 or blank value for "To Value"'''),
-				raise_exception=ManyBlankToValuesError)
-				
+			throw(_('There can only be one Shipping Rule Condition with 0 or blank value for "To Value"'),
+				ManyBlankToValuesError)
+
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""
 		self.shipping_rules_conditions = sorted(self.shipping_rule_conditions, key=lambda d: flt(d.from_value))
@@ -61,7 +59,7 @@ class ShippingRule(DocListController):
 			"""
 			separate = (x1 <= x2 <= y1 <= y2) or (y1 <= y2 <= x1 <= x2)
 			return (not separate)
-		
+
 		overlaps = []
 		for i in xrange(0, len(self.shipping_rule_conditions)):
 			for j in xrange(i+1, len(self.shipping_rule_conditions)):
@@ -72,13 +70,13 @@ class ShippingRule(DocListController):
 					range_b = (d2.from_value, d2.to_value or d2.from_value)
 					if overlap_exists_between(range_a, range_b):
 						overlaps.append([d1, d2])
-		
+
 		if overlaps:
 			company_currency = get_company_currency(self.company)
-			msgprint(_("Error") + ": " + _("Overlapping Conditions found between") + ":")
+			msgprint(_("Overlapping conditions found between:"))
 			messages = []
 			for d1, d2 in overlaps:
-				messages.append("%s-%s = %s " % (d1.from_value, d1.to_value, fmt_money(d1.shipping_amount, currency=company_currency)) + 
+				messages.append("%s-%s = %s " % (d1.from_value, d1.to_value, fmt_money(d1.shipping_amount, currency=company_currency)) +
 					_("and") + " %s-%s = %s" % (d2.from_value, d2.to_value, fmt_money(d2.shipping_amount, currency=company_currency)))
-					  	
+
 			msgprint("\n".join(messages), raise_exception=OverlappingConditionError)

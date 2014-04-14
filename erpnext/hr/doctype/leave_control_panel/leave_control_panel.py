@@ -4,16 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cint, cstr, flt, nowdate
+from frappe.utils import cint, cstr, flt, nowdate, comma_and
 from frappe import msgprint, _
 
-	
+
 
 
 from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
-	def get_employees(self):		
+	def get_employees(self):
 		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"],[self.grade,"grade"]]
 		condition = "where "
 		flag = 0
@@ -26,7 +26,7 @@ class LeaveControlPanel(Document):
 				flag = 1
 		emp_query = "select name from `tabEmployee` "
 		if flag == 1:
-			emp_query += condition 
+			emp_query += condition
 		e = frappe.db.sql(emp_query)
 		return e
 
@@ -41,7 +41,7 @@ class LeaveControlPanel(Document):
 		employees = self.get_employees()
 		if not employees:
 			frappe.throw(_("No employee found"))
-			
+
 		for d in self.get_employees():
 			try:
 				la = frappe.get_doc('Leave Allocation')
@@ -59,4 +59,4 @@ class LeaveControlPanel(Document):
 			except:
 				pass
 		if leave_allocated_for:
-			msgprint("Leaves Allocated Successfully for " + ", ".join(leave_allocated_for))
+			msgprint(_("Leaves Allocated Successfully for {0}").format(comma_and(leave_allocated_for)))

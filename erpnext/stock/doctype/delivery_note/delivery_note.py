@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, cint
+from frappe.utils import flt, cint
 
 from frappe import msgprint, _
 import frappe.defaults
@@ -54,9 +54,7 @@ class DeliveryNote(SellingController):
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			 for d in self.get('delivery_note_details'):
 				 if not d.against_sales_order:
-					 msgprint("Sales Order No. required against item %s"%d.item_code)
-					 raise Exception
-
+					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
 	def validate(self):
 		super(DeliveryNote, self).validate()
@@ -108,8 +106,7 @@ class DeliveryNote(SellingController):
 				where name = %s and (customer = %s or
 					ifnull(customer,'')='')""", (self.project_name, self.customer))
 			if not res:
-				msgprint("Customer - %s does not belong to project - %s. \n\nIf you want to use project for multiple customers then please make customer details blank in project - %s."%(self.customer,self.project_name,self.project_name))
-				raise Exception
+				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
@@ -119,14 +116,12 @@ class DeliveryNote(SellingController):
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if e in check_list:
-					msgprint("Please check whether item %s has been entered twice wrongly."
-						% d.item_code)
+					msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					check_list.append(e)
 			else:
 				if f in chk_dupl_itm:
-					msgprint("Please check whether item %s has been entered twice wrongly."
-						% d.item_code)
+					msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
 
@@ -134,8 +129,7 @@ class DeliveryNote(SellingController):
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
 				if not d['warehouse']:
-					msgprint("Please enter Warehouse for item %s as it is stock item"
-						% d['item_code'], raise_exception=1)
+					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 
 	def update_current_stock(self):
@@ -187,18 +181,13 @@ class DeliveryNote(SellingController):
 		"""
 		if not any([flt(d.get('packed_qty')) for d in self.get(self.fname)]):
 			return
-		packing_error_list = []
+		has_error = False
 		for d in self.get(self.fname):
 			if flt(d.get('qty')) != flt(d.get('packed_qty')):
-				packing_error_list.append([
-					d.get('item_code', ''),
-					d.get('qty', 0),
-					d.get('packed_qty', 0)
-				])
-		if packing_error_list:
-			err_msg = "\n".join([("Item: " + d[0] + ", Qty: " + cstr(d[1]) \
-				+ ", Packed: " + cstr(d[2])) for d in packing_error_list])
-			frappe.msgprint("Packing Error:\n" + err_msg, raise_exception=1)
+				frappe.msgprint(_("Packed quantity must equal quantity for Item {0} in row {1}").format(d.item_code, d.idx))
+				has_error = True
+		if has_error:
+			raise frappe.ValidationError
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql("""select t1.name
@@ -206,16 +195,14 @@ class DeliveryNote(SellingController):
 			where t1.name = t2.parent and t2.delivery_note = %s and t1.docstatus = 1""",
 			(self.name))
 		if submit_rv:
-			msgprint("Sales Invoice : " + cstr(submit_rv[0][0]) + " has already been submitted !")
-			raise Exception , "Validation Error."
+			frappe.throw(_("Sales Invoice {0} has already been submitted").format(submit_rv[0][0]))
 
 		submit_in = frappe.db.sql("""select t1.name
 			from `tabInstallation Note` t1, `tabInstallation Note Item` t2
 			where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1""",
 			(self.name))
 		if submit_in:
-			msgprint("Installation Note : "+cstr(submit_in[0][0]) +" has already been submitted !")
-			raise Exception , "Validation Error."
+			frappe.throw(_("Installation Note {0} has already been submitted").format(submit_in[0][0]))
 
 	def cancel_packing_slips(self):
 		"""
@@ -228,7 +215,7 @@ class DeliveryNote(SellingController):
 			for r in res:
 				ps = frappe.get_doc('Packing Slip', r[0])
 				ps.cancel()
-			frappe.msgprint(_("Packing Slip(s) Cancelled"))
+			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
 
 	def update_stock_ledger(self):
@@ -293,8 +280,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		si.run_method("onload_post_render")
 
 		if len(si.get("entries")) == 0:
-			frappe.msgprint(_("All these items have already been invoiced."),
-				raise_exception=True)
+			frappe.throw(_("All these items have already been invoiced"))
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)

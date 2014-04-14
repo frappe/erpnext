@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, cint
-from frappe import msgprint, _
+from frappe import _
 
 from frappe.model.document import Document
 
@@ -32,12 +32,12 @@ class PackingSlip(Document):
 			Validates if delivery note has status as draft
 		"""
 		if cint(frappe.db.get_value("Delivery Note", self.delivery_note, "docstatus")) != 0:
-			msgprint(_("""Invalid Delivery Note. Delivery Note should exist and should be in draft state. Please rectify and try again."""), raise_exception=1)
-	
+			frappe.throw(_("Delivery Note {0} must not be submitted").format(self.delivery_note))
+
 	def validate_items_mandatory(self):
 		rows = [d.item_code for d in self.get("item_details")]
 		if not rows:
-			frappe.msgprint(_("No Items to Pack"), raise_exception=1)
+			frappe.msgprint(_("No Items to pack"), raise_exception=1)
 
 	def validate_case_nos(self):
 		"""
@@ -50,8 +50,8 @@ class PackingSlip(Document):
 		elif self.from_case_no > self.to_case_no:
 			frappe.msgprint(_("'To Case No.' cannot be less than 'From Case No.'"),
 				raise_exception=1)
-		
-		
+
+
 		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
 			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
@@ -60,9 +60,7 @@ class PackingSlip(Document):
 			""", self.as_dict())
 
 		if res:
-			frappe.msgprint(_("""Case No(s) already in use. Please rectify and try again.
-				Recommended <b>From Case No. = %s</b>""") % self.get_recommended_case_no(),
-				raise_exception=1)
+			frappe.throw(_("""Case No(s) already in use. Try from Case No {0}""").format(self.get_recommended_case_no()))
 
 	def validate_qty(self):
 		"""
@@ -85,13 +83,13 @@ class PackingSlip(Document):
 			* Item Quantity dict of current packing slip doc
 			* No. of Cases of this packing slip
 		"""
-		
+
 		rows = [d.item_code for d in self.get("item_details")]
-		
+
 		condition = ""
 		if rows:
 			condition = " and item_code in (%s)" % (", ".join(["%s"]*len(rows)))
-		
+
 		# gets item code, qty per item code, latest packed qty per item code and stock uom
 		res = frappe.db.sql("""select item_code, ifnull(sum(qty), 0) as qty,
 			(select sum(ifnull(psi.qty, 0) * (abs(ps.to_case_no - ps.from_case_no) + 1))
@@ -100,7 +98,7 @@ class PackingSlip(Document):
 				and ps.delivery_note = dni.parent and psi.item_code=dni.item_code) as packed_qty,
 			stock_uom, item_name
 			from `tabDelivery Note Item` dni
-			where parent=%s %s 
+			where parent=%s %s
 			group by item_code""" % ("%s", condition),
 			tuple([self.delivery_note] + rows), as_dict=1)
 
@@ -117,12 +115,8 @@ class PackingSlip(Document):
 		item['recommended_qty'] = (flt(item['qty']) - flt(item['packed_qty'])) / no_of_cases
 		item['specified_qty'] = flt(ps_item_qty[item['item_code']])
 		if not item['packed_qty']: item['packed_qty'] = 0
-		
-		frappe.msgprint("""
-			Invalid Quantity specified (%(specified_qty)s %(stock_uom)s).
-			%(packed_qty)s out of %(qty)s %(stock_uom)s already packed for %(item_code)s.
-			<b>Recommended quantity for %(item_code)s = %(recommended_qty)s 
-			%(stock_uom)s</b>""" % item, raise_exception=1)
+
+		frappe.throw(_("Quantity for Item {0} must be less than {1}").format(item.get("item_code"), item.get("recommended_qty")))
 
 	def update_item_details(self):
 		"""
@@ -132,9 +126,9 @@ class PackingSlip(Document):
 			self.from_case_no = self.get_recommended_case_no()
 
 		for d in self.get("item_details"):
-			res = frappe.db.get_value("Item", d.item_code, 
+			res = frappe.db.get_value("Item", d.item_code,
 				["net_weight", "weight_uom"], as_dict=True)
-			
+
 			if res and len(res)>0:
 				d.net_weight = res["net_weight"]
 				d.weight_uom = res["weight_uom"]
@@ -146,12 +140,12 @@ class PackingSlip(Document):
 		"""
 		recommended_case_no = frappe.db.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.as_dict())
-		
+
 		return cint(recommended_case_no[0][0]) + 1
-		
+
 	def get_items(self):
 		self.set("item_details", [])
-		
+
 		dn_details = self.get_details_for_packing()[0]
 		for item in dn_details:
 			if flt(item.qty) > flt(item.packed_qty):
@@ -164,11 +158,11 @@ class PackingSlip(Document):
 
 def item_details(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
-	return frappe.db.sql("""select name, item_name, description from `tabItem` 
-				where name in ( select item_code FROM `tabDelivery Note Item` 
-	 						where parent= %s 
-	 							and ifnull(qty, 0) > ifnull(packed_qty, 0)) 
-	 			and %s like "%s" %s 
-	 			limit  %s, %s """ % ("%s", searchfield, "%s", 
-	 			get_match_cond(doctype), "%s", "%s"), 
+	return frappe.db.sql("""select name, item_name, description from `tabItem`
+				where name in ( select item_code FROM `tabDelivery Note Item`
+	 						where parent= %s
+	 							and ifnull(qty, 0) > ifnull(packed_qty, 0))
+	 			and %s like "%s" %s
+	 			limit  %s, %s """ % ("%s", searchfield, "%s",
+	 			get_match_cond(doctype), "%s", "%s"),
 	 			(filters["delivery_note"], "%%%s%%" % txt, start, page_len))

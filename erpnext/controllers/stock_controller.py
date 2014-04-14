@@ -65,7 +65,7 @@ class StockController(AccountsController):
 						warehouse_with_no_account.append(sle.warehouse)
 
 		if warehouse_with_no_account:
-			msgprint(_("No accounting entries for following warehouses") + ": \n" +
+			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_list)
@@ -231,12 +231,10 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if item.meta.get_field("expense_account") and not item.expense_account:
-			msgprint(_("""Expense/Difference account is mandatory for item: """) + item.item_code,
-				raise_exception=1)
+			frappe.throw(_("Expense or Difference account is mandatory for Item {0}").format(item.item_code))
 
 		if item.meta.get_field("expense_account") and not item.cost_center:
-			msgprint(_("""Cost Center is mandatory for item: """) + item.item_code,
-				raise_exception=1)
+			frappe.throw(_("""Cost Center is mandatory for item {0}""").format(item.item_code))
 
 	def get_sl_entries(self, d, args):
 		sl_dict = {
