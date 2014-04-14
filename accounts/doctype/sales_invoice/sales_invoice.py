@@ -68,6 +68,9 @@ class DocType(SellingController):
 			self.doc.is_opening = 'No'
 
 		self.set_aging_date()
+
+		get_obj('Account', self.doc.debit_to).validate_due_date(self.doc.posting_date, self.doc.due_date)
+
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
