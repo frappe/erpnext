@@ -424,8 +424,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount
 				- this.frm.doc.total_advance;
 			if(this.frm.doc.is_pos) {
-				if(update_paid_amount===undefined || update_paid_amount || !this.frm.doc.paid_amount)
+				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
 					this.frm.doc.paid_amount = flt(total_amount_to_pay);
+				}
 			} else {
 				this.frm.doc.paid_amount = 0
 			}

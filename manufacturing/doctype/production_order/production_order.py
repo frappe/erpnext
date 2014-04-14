@@ -124,7 +124,10 @@ class DocType:
 
 	def on_submit(self):
 		if not self.doc.wip_warehouse:
-			webnotes.throw(_("WIP Warehouse required before Submit"))
+			webnotes.throw(_("Work-in-Progress Warehouse is required before Submit"))
+		if not self.doc.fg_warehouse:
+			webnotes.throw(_("For Warehouse is required before Submit"))
+
 		webnotes.conn.set(self.doc,'status', 'Submitted')
 		self.update_planned_qty(self.doc.qty)
 
