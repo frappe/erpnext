@@ -4,7 +4,7 @@
 frappe.pages['support-analytics'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Support Analytics'),
+		title: __('Support Analytics'),
 		single_column: true
 	});					
 
@@ -18,7 +18,7 @@ frappe.pages['support-analytics'].onload = function(wrapper) {
 erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	init: function(wrapper) {
 		this._super({
-			title: frappe._("Support Analtyics"),
+			title: __("Support Analtyics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -27,22 +27,22 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: frappe._("From Date")},
-		{fieldtype:"Label", label: frappe._("To")},
-		{fieldtype:"Date", label: frappe._("To Date")},
-		{fieldtype:"Select", label: frappe._("Range"), 
+		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Label", label: __("To")},
+		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Select", label: __("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
+			{id: "check", name: __("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "status", name: frappe._("Status"), field: "status", width: 100},
+			{id: "status", name: __("Status"), field: "status", width: 100},
 		];
 		this.make_date_range_columns();		
 		this.columns = std_columns.concat(this.columns);

@@ -25,20 +25,20 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				});
 			
 			if(!from_sales_invoice)
-				cur_frm.add_custom_button(frappe._('Make Invoice'), this.make_sales_invoice);
+				cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice);
 		}
 	
 		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
-			cur_frm.add_custom_button(frappe._('Make Installation Note'), this.make_installation_note);
+			cur_frm.add_custom_button(__('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.appframe.add_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button(frappe._('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(__('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
 	
 		set_print_hide(doc, dt, dn);
@@ -48,7 +48,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Sales Order'), 
+			cur_frm.add_custom_button(__('From Sales Order'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",

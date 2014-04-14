@@ -63,7 +63,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
 			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.appframe.add_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
+			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
@@ -74,11 +74,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 				
 				if(!from_delivery_note)
-					cur_frm.appframe.add_primary_action(frappe._('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
+					cur_frm.appframe.add_primary_action(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
 			}
 
 			if(doc.outstanding_amount!=0)
-				cur_frm.appframe.add_primary_action(frappe._('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
+				cur_frm.appframe.add_primary_action(__('Make Payment Entry'), cur_frm.cscript.make_bank_voucher);
 		}
 
 		// Show buttons only when pos view is active
@@ -89,7 +89,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.appframe.add_primary_action(frappe._('From Sales Order'), 
+		this.$sales_order_btn = cur_frm.appframe.add_primary_action(__('From Sales Order'), 
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
@@ -106,7 +106,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(frappe._('From Delivery Note'), 
+		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(__('From Delivery Note'), 
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
@@ -134,7 +134,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
-				msgprint(frappe._("Please specify Company to proceed"));
+				msgprint(__("Please specify Company to proceed"));
 			} else {
 				var me = this;
 				return this.frm.call({

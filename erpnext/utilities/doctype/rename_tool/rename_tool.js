@@ -19,7 +19,7 @@ cur_frm.cscript.setup_upload = function() {
 	var me = this;
 	var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty()
 		.html("<hr><div class='alert alert-warning'>" +
-			frappe._("Upload a .csv file with two columns: the old name and the new name. Max 500 rows.")
+			__("Upload a .csv file with two columns: the old name and the new name. Max 500 rows.")
 			+ "</div>");
 	var $log = $(cur_frm.fields_dict.rename_log.wrapper).empty();
 

@@ -5,25 +5,25 @@ frappe.query_reports["Stock Projected Qty"] = {
 	"filters": [
 		{
 			"fieldname":"company",
-			"label": frappe._("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company"
 		},
 		{
 			"fieldname":"warehouse",
-			"label": frappe._("Warehouse"),
+			"label": __("Warehouse"),
 			"fieldtype": "Link",
 			"options": "Warehouse"
 		},
 		{
 			"fieldname":"item_code",
-			"label": frappe._("Item"),
+			"label": __("Item"),
 			"fieldtype": "Link",
 			"options": "Item"
 		},
 		{
 			"fieldname":"brand",
-			"label": frappe._("Brand"),
+			"label": __("Brand"),
 			"fieldtype": "Link",
 			"options": "Brand"
 		}

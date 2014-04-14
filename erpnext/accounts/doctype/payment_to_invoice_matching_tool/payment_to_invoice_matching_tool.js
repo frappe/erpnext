@@ -10,15 +10,15 @@ cur_frm.cscript.onload_post_render = function(doc) {
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.set_intro("");
 	if(!doc.voucher_no) {
-		cur_frm.set_intro(frappe._("Select the Invoice against which you want to allocate payments."));
+		cur_frm.set_intro(__("Select the Invoice against which you want to allocate payments."));
 	} else {
-		cur_frm.set_intro(frappe._("Set allocated amount against each Payment Entry and click 'Allocate'."));
+		cur_frm.set_intro(__("Set allocated amount against each Payment Entry and click 'Allocate'."));
 	}
 }
 
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	// TO-do: check for pos, it should not come
-	if (!doc.account) msgprint(frappe._("Please select Account first"));
+	if (!doc.account) msgprint(__("Please select Account first"));
 	else {
 		return {
 			doctype: doc.voucher_type,

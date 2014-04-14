@@ -26,17 +26,17 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this._super(doc, dt, dn);
 		
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
-			cur_frm.add_custom_button(frappe._('Make Sales Order'), 
+			cur_frm.add_custom_button(__('Make Sales Order'), 
 				cur_frm.cscript['Make Sales Order']);
 			if(doc.status!=="Ordered") {
-				cur_frm.add_custom_button(frappe._('Set as Lost'), 
+				cur_frm.add_custom_button(__('Set as Lost'), 
 					cur_frm.cscript['Declare Order Lost'], "icon-exclamation");
 			}
-			cur_frm.appframe.add_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 		}
 		
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Opportunity'), 
+			cur_frm.add_custom_button(__('From Opportunity'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
@@ -90,7 +90,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	
 	validate_company_and_party: function(party_field) {
 		if(!this.frm.doc.quotation_to) {
-			msgprint(frappe._("Please select a value for" + " " + 
+			msgprint(__("Please select a value for" + " " + 
 				frappe.meta.get_label(this.frm.doc.doctype, "quotation_to", this.frm.doc.name)));
 			return false;
 		} else if (this.frm.doc.quotation_to == "Lead") {
@@ -135,9 +135,9 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 	var dialog = new frappe.ui.Dialog({
 		title: "Set as Lost",
 		fields: [
-			{"fieldtype": "Text", "label": frappe._("Reason for losing"), "fieldname": "reason",
+			{"fieldtype": "Text", "label": __("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": frappe._("Update"), "fieldname": "update"},
+			{"fieldtype": "Button", "label": __("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -150,7 +150,7 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(frappe._("There were errors."));
+					msgprint(__("There were errors."));
 					return;
 				}
 				dialog.hide();

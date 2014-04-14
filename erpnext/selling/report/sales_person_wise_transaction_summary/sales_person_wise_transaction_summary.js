@@ -5,57 +5,57 @@ frappe.query_reports["Sales Person-wise Transaction Summary"] = {
 	"filters": [
 		{
 			fieldname: "sales_person",
-			label: frappe._("Sales Person"),
+			label: __("Sales Person"),
 			fieldtype: "Link",
 			options: "Sales Person"
 		},
 		{
 			fieldname: "doc_type",
-			label: frappe._("Document Type"),
+			label: __("Document Type"),
 			fieldtype: "Select",
 			options: "Sales Order\nDelivery Note\nSales Invoice",
 			default: "Sales Order"
 		},
 		{
 			fieldname: "from_date",
-			label: frappe._("From Date"),
+			label: __("From Date"),
 			fieldtype: "Date",
 			default: frappe.defaults.get_user_default("year_start_date"),
 		},
 		{
 			fieldname:"to_date",
-			label: frappe._("To Date"),
+			label: __("To Date"),
 			fieldtype: "Date",
 			default: get_today()
 		},
 		{
 			fieldname:"company",
-			label: frappe._("Company"),
+			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("company")
 		},
 		{
 			fieldname:"item_group",
-			label: frappe._("Item Group"),
+			label: __("Item Group"),
 			fieldtype: "Link",
 			options: "Item Group",
 		},
 		{
 			fieldname:"brand",
-			label: frappe._("Brand"),
+			label: __("Brand"),
 			fieldtype: "Link",
 			options: "Brand",
 		},
 		{
 			fieldname:"customer",
-			label: frappe._("Customer"),
+			label: __("Customer"),
 			fieldtype: "Link",
 			options: "Customer",
 		},
 		{
 			fieldname:"territory",
-			label: frappe._("Territory"),
+			label: __("Territory"),
 			fieldtype: "Link",
 			options: "Territory",
 		},

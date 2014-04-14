@@ -5,7 +5,7 @@
 frappe.pages['stock-ageing'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Stock Ageing'),
+		title: __('Stock Ageing'),
 		single_column: true
 	});
 
@@ -21,7 +21,7 @@ frappe.require("assets/erpnext/js/stock_grid_report.js");
 erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: frappe._("Stock Ageing"),
+			title: __("Stock Ageing"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -30,37 +30,37 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: frappe._("Item"), field: "name", width: 300,
+			{id: "name", name: __("Item"), field: "name", width: 300,
 				link_formatter: {
 					open_btn: true,
 					doctype: '"Item"'
 				}},
-			{id: "item_name", name: frappe._("Item Name"), field: "item_name", 
+			{id: "item_name", name: __("Item Name"), field: "item_name", 
 				width: 100, formatter: this.text_formatter},
-			{id: "description", name: frappe._("Description"), field: "description", 
+			{id: "description", name: __("Description"), field: "description", 
 				width: 200, formatter: this.text_formatter},
-			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
-			{id: "average_age", name: frappe._("Average Age"), field: "average_age",
+			{id: "brand", name: __("Brand"), field: "brand", width: 100},
+			{id: "average_age", name: __("Average Age"), field: "average_age",
 				formatter: this.currency_formatter},
-			{id: "earliest", name: frappe._("Earliest"), field: "earliest",
+			{id: "earliest", name: __("Earliest"), field: "earliest",
 				formatter: this.currency_formatter},
-			{id: "latest", name: frappe._("Latest"), field: "latest",
+			{id: "latest", name: __("Latest"), field: "latest",
 				formatter: this.currency_formatter},
 			{id: "stock_uom", name: "UOM", field: "stock_uom", width: 100},
 		];
 	},
 	filters: [
-		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: frappe._("Plot By"), 
+		{fieldtype:"Select", label: __("Plot By"), 
 			options: ["Average Age", "Earliest", "Latest"]},
-		{fieldtype:"Date", label: frappe._("To Date")},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;

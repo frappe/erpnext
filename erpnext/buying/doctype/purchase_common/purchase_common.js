@@ -300,7 +300,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = frappe.meta.docfield_map[me.frm.doc.doctype][fname];
 				if(docfield) {
-					var label = frappe._(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
 				}
 			});
@@ -347,7 +347,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = frappe.meta.docfield_map[grid_doctype][fname];
 				if(docfield) {
-					var label = frappe._(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] = 
 						label.trim() + " (" + currency + ")";
 				}

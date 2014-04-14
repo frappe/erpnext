@@ -21,44 +21,44 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped') {
 				
-				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + frappe._("% Delivered"), 
+				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"), 
 					doc.per_delivered);
-				cur_frm.dashboard.add_progress(cint(doc.per_billed) + frappe._("% Billed"), 
+				cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"), 
 					doc.per_billed);
 
-				cur_frm.add_custom_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
-					cur_frm.add_custom_button(frappe._('Make Delivery'), this.make_delivery_note);
+					cur_frm.add_custom_button(__('Make Delivery'), this.make_delivery_note);
 			
 				// maintenance
 				if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
-					cur_frm.add_custom_button(frappe._('Make Maint. Visit'), this.make_maintenance_visit);
-					cur_frm.add_custom_button(frappe._('Make Maint. Schedule'), 
+					cur_frm.add_custom_button(__('Make Maint. Visit'), this.make_maintenance_visit);
+					cur_frm.add_custom_button(__('Make Maint. Schedule'), 
 						this.make_maintenance_schedule);
 				}
 
 				// indent
 				if(!doc.order_type || (doc.order_type == 'Sales'))
-					cur_frm.add_custom_button(frappe._('Make ') + frappe._('Material Request'), 
+					cur_frm.add_custom_button(__('Make ') + __('Material Request'), 
 						this.make_material_request);
 			
 				// sales invoice
 				if(flt(doc.per_billed, 2) < 100)
-					cur_frm.add_custom_button(frappe._('Make Invoice'), this.make_sales_invoice);
+					cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice);
 			
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(frappe._('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
+					cur_frm.add_custom_button(__('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
 			} else {	
 				// un-stop
-				cur_frm.dashboard.set_headline_alert(frappe._("Stopped"), "alert-danger", "icon-stop");
-				cur_frm.add_custom_button(frappe._('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
+				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
+				cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
 			}
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Quotation'), 
+			cur_frm.add_custom_button(__('From Quotation'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
@@ -157,7 +157,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 cur_frm.cscript['Stop Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
-	var check = confirm(frappe._("Are you sure you want to STOP ") + doc.name);
+	var check = confirm(__("Are you sure you want to STOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', {
@@ -172,7 +172,7 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 cur_frm.cscript['Unstop Sales Order'] = function() {
 	var doc = cur_frm.doc;
 
-	var check = confirm(frappe._("Are you sure you want to UNSTOP ") + doc.name);
+	var check = confirm(__("Are you sure you want to UNSTOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', {

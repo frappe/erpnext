@@ -4,7 +4,7 @@
 frappe.pages['stock-ledger'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Stock Ledger'),
+		title: __('Stock Ledger'),
 		single_column: true
 	});
 	
@@ -17,7 +17,7 @@ frappe.require("assets/erpnext/js/stock_grid_report.js");
 erpnext.StockLedger = erpnext.StockGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: frappe._("Stock Ledger"),
+			title: __("Stock Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -28,29 +28,29 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 	setup_columns: function() {
 		this.hide_balance = (this.is_default("item_code") || this.voucher_no) ? true : false;
 		this.columns = [
-			{id: "posting_datetime", name: frappe._("Posting Date"), field: "posting_datetime", width: 120,
+			{id: "posting_datetime", name: __("Posting Date"), field: "posting_datetime", width: 120,
 				formatter: this.date_formatter},
-			{id: "item_code", name: frappe._("Item Code"), field: "item_code", width: 160, 	
+			{id: "item_code", name: __("Item Code"), field: "item_code", width: 160, 	
 				link_formatter: {
 					filter_input: "item_code",
 					open_btn: true,
 					doctype: '"Item"',
 				}},
-			{id: "description", name: frappe._("Description"), field: "description", width: 200,
+			{id: "description", name: __("Description"), field: "description", width: 200,
 				formatter: this.text_formatter},
-			{id: "warehouse", name: frappe._("Warehouse"), field: "warehouse", width: 100,
+			{id: "warehouse", name: __("Warehouse"), field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
-			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
-			{id: "stock_uom", name: frappe._("UOM"), field: "stock_uom", width: 100},
-			{id: "qty", name: frappe._("Qty"), field: "qty", width: 100,
+			{id: "brand", name: __("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: __("UOM"), field: "stock_uom", width: 100},
+			{id: "qty", name: __("Qty"), field: "qty", width: 100,
 				formatter: this.currency_formatter},
-			{id: "balance", name: frappe._("Balance Qty"), field: "balance", width: 100,
+			{id: "balance", name: __("Balance Qty"), field: "balance", width: 100,
 				formatter: this.currency_formatter,
 				hidden: this.hide_balance},
-			{id: "balance_value", name: frappe._("Balance Value"), field: "balance_value", width: 100,
+			{id: "balance_value", name: __("Balance Value"), field: "balance_value", width: 100,
 				formatter: this.currency_formatter, hidden: this.hide_balance},
-			{id: "voucher_type", name: frappe._("Voucher Type"), field: "voucher_type", width: 120},
-			{id: "voucher_no", name: frappe._("Voucher No"), field: "voucher_no", width: 160,
+			{id: "voucher_type", name: __("Voucher Type"), field: "voucher_type", width: 120},
+			{id: "voucher_no", name: __("Voucher No"), field: "voucher_no", width: 160,
 				link_formatter: {
 					filter_input: "voucher_no",
 					open_btn: true,
@@ -60,11 +60,11 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		
 	},
 	filters: [
-		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts) {
 				return item.warehouse == val || val == opts.default_value;
 			}},
-		{fieldtype:"Link", label: frappe._("Item Code"), link:"Item", default_value: "Select Item...",
+		{fieldtype:"Link", label: __("Item Code"), link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
 				return item.item_code == val || !val;
 			}},
@@ -72,20 +72,20 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Data", label: frappe._("Voucher No"),
+		{fieldtype:"Data", label: __("Voucher No"),
 			filter: function(val, item, opts) {
 				if(!val) return true;
 				return (item.voucher_no && item.voucher_no.indexOf(val)!=-1);
 			}},
-		{fieldtype:"Date", label: frappe._("From Date"), filter: function(val, item) {
+		{fieldtype:"Date", label: __("From Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Label", label: frappe._("To")},
-		{fieldtype:"Date", label: frappe._("To Date"), filter: function(val, item) {
+		{fieldtype:"Label", label: __("To")},
+		{fieldtype:"Date", label: __("To Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	
 	setup_filters: function() {

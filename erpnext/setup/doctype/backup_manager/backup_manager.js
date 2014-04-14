@@ -7,12 +7,12 @@ $.extend(cur_frm.cscript, {
 		
 		if(!(cint(cur_frm.doc.dropbox_access_allowed) || 
 			cint(cur_frm.doc.gdrive_access_allowed))) {
-				cur_frm.set_intro(frappe._("You can start by selecting backup frequency and \
+				cur_frm.set_intro(__("You can start by selecting backup frequency and \
 					granting access for sync"));
 		} else {
 			var services = {
-				"dropbox": frappe._("Dropbox"),
-				"gdrive": frappe._("Google Drive")
+				"dropbox": __("Dropbox"),
+				"gdrive": __("Google Drive")
 			}
 			var active_services = [];
 			
@@ -25,7 +25,7 @@ $.extend(cur_frm.cscript, {
 			});
 			
 			if(active_services.length > 0) {
-				cur_frm.set_intro(frappe._("Backups will be uploaded to") + ": " + 
+				cur_frm.set_intro(__("Backups will be uploaded to") + ": " + 
 					frappe.utils.comma_and(active_services));
 			} else {
 				cur_frm.set_intro("");
@@ -36,8 +36,8 @@ $.extend(cur_frm.cscript, {
 	
 	validate_send_notifications_to: function() {
 		if(!cur_frm.doc.send_notifications_to) {
-			msgprint(frappe._("Please specify") + ": " + 
-				frappe._(frappe.meta.get_label(cur_frm.doctype, "send_notifications_to")));
+			msgprint(__("Please specify") + ": " + 
+				__(frappe.meta.get_label(cur_frm.doctype, "send_notifications_to")));
 			return false;
 		}
 		

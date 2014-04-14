@@ -6,7 +6,7 @@ frappe.require("assets/erpnext/js/stock_analytics.js");
 frappe.pages['stock-balance'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Stock Balance'),
+		title: __('Stock Balance'),
 		single_column: true
 	});
 	
@@ -20,58 +20,58 @@ frappe.pages['stock-balance'].onload = function(wrapper) {
 erpnext.StockBalance = erpnext.StockAnalytics.extend({
 	init: function(wrapper) {
 		this._super(wrapper, {
-			title: frappe._("Stock Balance"),
+			title: __("Stock Balance"),
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
 				"Stock Entry", "Project", "Serial No"],
 		});
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: frappe._("Item"), field: "name", width: 300,
+			{id: "name", name: __("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "item_name", name: frappe._("Item Name"), field: "item_name", width: 100},
-			{id: "description", name: frappe._("Description"), field: "description", width: 200, 
+			{id: "item_name", name: __("Item Name"), field: "item_name", width: 100},
+			{id: "description", name: __("Description"), field: "description", width: 200, 
 				formatter: this.text_formatter},
-			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
-			{id: "stock_uom", name: frappe._("UOM"), field: "stock_uom", width: 100},
-			{id: "opening_qty", name: frappe._("Opening Qty"), field: "opening_qty", width: 100, 
+			{id: "brand", name: __("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: __("UOM"), field: "stock_uom", width: 100},
+			{id: "opening_qty", name: __("Opening Qty"), field: "opening_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow_qty", name: frappe._("In Qty"), field: "inflow_qty", width: 100, 
+			{id: "inflow_qty", name: __("In Qty"), field: "inflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow_qty", name: frappe._("Out Qty"), field: "outflow_qty", width: 100, 
+			{id: "outflow_qty", name: __("Out Qty"), field: "outflow_qty", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing_qty", name: frappe._("Closing Qty"), field: "closing_qty", width: 100, 
+			{id: "closing_qty", name: __("Closing Qty"), field: "closing_qty", width: 100, 
 				formatter: this.currency_formatter},
 				
-			{id: "opening_value", name: frappe._("Opening Value"), field: "opening_value", width: 100, 
+			{id: "opening_value", name: __("Opening Value"), field: "opening_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "inflow_value", name: frappe._("In Value"), field: "inflow_value", width: 100, 
+			{id: "inflow_value", name: __("In Value"), field: "inflow_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "outflow_value", name: frappe._("Out Value"), field: "outflow_value", width: 100, 
+			{id: "outflow_value", name: __("Out Value"), field: "outflow_value", width: 100, 
 				formatter: this.currency_formatter},
-			{id: "closing_value", name: frappe._("Closing Value"), field: "closing_value", width: 100, 
+			{id: "closing_value", name: __("Closing Value"), field: "closing_value", width: 100, 
 				formatter: this.currency_formatter},
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: frappe._("Project"), link:"Project", 
+		{fieldtype:"Select", label: __("Project"), link:"Project", 
 			default_value: "Select Project...", filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}, link_formatter: {filter_input: "project"}},
-		{fieldtype:"Date", label: frappe._("From Date")},
-		{fieldtype:"Label", label: frappe._("To")},
-		{fieldtype:"Date", label: frappe._("To Date")},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Label", label: __("To")},
+		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	
 	setup_plot_check: function() {

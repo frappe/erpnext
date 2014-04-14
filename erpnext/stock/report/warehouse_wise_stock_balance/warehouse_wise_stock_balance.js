@@ -5,14 +5,14 @@ frappe.query_reports["Warehouse-Wise Stock Balance"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
-			"label": frappe._("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
 			"default": sys_defaults.year_start_date,
 		},
 		{
 			"fieldname":"to_date",
-			"label": frappe._("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.datetime.get_today()

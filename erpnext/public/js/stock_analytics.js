@@ -6,7 +6,7 @@ frappe.require("assets/erpnext/js/stock_grid_report.js");
 erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	init: function(wrapper, opts) {
 		var args = {
-			title: frappe._("Stock Analytics"),
+			title: __("Stock Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -36,13 +36,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
+			{id: "check", name: __("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: frappe._("Item"), field: "name", width: 300,
+			{id: "name", name: __("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100},
-			{id: "stock_uom", name: frappe._("UOM"), field: "stock_uom", width: 100},
-			{id: "opening", name: frappe._("Opening"), field: "opening", hidden: true,
+			{id: "brand", name: __("Brand"), field: "brand", width: 100},
+			{id: "stock_uom", name: __("UOM"), field: "stock_uom", width: 100},
+			{id: "opening", name: __("Opening"), field: "opening", hidden: true,
 				formatter: this.currency_formatter}
 		];
 
@@ -50,23 +50,23 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: frappe._("Value or Qty"), options:["Value", "Quantity"],
+		{fieldtype:"Select", label: __("Value or Qty"), options:["Value", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse..."},
-		{fieldtype:"Date", label: frappe._("From Date")},
-		{fieldtype:"Label", label: frappe._("To")},
-		{fieldtype:"Date", label: frappe._("To Date")},
-		{fieldtype:"Select", label: frappe._("Range"), 
+		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Label", label: __("To")},
+		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Select", label: __("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;

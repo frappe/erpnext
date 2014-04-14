@@ -37,39 +37,39 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: frappe._("Account"), field: "name", width: 300, cssClass: "cell-title", 
+			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title", 
 				formatter: this.tree_formatter},
-			{id: "opening_dr", name: frappe._("Opening (Dr)"), field: "opening_dr", width: 100,
+			{id: "opening_dr", name: __("Opening (Dr)"), field: "opening_dr", width: 100,
 				formatter: this.currency_formatter},
-			{id: "opening_cr", name: frappe._("Opening (Cr)"), field: "opening_cr", width: 100,
+			{id: "opening_cr", name: __("Opening (Cr)"), field: "opening_cr", width: 100,
 				formatter: this.currency_formatter},
-			{id: "debit", name: frappe._("Debit"), field: "debit", width: 100,
+			{id: "debit", name: __("Debit"), field: "debit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "credit", name: frappe._("Credit"), field: "credit", width: 100,
+			{id: "credit", name: __("Credit"), field: "credit", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_dr", name: frappe._("Closing (Dr)"), field: "closing_dr", width: 100,
+			{id: "closing_dr", name: __("Closing (Dr)"), field: "closing_dr", width: 100,
 				formatter: this.currency_formatter},
-			{id: "closing_cr", name: frappe._("Closing (Cr)"), field: "closing_cr", width: 100,
+			{id: "closing_cr", name: __("Closing (Cr)"), field: "closing_cr", width: 100,
 				formatter: this.currency_formatter}
 		];
 
 	},
 	filters: [
-		{fieldtype: "Select", label: frappe._("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", label: __("Company"), link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype: "Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype: "Select", label: __("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype: "Date", label: frappe._("From Date")},
-		{fieldtype: "Label", label: frappe._("To")},
-		{fieldtype: "Date", label: frappe._("To Date")},
-		{fieldtype: "Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white",
+		{fieldtype: "Date", label: __("From Date")},
+		{fieldtype: "Label", label: __("To")},
+		{fieldtype: "Date", label: __("To Date")},
+		{fieldtype: "Button", label: __("Refresh"), icon:"icon-refresh icon-white",
 		 	cssClass:"btn-info"},
-		{fieldtype: "Button", label: frappe._("Reset Filters")},
+		{fieldtype: "Button", label: __("Reset Filters")},
 	],
 	setup_filters: function() {
 		this._super();
@@ -207,7 +207,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 
 	set_fiscal_year: function() {
 		if (this.opening_date > this.closing_date) {
-			msgprint(frappe._("Opening Date should be before Closing Date"));
+			msgprint(__("Opening Date should be before Closing Date"));
 			return;
 		}
 
@@ -221,7 +221,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		});
 
 		if (!this.fiscal_year) {
-			msgprint(frappe._("Opening Date and Closing Date should be within same Fiscal Year"));
+			msgprint(__("Opening Date and Closing Date should be within same Fiscal Year"));
 			return;
 		}
 	},

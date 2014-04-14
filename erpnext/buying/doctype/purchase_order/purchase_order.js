@@ -18,25 +18,25 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this.frm.dashboard.reset();
 		
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
-			cur_frm.dashboard.add_progress(cint(doc.per_received) + frappe._("% Received"), 
+			cur_frm.dashboard.add_progress(cint(doc.per_received) + __("% Received"), 
 				doc.per_received);
-			cur_frm.dashboard.add_progress(cint(doc.per_billed) + frappe._("% Billed"), 
+			cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"), 
 				doc.per_billed);
 
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
 			if(flt(doc.per_received, 2) < 100) 
-				cur_frm.add_custom_button(frappe._('Make Purchase Receipt'), this.make_purchase_receipt);	
+				cur_frm.add_custom_button(__('Make Purchase Receipt'), this.make_purchase_receipt);	
 			if(flt(doc.per_billed, 2) < 100) 
-				cur_frm.add_custom_button(frappe._('Make Invoice'), this.make_purchase_invoice);
+				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice);
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) 
-				cur_frm.add_custom_button(frappe._('Stop'), cur_frm.cscript['Stop Purchase Order'], "icon-exclamation");
+				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order'], "icon-exclamation");
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(frappe._('Unstop Purchase Order'), 
+			cur_frm.add_custom_button(__('Unstop Purchase Order'), 
 				cur_frm.cscript['Unstop Purchase Order'], "icon-check");
 	},
 		
@@ -55,7 +55,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 	
 	add_from_mappers: function() {
-		cur_frm.add_custom_button(frappe._('From Material Request'), 
+		cur_frm.add_custom_button(__('From Material Request'), 
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
@@ -71,7 +71,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		);
 
-		cur_frm.add_custom_button(frappe._('From Supplier Quotation'), 
+		cur_frm.add_custom_button(__('From Supplier Quotation'), 
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
@@ -85,7 +85,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		);	
 			
-		cur_frm.add_custom_button(frappe._('For Supplier'), 
+		cur_frm.add_custom_button(__('For Supplier'), 
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
@@ -137,7 +137,7 @@ cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 
 cur_frm.cscript['Stop Purchase Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm(frappe._("Do you really want to STOP ") + doc.name);
+	var check = confirm(__("Do you really want to STOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs':doc}, function(r,rt) {
@@ -148,7 +148,7 @@ cur_frm.cscript['Stop Purchase Order'] = function() {
 
 cur_frm.cscript['Unstop Purchase Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm(frappe._("Do you really want to UNSTOP ") + doc.name);
+	var check = confirm(__("Do you really want to UNSTOP ") + doc.name);
 
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs':doc}, function(r,rt) {

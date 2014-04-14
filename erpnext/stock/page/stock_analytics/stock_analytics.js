@@ -5,7 +5,7 @@
 frappe.pages['stock-analytics'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Stock Analytics'),
+		title: __('Stock Analytics'),
 		single_column: true
 	});
 

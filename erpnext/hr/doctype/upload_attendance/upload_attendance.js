@@ -17,7 +17,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 	
 	get_template:function() {
 		if(!this.frm.doc.att_fr_date || !this.frm.doc.att_to_date) {
-			msgprint(frappe._("Attendance From Date and Attendance To Date is mandatory"));
+			msgprint(__("Attendance From Date and Attendance To Date is mandatory"));
 			return;
 		}
 		window.location.href = repl(frappe.request.url + 
@@ -56,10 +56,10 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 						return v;
 					});
 
-					r.messages = ["<h4 style='color:red'>"+frappe._("Import Failed!")+"</h4>"]
+					r.messages = ["<h4 style='color:red'>"+__("Import Failed!")+"</h4>"]
 						.concat(r.messages)
 				} else {
-					r.messages = ["<h4 style='color:green'>"+frappe._("Import Successful!")+"</h4>"].
+					r.messages = ["<h4 style='color:green'>"+__("Import Successful!")+"</h4>"].
 						concat(r.message.messages)
 				}
 				

@@ -3,5 +3,5 @@
 
 // start
 $(document).on('startup', function() {
-	console.log(frappe._('Starting up...'));
+	console.log(__('Starting up...'));
 });

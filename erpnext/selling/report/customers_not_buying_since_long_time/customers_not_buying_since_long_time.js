@@ -5,7 +5,7 @@ frappe.query_reports["Customers Not Buying Since Long Time"] = {
 	"filters": [
 		{
 			"fieldname":"days_since_last_order",
-			"label": frappe._("Days Since Last Order"),
+			"label": __("Days Since Last Order"),
 			"fieldtype": "Int",
 			"default": 60
 		}

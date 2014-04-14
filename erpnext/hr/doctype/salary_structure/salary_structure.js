@@ -12,7 +12,7 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
   if((!doc.__islocal) && (doc.is_active == 'Yes')){
-    cur_frm.add_custom_button(frappe._('Make Salary Slip'), cur_frm.cscript['Make Salary Slip']);  
+    cur_frm.add_custom_button(__('Make Salary Slip'), cur_frm.cscript['Make Salary Slip']);  
   }
 
   cur_frm.toggle_enable('employee', doc.__islocal);

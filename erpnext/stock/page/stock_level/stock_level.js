@@ -4,7 +4,7 @@
 frappe.pages['stock-level'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Stock Level'),
+		title: __('Stock Level'),
 		single_column: true
 	});
 	
@@ -22,7 +22,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 		var me = this;
 		
 		this._super({
-			title: frappe._("Stock Level"),
+			title: __("Stock Level"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -37,12 +37,12 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 						Projected Qty = Actual Qty + Planned Qty + Requested Qty \
 						+ Ordered Qty - Reserved Qty </li> \
 					<ul> \
-						<li>"+frappe._("Actual Qty: Quantity available in the warehouse.") +"</li>"+
-						"<li>"+frappe._("Planned Qty: Quantity, for which, Production Order has been raised,")+
-							frappe._("but is pending to be manufactured.")+ "</li> " +
-						"<li>"+frappe._("Requested Qty: Quantity requested for purchase, but not ordered.") + "</li>" +
-						"<li>" + frappe._("Ordered Qty: Quantity ordered for purchase, but not received.")+ "</li>" +
-						"<li>" + frappe._("Reserved Qty: Quantity ordered for sale, but not delivered.") +  "</li>" +
+						<li>"+__("Actual Qty: Quantity available in the warehouse.") +"</li>"+
+						"<li>"+__("Planned Qty: Quantity, for which, Production Order has been raised,")+
+							__("but is pending to be manufactured.")+ "</li> " +
+						"<li>"+__("Requested Qty: Quantity requested for purchase, but not ordered.") + "</li>" +
+						"<li>" + __("Ordered Qty: Quantity ordered for purchase, but not received.")+ "</li>" +
+						"<li>" + __("Reserved Qty: Quantity ordered for sale, but not delivered.") +  "</li>" +
 					"</ul> \
 				</ul>");
 		});
@@ -50,57 +50,57 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 	
 	setup_columns: function() {
 		this.columns = [
-			{id: "item_code", name: frappe._("Item Code"), field: "item_code", width: 160, 	
+			{id: "item_code", name: __("Item Code"), field: "item_code", width: 160, 	
 				link_formatter: {
 					filter_input: "item_code",
 					open_btn: true,
 					doctype: '"Item"',
 				}},
-			{id: "item_name", name: frappe._("Item Name"), field: "item_name", width: 100,
+			{id: "item_name", name: __("Item Name"), field: "item_name", width: 100,
 				formatter: this.text_formatter},
-			{id: "description", name: frappe._("Description"), field: "description", width: 200, 
+			{id: "description", name: __("Description"), field: "description", width: 200, 
 				formatter: this.text_formatter},
-			{id: "brand", name: frappe._("Brand"), field: "brand", width: 100,
+			{id: "brand", name: __("Brand"), field: "brand", width: 100,
 				link_formatter: {filter_input: "brand"}},
-			{id: "warehouse", name: frappe._("Warehouse"), field: "warehouse", width: 100,
+			{id: "warehouse", name: __("Warehouse"), field: "warehouse", width: 100,
 				link_formatter: {filter_input: "warehouse"}},
-			{id: "uom", name: frappe._("UOM"), field: "uom", width: 60},
-			{id: "actual_qty", name: frappe._("Actual Qty"), 
+			{id: "uom", name: __("UOM"), field: "uom", width: 60},
+			{id: "actual_qty", name: __("Actual Qty"), 
 				field: "actual_qty", width: 80, formatter: this.currency_formatter},
-			{id: "planned_qty", name: frappe._("Planned Qty"), 
+			{id: "planned_qty", name: __("Planned Qty"), 
 				field: "planned_qty", width: 80, formatter: this.currency_formatter},
-			{id: "requested_qty", name: frappe._("Requested Qty"), 
+			{id: "requested_qty", name: __("Requested Qty"), 
 				field: "requested_qty", width: 80, formatter: this.currency_formatter},
-			{id: "ordered_qty", name: frappe._("Ordered Qty"), 
+			{id: "ordered_qty", name: __("Ordered Qty"), 
 				field: "ordered_qty", width: 80, formatter: this.currency_formatter},
-			{id: "reserved_qty", name: frappe._("Reserved Qty"), 
+			{id: "reserved_qty", name: __("Reserved Qty"), 
 				field: "reserved_qty", width: 80, formatter: this.currency_formatter},
-			{id: "projected_qty", name: frappe._("Projected Qty"), 
+			{id: "projected_qty", name: __("Projected Qty"), 
 				field: "projected_qty", width: 80, formatter: this.currency_formatter},
-			{id: "re_order_level", name: frappe._("Re-Order Level"), 
+			{id: "re_order_level", name: __("Re-Order Level"), 
 				field: "re_order_level", width: 80, formatter: this.currency_formatter},
-			{id: "re_order_qty", name: frappe._("Re-Order Qty"), 
+			{id: "re_order_qty", name: __("Re-Order Qty"), 
 				field: "re_order_qty", width: 80, formatter: this.currency_formatter},
 		];
 	},
 	
 	filters: [
-		{fieldtype:"Link", label: frappe._("Item Code"), link:"Item", default_value: "Select Item...",
+		{fieldtype:"Link", label: __("Item Code"), link:"Item", default_value: "Select Item...",
 			filter: function(val, item, opts) {
 				return item.item_code == val || !val;
 			}},
 			
-		{fieldtype:"Select", label: frappe._("Warehouse"), link:"Warehouse", 
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", 
 			default_value: "Select Warehouse...", filter: function(val, item, opts) {
 				return item.warehouse == val || val == opts.default_value;
 			}},
 		
-		{fieldtype:"Select", label: frappe._("Brand"), link:"Brand", 
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", 
 			default_value: "Select Brand...", filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val;
 			}},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	
 	setup_filters: function() {

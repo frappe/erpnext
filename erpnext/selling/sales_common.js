@@ -72,7 +72,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
 				if(!item.item_code) {
-					frappe.throw(frappe._("Please enter Item Code to get batch no"));
+					frappe.throw(__("Please enter Item Code to get batch no"));
 				} else {
 					filters = {
 						'item_code': item.item_code,
@@ -174,10 +174,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			frappe.model.round_floats_in(this.frm.doc, ["net_total", "total_commission"]);
 
 			if(this.frm.doc.net_total < this.frm.doc.total_commission) {
-				var msg = (frappe._("[Error]") + " " +
-					frappe._(frappe.meta.get_label(this.frm.doc.doctype, "total_commission",
+				var msg = (__("[Error]") + " " +
+					__(frappe.meta.get_label(this.frm.doc.doctype, "total_commission",
 						this.frm.doc.name)) + " > " +
-					frappe._(frappe.meta.get_label(this.frm.doc.doctype, "net_total", this.frm.doc.name)));
+					__(frappe.meta.get_label(this.frm.doc.doctype, "net_total", this.frm.doc.name)));
 				msgprint(msg);
 				throw msg;
 			}
@@ -421,8 +421,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	calculate_commission: function() {
 		if(this.frm.fields_dict.commission_rate) {
 			if(this.frm.doc.commission_rate > 100) {
-				var msg = frappe._(frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
-					" " + frappe._("cannot be greater than 100");
+				var msg = __(frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
+					" " + __("cannot be greater than 100");
 				msgprint(msg);
 				throw msg;
 			}
@@ -477,7 +477,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = frappe.meta.docfield_map[me.frm.doc.doctype][fname];
 				if(docfield) {
-					var label = frappe._(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[fname] = label.trim() + " (" + currency + ")";
 				}
 			});
@@ -521,7 +521,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			$.each(fields_list, function(i, fname) {
 				var docfield = frappe.meta.docfield_map[grid_doctype][fname];
 				if(docfield) {
-					var label = frappe._(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
 					field_label_map[grid_doctype + "-" + fname] =
 						label.trim() + " (" + currency + ")";
 				}
@@ -570,7 +570,7 @@ var set_sales_bom_help = function(doc) {
 
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 			help_msg = "<div class='alert alert-warning'>" +
-				frappe._("For 'Sales BOM' items, warehouse, serial no and batch no \
+				__("For 'Sales BOM' items, warehouse, serial no and batch no \
 				will be considered from the 'Packing List' table. \
 				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
 				those values can be entered in the main item table, values will be copied to 'Packing List' table.")+

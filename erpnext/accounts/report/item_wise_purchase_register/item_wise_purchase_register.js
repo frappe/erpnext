@@ -5,26 +5,26 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
-			"label": frappe._("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.defaults.get_user_default("year_start_date"),
 			"width": "80"
 		},
 		{
 			"fieldname":"to_date",
-			"label": frappe._("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},
 		{
 			"fieldname": "item_code",
-			"label": frappe._("Item"),
+			"label": __("Item"),
 			"fieldtype": "Link",
 			"options": "Item",
 		},
 		{
 			"fieldname":"account",
-			"label": frappe._("Account"),
+			"label": __("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -41,7 +41,7 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 		},
 		{
 			"fieldname":"company",
-			"label": frappe._("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company")

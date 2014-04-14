@@ -4,7 +4,7 @@
 frappe.pages['activity'].onload = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._("Activity"),
+		title: __("Activity"),
 		single_column: true
 	})
 	wrapper.appframe.add_module_icon("Activity");
@@ -24,7 +24,7 @@ frappe.pages['activity'].onload = function(wrapper) {
 	
 	// Build Report Button
 	if(frappe.boot.user.can_get_report.indexOf("Feed")!=-1) {
-		wrapper.appframe.add_primary_action(frappe._('Build Report'), function() {
+		wrapper.appframe.add_primary_action(__('Build Report'), function() {
 			frappe.set_route('Report', "Feed");
 		}, 'icon-th')
 	}
@@ -47,7 +47,7 @@ erpnext.ActivityFeed = Class.extend({
 		
 		// feedtype
 		if(!data.feed_type) {
-			data.feed_type = frappe._(data.doc_type);
+			data.feed_type = __(data.doc_type);
 			data.add_class = "label-info";
 			data.onclick = repl('onclick="window.location.href=\'#!List/%(feed_type)s\';"', data)
 		}

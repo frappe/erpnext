@@ -6,22 +6,22 @@ frappe.listview_settings['Time Log'] = {
 	add_fields: ["`tabTime Log`.`status`", "`tabTime Log`.`billable`", "`tabTime Log`.`activity_type`"],
 	selectable: true,
 	onload: function(me) {
-		me.appframe.add_button(frappe._("Make Time Log Batch"), function() {
+		me.appframe.add_button(__("Make Time Log Batch"), function() {
 			var selected = me.get_checked_items() || [];
 
 			if(!selected.length) {
-				msgprint(frappe._("Please select Time Logs."))
+				msgprint(__("Please select Time Logs."))
 			}
 			
 			// select only billable time logs
 			for(var i in selected) {
 				var d = selected[i];
 				if(!d.billable) {
-					msgprint(frappe._("Time Log is not billable") + ": " + d.name);
+					msgprint(__("Time Log is not billable") + ": " + d.name);
 					return;
 				}
 				if(d.status!="Submitted") {
-					msgprint(frappe._("Time Log Status must be Submitted."));
+					msgprint(__("Time Log Status must be Submitted."));
 				}
 			}
 			

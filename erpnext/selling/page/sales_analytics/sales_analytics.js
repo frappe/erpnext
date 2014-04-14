@@ -4,7 +4,7 @@
 frappe.pages['sales-analytics'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Sales Analytics'),
+		title: __('Sales Analytics'),
 		single_column: true
 	});
 	new erpnext.SalesAnalytics(wrapper);
@@ -17,7 +17,7 @@ frappe.pages['sales-analytics'].onload = function(wrapper) {
 erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: frappe._("Sales Analytics"),
+			title: __("Sales Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -30,14 +30,14 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 		
 		this.tree_grids = {
 			"Customer Group": {
-				label: frappe._("Customer Group / Customer"),
+				label: __("Customer Group / Customer"),
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_customer_group", 
 				formatter: function(item) { return item.name; }
 			},
 			"Customer": {
-				label: frappe._("Customer"),
+				label: __("Customer"),
 				show: false, 
 				item_key: "customer",
 				formatter: function(item) {
@@ -45,7 +45,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 				}
 			},	
 			"Item Group": {
-				label: frappe._("Item"),
+				label: __("Item"),
 				show: true, 
 				parent_field: "parent_item_group", 
 				item_key: "item_code",
@@ -54,7 +54,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 				}
 			},	
 			"Item": {
-				label: frappe._("Item"),
+				label: __("Item"),
 				show: false, 
 				item_key: "item_code",
 				formatter: function(item) {
@@ -62,7 +62,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 				}
 			},	
 			"Territory": {
-				label: frappe._("Territory / Customer"),
+				label: __("Territory / Customer"),
 				show: true, 
 				item_key: "customer",
 				parent_field: "parent_territory", 
@@ -88,23 +88,23 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", fieldname: "tree_type", label: frappe._("Tree Type"), options:["Customer Group", "Customer", 
+		{fieldtype:"Select", fieldname: "tree_type", label: __("Tree Type"), options:["Customer Group", "Customer", 
 			"Item Group", "Item", "Territory"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", fieldname: "based_on", label: frappe._("Based On"), options:["Sales Invoice", 
+		{fieldtype:"Select", fieldname: "based_on", label: __("Based On"), options:["Sales Invoice", 
 			"Sales Order", "Delivery Note"]},
-		{fieldtype:"Select", fieldname: "value_or_qty", label:  frappe._("Value or Qty"), options:["Value", "Quantity"]},
-		{fieldtype:"Select", fieldname: "company", label: frappe._("Company"), link:"Company", 
+		{fieldtype:"Select", fieldname: "value_or_qty", label:  __("Value or Qty"), options:["Value", "Quantity"]},
+		{fieldtype:"Select", fieldname: "company", label: __("Company"), link:"Company", 
 			default_value: "Select Company..."},
-		{fieldtype:"Date", fieldname: "from_date", label: frappe._("From Date")},
-		{fieldtype:"Label", fieldname: "to", label: frappe._("To")},
-		{fieldtype:"Date", fieldname: "to_date", label: frappe._("To Date")},
-		{fieldtype:"Select", fieldname: "range", label: frappe._("Range"), 
+		{fieldtype:"Date", fieldname: "from_date", label: __("From Date")},
+		{fieldtype:"Label", fieldname: "to", label: __("To")},
+		{fieldtype:"Date", fieldname: "to_date", label: __("To Date")},
+		{fieldtype:"Select", fieldname: "range", label: __("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", fieldname: "refresh", label: frappe._("Refresh"), icon:"icon-refresh"},
-		{fieldtype:"Button", fieldname: "reset_filters", label: frappe._("Reset Filters"), icon:"icon-filter"}
+		{fieldtype:"Button", fieldname: "refresh", label: __("Refresh"), icon:"icon-refresh"},
+		{fieldtype:"Button", fieldname: "reset_filters", label: __("Reset Filters"), icon:"icon-filter"}
 	],
 	setup_filters: function() {
 		var me = this;

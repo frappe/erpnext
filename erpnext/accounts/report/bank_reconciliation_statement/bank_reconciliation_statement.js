@@ -5,7 +5,7 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 	"filters": [
 		{
 			"fieldname":"account",
-			"label": frappe._("Bank Account"),
+			"label": __("Bank Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"reqd": 1,
@@ -21,7 +21,7 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": frappe._("Date"),
+			"label": __("Date"),
 			"fieldtype": "Date",
 			"default": get_today(),
 			"reqd": 1

@@ -56,12 +56,12 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			this.show_download_template();
 			this.show_upload();
 			if(this.frm.doc.reconciliation_json) {
-				this.frm.set_intro(frappe._("You can submit this Stock Reconciliation."));
+				this.frm.set_intro(__("You can submit this Stock Reconciliation."));
 			} else {
-				this.frm.set_intro(frappe._("Download the Template, fill appropriate data and attach the modified file."));
+				this.frm.set_intro(__("Download the Template, fill appropriate data and attach the modified file."));
 			}
 		} else if(this.frm.doc.docstatus == 1) {
-			this.frm.set_intro(frappe._("Cancelling this Stock Reconciliation will nullify its effect."));
+			this.frm.set_intro(__("Cancelling this Stock Reconciliation will nullify its effect."));
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		} else {
@@ -73,20 +73,20 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	
 	show_download_template: function() {
 		var me = this;
-		this.frm.add_custom_button(frappe._("Download Template"), function() {
-			this.title = frappe._("Stock Reconcilation Template");
-			frappe.tools.downloadify([[frappe._("Stock Reconciliation")],
+		this.frm.add_custom_button(__("Download Template"), function() {
+			this.title = __("Stock Reconcilation Template");
+			frappe.tools.downloadify([[__("Stock Reconciliation")],
 				["----"],
-				[frappe._("Stock Reconciliation can be used to update the stock on a particular date, ")
-					+ frappe._("usually as per physical inventory.")],
-				[frappe._("When submitted, the system creates difference entries ")
-					+ frappe._("to set the given stock and valuation on this date.")],
-				[frappe._("It can also be used to create opening stock entries and to fix stock value.")],
+				[__("Stock Reconciliation can be used to update the stock on a particular date, ")
+					+ __("usually as per physical inventory.")],
+				[__("When submitted, the system creates difference entries ")
+					+ __("to set the given stock and valuation on this date.")],
+				[__("It can also be used to create opening stock entries and to fix stock value.")],
 				["----"],
-				[frappe._("Notes:")],
-				[frappe._("Item Code and Warehouse should already exist.")],
-				[frappe._("You can update either Quantity or Valuation Rate or both.")],
-				[frappe._("If no change in either Quantity or Valuation Rate, leave the cell blank.")],
+				[__("Notes:")],
+				[__("Item Code and Warehouse should already exist.")],
+				[__("You can update either Quantity or Valuation Rate or both.")],
+				[__("If no change in either Quantity or Valuation Rate, leave the cell blank.")],
 				["----"],
 				["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null, this);
 			return false;
@@ -120,8 +120,8 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	show_download_reconciliation_data: function() {
 		var me = this;
 		if(this.frm.doc.reconciliation_json) {
-			this.frm.add_custom_button(frappe._("Download Reconcilation Data"), function() {
-				this.title = frappe._("Stock Reconcilation Data");
+			this.frm.add_custom_button(__("Download Reconcilation Data"), function() {
+				this.title = __("Stock Reconcilation Data");
 				frappe.tools.downloadify(JSON.parse(me.frm.doc.reconciliation_json), null, this);
 				return false;
 			}, "icon-download");

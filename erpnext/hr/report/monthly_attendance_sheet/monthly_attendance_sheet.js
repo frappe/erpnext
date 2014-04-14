@@ -5,7 +5,7 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 	"filters": [
 		{
 			"fieldname":"month",
-			"label": frappe._("Month"),
+			"label": __("Month"),
 			"fieldtype": "Select",
 			"options": "Jan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec",
 			"default": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", 
@@ -13,20 +13,20 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 		},
 		{
 			"fieldname":"fiscal_year",
-			"label": frappe._("Fiscal Year"),
+			"label": __("Fiscal Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": sys_defaults.fiscal_year,
 		},
 		{
 			"fieldname":"employee",
-			"label": frappe._("Employee"),
+			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee"
 		},
 		{
 			"fieldname":"company",
-			"label": frappe._("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company")

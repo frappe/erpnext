@@ -35,7 +35,7 @@ cur_frm.cscript.replace_abbr = function() {
 			},
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(frappe._("There were errors."));
+					msgprint(__("There were errors."));
 					return;
 				} else {
 					cur_frm.set_value("abbr", args.new_abbr);
@@ -61,8 +61,8 @@ cur_frm.cscript.has_special_chars = function(t) {
 
 cur_frm.cscript.company_name = function(doc){
   if(doc.company_name && cur_frm.cscript.has_special_chars(doc.company_name)){   
-    msgprint(("<font color=red>"+frappe._("Special Characters")+" <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> "+
-    	frappe._("are not allowed for ")+"</font>\n"+frappe._("Company Name")+" <b> "+ doc.company_name +"</b>"))        
+    msgprint(("<font color=red>"+__("Special Characters")+" <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> "+
+    	__("are not allowed for ")+"</font>\n"+__("Company Name")+" <b> "+ doc.company_name +"</b>"))        
     doc.company_name = '';
     refresh_field('company_name');
   }
@@ -70,8 +70,8 @@ cur_frm.cscript.company_name = function(doc){
 
 cur_frm.cscript.abbr = function(doc){
   if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){   
-    msgprint("<font color=red>"+frappe._("Special Characters ")+"<b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b>" +
-    	frappe._("are not allowed for")+ "</font>\nAbbr <b>" + doc.abbr +"</b>")        
+    msgprint("<font color=red>"+__("Special Characters ")+"<b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b>" +
+    	__("are not allowed for")+ "</font>\nAbbr <b>" + doc.abbr +"</b>")        
     doc.abbr = '';
     refresh_field('abbr');
   }

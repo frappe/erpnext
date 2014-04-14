@@ -70,10 +70,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	make_pos_btn: function() {
 		if(!this.pos_active) {
-			var btn_label = frappe._("POS View"),
+			var btn_label = __("POS View"),
 				icon = "icon-desktop";
 		} else {
-			var btn_label = frappe._(this.frm.doctype) + frappe._(" View"),
+			var btn_label = __(this.frm.doctype) + __(" View"),
 				icon = "icon-file-text";
 		}
 		var me = this;
@@ -89,7 +89,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
 		
 		if (!price_list)
-			msgprint(frappe._("Please select Price List"))
+			msgprint(__("Please select Price List"))
 		else {
 			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
 
@@ -354,10 +354,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	validate_on_previous_row: function(tax) {
 		// validate if a valid row id is mentioned in case of
 		// On Previous Row Amount and On Previous Row Total
-		if(([frappe._("On Previous Row Amount"), frappe._("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
+		if(([__("On Previous Row Amount"), __("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
 			(!tax.row_id || cint(tax.row_id) >= tax.idx)) {
-				var msg = repl(frappe._("Row") + " # %(idx)s [%(doctype)s]: " +
-					frappe._("Please specify a valid") + " %(row_id_label)s", {
+				var msg = repl(__("Row") + " # %(idx)s [%(doctype)s]: " +
+					__("Please specify a valid") + " %(row_id_label)s", {
 						idx: tax.idx,
 						doctype: tax.doctype,
 						row_id_label: frappe.meta.get_label(tax.doctype, "row_id", tax.name)
@@ -370,9 +370,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(!this.frm.tax_doclist) this.frm.tax_doclist = this.get_tax_doclist();
 		
 		var actual_type_error = function() {
-			var msg = repl(frappe._("For row") + " # %(idx)s [%(doctype)s]: " + 
+			var msg = repl(__("For row") + " # %(idx)s [%(doctype)s]: " + 
 				"%(charge_type_label)s = \"%(charge_type)s\" " +
-				frappe._("cannot be included in Item's rate"), {
+				__("cannot be included in Item's rate"), {
 					idx: tax.idx,
 					doctype: tax.doctype,
 					charge_type_label: frappe.meta.get_label(tax.doctype, "charge_type", tax.name),
@@ -382,9 +382,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		};
 		
 		var on_previous_row_error = function(row_range) {
-			var msg = repl(frappe._("For row") + " # %(idx)s [%(doctype)s]: " + 
-				frappe._("to be included in Item's rate, it is required that: ") + 
-				" [" + frappe._("Row") + " # %(row_range)s] " + frappe._("also be included in Item's rate"), {
+			var msg = repl(__("For row") + " # %(idx)s [%(doctype)s]: " + 
+				__("to be included in Item's rate, it is required that: ") + 
+				" [" + __("Row") + " # %(row_range)s] " + __("also be included in Item's rate"), {
 					idx: tax.idx,
 					doctype: tax.doctype,
 					charge_type_label: frappe.meta.get_label(tax.doctype, "charge_type", tax.name),
@@ -454,7 +454,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			tax_accounts.push([tax.name, tax.account_head]);
 		});
 		
-		var headings = $.map([frappe._("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
+		var headings = $.map([__("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
 			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
 			
 		var distinct_item_names = [];
@@ -494,9 +494,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		$.each(["company", "customer"], function(i, fieldname) {
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname)) {
 				if (!me.frm.doc[fieldname]) {
-					msgprint(frappe._("Please specify") + ": " + 
+					msgprint(__("Please specify") + ": " + 
 						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
-						". " + frappe._("It is needed to fetch Item Details."));
+						". " + __("It is needed to fetch Item Details."));
 						valid = false;
 				}
 			}
@@ -520,8 +520,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		
 		if(!this.frm.doc.conversion_rate) {
 			frappe.throw(repl('%(conversion_rate_label)s' + 
-				frappe._(' is mandatory. Maybe Currency Exchange record is not created for ') + 
-				'%(from_currency)s' + frappe._(" to ") + '%(to_currency)s', 
+				__(' is mandatory. Maybe Currency Exchange record is not created for ') + 
+				'%(from_currency)s' + __(" to ") + '%(to_currency)s', 
 				{
 					"conversion_rate_label": conversion_rate_label,
 					"from_currency": this.frm.doc.currency,

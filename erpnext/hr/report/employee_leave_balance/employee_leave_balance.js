@@ -5,14 +5,14 @@ frappe.query_reports["Employee Leave Balance"] = {
 	"filters": [
 		{
 			"fieldname":"fiscal_year",
-			"label": frappe._("Fiscal Year"),
+			"label": __("Fiscal Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year")
 		},
 		{
 			"fieldname":"company",
-			"label": frappe._("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company")

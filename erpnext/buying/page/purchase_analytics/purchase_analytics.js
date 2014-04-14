@@ -4,7 +4,7 @@
 frappe.pages['purchase-analytics'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Purchase Analytics'),
+		title: __('Purchase Analytics'),
 		single_column: true
 	});					
 	
@@ -18,7 +18,7 @@ frappe.pages['purchase-analytics'].onload = function(wrapper) {
 erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({
-			title: frappe._("Purchase Analytics"),
+			title: __("Purchase Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
@@ -31,7 +31,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		
 		this.tree_grids = {
 			"Supplier Type": {
-				label: frappe._("Supplier Type / Supplier"),
+				label: __("Supplier Type / Supplier"),
 				show: true, 
 				item_key: "supplier",
 				parent_field: "parent_supplier_type", 
@@ -44,7 +44,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 				}
 			},
 			"Supplier": {
-				label: frappe._("Supplier"),
+				label: __("Supplier"),
 				show: false, 
 				item_key: "supplier",
 				formatter: function(item) {
@@ -74,7 +74,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		this.tree_grid = this.tree_grids[this.tree_type];
 
 		var std_columns = [
-			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
+			{id: "check", name: __("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: this.tree_grid.label, field: "name", width: 300,
 				formatter: this.tree_formatter},
@@ -86,23 +86,23 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: frappe._("Tree Type"), options:["Supplier Type", "Supplier", 
+		{fieldtype:"Select", label: __("Tree Type"), options:["Supplier Type", "Supplier", 
 			"Item Group", "Item"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: frappe._("Based On"), options:["Purchase Invoice", 
+		{fieldtype:"Select", label: __("Based On"), options:["Purchase Invoice", 
 			"Purchase Order", "Purchase Receipt"]},
-		{fieldtype:"Select", label: frappe._("Value or Qty"), options:["Value", "Quantity"]},
-		{fieldtype:"Select", label: frappe._("Company"), link:"Company", 
+		{fieldtype:"Select", label: __("Value or Qty"), options:["Value", "Quantity"]},
+		{fieldtype:"Select", label: __("Company"), link:"Company", 
 			default_value: "Select Company..."},
-		{fieldtype:"Date", label: frappe._("From Date")},
-		{fieldtype:"Label", label: frappe._("To")},
-		{fieldtype:"Date", label: frappe._("To Date")},
-		{fieldtype:"Select", label: frappe._("Range"), 
+		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Label", label: __("To")},
+		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Select", label: __("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	setup_filters: function() {
 		var me = this;
@@ -130,18 +130,18 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			})
 			
 			frappe.report_dump.data["Supplier Type"] = [{
-				name: frappe._("All Supplier Types"), 
+				name: __("All Supplier Types"), 
 				id: "All Supplier Types",
 			}].concat(frappe.report_dump.data["Supplier Type"]);
 			
 			frappe.report_dump.data["Supplier"].push({
-				name: frappe._("Not Set"), 
+				name: __("Not Set"), 
 				parent_supplier_type: "All Supplier Types",
 				id: "Not Set",
 			});
 
 			frappe.report_dump.data["Item"].push({
-				name: frappe._("Not Set"), 
+				name: __("Not Set"), 
 				parent_item_group: "All Item Groups",
 				id: "Not Set",
 			});

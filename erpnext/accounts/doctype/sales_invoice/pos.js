@@ -523,7 +523,7 @@ erpnext.POS = Class.extend({
 						me.add_to_cart(r.message[0][0].name);
 				}
 				else
-					msgprint(frappe._("Invalid Barcode"));
+					msgprint(__("Invalid Barcode"));
 
 				me.refresh();
 			}
@@ -564,7 +564,7 @@ erpnext.POS = Class.extend({
 		var mode_of_payment = [];
 		
 		if (no_of_items == 0)
-			msgprint(frappe._("Payment cannot be made for empty cart"));
+			msgprint(__("Payment cannot be made for empty cart"));
 		else {
 			frappe.call({
 				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',

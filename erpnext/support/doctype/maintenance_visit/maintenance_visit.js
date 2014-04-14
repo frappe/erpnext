@@ -14,7 +14,7 @@ frappe.ui.form.on_change("Maintenance Visit", "contact_person",
 erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Maintenance Schedule'), 
+			cur_frm.add_custom_button(__('From Maintenance Schedule'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
@@ -26,7 +26,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						}
 					})
 				});
-			cur_frm.add_custom_button(frappe._('From Customer Issue'), 
+			cur_frm.add_custom_button(__('From Customer Issue'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.support.doctype.customer_issue.customer_issue.make_maintenance_visit",
@@ -38,7 +38,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						}
 					})
 				});
-			cur_frm.add_custom_button(frappe._('From Sales Order'), 
+			cur_frm.add_custom_button(__('From Sales Order'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",

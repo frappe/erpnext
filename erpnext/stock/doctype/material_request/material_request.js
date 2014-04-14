@@ -25,38 +25,38 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		cur_frm.dashboard.reset();
 		if(doc.docstatus===1) {
 			if(doc.status==="Stopped") {
-				cur_frm.dashboard.set_headline_alert(frappe._("Stopped"), "alert-danger", "icon-stop")
+				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop")
 			}
 			cur_frm.dashboard.add_progress(cint(doc.per_ordered) + "% " 
-				+ frappe._("Fulfilled"), cint(doc.per_ordered));
+				+ __("Fulfilled"), cint(doc.per_ordered));
 		}
 		
 		if(doc.docstatus==0) {
-			cur_frm.add_custom_button(frappe._("Get Items from BOM"), cur_frm.cscript.get_items_from_bom, "icon-sitemap");
+			cur_frm.add_custom_button(__("Get Items from BOM"), cur_frm.cscript.get_items_from_bom, "icon-sitemap");
 		}
 		
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 			if(doc.material_request_type === "Purchase")
-				cur_frm.add_custom_button(frappe._("Make Supplier Quotation"), 
+				cur_frm.add_custom_button(__("Make Supplier Quotation"), 
 					this.make_supplier_quotation);
 				
 			if(doc.material_request_type === "Transfer" && doc.status === "Submitted")
-				cur_frm.add_custom_button(frappe._("Transfer Material"), this.make_stock_entry);
+				cur_frm.add_custom_button(__("Transfer Material"), this.make_stock_entry);
 			
 			if(flt(doc.per_ordered, 2) < 100) {
 				if(doc.material_request_type === "Purchase")
-					cur_frm.add_custom_button(frappe._('Make Purchase Order'), 
+					cur_frm.add_custom_button(__('Make Purchase Order'), 
 						this.make_purchase_order);
 				
-				cur_frm.add_custom_button(frappe._('Stop Material Request'), 
+				cur_frm.add_custom_button(__('Stop Material Request'), 
 					cur_frm.cscript['Stop Material Request'], "icon-exclamation");
 			}
-			cur_frm.add_custom_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 
 		} 
 		
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Sales Order'), 
+			cur_frm.add_custom_button(__('From Sales Order'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
@@ -72,7 +72,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(frappe._('Unstop Material Request'), 
+			cur_frm.add_custom_button(__('Unstop Material Request'), 
 				cur_frm.cscript['Unstop Material Request'], "icon-check");
 		
 	},
@@ -91,13 +91,13 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	
 	get_items_from_bom: function() {
 		var d = new frappe.ui.Dialog({
-			title: frappe._("Get Items from BOM"),
+			title: __("Get Items from BOM"),
 			fields: [
-				{"fieldname":"bom", "fieldtype":"Link", "label":frappe._("BOM"), 
+				{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"), 
 					options:"BOM"},
 				{"fieldname":"fetch_exploded", "fieldtype":"Check", 
-					"label":frappe._("Fetch exploded BOM (including sub-assemblies)"), "default":1},
-				{fieldname:"fetch", "label":frappe._("Get Items from BOM"), "fieldtype":"Button"}
+					"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
+				{fieldname:"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
 			]
 		});
 		d.get_input("fetch").on("click", function() {
@@ -164,12 +164,12 @@ $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (flt(d.qty) < flt(d.min_order_qty))
-		alert(frappe._("Warning: Material Requested Qty is less than Minimum Order Qty"));
+		alert(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 };
 
 cur_frm.cscript['Stop Material Request'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm(frappe._("Do you really want to STOP this Material Request?"));
+	var check = confirm(__("Do you really want to STOP this Material Request?"));
 
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
@@ -180,7 +180,7 @@ cur_frm.cscript['Stop Material Request'] = function() {
 
 cur_frm.cscript['Unstop Material Request'] = function(){
 	var doc = cur_frm.doc;
-	var check = confirm(frappe._("Do you really want to UNSTOP this Material Request?"));
+	var check = confirm(__("Do you really want to UNSTOP this Material Request?"));
 	
 	if (check) {
 		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {

@@ -20,30 +20,30 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			.css({"margin-bottom": "15px", "min-height": "200px"})
 			.appendTo(main),
 		help_area = $('<div class="well">'+
-		'<h4>'+frappe._('Quick Help')+'</h4>'+
+		'<h4>'+__('Quick Help')+'</h4>'+
 		'<ol>'+
-			'<li>'+frappe._('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
+			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
 			'<li>'+
-			      frappe._('Accounting Entries can be made against leaf nodes, called')+
-				 '<b>' +frappe._('Ledgers')+'</b>.'+ frappe._('Entries against') +
-				 '<b>' +frappe._('Groups') + '</b>'+ frappe._('are not allowed.')+
+			      __('Accounting Entries can be made against leaf nodes, called')+
+				 '<b>' +__('Ledgers')+'</b>.'+ __('Entries against') +
+				 '<b>' +__('Groups') + '</b>'+ __('are not allowed.')+
 		    '</li>'+
-			'<li>'+frappe._('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
+			'<li>'+__('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
 			'<li>'+
-			     '<b>'+frappe._('To create a Bank Account:')+'</b>'+ 
-			      frappe._('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts)')+
-			      frappe._('and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
+			     '<b>'+__('To create a Bank Account:')+'</b>'+ 
+			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts)')+
+			      __('and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
 			'</li>'+
 			'<li>'+
-			      '<b>'+frappe._('To create a Tax Account:')+'</b>'+
-			      frappe._('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties)')+
-			      frappe._('and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
+			      '<b>'+__('To create a Tax Account:')+'</b>'+
+			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties)')+
+			      __('and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
 			'</li>'+
 		'</ol>'+
-		'<p>'+frappe._('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
+		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 	
 	if (frappe.boot.user.can_create.indexOf("Company") !== -1) {
-		wrapper.appframe.add_button(frappe._('New Company'), function() { newdoc('Company'); },
+		wrapper.appframe.add_button(__('New Company'), function() { newdoc('Company'); },
 			'icon-plus');
 	}
 	
@@ -184,21 +184,21 @@ erpnext.AccountsChart = Class.extend({
 		
 		// the dialog
 		var d = new frappe.ui.Dialog({
-			title:frappe._('New Account'),
+			title:__('New Account'),
 			fields: [
-				{fieldtype:'Data', fieldname:'account_name', label:frappe._('New Account Name'), reqd:true, 
-					description: frappe._("Name of new Account. Note: Please don't create accounts for Customers and Suppliers,")+
-					frappe._("they are created automatically from the Customer and Supplier master")},
-				{fieldtype:'Select', fieldname:'group_or_ledger', label:frappe._('Group or Ledger'),
-					options:'Group\nLedger', description: frappe._('Further accounts can be made under Groups,')+
-					 	frappe._('but entries can be made against Ledger')},
-				{fieldtype:'Select', fieldname:'account_type', label:frappe._('Account Type'),
+				{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true, 
+					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers,")+
+					__("they are created automatically from the Customer and Supplier master")},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
+					options:'Group\nLedger', description: __('Further accounts can be made under Groups,')+
+					 	__('but entries can be made against Ledger')},
+				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable', 
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account', 
 						'Income Account', 'Tax', 'Chargeable'].join('\n'),
-					description: frappe._("Optional. This setting will be used to filter in various transactions.") },
-				{fieldtype:'Float', fieldname:'tax_rate', label:frappe._('Tax Rate')},
-				{fieldtype:'Button', fieldname:'create_new', label:frappe._('Create New') }
+					description: __("Optional. This setting will be used to filter in various transactions.") },
+				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
+				{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
 			]
 		})
 
@@ -261,13 +261,13 @@ erpnext.AccountsChart = Class.extend({
 		var me = this;
 		// the dialog
 		var d = new frappe.ui.Dialog({
-			title:frappe._('New Cost Center'),
+			title:__('New Cost Center'),
 			fields: [
-				{fieldtype:'Data', fieldname:'cost_center_name', label:frappe._('New Cost Center Name'), reqd:true},
-				{fieldtype:'Select', fieldname:'group_or_ledger', label:frappe._('Group or Ledger'),
-					options:'Group\nLedger', description:frappe._('Further accounts can be made under Groups,')+
-					 	frappe._('but entries can be made against Ledger')},
-				{fieldtype:'Button', fieldname:'create_new', label:frappe._('Create New') }
+				{fieldtype:'Data', fieldname:'cost_center_name', label:__('New Cost Center Name'), reqd:true},
+				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
+					options:'Group\nLedger', description:__('Further accounts can be made under Groups,')+
+					 	__('but entries can be made against Ledger')},
+				{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
 			]
 		});
 	

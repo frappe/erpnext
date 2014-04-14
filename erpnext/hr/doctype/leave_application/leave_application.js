@@ -31,14 +31,14 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(user_roles, "HR User")) {
-		cur_frm.set_intro(frappe._("Fill the form and save it"))
+		cur_frm.set_intro(__("Fill the form and save it"))
 	} else {
 		if(doc.docstatus==0 && doc.status=="Open") {
 			if(user==doc.leave_approver) {
-				cur_frm.set_intro(frappe._("You are the Leave Approver for this record. Please Update the 'Status' and Save"));
+				cur_frm.set_intro(__("You are the Leave Approver for this record. Please Update the 'Status' and Save"));
 				cur_frm.toggle_enable("status", true);
 			} else {
-				cur_frm.set_intro(frappe._("This Leave Application is pending approval. Only the Leave Apporver can update status."))
+				cur_frm.set_intro(__("This Leave Application is pending approval. Only the Leave Apporver can update status."))
 				cur_frm.toggle_enable("status", false);
 				if(!doc.__islocal) {
 						cur_frm.frm_head.appframe.set_title_right("");
@@ -46,12 +46,12 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			}
 		} else {
  			if(doc.status=="Approved") {
-				cur_frm.set_intro(frappe._("Leave application has been approved."));
+				cur_frm.set_intro(__("Leave application has been approved."));
 				if(cur_frm.doc.docstatus==0) {
-					cur_frm.set_intro(frappe._("Please submit to update Leave Balance."));
+					cur_frm.set_intro(__("Please submit to update Leave Balance."));
 				}
 			} else if(doc.status=="Rejected") {
-				cur_frm.set_intro(frappe._("Leave application has been rejected."));
+				cur_frm.set_intro(__("Leave application has been rejected."));
 			}
 		}
 	}	
@@ -85,7 +85,7 @@ cur_frm.cscript.from_date = function(doc, dt, dn) {
 
 cur_frm.cscript.to_date = function(doc, dt, dn) {
 	if(cint(doc.half_day) == 1 && cstr(doc.from_date) && doc.from_date != doc.to_date){
-		msgprint(frappe._("To Date should be same as From Date for Half Day leave"));
+		msgprint(__("To Date should be same as From Date for Half Day leave"));
 		set_multiple(dt,dn,{to_date:doc.from_date});		
 	}
 	cur_frm.cscript.calculate_total_days(doc, dt, dn);
