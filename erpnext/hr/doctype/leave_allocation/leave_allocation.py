@@ -12,6 +12,8 @@ class LeaveAllocation(Document):
 	def validate(self):
 		self.validate_new_leaves_allocated_value()
 		self.check_existing_leave_allocation()
+		if not self.total_leaves_allocated:
+			self.total_leaves_allocated = self.new_leaves_allocated
 
 	def on_update_after_submit(self):
 		self.validate_new_leaves_allocated_value()
