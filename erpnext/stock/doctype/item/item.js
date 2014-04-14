@@ -181,7 +181,6 @@ cur_frm.cscript.image = function() {
 	if(!cur_frm.doc.description_html)
 		cur_frm.cscript.add_image(cur_frm.doc);
 	else {
-		msgprint(__("You may need to update: ") +
-			frappe.meta.get_docfield(cur_frm.doc.doctype, "description_html").label);
+		msgprint(__("You may need to update: {0}", [frappe.meta.get_docfield(cur_frm.doc.doctype, "description_html").label]));
 	}
 }

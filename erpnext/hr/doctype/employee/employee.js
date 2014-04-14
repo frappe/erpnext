@@ -61,11 +61,11 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		var me = this;
 		this.validate_salary_structure(btn, function(r) {
 			if(r.message) {
-				msgprint(__("Employee") + ' "' + me.frm.doc.name + '": ' 
-					+ __("An active Salary Structure already exists. \
+				msgprint(__("Employee {0}:\
+					An active Salary Structure already exists. \
 						If you want to create new one, please ensure that no active \
 						Salary Structure exists for this Employee. \
-						Go to the active Salary Structure and set \"Is Active\" = \"No\""));
+						Go to the active Salary Structure and set \"Is Active\" = \"No\"", [me.frm.doc.name]));
 			} else if(!r.exc) {
 				frappe.model.map({
 					source: me.frm.doc,

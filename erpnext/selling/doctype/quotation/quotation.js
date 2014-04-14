@@ -90,8 +90,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	
 	validate_company_and_party: function(party_field) {
 		if(!this.frm.doc.quotation_to) {
-			msgprint(__("Please select a value for" + " " + 
-				frappe.meta.get_label(this.frm.doc.doctype, "quotation_to", this.frm.doc.name)));
+			msgprint(__("Please select a value for {0} quotation_to {1}", [this.frm.doc.doctype, this.frm.doc.name]));
 			return false;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			return true;

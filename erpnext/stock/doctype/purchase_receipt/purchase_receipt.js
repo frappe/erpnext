@@ -63,8 +63,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		}
 		
 		if(item.qty > item.received_qty) {
-			msgprint(__("Error") + ": " + __(frappe.meta.get_label(item.doctype, "qty", item.name))
-				+ " > " + __(frappe.meta.get_label(item.doctype, "received_qty", item.name)));
+			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)), 
+						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
 			item.qty = item.rejected_qty = 0.0;
 		} else {
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
@@ -78,9 +78,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 		
 		if(item.rejected_qty > item.received_qty) {
-			msgprint(__("Error") + ": " + 
-				__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name))
-				+ " > " + __(frappe.meta.get_label(item.doctype, "received_qty", item.name)));
+			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
+						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
 			item.qty = item.rejected_qty = 0.0;
 		} else {
 			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));

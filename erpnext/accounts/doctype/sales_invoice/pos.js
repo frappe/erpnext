@@ -274,7 +274,7 @@ erpnext.POS = Class.extend({
 						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
 								me.frm.doc.quotation_to == "Customer") 
 								|| me.frm.doctype != "Quotation")) {
-							msgprint("Please select " + me.party + " first.");
+							msgprint("Please select {0} first.", [me.party]);
 							return;
 						}
 						else

@@ -78,8 +78,7 @@ cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
 			}
 		}
 		if(flt(ps_detail[i].qty)<=0) {
-			msgprint(__("Invalid quantity specified for item ") + ps_detail[i].item_code +
-				"."+__(" Quantity should be greater than 0."));
+			msgprint(__("Invalid quantity specified for item {0}. Quantity should be greater than 0.", [ps_detail[i].item_code]));
 			validated = false;
 		}
 	}
@@ -95,9 +94,7 @@ cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
 	for(var i=0; i<ps_detail.length; i++) {
 		var item = ps_detail[i];
 		if(item.weight_uom != doc.net_weight_uom) {
-			msgprint(__("Different UOM for items will lead to incorrect")+
-			__("(Total) Net Weight value. Make sure that Net Weight of each item is")+
-			__("in the same UOM."))
+			msgprint(__("Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM."));
 			validated = false;
 		}
 		net_weight_pkg += flt(item.net_weight) * flt(item.qty);
