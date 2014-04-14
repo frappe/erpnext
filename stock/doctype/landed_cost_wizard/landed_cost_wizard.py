@@ -72,6 +72,7 @@ class DocType:
 					matched_row[0].cost_center = lc.cost_center
 
 			pr_bean.run_method("validate")
+			pr_bean.check_mandatory()
 			for d in pr_bean.doclist:
 				d.save()
 
