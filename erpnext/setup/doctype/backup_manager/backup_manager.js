@@ -7,8 +7,7 @@ $.extend(cur_frm.cscript, {
 		
 		if(!(cint(cur_frm.doc.dropbox_access_allowed) || 
 			cint(cur_frm.doc.gdrive_access_allowed))) {
-				cur_frm.set_intro(__("You can start by selecting backup frequency and \
-					granting access for sync"));
+				cur_frm.set_intro(__("You can start by selecting backup frequency and granting access for sync"));
 		} else {
 			var services = {
 				"dropbox": __("Dropbox"),

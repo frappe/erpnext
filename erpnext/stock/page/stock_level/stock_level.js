@@ -38,8 +38,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 						+ Ordered Qty - Reserved Qty </li> \
 					<ul> \
 						<li>"+__("Actual Qty: Quantity available in the warehouse.") +"</li>"+
-						"<li>"+__("Planned Qty: Quantity, for which, Production Order has been raised,")+
-							__("but is pending to be manufactured.")+ "</li> " +
+						"<li>"+__("Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.")+ "</li> " +
 						"<li>"+__("Requested Qty: Quantity requested for purchase, but not ordered.") + "</li>" +
 						"<li>" + __("Ordered Qty: Quantity ordered for purchase, but not received.")+ "</li>" +
 						"<li>" + __("Reserved Qty: Quantity ordered for sale, but not delivered.") +  "</li>" +

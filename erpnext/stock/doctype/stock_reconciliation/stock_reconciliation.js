@@ -77,10 +77,8 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			this.title = __("Stock Reconcilation Template");
 			frappe.tools.downloadify([[__("Stock Reconciliation")],
 				["----"],
-				[__("Stock Reconciliation can be used to update the stock on a particular date, ")
-					+ __("usually as per physical inventory.")],
-				[__("When submitted, the system creates difference entries ")
-					+ __("to set the given stock and valuation on this date.")],
+				[__("Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.")],
+				[__("When submitted, the system creates difference entries to set the given stock and valuation on this date.")],
 				[__("It can also be used to create opening stock entries and to fix stock value.")],
 				["----"],
 				[__("Notes:")],

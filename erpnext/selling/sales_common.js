@@ -570,10 +570,7 @@ var set_sales_bom_help = function(doc) {
 
 		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 			help_msg = "<div class='alert alert-warning'>" +
-				__("For 'Sales BOM' items, warehouse, serial no and batch no \
-				will be considered from the 'Packing List' table. \
-				If warehouse and batch no are same for all packing items for any 'Sales BOM' item, \
-				those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
+				__("For 'Sales BOM' items, warehouse, serial no and batch no will be considered from the 'Packing List' table. If warehouse and batch no are same for all packing items for any 'Sales BOM' item, those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
 			"</div>";
 			frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
 		}
