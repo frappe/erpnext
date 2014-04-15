@@ -138,16 +138,15 @@ class BOM(Document):
 			as on costing date
 		"""
 		from erpnext.stock.utils import get_incoming_rate
-		dt = self.costing_date or nowdate()
-		time = self.costing_date == nowdate() and now().split()[1] or '23:59'
+		posting_date, posting_time = nowdate(), now().split()[1]
 		warehouse = frappe.db.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
 		rate = []
 		for wh in warehouse:
 			r = get_incoming_rate({
 				"item_code": args.get("item_code"),
 				"warehouse": wh[0],
-				"posting_date": dt,
-				"posting_time": time,
+				"posting_date": posting_date,
+				"posting_time": posting_time,
 				"qty": args.get("qty") or 0
 			})
 			if r:
@@ -352,6 +351,7 @@ class BOM(Document):
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
+		self.set('flat_bom_details', [])
 		for d in self.cur_exploded_items:
 			ch = self.append('flat_bom_details', {})
 			for i in self.cur_exploded_items[d].keys():

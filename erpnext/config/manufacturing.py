@@ -7,8 +7,9 @@ data = [
 		"items": [
 			{
 				"type": "doctype",
-				"name": "Bill of Materials",
+				"name": "BOM",
 				"description": _("Bill of Materials (BOM)"),
+				"label": _("Bill of Material")
 			},
 			{
 				"type": "doctype",
@@ -25,7 +26,7 @@ data = [
 				"name": "Workstation",
 				"description": _("Where manufacturing operations are carried out."),
 			},
-			
+
 		]
 	},
 	{
