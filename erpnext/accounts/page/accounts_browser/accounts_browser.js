@@ -31,13 +31,11 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			'<li>'+__('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
 			'<li>'+
 			     '<b>'+__('To create a Bank Account:')+'</b>'+ 
-			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts)')+
-			      __('and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
+			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
 			'</li>'+
 			'<li>'+
 			      '<b>'+__('To create a Tax Account:')+'</b>'+
-			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties)')+
-			      __('and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
+			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
 			'</li>'+
 		'</ol>'+
 		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
@@ -187,11 +185,9 @@ erpnext.AccountsChart = Class.extend({
 			title:__('New Account'),
 			fields: [
 				{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true, 
-					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers,")+
-					__("they are created automatically from the Customer and Supplier master")},
+					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master")},
 				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
-					options:'Group\nLedger', description: __('Further accounts can be made under Groups,')+
-					 	__('but entries can be made against Ledger')},
+					options:'Group\nLedger', description: __('Further accounts can be made under Groups, but entries can be made against Ledger')},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable', 
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account', 
@@ -265,8 +261,7 @@ erpnext.AccountsChart = Class.extend({
 			fields: [
 				{fieldtype:'Data', fieldname:'cost_center_name', label:__('New Cost Center Name'), reqd:true},
 				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
-					options:'Group\nLedger', description:__('Further accounts can be made under Groups,')+
-					 	__('but entries can be made against Ledger')},
+					options:'Group\nLedger', description:__('Further accounts can be made under Groups but entries can be made against Ledger')},
 				{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
 			]
 		});
