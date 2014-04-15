@@ -27,10 +27,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			this.frm.add_custom_button(frappe._('Make Payment Entry'), this.make_bank_voucher);
+			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_voucher);
 
 		if(doc.docstatus==1) { 
-			cur_frm.appframe.add_button(frappe._('View Ledger'), function() {
+			cur_frm.appframe.add_button(__('View Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
@@ -43,7 +43,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 
 		if(doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Purchase Order'), 
+			cur_frm.add_custom_button(__('From Purchase Order'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
@@ -58,7 +58,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					})
 				});
 
-			cur_frm.add_custom_button(frappe._('From Purchase Receipt'), 
+			cur_frm.add_custom_button(__('From Purchase Receipt'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
@@ -228,5 +228,5 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = frappe._("Purchase Invoice");
+		cur_frm.pformat.print_heading = __("Purchase Invoice");
 }

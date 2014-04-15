@@ -8,8 +8,8 @@ $.extend(cur_frm.cscript, {
 		this.frm.toggle_enable('year_end_date', doc.__islocal)
 	
 		if (!doc.__islocal && (doc.name != sys_defaults.fiscal_year)) {
-			this.frm.add_custom_button(frappe._("Set as Default"), this.frm.cscript.set_as_default);
-			this.frm.set_intro(frappe._("To set this Fiscal Year as Default, click on 'Set as Default'"));
+			this.frm.add_custom_button(__("Set as Default"), this.frm.cscript.set_as_default);
+			this.frm.set_intro(__("To set this Fiscal Year as Default, click on 'Set as Default'"));
 		} else this.frm.set_intro("");
 	},
 	set_as_default: function() {

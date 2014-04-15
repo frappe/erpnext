@@ -114,7 +114,7 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.hide_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) {
-		cur_frm.appframe.add_button(frappe._('View Ledger'), function() {
+		cur_frm.appframe.add_button(__('View Ledger'), function() {
 			frappe.route_options = {
 				"voucher_no": doc.name,
 				"from_date": doc.posting_date,
@@ -186,7 +186,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = frappe._("Journal Voucher");
+		cur_frm.pformat.print_heading = __("Journal Voucher");
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {

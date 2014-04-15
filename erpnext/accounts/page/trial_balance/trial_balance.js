@@ -6,7 +6,7 @@ frappe.require("assets/erpnext/js/account_tree_grid.js");
 frappe.pages['trial-balance'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Trial Balance'),
+		title: __('Trial Balance'),
 		single_column: true
 	});
 	var TrialBalance = erpnext.AccountTreeGrid.extend({
@@ -18,7 +18,7 @@ frappe.pages['trial-balance'].onload = function(wrapper) {
 			this.wrapper.bind("make", function() {
 				$('<div style="margin: 10px 0px; "\
 				 	class="with_period_closing_entry"><input type="checkbox" checked="checked">' + 
-						frappe._("With period closing entry") + '</div>')
+						__("With period closing entry") + '</div>')
 					.appendTo(me.wrapper)
 					.find("input").click(function() { me.refresh(); });
 			});

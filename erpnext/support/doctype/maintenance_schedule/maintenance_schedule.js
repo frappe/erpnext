@@ -16,7 +16,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (this.frm.doc.docstatus === 0) {
-			this.frm.add_custom_button(frappe._('From Sales Order'), 
+			this.frm.add_custom_button(__('From Sales Order'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
@@ -30,7 +30,7 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					});
 				});
 		} else if (this.frm.doc.docstatus === 1) {
-			this.frm.add_custom_button(frappe._("Make Maintenance Visit"), function() {
+			this.frm.add_custom_button(__("Make Maintenance Visit"), function() {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 					source_name: me.frm.doc.name
@@ -88,7 +88,7 @@ cur_frm.cscript.periodicity = function(doc, cdt, cdn){
 		return get_server_fields('get_no_of_visits', docstring(arg), 
 			'item_maintenance_detail', doc, cdt, cdn, 1);
 	} else {
-		msgprint(frappe._("Please enter Start Date and End Date"));
+		msgprint(__("Please enter Start Date and End Date"));
 	}
 }
 
@@ -99,7 +99,7 @@ cur_frm.cscript.generate_schedule = function(doc, cdt, cdn) {
 				refresh_field('maintenance_schedule_detail');
 			});
 	} else {
-		msgprint(frappe._("Please save the document before generating maintenance schedule"));
+		msgprint(__("Please save the document before generating maintenance schedule"));
 	}
 }
 

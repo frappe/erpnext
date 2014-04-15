@@ -274,7 +274,7 @@ erpnext.POS = Class.extend({
 						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
 								me.frm.doc.quotation_to == "Customer") 
 								|| me.frm.doctype != "Quotation")) {
-							msgprint("Please select " + me.party + " first.");
+							msgprint("Please select {0} first.", [me.party]);
 							return;
 						}
 						else
@@ -523,7 +523,7 @@ erpnext.POS = Class.extend({
 						me.add_to_cart(r.message[0][0].name);
 				}
 				else
-					msgprint(frappe._("Invalid Barcode"));
+					msgprint(__("Invalid Barcode"));
 
 				me.refresh();
 			}
@@ -564,7 +564,7 @@ erpnext.POS = Class.extend({
 		var mode_of_payment = [];
 		
 		if (no_of_items == 0)
-			msgprint(frappe._("Payment cannot be made for empty cart"));
+			msgprint(__("Payment cannot be made for empty cart"));
 		else {
 			frappe.call({
 				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',

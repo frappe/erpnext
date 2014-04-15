@@ -92,26 +92,26 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 			 cur_frm.savesubmit();
 		
 		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher"))
-			 cur_frm.add_custom_button(frappe._("Make Bank Voucher"), cur_frm.cscript.make_bank_voucher);
+			 cur_frm.add_custom_button(__("Make Bank Voucher"), cur_frm.cscript.make_bank_voucher);
 	}
 }
 
 cur_frm.cscript.set_help = function(doc) {
 	cur_frm.set_intro("");
 	if(doc.__islocal && !in_list(user_roles, "HR User")) {
-		cur_frm.set_intro(frappe._("Fill the form and save it"))
+		cur_frm.set_intro(__("Fill the form and save it"))
 	} else {
 		if(doc.docstatus==0 && doc.approval_status=="Draft") {
 			if(user==doc.exp_approver) {
-				cur_frm.set_intro(frappe._("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
+				cur_frm.set_intro(__("You are the Expense Approver for this record. Please Update the 'Status' and Save"));
 			} else {
-				cur_frm.set_intro(frappe._("Expense Claim is pending approval. Only the Expense Approver can update status."));
+				cur_frm.set_intro(__("Expense Claim is pending approval. Only the Expense Approver can update status."));
 			}
 		} else {
 			if(doc.approval_status=="Approved") {
-				cur_frm.set_intro(frappe._("Expense Claim has been approved."));
+				cur_frm.set_intro(__("Expense Claim has been approved."));
 			} else if(doc.approval_status=="Rejected") {
-				cur_frm.set_intro(frappe._("Expense Claim has been rejected."));
+				cur_frm.set_intro(__("Expense Claim has been rejected."));
 			}
 		}
 	}

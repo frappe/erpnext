@@ -5,13 +5,13 @@ frappe.query_reports["Daily Time Log Summary"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
-			"label": frappe._("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
 		},
 		{
 			"fieldname":"to_date",
-			"label": frappe._("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
 		},

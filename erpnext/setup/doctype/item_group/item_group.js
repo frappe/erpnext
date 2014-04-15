@@ -4,7 +4,7 @@
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);
-	cur_frm.appframe.add_button(frappe._("Item Group Tree"), function() {
+	cur_frm.appframe.add_button(__("Item Group Tree"), function() {
 		frappe.set_route("Sales Browser", "Item Group");
 	}, "icon-sitemap")
 
@@ -19,7 +19,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root item group
 	if(!doc.parent_item_group) {
 		cur_frm.set_read_only();
-		cur_frm.set_intro(frappe._("This is a root item group and cannot be edited."));
+		cur_frm.set_intro(__("This is a root item group and cannot be edited."));
 	} else {
 		cur_frm.set_intro(null);
 	}

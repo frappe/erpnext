@@ -44,7 +44,7 @@ cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(
 			query: "erpnext.controllers.queries.bom",
 			filters:{'item': cstr(d.item_code)}
 		}
-	} else msgprint(frappe._("Please enter Item first"));
+	} else msgprint(__("Please enter Item first"));
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {

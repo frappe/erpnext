@@ -42,7 +42,7 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 	if(doc.__islocal) 
 		return;
 	if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager"))
-		cur_frm.dashboard.set_headline('<span class="text-muted">'+ frappe._('Loading...')+ '</span>')
+		cur_frm.dashboard.set_headline('<span class="text-muted">'+ __('Loading...')+ '</span>')
 	
 	cur_frm.dashboard.add_doctype_badge("Opportunity", "customer");
 	cur_frm.dashboard.add_doctype_badge("Quotation", "customer");
@@ -59,9 +59,9 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 		callback: function(r) {
 			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
 				cur_frm.dashboard.set_headline(
-					frappe._("Total Billing This Year: ") + "<b>" 
+					__("Total Billing This Year: ") + "<b>" 
 					+ format_currency(r.message.total_billing, erpnext.get_currency(cur_frm.doc.company))
-					+ '</b> / <span class="text-muted">' + frappe._("Unpaid") + ": <b>" 
+					+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>" 
 					+ format_currency(r.message.total_unpaid, erpnext.get_currency(cur_frm.doc.company)) 
 					+ '</b></span>');
 			}
@@ -80,7 +80,7 @@ cur_frm.cscript.make_address = function() {
 				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
-			no_results_message: frappe._('No addresses created'),
+			no_results_message: __('No addresses created'),
 			render_row: cur_frm.cscript.render_address_row,
 		});
 		// note: render_address_row is defined in contact_control.js
@@ -98,7 +98,7 @@ cur_frm.cscript.make_contact = function() {
 				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
 			},
 			as_dict: 1,
-			no_results_message: frappe._('No contacts created'),
+			no_results_message: __('No contacts created'),
 			render_row: cur_frm.cscript.render_contact_row,
 		});
 		// note: render_contact_row is defined in contact_control.js

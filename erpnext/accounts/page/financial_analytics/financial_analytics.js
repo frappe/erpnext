@@ -6,7 +6,7 @@ frappe.require("assets/erpnext/js/account_tree_grid.js");
 frappe.pages['financial-analytics'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: frappe._('Financial Analytics'),
+		title: __('Financial Analytics'),
 		single_column: true
 	});
 	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
@@ -17,7 +17,7 @@ frappe.pages['financial-analytics'].onload = function(wrapper) {
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
 		{
-			fieldtype:"Select", label: frappe._("PL or BS"), 
+			fieldtype:"Select", label: __("PL or BS"), 
 			options:["Profit and Loss", "Balance Sheet"],
 			filter: function(val, item, opts, me) {
 				if(item._show) return true;
@@ -31,31 +31,31 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			}
 		},
 		{
-			fieldtype:"Select", label: frappe._("Company"), 
+			fieldtype:"Select", label: __("Company"), 
 			link:"Company", default_value: "Select Company...",
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value || item._show;
 			}
 		},
-		{fieldtype:"Select", label: frappe._("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", 
 			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: frappe._("From Date")},
-		{fieldtype:"Label", label: frappe._("To")},
-		{fieldtype:"Date", label: frappe._("To Date")},
-		{fieldtype:"Select", label: frappe._("Range"), 
+		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Label", label: __("To")},
+		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Select", label: __("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: frappe._("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: frappe._("Reset Filters")}
+		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
+		{fieldtype:"Button", label: __("Reset Filters")}
 	],
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: frappe._("Plot"), field: "check", width: 30,
+			{id: "check", name: __("Plot"), field: "check", width: 30,
 				formatter: this.check_formatter},
-			{id: "name", name: frappe._("Account"), field: "name", width: 300,
+			{id: "name", name: __("Account"), field: "name", width: 300,
 				formatter: this.tree_formatter},
-			{id: "opening_dr", name: frappe._("Opening (Dr)"), field: "opening_dr", 
+			{id: "opening_dr", name: __("Opening (Dr)"), field: "opening_dr", 
 				hidden: true, formatter: this.currency_formatter, balance_type: "Dr"},
-			{id: "opening_cr", name: frappe._("Opening (Cr)"), field: "opening_cr", 
+			{id: "opening_cr", name: __("Opening (Cr)"), field: "opening_cr", 
 				hidden: true, formatter: this.currency_formatter, balance_type: "Cr"},
 		];
 		

@@ -44,19 +44,19 @@ $.extend(erpnext, {
 		if(!grid_row.fields_dict.serial_no || 
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
 		
-		var $btn = $('<button class="btn btn-sm btn-default">'+frappe._("Add Serial No")+'</button>')
+		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
 			.appendTo($("<div>")
 				.css({"margin-bottom": "10px", "margin-left": "15px"})
 				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
 				
 		$btn.on("click", function() {
 			var d = new frappe.ui.Dialog({
-				title: frappe._("Add Serial No"),
+				title: __("Add Serial No"),
 				fields: [
 					{
 						"fieldtype": "Link",
 						"options": "Serial No",
-						"label": frappe._("Serial No"),
+						"label": __("Serial No"),
 						"get_query": {
 							item_code: grid_row.doc.item_code,
 							warehouse: grid_row.doc.warehouse
@@ -64,7 +64,7 @@ $.extend(erpnext, {
 					},
 					{
 						"fieldtype": "Button",
-						"label": frappe._("Add")
+						"label": __("Add")
 					}
 				]
 			});

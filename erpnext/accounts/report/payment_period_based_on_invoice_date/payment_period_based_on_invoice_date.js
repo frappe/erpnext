@@ -5,26 +5,26 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 	"filters": [
 		{
 			fieldname: "from_date",
-			label: frappe._("From Date"),
+			label: __("From Date"),
 			fieldtype: "Date",
 			default: frappe.defaults.get_user_default("year_start_date"),
 		},
 		{
 			fieldname:"to_date",
-			label: frappe._("To Date"),
+			label: __("To Date"),
 			fieldtype: "Date",
 			default: get_today()
 		},
 		{
 			fieldname:"payment_type",
-			label: frappe._("Payment Type"),
+			label: __("Payment Type"),
 			fieldtype: "Select",
 			options: "Incoming\nOutgoing",
 			default: "Incoming"
 		},
 		{
 			fieldname:"account",
-			label: frappe._("Account"),
+			label: __("Account"),
 			fieldtype: "Link",
 			options: "Account",
 			get_query: function() {
@@ -39,7 +39,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 		},
 		{
 			fieldname:"company",
-			label: frappe._("Company"),
+			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("company")

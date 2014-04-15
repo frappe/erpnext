@@ -5,7 +5,7 @@ frappe.query_reports["General Ledger"] = {
 	"filters": [
 		{
 			"fieldname":"company",
-			"label": frappe._("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company"),
@@ -13,7 +13,7 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			"fieldname":"from_date",
-			"label": frappe._("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			"reqd": 1,
@@ -21,7 +21,7 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			"fieldname":"to_date",
-			"label": frappe._("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 			"reqd": 1,
@@ -32,7 +32,7 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			"fieldname":"account",
-			"label": frappe._("Account"),
+			"label": __("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -47,18 +47,18 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			"fieldname":"voucher_no",
-			"label": frappe._("Voucher No"),
+			"label": __("Voucher No"),
 			"fieldtype": "Data",
 		},
 		{
 			"fieldname":"group_by_voucher",
-			"label": frappe._("Group by Voucher"),
+			"label": __("Group by Voucher"),
 			"fieldtype": "Check",
 			"default": 1
 		},
 		{
 			"fieldname":"group_by_account",
-			"label": frappe._("Group by Account"),
+			"label": __("Group by Account"),
 			"fieldtype": "Check",
 		}
 	]

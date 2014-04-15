@@ -85,11 +85,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.clear_custom_buttons();
 	
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
-		cur_frm.add_custom_button(frappe._('Create Quotation'), cur_frm.cscript.create_quotation);
+		cur_frm.add_custom_button(__('Create Quotation'), cur_frm.cscript.create_quotation);
 		if(doc.status!=="Quotation")
-			cur_frm.add_custom_button(frappe._('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
+			cur_frm.add_custom_button(__('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
 
-		cur_frm.add_custom_button(frappe._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+		cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 	}	
 }
 
@@ -116,11 +116,11 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 
 cur_frm.cscript['Declare Opportunity Lost'] = function() {
 	var dialog = new frappe.ui.Dialog({
-		title: frappe._("Set as Lost"),
+		title: __("Set as Lost"),
 		fields: [
-			{"fieldtype": "Text", "label": frappe._("Reason for losing"), "fieldname": "reason",
+			{"fieldtype": "Text", "label": __("Reason for losing"), "fieldname": "reason",
 				"reqd": 1 },
-			{"fieldtype": "Button", "label": frappe._("Update"), "fieldname": "update"},
+			{"fieldtype": "Button", "label": __("Update"), "fieldname": "update"},
 		]
 	});
 
@@ -133,7 +133,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 			args: args.reason,
 			callback: function(r) {
 				if(r.exc) {
-					msgprint(frappe._("There were errors."));
+					msgprint(__("There were errors."));
 					return;
 				}
 				dialog.hide();

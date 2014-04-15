@@ -23,12 +23,12 @@ $(document).bind('toolbar_setup', function() {
 frappe.provide('frappe.ui.misc');
 frappe.ui.misc.about = function() {
 	if(!frappe.ui.misc.about_dialog) {
-		var d = new frappe.ui.Dialog({title: frappe._('About')})
+		var d = new frappe.ui.Dialog({title: __('About')})
 	
 		$(d.body).html(repl("<div>\
 		<h2>ERPNext</h2>  \
-		<p>"+frappe._("An open source ERP made for the web.</p>") +
-		"<p>"+frappe._("To report an issue, go to ")+"<a href='https://github.com/frappe/erpnext/issues'>GitHub Issues</a></p> \
+		<p>"+__("An open source ERP made for the web.</p>") +
+		"<p>"+__("To report an issue, go to ")+"<a href='https://github.com/frappe/erpnext/issues'>GitHub Issues</a></p> \
 		<p><a href='http://erpnext.org' target='_blank'>http://erpnext.org</a>.</p>\
 		<p><a href='http://www.gnu.org/copyleft/gpl.html'>License: GNU General Public License Version 3</a></p>\
 		<hr>\

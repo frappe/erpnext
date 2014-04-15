@@ -6,8 +6,8 @@
 cur_frm.cscript = {
 	onload: function(doc, dt, dn) {
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Jobs Email Settings">'+frappe._("Jobs Email Settings")+'</a><br>\
-				<span class="help">'+frappe._('Automatically extract Job Applicants from a mail box ')+'e.g. "jobs@example.com"</span></p>';
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Jobs Email Settings">'+__("Jobs Email Settings")+'</a><br>\
+				<span class="help">'+__('Automatically extract Job Applicants from a mail box ')+'e.g. "jobs@example.com"</span></p>';
 		}
 	},
 	refresh: function(doc) {

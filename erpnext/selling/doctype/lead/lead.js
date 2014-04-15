@@ -23,8 +23,8 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 
 		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+frappe._('Sales Email Settings')+'</a><br>\
-				<span class="help">'+frappe._('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
+			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+__('Sales Email Settings')+'</a><br>\
+				<span class="help">'+__('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
 		}
 	},
 	
@@ -35,9 +35,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;
 		if(!this.frm.doc.__islocal && !this.frm.doc.__is_customer) {
-			this.frm.add_custom_button(frappe._("Create Customer"), this.create_customer);
-			this.frm.add_custom_button(frappe._("Create Opportunity"), this.create_opportunity);
-			this.frm.appframe.add_button(frappe._("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
+			this.frm.add_custom_button(__("Create Customer"), this.create_customer);
+			this.frm.add_custom_button(__("Create Opportunity"), this.create_opportunity);
+			this.frm.appframe.add_button(__("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
 		}
 		
 		cur_frm.communication_view = new frappe.views.CommunicationList({
@@ -67,7 +67,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 					order by is_primary_address, is_shipping_address desc'
 				},
 				as_dict: 1,
-				no_results_message: frappe._('No addresses created'),
+				no_results_message: __('No addresses created'),
 				render_row: this.render_address_row,
 			});
 			// note: render_address_row is defined in contact_control.js

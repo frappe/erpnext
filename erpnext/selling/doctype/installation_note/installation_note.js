@@ -49,7 +49,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 	
 	refresh: function() {
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(frappe._('From Delivery Note'), 
+			cur_frm.add_custom_button(__('From Delivery Note'), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",

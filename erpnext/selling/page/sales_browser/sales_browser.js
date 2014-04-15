@@ -16,8 +16,8 @@ pscript['onload_Sales Browser'] = function(wrapper){
 	$(wrapper)
 		.find(".layout-side-section")
 		.html('<div class="text-muted">'+ 
-			frappe._('Click on a link to get options to expand get options ') + 
-			frappe._('Add') + ' / ' + frappe._('Edit') + ' / '+ frappe._('Delete') + '.</div>')
+			__('Click on a link to get options to expand get options ') + 
+			__('Add') + ' / ' + __('Edit') + ' / '+ __('Delete') + '.</div>')
 
 	wrapper.make_tree = function() {
 		var ctype = frappe.get_route()[1] || 'Territory';
@@ -114,18 +114,18 @@ erpnext.SalesChart = Class.extend({
 			{fieldtype:'Data', fieldname: 'name_field', 
 				label:'New ' + me.ctype + ' Name', reqd:true},
 			{fieldtype:'Select', fieldname:'is_group', label:'Group Node', options:'No\nYes', 
-				description: frappe._("Further nodes can be only created under 'Group' type nodes")}, 
+				description: __("Further nodes can be only created under 'Group' type nodes")}, 
 			{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
 		]
 		
 		if(me.ctype == "Sales Person") {
 			fields.splice(-1, 0, {fieldtype:'Link', fieldname:'employee', label:'Employee',
-				options:'Employee', description: frappe._("Please enter Employee Id of this sales parson")});
+				options:'Employee', description: __("Please enter Employee Id of this sales parson")});
 		}
 		
 		// the dialog
 		var d = new frappe.ui.Dialog({
-			title: frappe._('New ') + frappe._(me.ctype),
+			title: __('New ') + __(me.ctype),
 			fields: fields
 		})		
 	

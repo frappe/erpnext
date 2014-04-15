@@ -5,21 +5,21 @@ frappe.query_reports["Budget Variance Report"] = {
 	"filters": [
 		{
 			fieldname: "fiscal_year",
-			label: frappe._("Fiscal Year"),
+			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
 			default: sys_defaults.fiscal_year
 		},
 		{
 			fieldname: "period",
-			label: frappe._("Period"),
+			label: __("Period"),
 			fieldtype: "Select",
 			options: "Monthly\nQuarterly\nHalf-Yearly\nYearly",
 			default: "Monthly"
 		},
 		{
 			fieldname: "company",
-			label: frappe._("Company"),
+			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("company")

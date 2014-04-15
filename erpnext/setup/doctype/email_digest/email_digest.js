@@ -3,10 +3,10 @@
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	doc = locals[dt][dn];
-	var save_msg = frappe._("You must ")+ "<b>"+frappe._("Save ")+"</b>"+frappe._("the form before proceeding");
-	var err_msg = frappe._("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
+	var save_msg = __("You must Save the form before proceeding");
+	var err_msg = __("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
 	
-	cur_frm.add_custom_button(frappe._('View Now'), function() {
+	cur_frm.add_custom_button(__('View Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			return $c_obj(doc, 'get_digest_msg', '', function(r, rt) {
@@ -16,7 +16,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				} else {
 					//console.log(arguments);
 					var d = new frappe.ui.Dialog({
-						title: frappe._('Email Digest: ') + dn,
+						title: __('Email Digest: ') + dn,
 						width: 800
 					});
 
@@ -29,7 +29,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			msgprint(save_msg);
 		}	
 	}, 1);
-	cur_frm.add_custom_button(frappe._('Send Now'), function() {
+	cur_frm.add_custom_button(__('Send Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
 			return $c_obj(doc, 'send', '', function(r, rt) {
@@ -38,7 +38,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 					console.log(r.exc);
 				} else {
 					//console.log(arguments);
-					msgprint(frappe._('Message Sent'));
+					msgprint(__('Message Sent'));
 				}
 			});
 		} else {
@@ -56,7 +56,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 			// Open a dialog and display checkboxes against email addresses
 			doc = locals[dt][dn];
 			var d = new frappe.ui.Dialog({
-				title: frappe._('Add/Remove Recipients'),
+				title: __('Add/Remove Recipients'),
 				width: 400
 			});
 			var dialog_div = $a(d.body, 'div', 'dialog-div', '', '');

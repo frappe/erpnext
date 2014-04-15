@@ -70,10 +70,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.docstatus === 1 && 
 				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
-				this.frm.add_custom_button(frappe._("Make Credit Note"), function() { me.make_return_jv(); });
+				this.frm.add_custom_button(__("Make Credit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
-				this.frm.add_custom_button(frappe._("Make Debit Note"), function() { me.make_return_jv(); });
+				this.frm.add_custom_button(__("Make Debit Note"), function() { me.make_return_jv(); });
 				this.add_excise_button();
 			}
 		}
@@ -166,11 +166,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.purpose === "Sales Return") {
 			if(this.frm.doc.delivery_note_no && this.frm.doc.sales_invoice_no) {
 				// both specified
-				msgprint(frappe._("You can not enter both Delivery Note No and Sales Invoice No. Please enter any one."));
+				msgprint(__("You can not enter both Delivery Note No and Sales Invoice No. Please enter any one."));
 				
 			} else if(!(this.frm.doc.delivery_note_no || this.frm.doc.sales_invoice_no)) {
 				// none specified
-				msgprint(frappe._("Please enter Delivery Note No or Sales Invoice No to proceed"));
+				msgprint(__("Please enter Delivery Note No or Sales Invoice No to proceed"));
 				
 			} else if(this.frm.doc.delivery_note_no) {
 				return {doctype: "Delivery Note", docname: this.frm.doc.delivery_note_no};
@@ -185,7 +185,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				
 			} else {
 				// not specified
-				msgprint(frappe._("Please enter Purchase Receipt No to proceed"));
+				msgprint(__("Please enter Purchase Receipt No to proceed"));
 				
 			}
 		}
@@ -193,7 +193,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	add_excise_button: function() {
 		if(frappe.boot.sysdefaults.country === "India")
-			this.frm.add_custom_button(frappe._("Make Excise Invoice"), function() {
+			this.frm.add_custom_button(__("Make Excise Invoice"), function() {
 				var excise = frappe.model.make_new_doc_and_get_name('Journal Voucher');
 				excise = locals['Journal Voucher'][excise];
 				excise.voucher_type = 'Excise Voucher';
@@ -333,7 +333,7 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 			}
 		}			
 	} else {
-		msgprint(frappe._("Please enter Item Code to get batch no"));
+		msgprint(__("Please enter Item Code to get batch no"));
 	}
 }
 
@@ -390,7 +390,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 cur_frm.cscript.validate_items = function(doc) {
 	cl = doc.mtn_details || [];
 	if (!cl.length) {
-		msgprint(frappe._("Item table can not be blank"));
+		msgprint(__("Item table can not be blank"));
 		validated = false;
 	}
 }

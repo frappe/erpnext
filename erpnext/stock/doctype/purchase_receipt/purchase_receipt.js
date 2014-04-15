@@ -17,7 +17,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		
 		if(this.frm.doc.docstatus == 1) {
 			if(!this.frm.doc.__billing_complete) {
-				cur_frm.add_custom_button(frappe._('Make Purchase Invoice'), 
+				cur_frm.add_custom_button(__('Make Purchase Invoice'), 
 					this.make_purchase_invoice);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
@@ -25,7 +25,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		} else {
-			cur_frm.add_custom_button(frappe._(frappe._('From Purchase Order')), 
+			cur_frm.add_custom_button(__(__('From Purchase Order')), 
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
@@ -63,8 +63,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		}
 		
 		if(item.qty > item.received_qty) {
-			msgprint(frappe._("Error") + ": " + frappe._(frappe.meta.get_label(item.doctype, "qty", item.name))
-				+ " > " + frappe._(frappe.meta.get_label(item.doctype, "received_qty", item.name)));
+			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)), 
+						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
 			item.qty = item.rejected_qty = 0.0;
 		} else {
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
@@ -78,9 +78,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
 		
 		if(item.rejected_qty > item.received_qty) {
-			msgprint(frappe._("Error") + ": " + 
-				frappe._(frappe.meta.get_label(item.doctype, "rejected_qty", item.name))
-				+ " > " + frappe._(frappe.meta.get_label(item.doctype, "received_qty", item.name)));
+			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
+						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
 			item.qty = item.rejected_qty = 0.0;
 		} else {
 			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
@@ -141,7 +140,7 @@ cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_q
 		}
 	}
 	else
-		msgprint(frappe._("Please enter Item Code."));
+		msgprint(__("Please enter Item Code."));
 }
 
 cur_frm.cscript.select_print_heading = function(doc, cdt, cdn) {

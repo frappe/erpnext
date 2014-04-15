@@ -17,7 +17,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				args: values,
 				callback: function(r) {
 					if(r.exc) {
-						var d = msgprint(frappe._("There were errors."));
+						var d = msgprint(__("There were errors."));
 						d.custom_onhide = function() {
 							frappe.set_route(erpnext.wiz.page_name, "0");
 						}
@@ -25,7 +25,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						wiz.show_complete();
 						setTimeout(function() {
 							if(user==="Administrator") {
-								msgprint(frappe._("Login with your new User ID") + ":" + values.email);
+								msgprint(__("Login with your new User ID") + ":" + values.email);
 								setTimeout(function() {
 									frappe.app.logout();
 								}, 2000);
@@ -37,40 +37,40 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				}
 			})
 		},
-		title: frappe._("ERPNext Setup Guide"),
+		title: __("ERPNext Setup Guide"),
 		welcome_html: '<h1 class="text-muted text-center"><i class="icon-magic"></i></h1>\
-			<h2 class="text-center">'+frappe._('ERPNext Setup')+'</h2>\
+			<h2 class="text-center">'+__('ERPNext Setup')+'</h2>\
 			<p class="text-center" style="margin: 0px 100px">' + 
-			frappe._('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') + 
+			__('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') + 
 			'</p>',
 		working_html: '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
-			<h2 class="text-center">'+frappe._('Setting up...')+'</h2>\
+			<h2 class="text-center">'+__('Setting up...')+'</h2>\
 			<p class="text-center">' + 
-			frappe._('Sit tight while your system is being setup. This may take a few moments.') + 
+			__('Sit tight while your system is being setup. This may take a few moments.') + 
 			'</p>',
 		complete_html: '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
-			<h2 class="text-center">'+frappe._('Setup Complete!')+'</h2>\
+			<h2 class="text-center">'+__('Setup Complete!')+'</h2>\
 			<p class="text-center">' + 
-			frappe._('Your setup is complete. Refreshing...') + 
+			__('Your setup is complete. Refreshing...') + 
 			'</p>',
 		slides: [
 			// User
 			{
-				title: frappe._("The First User: You"),
+				title: __("The First User: You"),
 				icon: "icon-user",
 				fields: [
-					{"fieldname": "first_name", "label": frappe._("First Name"), "fieldtype": "Data", 
+					{"fieldname": "first_name", "label": __("First Name"), "fieldtype": "Data", 
 						reqd:1},
-					{"fieldname": "last_name", "label": frappe._("Last Name"), "fieldtype": "Data", 
+					{"fieldname": "last_name", "label": __("Last Name"), "fieldtype": "Data", 
 						reqd:1},
-					{"fieldname": "email", "label": frappe._("Email Id"), "fieldtype": "Data", 
+					{"fieldname": "email", "label": __("Email Id"), "fieldtype": "Data", 
 						reqd:1, "description":"Your Login Id", "options":"Email"},
-					{"fieldname": "password", "label": frappe._("Password"), "fieldtype": "Password", 
+					{"fieldname": "password", "label": __("Password"), "fieldtype": "Password", 
 						reqd:1},
 					{fieldtype:"Attach Image", fieldname:"attach_user", 
 						label:"Attach Your User..."},
 				],
-				help: frappe._('The first user will become the System Manager (you can change that later).'),
+				help: __('The first user will become the System Manager (you can change that later).'),
 				onload: function(slide) {
 					if(user!=="Administrator") {
 						slide.form.fields_dict.password.$wrapper.toggle(false);
@@ -86,21 +86,21 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 		
 			// Organization
 			{
-				title: frappe._("The Organization"),
+				title: __("The Organization"),
 				icon: "icon-building",
 				fields: [
-					{fieldname:'company_name', label: frappe._('Company Name'), fieldtype:'Data', reqd:1,
+					{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
 						placeholder: 'e.g. "My Company LLC"'},
-					{fieldname:'company_abbr', label: frappe._('Company Abbreviation'), fieldtype:'Data',
+					{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
 						placeholder:'e.g. "MC"',reqd:1},
 					{fieldname:'fy_start_date', label:'Financial Year Start Date', fieldtype:'Date',
 						description:'Your financial year begins on', reqd:1},
 					{fieldname:'fy_end_date', label:'Financial Year End Date', fieldtype:'Date',
 						description:'Your financial year ends on', reqd:1},
-					{fieldname:'company_tagline', label: frappe._('What does it do?'), fieldtype:'Data',
+					{fieldname:'company_tagline', label: __('What does it do?'), fieldtype:'Data',
 						placeholder:'e.g. "Build tools for builders"', reqd:1},
 				],
-				help: frappe._('The name of your company for which you are setting up this system.'),
+				help: __('The name of your company for which you are setting up this system.'),
 				onload: function(slide) {
 					slide.get_input("company_name").on("change", function() {
 						var parts = slide.get_input("company_name").val().split(" ");
@@ -120,19 +120,19 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 		
 			// Country
 			{
-				title: frappe._("Country, Timezone and Currency"),
+				title: __("Country, Timezone and Currency"),
 				icon: "icon-flag",
 				fields: [
-					{fieldname:'country', label: frappe._('Country'), reqd:1,
+					{fieldname:'country', label: __('Country'), reqd:1,
 						options: "", fieldtype: 'Select'},
-					{fieldname:'currency', label: frappe._('Default Currency'), reqd:1,
+					{fieldname:'currency', label: __('Default Currency'), reqd:1,
 						options: "", fieldtype: 'Select'},
-					{fieldname:'timezone', label: frappe._('Time Zone'), reqd:1,
+					{fieldname:'timezone', label: __('Time Zone'), reqd:1,
 						options: "", fieldtype: 'Select'},
-					{fieldname:'chart_of_accounts', label: frappe._('Chart of Accounts'), 
+					{fieldname:'chart_of_accounts', label: __('Chart of Accounts'), 
 						options: "", fieldtype: 'Select'}
 				],
-				help: frappe._('Select your home country and check the timezone and currency.'),
+				help: __('Select your home country and check the timezone and currency.'),
 				onload: function(slide, form) {
 					frappe.call({
 						method:"frappe.country_info.get_country_timezone_info",
@@ -179,8 +179,8 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			// Logo
 			{
 				icon: "icon-bookmark",
-				title: frappe._("Logo and Letter Heads"),
-				help: frappe._('Upload your letter head and logo - you can edit them later.'),
+				title: __("Logo and Letter Heads"),
+				help: __('Upload your letter head and logo - you can edit them later.'),
 				fields: [
 					{fieldtype:"Attach Image", fieldname:"attach_letterhead", label:"Attach Letterhead..."},
 					{fieldtype:"Attach Image", fieldname:"attach_logo", label:"Attach Logo..."},
@@ -190,40 +190,40 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			// Taxes
 			{
 				icon: "icon-money",
-				"title": frappe._("Add Taxes"),
-				"help": frappe._("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
+				"title": __("Add Taxes"),
+				"help": __("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
 				"fields": [],
 			},
 
 			// Customers
 			{
 				icon: "icon-group",
-				"title": frappe._("Your Customers"),
-				"help": frappe._("List a few of your customers. They could be organizations or individuals."),
+				"title": __("Your Customers"),
+				"help": __("List a few of your customers. They could be organizations or individuals."),
 				"fields": [],
 			},
 		
 			// Items to Sell
 			{
 				icon: "icon-barcode",
-				"title": frappe._("Your Products or Services"),
-				"help": frappe._("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
+				"title": __("Your Products or Services"),
+				"help": __("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 				"fields": [],
 			},
 
 			// Suppliers
 			{
 				icon: "icon-group",
-				"title": frappe._("Your Suppliers"),
-				"help": frappe._("List a few of your suppliers. They could be organizations or individuals."),
+				"title": __("Your Suppliers"),
+				"help": __("List a few of your suppliers. They could be organizations or individuals."),
 				"fields": [],
 			},
 
 			// Items to Buy
 			{
 				icon: "icon-barcode",
-				"title": frappe._("Products or Services You Buy"),
-				"help": frappe._("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
+				"title": __("Products or Services You Buy"),
+				"help": __("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
 				"fields": [],
 			},
 
@@ -324,7 +324,7 @@ frappe.wiz.Wizard = Class.extend({
 			return;
 		var me = this;
 		this.$welcome = this.get_message(this.welcome_html + 
-			'<br><p class="text-center"><button class="btn btn-primary">'+frappe._("Start")+'</button></p>')
+			'<br><p class="text-center"><button class="btn btn-primary">'+__("Start")+'</button></p>')
 			.appendTo(this.parent);
 		
 		this.$welcome.find(".btn").click(function() {

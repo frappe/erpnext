@@ -5,14 +5,14 @@ frappe.query_reports["Accounts Receivable"] = {
 	"filters": [
 		{
 			"fieldname":"company",
-			"label": frappe._("Company"),
+			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company")
 		},
 		{
 			"fieldname":"account",
-			"label": frappe._("Account"),
+			"label": __("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -29,13 +29,13 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname":"report_date",
-			"label": frappe._("Date"),
+			"label": __("Date"),
 			"fieldtype": "Date",
 			"default": get_today()
 		},
 		{
 			"fieldname":"ageing_based_on",
-			"label": frappe._("Ageing Based On"),
+			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
 			"options": 'Posting Date' + NEWLINE + 'Due Date',
 			"default": "Posting Date"

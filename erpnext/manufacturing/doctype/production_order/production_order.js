@@ -17,13 +17,13 @@ $.extend(cur_frm.cscript, {
 		cfn_set_fields(doc, dt, dn);
 
 		if (doc.docstatus === 0 && !doc.__islocal) {
-			this.frm.set_intro(frappe._("Submit this Production Order for further processing."));
+			this.frm.set_intro(__("Submit this Production Order for further processing."));
 		} else if (doc.docstatus === 1) {
 			var percent = flt(doc.produced_qty) / flt(doc.qty) * 100;
-			this.frm.dashboard.add_progress(cint(percent) + "% " + frappe._("Complete"), percent);
+			this.frm.dashboard.add_progress(cint(percent) + "% " + __("Complete"), percent);
 
 			if(doc.status === "Stopped") {
-				this.frm.dashboard.set_headline_alert(frappe._("Stopped"), "alert-danger", "icon-stop");
+				this.frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
 			}
 		}
 	},
@@ -55,20 +55,20 @@ $.extend(cur_frm.cscript, {
 var cfn_set_fields = function(doc, dt, dn) {
 	if (doc.docstatus == 1) {
 		if (doc.status != 'Stopped' && doc.status != 'Completed')
-		cur_frm.add_custom_button(frappe._('Stop!'), cur_frm.cscript['Stop Production Order'], "icon-exclamation");
+		cur_frm.add_custom_button(__('Stop!'), cur_frm.cscript['Stop Production Order'], "icon-exclamation");
 		else if (doc.status == 'Stopped')
-			cur_frm.add_custom_button(frappe._('Unstop'), cur_frm.cscript['Unstop Production Order'], "icon-check");
+			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'], "icon-check");
 
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
-			cur_frm.add_custom_button(frappe._('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);
-			cur_frm.add_custom_button(frappe._('Update Finished Goods'), cur_frm.cscript['Update Finished Goods']);
+			cur_frm.add_custom_button(__('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);
+			cur_frm.add_custom_button(__('Update Finished Goods'), cur_frm.cscript['Update Finished Goods']);
 		} 
 	}
 }
 
 cur_frm.cscript['Stop Production Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm(frappe._("Do you really want to stop production order: " + doc.name));
+	var check = confirm(__("Do you really want to stop production order: " + doc.name));
 	if (check) {
 		return $c_obj(doc, 'stop_unstop', 'Stopped', function(r, rt) {cur_frm.refresh();});
 	}
@@ -76,7 +76,7 @@ cur_frm.cscript['Stop Production Order'] = function() {
 
 cur_frm.cscript['Unstop Production Order'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm(frappe._("Do really want to unstop production order: " + doc.name));
+	var check = confirm(__("Do really want to unstop production order: " + doc.name));
 	if (check)
 		return $c_obj(doc, 'stop_unstop', 'Unstopped', function(r, rt) {cur_frm.refresh();});
 }
@@ -111,5 +111,5 @@ cur_frm.set_query("bom_no", function(doc) {
 			query: "erpnext.controllers.queries.bom",
 			filters: {item: cstr(doc.production_item)}
 		}
-	} else msgprint(frappe._("Please enter Production Item first"));
+	} else msgprint(__("Please enter Production Item first"));
 });

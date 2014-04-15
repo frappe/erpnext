@@ -130,7 +130,7 @@ cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
 
 cur_frm.cscript.add_image = function(doc, dt, dn) {
 	if(!doc.image) {
-		msgprint(frappe._('Please select an "Image" first'));
+		msgprint(__('Please select an "Image" first'));
 		return;
 	}
 
@@ -145,7 +145,7 @@ cur_frm.cscript.add_image = function(doc, dt, dn) {
 // Quotation to validation - either customer or lead mandatory
 cur_frm.cscript.weight_to_validate = function(doc, cdt, cdn){
 	if((doc.nett_weight || doc.gross_weight) && !doc.weight_uom) {
-		msgprint(frappe._('Weight is mentioned,\nPlease mention "Weight UOM" too'));
+		msgprint(__('Weight is mentioned,\nPlease mention "Weight UOM" too'));
 		validated = 0;
 	}
 }
@@ -181,7 +181,6 @@ cur_frm.cscript.image = function() {
 	if(!cur_frm.doc.description_html)
 		cur_frm.cscript.add_image(cur_frm.doc);
 	else {
-		msgprint(frappe._("You may need to update: ") +
-			frappe.meta.get_docfield(cur_frm.doc.doctype, "description_html").label);
+		msgprint(__("You may need to update: {0}", [frappe.meta.get_docfield(cur_frm.doc.doctype, "description_html").label]));
 	}
 }

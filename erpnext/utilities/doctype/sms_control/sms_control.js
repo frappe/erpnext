@@ -53,7 +53,7 @@ function SMSManager() {
 				return $c_obj('SMS Control', 'send_form_sms', v, function(r,rt) {
 					$(this).done_working();
 					if(r.exc) {msgprint(r.exc); return; }
-					msgprint('Message Sent');
+					msgprint(__('Message Sent'));
 					me.dialog.hide();
 				})
 			}

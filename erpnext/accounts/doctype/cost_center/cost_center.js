@@ -40,8 +40,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable(['group_or_ledger', 'company'], doc.__islocal);
 
 	if(!doc.__islocal && doc.group_or_ledger=='Group') {
-		intro_txt += '<p><b>'+frappe._('Note:')+'</b>'+ frappe._('This Cost Center is a')+ '<i>'+frappe._('Group')+'</i>, '+ 
-		frappe._('Accounting Entries are not allowed against groups.')+'</p>';
+		intro_txt += __('Note: This Cost Center is a Group. Cannot make accounting entries against groups.');
 	}
 
 	cur_frm.cscript.hide_unhide_group_ledger(doc);
@@ -49,22 +48,22 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
 	
-	cur_frm.appframe.add_button(frappe._('Chart of Cost Centers'), 
+	cur_frm.appframe.add_button(__('Chart of Cost Centers'), 
 		function() { frappe.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 
 cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
 	if(!doc.company){
-		msgprint(frappe._('Please enter company name first'));
+		msgprint(__('Please enter company name first'));
 	}
 }
 
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button(frappe._('Convert to Ledger'), 
+		cur_frm.add_custom_button(__('Convert to Ledger'), 
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
-		cur_frm.add_custom_button(frappe._('Convert to Group'), 
+		cur_frm.add_custom_button(__('Convert to Group'), 
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 	}
 }
