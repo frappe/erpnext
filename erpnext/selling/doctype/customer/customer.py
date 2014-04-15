@@ -86,9 +86,7 @@ class Customer(TransactionBase):
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
-			frappe.msgprint("An Customer Group exists with same name (%s), \
-				please change the Customer name or rename the Customer Group" %
-				self.name, raise_exception=1)
+			frappe.throw("A Customer Group exists with same name please change the Customer name or rename the Customer Group")
 
 	def delete_customer_address(self):
 		addresses = frappe.db.sql("""select name, lead from `tabAddress`
@@ -140,7 +138,7 @@ class Customer(TransactionBase):
 @frappe.whitelist()
 def get_dashboard_info(customer):
 	if not frappe.has_permission("Customer", "read", customer):
-		frappe.msgprint("No Permission", raise_exception=True)
+		frappe.msgprint(_("Not permitted"), raise_exception=True)
 
 	out = {}
 	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:

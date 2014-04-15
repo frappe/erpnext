@@ -4,15 +4,14 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint
-from frappe.utils import flt, getdate, add_days
+from frappe import _
+from frappe.utils import flt, getdate, add_days, formatdate
 from frappe.model.controller import DocListController
 from datetime import date
 
 class StockFreezeError(frappe.ValidationError): pass
 
 class StockLedgerEntry(DocListController):
-
 	def validate(self):
 		from erpnext.stock.utils import validate_warehouse_company
 		self.validate_mandatory()
@@ -55,11 +54,7 @@ class StockLedgerEntry(DocListController):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
 		for k in mandatory:
 			if not self.get(k):
-				msgprint("Stock Ledger Entry: '%s' is mandatory" % k, raise_exception = 1)
-			elif k == 'warehouse':
-				if not frappe.db.exists("Warehouse", self.get(k)):
-					msgprint("Warehouse: '%s' does not exist in the system. Please check." %
-						self.get(k), raise_exception = 1)
+				frappe.throw(_("{0} is required").format(k))
 
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, has_batch_no, docstatus,
@@ -89,15 +84,14 @@ class StockLedgerEntry(DocListController):
 		if stock_frozen_upto:
 			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
 			if getdate(self.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in frappe.user.get_roles():
-				msgprint("You are not authorized to do / modify back dated stock entries before %s" % getdate(stock_frozen_upto).strftime('%d-%m-%Y'), raise_exception=StockFreezeError)
+				frappe.throw(_("Entries before {0} are frozen").format(formatdate(stock_frozen_upto)), StockFreezeError)
 
 		stock_frozen_upto_days = int(frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
 		if stock_frozen_upto_days:
 			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
 			older_than_x_days_ago = (add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today())
 			if older_than_x_days_ago and not stock_auth_role in frappe.user.get_roles():
-				msgprint("You are not authorized to do / modify back dated stock entries older than %d days ago" %stock_frozen_upto_days, raise_exception=StockFreezeError)
-
+				frappe.throw(_("Not allowed to update entries older than {0}").format(stock_frozen_upto_days), StockFreezeError)
 
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == '00:0':

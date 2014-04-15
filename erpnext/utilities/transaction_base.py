@@ -15,26 +15,26 @@ class TransactionBase(StatusUpdater):
 		if int(frappe.db.get_value("Notification Control", None, dt) or 0):
 			self.set("__notification_message",
 				frappe.db.get_value("Notification Control", None, dt + "_message"))
-							
+
 	def validate_posting_time(self):
 		if not self.posting_time:
 			self.posting_time = now_datetime().strftime('%H:%M:%S')
-			
+
 	def add_calendar_event(self, opts, force=False):
 		if self.contact_by != cstr(self._prev.contact_by) or \
 				self.contact_date != cstr(self._prev.contact_date) or force:
-			
+
 			self.delete_events()
 			self._add_calendar_event(opts)
-			
+
 	def delete_events(self):
-		frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent` 
-			where ref_type=%s and ref_name=%s""", (self.doctype, self.name)), 
+		frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
+			where ref_type=%s and ref_name=%s""", (self.doctype, self.name)),
 			ignore_permissions=True)
-			
+
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
-		
+
 		if self.contact_date:
 			event_doclist = frappe.get_doc({
 				"doctype": "Event",
@@ -46,18 +46,18 @@ class TransactionBase(StatusUpdater):
 				"ref_type": self.doctype,
 				"ref_name": self.name
 			})
-			
+
 			if frappe.db.exists("User", self.contact_by):
 				event_doclist.append("event_individuals", {
 					"doctype": "Event User",
 					"person": self.contact_by
 				})
-			
+
 			event_doclist.insert()
-			
+
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
-			
+
 	def validate_with_previous_doc(self, source_dt, ref):
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
@@ -71,27 +71,26 @@ class TransactionBase(StatusUpdater):
 						if ref_dn not in item_ref_dn:
 							item_ref_dn.append(ref_dn)
 						elif not val.get("allow_duplicate_prev_row_id"):
-							frappe.msgprint(_("Row ") + cstr(d.idx + 1) + 
-								_(": Duplicate row from same ") + key, raise_exception=1)
+							frappe.throw(_("Duplicate row {0} with same {1}").format(d.idx, key))
 					elif ref_dn:
 						ref_doc.setdefault(key, [])
 						if ref_dn not in ref_doc[key]:
 							ref_doc[key].append(ref_dn)
 			if ref_doc:
 				self.compare_values(ref_doc, val["compare_fields"])
-	
+
 	def compare_values(self, ref_doc, fields, doc=None):
 		for ref_doctype, ref_dn_list in ref_doc.items():
 			for ref_docname in ref_dn_list:
-				prevdoc_values = frappe.db.get_value(ref_doctype, ref_docname, 
+				prevdoc_values = frappe.db.get_value(ref_doctype, ref_docname,
 					[d[0] for d in fields], as_dict=1)
 
 				for field, condition in fields:
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
-	
+
 def delete_events(ref_type, ref_name):
-	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent` 
+	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
@@ -99,11 +98,11 @@ class UOMMustBeIntegerError(frappe.ValidationError): pass
 def validate_uom_is_integer(doc, uom_field, qty_fields):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
-	
+
 	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
-	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom, 
+	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom,
 		"must_be_whole_number") or None, distinct_uoms)
-		
+
 	if not integer_uoms:
 		return
 
@@ -112,7 +111,4 @@ def validate_uom_is_integer(doc, uom_field, qty_fields):
 			for f in qty_fields:
 				if d.get(f):
 					if cint(d.get(f))!=d.get(f):
-						frappe.msgprint(_("For UOM") + " '" + d.get(uom_field) \
-							+ "': " + _("Quantity cannot be a fraction.") \
-							+ " " + _("In Row") + ": " + str(d.idx),
-							raise_exception=UOMMustBeIntegerError)
+						frappe.throw(_("Quantity cannot be a fraction in row {0}").format(d.idx), UOMMustBeIntegerError)

@@ -11,34 +11,32 @@ from frappe.model.document import Document
 
 class RenameTool(Document):
 	pass
-		
+
 @frappe.whitelist()
 def get_doctypes():
 	return frappe.db.sql_list("""select name from tabDocType
 		where ifnull(allow_rename,0)=1 and module!='Core' order by name""")
-		
+
 @frappe.whitelist()
 def upload(select_doctype=None, rows=None):
 	from frappe.utils.datautils import read_csv_content_from_uploaded_file
-	from frappe.modules import scrub
 	from frappe.model.rename_doc import rename_doc
 
 	if not select_doctype:
 		select_doctype = frappe.form_dict.select_doctype
-		
+
 	if not frappe.has_permission(select_doctype, "write"):
 		raise frappe.PermissionError
 
 	if not rows:
 		rows = read_csv_content_from_uploaded_file()
 	if not rows:
-		frappe.msgprint(_("Please select a valid csv file with data."))
-		raise Exception
-		
-	if len(rows) > 500:
-		frappe.msgprint(_("Max 500 rows only."))
-		raise Exception
-	
+		frappe.throw(_("Please select a valid csv file with data"))
+
+	max_rows = 500
+	if len(rows) > max_rows:
+		frappe.throw(_("Maximum {0} rows allowed").format(max_rows))
+
 	rename_log = []
 	for row in rows:
 		# if row has some content
@@ -53,5 +51,5 @@ def upload(select_doctype=None, rows=None):
 				rename_log.append("<span style='color: RED'>" + \
 					_("Failed: ") + row[0] + " -> " + row[1] + "</span>")
 				rename_log.append("<span style='margin-left: 20px;'>" + repr(e) + "</span>")
-	
+
 	return rename_log

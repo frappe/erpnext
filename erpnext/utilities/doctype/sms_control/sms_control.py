@@ -19,7 +19,7 @@ class SMSControl(Document):
 			invalid_char_list = [' ', '+', '-', '(', ')']
 			for x in invalid_char_list:
 				d = d.replace(x, '')
-				
+
 			validated_receiver_list.append(d)
 
 		if not validated_receiver_list:
@@ -34,21 +34,18 @@ class SMSControl(Document):
 			'ERPNXT'
 		if len(sender_name) > 6 and \
 				frappe.db.get_default("country") == "India":
-			throw(_("""
-				As per TRAI rule, sender name must be exactly 6 characters.
+			throw("""As per TRAI rule, sender name must be exactly 6 characters.
 				Kindly change sender name in Setup --> Global Defaults.
-				
-				Note: Hyphen, space, numeric digit, special characters are not allowed.
-			"""))
+				Note: Hyphen, space, numeric digit, special characters are not allowed.""")
 		return sender_name
-	
+
 	def get_contact_number(self, arg):
 		"returns mobile number of the contact"
 		args = json.loads(arg)
-		number = frappe.db.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" % 
+		number = frappe.db.sql("""select mobile_no, phone from tabContact where name=%s and %s=%s""" %
 			('%s', args['key'], '%s'), (args['contact_name'], args['value']))
 		return number and (number[0][0] or number[0][1]) or ''
-	
+
 	def send_form_sms(self, arg):
 		"called from client side"
 		args = json.loads(arg)
@@ -72,7 +69,7 @@ class SMSControl(Document):
 		args = {ss.message_parameter : arg.get('message')}
 		for d in ss.get("static_parameter_details"):
 			args[d.parameter] = d.value
-		
+
 		resp = []
 		for d in arg.get('receiver_list'):
 			args[ss.receiver_parameter] = d

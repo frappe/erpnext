@@ -5,24 +5,24 @@
 
 from __future__ import unicode_literals
 import frappe
-
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils.email_lib.receive import POP3Mailbox
 import _socket, poplib
 
 class SupportEmailSettings(Document):
-		
+
 	def validate(self):
 		"""
 			Checks support ticket email settings
 		"""
-		if self.sync_support_mails and self.mail_server:			
+		if self.sync_support_mails and self.mail_server:
 			inc_email = frappe.get_doc('Incoming Email Settings')
 			# inc_email.encode()
 			inc_email.host = self.mail_server
 			inc_email.use_ssl = self.use_ssl
 			try:
-				err_msg = 'User Name or Support Password missing. Please enter and try again.'
+				err_msg = _('User Name or Support Password missing. Please enter and try again.')
 				if not (self.mail_login and self.mail_password):
 					raise AttributeError, err_msg
 				inc_email.username = self.mail_login
@@ -32,14 +32,13 @@ class SupportEmailSettings(Document):
 				raise
 
 			pop_mb = POP3Mailbox(inc_email)
-			
+
 			try:
 				pop_mb.connect()
 			except _socket.error, e:
 				# Invalid mail server -- due to refusing connection
-				frappe.msgprint('Invalid POP3 Mail Server. Please rectify and try again.')
+				frappe.msgprint(_('Invalid Mail Server. Please rectify and try again.'))
 				raise
 			except poplib.error_proto, e:
-				frappe.msgprint('Invalid User Name or Support Password. Please rectify and try again.')
+				frappe.msgprint(_('Invalid User Name or Support Password. Please rectify and try again.'))
 				raise
-		

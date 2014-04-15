@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.utils
 from frappe.utils import cstr
-from frappe import msgprint, throw, _
+from frappe import throw, _
 from frappe.model.document import Document
 
 class Newsletter(Document):
@@ -20,10 +20,7 @@ class Newsletter(Document):
 		self.recipients = self.test_email_id.split(",")
 		self.send_to_doctype = "Lead"
 		self.send_bulk()
-		msgprint("{send} {email}".format**{
-			"send": _("Scheduled to send to"),
-			"email": self.test_email_id
-		})
+		frappe.msgprint(_("Scheduled to send to {0}").format(self.test_email_id))
 
 	def send_emails(self):
 		"""send emails to leads and customers"""
@@ -32,27 +29,23 @@ class Newsletter(Document):
 
 		self.recipients = self.get_recipients()
 		self.send_bulk()
-		
-		msgprint("{send} {recipients} {doctype}(s)".format(**{
-			"send": _("Scheduled to send to"),
-			"recipients": len(self.recipients),
-			"doctype": self.send_to_doctype
-		}))
+
+		frappe.msgprint(_("Scheduled to send to {0} recipients").format(len(self.recipients)))
 
 		frappe.db.set(self, "email_sent", 1)
-	
+
 	def get_recipients(self):
 		self.email_field = None
 		if self.send_to_type=="Contact":
 			self.send_to_doctype = "Contact"
-			if self.contact_type == "Customer":		
-				return frappe.db.sql_list("""select email_id from tabContact 
+			if self.contact_type == "Customer":
+				return frappe.db.sql_list("""select email_id from tabContact
 					where ifnull(email_id, '') != '' and ifnull(customer, '') != ''""")
 
-			elif self.contact_type == "Supplier":		
-				return frappe.db.sql_list("""select email_id from tabContact 
+			elif self.contact_type == "Supplier":
+				return frappe.db.sql_list("""select email_id from tabContact
 					where ifnull(email_id, '') != '' and ifnull(supplier, '') != ''""")
-	
+
 		elif self.send_to_type=="Lead":
 			self.send_to_doctype = "Lead"
 			conditions = []
@@ -63,37 +56,37 @@ class Newsletter(Document):
 
 			if conditions:
 				conditions = "".join(conditions)
-				
-			return frappe.db.sql_list("""select email_id from tabLead 
+
+			return frappe.db.sql_list("""select email_id from tabLead
 				where ifnull(email_id, '') != '' %s""" % (conditions or ""))
 
 		elif self.send_to_type=="Employee":
 			self.send_to_doctype = "Employee"
 			self.email_field = "company_email"
 
-			return frappe.db.sql_list("""select 
-				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id 
+			return frappe.db.sql_list("""select
+				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id
 				from `tabEmployee` where status='Active'""")
 
 		elif self.email_list:
 			email_list = [cstr(email).strip() for email in self.email_list.split(",")]
 			for email in email_list:
 				create_lead(email)
-					
+
 			self.send_to_doctype = "Lead"
 			return email_list
-	
+
 	def send_bulk(self):
 		self.validate_send()
 
 		sender = self.send_from or frappe.utils.get_formatted_email(self.owner)
-		
+
 		from frappe.utils.email_lib.bulk import send
-		
+
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = True
 
-		send(recipients = self.recipients, sender = sender, 
+		send(recipients = self.recipients, sender = sender,
 			subject = self.subject, message = self.message,
 			doctype = self.send_to_doctype, email_field = self.email_field or "email_id",
 			ref_doctype = self.doctype, ref_docname = self.name)
@@ -103,19 +96,18 @@ class Newsletter(Document):
 
 	def validate_send(self):
 		if self.get("__islocal"):
-			throw(_("Please save the Newsletter before sending."))
+			throw(_("Please save the Newsletter before sending"))
 
 		from frappe import conf
 		if (conf.get("status") or None) == "Trial":
-			throw(_("Sending newsletters is not allowed for Trial users, \
-				to prevent abuse of this feature."))
+			throw(_("Newsletters is not allowed for Trial users"))
 
 @frappe.whitelist()
 def get_lead_options():
 	return {
-		"sources": ["All"] + filter(None, 
+		"sources": ["All"] + filter(None,
 			frappe.db.sql_list("""select distinct source from tabLead""")),
-		"statuses": ["All"] + filter(None, 
+		"statuses": ["All"] + filter(None,
 			frappe.db.sql_list("""select distinct status from tabLead"""))
 	}
 
@@ -125,10 +117,10 @@ def create_lead(email_id):
 	from email.utils import parseaddr
 	from frappe.model.naming import get_default_naming_series
 	real_name, email_id = parseaddr(email_id)
-	
+
 	if frappe.db.get_value("Lead", {"email_id": email_id}):
 		return
-	
+
 	lead = frappe.get_doc({
 		"doctype": "Lead",
 		"email_id": email_id,

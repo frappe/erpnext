@@ -3,31 +3,32 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	
+
 	columns = get_columns(filters)
 	item_map = get_item_details(filters)
 	iwb_map = get_item_warehouse_map(filters)
-	
+
 	data = []
 	for company in sorted(iwb_map):
 		for item in sorted(iwb_map[company]):
 			for wh in sorted(iwb_map[company][item]):
 				qty_dict = iwb_map[company][item][wh]
-				data.append([item, item_map[item]["item_name"], 
-					item_map[item]["description"], wh, 
-					qty_dict.opening_qty, qty_dict.in_qty, 
+				data.append([item, item_map[item]["item_name"],
+					item_map[item]["description"], wh,
+					qty_dict.opening_qty, qty_dict.in_qty,
 					qty_dict.out_qty, qty_dict.bal_qty, company
 				])
-	
+
 	return columns, data
 
 def get_columns(filters):
 	"""return columns based on filters"""
-	
+
 	columns = ["Item:Link/Item:100", "Item Name::150", "Description::150", \
 	"Warehouse:Link/Warehouse:100", "Opening Qty:Float:90", \
 	"In Qty:Float:80", "Out Qty:Float:80", "Balance Qty:Float:90", "Company:Link/Company:100"]
@@ -37,21 +38,21 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions = ""
 	if not filters.get("from_date"):
-		frappe.msgprint("Please enter From Date", raise_exception=1)
+		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
 		conditions += " and posting_date <= '%s'" % filters["to_date"]
 	else:
-		frappe.msgprint("Please enter To Date", raise_exception=1)
-		
+		frappe.throw(_("'To Date' is required"))
+
 	return conditions
 
 #get all details
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select item_code, warehouse, 
-		posting_date, actual_qty, company 
-		from `tabStock Ledger Entry` 
+	return frappe.db.sql("""select item_code, warehouse,
+		posting_date, actual_qty, company
+		from `tabStock Ledger Entry`
 		where docstatus < 2 %s order by item_code, warehouse""" %
 		conditions, as_dict=1)
 

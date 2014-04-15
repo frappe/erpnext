@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe import _
 from frappe.utils import getdate, flt
 
 def execute(filters=None):
@@ -13,7 +14,7 @@ def execute(filters=None):
 	avg_daily_outgoing = 0
 	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days)+1
 	if diff <= 0:
-		frappe.msgprint("To Date should not be less than eual to From Date",raise_exception=1)
+		frappe.throw(_("'From Date' must be after 'To Date'"))
 
 	columns = get_columns()
 	items = get_item_info()
@@ -27,8 +28,8 @@ def execute(filters=None):
 		avg_daily_outgoing = flt(total_outgoing/diff, float_preceision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.min_order_qty)
 
-		data.append([item.name, item.item_name, item.description, item.min_order_qty, item.lead_time_days, 
-			consumed_item_map.get(item.name, 0), delivered_item_map.get(item.name,0), total_outgoing, 
+		data.append([item.name, item.item_name, item.description, item.min_order_qty, item.lead_time_days,
+			consumed_item_map.get(item.name, 0), delivered_item_map.get(item.name,0), total_outgoing,
 			avg_daily_outgoing, reorder_level])
 
 	return columns , data
@@ -36,7 +37,7 @@ def execute(filters=None):
 def get_columns():
 	return[
 			"Item:Link/Item:120", "Item name:Data:120", "Description::160",
-			"Minimum Inventory Level:Float:160", "Lead Time Days:Float:120", "Consumed:Float:120", 
+			"Minimum Inventory Level:Float:160", "Lead Time Days:Float:120", "Consumed:Float:120",
 			"Delivered:Float:120", "Total Outgoing:Float:120", "Avg Daily Outgoing:Float:160",
 			"Reorder Level:Float:120"
 	]
@@ -47,10 +48,10 @@ def get_item_info():
 
 def get_consumed_items(condition):
 
-	cn_items = frappe.db.sql("""select se_item.item_code, 
+	cn_items = frappe.db.sql("""select se_item.item_code,
 				sum(se_item.actual_qty) as 'consume_qty'
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
-		where se.name = se_item.parent and se.docstatus = 1 
+		where se.name = se_item.parent and se.docstatus = 1
 		and ifnull(se_item.t_warehouse, '') = '' %s
 		group by se_item.item_code""" % (condition), as_dict=1)
 
@@ -64,13 +65,13 @@ def get_delivered_items(condition):
 
 	dn_items = frappe.db.sql("""select dn_item.item_code, sum(dn_item.qty) as dn_qty
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where dn.name = dn_item.parent and dn.docstatus = 1 %s 
+		where dn.name = dn_item.parent and dn.docstatus = 1 %s
 		group by dn_item.item_code""" % (condition), as_dict=1)
 
 	si_items = frappe.db.sql("""select si_item.item_name, sum(si_item.qty) as si_qty
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
-		where si.name = si_item.parent and si.docstatus = 1 and 
-		ifnull(si.update_stock, 0) = 1 and ifnull(si.is_pos, 0) = 1 %s 
+		where si.name = si_item.parent and si.docstatus = 1 and
+		ifnull(si.update_stock, 0) = 1 and ifnull(si.is_pos, 0) = 1 %s
 		group by si_item.item_name""" % (condition), as_dict=1)
 
 	dn_item_map = {}
@@ -87,5 +88,5 @@ def get_condition(filters):
 	if filters.get("from_date") and filters.get("to_date"):
 		conditions += " and posting_date between '%s' and '%s'" % (filters["from_date"],filters["to_date"])
 	else:
-		frappe.msgprint("Please set date in from date field",raise_exception=1)
+		frappe.throw(_("From and To dates required"))
 	return conditions
