@@ -39,16 +39,9 @@ class StockLedgerEntry(DocListController):
 				(self.warehouse, self.item_code, self.batch_no))[0][0])
 
 			if batch_bal_after_transaction < 0:
-				self.update({
-					'batch_bal': batch_bal_after_transaction - self.actual_qty
-				})
-
-				frappe.throw("""Not enough quantity (requested: %(actual_qty)s, \
-					current: %(batch_bal)s in Batch <b>%(batch_no)s</b> for Item \
-					<b>%(item_code)s</b> at Warehouse <b>%(warehouse)s</b> \
-					as on %(posting_date)s %(posting_time)s""" % self.as_dict())
-
-				self.pop('batch_bal')
+				frappe.throw(_("Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4}").format(\
+					batch_bal_after_transaction - self.actual_qty, self.item_code, self.warehouse,
+						formatdate(self.posting_date), self.posting_time))
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
@@ -63,18 +56,17 @@ class StockLedgerEntry(DocListController):
 			self.item_code, as_dict=True)[0]
 
 		if item_det.is_stock_item != 'Yes':
-			frappe.throw("""Item: "%s" is not a Stock Item.""" % self.item_code)
+			frappe.throw(_("Item {0} must be a stock Item").format(self.item_code))
 
 		# check if batch number is required
 		if item_det.has_batch_no =='Yes' and self.voucher_type != 'Stock Reconciliation':
 			if not self.batch_no:
-				frappe.throw("Batch number is mandatory for Item '%s'" % self.item_code)
+				frappe.throw("Batch number is mandatory for Item {0}".format(self.item_code))
 
 			# check if batch belongs to item
 			if not frappe.db.get_value("Batch",
 					{"item": self.item_code, "name": self.batch_no}):
-				frappe.throw("'%s' is not a valid Batch Number for Item '%s'" %
-					(self.batch_no, self.item_code))
+				frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
 
 		if not self.stock_uom:
 			self.stock_uom = item_det.stock_uom

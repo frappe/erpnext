@@ -15,8 +15,7 @@ class MaintenanceVisit(TransactionBase):
 	def validate_serial_no(self):
 		for d in self.get('maintenance_visit_details'):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
-				frappe.throw("Serial No: "+ d.serial_no + " not exists in the system")
-
+				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
 	def validate(self):
 		self.validate_serial_no()
@@ -51,11 +50,11 @@ class MaintenanceVisit(TransactionBase):
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ customer issue"""
-		check_for_docname = check_for_doctype = None
+		check_for_docname = None
 		for d in self.get('maintenance_visit_details'):
 			if d.prevdoc_docname:
 				check_for_docname = d.prevdoc_docname
-				check_for_doctype = d.prevdoc_doctype
+				#check_for_doctype = d.prevdoc_doctype
 
 		if check_for_docname:
 			check = frappe.db.sql("select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))", (self.name, check_for_docname, self.mntc_date, self.mntc_date, self.mntc_time))

@@ -80,8 +80,7 @@ class MaterialRequest(BuyingController):
 		for d in self.get('indent_details'):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
 				if not d.warehouse:
-					frappe.throw("Please Enter Warehouse for Item %s as it is stock item"
-						% cstr(d.item_code))
+					frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 				qty =flt(d.qty)
 				if is_stopped:
@@ -106,7 +105,7 @@ class MaterialRequest(BuyingController):
 			% (mod_db[0][0], cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
-			frappe.throw(cstr(self.doctype) + " => " + cstr(self.name) + " has been modified. Please Refresh.")
+			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
 
 	def update_status(self, status):
 		self.check_modified_date()

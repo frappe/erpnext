@@ -259,8 +259,7 @@ class PurchaseReceipt(BuyingController):
 			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
 			self.name)
 		if submitted:
-			frappe.throw("Purchase Invoice : " + cstr(submitted[0][0]) +
-				" has already been submitted !")
+			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
 
 		frappe.db.set(self,'status','Cancelled')
 

@@ -263,14 +263,10 @@ class StockEntry(StockController):
 				ref_item = ref.doc.getone({"item_code": item.item_code})
 				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
-					frappe.throw("{item}: {item_code} {returned}".format(
-						item=_("Item"), item_code=item.item_code,
-						returned=_("already returned though some other documents")),
-						StockOverReturnError)
+					frappe.throw(_("Item {0} has already been returned").format(item.item_code), StockOverReturnError)
 				elif item.transfer_qty > returnable_qty:
-					frappe.throw("{item}: {item_code}, {returned}: {qty}".format(
-						item=_("Item"), item_code=item.item_code,
-						returned=_("Max Returnable Qty"), qty=returnable_qty), StockOverReturnError)
+					frappe.throw(_("Cannot return more than {0} for Item {1}").format(returnable_qty, item.item_code),
+						StockOverReturnError)
 
 	def get_already_returned_item_qty(self, ref_fieldname):
 		return dict(frappe.db.sql("""select item_code, sum(transfer_qty) as qty

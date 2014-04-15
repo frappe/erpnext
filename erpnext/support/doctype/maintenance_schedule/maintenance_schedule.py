@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cstr, getdate, cint
+from frappe.utils import add_days, getdate, cint
 
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
@@ -46,7 +46,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def on_submit(self):
 		if not self.get('maintenance_schedule_detail'):
-			throw("Please click on 'Generate Schedule' to get schedule")
+			throw(_("Please click on 'Generate Schedule' to get schedule"))
 		self.check_serial_no_added()
 		self.validate_schedule()
 
@@ -141,12 +141,12 @@ class MaintenanceSchedule(TransactionBase):
 		period = (getdate(args['end_date']) - getdate(args['start_date'])).days + 1
 
 		if (args['periodicity'] == 'Yearly' or args['periodicity'] == 'Half Yearly' or
-			args['periodicity'] == 'Quarterly') and period < 365:
-			throw(cstr(args['periodicity']) + " periodicity can be set for period of atleast 1 year or more only")
+			args['periodicity'] == 'Quarterly') and period < 90:
+			throw(_("Period is too short"))
 		elif args['periodicity'] == 'Monthly' and period < 30:
-			throw("Monthly periodicity can be set for period of atleast 1 month or more")
+			throw(_("Period is too short"))
 		elif args['periodicity'] == 'Weekly' and period < 7:
-			throw("Weekly periodicity can be set for period of atleast 1 week or more")
+			throw(_("Period is too short"))
 
 	def get_no_of_visits(self, arg):
 		args = eval(arg)
@@ -192,7 +192,7 @@ class MaintenanceSchedule(TransactionBase):
 					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
 					msi.prevdoc_docname=%s and ms.docstatus=1""", d.prevdoc_docname)
 				if chk:
-					throw("Maintenance Schedule against " + d.prevdoc_docname + " already exist")
+					throw(_("Maintenance Schedule {0} exists against {0}").format(chk[0][0], d.prevdoc_docname))
 
 	def validate(self):
 		self.validate_maintenance_detail()
@@ -213,12 +213,10 @@ class MaintenanceSchedule(TransactionBase):
 				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
 
 			if sr_details.warranty_expiry_date and sr_details.warranty_expiry_date>=amc_start_date:
-				throw("""Serial No: %s is already under warranty upto %s.
-					Please check AMC Start Date.""" % (serial_no, sr_details.warranty_expiry_date))
+				throw(_("Serial No {0} is under warranty upto {1}").format(serial_no, sr_details.warranty_expiry_date))
 
 			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
-				throw("""Serial No: %s is already under AMC upto %s.
-					Please check AMC Start Date.""" % (serial_no, sr_details.amc_expiry_date))
+				throw(_("Serial No {0} is under maintenance contract upto {1}").format(serial_no, sr_details.amc_start_date))
 
 			if sr_details.status=="Delivered" and sr_details.delivery_date and \
 				sr_details.delivery_date >= amc_start_date:
@@ -252,7 +250,7 @@ class MaintenanceSchedule(TransactionBase):
 		for m in self.get('maintenance_schedule_detail'):
 			if serial_present:
 				if m.item_code in serial_present and not m.serial_no:
-					throw("Please click on 'Generate Schedule' to fetch serial no added for item "+m.item_code)
+					throw(_("Please click on 'Generate Schedule' to fetch Serial No added for Item {0}").format(m.item_code))
 
 	def on_cancel(self):
 		for d in self.get('item_maintenance_detail'):
