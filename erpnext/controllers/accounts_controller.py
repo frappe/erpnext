@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, today, cstr
+from frappe.utils import flt, cint, today
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
@@ -191,38 +191,17 @@ class AccountsController(TransactionBase):
 		"""
 		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"] and \
 				(not tax.row_id or cint(tax.row_id) >= tax.idx):
-			throw((_("Row") + " # %(idx)s [%(taxes_doctype)s]: " + \
-				_("Please specify a valid") + " %(row_id_label)s") % {
-					"idx": tax.idx,
-					"taxes_doctype": tax.doctype,
-					"row_id_label": self.meta.get_label("row_id",
-						parentfield=self.other_fname)
-				})
+			throw(_("Please specify a valid Row ID for {0} in row {1}").format(_(tax.doctype), tax.idx))
 
 	def validate_inclusive_tax(self, tax):
 		def _on_previous_row_error(row_range):
-			throw((_("Row") + " # %(idx)s [%(doctype)s]: " +
-				_("to be included in Item's rate, it is required that: ") +
-				" [" + _("Row") + " # %(row_range)s] " + _("also be included in Item's rate")) % {
-					"idx": tax.idx,
-					"doctype": tax.doctype,
-					"inclusive_label": frappe.get_meta(tax.doctype).get_label("included_in_print_rate"),
-					"charge_type_label": frappe.get_meta(tax.doctype).get_label("charge_type"),
-					"charge_type": tax.charge_type,
-					"row_range": row_range
-				})
+			throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,
+				row_range))
 
 		if cint(getattr(tax, "included_in_print_rate", None)):
 			if tax.charge_type == "Actual":
 				# inclusive tax cannot be of type Actual
-				throw((_("Row")
-					+ " # %(idx)s [%(doctype)s]: %(charge_type_label)s = \"%(charge_type)s\" "
-					+ "cannot be included in Item's rate") % {
-						"idx": tax.idx,
-						"doctype": tax.doctype,
-						"charge_type_label": frappe.get_meta(tax.doctype).get_label("charge_type"),
-						"charge_type": tax.charge_type,
-					})
+				throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
 			elif tax.charge_type == "On Previous Row Amount" and \
 					not cint(self.tax_doclist[cint(tax.row_id) - 1].included_in_print_rate):
 				# referred row should also be inclusive
@@ -434,17 +413,7 @@ class AccountsController(TransactionBase):
 
 					if total_billed_amt - max_allowed_amt > 0.01:
 						reduce_by = total_billed_amt - max_allowed_amt
-
-						frappe.throw(_("Row #") + cstr(item.idx) + ": " +
-							_(" Max amount allowed for Item ") + cstr(item.item_code) +
-							_(" against ") + ref_dt + " " +
-							cstr(item.get(ref_dt.lower().replace(" ", "_"))) + _(" is ") +
-							cstr(max_allowed_amt) + ". \n" +
-							_("""If you want to increase your overflow tolerance, please increase \
-							tolerance % in Global Defaults or Item master.
-							Or, you must reduce the amount by """) + cstr(reduce_by) + "\n" +
-							_("""Also, please check if the order item has already been billed \
-								in the Sales Order"""))
+						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'").format(item.item_code, item.row, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default

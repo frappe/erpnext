@@ -294,20 +294,19 @@ def validate_expense_against_budget(args):
 
 					args["month_end_date"] = frappe.db.sql("select LAST_DAY(%s)",
 						args.posting_date)[0][0]
-					action_for, action = "Monthly", monthly_action
+					action_for, action = _("Monthly"), monthly_action
 
 				elif yearly_action in ["Stop", "Warn"]:
 					budget_amount = budget[0].budget_allocated
-					action_for, action = "Monthly", yearly_action
+					action_for, action = _("Annual"), yearly_action
 
 				if action_for:
 					actual_expense = get_actual_expense(args)
 					if actual_expense > budget_amount:
-						throw(action_for + _(" budget ") + cstr(budget_amount) +
-							_(" for account ") + args.account + _(" against cost center ") +
-							args.cost_center + _(" will exceed by ") +
-							cstr(actual_expense - budget_amount) + _(" after this transaction.")
-							, exc=BudgetError if action=="Stop" else False)
+						frappe.msgprint(_("{0} budget for Account {1} against Cost Center {2} will exceed by {3}").format(
+							_(action_for), args.account, args.cost_center, cstr(actual_expense - budget_amount)))
+						if action=="Stop":
+							raise BudgetError
 
 def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
 	if distribution_id:

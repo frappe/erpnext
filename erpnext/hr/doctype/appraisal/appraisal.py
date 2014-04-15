@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, getdate
+from frappe.utils import flt, getdate
 
-from frappe import msgprint, _
+from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -34,9 +34,7 @@ class Appraisal(Document):
 			or (end_date>=%s and end_date<=%s))""",
 			(self.employee,self.start_date,self.end_date,self.start_date,self.end_date))
 		if chk:
-			frappe.throw("You have already created Appraisal "\
-				+cstr(chk[0][0])+" in the current date range for employee "\
-				+cstr(self.employee_name))
+			frappe.throw(_("Appraisal {0} created for Employee {1} in the given date range").format(chk[0][0], self.employee_name))
 
 	def calculate_total(self):
 		total, total_w  = 0, 0

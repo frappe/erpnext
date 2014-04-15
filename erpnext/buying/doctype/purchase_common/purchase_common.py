@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt
-from frappe import msgprint, _
+from frappe import _
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.controllers.buying_controller import BuyingController
@@ -33,8 +33,7 @@ class PurchaseCommon(BuyingController):
 				if flt(d.conversion_factor):
 					last_purchase_rate = flt(d.base_rate) / flt(d.conversion_factor)
 				else:
-					frappe.throw(_("Row ") + cstr(d.idx) + ": " +
-						_("UOM Conversion Factor is mandatory"))
+					frappe.throw(_("UOM Conversion factor is required in row {0}").format(d.idx))
 
 			# update last purchsae rate
 			if last_purchase_rate:
@@ -71,7 +70,7 @@ class PurchaseCommon(BuyingController):
 		for d in obj.get(obj.fname):
 			# validation for valid qty
 			if flt(d.qty) < 0 or (d.parenttype != 'Purchase Receipt' and not flt(d.qty)):
-				frappe.throw("Please enter valid qty for item %s" % cstr(d.item_code))
+				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
 			# udpate with latest quantities
 			bin = frappe.db.sql("""select projected_qty from `tabBin` where
@@ -86,19 +85,17 @@ class PurchaseCommon(BuyingController):
 
 			item = frappe.db.sql("""select is_stock_item, is_purchase_item,
 				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""", d.item_code)
-			if not item:
-				frappe.throw("Item %s does not exist in Item Master." % cstr(d.item_code))
 
 			from erpnext.stock.doctype.item.item import validate_end_of_life
 			validate_end_of_life(d.item_code, item[0][3])
 
 			# validate stock item
 			if item[0][0]=='Yes' and d.qty and not d.warehouse:
-				frappe.throw("Warehouse is mandatory for %s, since it is a stock item" % d.item_code)
+				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
 			# validate purchase item
 			if item[0][1] != 'Yes' and item[0][2] != 'Yes':
-				frappe.throw("Item %s is not a purchase item or sub-contracted item. Please check" % (d.item_code))
+				frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
 			# list criteria that should not repeat if item is stock item
 			e = [getattr(d, "schedule_date", None), d.item_code, d.description, d.warehouse, d.uom,
@@ -114,16 +111,14 @@ class PurchaseCommon(BuyingController):
 			if ch and ch[0][0] == 'Yes':
 				# check for same items
 				if e in check_list:
-					frappe.throw("""Item %s has been entered more than once with same description, schedule date, warehouse and uom.\n
-						Please change any of the field value to enter the item twice""" % d.item_code)
+					frappe.throw(_("Item {0} has been entered multiple times with same description or date or warehouse").format(d.item_code))
 				else:
 					check_list.append(e)
 
 			elif ch and ch[0][0] == 'No':
 				# check for same items
 				if f in chk_dupl_itm:
-					frappe.throw("""Item %s has been entered more than once with same description, schedule date.\n
-						Please change any of the field value to enter the item twice.""" % d.item_code)
+					frappe.throw(_("Item {0} has been entered multiple times with same description or date").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
 
@@ -152,8 +147,7 @@ class PurchaseCommon(BuyingController):
 		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and
 			status = 'Stopped'""" % (doctype, '%s'), docname)
 		if stopped:
-			frappe.throw("One cannot do any transaction against %s : %s, it's status is 'Stopped'" %
-				(doctype, docname), exc=frappe.InvalidStatusError)
+			frappe.throw("{0} {1} status is 'Stopped'".format(doctype, docname), frappe.InvalidStatusError)
 
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
 		if check == 'Next':
@@ -161,11 +155,10 @@ class PurchaseCommon(BuyingController):
 				where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1"""
 				% (doctype, detail_doctype, '%s'), docname)
 			if submitted:
-				frappe.throw(cstr(doctype) + ": " + cstr(submitted[0][0])
-					+ _("has already been submitted."))
+				frappe.throw(_("{0} {1} has already been submitted").format(doctype, submitted[0][0]))
 
 		if check == 'Previous':
 			submitted = frappe.db.sql("""select name from `tab%s`
 				where docstatus = 1 and name = %s""" % (doctype, '%s'), docname)
 			if not submitted:
-				frappe.throw(cstr(doctype) + ": " + cstr(submitted[0][0]) + _("not submitted"))
+				frappe.throw(_("{0} {1} is not submitted").format(doctype, submitted[0][0]))

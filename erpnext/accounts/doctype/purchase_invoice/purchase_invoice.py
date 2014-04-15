@@ -221,11 +221,11 @@ class PurchaseInvoice(BuyingController):
 			if d.purchase_order:
 				submitted = frappe.db.sql("select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order)
 				if not submitted:
-					frappe.throw("Purchase Order : "+ cstr(d.purchase_order) +" is not submitted")
+					frappe.throw(_("Purchase Order {0} is not submitted").format(d.purchase_order))
 			if d.purchase_receipt:
 				submitted = frappe.db.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = %s", d.purchase_receipt)
 				if not submitted:
-					frappe.throw("Purchase Receipt : "+ cstr(d.purchase_receipt) +" is not submitted")
+					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
 
 	def update_against_document_in_jv(self):
@@ -305,9 +305,7 @@ class PurchaseInvoice(BuyingController):
 			# accumulate valuation tax
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
 				if auto_accounting_for_stock and not tax.cost_center:
-					frappe.throw(_("Row %(row)s: Cost Center is mandatory \
-						if tax/charges category is Valuation or Valuation and Total" %
-						{"row": tax.idx}))
+					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)

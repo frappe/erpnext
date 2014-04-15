@@ -361,9 +361,7 @@ class SellingController(StockController):
 			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
 				if status == "Stopped":
-					frappe.throw(self.doctype +
-						_(" can not be created/modified against stopped Sales Order ") +
-						d.get(ref_fieldname))
+					frappe.throw(_("Sales Order {0} is stopped").format(d.get(ref_fieldname)))
 
 def check_active_sales_items(obj):
 	for d in obj.get(obj.fname):

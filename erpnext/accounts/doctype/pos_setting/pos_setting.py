@@ -43,7 +43,7 @@ class POSSetting(Document):
 			for link_dn in dn_list:
 				if link_dn and not frappe.db.exists({"doctype": link_dt,
 						"company": self.company, "name": link_dn}):
-					frappe.throw(link_dn +_(" does not belong to ") + self.company)
+					frappe.throw(_("{0} does not belong to Company {1}").format(link_dn, self.company))
 
 	def on_update(self):
 		self.set_defaults()

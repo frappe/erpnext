@@ -225,13 +225,11 @@ class JournalVoucher(AccountsController):
 		for d in self.get("entries"):
 			if d.against_invoice and frappe.db.get_value("Sales Invoice",
 					d.against_invoice, "debit_to") != d.account:
-				frappe.throw(_("Row #") + cstr(d.idx) +  ": " +
-					_("Account is not matching with Debit To account of Sales Invoice"))
+				frappe.throw(_("Account {0} must be sames as Debit To Account in Sales Invoice in row {0}").format(d.account, d.idx))
 
 			if d.against_voucher and frappe.db.get_value("Purchase Invoice",
 					d.against_voucher, "credit_to") != d.account:
-				frappe.throw(_("Row #") + cstr(d.idx) + ": " +
-					_("Account is not matching with Credit To account of Purchase Invoice"))
+				frappe.throw(_("Account {0} must be sames as Credit To Account in Purchase Invoice in row {0}").format(d.account, d.idx))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
