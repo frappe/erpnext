@@ -17,6 +17,4 @@ class CustomerGroup(NestedSet):
 
 	def validate_name_with_customer(self):
 		if frappe.db.exists("Customer", self.name):
-			frappe.msgprint(_("An Customer exists with same name (%s), \
-				please change the Customer Group name or rename the Customer") %
-				self.name, raise_exception=1)
+			frappe.msgprint(_("An Customer exists with same name"), raise_exception=1)

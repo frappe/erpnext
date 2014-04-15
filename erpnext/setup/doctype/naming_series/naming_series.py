@@ -15,11 +15,11 @@ class NamingSeries(Document):
 		return {
 			"transactions": "\n".join([''] + sorted(list(set(
 				frappe.db.sql_list("""select parent
-					from `tabDocField` where fieldname='naming_series'""") 
-				+ frappe.db.sql_list("""select dt from `tabCustom Field` 
+					from `tabDocField` where fieldname='naming_series'""")
+				+ frappe.db.sql_list("""select dt from `tabCustom Field`
 					where fieldname='naming_series'""")
 				)))),
-			"prefixes": "\n".join([''] + [i[0] for i in 
+			"prefixes": "\n".join([''] + [i[0] for i in
 				frappe.db.sql("""select name from tabSeries order by name""")])
 		}
 
@@ -86,16 +86,16 @@ class NamingSeries(Document):
 		dt = DocType()
 
 		parent = list(set(
-			frappe.db.sql_list("""select dt.name 
-				from `tabDocField` df, `tabDocType` dt 
+			frappe.db.sql_list("""select dt.name
+				from `tabDocField` df, `tabDocType` dt
 				where dt.name = df.parent and df.fieldname='naming_series' and dt.name != %s""",
 				self.select_doc_for_series)
-			+ frappe.db.sql_list("""select dt.name 
-				from `tabCustom Field` df, `tabDocType` dt 
+			+ frappe.db.sql_list("""select dt.name
+				from `tabCustom Field` df, `tabDocType` dt
 				where dt.name = df.dt and df.fieldname='naming_series' and dt.name != %s""",
 				self.select_doc_for_series)
 			))
-		sr = [[frappe.get_meta(p).get_field("naming_series").options, p] 
+		sr = [[frappe.get_meta(p).get_field("naming_series").options, p]
 			for p in parent]
 		options = self.scrub_options_list(self.set_options.split("\n"))
 		for series in options:
@@ -104,19 +104,12 @@ class NamingSeries(Document):
 				if i[0]:
 					existing_series = [d.split('.')[0] for d in i[0].split("\n")]
 					if series.split(".")[0] in existing_series:
-						throw("{oops}! {sr} {series} {msg} {existing_series}. {select}".format(**{
-							"oops": _("Oops"),
-							"sr": _("Series Name"),
-							"series": series,
-							"msg": _("is already in use in"),
-							"existing_series": i[1],
-							"select": _("Please select a new one")
-						}))
+						frappe.throw(_("Series {0} already used in {1}").format(series,i[1]))
 
 	def validate_series_name(self, n):
 		import re
 		if not re.match("^[a-zA-Z0-9-/.#]*$", n):
-			throw('Special Characters except "-" and "/" not allowed in naming series')
+			throw(_('Special Characters except "-" and "/" not allowed in naming series'))
 
 	def get_options(self, arg=''):
 		return frappe.get_meta(self.select_doc_for_series).get_field("naming_series").options
@@ -124,7 +117,7 @@ class NamingSeries(Document):
 	def get_current(self, arg=None):
 		"""get series current"""
 		if self.prefix:
-			self.current_value = frappe.db.get_value("Series", 
+			self.current_value = frappe.db.get_value("Series",
 				self.prefix.split('.')[0], "current")
 
 	def insert_series(self, series):
@@ -136,7 +129,7 @@ class NamingSeries(Document):
 		if self.prefix:
 			prefix = self.prefix.split('.')[0]
 			self.insert_series(prefix)
-			frappe.db.sql("update `tabSeries` set current = %s where name = %s", 
+			frappe.db.sql("update `tabSeries` set current = %s where name = %s",
 				(self.current_value, prefix))
 			msgprint(_("Series Updated Successfully"))
 		else:
@@ -149,8 +142,8 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")
 
 		# set values for mandatory
-		frappe.db.sql("""update `tab{doctype}` set naming_series={s} where 
-			ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"), 
+		frappe.db.sql("""update `tab{doctype}` set naming_series={s} where
+			ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"),
 			get_default_naming_series(doctype))
 
 		if hide_name_field:
@@ -165,7 +158,7 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 			make_property_setter(doctype, fieldname, "reqd", 1, "Check")
 
 			# set values for mandatory
-			frappe.db.sql("""update `tab{doctype}` set `{fieldname}`=`name` where 
+			frappe.db.sql("""update `tab{doctype}` set `{fieldname}`=`name` where
 				ifnull({fieldname}, '')=''""".format(doctype=doctype, fieldname=fieldname))
 
 def get_default_naming_series(doctype):

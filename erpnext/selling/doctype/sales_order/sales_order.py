@@ -145,7 +145,7 @@ class SalesOrder(SellingController):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus==2:
-					frappe.throw(quotation + ": " + frappe._("Quotation is cancelled."))
+					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
 

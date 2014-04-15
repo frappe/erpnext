@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt
-from frappe import msgprint, _
+from frappe import _
 
 from erpnext.controllers.buying_controller import BuyingController
 class MaterialRequest(BuyingController):
@@ -43,9 +43,7 @@ class MaterialRequest(BuyingController):
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
-					frappe.throw("You can raise indent of maximum qty: %s for item: %s against sales order: %s\
-						\n Anyway, you can add more qty in new row for the same item."
-						% (actual_so_qty - already_indented, item, so_no))
+					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
 	def validate_schedule_date(self):
 		for d in self.get('indent_details'):

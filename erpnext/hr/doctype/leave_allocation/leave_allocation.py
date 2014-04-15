@@ -63,7 +63,7 @@ class LeaveAllocation(Document):
 		cf = cf and cint(cf[0][0]) or 0
 		if not cf:
 			frappe.db.set(self,'carry_forward',0)
-			frappe.throw("Cannot carry forward {0}".format(self.leave_type))
+			frappe.throw(_("Cannot carry forward {0}").format(self.leave_type))
 
 	def get_carry_forwarded_leaves(self):
 		if self.carry_forward:

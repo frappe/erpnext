@@ -109,8 +109,7 @@ class Item(WebsiteGenerator):
 			self.is_pro_applicable = "No"
 
 		if self.is_pro_applicable == 'Yes' and self.is_stock_item == 'No':
-			frappe.throw(_("As Production Order can be made for this item, \
-				it must be a stock item."))
+			frappe.throw(_("As Production Order can be made for this item, it must be a stock item."))
 
 		if self.has_serial_no == 'Yes' and self.is_stock_item == 'No':
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
@@ -123,15 +122,13 @@ class Item(WebsiteGenerator):
 				and t2.docstatus = 1 and t1.docstatus =1 """, self.name)
 
 			if bom_mat and bom_mat[0][0]:
-				frappe.throw(_("Item must be a purchase item, \
-					as it is present in one or many Active BOMs"))
+				frappe.throw(_("Item must be a purchase item, as it is present in one or many Active BOMs"))
 
 		if self.is_manufactured_item != "Yes":
 			bom = frappe.db.sql("""select name from `tabBOM` where item = %s
 				and is_active = 1""", (self.name,))
 			if bom and bom[0][0]:
-				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many \
-					active BOMs present for this item"""))
+				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item"""))
 
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """

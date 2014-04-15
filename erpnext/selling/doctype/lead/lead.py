@@ -27,11 +27,11 @@ class Lead(SellingController):
 		self.set_status()
 
 		if self.source == 'Campaign' and not self.campaign_name and session['user'] != 'Guest':
-			frappe.throw("Please specify campaign name")
+			frappe.throw(_("Campaign Name is required"))
 
 		if self.email_id:
 			if not validate_email_add(self.email_id):
-				frappe.throw('Please enter valid email id.')
+				frappe.throw(_('{0} is not a valid email id').format(self.email_id))
 
 	def on_update(self):
 		self.check_email_id_is_unique()

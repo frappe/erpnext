@@ -9,23 +9,23 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		this.frm.fields_dict.reports_to.get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.employee_query"} }
 	},
-	
+
 	onload: function() {
 		this.setup_leave_approver_select();
 		this.frm.toggle_display(["esic_card_no", "gratuity_lic_id", "pan_number", "pf_number"],
 			frappe.boot.sysdefaults.country==="India");
 		if(this.frm.doc.__islocal) this.frm.set_value("employee_name", "");
 	},
-	
+
 	refresh: function() {
 		var me = this;
 		erpnext.hide_naming_series();
-		if(!this.frm.doc.__islocal) {			
+		if(!this.frm.doc.__islocal) {
 			cur_frm.add_custom_button(__('Make Salary Structure'), function() {
 				me.make_salary_structure(this); });
 		}
 	},
-	
+
 	setup_leave_approver_select: function() {
 		var me = this;
 		return this.frm.call({
@@ -33,21 +33,21 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			callback: function(r) {
 				var df = frappe.meta.get_docfield("Employee Leave Approver", "leave_approver",
 					me.frm.doc.name);
-				df.options = $.map(r.message, function(user) { 
-					return {value: user, label: frappe.user_info(user).fullname}; 
+				df.options = $.map(r.message, function(user) {
+					return {value: user, label: frappe.user_info(user).fullname};
 				});
 				me.frm.fields_dict.employee_leave_approvers.refresh();
 			}
 		});
 	},
-	
+
 	date_of_birth: function() {
 		return cur_frm.call({
 			method: "get_retirement_date",
 			args: {date_of_birth: this.frm.doc.date_of_birth}
 		});
 	},
-	
+
 	salutation: function() {
 		if(this.frm.doc.salutation) {
 			this.frm.set_value("gender", {
@@ -56,16 +56,12 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			}[this.frm.doc.salutation]);
 		}
 	},
-	
+
 	make_salary_structure: function(btn) {
 		var me = this;
 		this.validate_salary_structure(btn, function(r) {
 			if(r.message) {
-				msgprint(__("Employee {0}:\
-					An active Salary Structure already exists. \
-						If you want to create new one, please ensure that no active \
-						Salary Structure exists for this Employee. \
-						Go to the active Salary Structure and set \"Is Active\" = \"No\"", [me.frm.doc.name]));
+				msgprint(__("Active Salary Sructure already exists for Employee {0}", [me.frm.doc.name]));
 			} else if(!r.exc) {
 				frappe.model.map({
 					source: me.frm.doc,
@@ -74,7 +70,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			}
 		});
 	},
-	
+
 	validate_salary_structure: function(btn, callback) {
 		var me = this;
 		return this.frm.call({

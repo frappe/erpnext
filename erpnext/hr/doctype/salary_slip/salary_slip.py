@@ -130,7 +130,7 @@ class SalarySlip(TransactionBase):
 			(self.month, self.fiscal_year, self.employee, self.name))
 		if ret_exist:
 			self.employee = ''
-			frappe.throw("Salary Slip of employee {0} already created for this month".format(self.employee))
+			frappe.throw(_("Salary Slip of employee {0} already created for this month").format(self.employee))
 
 	def validate(self):
 		from frappe.utils import money_in_words

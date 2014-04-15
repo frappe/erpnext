@@ -10,7 +10,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
-			
+
 			$.each({
 				posting_date: today,
 				due_date: today,
@@ -24,18 +24,18 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
-			});			
+			});
 		}
 
 		if(this.other_fname) {
 			this[this.other_fname + "_remove"] = this.calculate_taxes_and_totals;
 		}
-		
+
 		if(this.fname) {
 			this[this.fname + "_remove"] = this.calculate_taxes_and_totals;
 		}
 	},
-	
+
 	onload_post_render: function() {
 		var me = this;
 		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
@@ -55,7 +55,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 		}
 	},
-	
+
 	refresh: function() {
 		this.frm.clear_custom_buttons();
 		erpnext.hide_naming_series();
@@ -77,7 +77,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				icon = "icon-file-text";
 		}
 		var me = this;
-		
+
 		this.$pos_btn = this.frm.appframe.add_button(btn_label, function() {
 			me.toggle_pos();
 		}, icon);
@@ -87,7 +87,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		// Check whether it is Selling or Buying cycle
 		var price_list = frappe.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
-		
+
 		if (!price_list)
 			msgprint(__("Please select Price List"))
 		else {
@@ -109,8 +109,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.refresh();
 		}
 	},
-	
-	
+
+
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
@@ -152,7 +152,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				});
 			}
 		}
-	},	
+	},
 
 	serial_no: function(doc, cdt, cdn) {
 		var me = this;
@@ -169,7 +169,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				var serial_nos = item.serial_no.trim().replace(/,/g, '\n');
 
 				serial_nos = serial_nos.trim().split('\n');
-				
+
 				// Trim each string and push unique string to new list
 				for (var x=0; x<=serial_nos.length - 1; x++) {
 					if (serial_nos[x].trim() != "" && sr_no.indexOf(serial_nos[x].trim()) == -1) {
@@ -187,18 +187,18 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 		}
 	},
-	
+
 	validate: function() {
 		this.calculate_taxes_and_totals();
 	},
-		
+
 	company: function() {
 		if(this.frm.doc.company && this.frm.fields_dict.currency) {
 			var company_currency = this.get_company_currency();
 			if (!this.frm.doc.currency) {
 				this.frm.set_value("currency", company_currency);
 			}
-			
+
 			if (this.frm.doc.currency == company_currency) {
 				this.frm.set_value("conversion_rate", 1.0);
 			}
@@ -209,27 +209,27 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.script_manager.trigger("currency");
 		}
 	},
-	
+
 	get_company_currency: function() {
 		return erpnext.get_currency(this.frm.doc.company);
 	},
-	
+
 	currency: function() {
 		var me = this;
 		this.set_dynamic_labels();
 
 		var company_currency = this.get_company_currency();
 		if(this.frm.doc.currency !== company_currency) {
-			this.get_exchange_rate(this.frm.doc.currency, company_currency, 
+			this.get_exchange_rate(this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
 					me.conversion_rate();
 				});
 		} else {
-			this.conversion_rate();		
+			this.conversion_rate();
 		}
 	},
-	
+
 	conversion_rate: function() {
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
@@ -240,14 +240,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 		if(flt(this.frm.doc.conversion_rate)>0.0) this.calculate_taxes_and_totals();
 	},
-	
+
 	get_price_list_currency: function(buying_or_selling) {
 		var me = this;
 		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
 		if(this.frm.doc[fieldname]) {
 			return this.frm.call({
 				method: "erpnext.setup.utils.get_price_list_currency",
-				args: { 
+				args: {
 					price_list: this.frm.doc[fieldname],
 				},
 				callback: function(r) {
@@ -258,7 +258,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			});
 		}
 	},
-	
+
 	get_exchange_rate: function(from_currency, to_currency, callback) {
 		var exchange_name = from_currency + "-" + to_currency;
 		frappe.model.with_doc("Currency Exchange", exchange_name, function(name) {
@@ -266,14 +266,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			callback(exchange_doc ? flt(exchange_doc.exchange_rate) : 0);
 		});
 	},
-	
+
 	price_list_currency: function() {
 		var me=this;
 		this.set_dynamic_labels();
-		
+
 		var company_currency = this.get_company_currency();
 		if(this.frm.doc.price_list_currency !== company_currency) {
-			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency, 
+			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
 				function(exchange_rate) {
 					if(exchange_rate) {
 						me.frm.set_value("plc_conversion_rate", exchange_rate);
@@ -284,7 +284,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.plc_conversion_rate();
 		}
 	},
-	
+
 	plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
@@ -294,11 +294,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.calculate_taxes_and_totals();
 		}
 	},
-	
+
 	qty: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
-	
+
 	tax_rate: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
@@ -314,30 +314,30 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			throw e;
 		}
 	},
-	
+
 	set_dynamic_labels: function() {
 		// What TODO? should we make price list system non-mandatory?
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
-			
+
 		var company_currency = this.get_company_currency();
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
 		this.frm.refresh_fields();
 	},
-	
+
 	recalculate: function() {
 		this.calculate_taxes_and_totals();
 	},
-	
+
 	recalculate_values: function() {
 		this.calculate_taxes_and_totals();
 	},
-	
+
 	calculate_charges: function() {
 		this.calculate_taxes_and_totals();
 	},
-	
+
 	included_in_print_rate: function(doc, cdt, cdn) {
 		var tax = frappe.get_doc(cdt, cdn);
 		try {
@@ -350,52 +350,32 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			throw e;
 		}
 	},
-	
+
 	validate_on_previous_row: function(tax) {
 		// validate if a valid row id is mentioned in case of
 		// On Previous Row Amount and On Previous Row Total
-		if(([__("On Previous Row Amount"), __("On Previous Row Total")].indexOf(tax.charge_type) != -1) &&
+		if((["On Previous Row Amount", "On Previous Row Total"].indexOf(tax.charge_type) != -1) &&
 			(!tax.row_id || cint(tax.row_id) >= tax.idx)) {
-				var msg = repl(__("Row") + " # %(idx)s [%(doctype)s]: " +
-					__("Please specify a valid") + " %(row_id_label)s", {
-						idx: tax.idx,
-						doctype: tax.doctype,
-						row_id_label: frappe.meta.get_label(tax.doctype, "row_id", tax.name)
-					});
+				var msg = __("Please specify a valid Row ID for row {0} in table {1}", [tax.idx, __(tax.doctype)])
 				frappe.throw(msg);
 			}
 	},
-	
+
 	validate_inclusive_tax: function(tax) {
 		if(!this.frm.tax_doclist) this.frm.tax_doclist = this.get_tax_doclist();
-		
+
 		var actual_type_error = function() {
-			var msg = repl(__("For row") + " # %(idx)s [%(doctype)s]: " + 
-				"%(charge_type_label)s = \"%(charge_type)s\" " +
-				__("cannot be included in Item's rate"), {
-					idx: tax.idx,
-					doctype: tax.doctype,
-					charge_type_label: frappe.meta.get_label(tax.doctype, "charge_type", tax.name),
-					charge_type: tax.charge_type
-				});
+			var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
 			frappe.throw(msg);
 		};
-		
+
 		var on_previous_row_error = function(row_range) {
-			var msg = repl(__("For row") + " # %(idx)s [%(doctype)s]: " + 
-				__("to be included in Item's rate, it is required that: ") + 
-				" [" + __("Row") + " # %(row_range)s] " + __("also be included in Item's rate"), {
-					idx: tax.idx,
-					doctype: tax.doctype,
-					charge_type_label: frappe.meta.get_label(tax.doctype, "charge_type", tax.name),
-					charge_type: tax.charge_type,
-					inclusive_label: frappe.meta.get_label(tax.doctype, "included_in_print_rate", tax.name),
-					row_range: row_range,
-				});
-			
+			var msg = __("For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included",
+				[tax.idx, __(tax.doctype), tax.charge_type, row_range])
+
 			frappe.throw(msg);
 		};
-		
+
 		if(cint(tax.included_in_print_rate)) {
 			if(tax.charge_type == "Actual") {
 				// inclusive tax cannot be of type Actual
@@ -405,7 +385,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					// referred row should also be an inclusive tax
 					on_previous_row_error(tax.row_id);
 			} else if(tax.charge_type == "On Previous Row Total") {
-				var taxes_not_included = $.map(this.frm.tax_doclist.slice(0, tax.row_id), 
+				var taxes_not_included = $.map(this.frm.tax_doclist.slice(0, tax.row_id),
 					function(t) { return cint(t.included_in_print_rate) ? null : t; });
 				if(taxes_not_included.length > 0) {
 					// all rows above this tax should be inclusive
@@ -414,26 +394,26 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 		}
 	},
-	
+
 	_load_item_tax_rate: function(item_tax_rate) {
 		return item_tax_rate ? JSON.parse(item_tax_rate) : {};
 	},
-	
+
 	_get_tax_rate: function(tax, item_tax_map) {
 		return (keys(item_tax_map).indexOf(tax.account_head) != -1) ?
 			flt(item_tax_map[tax.account_head], precision("rate", tax)) :
 			tax.rate;
 	},
-	
+
 	get_item_wise_taxes_html: function() {
 		var item_tax = {};
 		var tax_accounts = [];
 		var company_currency = this.get_company_currency();
-		
+
 		$.each(this.get_tax_doclist(), function(i, tax) {
 			var tax_amount_precision = precision("tax_amount", tax);
 			var tax_rate_precision = precision("rate", tax);
-			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'), 
+			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'),
 				function(item_code, tax_data) {
 					if(!item_tax[item_code]) item_tax[item_code] = {};
 					if($.isArray(tax_data)) {
@@ -445,7 +425,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						}
 						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
 							tax_amount_precision);
-						
+
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
 					} else {
 						item_tax[item_code][tax.name] = [flt(tax_data, tax_rate_precision) + "%", ""];
@@ -453,10 +433,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				});
 			tax_accounts.push([tax.name, tax.account_head]);
 		});
-		
-		var headings = $.map([__("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })), 
+
+		var headings = $.map([__("Item Name")].concat($.map(tax_accounts, function(head) { return head[1]; })),
 			function(head) { return '<th style="min-width: 100px;">' + (head || "") + "</th>" }).join("\n");
-			
+
 		var distinct_item_names = [];
 		var distinct_items = [];
 		$.each(this.get_item_doclist(), function(i, item) {
@@ -465,7 +445,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				distinct_items.push(item);
 			}
 		});
-		
+
 		var rows = $.map(distinct_items, function(item) {
 			var item_tax_record = item_tax[item.item_code || item.item_name];
 			if(!item_tax_record) { return null; }
@@ -478,7 +458,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				}).join("\n")
 			});
 		}).join("\n");
-		
+
 		if(!rows) return "";
 		return '<p><a href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">Show / Hide tax break-up</a><br><br></p>\
 		<div class="tax-break-up hide" style="overflow-x: auto;"><table class="table table-bordered table-hover">\
@@ -486,16 +466,16 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			<tbody>' + rows + '</tbody> \
 		</table></div>';
 	},
-	
+
 	validate_company_and_party: function() {
 		var me = this;
 		var valid = true;
-		
+
 		$.each(["company", "customer"], function(i, fieldname) {
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname)) {
 				if (!me.frm.doc[fieldname]) {
-					msgprint(__("Please specify") + ": " + 
-						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) + 
+					msgprint(__("Please specify") + ": " +
+						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +
 						". " + __("It is needed to fetch Item Details."));
 						valid = false;
 				}
@@ -503,25 +483,25 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		});
 		return valid;
 	},
-	
+
 	get_item_doclist: function() {
 		return this.frm.doc[this.fname] || [];
 	},
-	
+
 	get_tax_doclist: function() {
 		return this.frm.doc[this.other_fname] || [];
 	},
-	
+
 	validate_conversion_rate: function() {
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
-		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate", 
+		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
 			this.frm.doc.name);
 		var company_currency = this.get_company_currency();
-		
+
 		if(!this.frm.doc.conversion_rate) {
-			frappe.throw(repl('%(conversion_rate_label)s' + 
-				__(' is mandatory. Maybe Currency Exchange record is not created for ') + 
-				'%(from_currency)s' + __(" to ") + '%(to_currency)s', 
+			frappe.throw(repl('%(conversion_rate_label)s' +
+				__(' is mandatory. Maybe Currency Exchange record is not created for ') +
+				'%(from_currency)s' + __(" to ") + '%(to_currency)s',
 				{
 					"conversion_rate_label": conversion_rate_label,
 					"from_currency": this.frm.doc.currency,
@@ -529,7 +509,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				}));
 		}
 	},
-	
+
 	calculate_taxes_and_totals: function() {
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
@@ -552,13 +532,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		this.show_item_wise_taxes();
 	},
-	
+
 	initialize_taxes: function() {
 		var me = this;
 
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			tax.item_wise_tax_detail = {};
-			tax_fields = ["total", "tax_amount_after_discount_amount", 
+			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
@@ -566,17 +546,17 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				tax_fields.push("tax_amount");
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
-			
+
 			me.validate_on_previous_row(tax);
 			me.validate_inclusive_tax(tax);
 			frappe.model.round_floats_in(tax);
 		});
 	},
-	
+
 	calculate_taxes: function() {
 		var me = this;
 		var actual_tax_dict = {};
-		
+
 		// maintain actual tax rate based on idx
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			if (tax.charge_type == "Actual") {
@@ -602,34 +582,34 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				// store tax_amount for current item as it will be used for
 				// charge type = 'On Previous Row Amount'
 				tax.tax_amount_for_current_item = current_tax_amount;
-				
+
 				// accumulate tax amount into tax.tax_amount
 				if (!me.discount_amount_applied)
 					tax.tax_amount += current_tax_amount;
 
 				tax.tax_amount_after_discount_amount += current_tax_amount;
-				
+
 				// for buying
 				if(tax.category) {
 					// if just for valuation, do not add the tax amount in total
 					// hence, setting it as 0 for further steps
 					current_tax_amount = (tax.category == "Valuation") ? 0.0 : current_tax_amount;
-					
+
 					current_tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 				}
-				
+
 				// Calculate tax.total viz. grand total till that step
-				// note: grand_total_for_current_item contains the contribution of 
+				// note: grand_total_for_current_item contains the contribution of
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
 					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount,
 						precision("total", tax));
 				} else {
-					tax.grand_total_for_current_item = 
+					tax.grand_total_for_current_item =
 						flt(me.frm.tax_doclist[i-1].grand_total_for_current_item + current_tax_amount,
 							precision("total", tax));
 				}
-				
+
 				// in tax.total, accumulate grand total for each item
 				tax.total += tax.grand_total_for_current_item;
 
@@ -648,54 +628,54 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	round_off_totals: function(tax) {
 		tax.total = flt(tax.total, precision("total", tax));
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
-		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, 
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount,
 			precision("tax_amount", tax));
 	},
 
 	adjust_discount_amount_loss: function(tax) {
 		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.discount_amount) - tax.total;
-		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount + 
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
 	},
-	
+
 	get_current_tax_amount: function(item, tax, item_tax_map) {
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
-		
+
 		if(tax.charge_type == "Actual") {
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.frm.doc.net_total ?
 				((item.base_amount / this.frm.doc.net_total) * actual) :
 				0.0;
-			
+
 		} else if(tax.charge_type == "On Net Total") {
 			current_tax_amount = (tax_rate / 100.0) * item.base_amount;
-			
+
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item;
-			
+
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item;
 		}
 
 		current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
-		
+
 		// store tax breakup for each item
 		tax.item_wise_tax_detail[item.item_code || item.item_name] = [tax_rate, current_tax_amount];
-		
+
 		return current_tax_amount;
 	},
-	
+
 	_cleanup: function() {
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			$.each(["tax_amount_for_current_item", "grand_total_for_current_item",
-				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"], 
+				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"],
 				function(i, fieldname) { delete tax[fieldname]; });
-			
+
 			tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
 		});
 	},
@@ -706,17 +686,17 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.total_advance = flt(frappe.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));
-			
+
 			this.calculate_outstanding_amount();
 		}
 	},
-	
+
 	_set_in_company_currency: function(item, print_field, base_field) {
 		// set values in base currency
 		item[base_field] = flt(item[print_field] * this.frm.doc.conversion_rate,
 			precision(base_field, item));
 	},
-	
+
 	get_terms: function() {
 		var me = this;
 		if(this.frm.doc.tc_name) {

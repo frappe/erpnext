@@ -147,7 +147,7 @@ class PurchaseCommon(BuyingController):
 		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and
 			status = 'Stopped'""" % (doctype, '%s'), docname)
 		if stopped:
-			frappe.throw("{0} {1} status is 'Stopped'".format(doctype, docname), frappe.InvalidStatusError)
+			frappe.throw(_("{0} {1} status is 'Stopped'").format(doctype, docname), frappe.InvalidStatusError)
 
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
 		if check == 'Next':

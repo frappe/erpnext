@@ -11,8 +11,7 @@ def get_company_currency(company):
 	if not currency:
 		currency = frappe.db.get_default("currency")
 	if not currency:
-		throw(_('Please specify Default Currency in Company Master \
-			and Global Defaults'))
+		throw(_('Please specify Default Currency in Company Master and Global Defaults'))
 
 	return currency
 

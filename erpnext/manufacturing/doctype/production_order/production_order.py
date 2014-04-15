@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import cstr, flt, nowdate
-from frappe import msgprint, _
+from frappe import _
 
 class OverProductionError(frappe.ValidationError): pass
 
@@ -34,9 +34,7 @@ class ProductionOrder(Document):
 				and is_active=1 and item=%s"""
 				, (self.bom_no, self.production_item), as_dict =1)
 			if not bom:
-				frappe.throw("""Incorrect BOM: %s entered.
-					May be BOM not exists or inactive or not submitted
-					or for some other item.""" % cstr(self.bom_no))
+				frappe.throw(_("BOM {0} is not active or not submitted").format(self.bom_no))
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -44,7 +42,7 @@ class ProductionOrder(Document):
 				where name=%s and docstatus = 1""", self.sales_order, as_dict=1)[0]
 
 			if not so.name:
-				frappe.throw("Sales Order: %s is not valid" % self.sales_order)
+				frappe.throw(_("Sales Order {0} is not valid") % self.sales_order)
 
 			if not self.expected_delivery_date:
 				self.expected_delivery_date = so.delivery_date
@@ -115,8 +113,7 @@ class ProductionOrder(Document):
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry`
 			where production_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
-			frappe.throw("""Submitted Stock Entry %s exists against this production order.
-				Hence can not be cancelled.""" % stock_entry[0][0])
+			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
 
 		frappe.db.set(self,'status', 'Cancelled')
 		self.update_planned_qty(-self.qty)

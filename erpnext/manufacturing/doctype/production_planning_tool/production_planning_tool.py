@@ -152,21 +152,17 @@ class ProductionPlanningTool(Document):
 		for d in self.get('pp_details'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
-				frappe.throw("Please Enter Planned Qty for item: %s at row no: %s" %
-					(d.item_code, d.idx))
+				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
 
 	def validate_bom_no(self, d):
 		if not d.bom_no:
-			frappe.throw("Please enter bom no for item: %s at row no: %s" %
-				(d.item_code, d.idx))
+			frappe.throw(_("Please enter BOM for Item {0} at row {1}").format(d.item_code, d.idx))
 		else:
 			bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s
 				and docstatus = 1 and is_active = 1""",
 				(d.bom_no, d.item_code), as_dict = 1)
 			if not bom:
-				frappe.throw("""Incorrect BOM No: %s entered for item: %s at row no: %s
-					May be BOM is inactive or for other item or does not exists in the system""" %
-					(d.bom_no, d.item_doce, d.idx))
+				frappe.throw(_("Incorrect or Inactive BOM {0} for Item {1} at row {2}").format(d.bom_no, d.item_code, d.idx))
 
 	def raise_production_order(self):
 		"""It will raise production order (Draft) for all distinct FG items"""

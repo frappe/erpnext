@@ -65,8 +65,7 @@ class Warehouse(Document):
 			if parent_account:
 				self.create_account_under = parent_account
 			else:
-				frappe.throw(_("Please enter account group under which account \
-					for warehouse ") + self.name +_(" will be created"))
+				frappe.throw(_("Please enter parent account group for warehouse account"))
 
 	def on_trash(self):
 		# delete bin
@@ -75,8 +74,7 @@ class Warehouse(Document):
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
-				throw("""Warehouse: %s can not be deleted as qty exists for item: %s"""
-					% (self.name, d['item_code']))
+				throw(_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(self.name, d['item_code']))
 			else:
 				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 
@@ -87,8 +85,7 @@ class Warehouse(Document):
 
 		if frappe.db.sql("""select name from `tabStock Ledger Entry`
 				where warehouse = %s""", self.name):
-			throw(_("""Warehouse can not be deleted as stock ledger entry
-				exists for this warehouse."""))
+			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
 
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided

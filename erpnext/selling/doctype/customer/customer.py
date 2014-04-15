@@ -27,7 +27,7 @@ class Customer(TransactionBase):
 
 	def validate_values(self):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
-			frappe.throw("Series is Mandatory.", frappe.MandatoryError)
+			frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
 
 	def validate(self):
 		self.validate_values()
@@ -66,7 +66,7 @@ class Customer(TransactionBase):
 			c.is_primary_contact = 1
 			try:
 				c.save()
-			except NameError, e:
+			except NameError:
 				pass
 
 	def on_update(self):
@@ -86,7 +86,7 @@ class Customer(TransactionBase):
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
-			frappe.throw("A Customer Group exists with same name please change the Customer name or rename the Customer Group")
+			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"))
 
 	def delete_customer_address(self):
 		addresses = frappe.db.sql("""select name, lead from `tabAddress`

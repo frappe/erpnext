@@ -27,8 +27,7 @@ class SerialNo(StockController):
 
 	def validate(self):
 		if self.get("__islocal") and self.warehouse:
-			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be \
-				set by Stock Entry or Purchase Receipt"), SerialNoCannotCreateDirectError)
+			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"), SerialNoCannotCreateDirectError)
 
 		self.set_maintenance_status()
 		self.validate_warehouse()
@@ -166,8 +165,7 @@ class SerialNo(StockController):
 		if self.status == 'Delivered':
 			frappe.throw(_("Delivered Serial No ") + self.name + _(" can not be deleted"))
 		if self.warehouse:
-			frappe.throw(_("Cannot delete Serial No in warehouse. \
-				First remove from warehouse, then delete.") + ": " + self.name)
+			frappe.throw(_("Cannot delete Serial No in warehouse. First remove from warehouse, then delete.") + ": " + self.name)
 
 	def before_rename(self, old, new, merge=False):
 		if merge:
