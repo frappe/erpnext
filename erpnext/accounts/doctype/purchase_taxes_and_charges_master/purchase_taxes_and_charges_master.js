@@ -82,7 +82,7 @@ cur_frm.cscript.add_deduct_tax = function(doc, cdt, cdn) {
 		d.add_deduct_tax = '';
 	}
 	else if(d.category != 'Total' && d.add_deduct_tax == 'Deduct') {
-		msgprint(__("You cannot deduct when category is for 'Valuation' or 'Valuation and Total'"));
+		msgprint(__("Cannot deduct when category is for 'Valuation' or 'Valuation and Total'"));
 		d.add_deduct_tax = '';
 	}
 }
@@ -95,11 +95,11 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 		d.charge_type = '';
 	}
 	else if(d.idx == 1 && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')) {
-		msgprint(__("You cannot select Charge Type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
+		msgprint(__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
 		d.charge_type = '';
 	}
 	else if((d.category == 'Valuation' || d.category == 'Valuation and Total') && (d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total')) {
-		msgprint(__("You cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total"));
+		msgprint(__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total"));
 		d.charge_type = '';
 	}
 
@@ -116,16 +116,16 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 
 	if(!d.charge_type && d.row_id) {
-		msgprint(__("Please select Charge Type first"));
+		msgprint(__("Please select charge type first"));
 		d.row_id = '';
 	}
 	else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
-		msgprint(__("You can Enter Row only if your Charge Type is 'On Previous Row Amount' or ' Previous Row Total'"));
+		msgprint(__("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"));
 		d.row_id = '';
 	}
 	else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
 		if(d.row_id >= d.idx){
-			msgprint(__("You cannot Enter Row no. greater than or equal to current row no. for this Charge type"));
+			msgprint(__("Cannot refer row number greater than or equal to current row number for this Charge type"));
 			d.row_id = '';
 		}
 	}
@@ -171,7 +171,7 @@ cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 		d.tax_amount = '';
 	}
 	else if(d.charge_type && d.tax_amount) {
-		msgprint(__("You cannot directly enter Amount and if your Charge Type is Actual enter your amount in Rate"));
+		msgprint(__("Cannot directly set amount. For 'Actual' charge type, use the rate field"));
 		d.tax_amount = '';
 	}
 
