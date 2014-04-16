@@ -6,18 +6,7 @@ import frappe
 from frappe.utils import cint
 
 @frappe.whitelist()
-def get_feed(arg=None):
+def get_feed(limit_start, limit_page_length):
 	"""get feed"""
-	roles = frappe.get_roles()
-	return frappe.db.sql("""select
-		distinct t1.name, t1.feed_type, t1.doc_type, t1.doc_name, t1.subject, t1.owner,
-		t1.modified
-		from tabFeed t1, tabDocPerm t2
-		where t1.doc_type = t2.parent
-		and t2.role in (%s)
-		and t2.permlevel = 0
-		and ifnull(t2.`read`,0) = 1
-		order by t1.modified desc
-		limit %s, %s""" % (','.join(['%s']*len(roles)), '%s', '%s'),
-		tuple(roles + [cint(frappe.form_dict['limit_start']), cint(frappe.form_dict['limit_page_length'])]),
-		as_dict=1)
+	return frappe.get_list("Feed", fields=["name", "feed_type", "doc_type", "subject", "owner", "modified"],
+		limit_start = limit_start, limit_page_length = limit_page_length)
