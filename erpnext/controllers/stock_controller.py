@@ -74,14 +74,11 @@ class StockController(AccountsController):
 		return process_gl_map(gl_list)
 
 	def get_voucher_details(self, stock_ledger, default_expense_account, default_cost_center):
-		if not default_expense_account:
-			details = self.get(self.fname)
-		else:
-			details = [frappe._dict({
-				"name":d,
-				"expense_account": default_expense_account,
-				"cost_center": default_cost_center
-			}) for d in stock_ledger.keys()]
+		details = self.get(self.fname)
+		if default_expense_account:
+			for d in details:
+				d.expense_account = default_expense_account
+				d.cost_center = default_cost_center
 
 		return details
 
@@ -234,8 +231,8 @@ class StockController(AccountsController):
 		if not item.get("expense_account"):
 			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as there is difference in value").format(item.item_code))
 
-		if item.get("expense_account") and not item.cost_center:
-			frappe.throw(_("""Cost Center is mandatory for Item {0}""").format(item.item_code))
+		if item.get("expense_account") and not item.get("cost_center"):
+			frappe.throw(_("""Cost Center is mandatory for Item {0}""").format(item.get("item_code")))
 
 	def get_sl_entries(self, d, args):
 		sl_dict = {
