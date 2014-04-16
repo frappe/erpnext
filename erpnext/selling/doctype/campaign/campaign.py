@@ -7,4 +7,8 @@ import frappe
 from frappe.model.document import Document
 
 class Campaign(Document):
-	pass
+	def autoname(self):
+		if frappe.defaults.get_global_default('campaign_naming_by') == 'Campaign Name':
+			self.name = self.campaign_name
+		else:
+			self.name = make_autoname(self.naming_series+'.#####')
