@@ -62,7 +62,7 @@ var cfn_set_fields = function(doc, dt, dn) {
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
 			cur_frm.add_custom_button(__('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);
 			cur_frm.add_custom_button(__('Update Finished Goods'), cur_frm.cscript['Update Finished Goods']);
-		} 
+		}
 	}
 }
 
@@ -102,7 +102,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
-	}	
+	}
 }
 
 cur_frm.set_query("bom_no", function(doc) {

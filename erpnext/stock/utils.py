@@ -49,6 +49,7 @@ def get_bin(item_code, warehouse):
 		bin_obj.insert()
 	else:
 		bin_obj = frappe.get_doc('Bin', bin)
+	bin_obj.ignore_permissions = True
 	return bin_obj
 
 def update_bin(args):
@@ -82,6 +83,7 @@ def get_incoming_rate(args):
 				get_fifo_rate(previous_stock_queue, args.get("qty") or 0) or 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
+
 	return in_rate
 
 def get_avg_purchase_rate(serial_nos):
@@ -120,8 +122,9 @@ def get_fifo_rate(previous_stock_queue, qty):
 				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
 				batch[0] -= qty_to_pop
 				qty_to_pop = 0
+
 		# if queue gets blank and qty_to_pop remaining, get average rate of full queue
-		return outgoing_cost / abs(qty) - qty_to_pop
+		return outgoing_cost / (abs(qty) - qty_to_pop)
 
 def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	"""split serial nos, validate and return list of valid serial nos"""

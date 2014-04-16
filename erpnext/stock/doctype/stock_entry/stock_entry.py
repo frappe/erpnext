@@ -420,7 +420,7 @@ class StockEntry(StockController):
 						item["to_warehouse"] = ""
 
 				# add raw materials to Stock Entry Detail table
-				idx = self.add_to_stock_entry_detail(item_dict)
+				self.add_to_stock_entry_detail(item_dict)
 
 			# add finished good item to Stock Entry Detail table -- along with bom_no
 			if self.production_order and self.purpose == "Manufacture/Repack":
@@ -437,7 +437,7 @@ class StockEntry(StockController):
 						"expense_account": item.expense_account,
 						"cost_center": item.buying_cost_center,
 					}
-				}, bom_no=pro_obj.bom_no, idx=idx)
+				}, bom_no=pro_obj.bom_no)
 
 			elif self.purpose in ["Material Receipt", "Manufacture/Repack"]:
 				if self.purpose=="Material Receipt":
@@ -457,7 +457,7 @@ class StockEntry(StockController):
 						"expense_account": item[0].expense_account,
 						"cost_center": item[0].buying_cost_center,
 					}
-				}, bom_no=self.bom_no, idx=idx)
+				}, bom_no=self.bom_no)
 
 		self.get_stock_and_rate()
 
@@ -519,14 +519,12 @@ class StockEntry(StockController):
 
 		return issued_item_qty
 
-	def add_to_stock_entry_detail(self, item_dict, bom_no=None, idx=None):
-		if not idx:	idx = 1
+	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		expense_account, cost_center = frappe.db.get_values("Company", self.company, \
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:
-			se_child = self.append('mtn_details', {})
-			se_child.idx = idx
+			se_child = self.append('mtn_details')
 			se_child.s_warehouse = item_dict[d].get("from_warehouse", self.from_warehouse)
 			se_child.t_warehouse = item_dict[d].get("to_warehouse", self.to_warehouse)
 			se_child.item_code = cstr(d)
@@ -544,10 +542,6 @@ class StockEntry(StockController):
 
 			# to be assigned for finished item
 			se_child.bom_no = bom_no
-
-			# increment idx by 1
-			idx += 1
-		return idx
 
 	def validate_with_material_request(self):
 		for item in self.get("mtn_details"):

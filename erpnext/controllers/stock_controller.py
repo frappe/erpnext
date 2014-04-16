@@ -34,8 +34,7 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 
 		stock_ledger = self.get_stock_ledger_details()
-		voucher_details = self.get_voucher_details(stock_ledger, default_expense_account,
-			default_cost_center)
+		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center)
 
 		gl_list = []
 		warehouse_with_no_account = []
@@ -73,12 +72,15 @@ class StockController(AccountsController):
 
 		return process_gl_map(gl_list)
 
-	def get_voucher_details(self, stock_ledger, default_expense_account, default_cost_center):
+	def get_voucher_details(self, default_expense_account, default_cost_center):
 		details = self.get(self.fname)
-		if default_expense_account:
+
+		if default_expense_account or default_cost_center:
 			for d in details:
-				d.expense_account = default_expense_account
-				d.cost_center = default_cost_center
+				if default_expense_account and not d.get("expense_account"):
+					d.expense_account = default_expense_account
+				if default_cost_center and not d.get("cost_center"):
+					d.cost_center = default_cost_center
 
 		return details
 
