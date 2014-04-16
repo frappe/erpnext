@@ -189,7 +189,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	validate: function() {
-		this.calculate_taxes_and_totals();
+		this.calculate_taxes_and_totals(false);
 	},
 
 	company: function() {
@@ -299,7 +299,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	tax_rate: function(doc, cdt, cdn) {
+	// tax rate
+	rate: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
 
@@ -372,7 +373,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var on_previous_row_error = function(row_range) {
 			var msg = __("For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included",
 				[tax.idx, __(tax.doctype), tax.charge_type, row_range])
-
 			frappe.throw(msg);
 		};
 
@@ -680,14 +680,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		});
 	},
 
-	calculate_total_advance: function(parenttype, advance_parentfield) {
+	calculate_total_advance: function(parenttype, advance_parentfield, update_paid_amount) {
 		if(this.frm.doc.doctype == parenttype && this.frm.doc.docstatus < 2) {
 			var advance_doclist = this.frm.doc[advance_parentfield] || [];
 			this.frm.doc.total_advance = flt(frappe.utils.sum(
 				$.map(advance_doclist, function(adv) { return adv.allocated_amount })
 			), precision("total_advance"));
 
-			this.calculate_outstanding_amount();
+			this.calculate_outstanding_amount(update_paid_amount);
 		}
 	},
 

@@ -50,6 +50,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.set_aging_date()
+		frappe.get_doc("Account", self.credit_to).validate_due_date(self.posting_date, self.due_date)
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.update_valuation_rate("entries")

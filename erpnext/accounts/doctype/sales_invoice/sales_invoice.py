@@ -65,6 +65,7 @@ class SalesInvoice(SellingController):
 			self.is_opening = 'No'
 
 		self.set_aging_date()
+		frappe.get_doc("Account", self.debit_to).validate_due_date(self.posting_date, self.due_date)
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
@@ -463,6 +464,10 @@ class SalesInvoice(SellingController):
 				and 'No' or 'Yes'
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
+
+			if update_outstanding == "No":
+				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+				update_outstanding_amt(self.debit_to, self.doctype, self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):

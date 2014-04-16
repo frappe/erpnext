@@ -235,9 +235,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_taxes_and_totals: function() {
+	calculate_taxes_and_totals: function(update_paid_amount) {
 		this._super();
-		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
+		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details", update_paid_amount);
 		this.calculate_commission();
 		this.calculate_contribution();
 
@@ -398,7 +398,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		return grand_total_for_discount_amount;
 	},
 
-	calculate_outstanding_amount: function() {
+	calculate_outstanding_amount: function(update_paid_amount) {
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
@@ -408,7 +408,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount
 				- this.frm.doc.total_advance;
 			if(this.frm.doc.is_pos) {
-				if(!this.frm.doc.paid_amount) this.frm.doc.paid_amount = flt(total_amount_to_pay);
+				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
+					this.frm.doc.paid_amount = flt(total_amount_to_pay);
+				}
 			} else {
 				this.frm.doc.paid_amount = 0
 			}

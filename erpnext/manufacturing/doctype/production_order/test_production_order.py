@@ -49,7 +49,7 @@ class TestProductionOrder(unittest.TestCase):
 		return pro_doc.name
 
 	def test_over_production(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry import StockOverProductionError
+		from erpnext.manufacturing.doctype.production_order.production_order import StockOverProductionError
 		pro_order = self.test_planned_qty()
 
 		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")

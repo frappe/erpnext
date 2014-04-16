@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt, cstr, cint, getdate, add_days, formatdate
 from frappe import msgprint, throw, _
 from frappe.model.document import Document
 
@@ -150,6 +150,27 @@ class Account(Document):
 		if credit_limit > 0 and flt(total_outstanding) > credit_limit \
 				and not self.get_authorized_user():
 			throw(_("{0} Credit limit {0} crossed").format(_(credit_limit_from), credit_limit))
+
+	def validate_due_date(self, posting_date, due_date):
+		credit_days = (self.credit_days or frappe.db.get_value("Company", self.company, "credit_days"))
+		if credit_days is None:
+			return
+
+		posting_date, due_date = getdate(posting_date), getdate(due_date)
+		diff = (due_date - posting_date).days
+
+		if diff < 0:
+			frappe.throw(_("Due Date cannot be before Posting Date"))
+		elif diff > credit_days:
+			is_credit_controller = frappe.db.get_value("Accounts Settings", None,
+				"credit_controller") in frappe.user.get_roles()
+
+			if is_credit_controller:
+				msgprint(_("Note: Due Date exceeds the allowed credit days by {0} day(s)").format(
+					diff - credit_days))
+			else:
+				max_due_date = formatdate(add_days(posting_date, credit_days))
+				frappe.throw(_("Due Date cannot be after {0}").format(max_due_date))
 
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""

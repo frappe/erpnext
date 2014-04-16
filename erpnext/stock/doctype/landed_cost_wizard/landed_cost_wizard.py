@@ -58,13 +58,14 @@ class LandedCostWizard(Document):
 					ch.rate = amt
 					ch.tax_amount = amt
 					ch.docstatus = 1
-					ch.save(1)
+					ch.db_insert()
 				else:	# overwrite if exists
 					matched_row[0].rate = amt
 					matched_row[0].tax_amount = amt
 					matched_row[0].cost_center = lc.cost_center
 
 			pr_doc.run_method("validate")
+			pr_doc._validate_mandatory()
 			for d in pr_doc.get_all_children():
 				d.db_update()
 

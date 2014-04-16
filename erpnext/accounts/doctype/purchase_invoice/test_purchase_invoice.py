@@ -138,7 +138,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		wrapper.load_from_db()
 
 		expected_values = [
-			["_Test FG Item", 90, 7059],
+			["_Test FG Item", 90, 59],
 			["_Test Item Home Desktop 200", 135, 177]
 		]
 		for i, item in enumerate(wrapper.get("entries")):

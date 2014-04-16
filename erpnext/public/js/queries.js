@@ -24,8 +24,10 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.account_query" };
 	},
 
-	item: function() {
-		return { query: "erpnext.controllers.queries.item_query" };
+	item: function(filters) {
+		var args = { query: "erpnext.controllers.queries.item_query" };
+		if(filters) args["filters"] = filters;
+		return args;
 	},
 
 	bom: function() {
@@ -38,25 +40,25 @@ $.extend(erpnext.queries, {
 
 	customer_filter: function(doc) {
 		if(!doc.customer) {
-			frappe.throw(__("Please specify a") + " " + 
+			frappe.throw(__("Please specify a") + " " +
 				__(frappe.meta.get_label(doc.doctype, "customer", doc.name)));
 		}
-		
+
 		return { filters: { customer: doc.customer } };
 	},
 
 	supplier_filter: function(doc) {
 		if(!doc.supplier) {
-			frappe.throw(__("Please specify a") + " " + 
+			frappe.throw(__("Please specify a") + " " +
 				__(frappe.meta.get_label(doc.doctype, "supplier", doc.name)));
 		}
-		
+
 		return { filters: { supplier: doc.supplier } };
 	},
 
 	lead_filter: function(doc) {
 		if(!doc.lead) {
-			frappe.throw(__("Please specify a") + " " + 
+			frappe.throw(__("Please specify a") + " " +
 				__(frappe.meta.get_label(doc.doctype, "lead", doc.name)));
 		}
 

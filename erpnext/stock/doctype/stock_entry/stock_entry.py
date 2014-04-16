@@ -18,7 +18,6 @@ class NotUpdateStockError(frappe.ValidationError): pass
 class StockOverReturnError(frappe.ValidationError): pass
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
-class StockOverProductionError(frappe.ValidationError): pass
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -314,23 +313,10 @@ class StockEntry(StockController):
 		if self.production_order:
 			pro_doc = frappe.get_doc("Production Order", self.production_order)
 			_validate_production_order(pro_doc)
-			self.update_produced_qty(pro_doc)
+			pro_doc.run_method("update_status")
 			if self.purpose == "Manufacture/Repack":
+				pro_doc.run_method("update_produced_qty")
 				self.update_planned_qty(pro_doc)
-
-	def update_produced_qty(self, pro_doc):
-		if self.purpose == "Manufacture/Repack":
-			produced_qty = flt(pro_doc.produced_qty) + \
-				(self.docstatus==1 and 1 or -1 ) * flt(self.fg_completed_qty)
-
-			if produced_qty > flt(pro_doc.qty):
-				frappe.throw(_("Production Order") + ": " + self.production_order + "\n" +
-					_("Total Manufactured Qty can not be greater than Planned qty to manufacture")
-					+ "(%s/%s)" % (produced_qty, flt(pro_doc.qty)), StockOverProductionError)
-
-			status = 'Completed' if flt(produced_qty) >= flt(pro_doc.qty) else 'In Process'
-			frappe.db.sql("""update `tabProduction Order` set status=%s, produced_qty=%s
-				where name=%s""", (status, produced_qty, self.production_order))
 
 	def update_planned_qty(self, pro_doc):
 		from erpnext.stock.utils import update_bin

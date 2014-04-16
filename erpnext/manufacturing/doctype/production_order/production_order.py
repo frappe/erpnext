@@ -6,10 +6,10 @@ import frappe
 
 from frappe.utils import cstr, flt, nowdate
 from frappe import _
+from frappe.model.document import Document
 
 class OverProductionError(frappe.ValidationError): pass
-
-from frappe.model.document import Document
+class StockOverProductionError(frappe.ValidationError): pass
 
 class ProductionOrder(Document):
 
@@ -89,21 +89,41 @@ class ProductionOrder(Document):
 		frappe.msgprint(_("Production Order status is {0}").format(status))
 
 
-	def update_status(self, status):
-		if status == 'Stopped':
-			frappe.db.set(self, 'status', cstr(status))
-		else:
-			if flt(self.qty) == flt(self.produced_qty):
-				frappe.db.set(self, 'status', 'Completed')
-			if flt(self.qty) > flt(self.produced_qty):
-				frappe.db.set(self, 'status', 'In Process')
-			if flt(self.produced_qty) == 0:
-				frappe.db.set(self, 'status', 'Submitted')
+	def update_status(self, status=None):
+		if not status:
+			status = self.status
 
+		if status != 'Stopped':
+			stock_entries = frappe._dict(frappe.db.sql("""select purpose, sum(fg_completed_qty)
+				from `tabStock Entry` where production_order=%s and docstatus=1
+				group by purpose""", self.name))
+
+			status = "Submitted"
+			if stock_entries:
+				status = "In Process"
+				produced_qty = stock_entries.get("Manufacture/Repack")
+				if flt(produced_qty) == flt(self.qty):
+					status = "Completed"
+
+		if status != self.status:
+			self.db_set("status", status)
+
+	def update_produced_qty(self):
+		produced_qty = frappe.db.sql("""select sum(fg_completed_qty)
+			from `tabStock Entry` where production_order=%s and docstatus=1
+			and purpose='Manufacture/Repack'""", self.name)
+		produced_qty = flt(produced_qty[0][0]) if produced_qty else 0
+
+		if produced_qty > self.qty:
+			frappe.throw(_("Cannot manufacture more than the planned Quantity to Manufacture ({0}) in Production Order: {1}").format(self.qty, self.name), StockOverProductionError)
+
+		self.db_set("produced_qty", produced_qty)
 
 	def on_submit(self):
 		if not self.wip_warehouse:
-			frappe.throw(_("WIP Warehouse required before Submit"))
+			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
+		if not self.fg_warehouse:
+			frappe.throw(_("For Warehouse is required before Submit"))
 		frappe.db.set(self,'status', 'Submitted')
 		self.update_planned_qty(self.qty)
 

@@ -36,10 +36,11 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 				or employee_name like "%(txt)s")
 			%(mcond)s
 		order by
-			case when name like "%(txt)s" then 0 else 1 end,
-			case when employee_name like "%(txt)s" then 0 else 1 end,
-			name
+			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", employee_name), locate("%(_txt)s", item_name), 99999),
+			name, employee_name
 		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
 		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
 
  # searches for leads which are not converted
@@ -52,11 +53,12 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 				or company_name like "%(txt)s")
 			%(mcond)s
 		order by
-			case when name like "%(txt)s" then 0 else 1 end,
-			case when lead_name like "%(txt)s" then 0 else 1 end,
-			case when company_name like "%(txt)s" then 0 else 1 end,
-			lead_name asc
+			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", lead_name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", company_name), locate("%(_txt)s", name), 99999),
+			name, lead_name
 		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
 		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
 
  # searches for customer
@@ -76,11 +78,12 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 				or customer_name like "%(txt)s")
 			%(mcond)s
 		order by
-			case when name like "%(txt)s" then 0 else 1 end,
-			case when customer_name like "%(txt)s" then 0 else 1 end,
+			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", customer_name), locate("%(_txt)s", name), 99999),
 			name, customer_name
 		limit %(start)s, %(page_len)s""" % {'field': fields,'key': searchfield,
-		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype),
+		'txt': "%%%s%%" % txt, '_txt': txt.replace("%", ""),
+		'mcond':get_match_cond(doctype),
 		'start': start, 'page_len': page_len})
 
 # searches for supplier
@@ -98,11 +101,12 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 				or supplier_name like "%(txt)s")
 			%(mcond)s
 		order by
-			case when name like "%(txt)s" then 0 else 1 end,
-			case when supplier_name like "%(txt)s" then 0 else 1 end,
+			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", supplier_name), locate("%(_txt)s", name), 99999),
 			name, supplier_name
 		limit %(start)s, %(page_len)s """ % {'field': fields,'key': searchfield,
-		'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype), 'start': start,
+		'txt': "%%%s%%" % txt, '_txt': txt.replace("%", ""),
+		'mcond':get_match_cond(doctype), 'start': start,
 		'page_len': page_len})
 
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
@@ -141,12 +145,17 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			and (tabItem.`{key}` LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s)
 			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+			name, item_name
 		limit %(start)s, %(page_len)s """.format(key=searchfield,
 			fcond=get_filters_cond(doctype, filters, conditions),
 			mcond=get_match_cond(doctype)),
 			{
 				"today": nowdate(),
 				"txt": "%%%s%%" % txt,
+				"_txt": txt.replace("%", ""),
 				"start": start,
 				"page_len": page_len
 			})

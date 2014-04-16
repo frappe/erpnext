@@ -212,7 +212,7 @@ class JournalVoucher(AccountsController):
 			self.is_approving_authority = 0
 
 			# Fetch credit controller role
-			approving_authority = frappe.db.get_value("Global Defaults", None,
+			approving_authority = frappe.db.get_value("Accounts Settings", None,
 				"credit_controller")
 
 			# Check logged-in user is authorized
