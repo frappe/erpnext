@@ -94,7 +94,7 @@ class Warehouse(Document):
 
 		if merge:
 			if not frappe.db.exists("Warehouse", new_warehouse):
-				frappe.throw(_("Warehouse ") + new_warehouse +_(" does not exists"))
+				frappe.throw(_("Warehouse {0} does not exist").format(new_warehouse))
 
 			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
 				frappe.throw(_("Both Warehouse must belong to same Company"))

@@ -18,7 +18,7 @@ if(cur_frm.fields_dict['territory']) {
 	cur_frm.fields_dict['territory'].get_query = function(doc, dt, dn) {
 		return {
 			filters: {
-				'is_group': "No" 
+				'is_group': "No"
 			}
 		}
 	}
@@ -26,10 +26,10 @@ if(cur_frm.fields_dict['territory']) {
 
 cur_frm.cscript.render_contact_row = function(wrapper, data) {
 	// prepare data
-	data.fullname = (data.first_name || '') 
+	data.fullname = (data.first_name || '')
 		+ (data.last_name ? ' ' + data.last_name : '');
 	data.primary = data.is_primary_contact ? ' [Primary]' : '';
-	
+
 	// prepare description
 	var description = [];
 	$.each([
@@ -136,10 +136,7 @@ cur_frm.cscript.render_row_in_wrapper = function(wrapper, data, doctype) {
 
 cur_frm.cscript.delete_doc = function(doctype, name) {
 	// confirm deletion
-	var go_ahead = confirm(repl('Delete %(doctype)s "%(name)s"', {
-		doctype: doctype,
-		name: name
-	}));
+	var go_ahead = confirm(__("Delete {0} {1}?", [doctype, name]));
 	if (!go_ahead) return;
 
 	return frappe.call({

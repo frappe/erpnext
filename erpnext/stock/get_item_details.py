@@ -79,12 +79,12 @@ def get_item_details(args):
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
 		item_code = frappe.db.get_value("Item", {"barcode": barcode})
+		if not item_code:
+			frappe.throw(_("No Item with Barcode {0}").format(barcode))
 	elif serial_no:
 		item_code = frappe.db.get_value("Serial No", serial_no, "item_code")
-
-	if not item_code:
-		throw(_("No Item found with ") + _("Barcode") if barcode else _("Serial No") +
-			": %s" % (barcode or serial_no))
+		if not item_code:
+			frappe.throw(_("No Item with Serial No {0}").format(serial_no))
 
 	return item_code
 
@@ -99,22 +99,18 @@ def validate_item_details(args, item):
 		# validate if sales item or service item
 		if args.get("order_type") == "Maintenance":
 			if item.is_service_item != "Yes":
-				throw(_("Item") + (" %s: " % item.name) +
-					_("is not a service item.") +
-					_("Please select a service item or change the order type to Sales."))
+				throw(_("Item {0} must be a Service Item.").format(item.name))
 
 		elif item.is_sales_item != "Yes":
-			throw(_("Item") + (" %s: " % item.name) + _("is not a sales item"))
+			throw(_("Item {0} must be a Sales Item").format(item.name))
 
 	elif args.transaction_type == "buying":
 		# validate if purchase item or subcontracted item
 		if item.is_purchase_item != "Yes":
-			throw(_("Item") + (" %s: " % item.name) + _("is not a purchase item"))
+			throw(_("Item {0} must be a Purchase Item").format(item.name))
 
 		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != "Yes":
-			throw(_("Item") + (" %s: " % item.name) +
-				_("not a sub-contracted item.") +
-				_("Please select a sub-contracted item or do not sub-contract the transaction."))
+			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
 def get_basic_details(args, item_doc):
 	item = item_doc
@@ -180,7 +176,7 @@ def validate_price_list(args):
 	if args.get("price_list"):
 		if not frappe.db.get_value("Price List",
 			{"name": args.price_list, args.transaction_type: 1, "enabled": 1}):
-				throw(_("Price List is either disabled or for not ") + _(args.transaction_type))
+			throw(_("Price List {0} is disabled").format(args.price_list))
 	else:
 		throw(_("Price List not selected"))
 

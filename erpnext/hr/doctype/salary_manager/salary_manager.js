@@ -4,7 +4,7 @@
 var display_activity_log = function(msg) {
 	if(!pscript.ss_html)
 		pscript.ss_html = $a(cur_frm.fields_dict['activity_log'].wrapper,'div');
-	pscript.ss_html.innerHTML = 
+	pscript.ss_html.innerHTML =
 		'<div class="panel"><div class="panel-heading">'+__("Activity Log:")+'</div>'+msg+'</div>';
 }
 
@@ -19,7 +19,7 @@ cur_frm.cscript.create_salary_slip = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
-	var check = confirm(__("Do you really want to Submit all Salary Slip for month : ") + doc.month+ __(" and fiscal year : ")+doc.fiscal_year);
+	var check = confirm(__("Do you really want to Submit all Salary Slip for month {0} and year {1}", [doc.month, doc.fiscal_year]));
 	if(check){
 		var callback = function(r, rt){
 			if (r.message)
@@ -42,8 +42,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		var jv = frappe.model.make_new_doc_and_get_name('Journal Voucher');
 		jv = locals['Journal Voucher'][jv];
 		jv.voucher_type = 'Bank Voucher';
-		jv.user_remark = __('Payment of salary for the month: ') + doc.month + 
-			__(' and fiscal year: ') + doc.fiscal_year;
+		jv.user_remark = __('Payment of salary for the month {0} and year {1}', [doc.month, doc.fiscal_year]);
 		jv.fiscal_year = doc.fiscal_year;
 		jv.company = doc.company;
 		jv.posting_date = dateutil.obj_to_str(new Date());

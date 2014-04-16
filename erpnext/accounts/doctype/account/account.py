@@ -39,7 +39,7 @@ class Account(Document):
 			par = frappe.db.get_value("Account", self.parent_account,
 				["name", "group_or_ledger", "report_type"], as_dict=1)
 			if not par:
-				throw(_("Parent account does not exists"))
+				throw(_("Parent account does not exist"))
 			elif par["name"] == self.name:
 				throw(_("You can not assign itself as parent account"))
 			elif par["group_or_ledger"] != 'Group':
@@ -117,8 +117,7 @@ class Account(Document):
 
 	def validate_warehouse(self, warehouse):
 		if frappe.db.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
-			throw(_("Stock transactions exist against warehouse ") + warehouse +
-				_(" .You can not assign / modify / remove Master Name"))
+			throw(_("Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name'").format(warehouse))
 
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""
@@ -194,7 +193,7 @@ class Account(Document):
 		# Validate properties before merging
 		if merge:
 			if not frappe.db.exists("Account", new):
-				throw(_("Account ") + new +_(" does not exists"))
+				throw(_("Account {0} does not exist").format(new))
 
 			val = list(frappe.db.get_value("Account", new_account,
 				["group_or_ledger", "report_type", "company"]))

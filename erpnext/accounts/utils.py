@@ -225,7 +225,7 @@ def remove_against_link_from_jv(ref_type, ref_no, against_field):
 			and voucher_no != ifnull(against_voucher, '')""",
 			(now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Following Journal Vouchers Unlinked: {0}".format("\n".join(linked_jv))))
+		frappe.msgprint(_("Journal Vouchers {0} are un-linked".format("\n".join(linked_jv))))
 
 
 @frappe.whitelist()
@@ -233,9 +233,7 @@ def get_company_default(company, fieldname):
 	value = frappe.db.get_value("Company", company, fieldname)
 
 	if not value:
-		throw(_("Please mention default value for '") +
-			_(frappe.get_meta("Company").get_label(fieldname) +
-			_("' in Company: ") + company))
+		throw(_("Please set default value {0} in Company {0}").format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return value
 

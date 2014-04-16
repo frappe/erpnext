@@ -281,8 +281,7 @@ class SellingController(StockController):
 			discount = flt(frappe.db.get_value("Item", d.item_code, "max_discount"))
 
 			if discount and flt(d.discount_percentage) > discount:
-				frappe.throw(_("You cannot give more than ") + cstr(discount) + "% " +
-					_("discount on Item Code") + ": " + cstr(d.item_code))
+				frappe.throw(_("Maxiumm discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def get_item_list(self):
 		il = []
@@ -293,8 +292,7 @@ class SellingController(StockController):
 			if self.doctype == "Sales Order":
 				if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
-						frappe.throw(_("Please enter Reserved Warehouse for item ") +
-							d.item_code + _(" as it is stock Item or packing item"))
+						frappe.throw(_("Reserved Warehouse required for stock Item {0} in row {1}").format(d.item, d.idx))
 				reserved_warehouse = d.warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
@@ -373,7 +371,7 @@ def check_active_sales_items(obj):
 				is_service_item, income_account from tabItem where name = %s""",
 				d.item_code, as_dict=True)[0]
 			if item.is_sales_item == 'No' and item.is_service_item == 'No':
-				frappe.throw(_("Item is neither Sales nor Service Item") + ": " + d.item_code)
+				frappe.throw(_("Item {0} must be Sales or Service Item in {1}").format(d.item_code, d.idx))
 			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account",
 					d.income_account)

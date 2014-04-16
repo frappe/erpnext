@@ -7,7 +7,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		if(in_list(user_roles, "System Manager"))
 			cur_frm.add_custom_button("Replace Abbreviation", cur_frm.cscript.replace_abbr)
 	}
-		
+
 	if(!doc.__islocal) {
 		cur_frm.toggle_enable("default_currency", !cur_frm.doc.__transactions_exist);
 	}
@@ -60,42 +60,40 @@ cur_frm.cscript.has_special_chars = function(t) {
 }
 
 cur_frm.cscript.company_name = function(doc){
-  if(doc.company_name && cur_frm.cscript.has_special_chars(doc.company_name)){   
-    msgprint(("<font color=red>"+__("Special Characters")+" <b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b> "+
-    	__("are not allowed for ")+"</font>\n"+__("Company Name")+" <b> "+ doc.company_name +"</b>"))        
-    doc.company_name = '';
-    refresh_field('company_name');
-  }
+	if(doc.company_name && cur_frm.cscript.has_special_chars(doc.company_name)){
+		msgprint(__("Special Characters not allowed in Company Name"));
+		doc.company_name = '';
+		refresh_field('company_name');
+	}
 }
 
 cur_frm.cscript.abbr = function(doc){
-  if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){   
-    msgprint("<font color=red>"+__("Special Characters ")+"<b>! @ # $ % ^ * + = - [ ] ' ; , / { } | : < > ?</b>" +
-    	__("are not allowed for")+ "</font>\nAbbr <b>" + doc.abbr +"</b>")        
-    doc.abbr = '';
-    refresh_field('abbr');
-  }
+	if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){
+		msgprint(__("Special Characters not allowed in Abbreviation"));
+		doc.abbr = '';
+		refresh_field('abbr');
+	}
 }
 
-cur_frm.fields_dict.default_bank_account.get_query = function(doc) {    
+cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 	return{
 		filters: [
 			['Account', 'account_type', 'in', 'Bank, Cash'],
 			['Account', 'group_or_ledger', '=', 'Ledger'],
 			['Account', 'company', '=', doc.name]
 		]
-	}  
+	}
 }
 
 cur_frm.fields_dict.default_cash_account.get_query = cur_frm.fields_dict.default_bank_account.get_query;
 
-cur_frm.fields_dict.receivables_group.get_query = function(doc) {  
+cur_frm.fields_dict.receivables_group.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Group"
 		}
-	}  
+	}
 }
 
 cur_frm.get_field("chart_of_accounts").get_query = function(doc) {
@@ -109,33 +107,33 @@ cur_frm.get_field("chart_of_accounts").get_query = function(doc) {
 cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
 
 
-cur_frm.fields_dict.default_expense_account.get_query = function(doc) {    
+cur_frm.fields_dict.default_expense_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
 			"report_type": "Profit and Loss"
 		}
-	}  
+	}
 }
 
-cur_frm.fields_dict.default_income_account.get_query = function(doc) {    
+cur_frm.fields_dict.default_income_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
 			"report_type": "Profit and Loss"
 		}
-	}  
+	}
 }
 
-cur_frm.fields_dict.cost_center.get_query = function(doc) {    
+cur_frm.fields_dict.cost_center.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
 			'group_or_ledger': "Ledger",
 		}
-	}  
+	}
 }
 
 if (sys_defaults.auto_accounting_for_stock) {
@@ -149,7 +147,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		}
 	}
 
-	cur_frm.fields_dict["expenses_included_in_valuation"].get_query = 
+	cur_frm.fields_dict["expenses_included_in_valuation"].get_query =
 		cur_frm.fields_dict["stock_adjustment_account"].get_query;
 
 	cur_frm.fields_dict["stock_received_but_not_billed"].get_query = function(doc) {

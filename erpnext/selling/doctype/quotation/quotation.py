@@ -162,5 +162,4 @@ def _make_customer(source_name, ignore_permissions=False):
 					raise
 			except frappe.MandatoryError:
 				from frappe.utils import get_url_to_form
-				frappe.throw(_("Before proceeding, please create Customer from Lead") + \
-					(" - %s" % get_url_to_form("Lead", lead_name)))
+				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))

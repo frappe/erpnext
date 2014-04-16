@@ -180,7 +180,7 @@ class BOM(Document):
 		""" Validate main FG item"""
 		item = self.get_item_det(self.item)
 		if not item:
-			frappe.throw(_("Item {0} does not exists in the system or has expired").format(self.item))
+			frappe.throw(_("Item {0} does not exist in the system or has expired").format(self.item))
 		elif item[0]['is_manufactured_item'] != 'Yes' \
 				and item[0]['is_sub_contracted_item'] != 'Yes':
 			frappe.throw(_("Item {0} must be manufactured or sub-contracted").format(self.item))

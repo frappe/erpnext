@@ -176,14 +176,14 @@ class MaintenanceSchedule(TransactionBase):
 			if not d.item_code:
 				throw(_("Please select item code"))
 			elif not d.start_date or not d.end_date:
-				throw(_("Please select Start Date and End Date for item") + " " + d.item_code)
+				throw(_("Please select Start Date and End Date for Item {0}".format(d.item_code)))
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
 			elif not d.sales_person:
 				throw(_("Please select Incharge Person's name"))
 
 			if getdate(d.start_date) >= getdate(d.end_date):
-				throw(_("Start date should be less than end date for item") + " " + d.item_code)
+				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
 	def validate_sales_order(self):
 		for d in self.get('item_maintenance_detail'):
@@ -238,8 +238,7 @@ class MaintenanceSchedule(TransactionBase):
 		else:
 			for x in item_lst1:
 				if x not in item_lst2:
-					throw(_("Maintenance Schedule is not generated for item ") + x +
-						_(". Please click on 'Generate Schedule'"))
+					throw(_("Please click on 'Generate Schedule'"))
 
 	def check_serial_no_added(self):
 		serial_present =[]

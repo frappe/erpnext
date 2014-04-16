@@ -27,7 +27,7 @@ class LandedCostWizard(Document):
 	def validate_purchase_receipts(self, purchase_receipts):
 		for pr in purchase_receipts:
 			if frappe.db.get_value("Purchase Receipt", pr, "docstatus") != 1:
-				frappe.throw(_("Purchase Receipt") + ": " + pr + _(" is not submitted document"))
+				frappe.throw(_("Purchase Receipt {0} is not submitted").format(pr))
 
 	def add_charges_in_pr(self, purchase_receipts):
 		""" Add additional charges in selected pr proportionately"""

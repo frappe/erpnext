@@ -120,17 +120,16 @@ class JournalVoucher(AccountsController):
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
-				r.append('%s %s against Invoice: %s' %
-					(cstr(currency), fmt_money(flt(d.credit)), d.against_invoice))
+				r.append(_("{0} {1} against Invoice {1}").format(currency, fmt_money(flt(d.credit)), d.against_invoice))
 
 			if d.against_voucher and d.debit:
 				bill_no = frappe.db.sql("""select bill_no, bill_date, currency
 					from `tabPurchase Invoice` where name=%s""", d.against_voucher)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
-					r.append('%s %s against Bill %s dated %s' %
-						(cstr(bill_no[0][2]), fmt_money(flt(d.debit)), bill_no[0][0],
-						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d')) or ''))
+					r.append(_('{0} {1} against Bill {2} dated {3}').format(bill_no[0][2],
+						fmt_money(flt(d.debit)), bill_no[0][0],
+						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d'))))
 
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))

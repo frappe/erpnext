@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, nowdate
+from frappe.utils import flt, nowdate
 from frappe import _
 from frappe.model.document import Document
 
@@ -75,11 +75,8 @@ class ProductionOrder(Document):
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 
 		if total_qty > so_qty:
-			frappe.throw(_("Total production order qty for item") + ": " +
-				cstr(self.production_item) + _(" against sales order") + ": " +
-				cstr(self.sales_order) + _(" will be ") + cstr(total_qty) + ", " +
-				_("which is greater than sales order qty ") + "(" + cstr(so_qty) + ")" +
-				_("Please reduce qty."), exc=OverProductionError)
+			frappe.throw(_("Cannot produce more Item {0} than Sales Order quantity {1}").format(self.production_item,
+				so_qty), OverProductionError)
 
 	def stop_unstop(self, status):
 		""" Called from client side on Stop/Unstop event"""
@@ -115,7 +112,7 @@ class ProductionOrder(Document):
 		produced_qty = flt(produced_qty[0][0]) if produced_qty else 0
 
 		if produced_qty > self.qty:
-			frappe.throw(_("Cannot manufacture more than the planned Quantity to Manufacture ({0}) in Production Order: {1}").format(self.qty, self.name), StockOverProductionError)
+			frappe.throw(_("Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2}").format(produced_qty, self.qty, self.name, StockOverProductionError))
 
 		self.db_set("produced_qty", produced_qty)
 
@@ -167,7 +164,7 @@ def get_item_details(item):
 	return res
 
 @frappe.whitelist()
-def make_stock_entry(production_order_id, purpose):
+def make_stock_entry(production_order_id, purpose, qty=None):
 	production_order = frappe.get_doc("Production Order", production_order_id)
 
 	stock_entry = frappe.new_doc("Stock Entry")
@@ -176,7 +173,7 @@ def make_stock_entry(production_order_id, purpose):
 	stock_entry.company = production_order.company
 	stock_entry.bom_no = production_order.bom_no
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
-	stock_entry.fg_completed_qty = flt(production_order.qty) - flt(production_order.produced_qty)
+	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
 
 	if purpose=="Material Transfer":
 		stock_entry.to_warehouse = production_order.wip_warehouse

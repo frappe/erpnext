@@ -67,7 +67,7 @@ class SerialNo(StockController):
 		"""
 		item = frappe.get_doc("Item", self.item_code)
 		if item.has_serial_no!="Yes":
-			frappe.throw(_("Item must have 'Has Serial No' as 'Yes'") + ": " + self.item_code)
+			frappe.throw(_("Item {0} is not setup for Serial Nos. Check Item master").format(self.item_code))
 
 		self.item_group = item.item_group
 		self.description = item.description
@@ -163,9 +163,9 @@ class SerialNo(StockController):
 
 	def on_trash(self):
 		if self.status == 'Delivered':
-			frappe.throw(_("Delivered Serial No ") + self.name + _(" can not be deleted"))
+			frappe.throw(_("Delivered Serial No {0} cannot be deleted").format(self.name))
 		if self.warehouse:
-			frappe.throw(_("Cannot delete Serial No in warehouse. First remove from warehouse, then delete.") + ": " + self.name)
+			frappe.throw(_("Cannot delete Serial No {0} in stock. First remove from stock, then delete.").format(self.name))
 
 	def before_rename(self, old, new, merge=False):
 		if merge:
@@ -203,51 +203,49 @@ def process_serial_no(sle):
 def validate_serial_no(sle, item_det):
 	if item_det.has_serial_no=="No":
 		if sle.serial_no:
-			frappe.throw(_("Serial Number should be blank for Non Serialized Item" + ": "
-				+ sle.item_code), SerialNoNotRequiredError)
+			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
+				SerialNoNotRequiredError)
 	else:
 		if sle.serial_no:
 			serial_nos = get_serial_nos(sle.serial_no)
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
-				frappe.throw(_("Serial No qty cannot be a fraction") + \
-					(": %s (%s)" % (sle.item_code, sle.actual_qty)))
+				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
+
 			if len(serial_nos) and len(serial_nos) != abs(cint(sle.actual_qty)):
-				frappe.throw(_("Serial Nos do not match with qty") + \
-					(": %s (%s)" % (sle.item_code, sle.actual_qty)), SerialNoQtyError)
+				frappe.throw(_("{0} Serial Numbers required for Item {0}. Only {0} provided.").format(sle.actual_qty, sle.item_code, len(serial_nos)),
+					SerialNoQtyError)
 
 			if len(serial_nos) != len(set(serial_nos)):
-				frappe.throw(_("Duplicate Serial No entered against item") +
-					(": %s" % sle.item_code), SerialNoDuplicateError)
+				frappe.throw(_("Duplicate Serial No entered for Item {0}").format(sle.item_code), SerialNoDuplicateError)
 
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.get_doc("Serial No", serial_no)
 
 					if sr.item_code!=sle.item_code:
-						frappe.throw(_("Serial No does not belong to Item") +
-							(": %s (%s)" % (sle.item_code, serial_no)), SerialNoItemError)
+						frappe.throw(_("Serial No {0} does not belong to Item {1}").format(sle.item_code,
+							serial_no), SerialNoItemError)
 
 					if sr.warehouse and sle.actual_qty > 0:
-						frappe.throw(_("Same Serial No") + ": " + sr.name +
-							_(" can not be received twice"), SerialNoDuplicateError)
+						frappe.throw(_("Serial No {0} has already been received").format(sr.name),
+							SerialNoDuplicateError)
 
 					if sle.actual_qty < 0:
 						if sr.warehouse!=sle.warehouse:
-							frappe.throw(_("Serial No") + ": " + serial_no +
-								_(" does not belong to Warehouse") + ": " + sle.warehouse,
-								SerialNoWarehouseError)
+							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
+								sle.warehouse), SerialNoWarehouseError)
 
 						if sle.voucher_type in ("Delivery Note", "Sales Invoice") \
 							and sr.status != "Available":
-							frappe.throw(_("Serial No status must be 'Available' to Deliver")
-								+ ": " + serial_no, SerialNoStatusError)
+							frappe.throw(_("Serial No {0} status must be 'Available' to Deliver").format(serial_no),
+								SerialNoStatusError)
+
 				elif sle.actual_qty < 0:
 					# transfer out
-					frappe.throw(_("Serial No must exist to transfer out.") + \
-						": " + serial_no, SerialNoNotExistsError)
+					frappe.throw(_("Serial No {0} not in stock").format(serial_no), SerialNoNotExistsError)
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
-			frappe.throw(_("Serial Number Required for Serialized Item" + ": "
-				+ sle.item_code), SerialNoRequiredError)
+			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
+				SerialNoRequiredError)
 
 def update_serial_nos(sle, item_det):
 	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:

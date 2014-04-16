@@ -85,8 +85,7 @@ def make_entry(args, adv_adj, update_outstanding):
 
 def validate_total_debit_credit(total_debit, total_credit):
 	if abs(total_debit - total_credit) > 0.005:
-		frappe.throw(_("Debit and Credit not equal for this voucher: Diff (Debit) is ") +
-		 	cstr(total_debit - total_credit))
+		frappe.throw(_("Debit and Credit not equal for this voucher. Difference is {0}.").format(total_debit - total_credit))
 
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Voucher":
@@ -95,9 +94,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 
 		for entry in gl_map:
 			if entry.account in aii_accounts:
-				frappe.throw(_("Account") + ": " + entry.account +
-					_(" can only be debited/credited through Stock transactions"),
-					StockAccountInvalidTransaction)
+				frappe.throw(_("Account {0} can only be updated via Stock Transactions"), StockAccountInvalidTransaction)
 
 
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
@@ -121,5 +118,5 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_expense_against_budget(entry)
 
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
-				update_outstanding_amt(entry["account"], entry.get("against_voucher_type"),
-					entry.get("against_voucher"), on_cancel=True)
+			update_outstanding_amt(entry["account"], entry.get("against_voucher_type"),
+				entry.get("against_voucher"), on_cancel=True)

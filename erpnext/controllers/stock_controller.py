@@ -45,6 +45,8 @@ class StockController(AccountsController):
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
+						self.check_expense_account(detail)
+
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse],
 							"against": detail.expense_account,
@@ -73,8 +75,6 @@ class StockController(AccountsController):
 	def get_voucher_details(self, stock_ledger, default_expense_account, default_cost_center):
 		if not default_expense_account:
 			details = self.get(self.fname)
-			for d in details:
-				self.check_expense_account(d)
 		else:
 			details = [frappe._dict({
 				"name":d,
@@ -231,10 +231,10 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if item.meta.get_field("expense_account") and not item.expense_account:
-			frappe.throw(_("Expense or Difference account is mandatory for Item {0}").format(item.item_code))
+			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as there is difference in value").format(item.item_code))
 
-		if item.meta.get_field("expense_account") and not item.cost_center:
-			frappe.throw(_("""Cost Center is mandatory for item {0}""").format(item.item_code))
+		if getattr(item, "expense_account", None) and not item.cost_center:
+			frappe.throw(_("""Cost Center is mandatory for Item {0}""").format(item.item_code))
 
 	def get_sl_entries(self, d, args):
 		sl_dict = {

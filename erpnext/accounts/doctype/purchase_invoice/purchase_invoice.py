@@ -95,7 +95,7 @@ class PurchaseInvoice(BuyingController):
 
 			if not self.remarks and self.bill_date:
 				self.remarks = (self.remarks or '') + "\n" \
-					+ _("Against Bill %s dated %s").format(self.bill_no, formatdate(self.bill_date))
+					+ _("Against Bill {0} dated {1}").format(self.bill_no, formatdate(self.bill_date))
 
 		if not self.remarks:
 			self.remarks = "No Remarks"

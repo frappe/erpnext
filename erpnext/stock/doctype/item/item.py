@@ -218,7 +218,7 @@ class Item(WebsiteGenerator):
 		if merge:
 			# Validate properties before merging
 			if not frappe.db.exists("Item", newdn):
-				frappe.throw(_("Item ") + newdn +_(" does not exists"))
+				frappe.throw(_("Item {0} does not exist").format(newdn))
 
 			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
 			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]

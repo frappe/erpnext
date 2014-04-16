@@ -10,22 +10,22 @@ frappe.provide("erpnext.stock");
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
-		
+
 		this.frm.fields_dict.delivery_note_no.get_query = function() {
 			return { query: "erpnext.stock.doctype.stock_entry.stock_entry.query_sales_return_doc" };
 		};
-		
-		this.frm.fields_dict.sales_invoice_no.get_query = 
+
+		this.frm.fields_dict.sales_invoice_no.get_query =
 			this.frm.fields_dict.delivery_note_no.get_query;
-		
+
 		this.frm.fields_dict.purchase_receipt_no.get_query = function() {
-			return { 
+			return {
 				filters:{ 'docstatus': 1 }
 			};
 		};
-		
+
 		this.frm.fields_dict.mtn_details.grid.get_field('item_code').get_query = function() {
-			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) && 
+			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) &&
 				me.get_doctype_docname()) {
 					return {
 						query: "erpnext.stock.doctype.stock_entry.stock_entry.query_return_item",
@@ -40,13 +40,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				return erpnext.queries.item({is_stock_item: "Yes"});
 			}
 		};
-		
+
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-			this.frm.fields_dict.mtn_details.grid.get_field('expense_account').get_query = 
+			this.frm.fields_dict.mtn_details.grid.get_field('expense_account').get_query =
 					function() {
 				return {
-					filters: { 
+					filters: {
 						"company": me.frm.doc.company,
 						"group_or_ledger": "Ledger"
 					}
@@ -66,8 +66,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
 		this.show_general_ledger();
-		
-		if(this.frm.doc.docstatus === 1 && 
+
+		if(this.frm.doc.docstatus === 1 &&
 				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
 				this.frm.add_custom_button(__("Make Credit Note"), function() { me.make_return_jv(); });
@@ -77,7 +77,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				this.add_excise_button();
 			}
 		}
-		
+
 	},
 
 	on_submit: function() {
@@ -90,22 +90,22 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	set_default_account: function() {
 		var me = this;
-		
+
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			var account_for = "stock_adjustment_account";
 
-			if (this.frm.doc.purpose == "Purchase Return") 
+			if (this.frm.doc.purpose == "Purchase Return")
 				account_for = "stock_received_but_not_billed";
-			
+
 			return this.frm.call({
 				method: "erpnext.accounts.utils.get_company_default",
 				args: {
-					"fieldname": account_for, 
+					"fieldname": account_for,
 					"company": this.frm.doc.company
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						$.each(doc.mtn_details || [], function(i, d) {
+						$.each(me.frm.doc.mtn_details || [], function(i, d) {
 							if(!d.expense_account) d.expense_account = r.message;
 						});
 					}
@@ -116,9 +116,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	clean_up: function() {
 		// Clear Production Order record from locals, because it is updated via Stock Entry
-		if(this.frm.doc.production_order && 
+		if(this.frm.doc.production_order &&
 				this.frm.doc.purpose == "Manufacture/Repack") {
-			frappe.model.remove_from_locals("Production Order", 
+			frappe.model.remove_from_locals("Production Order",
 				this.frm.doc.production_order);
 		}
 	},
@@ -145,7 +145,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	production_order: function() {
 		var me = this;
 		this.toggle_enable_bom();
-		
+
 		return this.frm.call({
 			method: "get_production_order_details",
 			args: {production_order: this.frm.doc.production_order},
@@ -167,26 +167,26 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			if(this.frm.doc.delivery_note_no && this.frm.doc.sales_invoice_no) {
 				// both specified
 				msgprint(__("You can not enter both Delivery Note No and Sales Invoice No. Please enter any one."));
-				
+
 			} else if(!(this.frm.doc.delivery_note_no || this.frm.doc.sales_invoice_no)) {
 				// none specified
 				msgprint(__("Please enter Delivery Note No or Sales Invoice No to proceed"));
-				
+
 			} else if(this.frm.doc.delivery_note_no) {
 				return {doctype: "Delivery Note", docname: this.frm.doc.delivery_note_no};
-				
+
 			} else if(this.frm.doc.sales_invoice_no) {
 				return {doctype: "Sales Invoice", docname: this.frm.doc.sales_invoice_no};
-				
+
 			}
 		} else if(this.frm.doc.purpose === "Purchase Return") {
 			if(this.frm.doc.purchase_receipt_no) {
 				return {doctype: "Purchase Receipt", docname: this.frm.doc.purchase_receipt_no};
-				
+
 			} else {
 				// not specified
 				msgprint(__("Please enter Purchase Receipt No to proceed"));
-				
+
 			}
 		}
 	},
@@ -226,9 +226,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	mtn_details_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("mtn_details", row, 
+		this.frm.script_manager.copy_from_first_row("mtn_details", row,
 			["expense_account", "cost_center"]);
-		
+
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
@@ -236,49 +236,49 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	mtn_details_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	},
-	
+
 	customer: function() {
 		return this.frm.call({
 			method: "erpnext.accounts.party.get_party_details",
 			args: { party: this.frm.doc.customer, party_type:"Customer" }
 		});
 	},
-	
+
 	supplier: function() {
 		return this.frm.call({
 			method: "erpnext.accounts.party.get_party_details",
 			args: { party: this.frm.doc.supplier, party_type:"Supplier" }
 		});
 	},
-	
+
 	delivery_note_no: function() {
 		this.get_party_details({
 			ref_dt: "Delivery Note",
 			ref_dn: this.frm.doc.delivery_note_no
 		})
 	},
-	
+
 	sales_invoice_no: function() {
 		this.get_party_details({
 			ref_dt: "Sales Invoice",
 			ref_dn: this.frm.doc.sales_invoice_no
 		})
 	},
-	
+
 	purchase_receipt_no: function() {
 		this.get_party_details({
 			ref_dt: "Purchase Receipt",
 			ref_dn: this.frm.doc.purchase_receipt_no
 		})
 	},
-	
+
 	get_party_details: function(args) {
 		return this.frm.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_party_details",
 			args: args,
 		})
 	}
-	
+
 });
 
 cur_frm.script_manager.make(erpnext.stock.StockEntry);
@@ -286,23 +286,23 @@ cur_frm.script_manager.make(erpnext.stock.StockEntry);
 cur_frm.cscript.toggle_related_fields = function(doc) {
 	disable_from_warehouse = inList(["Material Receipt", "Sales Return"], doc.purpose);
 	disable_to_warehouse = inList(["Material Issue", "Purchase Return"], doc.purpose);
-	
+
 	cur_frm.toggle_enable("from_warehouse", !disable_from_warehouse);
 	cur_frm.toggle_enable("to_warehouse", !disable_to_warehouse);
-		
+
 	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("s_warehouse", !disable_from_warehouse);
 	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
-		
+
 	if(doc.purpose == 'Purchase Return') {
-		doc.customer = doc.customer_name = doc.customer_address = 
+		doc.customer = doc.customer_name = doc.customer_address =
 			doc.delivery_note_no = doc.sales_invoice_no = null;
 		doc.bom_no = doc.production_order = doc.fg_completed_qty = null;
 	} else if(doc.purpose == 'Sales Return') {
 		doc.supplier=doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no=null;
 		doc.bom_no = doc.production_order = doc.fg_completed_qty = null;
 	} else {
-		doc.customer = doc.customer_name = doc.customer_address = 
-			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier = 
+		doc.customer = doc.customer_name = doc.customer_address =
+			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
 			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 	}
 }
@@ -331,7 +331,7 @@ cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = functi
 				's_warehouse': d.s_warehouse,
 				'posting_date': doc.posting_date
 			}
-		}			
+		}
 	} else {
 		msgprint(__("Please enter Item Code to get batch no"));
 	}
@@ -350,10 +350,10 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			'cost_center'		: d.cost_center,
 			'company'		: cur_frm.doc.company
 		};
-		return get_server_fields('get_item_details', {arg: JSON.stringify(args)}, 
+		return get_server_fields('get_item_details', {arg: JSON.stringify(args)},
 			'mtn_details', doc, cdt, cdn, 1);
 	}
-	
+
 }
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
@@ -366,7 +366,7 @@ cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
 		'bom_no'		: d.bom_no,
 		'qty'			: d.s_warehouse ? -1* d.qty : d.qty
 	}
-	return get_server_fields('get_warehouse_details', JSON.stringify(args), 
+	return get_server_fields('get_warehouse_details', JSON.stringify(args),
 		'mtn_details', doc, cdt, cdn, 1);
 }
 
@@ -376,7 +376,7 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.uom && d.item_code){
 		var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
-		return get_server_fields('get_uom_details', JSON.stringify(arg), 
+		return get_server_fields('get_uom_details', JSON.stringify(arg),
 			'mtn_details', doc, cdt, cdn, 1);
 	}
 }

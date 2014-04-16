@@ -72,7 +72,15 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		for item in self.get("mtn_details"):
 			if item.item_code not in stock_items:
-				frappe.throw(_("""Only Stock Items are allowed for Stock Entry"""))
+				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
+			if not item.stock_uom:
+				item.stock_uom = frappe.db.get_value("Item", item.item_code, "stock_uom")
+			if not item.uom:
+				item.uom = item.stock_uom
+			if not item.conversion_factor:
+				item.conversion_factor = 1
+			if not item.transfer_qty:
+				item.transfer_qty = item.qty * item.conversion_factor
 
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
@@ -224,7 +232,7 @@ class StockEntry(StockController):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		for d in self.get('mtn_details'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
-				frappe.throw(_("Quantity in row {0} must be same as manufactured quantity").format(d.idx))
+				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}").format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""

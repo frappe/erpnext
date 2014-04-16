@@ -11,13 +11,13 @@ $.extend(erpnext, {
 		else
 			return frappe.boot.sysdefaults.currency;
 	},
-	
+
 	hide_naming_series: function() {
-		if(cur_frm.fields_dict.naming_series && !frappe.meta.get_docfield(cur_frm.doctype, "naming_series")) {
+		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
 		}
 	},
-	
+
 	hide_company: function() {
 		if(cur_frm.fields_dict.company) {
 			var companies = Object.keys(locals[":Company"] || {});
@@ -27,28 +27,28 @@ $.extend(erpnext, {
 			}
 		}
 	},
-	
+
 	add_applicable_territory: function() {
 		if(cur_frm.doc.__islocal && (cur_frm.doc.valid_for_territories || []).length===0) {
 				var default_territory = frappe.defaults.get_user_default("territory");
 				if(default_territory) {
-					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory", 
+					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory",
 						"valid_for_territories");
 					territory.territory = default_territory;
 				}
-				
+
 		}
 	},
-	
+
 	setup_serial_no: function(grid_row) {
-		if(!grid_row.fields_dict.serial_no || 
+		if(!grid_row.fields_dict.serial_no ||
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
-		
+
 		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
 			.appendTo($("<div>")
 				.css({"margin-bottom": "10px", "margin-left": "15px"})
 				.appendTo(grid_row.fields_dict.serial_no.$wrapper));
-				
+
 		$btn.on("click", function() {
 			var d = new frappe.ui.Dialog({
 				title: __("Add Serial No"),
@@ -68,7 +68,7 @@ $.extend(erpnext, {
 					}
 				]
 			});
-			
+
 			d.get_input("add").on("click", function() {
 				var serial_no = d.get_value("serial_no");
 				if(serial_no) {
@@ -78,7 +78,7 @@ $.extend(erpnext, {
 				d.hide();
 				return false;
 			});
-			
+
 			d.show();
 		});
 	}

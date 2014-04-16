@@ -6,10 +6,6 @@ import frappe
 
 from frappe.utils import cint, cstr, flt, nowdate, comma_and
 from frappe import msgprint, _
-
-
-
-
 from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
@@ -33,7 +29,7 @@ class LeaveControlPanel(Document):
 	def validate_values(self):
 		for f in ["fiscal_year", "leave_type", "no_of_days"]:
 			if not self.get(f):
-				frappe.throw(_(self.meta.get_label(f)) + _(" is mandatory"))
+				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
 
 	def allocate_leave(self):
 		self.validate_values()

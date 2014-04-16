@@ -33,7 +33,7 @@ class GLEntry(Document):
 		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(k))
+				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
 
 		# Zero value transaction is not allowed
 		if not (flt(self.debit) or flt(self.credit)):

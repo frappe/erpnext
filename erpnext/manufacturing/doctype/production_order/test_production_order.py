@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import cstr, getdate
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry
 
@@ -13,56 +12,69 @@ from erpnext.manufacturing.doctype.production_order.production_order import make
 class TestProductionOrder(unittest.TestCase):
 	def test_planned_qty(self):
 		set_perpetual_inventory(0)
-		frappe.db.sql("delete from `tabStock Ledger Entry`")
-		frappe.db.sql("""delete from `tabBin`""")
-		frappe.db.sql("""delete from `tabGL Entry`""")
-
 		pro_doc = frappe.copy_doc(test_records[0])
 		pro_doc.insert()
 		pro_doc.submit()
 
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import test_records as se_test_records
-		mr1 = frappe.copy_doc(se_test_records[0])
-		mr1.insert()
-		mr1.submit()
+		# add raw materials to stores
+		s = frappe.new_doc("Stock Entry")
+		s.purpose = "Material Receipt"
+		s.company = "_Test Company"
+		s.append("mtn_details", {
+			"item_code": "_Test Item",
+			"t_warehouse": "Stores - _TC",
+			"qty": 100,
+			"incoming_rate": 5000
+		})
+		s.insert()
+		s.submit()
 
-		mr2 = frappe.copy_doc(se_test_records[0])
-		mr2.get("mtn_details")[0].item_code = "_Test Item Home Desktop 100"
-		mr2.insert()
-		mr2.submit()
+		# add raw materials to stores
+		s = frappe.new_doc("Stock Entry")
+		s.purpose = "Material Receipt"
+		s.company = "_Test Company"
+		s.append("mtn_details", {
+			"item_code": "_Test Item Home Desktop 100",
+			"t_warehouse": "Stores - _TC",
+			"qty": 100,
+			"incoming_rate": 1000
+		})
+		s.insert()
+		s.submit()
 
-		stock_entry = make_stock_entry(pro_doc.name, "Manufacture/Repack")
-		stock_entry = frappe.get_doc(stock_entry)
-		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.fg_completed_qty = 4
-		stock_entry.posting_date = "2013-05-12"
-		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.set("mtn_details", [])
-		stock_entry.run_method("get_items")
-		stock_entry.submit()
+		# from stores to wip
+		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Material Transfer", 4))
+		for d in s.get("mtn_details"):
+			d.s_warehouse = "Stores - _TC"
+		s.insert()
+		s.submit()
+
+		# from wip to fg
+		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture/Repack", 4))
+		s.insert()
+		s.submit()
 
 		self.assertEqual(frappe.db.get_value("Production Order", pro_doc.name,
 			"produced_qty"), 4)
 		self.assertEqual(frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"), 6)
 
-		return pro_doc.name
+		return pro_doc
 
 	def test_over_production(self):
 		from erpnext.manufacturing.doctype.production_order.production_order import StockOverProductionError
-		pro_order = self.test_planned_qty()
+		pro_doc = self.test_planned_qty()
 
-		stock_entry = make_stock_entry(pro_order, "Manufacture/Repack")
-		stock_entry = frappe.get_doc(stock_entry)
-		stock_entry.posting_date = "2013-05-12"
-		stock_entry.fiscal_year = "_Test Fiscal Year 2013"
-		stock_entry.fg_completed_qty = 15
-		stock_entry.set("mtn_details", [])
-		stock_entry.run_method("get_items")
-		stock_entry.insert()
+		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Material Transfer", 7))
+		for d in s.get("mtn_details"):
+			d.s_warehouse = "Stores - _TC"
+		s.insert()
+		s.submit()
 
-		self.assertRaises(StockOverProductionError, stock_entry.submit)
+		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture/Repack", 7))
+		s.insert()
 
+		self.assertRaises(StockOverProductionError, s.submit)
 
 
 test_records = frappe.get_test_records('Production Order')

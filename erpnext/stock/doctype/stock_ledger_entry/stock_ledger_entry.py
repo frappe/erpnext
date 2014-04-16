@@ -47,7 +47,7 @@ class StockLedgerEntry(DocListController):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(k))
+				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
 
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, has_batch_no, docstatus,

@@ -9,16 +9,15 @@ from frappe import throw, _
 from frappe.model.controller import DocListController
 
 class PricingRule(DocListController):
-
 	def validate(self):
 		self.validate_mandatory()
 		self.cleanup_fields_value()
 
 	def validate_mandatory(self):
 		for field in ["apply_on", "applicable_for", "price_or_discount"]:
-			val = self.get("applicable_for")
-			if val and not self.get(frappe.scrub(val)):
-				throw(_("{0} is required").format(val), frappe.MandatoryError)
+			tocheck = frappe.scrub(self.get(field) or "")
+			if tocheck and not self.get(tocheck):
+				throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
 
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "price_or_discount"]:

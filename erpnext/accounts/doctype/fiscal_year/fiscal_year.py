@@ -41,4 +41,4 @@ class FiscalYear(Document):
 		for fiscal_year, ysd, yed in year_start_end_dates:
 			if (getdate(self.year_start_date) == ysd and getdate(self.year_end_date) == yed) \
 				and (not frappe.flags.in_test):
-					frappe.throw(_("Year Start Date and Year End Date are already set in Fiscal Year: ") + fiscal_year)
+					frappe.throw(_("Year Start Date and Year End Date are already set in Fiscal Year {0}").format(fiscal_year))

@@ -138,9 +138,7 @@ class StockReconciliation(StockController):
 			# check valuation rate mandatory
 			if row.qty != "" and not row.valuation_rate and \
 					flt(previous_sle.get("qty_after_transaction")) <= 0:
-				frappe.throw(_("As existing qty for item: ") + row.item_code +
-					_(" at warehouse: ") + row.warehouse +
-					_(" is less than equals to zero in the system, valuation rate is mandatory for this item"))
+				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
 			change_in_qty = row.qty != "" and \
 				(flt(row.qty) - flt(previous_sle.get("qty_after_transaction")))
