@@ -112,7 +112,7 @@ class ProductionOrder(Document):
 		produced_qty = flt(produced_qty[0][0]) if produced_qty else 0
 
 		if produced_qty > self.qty:
-			frappe.throw(_("Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2}").format(produced_qty, self.qty, self.name, StockOverProductionError))
+			frappe.throw(_("Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2}").format(produced_qty, self.qty, self.name), StockOverProductionError)
 
 		self.db_set("produced_qty", produced_qty)
 

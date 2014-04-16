@@ -824,3 +824,23 @@ def make_serialized_item():
 	return se
 
 test_records = frappe.get_test_records('Stock Entry')
+
+def make_stock_entry(item, source, target, qty, incoming_rate=None):
+	s = frappe.new_doc("Stock Entry")
+	if source and target:
+		s.purpose = "Material Transfer"
+	elif source:
+		s.purpose = "Material Issue"
+	else:
+		s.purpose = "Material Receipt"
+	s.company = "_Test Company"
+	s.append("mtn_details", {
+		"item_code": item,
+		"s_warehouse": source,
+		"t_warehouse": target,
+		"qty": qty,
+		"incoming_rate": incoming_rate
+	})
+	s.insert()
+	s.submit()
+	return s
