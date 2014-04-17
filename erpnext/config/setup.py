@@ -3,14 +3,14 @@ from frappe.widgets.moduleview import add_setup_section
 
 data = [
 	{
-		"label": _("Tools"),
+		"label": _("Settings"),
 		"icon": "icon-wrench",
 		"items": [
 			{
 				"type": "doctype",
 				"name": "Global Defaults",
 				"label": _("Global Settings"),
-				"description": _("Set the Date & Number Formats, Default Currency, Current Fiscal Year, etc."),
+				"description": _("Set Default Values like Company, Currency, Current Fiscal Year, etc."),
 				"hide_count": True
 			}
 		]
@@ -124,7 +124,7 @@ data = [
 
 def get_data():
 	out = list(data)
-	
+
 	for module, label, icon in (
 		("accounts", _("Accounts"), "icon-money"),
 		("stock", _("Stock"), "icon-truck"),
@@ -132,7 +132,7 @@ def get_data():
 		("buying", _("Buying"), "icon-shopping-cart"),
 		("hr", _("Human Resources"), "icon-group"),
 		("support", _("Support"), "icon-phone")):
-		
+
 		add_setup_section(out, "erpnext", module, label, icon)
 
 	return out

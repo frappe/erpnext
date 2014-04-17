@@ -2,11 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json, base64
+import frappe, json
 
-from frappe.utils import cint, cstr, getdate, now, nowdate, get_defaults
-from frappe import _
+from frappe.utils import cstr, getdate
 from frappe.utils.file_manager import save_file
+from frappe.translate import set_default_language, get_dict, get_lang_dict
+from frappe.country_info import get_country_info
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -19,27 +20,50 @@ def setup_account(args=None):
 		args = json.loads(args)
 	args = frappe._dict(args)
 
+	if args.language != "english":
+		set_default_language(args.language)
+
 	update_user_name(args)
+	frappe.local.message_log = []
+
 	create_fiscal_year_and_company(args)
+	frappe.local.message_log = []
+
 	set_defaults(args)
+	frappe.local.message_log = []
+
 	create_territories()
+	frappe.local.message_log = []
+
 	create_price_lists(args)
+	frappe.local.message_log = []
+
 	create_feed_and_todo()
+	frappe.local.message_log = []
+
 	create_email_digest()
+	frappe.local.message_log = []
+
 	create_letter_head(args)
+	frappe.local.message_log = []
+
 	create_taxes(args)
+	frappe.local.message_log = []
+
 	create_items(args)
+	frappe.local.message_log = []
+
 	create_customers(args)
+	frappe.local.message_log = []
+
 	create_suppliers(args)
+	frappe.local.message_log = []
+
 	frappe.db.set_default('desktop:home_page', 'desktop')
 
 	frappe.clear_cache()
 	frappe.db.commit()
 
-	# suppress msgprints
-	frappe.local.message_log = []
-
-	return "okay"
 
 def update_user_name(args):
 	if args.get("email"):
@@ -116,12 +140,22 @@ def set_defaults(args):
 		'current_fiscal_year': args.curr_fiscal_year,
 		'default_currency': args.get('currency'),
 		'default_company':args.get('company_name'),
-		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
-		"float_precision": 3,
 		"country": args.get("country"),
-		"time_zone": args.get("time_zone")
 	})
+
 	global_defaults.save()
+
+	system_settings = frappe.get_doc("System Settings", "System Settings")
+	system_settings.update({
+		"language": args.get("language"),
+		"time_zone": args.get("timezone"),
+		"float_precision": 3,
+		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
+		'number_format': get_country_info(args.get("country")).get("number_format", "#,###.##"),
+	})
+
+	system_settings.save()
+
 
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1
@@ -317,7 +351,7 @@ def create_suppliers(args):
 
 def create_letter_head(args):
 	if args.get("attach_letterhead"):
-		lh = frappe.get_doc({
+		frappe.get_doc({
 			"doctype":"Letter Head",
 			"letter_head_name": "Standard",
 			"is_default": 1
@@ -348,3 +382,13 @@ def create_territories():
 				"parent_territory": root_territory,
 				"is_group": "No"
 			}).insert()
+
+@frappe.whitelist()
+def load_messages(language):
+	lang = get_lang_dict()[language]
+	frappe.local.lang = lang
+	m = get_dict("page", "setup-wizard")
+	m.update(get_dict("boot"))
+	frappe.local.response["__messages"] = m
+	return lang
+

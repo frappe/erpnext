@@ -5,12 +5,12 @@ $.extend(cur_frm.cscript, {
 	onload: function(doc) {
 		var me = this;
 		this.timezone = doc.time_zone;
-		
+
 		frappe.call({
 			method: "frappe.country_info.get_country_timezone_info",
 			callback: function(data) {
-				erpnext.country_info = data.message.country_info;
-				erpnext.all_timezones = data.message.all_timezones;
+				frappe.country_info = data.message.country_info;
+				frappe.all_timezones = data.message.all_timezones;
 				me.set_timezone_options();
 				cur_frm.set_value("time_zone", me.timezone);
 			}
@@ -28,7 +28,7 @@ $.extend(cur_frm.cscript, {
 		var timezones = [];
 
 		if (this.frm.doc.country) {
-			var timezones = (erpnext.country_info[this.frm.doc.country].timezones || []).sort();
+			var timezones = (frappe.country_info[this.frm.doc.country].timezones || []).sort();
 		}
 
 		this.frm.set_value("time_zone", timezones[0]);
@@ -38,10 +38,10 @@ $.extend(cur_frm.cscript, {
 	set_timezone_options: function(filtered_options) {
 		var me = this;
 		if(!filtered_options) filtered_options = [];
-		var remaining_timezones = $.map(erpnext.all_timezones, function(v) 
+		var remaining_timezones = $.map(frappe.all_timezones, function(v)
 			{ return filtered_options.indexOf(v)===-1 ? v : null; });
 
-		this.frm.set_df_property("time_zone", "options", 
+		this.frm.set_df_property("time_zone", "options",
 			(filtered_options.concat([""]).concat(remaining_timezones)).join("\n"));
 	}
 });
