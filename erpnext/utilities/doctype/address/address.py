@@ -73,3 +73,18 @@ def get_address_display(address_dict):
 
 	return display.strip()
 
+def get_territory_from_address(address):
+	"""Tries to match city, state and country of address to existing territory"""
+	if not address:
+		return
+
+	if isinstance(address, basestring):
+		address = frappe.get_doc("Address", address)
+
+	territory = None
+	for fieldname in ("city", "state", "country"):
+		territory = frappe.db.get_value("Territory", address.get(fieldname))
+		if territory:
+			break
+
+	return territory

@@ -27,6 +27,7 @@ class AccountsController(TransactionBase):
 				self.set(fieldname, today())
 				if not self.fiscal_year:
 					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
+				break
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year") :
@@ -125,12 +126,15 @@ class AccountsController(TransactionBase):
 			tax_master = frappe.get_doc(tax_master_doctype, self.get(tax_master_field))
 
 			for i, tax in enumerate(tax_master.get(tax_parentfield)):
+				tax = tax.as_dict()
+
 				for fieldname in default_fields:
-					tax.set(fieldname, None)
+					if fieldname in tax:
+						del tax[fieldname]
 
 				self.append(tax_parentfield, tax)
 
-	def get_other_charges(self):
+	def set_other_charges(self):
 		self.set("other_charges", [])
 		self.set_taxes("other_charges", "taxes_and_charges")
 

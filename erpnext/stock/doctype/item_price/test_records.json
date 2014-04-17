@@ -1,8 +1,20 @@
 [
  {
-  "doctype": "Item Price", 
-  "item_code": "_Test Item", 
-  "price_list": "_Test Price List", 
+  "doctype": "Item Price",
+  "item_code": "_Test Item",
+  "price_list": "_Test Price List",
   "price_list_rate": 100
+ },
+ {
+  "doctype": "Item Price",
+  "item_code": "_Test Item",
+  "price_list": "_Test Price List Rest of the World",
+  "price_list_rate": 10
+ },
+ {
+  "doctype": "Item Price",
+  "item_code": "_Test Item 2",
+  "price_list": "_Test Price List Rest of the World",
+  "price_list_rate": 20
  }
 ]

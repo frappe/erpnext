@@ -21,3 +21,4 @@ class Territory(NestedSet):
 	def on_update(self):
 		super(Territory, self).on_update()
 		self.validate_one_root()
+

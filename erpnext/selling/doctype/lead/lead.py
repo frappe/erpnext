@@ -33,6 +33,10 @@ class Lead(SellingController):
 			if not validate_email_add(self.email_id):
 				frappe.throw(_('{0} is not a valid email id').format(self.email_id))
 
+			if self.email_id == self.lead_owner:
+				# Lead Owner cannot be same as the Lead
+				self.lead_owner = None
+
 	def on_update(self):
 		self.check_email_id_is_unique()
 		self.add_calendar_event()

@@ -716,7 +716,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(this.frm.doc.taxes_and_charges) {
 			return this.frm.call({
 				doc: this.frm.doc,
-				method: "get_other_charges",
+				method: "set_other_charges",
 				callback: function(r) {
 					if(!r.exc) {
 						me.calculate_taxes_and_totals();

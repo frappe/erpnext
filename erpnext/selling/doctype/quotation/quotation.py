@@ -13,6 +13,14 @@ class Quotation(SellingController):
 	tname = 'Quotation Item'
 	fname = 'quotation_details'
 
+	def validate(self):
+		super(Quotation, self).validate()
+		self.set_status()
+		self.validate_order_type()
+		self.validate_for_items()
+		self.validate_uom_is_integer("stock_uom", "qty")
+		self.quotation_to = "Customer" if self.customer else "Lead"
+
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
 
@@ -41,13 +49,6 @@ class Quotation(SellingController):
 
 				if is_sales_item == 'No':
 					frappe.throw(_("Item {0} must be Sales Item").format(d.item_code))
-
-	def validate(self):
-		super(Quotation, self).validate()
-		self.set_status()
-		self.validate_order_type()
-		self.validate_for_items()
-		self.validate_uom_is_integer("stock_uom", "qty")
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("quotation_details")])):

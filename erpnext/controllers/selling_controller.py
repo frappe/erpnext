@@ -62,14 +62,36 @@ class SellingController(StockController):
 					shipping_amount = condition.shipping_amount
 					break
 
-			self.append("other_charges", {
+			shipping_charge = {
 				"doctype": "Sales Taxes and Charges",
 				"charge_type": "Actual",
 				"account_head": shipping_rule.account,
-				"cost_center": shipping_rule.cost_center,
-				"description": shipping_rule.label,
-				"rate": shipping_amount
+				"cost_center": shipping_rule.cost_center
+			}
+
+			existing_shipping_charge = self.get("other_charges", filters=shipping_charge)
+			if existing_shipping_charge:
+				# take the last record found
+				existing_shipping_charge[-1].rate = shipping_amount
+			else:
+				shipping_charge["rate"] = shipping_amount
+				shipping_charge["description"] = shipping_rule.label
+				self.append("other_charges", shipping_charge)
+
+			self.calculate_taxes_and_totals()
+
+	def remove_shipping_charge(self):
+		if self.shipping_rule:
+			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
+			existing_shipping_charge = self.get("other_charges", {
+				"doctype": "Sales Taxes and Charges",
+				"charge_type": "Actual",
+				"account_head": shipping_rule.account,
+				"cost_center": shipping_rule.cost_center
 			})
+			if existing_shipping_charge:
+				self.get("other_charges").remove(existing_shipping_charge[-1])
+				self.calculate_taxes_and_totals()
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -242,6 +264,9 @@ class SellingController(StockController):
 				self.precision("total_commission"))
 
 	def calculate_contribution(self):
+		if not self.meta.get_field("sales_team"):
+			return
+
 		total = 0.0
 		sales_team = self.get("sales_team")
 		for sales_person in sales_team:
