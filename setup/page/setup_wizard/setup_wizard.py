@@ -122,7 +122,7 @@ def set_defaults(args):
 		'date_format': webnotes.conn.get_value("Country", args.get("country"), "date_format"),
 		"float_precision": 3,
 		"country": args.get("country"),
-		"time_zone": args.get("time_zone")
+		"time_zone": args.get("timezone")
 	})
 	global_defaults.save()
 	
