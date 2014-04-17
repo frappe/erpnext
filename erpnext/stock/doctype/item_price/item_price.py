@@ -29,9 +29,10 @@ class ItemPrice(Document):
 
 	def check_duplicate_item(self):
 		if frappe.db.sql("""select name from `tabItem Price`
-			where item_code=%s and price_list=%s and name!=%s""",
-			(self.item_code, self.price_list, self.name)):
-			frappe.throw(_("Item {0} appears multiple times in Price List {1}").format(self.item_code, self.price_list))
+			where item_code=%s and price_list=%s and name!=%s""", (self.item_code, self.price_list, self.name)):
+
+			frappe.throw(_("Item {0} appears multiple times in Price List {1}").format(self.item_code, self.price_list),
+				ItemPriceDuplicateItem)
 
 	def update_price_list_details(self):
 		self.buying, self.selling, self.currency = \
