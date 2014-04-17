@@ -33,13 +33,13 @@ class StockController(AccountsController):
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
 
-		stock_ledger = self.get_stock_ledger_details()
-		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center)
+		sle_map = self.get_stock_ledger_details()
+		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
 
 		gl_list = []
 		warehouse_with_no_account = []
 		for detail in voucher_details:
-			sle_list = stock_ledger.get(detail.name)
+			sle_list = sle_map.get(detail.name)
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
@@ -72,17 +72,21 @@ class StockController(AccountsController):
 
 		return process_gl_map(gl_list)
 
-	def get_voucher_details(self, default_expense_account, default_cost_center):
-		details = self.get(self.fname)
+	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
+		if self.doctype == "Stock Reconciliation":
+			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
+				"cost_center": default_cost_center }) for voucher_detail_no, sle in sle_map.items()]
+		else:
+			details = self.get(self.fname)
 
-		if default_expense_account or default_cost_center:
-			for d in details:
-				if default_expense_account and not d.get("expense_account"):
-					d.expense_account = default_expense_account
-				if default_cost_center and not d.get("cost_center"):
-					d.cost_center = default_cost_center
+			if default_expense_account or default_cost_center:
+				for d in details:
+					if default_expense_account and not d.get("expense_account"):
+						d.expense_account = default_expense_account
+					if default_cost_center and not d.get("cost_center"):
+						d.cost_center = default_cost_center
 
-		return details
+			return details
 
 	def get_items_and_warehouse_accounts(self, warehouse_account=None):
 		items, warehouses = [], []
