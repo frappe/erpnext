@@ -1,4 +1,5 @@
 {
- "db_name": "travis", 
- "db_password": "travis"
+ "db_name": "travis",
+ "db_password": "travis",
+ "mute_emails": 1
 }
