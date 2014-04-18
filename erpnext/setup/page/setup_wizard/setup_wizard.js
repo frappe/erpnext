@@ -32,7 +32,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					var d = msgprint(__("There were errors."));
 					d.custom_onhide = function() {
 						frappe.set_route(erpnext.wiz.page_name, "0");
-					}
+					};
 				}
 			})
 		},
@@ -42,16 +42,16 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			<p class="text-center" style="margin: 0px 100px">' +
 			__('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') +
 			'</p>',
-		working_html: '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
+		working_html: function() { return '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
 			<h2 class="text-center">'+__('Setting up...')+'</h2>\
 			<p class="text-center">' +
 			__('Sit tight while your system is being setup. This may take a few moments.') +
-			'</p>',
-		complete_html: '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
+			'</p>' },
+		complete_html: function() { return '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
 			<h2 class="text-center">'+__('Setup Complete!')+'</h2>\
 			<p class="text-center">' +
 			__('Your setup is complete. Refreshing...') +
-			'</p>',
+			'</p>'},
 		slides: [
 			// User
 			{
@@ -373,11 +373,11 @@ frappe.wiz.Wizard = Class.extend({
 	show_working: function() {
 		this.hide_current_slide();
 		frappe.set_route(this.page_name);
-		this.current_slide = {"$wrapper": this.get_message(this.working_html).appendTo(this.parent)};
+		this.current_slide = {"$wrapper": this.get_message(this.working_html()).appendTo(this.parent)};
 	},
 	show_complete: function() {
 		this.hide_current_slide();
-		this.current_slide = {"$wrapper": this.get_message(this.complete_html).appendTo(this.parent)};
+		this.current_slide = {"$wrapper": this.get_message(this.complete_html()).appendTo(this.parent)};
 	},
 	show: function(id) {
 		if(!this.welcomed) {
