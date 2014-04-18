@@ -14,23 +14,21 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		self.name = self.item_group_name
 
 	def validate(self):
+		super(ItemGroup, self).on_update()
 		if not self.parent_website_route:
 			self.parent_website_route = frappe.get_website_route("Item Group",
 				self.parent_item_group)
 
 	def on_update(self):
-		NestedSet.on_update(self)
-		WebsiteGenerator.on_update(self)
+		super(ItemGroup, self).on_update()
 		self.validate_name_with_item()
 		self.validate_one_root()
 
 	def after_rename(self, olddn, newdn, merge=False):
-		NestedSet.after_rename(self, olddn, newdn, merge)
-		WebsiteGenerator.after_rename(self, olddn, newdn, merge)
+		super(ItemGroup, self).on_update()
 
 	def on_trash(self):
-		NestedSet.on_trash(self)
-		WebsiteGenerator.on_trash(self)
+		super(ItemGroup, self).on_update()
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):

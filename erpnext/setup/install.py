@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 
 import frappe
 
+from frappe import _
+
 def after_install():
-	import_defaults()
 	import_country_and_currency()
 	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
 	import_charts()
@@ -41,87 +42,6 @@ def import_country_and_currency():
 				"fraction_units": country.currency_fraction_units,
 				"number_format": country.number_format
 			}).insert()
-
-def import_defaults():
-	records = [
-		# role
-		{'doctype': "Role", "role_name": "Analytics"},
-
-		# item group
-		{'doctype': 'Item Group', 'item_group_name': 'All Item Groups', 'is_group': 'Yes', 'parent_item_group': ''},
-		{'doctype': 'Item Group', 'item_group_name': 'Products', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
-		{'doctype': 'Item Group', 'item_group_name': 'Raw Material', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
-		{'doctype': 'Item Group', 'item_group_name': 'Services', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
-		{'doctype': 'Item Group', 'item_group_name': 'Sub Assemblies', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
-		{'doctype': 'Item Group', 'item_group_name': 'Consumable', 'is_group': 'No', 'parent_item_group': 'All Item Groups'},
-
-		# deduction type
-		{'doctype': 'Deduction Type', 'name': 'Income Tax', 'description': 'Income Tax', 'deduction_name': 'Income Tax'},
-		{'doctype': 'Deduction Type', 'name': 'Professional Tax', 'description': 'Professional Tax', 'deduction_name': 'Professional Tax'},
-		{'doctype': 'Deduction Type', 'name': 'Provident Fund', 'description': 'Provident fund', 'deduction_name': 'Provident Fund'},
-
-		# earning type
-		{'doctype': 'Earning Type', 'name': 'Basic', 'description': 'Basic', 'earning_name': 'Basic', 'taxable': 'Yes'},
-		{'doctype': 'Earning Type', 'name': 'House Rent Allowance', 'description': 'House Rent Allowance', 'earning_name': 'House Rent Allowance', 'taxable': 'No'},
-
-		# expense claim type
-		{'doctype': 'Expense Claim Type', 'name': 'Calls', 'expense_type': 'Calls'},
-		{'doctype': 'Expense Claim Type', 'name': 'Food', 'expense_type': 'Food'},
-		{'doctype': 'Expense Claim Type', 'name': 'Medical', 'expense_type': 'Medical'},
-		{'doctype': 'Expense Claim Type', 'name': 'Others', 'expense_type': 'Others'},
-		{'doctype': 'Expense Claim Type', 'name': 'Travel', 'expense_type': 'Travel'},
-
-		# leave type
-		{'doctype': 'Leave Type', 'leave_type_name': 'Casual Leave', 'name': 'Casual Leave', 'is_encash': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', },
-		{'doctype': 'Leave Type', 'leave_type_name': 'Compensatory Off', 'name': 'Compensatory Off', 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': 'Sick Leave', 'name': 'Sick Leave', 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': 'Privilege Leave', 'name': 'Privilege Leave', 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': 'Leave Without Pay', 'name': 'Leave Without Pay', 'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1},
-
-		# territory
-		{'doctype': 'Territory', 'territory_name': 'All Territories', 'is_group': 'Yes', 'name': 'All Territories', 'parent_territory': ''},
-
-		# customer group
-		{'doctype': 'Customer Group', 'customer_group_name': 'All Customer Groups', 'is_group': 'Yes', 	'name': 'All Customer Groups', 'parent_customer_group': ''},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Individual', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Commercial', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Non Profit', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
-		{'doctype': 'Customer Group', 'customer_group_name': 'Government', 'is_group': 'No', 'parent_customer_group': 'All Customer Groups'},
-
-		# supplier type
-		{'doctype': 'Supplier Type', 'supplier_type': 'Services'},
-		{'doctype': 'Supplier Type', 'supplier_type': 'Local'},
-		{'doctype': 'Supplier Type', 'supplier_type': 'Raw Material'},
-		{'doctype': 'Supplier Type', 'supplier_type': 'Electrical'},
-		{'doctype': 'Supplier Type', 'supplier_type': 'Hardware'},
-		{'doctype': 'Supplier Type', 'supplier_type': 'Pharmaceutical'},
-		{'doctype': 'Supplier Type', 'supplier_type': 'Distributor'},
-
-		# Sales Person
-		{'doctype': 'Sales Person', 'sales_person_name': 'Sales Team', 'is_group': "Yes", "parent_sales_person": ""},
-
-		# UOM
-		{'uom_name': 'Unit', 'doctype': 'UOM', 'name': 'Unit', "must_be_whole_number": 1},
-		{'uom_name': 'Box', 'doctype': 'UOM', 'name': 'Box', "must_be_whole_number": 1},
-		{'uom_name': 'Kg', 'doctype': 'UOM', 'name': 'Kg'},
-		{'uom_name': 'Nos', 'doctype': 'UOM', 'name': 'Nos', "must_be_whole_number": 1},
-		{'uom_name': 'Pair', 'doctype': 'UOM', 'name': 'Pair', "must_be_whole_number": 1},
-		{'uom_name': 'Set', 'doctype': 'UOM', 'name': 'Set', "must_be_whole_number": 1},
-		{'uom_name': 'Hour', 'doctype': 'UOM', 'name': 'Hour'},
-		{'uom_name': 'Minute', 'doctype': 'UOM', 'name': 'Minute'},
-
-	]
-
-	from frappe.modules import scrub
-	for r in records:
-		doc = frappe.get_doc(r)
-
-		# ignore mandatory for root
-		parent_link_field = ("parent_" + scrub(doc.doctype))
-		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
-			doc.ignore_mandatory = True
-
-		doc.insert()
 
 def feature_setup():
 	"""save global defaults and features setup"""

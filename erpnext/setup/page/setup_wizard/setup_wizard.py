@@ -5,9 +5,12 @@ from __future__ import unicode_literals
 import frappe, json
 
 from frappe.utils import cstr, getdate
+from frappe import _
 from frappe.utils.file_manager import save_file
 from frappe.translate import set_default_language, get_dict, get_lang_dict
 from frappe.country_info import get_country_info
+from default_website import website_maker
+import install_fixtures
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -22,6 +25,8 @@ def setup_account(args=None):
 
 	if args.language != "english":
 		set_default_language(args.language)
+
+	install_fixtures.install()
 
 	update_user_name(args)
 	frappe.local.message_log = []
@@ -60,6 +65,8 @@ def setup_account(args=None):
 	frappe.local.message_log = []
 
 	frappe.db.set_default('desktop:home_page', 'desktop')
+
+	website_maker(args.company_name, args.company_tagline, args.email)
 
 	frappe.clear_cache()
 	frappe.db.commit()
@@ -127,7 +134,7 @@ def create_price_lists(args):
 			"selling": 1 if pl_type == "Selling" else 0,
 			"currency": args["currency"],
 			"valid_for_territories": [{
-				"territory": "All Territories"
+				"territory": frappe.db.get_value("Territory", {"parent_territory":""})
 			}]
 		}).insert()
 
@@ -273,10 +280,11 @@ def create_items(args):
 				"item_name": item,
 				"description": item,
 				"is_sales_item": "Yes",
-				"is_stock_item": item_group!="Services" and "Yes" or "No",
+				"show_in_website": 1,
+				"is_stock_item": item_group!=_("Services") and "Yes" or "No",
 				"item_group": item_group,
 				"stock_uom": args.get("item_uom_" + str(i)),
-				"default_warehouse": item_group!="Service" and ("Finished Goods - " + args.get("company_abbr")) or ""
+				"default_warehouse": item_group!=_("Service") and (_("Finished Goods") + " - " + args.get("company_abbr")) or ""
 			}).insert()
 
 			if args.get("item_img_" + str(i)):
@@ -294,10 +302,10 @@ def create_items(args):
 				"item_name": item,
 				"description": item,
 				"is_sales_item": "No",
-				"is_stock_item": item_group!="Services" and "Yes" or "No",
+				"is_stock_item": item_group!=_("Services") and "Yes" or "No",
 				"item_group": item_group,
 				"stock_uom": args.get("item_buy_uom_" + str(i)),
-				"default_warehouse": item_group!="Service" and ("Stores - " + args.get("company_abbr")) or ""
+				"default_warehouse": item_group!=_("Services") and (_("Stores") + " - " + args.get("company_abbr")) or ""
 			}).insert()
 
 			if args.get("item_img_" + str(i)):
@@ -314,7 +322,7 @@ def create_customers(args):
 				"doctype":"Customer",
 				"customer_name": customer,
 				"customer_type": "Company",
-				"customer_group": "Commercial",
+				"customer_group": _("Commercial"),
 				"territory": args.get("country"),
 				"company": args.get("company_name")
 			}).insert()
@@ -335,7 +343,7 @@ def create_suppliers(args):
 			frappe.get_doc({
 				"doctype":"Supplier",
 				"supplier_name": supplier,
-				"supplier_type": "Local",
+				"supplier_type": _("Local"),
 				"company": args.get("company_name")
 			}).insert()
 
@@ -353,13 +361,13 @@ def create_letter_head(args):
 	if args.get("attach_letterhead"):
 		frappe.get_doc({
 			"doctype":"Letter Head",
-			"letter_head_name": "Standard",
+			"letter_head_name": _("Standard"),
 			"is_default": 1
 		}).insert()
 
 		filename, filetype, content = args.get("attach_letterhead").split(",")
-		fileurl = save_file(filename, content, "Letter Head", "Standard", decode=True).file_name
-		frappe.db.set_value("Letter Head", "Standard", "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_name
+		frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
@@ -374,7 +382,7 @@ def create_territories():
 	from frappe.utils.nestedset import get_root_of
 	country = frappe.db.get_default("country")
 	root_territory = get_root_of("Territory")
-	for name in (country, "Rest Of The World"):
+	for name in (country, _("Rest Of The World")):
 		if name and not frappe.db.exists("Territory", name):
 			frappe.get_doc({
 				"doctype": "Territory",
@@ -391,4 +399,5 @@ def load_messages(language):
 	m.update(get_dict("boot"))
 	frappe.local.response["__messages"] = m
 	return lang
+
 

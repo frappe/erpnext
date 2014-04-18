@@ -1,16 +1,26 @@
 [
  {
-  "abbr": "_TC", 
-  "company_name": "_Test Company", 
-  "default_currency": "INR", 
-  "doctype": "Company", 
+  "abbr": "_TC",
+  "company_name": "_Test Company",
+  "country": "India",
+  "default_currency": "INR",
+  "doctype": "Company",
   "domain": "Manufacturing"
- }, 
+ },
  {
-  "abbr": "_TC1", 
-  "company_name": "_Test Company 1", 
-  "default_currency": "USD", 
-  "doctype": "Company", 
+  "abbr": "_TC1",
+  "company_name": "_Test Company 1",
+  "country": "United States",
+  "default_currency": "USD",
+  "doctype": "Company",
+  "domain": "Retail"
+ },
+ {
+  "abbr": "_TC2",
+  "company_name": "_Test Company 3",
+  "default_currency": "EUR",
+  "country": "Germany",
+  "doctype": "Company",
   "domain": "Retail"
  }
 ]

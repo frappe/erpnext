@@ -1,0 +1,29 @@
+.page-header {
+	color: white;
+	background-color: #444;
+	padding: 40px 0px;
+}
+
+.page-header h1 {
+	color: white;
+}
+
+.slide {
+	padding: 60px 40px;
+	max-width: 900px;
+	margin: auto;
+	border-top: 1px solid #f2f2f2;
+}
+
+.slide h3 {
+	margin-bottom: 70px;
+}
+
+.img-wrapper {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+	padding: 10px;
+	border-radius: 5px;
+	border: 1px solid #f9f9f9;
+}

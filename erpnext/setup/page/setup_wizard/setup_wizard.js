@@ -290,10 +290,10 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			{fieldtype:"Section Break"},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i,
-				options:["Products", "Services", "Raw Material", "Sub Assemblies"]},
+				options:[_("Products"), _("Services")]},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
-				options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
+				options:[_("Unit"), _("Nos"), _("Box"), _("Pair"), _("Kg"), _("Set"), _("Hour"), _("Minute")]},
 			{fieldtype:"Section Break"}
 		])
 	}
@@ -317,10 +317,10 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			{fieldtype:"Section Break"},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Select", fieldname:"item_buy_group_" + i, label: __("Group"),
-				options:["Raw Material", "Consumable", "Sub Assemblies", "Services", "Products"]},
+				options:[_("Raw Material"), _("Consumable"), _("Sub Assemblies"), _("Services"), _("Products")]},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Select", fieldname:"item_buy_uom_" + i, label: __("UOM"),
-				options:["Unit", "Nos", "Box", "Pair", "Kg", "Set", "Hour", "Minute"]},
+				options:[_("Unit"), _("Nos"), _("Box"), _("Pair"), _("Kg"), _("Set"), _("Hour"), _("Minute")]},
 			{fieldtype:"Section Break"},
 		])
 	}
