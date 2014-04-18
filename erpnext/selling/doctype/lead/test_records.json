@@ -4,7 +4,7 @@
   "email_id": "test_lead@example.com",
   "lead_name": "_Test Lead",
   "status": "Open",
-  "territory": "_Test Territory Rest Of The World"
+  "territory": "_Test Territory"
  },
  {
   "doctype": "Lead",

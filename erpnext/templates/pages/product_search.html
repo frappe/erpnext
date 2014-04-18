@@ -1,0 +1,33 @@
+{% block title %} {{ "Product Search" }} {% endblock %}
+
+{% block header %}<h2>Product Search</h2>{% endblock %}
+
+{% block content %}
+<script>{% include "templates/includes/product_list.js" %}</script>
+
+<script>
+$(document).ready(function() {
+	var txt = get_url_arg("q");
+	$(".search-results").html("Search results for: " + txt);
+	window.search = txt;
+	window.start = 0;
+	window.get_product_list();
+});
+</script>
+
+{% include "templates/includes/product_search_box.html" %}
+<div class="product-search-content">
+	<h3 class="search-results">Search Results</h3>
+	<div id="search-list" class="row">
+		
+	</div>
+	<div style="text-align: center;">
+		<div class="more-btn" 
+			style="display: none; text-align: center;">
+			<button class="btn">More...</button>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% include "templates/includes/sidebar.html" %}{% endblock %}

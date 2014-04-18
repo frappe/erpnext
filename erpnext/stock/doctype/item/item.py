@@ -6,6 +6,8 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
+from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
+from frappe.website.render import clear_cache
 
 class WarehouseNotSet(frappe.ValidationError): pass
 
@@ -46,6 +48,7 @@ class Item(WebsiteGenerator):
 
 	def on_update(self):
 		super(Item, self).on_update()
+		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
 
@@ -230,6 +233,9 @@ class Item(WebsiteGenerator):
 
 	def after_rename(self, olddn, newdn, merge):
 		super(Item, self).after_rename(olddn, newdn, merge)
+		if self.page_name:
+			invalidate_cache_for_item(self)
+			clear_cache(self.page_name)
 
 		frappe.db.set_value("Item", newdn, "item_code", newdn)
 		if merge:
@@ -344,3 +350,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	})
 
 	return out
+
+def invalidate_cache_for_item(doc):
+	invalidate_cache_for(doc, doc.item_group)
+	for d in doc.get({"doctype":"Website Item Group"}):
+		invalidate_cache_for(doc, d.item_group)
