@@ -46,6 +46,12 @@ def get_balance_on(account=None, date=None):
 		account = frappe.form_dict.get("account")
 		date = frappe.form_dict.get("date")
 
+	acc = frappe.db.get_value('Account', account, \
+		['lft', 'rgt', 'report_type', 'group_or_ledger'], as_dict=1)
+
+	if not acc:
+		frappe.throw(_("Account {0} does not exist").format(account), frappe.DoesNotExistError)
+
 	cond = []
 	if date:
 		cond.append("posting_date <= '%s'" % date)
@@ -64,9 +70,6 @@ def get_balance_on(account=None, date=None):
 			# this indicates that it is a date older than any existing fiscal year.
 			# hence, assuming balance as 0.0
 			return 0.0
-
-	acc = frappe.db.get_value('Account', account, \
-		['lft', 'rgt', 'report_type', 'group_or_ledger'], as_dict=1)
 
 	# for pl accounts, get balance within a fiscal year
 	if acc.report_type == 'Profit and Loss':
