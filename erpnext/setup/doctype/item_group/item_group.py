@@ -27,10 +27,12 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		self.validate_one_root()
 
 	def after_rename(self, olddn, newdn, merge=False):
-		super(ItemGroup, self).on_update()
+		NestedSet.after_rename(self)
+		WebsiteGenerator.after_rename(self)
 
 	def on_trash(self):
-		super(ItemGroup, self).on_update()
+		NestedSet.on_trash(self)
+		WebsiteGenerator.on_trash(self)
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):

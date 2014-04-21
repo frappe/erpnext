@@ -48,7 +48,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			__('Sit tight while your system is being setup. This may take a few moments.') +
 			'</p>' },
 		complete_html: function() { return '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
-			<h2 class="text-center">'+__('Setup Complete!')+'</h2>\
+			<h2 class="text-center">'+__('Setup Complete')+'</h2>\
 			<p class="text-center">' +
 			__('Your setup is complete. Refreshing...') +
 			'</p>'},
@@ -221,6 +221,16 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"title": __("Add Taxes"),
 				"help": __("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
 				"fields": [],
+				before_load: function(slide) {
+					for(var i=1; i<4; i++) {
+						slide.fields = slide.fields.concat([
+							{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i, placeholder:__("e.g. VAT")},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Data", fieldname:"tax_rate_i", label:__("Rate (%)"), placeholder:__("e.g. 5")},
+							{fieldtype:"Section Break"},
+						]);
+					}
+				}
 			},
 
 			// Customers
@@ -229,6 +239,18 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"title": __("Your Customers"),
 				"help": __("List a few of your customers. They could be organizations or individuals."),
 				"fields": [],
+				before_load: function(slide) {
+					for(var i=1; i<6; i++) {
+						slide.fields = slide.fields.concat([
+							{fieldtype:"Data", fieldname:"customer_" + i, label:__("Customer") + " " + i,
+								placeholder:__("Customer Name")},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Data", fieldname:"customer_contact_" + i,
+								label:__("Contact"), placeholder:__("Contact Name")},
+							{fieldtype:"Section Break"}
+						])
+					}
+				}
 			},
 
 			// Items to Sell
@@ -237,6 +259,24 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"title": __("Your Products or Services"),
 				"help": __("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 				"fields": [],
+				before_load: function(slide) {
+					for(var i=1; i<6; i++) {
+						slide.fields = slide.fields.concat([
+							{fieldtype:"Data", fieldname:"item_" + i, label:__("Item") + " " + i,
+								placeholder:__("A Product or Service")},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Attach", fieldname:"item_img_" + i, label:__("Attach Image")},
+							{fieldtype:"Section Break"},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i,
+								options:[__("Products"), __("Services")]},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
+								options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"), __("Hour"), __("Minute")]},
+							{fieldtype:"Section Break"}
+						])
+					}
+				}
 			},
 
 			// Suppliers
@@ -245,6 +285,18 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"title": __("Your Suppliers"),
 				"help": __("List a few of your suppliers. They could be organizations or individuals."),
 				"fields": [],
+				before_load: function(slide) {
+					for(var i=1; i<6; i++) {
+						slide.fields = slide.fields.concat([
+							{fieldtype:"Data", fieldname:"supplier_" + i, label:__("Supplier")+" " + i,
+								placeholder:"Supplier Name"},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Data", fieldname:"supplier_contact_" + i,
+								label:"Contact", placeholder:__("Contact Name")},
+							{fieldtype:"Section Break"}
+						])
+					}
+				}
 			},
 
 			// Items to Buy
@@ -253,77 +305,28 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"title": __("Products or Services You Buy"),
 				"help": __("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
 				"fields": [],
+				before_load: function(slide) {
+					for(var i=1; i<6; i++) {
+						slide.fields = slide.fields.concat([
+							{fieldtype:"Data", fieldname:"item_buy_" + i, label: __("Item") + " " + i,
+								placeholder:__("A Product or Service")},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Section Break"},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Select", fieldname:"item_buy_group_" + i, label: __("Group"),
+								options:[__("Raw Material"), __("Consumable"), __("Sub Assemblies"), __("Services"), __("Products")]},
+							{fieldtype:"Column Break"},
+							{fieldtype:"Select", fieldname:"item_buy_uom_" + i, label: __("UOM"),
+								options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"), __("Hour"), __("Minute")]},
+							{fieldtype:"Section Break"},
+						])
+					}
+				}
 			},
 
 		]
 	}
 
-	// taxes
-	for(var i=1; i<4; i++) {
-		wizard_settings.slides[5].fields = wizard_settings.slides[5].fields.concat([
-			{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i, placeholder:__("e.g. VAT")},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Data", fieldname:"tax_rate_i", label:__("Rate (%)"), placeholder:__("e.g. 5")},
-			{fieldtype:"Section Break"},
-		])
-	}
-
-	// customers
-	for(var i=1; i<6; i++) {
-		wizard_settings.slides[6].fields = wizard_settings.slides[6].fields.concat([
-			{fieldtype:"Data", fieldname:"customer_" + i, label:__("Customer") + " " + i,
-				placeholder:__("Customer Name")},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Data", fieldname:"customer_contact_" + i,
-				label:__("Contact"), placeholder:__("Contact Name")},
-			{fieldtype:"Section Break"}
-		])
-	}
-
-	// products
-	for(var i=1; i<6; i++) {
-		wizard_settings.slides[7].fields = wizard_settings.slides[7].fields.concat([
-			{fieldtype:"Data", fieldname:"item_" + i, label:__("Item") + " " + i,
-				placeholder:__("A Product or Service")},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Attach", fieldname:"item_img_" + i, label:__("Attach Image")},
-			{fieldtype:"Section Break"},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i,
-				options:[_("Products"), _("Services")]},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
-				options:[_("Unit"), _("Nos"), _("Box"), _("Pair"), _("Kg"), _("Set"), _("Hour"), _("Minute")]},
-			{fieldtype:"Section Break"}
-		])
-	}
-
-	for(var i=1; i<6; i++) {
-		wizard_settings.slides[8].fields = wizard_settings.slides[8].fields.concat([
-			{fieldtype:"Data", fieldname:"supplier_" + i, label:__("Supplier")+" " + i,
-				placeholder:"Supplier Name"},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Data", fieldname:"supplier_contact_" + i,
-				label:"Contact", placeholder:__("Contact Name")},
-			{fieldtype:"Section Break"}
-		])
-	}
-
-	for(var i=1; i<6; i++) {
-		wizard_settings.slides[9].fields = wizard_settings.slides[9].fields.concat([
-			{fieldtype:"Data", fieldname:"item_buy_" + i, label: __("Item") + " " + i,
-				placeholder:__("A Product or Service")},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Section Break"},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Select", fieldname:"item_buy_group_" + i, label: __("Group"),
-				options:[_("Raw Material"), _("Consumable"), _("Sub Assemblies"), _("Services"), _("Products")]},
-			{fieldtype:"Column Break"},
-			{fieldtype:"Select", fieldname:"item_buy_uom_" + i, label: __("UOM"),
-				options:[_("Unit"), _("Nos"), _("Box"), _("Pair"), _("Kg"), _("Set"), _("Hour"), _("Minute")]},
-			{fieldtype:"Section Break"},
-		])
-	}
 
 	erpnext.wiz = new frappe.wiz.Wizard(wizard_settings)
 }
@@ -420,6 +423,11 @@ frappe.wiz.WizardSlide = Class.extend({
 	make: function() {
 		var me = this;
 		if(this.$body) this.$body.remove();
+
+		if(this.before_load) {
+			this.before_load(this);
+		}
+
 		this.$body = $(repl('<div class="panel panel-default">\
 			<div class="panel-heading">\
 				<div class="panel-title row">\
@@ -439,7 +447,7 @@ frappe.wiz.WizardSlide = Class.extend({
 				</div>\
 				<hr>\
 				<div class="footer">\
-					<div class="text-right"><a class="prev-btn hide btn btn-default">Previous</a> \
+					<div class="text-right"><a class="prev-btn hide btn btn-default">'+__('Previous')+'</a> \
 						<a class="next-btn hide btn btn-primary">'+__("Next")+'</a> \
 						<a class="complete-btn hide btn btn-primary"><b>'+__("Complete Setup")+'</b></a>\
 					</div>\

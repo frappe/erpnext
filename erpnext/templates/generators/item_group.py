@@ -24,7 +24,7 @@ def get_context(context):
 	if context.doc.slideshow:
 		item_group_context.update(get_slideshow(context.doc))
 
-	for d in item_group_context.sub_groups:
+	for d in item_group_context.get("sub_groups"):
 		d.count = get_group_item_count(d.name)
 
 	return item_group_context
