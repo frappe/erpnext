@@ -27,8 +27,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		self.validate_one_root()
 
 	def after_rename(self, olddn, newdn, merge=False):
-		NestedSet.after_rename(self)
-		WebsiteGenerator.after_rename(self)
+		NestedSet.after_rename(self, olddn, newdn, merge)
+		WebsiteGenerator.after_rename(self, olddn, newdn, merge)
 
 	def on_trash(self):
 		NestedSet.on_trash(self)

@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import msgprint, _, throw
-
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 
 status_map = {
 	"Contact": [
@@ -53,7 +52,7 @@ status_map = {
 	],
 }
 
-class StatusUpdater(DocListController):
+class StatusUpdater(Document):
 	"""
 		Updates the status of the calling records
 		Delivery Note: Update Delivered Qty, Update Percent and Validate over delivery

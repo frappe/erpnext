@@ -9,9 +9,9 @@ from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
 from frappe.defaults import get_restrictions
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 
-class Employee(DocListController):
+class Employee(Document):
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:

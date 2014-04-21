@@ -11,11 +11,10 @@ from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 
 class StockReconciliation(StockController):
-	def setup(self):
+	def validate(self):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 		self.entries = []
 
-	def validate(self):
 		self.validate_data()
 		self.validate_expense_account()
 

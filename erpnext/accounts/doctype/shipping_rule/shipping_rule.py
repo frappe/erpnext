@@ -7,15 +7,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 from erpnext.setup.utils import get_company_currency
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
 class ManyBlankToValuesError(frappe.ValidationError): pass
 
-class ShippingRule(DocListController):
-
+class ShippingRule(Document):
 	def validate(self):
 		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
 		self.shipping_rule_conditions = self.get("shipping_rule_conditions")

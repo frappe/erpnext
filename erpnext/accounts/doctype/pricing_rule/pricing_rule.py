@@ -6,9 +6,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import throw, _
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 
-class PricingRule(DocListController):
+class PricingRule(Document):
 	def validate(self):
 		self.validate_mandatory()
 		self.cleanup_fields_value()

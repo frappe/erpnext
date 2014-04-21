@@ -14,15 +14,14 @@ class OverlapError(frappe.ValidationError): pass
 class InvalidLeaveApproverError(frappe.ValidationError): pass
 class LeaveApproverIdentityError(frappe.ValidationError): pass
 
-from frappe.model.controller import DocListController
-class LeaveApplication(DocListController):
-	def setup(self):
+from frappe.model.document import Document
+class LeaveApplication(Document):
+	def validate(self):
 		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
 			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
 		else:
 			self.previous_doc = None
 
-	def validate(self):
 		self.validate_to_date()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
