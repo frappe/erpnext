@@ -92,10 +92,9 @@ class PurchaseReceipt(BuyingController):
 	def validate_challan_no(self):
 		"Validate if same challan no exists for same supplier in a submitted purchase receipt"
 		if self.challan_no:
-			exists = frappe.db.sql_list("""
-			SELECT name FROM `tabPurchase Receipt`
-			WHERE name!=%s AND supplier=%s AND challan_no=%s
-		AND docstatus=1""", (self.name, self.supplier, self.challan_no))
+			exists = frappe.db.sql_list("""select name from `tabPurchase Receipt`
+				where docstatus=1 and name!=%s and supplier=%s and challan_no=%s
+				and fiscal_year=%s""", (self.name, self.supplier, self.challan_no, self.doc.fiscal_year))
 			if exists:
 				frappe.throw(_("Supplier delivery number duplicate in {0}").format(exists))
 
