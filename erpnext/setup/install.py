@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 
 def after_install():
+	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	import_country_and_currency()
 	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
 	import_charts()

@@ -12,6 +12,7 @@ keydict = {
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
 	'currency': 'default_currency',
+	"country": "country",
 	'hide_currency_symbol':'hide_currency_symbol',
 	'account_url':'account_url',
 	'disable_rounded_total': 'disable_rounded_total',

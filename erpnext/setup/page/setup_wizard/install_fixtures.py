@@ -9,8 +9,6 @@ from frappe import _
 
 def install():
 	records = [
-		# role
-		{'doctype': "Role", "role_name": "Analytics"},
 
 		# item group
 		{'doctype': 'Item Group', 'item_group_name': _('All Item Groups'), 'is_group': 'Yes', 'parent_item_group': ''},

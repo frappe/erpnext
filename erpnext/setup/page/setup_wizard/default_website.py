@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, os
+import frappe
 
 from frappe import _
 from frappe.utils import nowdate
@@ -22,13 +22,13 @@ class website_maker(object):
 			"doctype": "Web Page",
 			"title": self.company,
 			"published": 1,
-			"header": "<h1>{0}</h1>".format(self.tagline)+\
+			"header": "<h1>{0}</h1>".format(self.tagline or "Headline")+\
 				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
 				'<p><a class="btn btn-primary" href="/login">Login</a></p>',
-			"description": self.company + ":" + self.tagline,
+			"description": self.company + ":" + (self.tagline or ""),
 			"css": frappe.get_template("setup/page/setup_wizard/sample_home_page.css").render(),
 			"main_section": frappe.get_template("setup/page/setup_wizard/sample_home_page.html").render({
-				"company": self.company, "tagline": self.tagline
+				"company": self.company, "tagline": (self.tagline or "")
 			})
 		}).insert()
 
@@ -73,7 +73,7 @@ class website_maker(object):
 			"title": _("General")
 		}).insert()
 
-		blog_post = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Blog Post",
 			"title": "Welcome",
 			"published": 1,

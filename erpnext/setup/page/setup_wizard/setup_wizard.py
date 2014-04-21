@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils.file_manager import save_file
 from frappe.translate import set_default_language, get_dict, get_lang_dict
 from frappe.country_info import get_country_info
+from frappe.utils.nestedset import get_root_of
 from default_website import website_maker
 import install_fixtures
 
@@ -134,7 +135,7 @@ def create_price_lists(args):
 			"selling": 1 if pl_type == "Selling" else 0,
 			"currency": args["currency"],
 			"valid_for_territories": [{
-				"territory": frappe.db.get_value("Territory", {"parent_territory":""})
+				"territory": get_root_of("Territory")
 			}]
 		}).insert()
 
