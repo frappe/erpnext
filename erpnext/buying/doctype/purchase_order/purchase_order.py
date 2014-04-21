@@ -168,8 +168,7 @@ class PurchaseOrder(BuyingController):
 			where t1.name = t2.parent and t2.purchase_order = %s and t1.docstatus = 1""",
 			self.name)
 		if submitted:
-			msgprint(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
-			raise Exception
+			throw(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
 
 		frappe.db.set(self,'status','Cancelled')
 		self.update_prevdoc_status()

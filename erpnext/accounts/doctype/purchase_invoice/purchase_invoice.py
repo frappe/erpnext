@@ -123,7 +123,6 @@ class PurchaseInvoice(BuyingController):
 				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = %s", d.purchase_order)
 				if stopped:
 					throw(_("Purchase Order {0} is 'Stopped'").format(d.purchase_order))
-					raise Exception
 
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc(self.tname, {
@@ -168,8 +167,7 @@ class PurchaseInvoice(BuyingController):
 		if self.is_opening != 'Yes':
 			self.aging_date = self.posting_date
 		elif not self.aging_date:
-			msgprint(_("Ageing date is mandatory for opening entry"))
-			raise Exception
+			throw(_("Ageing date is mandatory for opening entry"))
 
 	def set_against_expense_account(self):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
@@ -210,7 +208,6 @@ class PurchaseInvoice(BuyingController):
 			 for d in self.get('entries'):
 				 if not d.purchase_receipt:
 					 throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
-					 raise Exception
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:

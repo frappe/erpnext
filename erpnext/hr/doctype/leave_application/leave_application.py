@@ -71,8 +71,8 @@ class LeaveApplication(DocListController):
 
 		if block_dates:
 			if self.status == "Approved":
-				frappe.msgprint(_("Cannot approve leave as you are not authorized to approve leaves on Block Dates"))
-				raise LeaveDayBlockedError
+				frappe.throw(_("Cannot approve leave as you are not authorized to approve leaves on Block Dates"),
+					LeaveDayBlockedError)
 
 	def get_holidays(self):
 		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1

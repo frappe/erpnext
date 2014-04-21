@@ -49,8 +49,7 @@ class Opportunity(TransactionBase):
 
 			return ret
 		else:
-			msgprint("Customer : %s does not exist in system." % (name))
-			raise Exception
+			frappe.throw(_("Customer {0} does not exist").format(name), frappe.DoesNotExistError)
 
 	def on_update(self):
 		self.add_calendar_event()

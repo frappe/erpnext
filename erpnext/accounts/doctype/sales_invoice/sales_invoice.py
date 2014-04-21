@@ -301,9 +301,7 @@ class SalesInvoice(SellingController):
 		if self.is_opening != 'Yes':
 			self.aging_date = self.posting_date
 		elif not self.aging_date:
-			msgprint(_("Ageing Date is mandatory for opening entry"))
-			raise Exception
-
+			throw(_("Ageing Date is mandatory for opening entry"))
 
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
@@ -336,8 +334,7 @@ class SalesInvoice(SellingController):
 				where name = %s and (customer = %s or
 					ifnull(customer,'')='')""", (self.project_name, self.customer))
 			if not res:
-				msgprint(_("Customer {0} does not belong to project {1}").format(self.customer,self.project_name))
-				raise Exception
+				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project_name))
 
 	def validate_pos(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
@@ -440,8 +437,7 @@ class SalesInvoice(SellingController):
 				submitted = frappe.db.sql("""select name from `tabDelivery Note`
 					where docstatus = 1 and name = %s""", d.delivery_note)
 				if not submitted:
-					msgprint(_("Delivery Note {0} is not submitted").format(d.delivery_note))
-					raise Exception
+					throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def update_stock_ledger(self):
 		sl_entries = []
