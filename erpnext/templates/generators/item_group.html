@@ -1,7 +1,3 @@
-{% block title %} {{ title }} {% endblock %}
-
-{% block header %}<h2>{{ title }}</h2>{% endblock %}
-
 {% block content %}
 <div class="item-group-content">
 	{% include 'templates/includes/product_search_box.html' %}
@@ -11,22 +7,9 @@
 		{% endif %}
 		{% if description %}<!-- description -->
 		<div itemprop="description">{{ description or ""}}</div>
-		{% else %}
-		<h3>{{ name }}</h3>
 		{% endif %}
 	</div>
 	<div>
-		{% if sub_groups %}
-		<hr />
-		<div class="row">
-		{% for d in sub_groups %}
-			<div class="col-sm-4">
-				<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
-			</div>
-		{% endfor %}
-		</div>
-		<hr />
-		{% endif %}
 		{% if items %}
 		<div id="search-list" class="row">
 			{% for item in items %}
@@ -37,7 +20,7 @@
 				<div class="alert alert-info info">Showing top 100 items.</div>
 			{% endif %}
 		{% else %}
-			<div class="alert alert-warning">No items listed.</div>
+			<div class="text-muted">No items listed.</div>
 		{% endif %}
 	</div>
 </div>
@@ -53,5 +36,3 @@ $(function() {
 </script>
 
 {% endblock %}
-
-{% block sidebar %}{% include "templates/includes/sidebar.html" %}{% endblock %}

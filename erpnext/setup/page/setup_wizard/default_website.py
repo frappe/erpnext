@@ -55,6 +55,11 @@ class website_maker(object):
 			"label":"Blog",
 			"url": "blog"
 		})
+		website_settings.append("top_bar_items", {
+			"doctype": "Top Bar Item",
+			"label": _("Products"),
+			"url": frappe.db.get_value("Website Route", {"ref_doctype":"Item Group"})
+		})
 		website_settings.save()
 
 	def make_blog(self):

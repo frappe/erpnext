@@ -16,8 +16,9 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def validate(self):
 		if not self.parent_website_route:
-			self.parent_website_route = frappe.get_website_route("Item Group",
-				self.parent_item_group)
+			if frappe.db.get_value("Item Group", self.parent_item_group, "show_in_website"):
+				self.parent_website_route = frappe.get_website_route("Item Group",
+					self.parent_item_group)
 
 	def on_update(self):
 		NestedSet.on_update(self)

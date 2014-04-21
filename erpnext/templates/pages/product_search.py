@@ -12,18 +12,19 @@ no_sitemap = 1
 @frappe.whitelist(allow_guest=True)
 def get_product_list(search=None, start=0, limit=10):
 	# base query
-	query = """select name, item_name, page_name, website_image, item_group,
-			web_long_description as website_description
-		from `tabItem` where docstatus = 0 and show_in_website = 1 """
+	query = """select t1.name, t1.item_name, t1.page_name, t1.website_image, t1.item_group,
+			t1.web_long_description as website_description, t2.name as route
+		from `tabItem` t1, `tabWebsite Route` t2 where t1.show_in_website = 1
+			and t1.name = t2.docname and t2.ref_doctype = 'Item'"""
 
 	# search term condition
 	if search:
-		query += """and (web_long_description like %(search)s or
-				item_name like %(search)s or name like %(search)s)"""
+		query += """and (t1.web_long_description like %(search)s or t1.description like %(search)s or
+				t1.item_name like %(search)s or t1.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
+	query += """order by t1.weightage desc, t1.modified desc limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {
 		"search": search,

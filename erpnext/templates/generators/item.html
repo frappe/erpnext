@@ -22,19 +22,20 @@
 				{% endif %}
 			</div>
 			<div class="col-md-6">
-				<h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3>
-				<p class="help">Item Code: <span itemprop="productID">{{ name }}</span></p>
-				<h4>Product Description</h4>
+				<!-- <h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3> -->
 				<div itemprop="description">
-				{{ web_long_description or description or "[No description given]" }}
+				{{ web_long_description or description or _("No description given") }}
 				</div>
+				<p class="text-muted">
+					{{ _("Item Code") }}: <span itemprop="productID">{{ name }}</span></p>
+				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
 					<div class="item-price-info" style="display: none;">
 						<h4 class="item-price" itemprop="price"></h4>
 						<div class="item-stock" itemprop="availablity"></div>
 						<div id="item-add-to-cart">
 							<button class="btn btn-primary">
-								<i class="icon-shopping-cart"></i> Add to Cart</button>
+								<i class="icon-shopping-cart"></i> + {{ _("Add to Cart") }}</button>
 						</div>
 						<div id="item-update-cart" class="input-group col-md-4" style="display: none;
 							padding-left: 0px; padding-right: 0px;">
@@ -51,7 +52,7 @@
 		{% if doc.get({"doctype":"Item Website Specification"}) -%}
 		<div class="row" style="margin-top: 20px">
 			<div class="col-md-12">
-				<h4>Specifications</h4>
+				<h4>{{ _("Specifications") }}</h4>
 				<table class="table table-bordered" style="width: 100%">
 				{% for d in doc.get(
 					{"doctype":"Item Website Specification"}) -%}
