@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import cint
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 import frappe.defaults
 
-class PriceList(DocListController):
+class PriceList(Document):
 	def validate(self):
 		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))

@@ -6,12 +6,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate, add_days, formatdate
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 from datetime import date
 
 class StockFreezeError(frappe.ValidationError): pass
 
-class StockLedgerEntry(DocListController):
+class StockLedgerEntry(Document):
 	def validate(self):
 		from erpnext.stock.utils import validate_warehouse_company
 		self.validate_mandatory()

@@ -6,9 +6,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.model.controller import DocListController
+from frappe.model.document import Document
 
-class CurrencyExchange(DocListController):
+class CurrencyExchange(Document):
 
 	def autoname(self):
 		self.name = self.from_currency + "-" + self.to_currency
