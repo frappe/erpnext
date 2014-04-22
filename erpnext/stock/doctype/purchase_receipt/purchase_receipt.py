@@ -294,6 +294,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
 		doc.run_method("set_missing_values")
+		doc.run_method("calculate_taxes_and_totals")
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {

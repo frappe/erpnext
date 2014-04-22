@@ -247,7 +247,8 @@ class SalesOrder(SellingController):
 		return "order" if self.docstatus==1 else None
 
 def set_missing_values(source, target):
-	target.run_method("onload_post_render")
+	target.run_method("set_missing_values")
+	target.run_method("calculate_taxes_and_totals")
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
@@ -316,7 +317,8 @@ def make_delivery_note(source_name, target_doc=None):
 def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.is_pos = 0
-		target.run_method("onload_post_render")
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)

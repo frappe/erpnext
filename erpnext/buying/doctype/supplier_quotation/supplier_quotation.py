@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
 class SupplierQuotation(BuyingController):
@@ -52,11 +53,10 @@ class SupplierQuotation(BuyingController):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1

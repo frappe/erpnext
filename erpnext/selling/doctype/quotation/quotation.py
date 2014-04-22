@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr
-
+from frappe.model.mapper import get_mapped_doc
 from frappe import _
 
 from erpnext.controllers.selling_controller import SellingController
@@ -96,8 +96,6 @@ def make_sales_order(source_name, target_doc=None):
 	return _make_sales_order(source_name, target_doc)
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
-	from frappe.model.mapper import get_mapped_doc
-
 	customer = _make_customer(source_name, ignore_permissions)
 
 	def set_missing_values(source, target):
@@ -105,9 +103,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
 
-		si = frappe.get_doc(target)
-		si.ignore_permissions = ignore_permissions
-		si.run_method("onload_post_render")
+		target.ignore_permissions = ignore_permissions
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {

@@ -10,10 +10,6 @@ from frappe import _, throw
 from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
-	def onload_post_render(self):
-		# contact, address, item details and pos details (if applicable)
-		self.set_missing_values()
-
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_max_discount()

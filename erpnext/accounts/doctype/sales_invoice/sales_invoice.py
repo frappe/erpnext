@@ -12,6 +12,7 @@ from frappe import _, msgprint, throw
 
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
+from frappe.model.mapper import get_mapped_doc
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
@@ -781,10 +782,9 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def set_missing_values(source, target):
-		target.run_method("onload_post_render")
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.base_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \

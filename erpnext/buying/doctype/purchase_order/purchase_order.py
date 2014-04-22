@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt
 from frappe import msgprint, _, throw
+from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 
 class PurchaseOrder(BuyingController):
@@ -180,10 +181,9 @@ class PurchaseOrder(BuyingController):
 
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
@@ -218,10 +218,9 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)

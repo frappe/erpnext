@@ -39,20 +39,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload_post_render: function() {
 		var me = this;
 		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
-			if(!this.frm.doc.customer || !this.frm.doc.supplier) {
-				return this.frm.call({
-					doc: this.frm.doc,
-					method: "onload_post_render",
-					freeze: true,
-					callback: function(r) {
-						// remove this call when using client side mapper
-						me.set_dynamic_labels();
-						me.calculate_taxes_and_totals();
-					}
-				});
-			} else {
-				this.calculate_taxes_and_totals();
-			}
+			this.calculate_taxes_and_totals();
 		}
 	},
 

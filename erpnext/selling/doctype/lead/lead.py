@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, validate_email_add, cint, comma_and
 from frappe import session
-
+from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -76,8 +76,6 @@ def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
 
 def _make_customer(source_name, target_doc=None, ignore_permissions=False):
-	from frappe.model.mapper import get_mapped_doc
-
 	def set_missing_values(source, target):
 		if source.company_name:
 			target.customer_type = "Company"
@@ -103,8 +101,6 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	doclist = get_mapped_doc("Lead", source_name,
 		{"Lead": {
 			"doctype": "Opportunity",

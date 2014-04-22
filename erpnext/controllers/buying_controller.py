@@ -11,10 +11,6 @@ from erpnext.accounts.party import get_party_details
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
-	def onload_post_render(self):
-		# contact, address, item details
-		self.set_missing_values()
-
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:

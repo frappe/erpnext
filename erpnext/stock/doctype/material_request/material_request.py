@@ -9,6 +9,7 @@ import frappe
 
 from frappe.utils import cstr, flt
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
 class MaterialRequest(BuyingController):
@@ -208,8 +209,8 @@ def _update_requested_qty(doc, mr_obj, mr_items):
 			})
 
 def set_missing_values(source, target_doc):
-	po = frappe.get_doc(target_doc)
-	po.run_method("set_missing_values")
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("calculate_taxes_and_totals")
 
 def update_item(obj, target, source_parent):
 	target.conversion_factor = 1
@@ -217,8 +218,6 @@ def update_item(obj, target, source_parent):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {
 			"doctype": "Purchase Order",
@@ -244,23 +243,19 @@ def make_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
 	if target_doc:
 		if isinstance(target_doc, basestring):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
-		target_doc = target_doc.get({"parentfield": ["!=", "po_details"]})
+		target_doc.set("po_details", [])
 
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
 
 	def postprocess(source, target_doc):
-		target_doc[0].supplier = source_name
+		target_doc.supplier = source_name
 		set_missing_values(source, target_doc)
-
-		po_items = target_doc.get({"parentfield": "po_details"})
-		target_doc = target_doc.get({"parentfield": ["!=", "po_details"]}) + \
-			[d for d in po_items
-				if d.get("item_code") in supplier_items and d.get("qty") > 0]
+		target_doc.set("po_details", [d for d in target_doc.get("po_details")
+			if d.get("item_code") in supplier_items and d.get("qty" > 0)])
 
 		return target_doc
 
@@ -282,7 +277,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 			}
 		}, target_doc, postprocess)
 
-	return target_doc.as_dict()
+	return target_doc
 
 def get_material_requests_based_on_supplier(supplier):
 	supplier_items = [d[0] for d in frappe.db.get_values("Item",
@@ -300,8 +295,6 @@ def get_material_requests_based_on_supplier(supplier):
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Supplier Quotation",
@@ -324,8 +317,6 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
 		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
@@ -333,8 +324,7 @@ def make_stock_entry(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer"
-		se = frappe.get_doc(target)
-		se.run_method("get_stock_and_rate")
+		target.run_method("get_stock_and_rate")
 
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {

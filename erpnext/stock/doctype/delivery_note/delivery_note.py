@@ -275,12 +275,13 @@ def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def update_accounts(source, target):
-		si = frappe.get_doc(target)
-		si.is_pos = 0
-		si.run_method("onload_post_render")
+		target.is_pos = 0
+		target.run_method("set_missing_values")
 
-		if len(si.get("entries")) == 0:
+		if len(target.get("entries")) == 0:
 			frappe.throw(_("All these items have already been invoiced"))
+
+		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)

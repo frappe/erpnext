@@ -3,11 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe.utils import cstr, cint
-
 from frappe import msgprint, _
-
+from frappe.model.mapper import get_mapped_doc
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -129,11 +127,9 @@ class Opportunity(TransactionBase):
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
-		quotation.run_method("onload_post_render")
+		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 
 	doclist = get_mapped_doc("Opportunity", source_name, {
