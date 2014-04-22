@@ -33,21 +33,6 @@ class website_maker(object):
 			})
 		}).insert()
 
-		# about page
-		self.webpage = frappe.get_doc({
-			"doctype": "Web Page",
-			"title": self.company,
-			"published": 1,
-			"header": "<h1>{0}</h1>".format(self.tagline or "Headline")+\
-				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
-				'<p><a class="btn btn-primary" href="/login">Login</a></p>',
-			"description": self.company + ":" + (self.tagline or ""),
-			"css": frappe.get_template("setup/page/setup_wizard/sample_home_page.css").render(),
-			"main_section": frappe.get_template("setup/page/setup_wizard/sample_home_page.html").render({
-				"company": self.company, "tagline": (self.tagline or "")
-			})
-		}).insert()
-
 	def make_style_settings(self):
 		style_settings = frappe.get_doc("Style Settings", "Style Settings")
 		style_settings.top_bar_background = "F2F2F2"
