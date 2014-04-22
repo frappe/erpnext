@@ -1,26 +1,34 @@
 .page-header {
 	color: white;
-	background-color: #444;
-	padding: 40px 0px;
+	background: #263248;
+	text-align: center;
+	padding: 80px 0px;
+}
+
+.page-header .page-header-left {
+	width: 100%;
 }
 
 .page-header h1 {
 	color: white;
 }
 
+.slide h2 {
+	margin-bottom: 30px;
+}
+
+.slides {
+	margin-top: -15px;
+}
+
 .slide {
 	padding: 60px 40px;
-	max-width: 900px;
+	max-width: 800px;
 	margin: auto;
-	border-top: 1px solid #f2f2f2;
 }
 
 .container {
 	max-width: 900px;
-}
-
-.slide h3 {
-	margin-bottom: 70px;
 }
 
 .img-wrapper {

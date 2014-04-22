@@ -18,6 +18,22 @@ class website_maker(object):
 		self.make_blog()
 
 	def make_web_page(self):
+		# home page
+		self.webpage = frappe.get_doc({
+			"doctype": "Web Page",
+			"title": self.company,
+			"published": 1,
+			"header": "<h1>{0}</h1>".format(self.tagline or "Headline")+\
+				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
+				'<p><a class="btn btn-primary" href="/login">Login</a></p>',
+			"description": self.company + ":" + (self.tagline or ""),
+			"css": frappe.get_template("setup/page/setup_wizard/sample_home_page.css").render(),
+			"main_section": frappe.get_template("setup/page/setup_wizard/sample_home_page.html").render({
+				"company": self.company, "tagline": (self.tagline or "")
+			})
+		}).insert()
+
+		# about page
 		self.webpage = frappe.get_doc({
 			"doctype": "Web Page",
 			"title": self.company,
