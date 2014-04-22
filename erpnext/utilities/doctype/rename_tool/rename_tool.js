@@ -8,7 +8,7 @@ cur_frm.cscript.refresh = function(doc) {
 			cur_frm.set_df_property("select_doctype", "options", r.message);
 			cur_frm.cscript.setup_upload();
 		}
-	});	
+	});
 }
 
 cur_frm.cscript.select_doctype = function() {
@@ -31,14 +31,14 @@ cur_frm.cscript.setup_upload = function() {
 			select_doctype: cur_frm.doc.select_doctype
 		},
 		sample_url: "e.g. http://example.com/somefile.csv",
-		callback: function(fid, filename, r) {
+		callback: function(attachment, r) {
 			$log.empty().html("<hr>");
 			$.each(r.message, function(i, v) {
 				$("<div>" + v + "</div>").appendTo($log);
 			});
 		}
 	});
-	
+
 	// rename button
 	$wrapper.find('form input[type="submit"]')
 		.click(function() {
@@ -46,5 +46,5 @@ cur_frm.cscript.setup_upload = function() {
 		})
 		.addClass("btn-info")
 		.attr('value', 'Upload and Rename')
-	
+
 }

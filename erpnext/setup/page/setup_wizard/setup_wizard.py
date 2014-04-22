@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import cstr, getdate
+from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
 from frappe.translate import set_default_language, get_dict, get_lang_dict
@@ -15,8 +15,8 @@ import install_fixtures
 
 @frappe.whitelist()
 def setup_account(args=None):
-	# if frappe.db.sql("select name from tabCompany"):
-	# 	frappe.throw(_("Setup Already Complete!!"))
+	if frappe.db.sql("select name from tabCompany"):
+		frappe.throw(_("Setup Already Complete!!"))
 
 	if not args:
 		args = frappe.local.form_dict
@@ -67,7 +67,7 @@ def setup_account(args=None):
 
 	frappe.db.set_default('desktop:home_page', 'desktop')
 
-	website_maker(args.company_name, args.company_tagline, args.email)
+	website_maker(args.company_name, args.company_tagline, args.name)
 
 	frappe.clear_cache()
 	frappe.db.commit()
@@ -259,6 +259,9 @@ def get_fy_details(fy_start_date, fy_end_date):
 def create_taxes(args):
 	for i in xrange(1,6):
 		if args.get("tax_" + str(i)):
+			# replace % in case someone also enters the % symbol
+			tax_rate = (args.get("tax_rate_" + str(i)) or "").replace("%", "")
+
 			frappe.get_doc({
 				"doctype":"Account",
 				"company": args.get("company_name"),
@@ -267,7 +270,7 @@ def create_taxes(args):
 				"group_or_ledger": "Ledger",
 				"report_type": "Balance Sheet",
 				"account_type": "Tax",
-				"tax_rate": args.get("tax_rate_" + str(i))
+				"tax_rate": flt(tax_rate) if tax_rate else None
 			}).insert()
 
 def create_items(args):
@@ -290,7 +293,7 @@ def create_items(args):
 
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
-				fileurl = save_file(filename, content, "Item", item, decode=True).file_name
+				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
 				frappe.db.set_value("Item", item, "image", fileurl)
 
 	for i in xrange(1,6):
@@ -311,7 +314,7 @@ def create_items(args):
 
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
-				fileurl = save_file(filename, content, "Item", item, decode=True).file_name
+				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
 				frappe.db.set_value("Item", item, "image", fileurl)
 
 

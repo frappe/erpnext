@@ -10,28 +10,28 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 		this.frm.set_value("att_fr_date", get_today());
 		this.frm.set_value("att_to_date", get_today());
 	},
-	
+
 	refresh: function() {
 		this.show_upload();
 	},
-	
+
 	get_template:function() {
 		if(!this.frm.doc.att_fr_date || !this.frm.doc.att_to_date) {
 			msgprint(__("Attendance From Date and Attendance To Date is mandatory"));
 			return;
 		}
-		window.location.href = repl(frappe.request.url + 
+		window.location.href = repl(frappe.request.url +
 			'?cmd=%(cmd)s&from_date=%(from_date)s&to_date=%(to_date)s', {
 				cmd: "erpnext.hr.doctype.upload_attendance.upload_attendance.get_template",
 				from_date: this.frm.doc.att_fr_date,
 				to_date: this.frm.doc.att_to_date,
 			});
 	},
-	
+
 	show_upload: function() {
 		var me = this;
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-		
+
 		// upload
 		frappe.upload.make({
 			parent: $wrapper,
@@ -39,7 +39,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 				method: 'erpnext.hr.doctype.upload_attendance.upload_attendance.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(fid, filename, r) {
+			callback: function(attachment, r) {
 				var $log_wrapper = $(cur_frm.fields_dict.import_log.wrapper).empty();
 
 				if(!r.messages) r.messages = [];
@@ -62,7 +62,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 					r.messages = ["<h4 style='color:green'>"+__("Import Successful!")+"</h4>"].
 						concat(r.message.messages)
 				}
-				
+
 				$.each(r.messages, function(i, v) {
 					var $p = $('<p>').html(v).appendTo($log_wrapper);
 					if(v.substr(0,5)=='Error') {
@@ -77,7 +77,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 				});
 			}
 		});
-		
+
 		// rename button
 		$wrapper.find('form input[type="submit"]')
 			.attr('value', 'Upload and Import')

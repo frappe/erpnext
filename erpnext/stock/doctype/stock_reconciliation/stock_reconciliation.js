@@ -7,16 +7,16 @@ frappe.provide("erpnext.stock");
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	onload: function() {
 		this.set_default_expense_account();
-	}, 
-	
+	},
+
 	set_default_expense_account: function() {
 		var me = this;
-		
+
 		if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
 			return this.frm.call({
 				method: "erpnext.accounts.utils.get_company_default",
 				args: {
-					"fieldname": "stock_adjustment_account", 
+					"fieldname": "stock_adjustment_account",
 					"company": this.frm.doc.company
 				},
 				callback: function(r) {
@@ -25,13 +25,13 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			});
 		}
 	},
-	
+
 	setup: function() {
 		var me = this;
 		if (sys_defaults.auto_accounting_for_stock) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 			this.frm.add_fetch("company", "cost_center", "cost_center");
-		
+
 			this.frm.fields_dict["expense_account"].get_query = function() {
 				return {
 					"filters": {
@@ -50,7 +50,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			}
 		}
 	},
-	
+
 	refresh: function() {
 		if(this.frm.doc.docstatus===0) {
 			this.show_download_template();
@@ -70,7 +70,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		this.show_reconciliation_data();
 		this.show_download_reconciliation_data();
 	},
-	
+
 	show_download_template: function() {
 		var me = this;
 		this.frm.add_custom_button(__("Download Template"), function() {
@@ -90,11 +90,11 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			return false;
 		}, "icon-download");
 	},
-	
+
 	show_upload: function() {
 		var me = this;
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-		
+
 		// upload
 		frappe.upload.make({
 			parent: $wrapper,
@@ -102,7 +102,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				method: 'erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.upload'
 			},
 			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(fid, filename, r) {
+			callback: function(attachment, r) {
 				me.frm.set_value("reconciliation_json", JSON.stringify(r.message));
 				me.show_reconciliation_data();
 				me.frm.save();
@@ -114,7 +114,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			.attr('value', 'Upload')
 
 	},
-	
+
 	show_download_reconciliation_data: function() {
 		var me = this;
 		if(this.frm.doc.reconciliation_json) {
@@ -125,7 +125,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			}, "icon-download");
 		}
 	},
-	
+
 	show_reconciliation_data: function() {
 		var $wrapper = $(cur_frm.fields_dict.reconciliation_html.wrapper).empty();
 		if(this.frm.doc.reconciliation_json) {
@@ -133,11 +133,11 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 			var _make = function(data, header) {
 				var result = "";
-				
+
 				var _render = header
 					? function(col) { return "<th>" + col + "</th>"; }
 					: function(col) { return "<td>" + col + "</td>"; };
-				
+
 				$.each(data, function(i, row) {
 					result += "<tr>"
 						+ $.map(row, _render).join("")
@@ -145,7 +145,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				});
 				return result;
 			};
-			
+
 			var $reconciliation_table = $("<div style='overflow-x: auto;'>\
 					<table class='table table-striped table-bordered'>\
 					<thead>" + _make([reconciliation_data[0]], true) + "</thead>\

@@ -106,6 +106,13 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						slide.form.fields_dict.first_name.set_input(frappe.boot.user.first_name);
 						slide.form.fields_dict.last_name.set_input(frappe.boot.user.last_name);
 
+						var user_image = frappe.get_cookie("user_image");
+						if(user_image) {
+							var $attach_user = slide.form.fields_dict.attach_user.$wrapper;
+							$attach_user.find(".missing-image").toggle(false);
+							$attach_user.find("img").attr("src", user_image).toggle(true);
+						}
+
 						delete slide.form.fields_dict.email;
 						delete slide.form.fields_dict.password;
 					}
@@ -226,7 +233,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i, placeholder:__("e.g. VAT")},
 							{fieldtype:"Column Break"},
-							{fieldtype:"Data", fieldname:"tax_rate_i", label:__("Rate (%)"), placeholder:__("e.g. 5")},
+							{fieldtype:"Data", fieldname:"tax_rate_" + i, label:__("Rate (%)"), placeholder:__("e.g. 5")},
 							{fieldtype:"Section Break"},
 						]);
 					}

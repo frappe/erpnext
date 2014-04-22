@@ -204,15 +204,6 @@ class Item(WebsiteGenerator):
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": frappe.db.get_value("Account", tax_type, "tax_rate") }
 
-	def get_file_details(self, arg = ''):
-		file = frappe.db.sql("select file_group, description from tabFile where name = %s", eval(arg)['file_name'], as_dict = 1)
-
-		ret = {
-			'file_group'	:	file and file[0]['file_group'] or '',
-			'description'	:	file and file[0]['description'] or ''
-		}
-		return ret
-
 	def on_trash(self):
 		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
