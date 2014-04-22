@@ -83,6 +83,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					});
 				}
 			},
+
 			{
 				title: __("The First User: You"),
 				icon: "icon-user",
@@ -116,40 +117,6 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						delete slide.form.fields_dict.email;
 						delete slide.form.fields_dict.password;
 					}
-				}
-			},
-
-			// Organization
-			{
-				title: __("The Organization"),
-				icon: "icon-building",
-				fields: [
-					{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
-						placeholder: __('e.g. "My Company LLC"')},
-					{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
-						placeholder: __('e.g. "MC"'),reqd:1},
-					{fieldname:'fy_start_date', label:__('Financial Year Start Date'), fieldtype:'Date',
-						description: __('Your financial year begins on'), reqd:1},
-					{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
-						description: __('Your financial year ends on'), reqd:1},
-					{fieldname:'company_tagline', label: __('What does it do?'), fieldtype:'Data',
-						placeholder:__('e.g. "Build tools for builders"'), reqd:1},
-				],
-				help: __('The name of your company for which you are setting up this system.'),
-				onload: function(slide) {
-					slide.get_input("company_name").on("change", function() {
-						var parts = slide.get_input("company_name").val().split(" ");
-						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
-						slide.get_input("company_abbr").val(abbr.toUpperCase());
-					}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
-
-					slide.get_input("fy_start_date").on("change", function() {
-						var year_end_date =
-							frappe.datetime.add_days(frappe.datetime.add_months(
-								frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
-						slide.get_input("fy_end_date").val(frappe.datetime.obj_to_user(year_end_date));
-
-					});
 				}
 			},
 
@@ -197,6 +164,10 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						// add all timezones at the end, so that user has the option to change it to any timezone
 						$timezone.add_options([""].concat(frappe.all_timezones));
 
+						// temporarily set date format
+						frappe.boot.sysdefaults.date_format = (frappe.country_info[country].date_format
+							|| "dd-mm-yyyy");
+
 						// get country specific chart of accounts
 						// frappe.call({
 						// 	method: "erpnext.accounts.doctype.chart_of_accounts.chart_of_accounts.get_charts_for_country",
@@ -207,6 +178,40 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						// 				.add_options([""].concat(r.message));
 						// 	}
 						// })
+					});
+				}
+			},
+
+			// Organization
+			{
+				title: __("The Organization"),
+				icon: "icon-building",
+				fields: [
+					{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
+						placeholder: __('e.g. "My Company LLC"')},
+					{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
+						placeholder: __('e.g. "MC"'),reqd:1},
+					{fieldname:'fy_start_date', label:__('Financial Year Start Date'), fieldtype:'Date',
+						description: __('Your financial year begins on'), reqd:1},
+					{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
+						description: __('Your financial year ends on'), reqd:1},
+					{fieldname:'company_tagline', label: __('What does it do?'), fieldtype:'Data',
+						placeholder:__('e.g. "Build tools for builders"'), reqd:1},
+				],
+				help: __('The name of your company for which you are setting up this system.'),
+				onload: function(slide) {
+					slide.get_input("company_name").on("change", function() {
+						var parts = slide.get_input("company_name").val().split(" ");
+						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
+						slide.get_input("company_abbr").val(abbr.toUpperCase());
+					}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
+
+					slide.get_input("fy_start_date").on("change", function() {
+						var year_end_date =
+							frappe.datetime.add_days(frappe.datetime.add_months(
+								frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
+						slide.get_input("fy_end_date").val(frappe.datetime.obj_to_user(year_end_date));
+
 					});
 				}
 			},
@@ -233,7 +238,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i, placeholder:__("e.g. VAT")},
 							{fieldtype:"Column Break"},
-							{fieldtype:"Data", fieldname:"tax_rate_" + i, label:__("Rate (%)"), placeholder:__("e.g. 5")},
+							{fieldtype:"Float", fieldname:"tax_rate_" + i, label:__("Rate (%)"), placeholder:__("e.g. 5")},
 							{fieldtype:"Section Break"},
 						]);
 					}

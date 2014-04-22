@@ -68,6 +68,7 @@ def setup_account(args=None):
 	frappe.db.set_default('desktop:home_page', 'desktop')
 
 	website_maker(args.company_name, args.company_tagline, args.name)
+	create_logo(args)
 
 	frappe.clear_cache()
 	frappe.db.commit()
@@ -98,7 +99,7 @@ def update_user_name(args):
 
 	if args.get("attach_user"):
 		filename, filetype, content = args.get("attach_user").split(",")
-		fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_name
+		fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_url
 		frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
 
 	add_all_roles_to(args.get("name"))
@@ -370,8 +371,16 @@ def create_letter_head(args):
 		}).insert()
 
 		filename, filetype, content = args.get("attach_letterhead").split(",")
-		fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_name
+		fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
 		frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+
+def create_logo(args):
+	if args.get("attach_logo"):
+		filename, filetype, content = args.get("attach_logo").split(",")
+		fileurl = save_file(filename, content, "Website Settings", "Website Settings",
+			decode=True).file_url
+		frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
+			"<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
