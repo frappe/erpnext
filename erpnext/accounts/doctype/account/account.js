@@ -1,6 +1,8 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.list_route = "Accounts Browser/Account";
+
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.__islocal) {
 		msgprint(__("Please create new account from Chart of Accounts."));
@@ -8,20 +10,20 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 
 	cur_frm.toggle_display('account_name', doc.__islocal);
-	
+
 	// hide fields if group
-	cur_frm.toggle_display(['account_type', 'master_type', 'master_name', 
-		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')	
-		
+	cur_frm.toggle_display(['account_type', 'master_type', 'master_name',
+		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')
+
 	// disable fields
 	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
-	
+
 	if(doc.group_or_ledger=='Ledger') {
 		frappe.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
 			var accounts_settings = frappe.get_doc("Accounts Settings", name);
-			var display = accounts_settings["frozen_accounts_modifier"] 
+			var display = accounts_settings["frozen_accounts_modifier"]
 				&& in_list(user_roles, accounts_settings["frozen_accounts_modifier"]);
-			
+
 			cur_frm.toggle_display('freeze_account', display);
 		});
 	}
@@ -33,9 +35,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	} else {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
-		cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'], 
+		cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'],
 			doc.master_type));
-		
+
 		cur_frm.cscript.master_type(doc, cdt, cdn);
 		cur_frm.cscript.account_type(doc, cdt, cdn);
 
@@ -45,10 +47,10 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.master_type = function(doc, cdt, cdn) {
-	cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'], 
+	cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'],
 		doc.master_type));
-		
-	cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' || 
+
+	cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' ||
 		in_list(['Customer', 'Supplier'], doc.master_type));
 }
 
@@ -58,22 +60,22 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
 		cur_frm.toggle_display('master_type', cstr(doc.account_type)=='');
-		cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' || 
+		cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' ||
 			in_list(['Customer', 'Supplier'], doc.master_type));
 	}
 }
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
-	cur_frm.appframe.add_button(__('Chart of Accounts'), 
+	cur_frm.appframe.add_button(__('Chart of Accounts'),
 		function() { frappe.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button(__('Convert to Ledger'), 
+		cur_frm.add_custom_button(__('Convert to Ledger'),
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
-		cur_frm.add_custom_button(__('Convert to Group'), 
+		cur_frm.add_custom_button(__('Convert to Group'),
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
-			
+
 		cur_frm.appframe.add_button(__('View Ledger'), function() {
 			frappe.route_options = {
 				"account": doc.name,
@@ -88,7 +90,7 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 
 cur_frm.cscript.convert_to_ledger = function(doc, cdt, cdn) {
   return $c_obj(cur_frm.doc,'convert_group_to_ledger','',function(r,rt) {
-    if(r.message == 1) {  
+    if(r.message == 1) {
 	  cur_frm.refresh();
     }
   });
@@ -119,7 +121,7 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 cur_frm.fields_dict['parent_account'].get_query = function(doc) {
 	return {
 		filters: {
-			"group_or_ledger": "Group", 
+			"group_or_ledger": "Group",
 			"company": doc.company
 		}
 	}

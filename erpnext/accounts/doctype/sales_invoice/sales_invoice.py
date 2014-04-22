@@ -784,8 +784,7 @@ def make_delivery_note(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def set_missing_values(source, target):
-		doc = frappe.get_doc(target)
-		doc.run_method("onload_post_render")
+		target.run_method("onload_post_render")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.base_amount = (flt(source_doc.qty) - flt(source_doc.delivered_qty)) * \

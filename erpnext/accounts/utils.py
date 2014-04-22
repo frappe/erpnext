@@ -99,11 +99,12 @@ def add_ac(args=None):
 		args = frappe.local.form_dict
 		args.pop("cmd")
 
-	ac = frappe.get_doc(args)
-	ac.doctype = "Account"
+	ac = frappe.new_doc("Account")
+	ac.update(args)
 	ac.old_parent = ""
 	ac.freeze_account = "No"
 	ac.insert()
+
 	return ac.name
 
 @frappe.whitelist()
@@ -112,8 +113,8 @@ def add_cc(args=None):
 		args = frappe.local.form_dict
 		args.pop("cmd")
 
-	cc = frappe.get_doc(args)
-	cc.doctype = "Cost Center"
+	cc = frappe.new_doc("Cost Center")
+	cc.update(args)
 	cc.old_parent = ""
 	cc.insert()
 	return cc.name

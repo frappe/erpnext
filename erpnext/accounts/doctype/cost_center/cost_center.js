@@ -2,11 +2,14 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
+
+cur_frm.list_route = "Accounts Browser/Cost Center";
+
 erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 	onload: function() {
 		this.setup_queries();
 	},
-	
+
 	setup_queries: function() {
 		var me = this;
 		if(this.frm.fields_dict["budget_details"].grid.get_field("account")) {
@@ -20,10 +23,10 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
-		
+
 		this.frm.set_query("parent_cost_center", function() {
 			return {
-				filters:[			
+				filters:[
 					['Cost Center', 'group_or_ledger', '=', 'Group'],
 					['Cost Center', 'company', '=', me.frm.doc.company],
 				]
@@ -44,11 +47,11 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 
 	cur_frm.cscript.hide_unhide_group_ledger(doc);
-	
+
 	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
-	
-	cur_frm.appframe.add_button(__('Chart of Cost Centers'), 
+
+	cur_frm.appframe.add_button(__('Chart of Cost Centers'),
 		function() { frappe.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 
@@ -60,10 +63,10 @@ cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
 
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
 	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button(__('Convert to Ledger'), 
+		cur_frm.add_custom_button(__('Convert to Ledger'),
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
-		cur_frm.add_custom_button(__('Convert to Group'), 
+		cur_frm.add_custom_button(__('Convert to Group'),
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
 	}
 }

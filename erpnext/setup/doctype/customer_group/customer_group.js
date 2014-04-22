@@ -1,6 +1,8 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
- 
+
+cur_frm.list_route = "Sales Browser/Customer Group";
+
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);
 }
@@ -22,5 +24,5 @@ cur_frm.fields_dict['parent_customer_group'].get_query = function(doc,cdt,cdn) {
 		filters: {
 			'is_group': "Yes"
 		}
-	} 
+	}
 }

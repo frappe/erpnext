@@ -11,28 +11,27 @@ def get_children():
 	frappe.local.form_dict['parent_field'] = 'parent_' + ctype.lower().replace(' ', '_')
 	if not frappe.form_dict.get('parent'):
 		frappe.local.form_dict['parent'] = ''
-		
-	return frappe.db.sql("""select name as value, 
+
+	return frappe.db.sql("""select name as value,
 		if(is_group='Yes', 1, 0) as expandable
 		from `tab%(ctype)s`
 		where docstatus < 2
 		and ifnull(%(parent_field)s,'') = "%(parent)s"
 		order by name""" % frappe.local.form_dict, as_dict=1)
-		
+
 @frappe.whitelist()
 def add_node():
-	# 	ctype = frappe.form_dict.get('ctype')
+	ctype = frappe.form_dict.get('ctype')
 	parent_field = 'parent_' + ctype.lower().replace(' ', '_')
 	name_field = ctype.lower().replace(' ', '_') + '_name'
-	
-	doclist = [{
-		"doctype": ctype,
-		"__islocal": 1,
+
+	doc = frappe.new_doc(ctype)
+	doc.update({
 		name_field: frappe.form_dict['name_field'],
 		parent_field: frappe.form_dict['parent'],
 		"is_group": frappe.form_dict['is_group']
-	}]
+	})
 	if ctype == "Sales Person":
-		doclist[0]["employee"] = frappe.form_dict.get('employee')
-		
-	frappe.get_doc(doclist).save()
+		doc.employee = frappe.form_dict.get('employee')
+
+	doc.save()
