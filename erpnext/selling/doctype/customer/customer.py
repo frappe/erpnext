@@ -66,7 +66,7 @@ class Customer(TransactionBase):
 			c.is_primary_contact = 1
 			try:
 				c.save()
-			except NameError:
+			except frappe.NameError:
 				pass
 
 	def on_update(self):

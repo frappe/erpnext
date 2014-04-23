@@ -15,7 +15,7 @@ def install(company):
 	for d in docs:
 		try:
 			frappe.get_doc(d).insert()
-		except NameError:
+		except frappe.NameError:
 			pass
 
 
