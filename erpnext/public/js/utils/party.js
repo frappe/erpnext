@@ -8,19 +8,21 @@ erpnext.utils.get_party_details = function(frm, method, args) {
 	}
 	if(!args) {
 		if(frm.doc.customer) {
-			args = { 
+			args = {
 				party: frm.doc.customer,
 				party_type: "Customer",
 				price_list: frm.doc.selling_price_list
 			};
-		} else {
-			args = { 
+		} else if(frm.doc.supplier) {
+			args = {
 				party: frm.doc.supplier,
 				party_type: "Supplier",
 				price_list: frm.doc.buying_price_list
 			};
 		}
 	}
+	if(!args) return;
+
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	frappe.call({
@@ -44,7 +46,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 		} else if(frm.doc.supplier) {
 			address_field = "supplier_address";
 		} else return;
-	} 
+	}
 	if(!display_field) display_field = "address_display";
 	if(frm.doc[address_field]) {
 		frappe.call({
@@ -60,7 +62,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 
 erpnext.utils.get_contact_details = function(frm) {
 	if(frm.updating_party_details) return;
-	
+
 	if(frm.doc["contact_person"]) {
 		frappe.call({
 			method: "erpnext.utilities.doctype.contact.contact.get_contact_details",

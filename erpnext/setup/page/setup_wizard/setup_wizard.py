@@ -204,9 +204,6 @@ def set_defaults(args):
 	email_settings.send_print_in_body_and_attachment = 1
 	email_settings.save()
 
-	# default
-	frappe.db.set_default("company_name", args["company_name"])
-
 def create_feed_and_todo():
 	"""update activty feed and create todo for creation of item, customer, vendor"""
 	from erpnext.home import make_feed
