@@ -82,9 +82,6 @@ class NamingSeries(Document):
 		frappe.clear_cache(doctype=doctype)
 
 	def check_duplicate(self):
-		from frappe.core.doctype.doctype.doctype import DocType
-		dt = DocType()
-
 		parent = list(set(
 			frappe.db.sql_list("""select dt.name
 				from `tabDocField` df, `tabDocType` dt
@@ -97,9 +94,11 @@ class NamingSeries(Document):
 			))
 		sr = [[frappe.get_meta(p).get_field("naming_series").options, p]
 			for p in parent]
+
+		dt = frappe.get_doc("DocType", self.select_doc_for_series)
 		options = self.scrub_options_list(self.set_options.split("\n"))
 		for series in options:
-			dt.validate_series(series, self.select_doc_for_series)
+			dt.validate_series(series)
 			for i in sr:
 				if i[0]:
 					existing_series = [d.split('.')[0] for d in i[0].split("\n")]
