@@ -138,7 +138,8 @@ def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type"])
 	if quotation and quotation[0]:
 		lead_name = quotation[0]
-		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name})
+		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
+			["name", "customer_name"], as_dict=True)
 		if not customer_name:
 			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
@@ -162,3 +163,5 @@ def _make_customer(source_name, ignore_permissions=False):
 			except frappe.MandatoryError:
 				from frappe.utils import get_url_to_form
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
+		else:
+			return customer_name
