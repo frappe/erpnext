@@ -7,8 +7,14 @@ cur_frm.cscript.refresh = function(doc) {
 	// make sensitive fields(has_serial_no, is_stock_item, valuation_method)
 	// read only if any stock ledger entry exists
 
-	cur_frm.cscript.make_dashboard()
-	erpnext.hide_naming_series();
+	cur_frm.cscript.make_dashboard();
+
+	if (frappe.defaults.get_default("item_naming_by")!="Naming Series") {
+		cur_frm.toggle_display("naming_series", false);
+	} else {
+		erpnext.toggle_naming_series();
+	}
+
 
 	if(!doc.__islocal && doc.show_in_website) {
 		cur_frm.appframe.add_button("View In Website", function() {

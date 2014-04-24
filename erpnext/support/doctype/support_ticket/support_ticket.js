@@ -17,7 +17,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	refresh: function(doc) {
-		erpnext.hide_naming_series();
+		erpnext.toggle_naming_series();
 		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {
 			if(cur_frm.fields_dict.status.get_status()=="Write") {

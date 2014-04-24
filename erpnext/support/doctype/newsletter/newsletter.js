@@ -13,7 +13,7 @@ cur_frm.cscript.onload = function(doc) {
 }
 
 cur_frm.cscript.refresh = function(doc) {
-	erpnext.hide_naming_series();
+	erpnext.toggle_naming_series();
 	if(!doc.__islocal && !cint(doc.email_sent) && !doc.__unsaved
 			&& inList(frappe.boot.user.can_write, doc.doctype)) {
 		cur_frm.add_custom_button(__('Send'), function() {

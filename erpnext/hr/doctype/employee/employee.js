@@ -19,7 +19,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 	refresh: function() {
 		var me = this;
-		erpnext.hide_naming_series();
+		erpnext.toggle_naming_series();
 		if(!this.frm.doc.__islocal) {
 			cur_frm.add_custom_button(__('Make Salary Structure'), function() {
 				me.make_salary_structure(this); });

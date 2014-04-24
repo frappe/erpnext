@@ -30,7 +30,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	
 	refresh: function() {
 		var doc = this.frm.doc;
-		erpnext.hide_naming_series();
+		erpnext.toggle_naming_series();
 		this.frm.clear_custom_buttons();
 
 		this.frm.__is_customer = this.frm.__is_customer || this.frm.doc.__is_customer;

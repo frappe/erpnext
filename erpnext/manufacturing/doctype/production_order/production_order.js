@@ -12,7 +12,7 @@ $.extend(cur_frm.cscript, {
 
 	refresh: function(doc, dt, dn) {
 		this.frm.dashboard.reset();
-		erpnext.hide_naming_series();
+		erpnext.toggle_naming_series();
 		this.frm.set_intro("");
 		cfn_set_fields(doc, dt, dn);
 

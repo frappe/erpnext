@@ -20,11 +20,16 @@ cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {
 	cur_frm.cscript.setup_dashboard(doc);
-	erpnext.hide_naming_series();
 
-	if(doc.__islocal){		
+	if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
+		cur_frm.toggle_display("naming_series", false);
+	} else {
+		erpnext.toggle_naming_series();
+	}
+
+	if(doc.__islocal){
 		hide_field(['address_html','contact_html']);
-	}else{		
+	}else{
 		unhide_field(['address_html','contact_html']);
 		// make lists
 		cur_frm.cscript.make_address(doc, dt, dn);
@@ -39,17 +44,17 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 
 cur_frm.cscript.setup_dashboard = function(doc) {
 	cur_frm.dashboard.reset(doc);
-	if(doc.__islocal) 
+	if(doc.__islocal)
 		return;
 	if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager"))
 		cur_frm.dashboard.set_headline('<span class="text-muted">'+ __('Loading...')+ '</span>')
-	
+
 	cur_frm.dashboard.add_doctype_badge("Opportunity", "customer");
 	cur_frm.dashboard.add_doctype_badge("Quotation", "customer");
 	cur_frm.dashboard.add_doctype_badge("Sales Order", "customer");
 	cur_frm.dashboard.add_doctype_badge("Delivery Note", "customer");
 	cur_frm.dashboard.add_doctype_badge("Sales Invoice", "customer");
-	
+
 	return frappe.call({
 		type: "GET",
 		method: "erpnext.selling.doctype.customer.customer.get_dashboard_info",
@@ -59,10 +64,10 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 		callback: function(r) {
 			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
 				cur_frm.dashboard.set_headline(
-					__("Total Billing This Year: ") + "<b>" 
+					__("Total Billing This Year: ") + "<b>"
 					+ format_currency(r.message.total_billing, erpnext.get_currency(cur_frm.doc.company))
-					+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>" 
-					+ format_currency(r.message.total_unpaid, erpnext.get_currency(cur_frm.doc.company)) 
+					+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>"
+					+ format_currency(r.message.total_unpaid, erpnext.get_currency(cur_frm.doc.company))
 					+ '</b></span>');
 			}
 			cur_frm.dashboard.set_badge_count(r.message);

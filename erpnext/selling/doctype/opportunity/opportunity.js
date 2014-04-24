@@ -81,7 +81,7 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
-	erpnext.hide_naming_series();
+	erpnext.toggle_naming_series();
 	cur_frm.clear_custom_buttons();
 	
 	if(doc.docstatus === 1 && doc.status!=="Lost") {

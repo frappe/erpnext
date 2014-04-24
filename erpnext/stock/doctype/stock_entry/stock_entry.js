@@ -61,7 +61,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	refresh: function() {
 		var me = this;
-		erpnext.hide_naming_series();
+		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();

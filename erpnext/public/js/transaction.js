@@ -45,7 +45,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	refresh: function() {
 		this.frm.clear_custom_buttons();
-		erpnext.hide_naming_series();
+		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();

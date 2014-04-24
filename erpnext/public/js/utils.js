@@ -12,7 +12,7 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
-	hide_naming_series: function() {
+	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
 		}
