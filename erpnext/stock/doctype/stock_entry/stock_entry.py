@@ -30,6 +30,7 @@ class StockEntry(StockController):
 		pro_obj = self.production_order and \
 			frappe.get_doc('Production Order', self.production_order) or None
 
+		self.set_transfer_qty()
 		self.validate_item()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
@@ -67,6 +68,10 @@ class StockEntry(StockController):
 			"Manufacture/Repack", "Subcontract", "Sales Return", "Purchase Return"]
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
+
+	def set_transfer_qty(self):
+		for item in self.get("mtn_details"):
+			item.transfer_qty = flt(item.qty * item.conversion_factor, self.precision("transfer_qty", item))
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
@@ -157,7 +162,7 @@ class StockEntry(StockController):
 			production_item, qty = frappe.db.get_value("Production Order",
 				self.production_order, ["production_item", "qty"])
 			args = other_ste + [production_item]
-			fg_qty_already_entered = frappe.db.sql("""select sum(actual_qty)
+			fg_qty_already_entered = frappe.db.sql("""select sum(transfer_qty)
 				from `tabStock Entry Detail`
 				where parent in (%s)
 					and item_code = %s
