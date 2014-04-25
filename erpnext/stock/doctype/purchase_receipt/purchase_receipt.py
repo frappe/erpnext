@@ -207,7 +207,7 @@ class PurchaseReceipt(BuyingController):
 				(d.item_code,), as_dict = 1)
 			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
 			if ins_reqd == 'Yes' and not d.qa_no:
-				frappe.throw(_("Quality Inspection required for Item {0}").format(d.item_code))
+				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 
 	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
