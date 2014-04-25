@@ -27,7 +27,7 @@ cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 	if (doc.purchase_receipt_no) {
 		return {
-			query: "buying.doctype.quality_inspection.quality_inspection.item_query",
+			query: "erpnext.buying.doctype.quality_inspection.quality_inspection.item_query",
 			filters: {
 				"from": "Purchase Receipt Item",
 				"parent": doc.purchase_receipt_no
@@ -35,7 +35,7 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 		}
 	} else if (doc.delivery_note_no) {
 		return {
-			query: "buying.doctype.quality_inspection.quality_inspection.item_query",
+			query: "erpnext.buying.doctype.quality_inspection.quality_inspection.item_query",
 			filters: {
 				"from": "Delivery Note Item",
 				"parent": doc.delivery_note_no

@@ -7,7 +7,7 @@ cur_frm.add_fetch("time_log", "hours", "hours");
 
 cur_frm.set_query("time_log", "time_log_batch_details", function(doc) {
 	return {
-		query: "projects.utils.get_time_log_list",
+		query: "erpnext.projects.utils.get_time_log_list",
 		filters: {
 			"billable": 1,
 			"status": "Submitted"

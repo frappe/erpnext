@@ -56,7 +56,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 			frappe.model.validate_missing(jvd, "account");
 
 			return {
-				query: "accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
+				query: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
 				filters: { account: jvd.account }
 			};
 		});

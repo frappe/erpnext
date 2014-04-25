@@ -109,7 +109,7 @@ cur_frm.fields_dict['master_name'].get_query = function(doc) {
 		var dt = doc.master_type || "Warehouse";
 		return {
 			doctype: dt,
-			query: "accounts.doctype.account.account.get_master_name",
+			query: "erpnext.accounts.doctype.account.account.get_master_name",
 			filters: {
 				"master_type": dt,
 				"company": doc.company
