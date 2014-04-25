@@ -35,6 +35,7 @@ class DocType(StockController):
 		pro_obj = self.doc.production_order and \
 			get_obj('Production Order', self.doc.production_order) or None
 
+		self.set_transfer_qty()
 		self.validate_item()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
@@ -73,6 +74,10 @@ class DocType(StockController):
 		if self.doc.purpose not in valid_purposes:
 			msgprint(_("Purpose must be one of ") + comma_or(valid_purposes),
 				raise_exception=True)
+
+	def set_transfer_qty(self):
+		for item in self.doclist.get({"parentfield": "mtn_details"}):
+			item.transfer_qty = flt(item.qty * item.conversion_factor, self.precision("transfer_qty", item))
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
@@ -164,7 +169,7 @@ class DocType(StockController):
 			production_item, qty = webnotes.conn.get_value("Production Order",
 				self.doc.production_order, ["production_item", "qty"])
 			args = other_ste + [production_item]
-			fg_qty_already_entered = webnotes.conn.sql("""select sum(actual_qty)
+			fg_qty_already_entered = webnotes.conn.sql("""select sum(transfer_qty)
 				from `tabStock Entry Detail`
 				where parent in (%s)
 					and item_code = %s
