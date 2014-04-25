@@ -3,10 +3,10 @@
 
 {% include 'utilities/doctype/sms_control/sms_control.js' %};
 
-frappe.ui.form.on_change("Opportunity", "customer", function(frm) { 
+frappe.ui.form.on_change("Opportunity", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
 frappe.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_address_display);
-frappe.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);	
+frappe.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);
 
 
 frappe.provide("erpnext.selling");
@@ -18,15 +18,15 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.enquiry_from && this.frm.doc.lead)
 			this.frm.doc.enquiry_from = "Lead";
 
-		if(!this.frm.doc.status) 
+		if(!this.frm.doc.status)
 			set_multiple(cdt, cdn, { status:'Draft' });
-		if(!this.frm.doc.date) 
+		if(!this.frm.doc.date)
 			this.frm.doc.transaction_date = date.obj_to_str(new Date());
-		if(!this.frm.doc.company && frappe.defaults.get_user_default("company")) 
+		if(!this.frm.doc.company && frappe.defaults.get_user_default("company"))
 			set_multiple(cdt, cdn, { company:frappe.defaults.get_user_default("company") });
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year)
 			set_multiple(cdt, cdn, { fiscal_year:sys_defaults.fiscal_year });
-	
+
 
 		if(!this.frm.doc.__islocal) {
 			cur_frm.communication_view = new frappe.views.CommunicationList({
@@ -36,32 +36,32 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 				recipients: this.frm.doc.contact_email
 			});
 		}
-		
+
 		if(this.frm.doc.customer && !this.frm.doc.customer_name) cur_frm.cscript.customer(this.frm.doc);
-		
+
 		this.setup_queries();
 	},
-	
+
 	setup_queries: function() {
 		var me = this;
-		
+
 		if(this.frm.fields_dict.contact_by.df.options.match(/^User/)) {
 			this.frm.set_query("contact_by", erpnext.queries.user);
 		}
-		
+
 		this.frm.set_query("customer_address", function() {
 			if(me.frm.doc.lead) return {filters: { lead: me.frm.doc.lead } };
 			else if(me.frm.doc.customer) return {filters: { customer: me.frm.doc.customer } };
 		});
-		
+
 		this.frm.set_query("item_code", "enquiry_details", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters: me.frm.doc.enquiry_type === "Maintenance" ? 
+				filters: me.frm.doc.enquiry_type === "Maintenance" ?
 					{"is_service_item": "Yes"} : {"is_sales_item": "Yes"}
 			};
 		});
-		
+
 		$.each([["lead", "lead"],
 			["customer", "customer"],
 			["contact_person", "customer_filter"],
@@ -69,7 +69,7 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
 			});
 	},
-		
+
 	create_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
@@ -83,14 +83,14 @@ $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
 	cur_frm.clear_custom_buttons();
-	
+
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
 		cur_frm.add_custom_button(__('Create Quotation'), cur_frm.cscript.create_quotation);
 		if(doc.status!=="Quotation")
 			cur_frm.add_custom_button(__('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
 
 		cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
-	}	
+	}
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
@@ -101,7 +101,7 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code, 
+		return get_server_fields('get_item_details', d.item_code,
 			'enquiry_details', doc, cdt, cdn, 1);
 	}
 }
@@ -134,9 +134,10 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 			callback: function(r) {
 				if(r.exc) {
 					msgprint(__("There were errors."));
-					return;
+				} else {
+					dialog.hide();
+					cur_frm.refresh();
 				}
-				dialog.hide();
 			},
 			btn: this
 		})
