@@ -839,7 +839,8 @@ def make_stock_entry(item, source, target, qty, incoming_rate=None):
 		"s_warehouse": source,
 		"t_warehouse": target,
 		"qty": qty,
-		"incoming_rate": incoming_rate
+		"incoming_rate": incoming_rate,
+		"conversion_factor": 1.0
 	})
 	s.insert()
 	s.submit()
