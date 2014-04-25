@@ -23,16 +23,16 @@ $.extend(cur_frm.cscript, {
 			"Billed": __("This Time Log Batch has been billed."),
 			"Cancelled": __("This Time Log Batch has been cancelled.")
 		}[doc.status]);
-		
+
 		if(doc.status=="Submitted") {
-			cur_frm.add_custom_button(__("Make Sales Invoice"), function() { cur_frm.cscript.make_invoice() }, 
+			cur_frm.add_custom_button(__("Make Sales Invoice"), function() { cur_frm.cscript.make_invoice() },
 				"icon-file-alt");
 		}
 	},
 	make_invoice: function() {
-		frappe.model.map({
-			source: cur_frm.doc,
-			target: "Sales Invoice"
+		frappe.model.open_mapped_doc({
+			method: "erpnext.projects.doctype.time_log_batch.time_log_batch.make_sales_invoice",
+			source_name: cur_frm.doc.name
 		});
 	}
 });

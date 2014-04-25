@@ -20,7 +20,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var me = this;
 		erpnext.toggle_naming_series();
-		if(!this.frm.doc.__islocal) {
+		if(!this.frm.doc.__islocal && !this.frm.doc.salary_structure_exists) {
 			cur_frm.add_custom_button(__('Make Salary Structure'), function() {
 				me.make_salary_structure(this); });
 		}
@@ -58,35 +58,10 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	},
 
 	make_salary_structure: function(btn) {
-		var me = this;
-		this.validate_salary_structure(btn, function(r) {
-			if(r.message) {
-				msgprint(__("Active Salary Sructure already exists for Employee {0}", [me.frm.doc.name]));
-			} else if(!r.exc) {
-				frappe.model.map({
-					source: me.frm.doc,
-					target: "Salary Structure"
-				});
-			}
+		frappe.model.open_mapped_doc({
+			method: "erpnext.hr.doctype.employee.employee.make_salary_structure",
+			source_name: cur_frm.doc.name
 		});
-	},
-
-	validate_salary_structure: function(btn, callback) {
-		var me = this;
-		return this.frm.call({
-			btn: btn,
-			method: "frappe.client.get_value",
-			args: {
-				doctype: "Salary Structure",
-				fieldname: "name",
-				filters: {
-					employee: me.frm.doc.name,
-					is_active: "Yes",
-					docstatus: ["!=", 2]
-				},
-			},
-			callback: callback
-		});
-	},
+	}
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

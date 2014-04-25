@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 
 class TimeLogBatch(Document):
 
@@ -58,3 +59,24 @@ class TimeLogBatch(Document):
 			tl.sales_invoice = self.sales_invoice
 			tl.ignore_validate_update_after_submit = True
 			tl.save()
+
+@frappe.whitelist()
+def make_sales_invoice(source_name, target=None):
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.stock_uom = "Hour"
+		target_doc.description = "via Time Logs"
+
+	target = frappe.new_doc("Sales Invoice")
+	target.append("entries", get_mapped_doc("Time Log Batch", source_name, {
+		"Time Log Batch": {
+			"doctype": "Sales Invoice Item",
+			"field_map": {
+				"rate": "base_rate",
+				"name": "time_log_batch",
+				"total_hours": "qty",
+			},
+			"postprocess": update_item
+		}
+	}))
+
+	return target

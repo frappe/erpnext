@@ -10,8 +10,21 @@ from frappe import throw, _
 import frappe.permissions
 from frappe.defaults import get_restrictions
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 
 class Employee(Document):
+	def onload(self):
+		self.salary_structure_exists = frappe.db.get_value("Salary Structure",
+			{"employee": self.name, "is_active": "Yes", "docstatus": ["!=", 2]})
+
+	def as_dict(self):
+		doc = super(Employee, self).as_dict()
+
+		if hasattr(self, "salary_structure_exists"):
+			doc["salary_structure_exists"] = self.salary_structure_exists
+
+		return doc
+
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
 		if not naming_method:
@@ -203,3 +216,16 @@ def get_retirement_date(date_of_birth=None):
 		dt = getdate(date_of_birth) + datetime.timedelta(21915)
 		ret = {'date_of_retirement': dt.strftime('%Y-%m-%d')}
 	return ret
+
+@frappe.whitelist()
+def make_salary_structure(source_name, target=None):
+	target = get_mapped_doc("Employee", source_name, {
+		"Employee": {
+			"doctype": "Salary Structure",
+			"field_map": {
+				"name": "employee"
+			}
+		}
+	})
+	target.make_earn_ded_table()
+	return target
