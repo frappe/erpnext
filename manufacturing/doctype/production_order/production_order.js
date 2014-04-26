@@ -10,6 +10,10 @@ $.extend(cur_frm.cscript, {
 		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
 	},
 
+	before_submit: function() {
+		cur_frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
+	},
+
 	refresh: function(doc, dt, dn) {
 		this.frm.dashboard.reset();
 		erpnext.hide_naming_series();
@@ -62,7 +66,7 @@ var cfn_set_fields = function(doc, dt, dn) {
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
 			cur_frm.add_custom_button(wn._('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);
 			cur_frm.add_custom_button(wn._('Update Finished Goods'), cur_frm.cscript['Update Finished Goods']);
-		} 
+		}
 	}
 }
 
@@ -102,7 +106,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
 		]
-	}	
+	}
 }
 
 cur_frm.set_query("bom_no", function(doc) {

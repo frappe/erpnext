@@ -3,9 +3,11 @@
 
 $.extend(cur_frm.cscript, {
 	onload: function() {
-		cur_frm.set_query("item_code", erpnext.queries.item);
+		cur_frm.set_query("item_code", function() {
+			return erpnext.queries.item({"is_stock_item": "Yes"});
+		});
 	},
-	
+
 	item_code: function() {
 		if(cur_frm.doc.item_code) {
 			return cur_frm.call({
