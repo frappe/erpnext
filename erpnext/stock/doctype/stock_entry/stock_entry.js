@@ -350,7 +350,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			'cost_center'		: d.cost_center,
 			'company'		: cur_frm.doc.company
 		};
-		return get_server_fields('get_item_details', {arg: JSON.stringify(args)},
+		return get_server_fields('get_item_details', JSON.stringify(args),
 			'mtn_details', doc, cdt, cdn, 1);
 	}
 

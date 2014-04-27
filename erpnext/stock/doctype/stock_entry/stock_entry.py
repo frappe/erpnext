@@ -11,8 +11,6 @@ from frappe import _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
-import json
-
 
 class NotUpdateStockError(frappe.ValidationError): pass
 class StockOverReturnError(frappe.ValidationError): pass
@@ -340,23 +338,22 @@ class StockEntry(StockController):
 			"planned_qty": (self.docstatus==1 and -1 or 1 ) * flt(self.fg_completed_qty)
 		})
 
-	def get_item_details(self, arg):
-		arg = json.loads(arg)
+	def get_item_details(self, args):
 		item = frappe.db.sql("""select stock_uom, description, item_name,
 			expense_account, buying_cost_center from `tabItem`
 			where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""",
-			(arg.get('item_code')), as_dict = 1)
+			(args.get('item_code')), as_dict = 1)
 		if not item:
-			frappe.throw(_("Item {0} is not active or end of life has been reached").format(arg.get("item_code")))
+			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
 
 		ret = {
 			'uom'			      	: item and item[0]['stock_uom'] or '',
 			'stock_uom'			  	: item and item[0]['stock_uom'] or '',
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
-			'expense_account'		: item and item[0]['expense_account'] or arg.get("expense_account") \
-				or frappe.db.get_value("Company", arg.get("company"), "default_expense_account"),
-			'cost_center'			: item and item[0]['buying_cost_center'] or arg.get("cost_center"),
+			'expense_account'		: item and item[0]['expense_account'] or args.get("expense_account") \
+				or frappe.db.get_value("Company", args.get("company"), "default_expense_account"),
+			'cost_center'			: item and item[0]['buying_cost_center'] or args.get("cost_center"),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
 			'conversion_factor'		: 1,
@@ -364,7 +361,7 @@ class StockEntry(StockController):
 			'actual_qty'			: 0,
 			'incoming_rate'			: 0
 		}
-		stock_and_rate = arg.get('warehouse') and self.get_warehouse_details(json.dumps(arg)) or {}
+		stock_and_rate = args.get('warehouse') and self.get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
 		return ret
 
@@ -383,7 +380,6 @@ class StockEntry(StockController):
 		return ret
 
 	def get_warehouse_details(self, args):
-		args = json.loads(args)
 		ret = {}
 		if args.get('warehouse') and args.get('item_code'):
 			args.update({
