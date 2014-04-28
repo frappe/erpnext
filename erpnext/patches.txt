@@ -34,3 +34,4 @@ erpnext.patches.4_0.import_country_codes
 erpnext.patches.4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
 execute:frappe.delete_doc("Page", "Financial Statements")
+execute:frappe.delete_doc("DocType", "Stock Ledger")
