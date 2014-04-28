@@ -93,25 +93,20 @@ class Company(Document):
 		account.insert()
 
 	def set_default_accounts(self):
-		def _set_default_accounts(accounts):
-			for field, account_type in accounts.items():
-				account = frappe.db.get_value("Account", {"account_type": account_type,
-					"group_or_ledger": "Ledger", "company": self.name})
+		def _set_default_account(fieldname, account_type):
+			account = frappe.db.get_value("Account", {"account_type": account_type,
+				"group_or_ledger": "Ledger", "company": self.name})
 
-				if account and not self.get(field):
-					frappe.db.set(self, field, account)
+			if account and not self.get(fieldname):
+				self.db_set(fieldname, account)
 
-		_set_default_accounts({
-			"default_cash_account": _("Cash"),
-			"default_bank_account": _("Bank")
-		})
+		_set_default_account("default_cash_account", "Cash")
+		_set_default_account("default_bank_account", "Bank")
 
 		if cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
-			_set_default_accounts({
-				"stock_received_but_not_billed": _("Stock Received But Not Billed"),
-				"stock_adjustment_account": _("Stock Adjustment"),
-				"expenses_included_in_valuation": _("Expenses Included In Valuation")
-			})
+			_set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
+			_set_default_account("stock_adjustment_account", "Stock Adjustment")
+			_set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
 
 	def create_default_cost_center(self):
 		cc_list = [

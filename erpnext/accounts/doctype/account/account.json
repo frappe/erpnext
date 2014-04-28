@@ -1,7 +1,7 @@
 {
  "allow_copy": 1, 
  "allow_rename": 1, 
- "creation": "2013-01-30 12:49:46.000000", 
+ "creation": "2013-01-30 12:49:46", 
  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -10,6 +10,7 @@
   {
    "fieldname": "properties", 
    "fieldtype": "Section Break", 
+   "in_list_view": 1, 
    "label": "Account Details", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
@@ -17,6 +18,7 @@
   {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
+   "in_list_view": 1, 
    "permlevel": 0, 
    "width": "50%"
   }, 
@@ -24,6 +26,7 @@
    "fieldname": "account_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Account Name", 
    "no_copy": 1, 
    "oldfieldname": "account_name", 
@@ -37,6 +40,7 @@
    "fieldname": "level", 
    "fieldtype": "Int", 
    "hidden": 1, 
+   "in_list_view": 1, 
    "label": "Level", 
    "oldfieldname": "level", 
    "oldfieldtype": "Int", 
@@ -49,6 +53,7 @@
    "fieldname": "group_or_ledger", 
    "fieldtype": "Select", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Group or Ledger", 
    "oldfieldname": "group_or_ledger", 
    "oldfieldtype": "Select", 
@@ -103,7 +108,7 @@
    "label": "Account Type", 
    "oldfieldname": "account_type", 
    "oldfieldtype": "Select", 
-   "options": "Bank\nCash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nIncome Account\nStock Received But Not Billed\nExpenses Included In Valuation\nStock Adjustment", 
+   "options": "\nBank\nCash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nIncome Account\nStock Received But Not Billed\nExpenses Included In Valuation\nStock Adjustment", 
    "permlevel": 0, 
    "search_index": 0
   }, 
@@ -206,7 +211,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-03-19 12:07:27.000000", 
+ "modified": "2014-04-28 16:52:32.059072", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
