@@ -18,40 +18,40 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		this.frm.dashboard.reset();
-		
+
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped') {
-				
-				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + wn._("% Delivered"), 
+
+				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + wn._("% Delivered"),
 					doc.per_delivered);
-				cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"), 
+				cur_frm.dashboard.add_progress(cint(doc.per_billed) + wn._("% Billed"),
 					doc.per_billed);
 
 				cur_frm.add_custom_button(wn._('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 				// delivery note
-				if(flt(doc.per_delivered, 2) < 100 && doc.order_type=='Sales')
+				if(flt(doc.per_delivered, 2) < 100 && ['Sales', 'Shopping Cart'].indexOf(doc.order_type)!==-1)
 					cur_frm.add_custom_button(wn._('Make Delivery'), this.make_delivery_note);
-			
+
 				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 && (doc.order_type !='Sales')) {
+				if(flt(doc.per_delivered, 2) < 100 && ['Sales', 'Shopping Cart'].indexOf(doc.order_type)===-1) {
 					cur_frm.add_custom_button(wn._('Make Maint. Visit'), this.make_maintenance_visit);
-					cur_frm.add_custom_button(wn._('Make Maint. Schedule'), 
+					cur_frm.add_custom_button(wn._('Make Maint. Schedule'),
 						this.make_maintenance_schedule);
 				}
 
 				// indent
-				if(!doc.order_type || (doc.order_type == 'Sales'))
-					cur_frm.add_custom_button(wn._('Make ') + wn._('Material Request'), 
+				if(!doc.order_type || ['Sales', 'Shopping Cart'].indexOf(doc.order_type)!==-1)
+					cur_frm.add_custom_button(wn._('Make ') + wn._('Material Request'),
 						this.make_material_request);
-			
+
 				// sales invoice
 				if(flt(doc.per_billed, 2) < 100)
 					cur_frm.add_custom_button(wn._('Make Invoice'), this.make_sales_invoice);
-			
+
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
 					cur_frm.add_custom_button(wn._('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
-			} else {	
+			} else {
 				// un-stop
 				cur_frm.dashboard.set_headline_alert(wn._("Stopped"), "alert-danger", "icon-stop");
 				cur_frm.add_custom_button(wn._('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
@@ -59,7 +59,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(wn._('From Quotation'), 
+			cur_frm.add_custom_button(wn._('From Quotation'),
 				function() {
 					wn.model.map_current_doc({
 						method: "selling.doctype.quotation.quotation.make_sales_order",
@@ -77,7 +77,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 		this.order_type(doc);
 	},
-	
+
 	order_type: function() {
 		this.frm.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
 	},
@@ -85,7 +85,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	tc_name: function() {
 		this.get_terms();
 	},
-	
+
 	reserved_warehouse: function(doc, cdt, cdn) {
 		var item = wn.model.get_doc(cdt, cdn);
 		if(item.item_code && item.reserved_warehouse) {
@@ -120,14 +120,14 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			source_name: cur_frm.doc.name
 		})
 	},
-	
+
 	make_maintenance_schedule: function() {
 		wn.model.open_mapped_doc({
 			method: "selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 			source_name: cur_frm.doc.name
 		})
-	}, 
-	
+	},
+
 	make_maintenance_visit: function() {
 		wn.model.open_mapped_doc({
 			method: "selling.doctype.sales_order.sales_order.make_maintenance_visit",
@@ -162,7 +162,7 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 
 	if (check) {
 		return $c('runserverobj', {
-			'method':'stop_sales_order', 
+			'method':'stop_sales_order',
 			'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))
 			}, function(r,rt) {
 			cur_frm.refresh();
@@ -177,7 +177,7 @@ cur_frm.cscript['Unstop Sales Order'] = function() {
 
 	if (check) {
 		return $c('runserverobj', {
-			'method':'unstop_sales_order', 
+			'method':'unstop_sales_order',
 			'docs': wn.model.compress(make_doclist(doc.doctype, doc.name))
 		}, function(r,rt) {
 			cur_frm.refresh();
