@@ -6,5 +6,5 @@ import frappe
 
 from frappe.model.document import Document
 
-class ModeOfPayment(Document):
+class ModeofPayment(Document):
 	pass
