@@ -33,7 +33,7 @@ cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = function(doc) {
  	return erpnext.queries.item({
-		'ifnull(tabItem.is_pro_applicable, "No")': 'Yes'
+		'is_pro_applicable': 'Yes'
 	});
 }
 

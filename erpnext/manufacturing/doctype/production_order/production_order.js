@@ -10,6 +10,10 @@ $.extend(cur_frm.cscript, {
 		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
 	},
 
+	before_submit: function() {
+		cur_frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
+	},
+
 	refresh: function(doc, dt, dn) {
 		this.frm.dashboard.reset();
 		erpnext.toggle_naming_series();
