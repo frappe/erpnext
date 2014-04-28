@@ -17,8 +17,8 @@ class Employee(Document):
 		self.salary_structure_exists = frappe.db.get_value("Salary Structure",
 			{"employee": self.name, "is_active": "Yes", "docstatus": ["!=", 2]})
 
-	def as_dict(self):
-		doc = super(Employee, self).as_dict()
+	def as_dict(self, no_nulls=False):
+		doc = super(Employee, self).as_dict(no_nulls)
 
 		if hasattr(self, "salary_structure_exists"):
 			doc["salary_structure_exists"] = self.salary_structure_exists
