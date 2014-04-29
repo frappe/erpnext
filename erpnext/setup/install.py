@@ -57,7 +57,8 @@ def feature_setup():
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
-	doc.update(dict(zip(flds, [1]*len(flds))))
+	for f in flds:
+		doc.set(f, 1)
 	doc.save()
 
 def set_single_defaults():

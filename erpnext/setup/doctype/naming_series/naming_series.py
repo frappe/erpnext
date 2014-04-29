@@ -24,7 +24,7 @@ class NamingSeries(Document):
 		}
 
 	def scrub_options_list(self, ol):
-		options = filter(lambda x: x, [cstr(n.upper()).strip() for n in ol])
+		options = filter(lambda x: x, [cstr(n).strip() for n in ol])
 		return options
 
 	def update_series(self, arg=None):
