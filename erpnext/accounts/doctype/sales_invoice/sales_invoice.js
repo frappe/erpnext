@@ -129,7 +129,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.get_terms();
 	},
 
-	is_pos: function(callback_fn) {
+	is_pos: function(doc, dt, dn, callback_fn) {
 		cur_frm.cscript.hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
@@ -143,10 +143,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("update_stock");
-							me.set_default_values();
+							frappe.model.set_default_values(me.frm.doc);
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();
-
 							if(callback_fn) callback_fn();
 						}
 					}
