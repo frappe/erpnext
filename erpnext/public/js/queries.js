@@ -20,10 +20,6 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.supplier_query" };
 	},
 
-	account: function() {
-		return { query: "erpnext.controllers.queries.account_query" };
-	},
-
 	item: function(filters) {
 		var args = { query: "erpnext.controllers.queries.item_query" };
 		if(filters) args["filters"] = filters;
