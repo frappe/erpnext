@@ -5,7 +5,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	doc = locals[dt][dn];
 	var save_msg = __("You must Save the form before proceeding");
 	var err_msg = __("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
-	
+
 	cur_frm.add_custom_button(__('View Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
@@ -27,7 +27,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			});
 		} else {
 			msgprint(save_msg);
-		}	
+		}
 	}, 1);
 	cur_frm.add_custom_button(__('Send Now'), function() {
 		doc = locals[dt][dn];
@@ -89,7 +89,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 				cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
 			});
 
-			cur_frm.rec_dialog = d;	
+			cur_frm.rec_dialog = d;
 			d.show();
 		}
 	});
