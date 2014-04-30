@@ -3,8 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint, throw
-import json
+from frappe import _, throw
 
 def get_company_currency(company):
 	currency = frappe.db.get_value("Company", company, "default_currency")
@@ -38,3 +37,30 @@ def get_price_list_currency(price_list):
 		throw(_("Price List {0} is disabled").format(price_list))
 	else:
 		return {"price_list_currency": price_list_currency}
+
+def before_tests():
+	# complete setup if missing
+	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
+	if not frappe.get_list("Item Group"):
+		setup_account({
+			"currency"			:"USD",
+			"first_name"		:"Test",
+			"last_name"			:"User",
+			"company_name"		:"Wind Power LLC",
+			"timezone"			:"America/New_York",
+			"company_abbr"		:"WP",
+			"industry"			:"Manufacturing",
+			"country"			:"United States",
+			"fy_start_date"		:"2014-01-01",
+			"fy_end_date"		:"2014-12-31",
+			"language"			:"english",
+			"company_tagline"	:"Testing",
+			"email"				:"test@erpnext.com",
+			"password"			:"test"
+		})
+
+	frappe.db.sql("delete from `tabLeave Allocation`")
+	frappe.db.sql("delete from `tabLeave Application`")
+	frappe.db.sql("delete from `tabSalary Slip`")
+	frappe.db.sql("delete from `tabItem Price`")
+	frappe.db.commit()

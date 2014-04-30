@@ -33,7 +33,6 @@ class Account(Document):
 	def validate(self):
 		self.validate_master_name()
 		self.validate_parent()
-		self.validate_duplicate_account()
 		self.validate_root_details()
 		self.validate_mandatory()
 		self.validate_warehouse_account()
@@ -60,12 +59,6 @@ class Account(Document):
 
 			if par["report_type"]:
 				self.report_type = par["report_type"]
-
-	def validate_duplicate_account(self):
-		if self.get('__islocal') or not self.name:
-			company_abbr = frappe.db.get_value("Company", self.company, "abbr")
-			if frappe.db.exists("Account", (self.account_name + " - " + company_abbr)):
-				throw(_("Account {0} already exists").format(self.account_name))
 
 	def validate_root_details(self):
 		#does not exists parent

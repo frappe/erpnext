@@ -61,15 +61,6 @@ class CostCenter(NestedSet):
 				check_acc_list.append([d.account, d.fiscal_year])
 
 	def validate(self):
-		"""
-			Cost Center name must be unique
-		"""
-		if ((self.get("__islocal") or not self.name) and
-			frappe.db.sql("select name from `tabCost Center` where cost_center_name=%s and company=%s",
-				(self.cost_center_name, self.company))
-			):
-			msgprint(_("Cost Center Name already exists"), raise_exception=1)
-
 		self.validate_mandatory()
 		self.validate_budget_details()
 

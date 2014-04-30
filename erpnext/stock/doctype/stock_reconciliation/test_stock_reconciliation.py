@@ -190,6 +190,7 @@ class TestStockReconciliation(unittest.TestCase):
 		})
 		stock_reco.insert()
 		stock_reco.submit()
+		frappe.db.commit()
 		return stock_reco
 
 	def insert_existing_sle(self, valuation_method):

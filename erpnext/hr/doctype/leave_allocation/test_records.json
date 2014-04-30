@@ -1,0 +1,18 @@
+[
+ {
+  "docstatus": 1,
+  "doctype": "Leave Allocation",
+  "employee": "_T-Employee-0001",
+  "fiscal_year": "_Test Fiscal Year 2013",
+  "leave_type": "_Test Leave Type",
+  "new_leaves_allocated": 15
+ },
+ {
+  "docstatus": 1,
+  "doctype": "Leave Allocation",
+  "employee": "_T-Employee-0002",
+  "fiscal_year": "_Test Fiscal Year 2013",
+  "leave_type": "_Test Leave Type",
+  "new_leaves_allocated": 15
+ }
+]
