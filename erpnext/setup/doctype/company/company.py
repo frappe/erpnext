@@ -94,10 +94,13 @@ class Company(Document):
 
 	def set_default_accounts(self):
 		def _set_default_account(fieldname, account_type):
+			if self.get(fieldname):
+				return
+
 			account = frappe.db.get_value("Account", {"account_type": account_type,
 				"group_or_ledger": "Ledger", "company": self.name})
 
-			if account and not self.get(fieldname):
+			if account:
 				self.db_set(fieldname, account)
 
 		_set_default_account("default_cash_account", "Cash")
@@ -107,6 +110,9 @@ class Company(Document):
 			_set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
 			_set_default_account("stock_adjustment_account", "Stock Adjustment")
 			_set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
+
+		if not self.default_income_account:
+			self.db_set("default_income_account", frappe.db.get_value("Account", {"account_name": _("Sales")}))
 
 	def create_default_cost_center(self):
 		cc_list = [

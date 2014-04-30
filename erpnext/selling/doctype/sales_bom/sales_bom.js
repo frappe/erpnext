@@ -3,11 +3,6 @@
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable('new_item_code', doc.__islocal);
-	if(!doc.__islocal) {
-		cur_frm.add_custom_button(__("Check for Duplicates"), function() {
-			return cur_frm.call_server('check_duplicate', 1)
-		}, 'icon-search')
-	}
 }
 
 cur_frm.fields_dict.new_item_code.get_query = function() {
