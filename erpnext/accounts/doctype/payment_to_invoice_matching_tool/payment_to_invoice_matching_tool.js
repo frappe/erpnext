@@ -1,19 +1,8 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.add_fetch("account", "company", "company")
-
 cur_frm.cscript.onload_post_render = function(doc) {
 	$(cur_frm.get_field("reconcile").input).addClass("btn-info");
-}
-
-cur_frm.cscript.refresh = function(doc) {
-	cur_frm.set_intro("");
-	if(!doc.voucher_no) {
-		cur_frm.set_intro(__("Select the Invoice against which you want to allocate payments."));
-	} else {
-		cur_frm.set_intro(__("Set allocated amount against each Payment Entry and click 'Allocate'."));
-	}
 }
 
 cur_frm.fields_dict.voucher_no.get_query = function(doc) {
@@ -22,15 +11,41 @@ cur_frm.fields_dict.voucher_no.get_query = function(doc) {
 	else {
 		return {
 			doctype: doc.voucher_type,
-			query: "erpnext.accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.gl_entry_details",
+			query: "erpnext.accounts.doctype.payment_to_invoice_matching_tool.payment_to_invoice_matching_tool.get_voucher_nos",
 			filters: {
-				"dt": doc.voucher_type,
-				"acc": doc.account
+				"voucher_type": doc.voucher_type,
+				"account": doc.account
 			}
-		}		
+		}
 	}
 }
 
-cur_frm.cscript.voucher_no  = function(doc, cdt, cdn) {
-	return get_server_fields('get_voucher_details', '', '', doc, cdt, cdn, 1)
+cur_frm.cscript.voucher_no  = function() {
+	return cur_frm.call({
+		doc: cur_frm.doc,
+		method: "get_voucher_details"
+	});
+}
+
+cur_frm.cscript.get_against_entries  = function() {
+	return cur_frm.call({
+		doc: cur_frm.doc,
+		method: "get_against_entries"
+	});
+}
+
+cur_frm.cscript.reconcile  = function() {
+	return cur_frm.call({
+		doc: cur_frm.doc,
+		method: "reconcile"
+	});
+}
+
+cur_frm.cscript.amt_to_be_reconciled = function(doc, cdt, cdn) {
+	var total_allocated_amount = 0
+	$.each(cur_frm.doc.against_entries, function(i, d) {
+		if(d.amt_to_be_reconciled > 0) total_allocated_amount += flt(d.amt_to_be_reconciled);
+		else if (d.amt_to_be_reconciled < 0) frappe.throw(__("Allocated amount can not be negative"));
+	})
+	cur_frm.set_value("total_allocated_amount", total_allocated_amount);
 }

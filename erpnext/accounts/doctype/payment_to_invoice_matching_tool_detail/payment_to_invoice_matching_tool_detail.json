@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:39.000000", 
+ "creation": "2013-02-22 01:27:39", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -16,7 +16,7 @@
    "width": "140px"
   }, 
   {
-   "fieldname": "amt_due", 
+   "fieldname": "unmatched_amount", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Unmatched Amount", 
@@ -25,13 +25,18 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "amt_to_be_reconciled", 
+   "fieldname": "allocated_amount", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Allocated Amount", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "posting_date", 
@@ -76,13 +81,30 @@
    "print_hide": 1, 
    "read_only": 1, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "is_advance", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Is Advance", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "original_amount", 
+   "fieldtype": "Currency", 
+   "hidden": 1, 
+   "label": "Original Amount", 
+   "permlevel": 0
   }
  ], 
+ "hide_toolbar": 1, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:24.000000", 
+ "modified": "2014-04-30 19:27:15.993641", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment to Invoice Matching Tool Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

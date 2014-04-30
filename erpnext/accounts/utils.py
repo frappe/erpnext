@@ -125,7 +125,7 @@ def reconcile_against_document(args):
 	"""
 	for d in args:
 		check_if_jv_modified(d)
-
+		validate_allocated_amount(d)
 		against_fld = {
 			'Journal Voucher' : 'against_jv',
 			'Sales Invoice' : 'against_invoice',
@@ -159,10 +159,16 @@ def check_if_jv_modified(args):
 		and ifnull(t2.against_voucher, '')=''
 		and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
 		and t1.name = '%(voucher_no)s' and t2.name = '%(voucher_detail_no)s'
-		and t1.docstatus=1 and t2.%(dr_or_cr)s = %(unadjusted_amt)s""" % args)
+		and t1.docstatus=1 """ % args)
 
 	if not ret:
 		throw(_("""Payment Entry has been modified after you pulled it. Please pull it again."""))
+
+def validate_allocated_amount(args):
+	if args.get("allocated_amt") < 0:
+		throw(_("Allocated amount can not be negative"))
+	elif args.get("allocated_amt") > args.get("unadjusted_amt"):
+		throw(_("Allocated amount can not greater than unadusted amount"))
 
 def update_against_doc(d, jv_obj):
 	"""
