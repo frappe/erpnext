@@ -10,6 +10,19 @@ from frappe.model.document import Document
 class Account(Document):
 	nsm_parent_field = 'parent_account'
 
+	def onload(self):
+		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings", "frozen_accounts_modifier")
+		print frozen_accounts_modifier
+		if frozen_accounts_modifier in frappe.user.get_roles():
+			self.can_freeze_account = True
+
+	def as_dict(self, no_nulls=False):
+		doc = super(Account, self).as_dict(no_nulls)
+		if self.get("can_freeze_account"):
+			doc["can_freeze_account"] = self.can_freeze_account
+
+		return doc
+
 	def autoname(self):
 		self.name = self.account_name.strip() + ' - ' + \
 			frappe.db.get_value("Company", self.company, "abbr")
@@ -63,8 +76,7 @@ class Account(Document):
 	def validate_frozen_accounts_modifier(self):
 		old_value = frappe.db.get_value("Account", self.name, "freeze_account")
 		if old_value and old_value != self.freeze_account:
-			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,
-				'frozen_accounts_modifier')
+			frozen_accounts_modifier = frappe.db.get_value('Accounts Settings', None, 'frozen_accounts_modifier')
 			if not frozen_accounts_modifier or \
 				frozen_accounts_modifier not in frappe.user.get_roles():
 					throw(_("You are not authorized to set Frozen value"))
