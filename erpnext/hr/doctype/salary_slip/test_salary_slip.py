@@ -9,14 +9,14 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.sql("""delete from `tabLeave Application`""")
 		frappe.db.sql("""delete from `tabSalary Slip`""")
 		from erpnext.hr.doctype.leave_application.test_leave_application import test_records as leave_applications
-		la = frappe.copy_doc(leave_applications[4])
+		la = frappe.copy_doc(leave_applications[2])
 		la.insert()
 		la.status = "Approved"
 		la.submit()
-		
+
 	def tearDown(self):
 		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
-		
+
 	def test_salary_slip_with_holidays_included(self):
 		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
 		ss = frappe.copy_doc(test_records[0])
@@ -29,7 +29,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEquals(ss.deduction_details[1].d_modified_amount, 48.39)
 		self.assertEquals(ss.gross_pay, 15016.13)
 		self.assertEquals(ss.net_pay, 14867.74)
-		
+
 	def test_salary_slip_with_holidays_excluded(self):
 		ss = frappe.copy_doc(test_records[0])
 		ss.insert()

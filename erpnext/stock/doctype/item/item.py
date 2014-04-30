@@ -27,6 +27,8 @@ class Item(WebsiteGenerator):
 	def validate(self):
 		if not self.stock_uom:
 			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
+		if self.image and not self.website_image:
+			self.website_image = self.image
 
 		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
@@ -131,6 +133,7 @@ class Item(WebsiteGenerator):
 			bom = frappe.db.sql("""select name from `tabBOM` where item = %s
 				and is_active = 1""", (self.name,))
 			if bom and bom[0][0]:
+				print self.name
 				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item"""))
 
 	def fill_customer_code(self):
