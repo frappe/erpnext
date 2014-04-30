@@ -4,6 +4,11 @@
 import frappe, unittest
 
 class TimeLogBatchTest(unittest.TestCase):
+	def setUp(self):
+		for name in frappe.db.sql_list("select name from `tabTime Log` where docstatus=1"):
+			frappe.get_doc("Time Log", name).cancel()
+			frappe.delete_doc("Time Log", name)
+
 	def test_time_log_status(self):
 		from erpnext.projects.doctype.time_log.test_time_log import test_records as time_log_records
 		time_log = frappe.copy_doc(time_log_records[0])
