@@ -41,11 +41,11 @@ cur_frm.cscript.reconcile  = function() {
 	});
 }
 
-cur_frm.cscript.amt_to_be_reconciled = function(doc, cdt, cdn) {
+cur_frm.cscript.allocated_amount = function(doc, cdt, cdn) {
 	var total_allocated_amount = 0
 	$.each(cur_frm.doc.against_entries, function(i, d) {
-		if(d.amt_to_be_reconciled > 0) total_allocated_amount += flt(d.amt_to_be_reconciled);
-		else if (d.amt_to_be_reconciled < 0) frappe.throw(__("Allocated amount can not be negative"));
+		if(d.allocated_amount > 0) total_allocated_amount += flt(d.allocated_amount);
+		else if (d.allocated_amount < 0) frappe.throw(__("Allocated amount can not be negative"));
 	})
 	cur_frm.set_value("total_allocated_amount", total_allocated_amount);
 }
