@@ -19,13 +19,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
 
 	if(doc.group_or_ledger=='Ledger') {
-		frappe.model.with_doc("Accounts Settings", "Accounts Settings", function (name) {
-			var accounts_settings = frappe.get_doc("Accounts Settings", name);
-			var display = accounts_settings["frozen_accounts_modifier"]
-				&& in_list(user_roles, accounts_settings["frozen_accounts_modifier"]);
-
-			cur_frm.toggle_display('freeze_account', display);
-		});
+		cur_frm.toggle_display('freeze_account', doc.can_freeze_account);
 	}
 
 	// read-only for root accounts

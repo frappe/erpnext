@@ -9,6 +9,7 @@ from frappe import _
 
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
+	set_single_defaults()
 	import_country_and_currency()
 	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
 	import_charts()
@@ -16,7 +17,6 @@ def after_install():
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
-	set_single_defaults()
 	frappe.db.commit()
 
 def import_country_and_currency():
@@ -57,7 +57,8 @@ def feature_setup():
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'
 	]
-	doc.update(dict(zip(flds, [1]*len(flds))))
+	for f in flds:
+		doc.set(f, 1)
 	doc.save()
 
 def set_single_defaults():
