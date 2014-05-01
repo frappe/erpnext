@@ -7,8 +7,7 @@ import frappe
 from frappe.utils import cstr, flt
 from frappe.model.naming import make_autoname
 from frappe import _
-
-
+from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
 class SalaryStructure(Document):
@@ -70,11 +69,6 @@ class SalaryStructure(Document):
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
-	return get_mapped_doc(source_name, target_doc).as_dict()
-
-def get_mapped_doc(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-
 	def postprocess(source, target):
 		target.run_method("pull_emp_details")
 		target.run_method("get_leave_details")
