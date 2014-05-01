@@ -235,7 +235,7 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as there is difference in value").format(item.item_code))
+			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
 
 		if item.get("expense_account") and not item.get("cost_center"):
 			frappe.throw(_("""Cost Center is mandatory for Item {0}""").format(item.get("item_code")))

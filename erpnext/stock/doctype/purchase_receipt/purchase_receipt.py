@@ -290,11 +290,18 @@ class PurchaseReceipt(BuyingController):
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
+		if len(target.get("entries")) == 0:
+			frappe.throw(_("All items have already been invoiced"))
+
 		doc = frappe.get_doc(target)
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -311,6 +318,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"prevdoc_detail_docname": "po_detail",
 				"prevdoc_docname": "purchase_order",
 			},
+			"postprocess": update_item,
+			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -319,3 +328,15 @@ def make_purchase_invoice(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def get_invoiced_qty_map(purchase_receipt):
+	"""returns a map: {pr_detail: invoiced_qty}"""
+	invoiced_qty_map = {}
+
+	for pr_detail, qty in frappe.db.sql("""select pr_detail, qty from `tabPurchase Invoice Item`
+		where purchase_receipt=%s and docstatus=1""", purchase_receipt):
+			if not invoiced_qty_map.get(pr_detail):
+				invoiced_qty_map[pr_detail] = 0
+			invoiced_qty_map[pr_detail] += qty
+
+	return invoiced_qty_map
