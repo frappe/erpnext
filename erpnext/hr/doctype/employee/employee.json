@@ -3,7 +3,7 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-03-07 09:04:18.000000", 
+ "creation": "2013-03-07 09:04:18", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -722,7 +722,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-02-03 18:06:04.000000", 
+ "modified": "2014-04-30 09:01:10.879762", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
@@ -771,6 +771,12 @@
    "role": "HR Manager", 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "restricted": 1, 
+   "role": "Leave Approver"
   }
  ], 
  "search_fields": "employee_name"

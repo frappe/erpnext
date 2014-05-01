@@ -8,7 +8,7 @@ class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabLeave Application`""")
 		frappe.db.sql("""delete from `tabSalary Slip`""")
-		from erpnext.hr.doctype.leave_application.test_leave_application import test_records as leave_applications
+		from erpnext.hr.doctype.leave_application.test_leave_application import _test_records as leave_applications
 		la = frappe.copy_doc(leave_applications[2])
 		la.insert()
 		la.status = "Approved"

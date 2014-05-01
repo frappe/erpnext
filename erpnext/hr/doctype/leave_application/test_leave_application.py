@@ -118,7 +118,7 @@ class TestLeaveApplication(unittest.TestCase):
 		from frappe.utils.user import add_role
 		add_role("test1@example.com", "Employee")
 		add_role("test@example.com", "Leave Approver")
-		add_role("test@example.com", "HR Manager")
+		self._add_employee_leave_approver("_T-Employee-0002", "test@example.com")
 
 		application = self.get_application(_test_records[1])
 		application.leave_approver = "test@example.com"
