@@ -369,14 +369,17 @@ class AccountsController(TransactionBase):
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr):
-		res = frappe.db.sql("""select t1.name as jv_no, t1.remark,
-			t2.%s as amount, t2.name as jv_detail_no
-			from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
-			where t1.name = t2.parent and t2.account = %s and t2.is_advance = 'Yes'
-			and (t2.against_voucher is null or t2.against_voucher = '')
-			and (t2.against_invoice is null or t2.against_invoice = '')
-			and (t2.against_jv is null or t2.against_jv = '')
-			and t1.docstatus = 1 order by t1.posting_date""" %
+		res = frappe.db.sql("""
+			select
+				t1.name as jv_no, t1.remark, t2.%s as amount, t2.name as jv_detail_no
+			from
+				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+			where
+				t1.name = t2.parent and t2.account = %s and t2.is_advance = 'Yes' and t1.docstatus = 1
+				and ifnull(t2.against_voucher, '')  = ''
+				and ifnull(t2.against_invoice, '')  = ''
+				and ifnull(t2.against_jv, '')  = ''
+			order by t1.posting_date""" %
 			(dr_or_cr, '%s'), account_head, as_dict=1)
 
 		self.set(parentfield, [])

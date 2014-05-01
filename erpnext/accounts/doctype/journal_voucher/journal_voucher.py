@@ -21,21 +21,20 @@ class JournalVoucher(AccountsController):
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening='No'
-
 		self.clearance_date = None
 
 		super(JournalVoucher, self).validate_date_with_fiscal_year()
 
-		self.validate_debit_credit()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
+		self.validate_debit_and_credit()
 		self.validate_against_jv()
-
+		self.validate_against_sales_invoice()
+		self.validate_against_purchase_invoice()
 		self.set_against_account()
 		self.create_remarks()
 		self.set_aging_date()
 		self.set_print_format_fields()
-
 
 	def on_submit(self):
 		if self.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
@@ -48,16 +47,6 @@ class JournalVoucher(AccountsController):
 		remove_against_link_from_jv(self.doctype, self.name, "against_jv")
 
 		self.make_gl_entries(1)
-
-	def on_trash(self):
-		pass
-		#if self.amended_from:
-		#	frappe.delete_doc("Journal Voucher", self.amended_from)
-
-	def validate_debit_credit(self):
-		for d in self.get('entries'):
-			if d.debit and d.credit:
-				msgprint(_("You cannot credit and debit same account at the same time."), raise_exception=1)
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Voucher']:
@@ -81,33 +70,68 @@ class JournalVoucher(AccountsController):
 		for d in self.get('entries'):
 			if d.against_jv:
 				if d.against_jv == self.name:
-					msgprint(_("You can not enter current voucher in 'Against Journal Voucher' column"), raise_exception=1)
-				elif not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-						where account = %s and docstatus = 1 and parent = %s""",
-						(d.account, d.against_jv)):
-					msgprint(_("Journal Voucher {0} does not have account {1}.").format(d.against_jv, d.account), raise_exception=1)
+					frappe.throw(_("You can not enter current voucher in 'Against Journal Voucher' column"))
+
+				against_entries = frappe.db.sql("""select * from `tabJournal Voucher Detail`
+					where account = %s and docstatus = 1 and parent = %s
+					and ifnull(against_jv, '') = ''""", (d.account, d.against_jv), as_dict=True)
+
+				if not against_entries:
+					frappe.throw(_("Journal Voucher {0} does not have account {1} or already matched")
+						.format(d.against_jv, d.account))
+				else:
+					dr_or_cr = "debit" if d.credit > 0 else "credit"
+					valid = False
+					for jvd in against_entries:
+						if flt(jvd[dr_or_cr]) > 0:
+							valid = True
+					if not valid:
+						frappe.throw(_("Against Journal Voucher {0} does not have any unmatched {1} entry")
+							.format(d.against_jv, dr_or_cr))
+
+	def validate_against_sales_invoice(self):
+		for d in self.get("entries"):
+			if d.against_invoice:
+				if d.debit > 0:
+					frappe.throw(_("Row {0}: Debit entry can not be linked with a Sales Invoice")
+						.format(d.idx))
+				if frappe.db.get_value("Sales Invoice", d.against_invoice, "debit_to") != d.account:
+					frappe.throw(_("Row {0}: Account does not match with \
+						Sales Invoice Debit To account").format(d.idx, d.account))
+
+	def validate_against_purchase_invoice(self):
+		for d in self.get("entries"):
+			if d.against_voucher:
+				if flt(d.credit) > 0:
+					frappe.throw(_("Row {0}: Credit entry can not be linked with a Purchase Invoice")
+						.format(d.idx))
+				if frappe.db.get_value("Purchase Invoice", d.against_voucher, "credit_to") != d.account:
+					frappe.throw(_("Row {0}: Account does not match with \
+						Purchase Invoice Credit To account").format(d.idx, d.account))
 
 	def set_against_account(self):
-		# Debit = Credit
-		debit, credit = 0.0, 0.0
-		debit_list, credit_list = [], []
-		for d in self.get('entries'):
-			debit += flt(d.debit, 2)
-			credit += flt(d.credit, 2)
-			if flt(d.debit)>0 and (d.account not in debit_list): debit_list.append(d.account)
-			if flt(d.credit)>0 and (d.account not in credit_list): credit_list.append(d.account)
+		accounts_debited, accounts_credited = [], []
+		for d in self.get("entries"):
+			if flt(d.debit > 0): accounts_debited.append(d.account)
+			if flt(d.credit) > 0: accounts_credited.append(d.account)
 
-		self.total_debit = debit
-		self.total_credit = credit
+		for d in self.get("entries"):
+			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
+			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
+
+	def validate_debit_and_credit(self):
+		self.total_debit, self.total_credit = 0, 0
+
+		for d in self.get("entries"):
+			if d.debit and d.credit:
+				frappe.throw(_("You cannot credit and debit same account at the same time"))
+
+			self.total_debit = flt(self.total_debit) + flt(d.debit)
+			self.total_credit = flt(self.total_credit) + flt(d.credit)
 
 		if abs(self.total_debit-self.total_credit) > 0.001:
-			msgprint(_("Debit must equal Credit. The difference is {0}").format(self.total_debit-self.total_credit),
-				raise_exception=1)
-
-		# update against account
-		for d in self.get('entries'):
-			if flt(d.debit) > 0: d.against_account = ', '.join(credit_list)
-			if flt(d.credit) > 0: d.against_account = ', '.join(debit_list)
+			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
+				.format(self.total_debit - self.total_credit))
 
 	def create_remarks(self):
 		r = []
@@ -220,21 +244,8 @@ class JournalVoucher(AccountsController):
 
 		return self.is_approving_authority
 
-	def check_account_against_entries(self):
-		for d in self.get("entries"):
-			if d.against_invoice and frappe.db.get_value("Sales Invoice",
-					d.against_invoice, "debit_to") != d.account:
-				frappe.throw(_("Account {0} must be sames as Debit To Account in Sales Invoice in row {0}").format(d.account, d.idx))
-
-			if d.against_voucher and frappe.db.get_value("Purchase Invoice",
-					d.against_voucher, "credit_to") != d.account:
-				frappe.throw(_("Account {0} must be sames as Credit To Account in Purchase Invoice in row {0}").format(d.account, d.idx))
-
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
-
-		if not cancel:
-			self.check_account_against_entries()
 
 		gl_map = []
 		for d in self.get("entries"):
