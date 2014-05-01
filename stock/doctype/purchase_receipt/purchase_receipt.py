@@ -292,15 +292,38 @@ class DocType(BuyingController):
 		gl_entries = super(DocType, self).get_gl_entries(warehouse_account, against_stock_account)
 		return gl_entries
 
+def get_invoiced_qty_map(purchase_receipt):
+	"""returns a map: {pr_detail: invoiced_qty}"""
+	invoiced_qty_map = {}
+
+	for pr_detail, qty in webnotes.conn.sql("""select pr_detail, qty from `tabPurchase Invoice Item`
+		where purchase_receipt=%s and docstatus=1""", purchase_receipt):
+			if not invoiced_qty_map.get(pr_detail):
+				invoiced_qty_map[pr_detail] = 0
+			invoiced_qty_map[pr_detail] += qty
+
+	return invoiced_qty_map
 
 @webnotes.whitelist()
 def make_purchase_invoice(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
+	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
-		bean = webnotes.bean(target)
-		bean.run_method("set_missing_values")
-		bean.run_method("set_supplier_defaults")
+		pi = webnotes.bean(target)
+		pi.run_method("set_missing_values")
+		pi.run_method("set_supplier_defaults")
+
+		pi.set_doclist(pi.doclist.get({"parentfield": ["!=", "entries"]}) +
+			pi.doclist.get({"parentfield": "entries", "qty": [">", 0]}))
+
+		if len(pi.doclist.get({"parentfield": "entries"})) == 0:
+			webnotes.msgprint(_("All items have already been invoiced."), raise_exception=True)
+
+		return pi.doclist
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
 
 	doclist = get_mapped_doclist("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -318,6 +341,7 @@ def make_purchase_invoice(source_name, target_doclist=None):
 				"prevdoc_docname": "purchase_order",
 				"purchase_rate": "rate"
 			},
+			"postprocess": update_item
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
