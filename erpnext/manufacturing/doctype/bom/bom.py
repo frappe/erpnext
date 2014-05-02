@@ -125,6 +125,7 @@ class BOM(Document):
 			})["rate"]
 
 		if self.docstatus in (0, 1):
+			self.ignore_validate_update_after_submit = True
 			self.save()
 
 	def get_bom_unitcost(self, bom_no):
