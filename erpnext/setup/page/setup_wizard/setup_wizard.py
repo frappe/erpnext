@@ -27,7 +27,7 @@ def setup_account(args=None):
 	if args.language != "english":
 		set_default_language(args.language)
 
-	install_fixtures.install()
+	install_fixtures.install(args.get("country"))
 
 	update_user_name(args)
 	frappe.local.message_log = []

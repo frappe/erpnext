@@ -241,7 +241,6 @@ class SalarySlip(TransactionBase):
 				</tr>
 				<tr>
 					<td width = "50%%">Designation : %s</td>
-					<td width = "50%%">Grade : %s</td>
 				</tr>
 				<tr>
 					<td width = "50%%">Bank Account No. : %s</td>
@@ -285,7 +284,7 @@ class SalarySlip(TransactionBase):
 			</table></div>''' % (cstr(letter_head), cstr(self.employee),
 				cstr(self.employee_name), cstr(self.month), cstr(self.fiscal_year),
 				cstr(self.department), cstr(self.branch), cstr(self.designation),
-				cstr(self.grade), cstr(self.bank_account_no), cstr(self.bank_name),
+				cstr(self.bank_account_no), cstr(self.bank_name),
 				cstr(self.arrear_amount), cstr(self.payment_days), earn_table, ded_table,
 				cstr(flt(self.gross_pay)), cstr(flt(self.total_deduction)),
 				cstr(flt(self.net_pay)), cstr(self.total_in_words))

@@ -16,7 +16,7 @@ class SalaryStructure(Document):
 
 	def get_employee_details(self):
 		ret = {}
-		det = frappe.db.sql("""select employee_name, branch, designation, department, grade
+		det = frappe.db.sql("""select employee_name, branch, designation, department
 			from `tabEmployee` where name = %s""", self.employee)
 		if det:
 			ret = {
@@ -24,7 +24,6 @@ class SalaryStructure(Document):
 				'branch': cstr(det[0][1]),
 				'designation': cstr(det[0][2]),
 				'department': cstr(det[0][3]),
-				'grade': cstr(det[0][4]),
 				'backup_employee': cstr(self.employee)
 			}
 		return ret
