@@ -317,7 +317,7 @@ class SellingController(StockController):
 			if self.doctype == "Sales Order":
 				if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
-						frappe.throw(_("Reserved Warehouse required for stock Item {0} in row {1}").format(d.item, d.idx))
+						frappe.throw(_("Reserved Warehouse required for stock Item {0} in row {1}").format(d.item_code, d.idx))
 				reserved_warehouse = d.warehouse
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
