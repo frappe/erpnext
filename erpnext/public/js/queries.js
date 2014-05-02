@@ -64,4 +64,8 @@ $.extend(erpnext.queries, {
 	not_a_group_filter: function() {
 		return { filters: { is_group: "No" } };
 	},
+
+	employee: function() {
+		return { query: "erpnext.controllers.queries.employee_query" }
+	}
 });

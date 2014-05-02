@@ -40,7 +40,7 @@ class LeaveControlPanel(Document):
 
 		for d in self.get_employees():
 			try:
-				la = frappe.get_doc('Leave Allocation')
+				la = frappe.new_doc('Leave Allocation')
 				la.set("__islocal", 1)
 				la.employee = cstr(d[0])
 				la.employee_name = frappe.db.get_value('Employee',cstr(d[0]),'employee_name')

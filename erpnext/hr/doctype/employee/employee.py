@@ -86,33 +86,32 @@ class Employee(Document):
 
 	def update_user(self):
 		# add employee role if missing
-		if not "Employee" in frappe.db.sql_list("""select role from tabUserRole
-				where parent=%s""", self.user_id):
-			from frappe.utils.user import add_role
-			add_role(self.user_id, "Employee")
+		user = frappe.get_doc("User", self.user_id)
+		user.ignore_permissions = True
 
-		user_wrapper = frappe.get_doc("User", self.user_id)
+		if "Employee" not in user.get("user_roles"):
+			user.add_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
 		if self.employee_name:
 			employee_name = self.employee_name.split(" ")
 			if len(employee_name) >= 3:
-				user_wrapper.last_name = " ".join(employee_name[2:])
-				user_wrapper.middle_name = employee_name[1]
+				user.last_name = " ".join(employee_name[2:])
+				user.middle_name = employee_name[1]
 			elif len(employee_name) == 2:
-				user_wrapper.last_name = employee_name[1]
+				user.last_name = employee_name[1]
 
-			user_wrapper.first_name = employee_name[0]
+			user.first_name = employee_name[0]
 
 		if self.date_of_birth:
-			user_wrapper.birth_date = self.date_of_birth
+			user.birth_date = self.date_of_birth
 
 		if self.gender:
-			user_wrapper.gender = self.gender
+			user.gender = self.gender
 
 		if self.image:
-			if not user_wrapper.user_image == self.image:
-				user_wrapper.user_image = self.image
+			if not user.user_image:
+				user.user_image = self.image
 				try:
 					frappe.get_doc({
 						"doctype": "File Data",
@@ -123,8 +122,8 @@ class Employee(Document):
 				except frappe.DuplicateEntryError, e:
 					# already exists
 					pass
-		user_wrapper.ignore_permissions = True
-		user_wrapper.save()
+
+		user.save()
 
 	def validate_date(self):
 		if self.date_of_birth and self.date_of_joining and getdate(self.date_of_birth) >= getdate(self.date_of_joining):
