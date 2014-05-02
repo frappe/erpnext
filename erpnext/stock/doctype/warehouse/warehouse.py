@@ -55,7 +55,6 @@ class Warehouse(Document):
 					})
 					ac_doc.ignore_permissions = True
 					ac_doc.insert()
-
 					msgprint(_("Account head {0} created").format(ac_doc.name))
 
 	def validate_parent_account(self):
