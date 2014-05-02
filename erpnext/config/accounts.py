@@ -30,6 +30,15 @@ data = [
 				"name": "Supplier",
 				"description": _("Supplier database.")
 			},
+			{
+				"type": "page",
+				"name": "Accounts Browser",
+				"icon": "icon-sitemap",
+				"label": _("Chart of Accounts"),
+				"route": "Accounts Browser/Account",
+				"description": _("Tree of finanial accounts."),
+				"doctype": "Account",
+			},
 		]
 	},
 	{
