@@ -33,7 +33,7 @@ class SalaryManager(Document):
 		self.check_mandatory()
 
 		cond = ''
-		for f in ['company', 'branch', 'department', 'designation', 'grade']:
+		for f in ['company', 'branch', 'department', 'designation']:
 			if self.get(f):
 				cond += " and t1." + f + " = '" + self.get(f).replace("'", "\'") + "'"
 

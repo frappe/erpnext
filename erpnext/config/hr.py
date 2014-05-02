@@ -104,11 +104,6 @@ data = [
 			},
 			{
 				"type": "doctype",
-				"name": "Grade",
-				"description": _("Employee grade.")
-			},
-			{
-				"type": "doctype",
 				"name": "Designation",
 				"description": _("Employee designation (e.g. CEO, Director etc.).")
 			},

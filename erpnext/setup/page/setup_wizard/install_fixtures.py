@@ -7,7 +7,7 @@ import frappe
 
 from frappe import _
 
-def install():
+def install(country=None):
 	records = [
 
 		# item group
@@ -44,6 +44,51 @@ def install():
 		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'), 'is_encash': 0, 'is_carry_forward': 0, },
 		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'), 'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1},
 
+		# Employment Type
+		{'doctype': 'Employment Type', 'employee_type_name': _('Full-time')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Part-time')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Probation')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Contract')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Commission')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Piecework')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Trainee')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
+		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
+
+		# Department
+		{'doctype': 'Department', 'department_name': _('Accounts')},
+		{'doctype': 'Department', 'department_name': _('Marketing')},
+		{'doctype': 'Department', 'department_name': _('Sales')},
+		{'doctype': 'Department', 'department_name': _('Purchase')},
+		{'doctype': 'Department', 'department_name': _('Operations')},
+		{'doctype': 'Department', 'department_name': _('Production')},
+		{'doctype': 'Department', 'department_name': _('Dispatch')},
+		{'doctype': 'Department', 'department_name': _('Customer Service')},
+		{'doctype': 'Department', 'department_name': _('Human Resources')},
+		{'doctype': 'Department', 'department_name': _('Management')},
+		{'doctype': 'Department', 'department_name': _('Quality Management')},
+		{'doctype': 'Department', 'department_name': _('Research & Development')},
+		{'doctype': 'Department', 'department_name': _('Legal')},
+
+		# Designation
+		{'doctype': 'Designation', 'designation_name': _('CEO')},
+		{'doctype': 'Designation', 'designation_name': _('Director')},
+		{'doctype': 'Designation', 'designation_name': _('Manager')},
+		{'doctype': 'Designation', 'designation_name': _('Analyst')},
+		{'doctype': 'Designation', 'designation_name': _('Engineer')},
+		{'doctype': 'Designation', 'designation_name': _('Accountant')},
+		{'doctype': 'Designation', 'designation_name': _('Secretary')},
+		{'doctype': 'Designation', 'designation_name': _('Associate')},
+		{'doctype': 'Designation', 'designation_name': _('Administrative Officer')},
+		{'doctype': 'Designation', 'designation_name': _('Business Development Manager')},
+		{'doctype': 'Designation', 'designation_name': _('HR Manager')},
+		{'doctype': 'Designation', 'designation_name': _('Project Manager')},
+		{'doctype': 'Designation', 'designation_name': _('Head of Marketing and Sales')},
+		{'doctype': 'Designation', 'designation_name': _('Software Developer')},
+		{'doctype': 'Designation', 'designation_name': _('Designer')},
+		{'doctype': 'Designation', 'designation_name': _('Assistant')},
+		{'doctype': 'Designation', 'designation_name': _('Researcher')},
+
 		# territory
 		{'doctype': 'Territory', 'territory_name': _('All Territories'), 'is_group': 'Yes', 'name': _('All Territories'), 'parent_territory': ''},
 
@@ -76,6 +121,72 @@ def install():
 		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': 'Hour'},
 		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': 'Minute'},
 
+		# Mode of Payment
+		{'doctype': 'Mode of Payment', 'mode_of_payment': 'Check' if country=="United States" else _('Cheque')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft')},
+
+		# Activity Type
+		{'doctype': 'Activity Type', 'activity_type': _('Planning')},
+		{'doctype': 'Activity Type', 'activity_type': _('Research')},
+		{'doctype': 'Activity Type', 'activity_type': _('Proposal Writing')},
+		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
+		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
+
+		# Industry Type
+		{'doctype': 'Industry Type', 'industry': _('Accounting')},
+		{'doctype': 'Industry Type', 'industry': _('Advertising')},
+		{'doctype': 'Industry Type', 'industry': _('Aerospace')},
+		{'doctype': 'Industry Type', 'industry': _('Agriculture')},
+		{'doctype': 'Industry Type', 'industry': _('Airline')},
+		{'doctype': 'Industry Type', 'industry': _('Apparel & Accessories')},
+		{'doctype': 'Industry Type', 'industry': _('Automotive')},
+		{'doctype': 'Industry Type', 'industry': _('Banking')},
+		{'doctype': 'Industry Type', 'industry': _('Biotechnology')},
+		{'doctype': 'Industry Type', 'industry': _('Broadcasting')},
+		{'doctype': 'Industry Type', 'industry': _('Brokerage')},
+		{'doctype': 'Industry Type', 'industry': _('Chemical')},
+		{'doctype': 'Industry Type', 'industry': _('Computer')},
+		{'doctype': 'Industry Type', 'industry': _('Consulting')},
+		{'doctype': 'Industry Type', 'industry': _('Consumer Products')},
+		{'doctype': 'Industry Type', 'industry': _('Cosmetics')},
+		{'doctype': 'Industry Type', 'industry': _('Defense')},
+		{'doctype': 'Industry Type', 'industry': _('Department Stores')},
+		{'doctype': 'Industry Type', 'industry': _('Education')},
+		{'doctype': 'Industry Type', 'industry': _('Electronics')},
+		{'doctype': 'Industry Type', 'industry': _('Energy')},
+		{'doctype': 'Industry Type', 'industry': _('Entertainment & Leisure')},
+		{'doctype': 'Industry Type', 'industry': _('Executive Search')},
+		{'doctype': 'Industry Type', 'industry': _('Financial Services')},
+		{'doctype': 'Industry Type', 'industry': _('Food, Beverage & Tobacco')},
+		{'doctype': 'Industry Type', 'industry': _('Grocery')},
+		{'doctype': 'Industry Type', 'industry': _('Health Care')},
+		{'doctype': 'Industry Type', 'industry': _('Internet Publishing')},
+		{'doctype': 'Industry Type', 'industry': _('Investment Banking')},
+		{'doctype': 'Industry Type', 'industry': _('Legal')},
+		{'doctype': 'Industry Type', 'industry': _('Manufacturing')},
+		{'doctype': 'Industry Type', 'industry': _('Motion Picture & Video')},
+		{'doctype': 'Industry Type', 'industry': _('Music')},
+		{'doctype': 'Industry Type', 'industry': _('Newspaper Publishers')},
+		{'doctype': 'Industry Type', 'industry': _('Online Auctions')},
+		{'doctype': 'Industry Type', 'industry': _('Pension Funds')},
+		{'doctype': 'Industry Type', 'industry': _('Pharmaceuticals')},
+		{'doctype': 'Industry Type', 'industry': _('Private Equity')},
+		{'doctype': 'Industry Type', 'industry': _('Publishing')},
+		{'doctype': 'Industry Type', 'industry': _('Real Estate')},
+		{'doctype': 'Industry Type', 'industry': _('Retail & Wholesale')},
+		{'doctype': 'Industry Type', 'industry': _('Securities & Commodity Exchanges')},
+		{'doctype': 'Industry Type', 'industry': _('Service')},
+		{'doctype': 'Industry Type', 'industry': _('Soap & Detergent')},
+		{'doctype': 'Industry Type', 'industry': _('Software')},
+		{'doctype': 'Industry Type', 'industry': _('Sports')},
+		{'doctype': 'Industry Type', 'industry': _('Technology')},
+		{'doctype': 'Industry Type', 'industry': _('Telecommunications')},
+		{'doctype': 'Industry Type', 'industry': _('Television')},
+		{'doctype': 'Industry Type', 'industry': _('Transportation')},
+		{'doctype': 'Industry Type', 'industry': _('Venture Capital')}
 	]
 
 	from frappe.modules import scrub

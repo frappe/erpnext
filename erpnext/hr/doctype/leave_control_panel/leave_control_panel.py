@@ -10,7 +10,7 @@ from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
 	def get_employees(self):
-		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"],[self.grade,"grade"]]
+		lst1 = [[self.employee_type,"employment_type"],[self.branch,"branch"],[self.designation,"designation"],[self.department, "department"]]
 		condition = "where "
 		flag = 0
 		for l in lst1:

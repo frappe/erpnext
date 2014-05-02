@@ -150,6 +150,11 @@ data = [
 				"name": "Sales Email Settings",
 				"description": _("Setup incoming server for sales email id. (e.g. sales@example.com)")
 			},
+			{
+				"type": "doctype",
+				"name": "Industry Type",
+				"description": _("Track Leads by Industry Type.")
+			},
 		]
 	},
 	{
