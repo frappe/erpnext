@@ -7,8 +7,9 @@ import frappe
 @frappe.whitelist(allow_guest=True)
 def send_message(subject="Website Query", message="", sender="", status="Open"):
 	from frappe.templates.pages.contact import send_message as website_send_message
+	res = website_send_message(subject, message, sender)
 
-	if not website_send_message(subject, message, sender):
+	if not res:
 		return
 
 	if subject=="Support":
@@ -21,3 +22,4 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		add_sales_communication(subject or "Website Query", message, sender, sender,
 			mail=None, status=status)
 
+	return res
