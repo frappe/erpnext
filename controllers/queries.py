@@ -33,7 +33,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			%(mcond)s
 		order by
 			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", employee_name), locate("%(_txt)s", item_name), 99999),
+			if(locate("%(_txt)s", employee_name), locate("%(_txt)s", employee_name), 99999),
 			name, employee_name
 		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,
 		'_txt': txt.replace("%", ""),
@@ -50,8 +50,8 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			%(mcond)s
 		order by
 			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", lead_name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", company_name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", lead_name), locate("%(_txt)s", lead_name), 99999),
+			if(locate("%(_txt)s", company_name), locate("%(_txt)s", company_name), 99999),
 			name, lead_name
 		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,
 		'_txt': txt.replace("%", ""),
@@ -75,7 +75,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			%(mcond)s
 		order by
 			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", customer_name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", customer_name), locate("%(_txt)s", customer_name), 99999),
 			name, customer_name
 		limit %(start)s, %(page_len)s""" % {'field': fields,'key': searchfield,
 		'txt': "%%%s%%" % txt, '_txt': txt.replace("%", ""),
@@ -98,7 +98,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 			%(mcond)s
 		order by
 			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", supplier_name), locate("%(_txt)s", name), 99999),
+			if(locate("%(_txt)s", supplier_name), locate("%(_txt)s", supplier_name), 99999),
 			name, supplier_name
 		limit %(start)s, %(page_len)s """ % {'field': fields,'key': searchfield,
 		'txt': "%%%s%%" % txt, '_txt': txt.replace("%", ""),
