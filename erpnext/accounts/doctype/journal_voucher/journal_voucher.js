@@ -227,8 +227,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				"company": doc.company
 			},
 			callback: function(r) {
-				frappe.model.clear_table("Journal Voucher Detail", "Journal Voucher",
-					doc.name, "entries");
+				frappe.model.clear_table(doc, "entries");
 				if(r.message) {
 					update_jv_details(doc, r);
 				}

@@ -702,15 +702,20 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var me = this;
 		if(this.frm.doc.taxes_and_charges) {
 			return this.frm.call({
-				doc: this.frm.doc,
-				method: "set_other_charges",
+				method: "erpnext.controllers.accounts_controller.get_taxes_and_charges",
+				args: {
+					"master_doctype": "Sales Taxes and Charges Master",
+					"master_name": this.frm.doc.taxes_and_charges,
+					"tax_parentfield": this.other_fname
+				},
 				callback: function(r) {
 					if(!r.exc) {
+						me.frm.set_value(me.other_fname, r.message);
 						me.calculate_taxes_and_totals();
 					}
 				}
 			});
-		}
+		});
 	},
 
 	show_item_wise_taxes: function() {

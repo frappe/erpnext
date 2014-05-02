@@ -121,12 +121,12 @@ pscript.feature_dict = {
 		'Sales BOM': {'fields':['currency']},
 		'Sales Order': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'sales_order_details':['base_price_list_rate','base_amount','base_rate']}
 	},
-	
+
 	'fs_imports': {
 		'Purchase Invoice': {
 			'fields': ['conversion_rate', 'currency', 'grand_total',
 		 		'in_words', 'net_total', 'other_charges_added',
-		 		'other_charges_deducted'], 
+		 		'other_charges_deducted'],
 			'entries': ['base_price_list_rate', 'base_amount','base_rate']
 		},
 		'Purchase Order': {
@@ -144,7 +144,7 @@ pscript.feature_dict = {
 			'fields':['conversion_rate','currency']
 		}
 	},
-	
+
 	'fs_item_advanced': {
 		'Item': {'fields':['item_customer_details']}
 	},
@@ -188,7 +188,7 @@ pscript.feature_dict = {
 
 $(document).bind('form_refresh', function() {
 	for(var sys_feat in sys_defaults) {
-		if(sys_defaults[sys_feat]=='0' 
+		if(sys_defaults[sys_feat]=='0'
 			&& (sys_feat in pscript.feature_dict)) { //"Features to hide" exists
 
 			if(cur_frm.doc.doctype in pscript.feature_dict[sys_feat]) {
@@ -196,7 +196,7 @@ $(document).bind('form_refresh', function() {
 					if(fort=='fields') {
 						hide_field(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
 					} else if(cur_frm.fields_dict[fort]) {
-						cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort], false);						
+						cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort], false);
 					} else {
 						msgprint(__('Grid "')+fort+__('" does not exists'));
 					}

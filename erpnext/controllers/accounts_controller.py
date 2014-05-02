@@ -122,17 +122,8 @@ class AccountsController(TransactionBase):
 
 			tax_doctype = self.meta.get_field(tax_parentfield).options
 
-			from frappe.model import default_fields
-			tax_master = frappe.get_doc(tax_master_doctype, self.get(tax_master_field))
-
-			for i, tax in enumerate(tax_master.get(tax_parentfield)):
-				tax = tax.as_dict()
-
-				for fieldname in default_fields:
-					if fieldname in tax:
-						del tax[fieldname]
-
-				self.append(tax_parentfield, tax)
+			self.extend(tax_parentfield,
+				get_taxes_and_charges(tax_doctype, self.get(tax_master_field)), tax_parentfield)
 
 	def set_other_charges(self):
 		self.set("other_charges", [])
@@ -457,3 +448,20 @@ class AccountsController(TransactionBase):
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")
+
+@frappe.whitelist()
+def get_taxes_and_charges(master_doctype, master_name, tax_parentfield):
+	from frappe.model import default_fields
+	tax_master = frappe.get_doc(master_doctype, master_name)
+
+	taxes_and_charges = []
+	for i, tax in enumerate(tax_master.get(tax_parentfield)):
+		tax = tax.as_dict()
+
+		for fieldname in default_fields:
+			if fieldname in tax:
+				del tax[fieldname]
+
+		taxes_and_charges.append(tax)
+
+	return taxes_and_charges
