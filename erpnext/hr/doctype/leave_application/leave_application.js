@@ -4,20 +4,20 @@
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
-	if(!doc.posting_date) 
+	if(!doc.posting_date)
 		set_multiple(dt,dn,{posting_date:get_today()});
 	if(doc.__islocal) {
 		cur_frm.set_value("status", "Open");
 		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
-	
+
 	var leave_approver = doc.leave_approver;
 	return cur_frm.call({
 		method: "erpnext.hr.utils.get_leave_approver_list",
 		callback: function(r) {
-			cur_frm.set_df_property("leave_approver", "options", $.map(r.message, 
-				function(user) { 
-					return {value: user, label: frappe.user_info(user).fullname}; 
+			cur_frm.set_df_property("leave_approver", "options", $.map(r.message,
+				function(user) {
+					return {value: user, label: frappe.user_info(user).fullname};
 				}));
 			if(leave_approver) cur_frm.set_value("leave_approver", leave_approver);
 			cur_frm.cscript.get_leave_balance(cur_frm.doc);
@@ -54,7 +54,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				cur_frm.set_intro(__("Leave application has been rejected."));
 			}
 		}
-	}	
+	}
 }
 
 cur_frm.cscript.employee = function (doc, dt, dn){
@@ -86,11 +86,11 @@ cur_frm.cscript.from_date = function(doc, dt, dn) {
 cur_frm.cscript.to_date = function(doc, dt, dn) {
 	if(cint(doc.half_day) == 1 && cstr(doc.from_date) && doc.from_date != doc.to_date){
 		msgprint(__("To Date should be same as From Date for Half Day leave"));
-		set_multiple(dt,dn,{to_date:doc.from_date});		
+		set_multiple(dt,dn,{to_date:doc.from_date});
 	}
 	cur_frm.cscript.calculate_total_days(doc, dt, dn);
 }
-	
+
 cur_frm.cscript.get_leave_balance = function(doc, dt, dn) {
 	if(doc.docstatus==0 && doc.employee && doc.leave_type && doc.fiscal_year) {
 		return cur_frm.call({
@@ -114,8 +114,4 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 	}
 }
 
-cur_frm.fields_dict.employee.get_query = function() {
-	return {
-		query: "erpnext.hr.doctype.leave_application.leave_application.query_for_permitted_employees"
-	};
-}
+cur_frm.fields_dict.employee.get_query = erpnext.queries.employee;
