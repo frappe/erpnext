@@ -715,7 +715,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					}
 				}
 			});
-		});
+		}
 	},
 
 	show_item_wise_taxes: function() {
