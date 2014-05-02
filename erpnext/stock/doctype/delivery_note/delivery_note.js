@@ -16,19 +16,19 @@ frappe.provide("erpnext.stock");
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
-		
+
 		if(!doc.__billing_complete && doc.docstatus==1) {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
-			from_sales_invoice = cur_frm.doc.delivery_note_details.some(function(item) { 
-					return item.against_sales_invoice ? true : false; 
+			from_sales_invoice = cur_frm.doc.delivery_note_details.some(function(item) {
+					return item.against_sales_invoice ? true : false;
 				});
-			
+
 			if(!from_sales_invoice)
 				cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice);
 		}
-	
-		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1) 
+
+		if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 			cur_frm.add_custom_button(__('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
@@ -40,15 +40,15 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==0 && !doc.__islocal) {
 			cur_frm.add_custom_button(__('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
-	
+
 		set_print_hide(doc, dt, dn);
-	
+
 		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
 		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
 		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Sales Order'), 
+			cur_frm.add_custom_button(__('From Sales Order'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
@@ -65,15 +65,15 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				});
 		}
 
-	}, 
-	
+	},
+
 	make_sales_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			source_name: cur_frm.doc.name
 		})
-	}, 
-	
+	},
+
 	make_installation_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
@@ -88,7 +88,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	delivery_note_details_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	}
-	
+
 });
 
 // for backward compatibility: combine new and previous states
@@ -115,7 +115,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 	return{
 		filters: { 'supplier_type': "transporter" }
-	}	
+	}
 }
 
 cur_frm.cscript['Make Packing Slip'] = function() {
@@ -155,7 +155,7 @@ cur_frm.cscript.print_without_amount = function(doc, cdt, cdn) {
 //****************** For print sales order no and date*************************
 cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 	//function to make row of table
-	
+
 	var make_row = function(title,val1, val2, bold){
 		var bstart = '<b>'; var bend = '</b>';
 
@@ -165,12 +165,12 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 	}
 
 	out ='';
-	
+
 	var cl = doc.delivery_note_details || [];
 
-	// outer table	
+	// outer table
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';
-	
+
 	// main table
 	out +='<table class="noborder" style="width:100%">';
 
@@ -234,11 +234,11 @@ if (sys_defaults.auto_accounting_for_stock) {
 		}
 		refresh_field(cur_frm.cscript.fname);
 	}
-	
+
 	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
 		return {
 
-			filters: { 
+			filters: {
 				'company': doc.company,
 				'group_or_ledger': "Ledger"
 			}

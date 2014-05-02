@@ -242,7 +242,7 @@ class StockController(AccountsController):
 
 	def get_sl_entries(self, d, args):
 		sl_dict = {
-			"item_code": d.item_code,
+			"item_code": d.get("item_code", None),
 			"warehouse": d.get("warehouse", None),
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
@@ -250,12 +250,12 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
 			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.get("stock_qty")),
-			"stock_uom": d.stock_uom,
+			"stock_uom": d.get("stock_uom"),
 			"incoming_rate": 0,
 			"company": self.company,
 			"fiscal_year": self.fiscal_year,
-			"batch_no": cstr(d.batch_no).strip(),
-			"serial_no": d.serial_no,
+			"batch_no": cstr(d.get("batch_no")).strip(),
+			"serial_no": d.get("serial_no"),
 			"project": d.get("project_name"),
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"
 		}
