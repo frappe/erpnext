@@ -120,10 +120,8 @@ class AccountsController(TransactionBase):
 			if not tax_master_doctype:
 				tax_master_doctype = self.meta.get_field(tax_master_field).options
 
-			tax_doctype = self.meta.get_field(tax_parentfield).options
-
 			self.extend(tax_parentfield,
-				get_taxes_and_charges(tax_doctype, self.get(tax_master_field)), tax_parentfield)
+				get_taxes_and_charges(tax_master_doctype, self.get(tax_master_field), tax_parentfield))
 
 	def set_other_charges(self):
 		self.set("other_charges", [])

@@ -9,9 +9,6 @@ from frappe.utils import cint
 from frappe.model.document import Document
 
 class POSSetting(Document):
-	def get_series(self):
-		frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
-
 	def validate(self):
 		self.check_for_duplicate()
 		self.validate_expense_account()
@@ -67,3 +64,7 @@ class POSSetting(Document):
 				frappe.defaults.set_user_default("is_pos", 1, user)
 			else:
 				frappe.defaults.set_global_default("is_pos", 1)
+
+@frappe.whitelist()
+def get_series():
+	return frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
