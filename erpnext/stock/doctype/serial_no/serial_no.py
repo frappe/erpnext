@@ -33,6 +33,7 @@ class SerialNo(StockController):
 		self.validate_warehouse()
 		self.validate_item()
 		self.on_stock_ledger_entry()
+		self.validate_status()
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
@@ -191,6 +192,25 @@ class SerialNo(StockController):
 			self.set_purchase_details(last_sle.get("purchase_sle"))
 			self.set_sales_details(last_sle.get("delivery_sle"))
 			self.set_maintenance_status()
+
+	def validate_status(self):
+		def check_if_available_for_delivery():
+			if not (self.purchase_document_type and self.purchase_document_no):
+				frappe.throw(_("Serial No {0} has to be received to make it available for delivery").format(self.name))
+
+		if self.status == "Available":
+			check_if_available_for_delivery()
+
+			if self.delivery_document_type and self.delivery_document_no:
+				frappe.throw(_("Serial No {0} already delivered. It cannot be made available for delivery.").format(self.name))
+
+		elif self.status == "Delivered":
+			check_if_available_for_delivery()
+
+			if not (self.delivery_document_type and self.delivery_document_no):
+				frappe.throw(_("Delivery details missing for Serial No {0}").format(self.name))
+
+		# TODO status validations for Sales Returned and Purchase Returned?
 
 	def on_communication(self):
 		return
