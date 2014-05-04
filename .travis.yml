@@ -18,13 +18,14 @@ install:
   - pip install --editable .
 
 script:
-    cd ./test_sites/ &&
-	frappe --use test_site &&
-    frappe --reinstall &&
-    frappe --install_app erpnext --verbose &&
-    frappe --verbose --run_tests --app erpnext
+  - cd ./test_sites/
+  - frappe --use test_site
+  - frappe --reinstall
+  - frappe --install_app erpnext --verbose
+  - frappe -b
+  - frappe --serve_test &
+  - frappe --verbose --run_tests --app erpnext
 
 before_script:
-  - mysql -e 'create database test_site' &&
-  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('test_site') WHERE user='test_site';\nFLUSH PRIVILEGES;\n" | mysql -u root
-
+  - mysql -e 'create database test_frappe'
+  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root
