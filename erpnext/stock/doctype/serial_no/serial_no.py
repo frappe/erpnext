@@ -262,7 +262,7 @@ def update_serial_nos(sle, item_det):
 				sr = frappe.get_doc("Serial No", serial_no)
 				sr.via_stock_ledger = True
 				sr.warehouse = sle.warehouse if sle.actual_qty > 0 else None
-				sr.save()
+				sr.save(ignore_permissions=True)
 			elif sle.actual_qty > 0:
 				make_serial_no(serial_no, sle)
 
@@ -277,6 +277,7 @@ def get_serial_nos(serial_no):
 
 def make_serial_no(serial_no, sle):
 	sr = frappe.new_doc("Serial No")
+	sr.ignore_permissions = True
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
 	sr.warehouse = None

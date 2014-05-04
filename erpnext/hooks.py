@@ -25,6 +25,15 @@ before_tests = "erpnext.setup.utils.before_tests"
 
 standard_queries = "Customer:erpnext.selling.doctype.customer.customer.get_customer_list"
 
+permission_query_conditions = {
+		"Feed": "erpnext.home.doctype.feed.feed.get_permission_query_conditions",
+	}
+
+has_permission = {
+		"Feed": "erpnext.home.doctype.feed.feed.has_permission",
+	}
+
+
 doc_events = {
 	"*": {
 		"on_update": "erpnext.home.update_feed",

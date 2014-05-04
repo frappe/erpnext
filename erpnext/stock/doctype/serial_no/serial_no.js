@@ -13,4 +13,8 @@ cur_frm.cscript.onload = function() {
 	cur_frm.set_query("item_code", function() {
 		return erpnext.queries.item({"is_stock_item": "Yes", "has_serial_no": "Yes"})
 	});
-}
+};
+
+frappe.ui.form.on("Serial No", "refresh", function(frm) {
+	frm.toggle_enable("item_code", frm.doc.__islocal);
+});

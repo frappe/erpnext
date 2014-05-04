@@ -15,6 +15,7 @@ import install_fixtures
 
 @frappe.whitelist()
 def setup_account(args=None):
+
 	if frappe.db.sql("select name from tabCompany"):
 		frappe.throw(_("Setup Already Complete!!"))
 
@@ -260,16 +261,22 @@ def create_taxes(args):
 			# replace % in case someone also enters the % symbol
 			tax_rate = (args.get("tax_rate_" + str(i)) or "").replace("%", "")
 
-			frappe.get_doc({
-				"doctype":"Account",
-				"company": args.get("company_name"),
-				"parent_account": "Duties and Taxes - " + args.get("company_abbr"),
-				"account_name": args.get("tax_" + str(i)),
-				"group_or_ledger": "Ledger",
-				"report_type": "Balance Sheet",
-				"account_type": "Tax",
-				"tax_rate": flt(tax_rate) if tax_rate else None
-			}).insert()
+			try:
+				frappe.get_doc({
+					"doctype":"Account",
+					"company": args.get("company_name"),
+					"parent_account": "Duties and Taxes - " + args.get("company_abbr"),
+					"account_name": args.get("tax_" + str(i)),
+					"group_or_ledger": "Ledger",
+					"report_type": "Balance Sheet",
+					"account_type": "Tax",
+					"tax_rate": flt(tax_rate) if tax_rate else None
+				}).insert()
+			except frappe.NameError, e:
+				if e.args[2][0]==1062:
+					pass
+				else:
+					raise
 
 def create_items(args):
 	for i in xrange(1,6):

@@ -365,7 +365,7 @@ frappe.wiz.Wizard = Class.extend({
 		this.parent = $('<div class="setup-wizard-wrapper">').appendTo(this.parent);
 	},
 	get_message: function(html) {
-		return $(repl('<div class="panel panel-default">\
+		return $(repl('<div class="panel panel-default" data-state="setup-complete">\
 			<div class="panel-body" style="padding: 40px;">%(html)s</div>\
 		</div>', {html:html}))
 	},
@@ -430,7 +430,9 @@ frappe.wiz.Wizard = Class.extend({
 frappe.wiz.WizardSlide = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
-		this.$wrapper = $("<div>").appendTo(this.wiz.parent);
+		this.$wrapper = $("<div>")
+			.appendTo(this.wiz.parent)
+			.attr("data-slide-id", this.id);
 	},
 	make: function() {
 		var me = this;
