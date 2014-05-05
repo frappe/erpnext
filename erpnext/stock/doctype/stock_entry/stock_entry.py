@@ -395,6 +395,8 @@ class StockEntry(StockController):
 		return ret
 
 	def get_items(self):
+		self.set('mtn_details', [])
+
 		pro_obj = None
 		if self.production_order:
 			# common validations
