@@ -246,9 +246,14 @@ def apply_pricing_rule(out, args):
 	args_dict.update(out)
 	all_pricing_rules = get_pricing_rules(args_dict)
 
+	rule_for_price = False
 	for rule_for in ["price", "discount_percentage"]:
 		pricing_rules = filter(lambda x: x[rule_for] > 0.0, all_pricing_rules)
+		if rule_for_price:
+			pricing_rules = filter(lambda x: not x["for_price_list"], pricing_rules)
+
 		pricing_rule = filter_pricing_rules(args_dict, pricing_rules)
+
 		if pricing_rule:
 			if rule_for == "discount_percentage":
 				out["discount_percentage"] = pricing_rule["discount_percentage"]
@@ -258,6 +263,7 @@ def apply_pricing_rule(out, args):
 				out["price_list_rate"] = pricing_rule["price"] * \
 					flt(args_dict.plc_conversion_rate) / flt(args_dict.conversion_rate)
 				out["pricing_rule_for_price"] = pricing_rule["name"]
+				rule_for_price = True
 
 def get_pricing_rules(args_dict):
 	def _get_tree_conditions(doctype, allow_blank=True):
