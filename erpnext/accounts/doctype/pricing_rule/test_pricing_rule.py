@@ -11,6 +11,8 @@ class TestPricingRule(unittest.TestCase):
 		from erpnext.stock.get_item_details import get_item_details
 		from frappe import MandatoryError
 
+		frappe.db.sql("delete from `tabPricing Rule`")
+
 		test_record = {
 			"doctype": "Pricing Rule",
 			"apply_on": "Item Code",
@@ -69,8 +71,8 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(details.get("discount_percentage"), 5)
 
 		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
-		details = get_item_details(args)
-		self.assertEquals(details.get("discount_percentage"), 15)
+		from erpnext.stock.get_item_details import MultiplePricingRuleConflict
+		self.assertRaises (MultiplePricingRuleConflict, get_item_details, args)
 
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)

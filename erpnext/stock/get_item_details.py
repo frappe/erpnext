@@ -7,6 +7,8 @@ from frappe import _, throw
 from frappe.utils import flt, cint, add_days
 import json
 
+class MultiplePricingRuleConflict(frappe.ValidationError): pass
+
 @frappe.whitelist()
 def get_item_details(args):
 	"""
@@ -332,10 +334,9 @@ def filter_pricing_rules(args_dict, pricing_rules):
 					break
 
 	if len(pricing_rules) > 1:
-		# pricing_rules = sorted(pricing_rules, key=lambda x: x[price_or_discount])
 		frappe.throw(_("Multiple Price Rule exists with same criteria, please resolve \
 			conflict by assigning priority. Price Rules: {0}")
-			.format("\n".join([d.name for d in pricing_rules])))
+			.format("\n".join([d.name for d in pricing_rules])), MultiplePricingRuleConflict)
 	elif pricing_rules:
 		return pricing_rules[0]
 
