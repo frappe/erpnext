@@ -52,8 +52,7 @@ class Employee(Document):
 			self.validate_duplicate_user_id()
 
 	def on_update(self):
-		if self.user_id and frappe.db.get_value("User", self.user_id, 'docstatus') == 0:
-			self.restrict_user()
+		if self.user_id:
 			self.update_user_default()
 			self.update_user()
 
@@ -65,6 +64,7 @@ class Employee(Document):
 		self.add_restriction_if_required("Employee", self.user_id)
 
 	def update_user_default(self):
+		self.restrict_user()
 		frappe.db.set_default("employee_name", self.employee_name, self.user_id)
 		frappe.db.set_default("company", self.company, self.user_id)
 
@@ -228,3 +228,11 @@ def make_salary_structure(source_name, target=None):
 	})
 	target.make_earn_ded_table()
 	return target
+
+def update_user_default(doc, method):
+	# called via User hook
+	try:
+		employee = frappe.get_doc("Employee", {"user_id": doc.name})
+		employee.update_user_default()
+	except frappe.DoesNotExistError:
+		pass

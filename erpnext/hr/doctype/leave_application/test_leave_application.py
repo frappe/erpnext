@@ -5,6 +5,7 @@ import frappe
 import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
+from frappe.core.page.user_properties.user_properties import clear_restrictions
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -67,6 +68,18 @@ class TestLeaveApplication(unittest.TestCase):
 		employee.save()
 		frappe.set_user(temp_session_user)
 
+	def _remove_employee_leave_approver(self, employee, leave_approver):
+		temp_session_user = frappe.session.user
+		frappe.set_user("Administrator")
+		employee = frappe.get_doc("Employee", employee)
+		d = employee.get("employee_leave_approvers", {
+			"leave_approver": leave_approver
+		})
+		if d:
+			employee.get("employee_leave_approvers").remove(d[0])
+			employee.save()
+		frappe.set_user(temp_session_user)
+
 	def get_application(self, doc):
 		application = frappe.copy_doc(doc)
 		application.from_date = "2013-01-01"
@@ -78,6 +91,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		from frappe.utils.user import add_role
 		add_role("test1@example.com", "HR User")
+		clear_restrictions("Employee")
 
 		frappe.db.set_value("Department", "_Test Department",
 			"leave_block_list", "_Test Leave Block List")
@@ -154,6 +168,8 @@ class TestLeaveApplication(unittest.TestCase):
 	def _test_leave_approval_basic_case(self):
 		self._clear_applications()
 
+		self._add_employee_leave_approver("_T-Employee-0001", "test1@example.com")
+
 		# create leave application as Employee
 		frappe.set_user("test@example.com")
 		application = self.get_application(_test_records[0])
@@ -175,8 +191,8 @@ class TestLeaveApplication(unittest.TestCase):
 		# add a different leave approver in the employee's list
 		# should raise exception if not a valid leave approver
 		self._add_employee_leave_approver("_T-Employee-0001", "test2@example.com")
+		self._remove_employee_leave_approver("_T-Employee-0001", "test1@example.com")
 
-		# TODO - add test2@example.com leave approver in employee's leave approvers list
 		application = self.get_application(_test_records[0])
 		frappe.set_user("test@example.com")
 
