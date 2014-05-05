@@ -248,16 +248,16 @@ def apply_pricing_rule(out, args):
 
 	for rule_for in ["price", "discount_percentage"]:
 		pricing_rules = filter(lambda x: x[rule_for] > 0.0, all_pricing_rules)
-		pricing_rules = filter_pricing_rules(args_dict, pricing_rules, rule_for)
-		if pricing_rules:
+		pricing_rule = filter_pricing_rules(args_dict, pricing_rules)
+		if pricing_rule:
 			if rule_for == "discount_percentage":
-				out["discount_percentage"] = pricing_rules[-1]["discount_percentage"]
-				out["pricing_rule_for_discount"] = pricing_rules[-1]["name"]
+				out["discount_percentage"] = pricing_rule["discount_percentage"]
+				out["pricing_rule_for_discount"] = pricing_rule["name"]
 			else:
-				out["base_price_list_rate"] = pricing_rules[0]["price"]
-				out["price_list_rate"] = pricing_rules[0]["price"] * \
+				out["base_price_list_rate"] = pricing_rule["price"]
+				out["price_list_rate"] = pricing_rule["price"] * \
 					flt(args_dict.plc_conversion_rate) / flt(args_dict.conversion_rate)
-				out["pricing_rule_for_price"] = pricing_rules[-1]["name"]
+				out["pricing_rule_for_price"] = pricing_rule["name"]
 
 def get_pricing_rules(args_dict):
 	def _get_tree_conditions(doctype, allow_blank=True):
@@ -301,7 +301,7 @@ def get_pricing_rules(args_dict):
 			item_group_condition=_get_tree_conditions("Item Group", False), conditions=conditions),
 			args_dict, as_dict=1)
 
-def filter_pricing_rules(args_dict, pricing_rules, price_or_discount):
+def filter_pricing_rules(args_dict, pricing_rules):
 	# filter for qty
 	if pricing_rules and args_dict.get("qty"):
 		pricing_rules = filter(lambda x: (args_dict.qty>=flt(x.min_qty)
@@ -325,10 +325,13 @@ def filter_pricing_rules(args_dict, pricing_rules, price_or_discount):
 					pricing_rules = apply_internal_priority(pricing_rules, field_set, args_dict)
 					break
 
-		if len(pricing_rules) > 1:
-			pricing_rules = sorted(pricing_rules, key=lambda x: x[price_or_discount])
-
-	return pricing_rules
+	if len(pricing_rules) > 1:
+		# pricing_rules = sorted(pricing_rules, key=lambda x: x[price_or_discount])
+		frappe.throw(_("Multiple Price Rule exists with same criteria, please resolve \
+			conflict by assigning priority. Price Rules: {0}")
+			.format("\n".join([d.name for d in pricing_rules])))
+	elif pricing_rules:
+		return pricing_rules[0]
 
 def if_all_rules_same(pricing_rules, fields):
 	all_rules_same = True
