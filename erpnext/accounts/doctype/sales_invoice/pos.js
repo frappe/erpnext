@@ -104,7 +104,7 @@ erpnext.POS = Class.extend({
 					</div>\
 				</div>\
 			</div></div>');
-		
+
 		this.check_transaction_type();
 		this.make();
 
@@ -134,7 +134,7 @@ erpnext.POS = Class.extend({
 	set_transaction_defaults: function(party, export_or_import) {
 		var me = this;
 		this.party = party;
-		this.price_list = (party == "Customer" ? 
+		this.price_list = (party == "Customer" ?
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list);
 		this.price_list_field = (party == "Customer" ? "selling_price_list" : "buying_price_list");
 		this.sales_or_purchase = (party == "Customer" ? "Sales" : "Purchase");
@@ -169,7 +169,7 @@ erpnext.POS = Class.extend({
 		this.party_field.make_input();
 		this.party_field.$input.on("change", function() {
 			if(!me.party_field.autocomplete_open)
-				frappe.model.set_value(me.frm.doctype, me.frm.docname, 
+				frappe.model.set_value(me.frm.doctype, me.frm.docname,
 					me.party.toLowerCase(), this.value);
 		});
 	},
@@ -258,7 +258,7 @@ erpnext.POS = Class.extend({
 									<div class="small">%(item_code)s</div>\
 									<div class="small">%(item_name)s</div>\
 									<div class="small">%(item_price)s</div>\
-								</div>', 
+								</div>',
 							{
 								item_code: obj.name,
 								item_price: format_currency(obj.price_list_rate, obj.currency),
@@ -271,10 +271,10 @@ erpnext.POS = Class.extend({
 				// if form is local then allow this function
 				$(me.wrapper).find("div.pos-item").on("click", function() {
 					if(me.frm.doc.docstatus==0) {
-						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" && 
-								me.frm.doc.quotation_to == "Customer") 
+						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" &&
+								me.frm.doc.quotation_to == "Customer")
 								|| me.frm.doctype != "Quotation")) {
-							msgprint("Please select {0} first.", [me.party]);
+							msgprint(__("Please select {0} first.", [me.party]));
 							return;
 						}
 						else
@@ -290,7 +290,7 @@ erpnext.POS = Class.extend({
 
 		// get no_of_items
 		var no_of_items = me.wrapper.find("#cart tbody tr").length;
-		
+
 		// check whether the item is already added
 		if (no_of_items != 0) {
 			$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
@@ -303,7 +303,7 @@ erpnext.POS = Class.extend({
 				}
 			});
 		}
-		
+
 		// if item not found then add new item
 		if (!caught)
 			this.add_new_item_to_grid(item_code, serial_no);
@@ -314,7 +314,7 @@ erpnext.POS = Class.extend({
 	add_new_item_to_grid: function(item_code, serial_no) {
 		var me = this;
 
-		var child = frappe.model.add_child(me.frm.doc, this.frm.doctype + " Item", 
+		var child = frappe.model.add_child(me.frm.doc, this.frm.doctype + " Item",
 			this.frm.cscript.fname);
 		child.item_code = item_code;
 
@@ -423,7 +423,7 @@ erpnext.POS = Class.extend({
 		$(this.wrapper).find(".tax-table")
 			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
-		
+
 		$.each(taxes, function(i, d) {
 			if (d.tax_amount) {
 				$(repl('<tr>\
@@ -432,7 +432,7 @@ erpnext.POS = Class.extend({
 				<tr>', {
 					description: d.description,
 					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
-					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate), 
+					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate),
 						me.frm.doc.currency)
 				})).appendTo(".tax-table tbody");
 			}
@@ -440,14 +440,14 @@ erpnext.POS = Class.extend({
 	},
 	set_totals: function() {
 		var me = this;
-		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total], 
+		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total],
 			me.frm.doc.currency));
-		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total], 
+		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total],
 			me.frm.doc.currency));
-		
+
 		$(".paid-amount-area").toggle(!!this.frm.doc.paid_amount);
 		if(this.frm.doc.paid_amount) {
-			this.wrapper.find(".paid-amount").text(format_currency(this.frm.doc.paid_amount, 
+			this.wrapper.find(".paid-amount").text(format_currency(this.frm.doc.paid_amount,
 				me.frm.doc.currency));
 		}
 	},
@@ -498,7 +498,7 @@ erpnext.POS = Class.extend({
 		$(this.wrapper)
 			.find(".remove-items, .make-payment, .increase-qty, .decrease-qty")
 			.toggle(this.frm.doc.docstatus===0);
-			
+
 		$(this.wrapper).find('input, button').prop("disabled", !(this.frm.doc.docstatus===0));
 	},
 	hide_payment_button: function() {
@@ -562,15 +562,16 @@ erpnext.POS = Class.extend({
 		var me = this;
 		var no_of_items = $(this.wrapper).find("#cart tbody tr").length;
 		var mode_of_payment = [];
-		
+
 		if (no_of_items == 0)
 			msgprint(__("Payment cannot be made for empty cart"));
 		else {
 			frappe.call({
 				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',
 				callback: function(r) {
-					if(!r.message.length) {
+					if(!r.message) {
 						msgprint(__("Please add to Modes of Payment from Setup."))
+						return;
 					}
 					for (x=0; x<=r.message.length - 1; x++) {
 						mode_of_payment.push(r.message[x].name);
@@ -579,10 +580,10 @@ erpnext.POS = Class.extend({
 					// show payment wizard
 					var dialog = new frappe.ui.Dialog({
 						width: 400,
-						title: 'Payment', 
+						title: 'Payment',
 						fields: [
 							{fieldtype:'Data', fieldname:'total_amount', label:'Total Amount', read_only:1},
-							{fieldtype:'Select', fieldname:'mode_of_payment', label:'Mode of Payment', 
+							{fieldtype:'Select', fieldname:'mode_of_payment', label:'Mode of Payment',
 								options:mode_of_payment.join('\n'), reqd: 1},
 							{fieldtype:'Button', fieldname:'pay', label:'Pay'}
 						]
@@ -592,7 +593,7 @@ erpnext.POS = Class.extend({
 					});
 					dialog.show();
 					dialog.get_input("total_amount").prop("disabled", true);
-					
+
 					dialog.fields_dict.pay.input.onclick = function() {
 						me.frm.set_value("mode_of_payment", dialog.get_values().mode_of_payment);
 						me.frm.set_value("paid_amount", dialog.get_values().total_amount);
