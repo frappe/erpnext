@@ -1,7 +1,8 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:workstation_name", 
- "creation": "2013-01-10 16:34:17.000000", 
+ "creation": "2013-01-10 16:34:17", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +10,7 @@
   {
    "fieldname": "workstation_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Workstation Name", 
    "oldfieldname": "workstation_name", 
    "oldfieldtype": "Data", 
@@ -18,6 +20,7 @@
   {
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Warehouse", 
    "oldfieldname": "warehouse", 
    "oldfieldtype": "Link", 
@@ -28,6 +31,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Text", 
+   "in_list_view": 1, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Text", 
@@ -38,6 +42,7 @@
    "fieldname": "capacity", 
    "fieldtype": "Data", 
    "hidden": 1, 
+   "in_list_view": 1, 
    "label": "Capacity", 
    "oldfieldname": "capacity", 
    "oldfieldtype": "Data", 
@@ -48,6 +53,7 @@
    "fieldname": "capacity_units", 
    "fieldtype": "Select", 
    "hidden": 1, 
+   "in_list_view": 1, 
    "label": "Capacity Units", 
    "oldfieldname": "capacity_units", 
    "oldfieldtype": "Select", 
@@ -126,7 +132,7 @@
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-01-20 17:49:35.000000", 
+ "modified": "2014-05-06 12:12:33.424191", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 
