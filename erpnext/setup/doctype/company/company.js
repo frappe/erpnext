@@ -49,32 +49,6 @@ cur_frm.cscript.replace_abbr = function() {
 	dialog.show();
 }
 
-cur_frm.cscript.has_special_chars = function(t) {
-  var iChars = "!@#$%^*+=-[]\\\';,/{}|\":<>?";
-  for (var i = 0; i < t.length; i++) {
-    if (iChars.indexOf(t.charAt(i)) != -1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-cur_frm.cscript.company_name = function(doc){
-	if(doc.company_name && cur_frm.cscript.has_special_chars(doc.company_name)){
-		msgprint(__("Special Characters not allowed in Company Name"));
-		doc.company_name = '';
-		refresh_field('company_name');
-	}
-}
-
-cur_frm.cscript.abbr = function(doc){
-	if(doc.abbr && cur_frm.cscript.has_special_chars(doc.abbr)){
-		msgprint(__("Special Characters not allowed in Abbreviation"));
-		doc.abbr = '';
-		refresh_field('abbr');
-	}
-}
-
 cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 	return{
 		filters: [

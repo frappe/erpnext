@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, getdate, nowdate
+from frappe.utils import flt, getdate, nowdate
 from frappe import msgprint, _
 from frappe.model.document import Document
 
@@ -13,29 +13,34 @@ class BankReconciliation(Document):
 			msgprint("Bank Account, From Date and To Date are Mandatory")
 			return
 
+		condition = ""
+		if not self.include_reconciled_entries:
+			condition = "and ifnull(clearance_date, '') in ('', '0000-00-00')"
+
+
 		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit,
-				t2.credit, t1.posting_date, t2.against_account
+				t2.credit, t1.posting_date, t2.against_account, t1.clearance_date
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
 				t2.parent = t1.name and t2.account = %s
-				and (clearance_date is null or clearance_date = '0000-00-00' or clearance_date = '')
-				and t1.posting_date >= %s and t1.posting_date <= %s and t1.docstatus=1""",
-				(self.bank_account, self.from_date, self.to_date))
+				and t1.posting_date >= %s and t1.posting_date <= %s and t1.docstatus=1 %s""" %
+				('%s', '%s', '%s', condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 
 		self.set('entries', [])
 		self.total_amount = 0.0
 
 		for d in dl:
 			nl = self.append('entries', {})
-			nl.posting_date = cstr(d[5])
-			nl.voucher_id = cstr(d[0])
-			nl.cheque_number = cstr(d[1])
-			nl.cheque_date = cstr(d[2])
-			nl.debit = flt(d[3])
-			nl.credit = flt(d[4])
-			nl.against_account = cstr(d[6])
-			self.total_amount += flt(flt(d[4]) - flt(d[3]))
+			nl.posting_date = d.posting_date
+			nl.voucher_id = d.name
+			nl.cheque_number = d.cheque_no
+			nl.cheque_date = d.cheque_date
+			nl.debit = d.debit
+			nl.credit = d.credit
+			nl.against_account = d.against_account
+			nl.clearance_date = d.clearance_date
+			self.total_amount += flt(d.debit) - flt(d.credit)
 
 	def update_details(self):
 		vouchers = []

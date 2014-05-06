@@ -27,7 +27,7 @@ cur_frm.cscript.setup_upload = function() {
 	frappe.upload.make({
 		parent: $wrapper,
 		args: {
-			method: 'utilities.doctype.rename_tool.rename_tool.upload',
+			method: 'erpnext.utilities.doctype.rename_tool.rename_tool.upload',
 			select_doctype: cur_frm.doc.select_doctype
 		},
 		sample_url: "e.g. http://example.com/somefile.csv",
