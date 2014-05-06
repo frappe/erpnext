@@ -351,8 +351,8 @@ class StockEntry(StockController):
 			'stock_uom'			  	: item and item[0]['stock_uom'] or '',
 			'description'		  	: item and item[0]['description'] or '',
 			'item_name' 		  	: item and item[0]['item_name'] or '',
-			'expense_account'		: item and item[0]['expense_account'] or args.get("expense_account") \
-				or frappe.db.get_value("Company", args.get("company"), "default_expense_account"),
+			'expense_account'		: args.get("expense_account") \
+				or frappe.db.get_value("Company", args.get("company"), "stock_adjustment_account"),
 			'cost_center'			: item and item[0]['buying_cost_center'] or args.get("cost_center"),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
