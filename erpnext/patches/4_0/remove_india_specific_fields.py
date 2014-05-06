@@ -18,6 +18,10 @@ def execute():
 	}
 
 	for (doctype, fieldname), df in docfields.items():
+		opts = df.as_dict()
+		if df.idx >= 2:
+			opts["insert_after"] = frappe.get_meta(doctype).get("fields")[df.idx - 2].fieldname
+
 		frappe.delete_doc("DocField", df.name)
 		frappe.clear_cache(doctype=doctype)
-		create_custom_field_if_values_exist(doctype, df.as_dict())
+		create_custom_field_if_values_exist(doctype, opts)
