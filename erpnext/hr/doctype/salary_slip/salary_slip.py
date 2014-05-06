@@ -38,12 +38,10 @@ class SalarySlip(TransactionBase):
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee,
-			["bank_name", "bank_ac_no", "esic_card_no", "pf_number"], as_dict=1)
+			["bank_name", "bank_ac_no"], as_dict=1)
 		if emp:
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
-			self.esic_no = emp.esic_card_no
-			self.pf_no = emp.pf_number
 
 	def get_leave_details(self, lwp=None):
 		if not self.fiscal_year:

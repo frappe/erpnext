@@ -338,30 +338,6 @@
    "permlevel": 0
   },
   {
-   "fieldname": "esic_card_no",
-   "fieldtype": "Data",
-   "label": "ESIC CARD No",
-   "oldfieldname": "esic_card_no",
-   "oldfieldtype": "Data",
-   "permlevel": 0
-  },
-  {
-   "fieldname": "pf_number",
-   "fieldtype": "Data",
-   "label": "PF Number",
-   "oldfieldname": "pf_number",
-   "oldfieldtype": "Data",
-   "permlevel": 0
-  },
-  {
-   "fieldname": "gratuity_lic_id",
-   "fieldtype": "Data",
-   "label": "Gratuity LIC ID",
-   "oldfieldname": "gratuity_lic_id",
-   "oldfieldtype": "Data",
-   "permlevel": 0
-  },
-  {
    "fieldname": "organization_profile",
    "fieldtype": "Section Break",
    "label": "Organization Profile",
@@ -496,12 +472,6 @@
    "fieldtype": "Column Break",
    "permlevel": 0,
    "width": "50%"
-  },
-  {
-   "fieldname": "pan_number",
-   "fieldtype": "Data",
-   "label": "PAN Number",
-   "permlevel": 0
   },
   {
    "fieldname": "passport_number",
@@ -711,7 +681,7 @@
  ],
  "icon": "icon-user",
  "idx": 1,
- "modified": "2014-04-30 09:03:10.879762",
+ "modified": "2014-04-30 09:03:11.879762",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
