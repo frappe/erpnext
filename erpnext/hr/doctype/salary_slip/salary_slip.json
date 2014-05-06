@@ -72,24 +72,6 @@
    "search_index": 0
   },
   {
-   "fieldname": "pf_no",
-   "fieldtype": "Data",
-   "label": "PF No.",
-   "oldfieldname": "pf_no",
-   "oldfieldtype": "Data",
-   "permlevel": 0,
-   "read_only": 1
-  },
-  {
-   "fieldname": "esic_no",
-   "fieldtype": "Data",
-   "label": "ESIC No.",
-   "oldfieldname": "esic_no",
-   "oldfieldtype": "Data",
-   "permlevel": 0,
-   "read_only": 1
-  },
-  {
    "fieldname": "letter_head",
    "fieldtype": "Link",
    "label": "Letter Head",
@@ -343,7 +325,7 @@
  "icon": "icon-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2014-05-01 04:21:14.543092",
+ "modified": "2014-05-01 04:22:14.543092",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

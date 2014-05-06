@@ -29,12 +29,10 @@ class SalaryStructure(Document):
 		return ret
 
 	def get_ss_values(self,employee):
-		basic_info = frappe.db.sql("""select bank_name, bank_ac_no, esic_card_no, pf_number
+		basic_info = frappe.db.sql("""select bank_name, bank_ac_no
 			from `tabEmployee` where name =%s""", employee)
 		ret = {'bank_name': basic_info and basic_info[0][0] or '',
-			'bank_ac_no': basic_info and basic_info[0][1] or '',
-			'esic_no': basic_info and basic_info[0][2] or '',
-			'pf_no': basic_info and basic_info[0][3] or ''}
+			'bank_ac_no': basic_info and basic_info[0][1] or ''}
 		return ret
 
 	def make_table(self, doct_name, tab_fname, tab_name):
