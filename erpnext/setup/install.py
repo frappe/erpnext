@@ -44,6 +44,10 @@ def import_country_and_currency():
 				"number_format": country.number_format
 			}).insert()
 
+	# enable frequently used currencies
+	for currency in ("INR", "USD", "GBP", "EUR", "AED", "AUD", "JPY", "CNY", "CHF"):
+		frappe.db.set_value("Currency", currency, "enabled", 1)
+
 def feature_setup():
 	"""save global defaults and features setup"""
 	doc = frappe.get_doc("Features Setup", "Features Setup")
