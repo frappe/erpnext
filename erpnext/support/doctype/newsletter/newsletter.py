@@ -16,6 +16,13 @@ class Newsletter(Document):
 				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
 				group by status""", (self.doctype, self.name))) or None)
 
+	def as_dict(self, no_nulls=False):
+		doc = super(Newsletter, self).as_dict(no_nulls)
+		if self.get("__status_count"):
+			doc["__status_count"] = self.get("__status_count")
+
+		return doc
+
 	def test_send(self, doctype="Lead"):
 		self.recipients = self.test_email_id.split(",")
 		self.send_to_doctype = "Lead"
