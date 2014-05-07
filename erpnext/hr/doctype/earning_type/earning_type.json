@@ -2,23 +2,15 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:earning_name", 
- "creation": "2013-01-24 11:03:32.000000", 
+ "creation": "2013-01-24 11:03:32", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "earning_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Name", 
    "oldfieldname": "earning_name", 
    "oldfieldtype": "Data", 
@@ -28,6 +20,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
+   "in_list_view": 1, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -38,6 +31,7 @@
   {
    "fieldname": "taxable", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Taxable", 
    "oldfieldname": "taxable", 
    "oldfieldtype": "Select", 
@@ -50,6 +44,7 @@
    "fieldname": "exemption_limit", 
    "fieldtype": "Float", 
    "hidden": 0, 
+   "in_list_view": 1, 
    "label": "Exemption Limit", 
    "oldfieldname": "exemption_limit", 
    "oldfieldtype": "Currency", 
@@ -58,7 +53,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:38.000000", 
+ "modified": "2014-05-07 06:39:38.414922", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Earning Type", 

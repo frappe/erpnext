@@ -874,7 +874,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2014-05-06 08:20:39.926614", 
+ "modified": "2014-05-07 05:38:12.866900", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
@@ -925,6 +925,12 @@
    "print": 1, 
    "read": 1, 
    "role": "Customer"
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Material User"
   }
  ], 
  "read_only_onload": 1, 
