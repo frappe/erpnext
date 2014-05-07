@@ -20,7 +20,7 @@ def get_filters_cond(doctype, filters, conditions):
 		query = DatabaseQuery(doctype)
 		query.filters = flt
 		query.conditions = conditions
-		query.build_filter_conditions()
+		query.build_filter_conditions(flt, conditions)
 
 		cond = ' and ' + ' and '.join(query.conditions)
 	else:
