@@ -299,9 +299,9 @@ class AccountsController(TransactionBase):
 		key = item.item_code or item.item_name
 		if tax.item_wise_tax_detail.get(key):
 			item_wise_tax_amount = tax.item_wise_tax_detail[key][1] + current_tax_amount
-			tax.item_wise_tax_detail[key] = [tax_rate, item_wise_tax_amount]
+			tax.item_wise_tax_detail[key] = [tax_rate,item_wise_tax_amount]
 		else:
-			tax.item_wise_tax_detail[key] = [tax_rate, current_tax_amount]
+			tax.item_wise_tax_detail[key] = [tax_rate,current_tax_amount]
 
 		return current_tax_amount
 
@@ -316,7 +316,7 @@ class AccountsController(TransactionBase):
 
 	def _cleanup(self):
 		for tax in self.tax_doclist:
-			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail)
+			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""
