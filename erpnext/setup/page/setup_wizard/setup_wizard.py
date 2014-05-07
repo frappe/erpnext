@@ -36,9 +36,6 @@ def setup_account(args=None):
 	create_fiscal_year_and_company(args)
 	frappe.local.message_log = []
 
-	create_naming_series(args)
-	frappe.local.message_log = []
-
 	set_defaults(args)
 	frappe.local.message_log = []
 
@@ -129,21 +126,6 @@ def create_fiscal_year_and_company(args):
 	}).insert()
 
 	args["curr_fiscal_year"] = curr_fiscal_year
-
-def create_naming_series(args):
-	for doctype in ("Production Order", "Supplier Quotation", "Purchase Order",
-		"Purchase Invoice", "Purchase Receipt", "Opportunity", "Quotation",
-		"Sales Order", "Sales Invoice", "Delivery Note", "Installation Note",
-		"Customer Issue", "Journal Voucher"):
-
-		naming_series = frappe.get_doc("Naming Series")
-		naming_series.select_doc_for_series = doctype
-
-		# append fiscal year name to existing series
-		existing_series = frappe.get_meta(doctype).get_field("naming_series").options.split("\n")
-		naming_series.set_options = "\n".join(existing_series + ["{}{}-".format(existing_series[0], args["curr_fiscal_year"])])
-
-		naming_series.update_series()
 
 def create_price_lists(args):
 	for pl_type in ["Selling", "Buying"]:
