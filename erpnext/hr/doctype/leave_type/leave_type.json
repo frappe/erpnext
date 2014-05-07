@@ -1,23 +1,15 @@
 {
  "allow_import": 1, 
  "autoname": "field:leave_type_name", 
- "creation": "2013-02-21 09:55:58.000000", 
+ "creation": "2013-02-21 09:55:58", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "leave_type_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Leave Type Name", 
    "oldfieldname": "leave_type_name", 
    "oldfieldtype": "Data", 
@@ -27,6 +19,7 @@
   {
    "fieldname": "max_days_allowed", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Max Days Leave Allowed", 
    "oldfieldname": "max_days_allowed", 
    "oldfieldtype": "Data", 
@@ -36,6 +29,7 @@
   {
    "fieldname": "is_carry_forward", 
    "fieldtype": "Check", 
+   "in_list_view": 1, 
    "label": "Is Carry Forward", 
    "oldfieldname": "is_carry_forward", 
    "oldfieldtype": "Check", 
@@ -45,6 +39,7 @@
    "fieldname": "is_encash", 
    "fieldtype": "Check", 
    "hidden": 1, 
+   "in_list_view": 1, 
    "label": "Is Encash", 
    "oldfieldname": "is_encash", 
    "oldfieldtype": "Check", 
@@ -67,7 +62,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:56.000000", 
+ "modified": "2014-05-07 06:39:38.884656", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Type", 
@@ -98,6 +93,11 @@
    "role": "HR Manager", 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "Employee"
   }
  ]
 }

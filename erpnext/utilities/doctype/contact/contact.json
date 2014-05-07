@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "allow_rename": 1, 
- "creation": "2013-01-10 16:34:32.000000", 
+ "creation": "2013-01-10 16:34:32", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -186,15 +186,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "communications", 
    "fieldtype": "Table", 
    "hidden": 1, 
@@ -208,7 +199,7 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2014-01-20 17:48:29.000000", 
+ "modified": "2014-05-07 06:39:39.702149", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 

@@ -224,7 +224,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-05-06 08:20:28.360537", 
+ "modified": "2014-05-07 05:41:33.127710", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
@@ -243,6 +243,12 @@
    "role": "Manufacturing User", 
    "submit": 1, 
    "write": 1
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Material User"
   }
  ]
 }
