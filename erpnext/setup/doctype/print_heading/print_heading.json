@@ -1,24 +1,16 @@
 {
  "allow_import": 1, 
  "autoname": "field:print_heading", 
- "creation": "2013-01-10 16:34:24.000000", 
+ "creation": "2013-01-10 16:34:24", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "print_heading", 
    "fieldtype": "Data", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Print Heading", 
    "oldfieldname": "print_heading", 
    "oldfieldtype": "Data", 
@@ -28,6 +20,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
+   "in_list_view": 1, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -37,7 +30,7 @@
  ], 
  "icon": "icon-font", 
  "idx": 1, 
- "modified": "2014-01-20 17:49:01.000000", 
+ "modified": "2014-05-07 06:39:39.352519", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Print Heading", 
@@ -52,9 +45,14 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "All", 
+   "role": "System Manager", 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "All"
   }
  ], 
  "search_fields": "print_heading"

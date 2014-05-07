@@ -123,6 +123,7 @@
   {
    "fieldname": "default_currency", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Default Currency", 
    "no_copy": 1, 
    "options": "Currency", 
@@ -131,6 +132,7 @@
   {
    "fieldname": "default_price_list", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Price List", 
    "options": "Price List", 
    "permlevel": 0
@@ -138,6 +140,7 @@
   {
    "fieldname": "default_taxes_and_charges", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Taxes and Charges", 
    "options": "Purchase Taxes and Charges Master", 
    "permlevel": 0
@@ -183,7 +186,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-06 08:20:18.846251", 
+ "modified": "2014-05-07 06:08:33.836379", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 
@@ -216,6 +219,16 @@
    "role": "Purchase Master Manager", 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "Material User"
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "Accounts User"
   }
  ], 
  "search_fields": "supplier_name,supplier_type"

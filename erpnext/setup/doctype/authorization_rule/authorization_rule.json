@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "AR.####", 
- "creation": "2013-01-10 16:34:22.000000", 
+ "creation": "2013-01-10 16:34:22", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +9,7 @@
   {
    "fieldname": "company", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Company", 
    "oldfieldname": "company", 
    "oldfieldtype": "Link", 
@@ -20,6 +21,7 @@
   {
    "fieldname": "transaction", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Transaction", 
    "oldfieldname": "transaction", 
    "oldfieldtype": "Select", 
@@ -30,6 +32,7 @@
   {
    "fieldname": "based_on", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Based On", 
    "oldfieldname": "based_on", 
    "oldfieldtype": "Select", 
@@ -40,6 +43,7 @@
   {
    "fieldname": "master_name", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Customer / Item Name", 
    "oldfieldname": "master_name", 
    "oldfieldtype": "Link", 
@@ -49,6 +53,7 @@
   {
    "fieldname": "system_role", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Applicable To (Role)", 
    "oldfieldname": "system_role", 
    "oldfieldtype": "Link", 
@@ -111,19 +116,11 @@
    "oldfieldname": "value", 
    "oldfieldtype": "Currency", 
    "permlevel": 0
-  }, 
-  {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0
   }
  ], 
  "icon": "icon-shield", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:25.000000", 
+ "modified": "2014-05-07 06:39:38.981478", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Authorization Rule", 

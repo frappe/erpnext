@@ -8,16 +8,6 @@
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "in_list_view": 1, 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "department_name", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
@@ -39,7 +29,7 @@
  ], 
  "icon": "icon-sitemap", 
  "idx": 1, 
- "modified": "2014-05-06 12:06:49.222106", 
+ "modified": "2014-05-07 06:39:39.931091", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Department", 

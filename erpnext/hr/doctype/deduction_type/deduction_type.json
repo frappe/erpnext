@@ -2,23 +2,15 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:deduction_name", 
- "creation": "2013-01-22 16:50:30.000000", 
+ "creation": "2013-01-22 16:50:30", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "deduction_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Name", 
    "oldfieldname": "deduction_name", 
    "oldfieldtype": "Data", 
@@ -28,6 +20,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
+   "in_list_view": 1, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -37,7 +30,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:34.000000", 
+ "modified": "2014-05-07 06:39:38.154345", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Deduction Type", 
