@@ -10,34 +10,34 @@ from webnotes.utils.email_lib import sendmail
 
 class UserNotAllowedForWarehouse(webnotes.ValidationError): pass
 class InvalidWarehouseCompany(webnotes.ValidationError): pass
-	
+
 def get_stock_balance_on(warehouse, posting_date=None):
 	if not posting_date: posting_date = nowdate()
-	
+
 	stock_ledger_entries = webnotes.conn.sql("""
-		SELECT 
+		SELECT
 			item_code, stock_value
-		FROM 
+		FROM
 			`tabStock Ledger Entry`
-		WHERE 
+		WHERE
 			warehouse=%s AND posting_date <= %s
 		ORDER BY timestamp(posting_date, posting_time) DESC, name DESC
 	""", (warehouse, posting_date), as_dict=1)
-	 
+
 	sle_map = {}
 	for sle in stock_ledger_entries:
 		sle_map.setdefault(sle.item_code, flt(sle.stock_value))
-		
+
 	return sum(sle_map.values())
-	
+
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in webnotes.conn.sql("""SELECT item_code, warehouse, stock_value as stock_value 
+	for d in webnotes.conn.sql("""SELECT item_code, warehouse, stock_value as stock_value
 		FROM tabBin""", as_dict=1):
 			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
-			
+
 	return bin_map
-	
+
 def get_bin(item_code, warehouse):
 	bin = webnotes.conn.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
@@ -61,13 +61,13 @@ def update_bin(args):
 		bin.update_stock(args)
 		return bin
 	else:
-		msgprint("[Stock Update] Ignored %s since it is not a stock item" 
+		msgprint("[Stock Update] Ignored %s since it is not a stock item"
 			% args.get("item_code"))
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = webnotes.conn.get_value("Item", item_code, "end_of_life")
-	
+
 	from webnotes.utils import getdate, now_datetime, formatdate
 	if end_of_life and getdate(end_of_life) <= now_datetime().date():
 		msg = (_("Item") + " %(item_code)s: " + _("reached its end of life on") + \
@@ -77,29 +77,29 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 				"date": formatdate(end_of_life),
 				"end_of_life_label": webnotes.get_doctype("Item").get_label("end_of_life")
 			}
-		
+
 		_msgprint(msg, verbose)
-			
+
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:
 		is_stock_item = webnotes.conn.get_value("Item", item_code, "is_stock_item")
-		
+
 	if is_stock_item != "Yes":
 		msg = (_("Item") + " %(item_code)s: " + _("is not a Stock Item")) % {
 			"item_code": item_code,
 		}
-		
+
 		_msgprint(msg, verbose)
-		
+
 def validate_cancelled_item(item_code, docstatus=None, verbose=1):
 	if docstatus is None:
 		docstatus = webnotes.conn.get_value("Item", item_code, "docstatus")
-	
+
 	if docstatus == 2:
 		msg = (_("Item") + " %(item_code)s: " + _("is a cancelled Item")) % {
 			"item_code": item_code,
 		}
-		
+
 		_msgprint(msg, verbose)
 
 def _msgprint(msg, verbose):
@@ -111,12 +111,12 @@ def _msgprint(msg, verbose):
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from stock.stock_ledger import get_previous_sle
-		
+
 	in_rate = 0
 	if args.get("serial_no"):
 		in_rate = get_avg_purchase_rate(args.get("serial_no"))
 	elif args.get("bom_no"):
-		result = webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1) 
+		result = webnotes.conn.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1)
 			from `tabBOM` where name = %s and docstatus=1 and is_active=1""", args.get("bom_no"))
 		in_rate = result and flt(result[0][0]) or 0
 	else:
@@ -126,17 +126,16 @@ def get_incoming_rate(args):
 			if not previous_sle:
 				return 0.0
 			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
-			in_rate = previous_stock_queue and \
-				get_fifo_rate(previous_stock_queue, args.get("qty") or 0) or 0
+			in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
 	return in_rate
-	
+
 def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
-	
+
 	serial_nos = get_valid_serial_nos(serial_nos)
-	return flt(webnotes.conn.sql("""select avg(ifnull(purchase_rate, 0)) from `tabSerial No` 
+	return flt(webnotes.conn.sql("""select avg(ifnull(purchase_rate, 0)) from `tabSerial No`
 		where name in (%s)""" % ", ".join(["%s"] * len(serial_nos)),
 		tuple(serial_nos))[0][0])
 
@@ -146,36 +145,38 @@ def get_valuation_method(item_code):
 	if not val_method:
 		val_method = get_global_default('valuation_method') or "FIFO"
 	return val_method
-		
+
 def get_fifo_rate(previous_stock_queue, qty):
 	"""get FIFO (average) Rate from Queue"""
 	if qty >= 0:
-		total = sum(f[0] for f in previous_stock_queue)	
+		total = sum(f[0] for f in previous_stock_queue)
 		return total and sum(f[0] * f[1] for f in previous_stock_queue) / flt(total) or 0.0
 	else:
-		outgoing_cost = 0
+		available_qty_for_outgoing, outgoing_cost = 0, 0
 		qty_to_pop = abs(qty)
 		while qty_to_pop and previous_stock_queue:
 			batch = previous_stock_queue[0]
 			if 0 < batch[0] <= qty_to_pop:
 				# if batch qty > 0
 				# not enough or exactly same qty in current batch, clear batch
+				available_qty_for_outgoing += flt(batch[0])
 				outgoing_cost += flt(batch[0]) * flt(batch[1])
 				qty_to_pop -= batch[0]
 				previous_stock_queue.pop(0)
 			else:
 				# all from current batch
+				available_qty_for_outgoing += flt(qty_to_pop)
 				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
 				batch[0] -= qty_to_pop
 				qty_to_pop = 0
-		# if queue gets blank and qty_to_pop remaining, get average rate of full queue
-		return outgoing_cost / abs(qty) - qty_to_pop
-	
+
+		return outgoing_cost / available_qty_for_outgoing
+
 def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	"""split serial nos, validate and return list of valid serial nos"""
 	# TODO: remove duplicates in client side
 	serial_nos = cstr(sr_nos).strip().replace(',', '\n').split('\n')
-	
+
 	valid_serial_nos = []
 	for val in serial_nos:
 		if val:
@@ -184,23 +185,23 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 				msgprint("You have entered duplicate serial no: '%s'" % val, raise_exception=1)
 			else:
 				valid_serial_nos.append(val)
-	
+
 	if qty and len(valid_serial_nos) != abs(qty):
 		msgprint("Please enter serial nos for "
 			+ cstr(abs(qty)) + " quantity against item code: " + item_code,
 			raise_exception=1)
-		
+
 	return valid_serial_nos
-	
+
 def get_warehouse_list(doctype, txt, searchfield, start, page_len, filters):
 	"""used in search queries"""
 	wlist = []
-	for w in webnotes.conn.sql_list("""select name from tabWarehouse 
+	for w in webnotes.conn.sql_list("""select name from tabWarehouse
 		where ifnull(disabled, 0)=0 and name like '%%%s%%'""" % txt):
 		if webnotes.session.user=="Administrator":
 			wlist.append([w])
 		else:
-			warehouse_users = webnotes.conn.sql_list("""select user from `tabWarehouse User` 
+			warehouse_users = webnotes.conn.sql_list("""select user from `tabWarehouse User`
 				where parent=%s""", w)
 			if not warehouse_users:
 				wlist.append([w])
@@ -213,58 +214,58 @@ def validate_warehouse_user(warehouse):
 		return
 	warehouse_users = [p[0] for p in webnotes.conn.sql("""select user from `tabWarehouse User`
 		where parent=%s""", warehouse)]
-				
+
 	if warehouse_users and not (webnotes.session.user in warehouse_users):
 		webnotes.throw(_("Not allowed entry in Warehouse") \
 			+ ": " + warehouse, UserNotAllowedForWarehouse)
-			
+
 def validate_warehouse_company(warehouse, company):
 	warehouse_company = webnotes.conn.get_value("Warehouse", warehouse, "company")
 	if warehouse_company and warehouse_company != company:
 		webnotes.msgprint(_("Warehouse does not belong to company.") + " (" + \
 			warehouse + ", " + company +")", raise_exception=InvalidWarehouseCompany)
 
-def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, voucher_detail_no, 
+def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, voucher_detail_no,
 		stock_ledger_entries, item_sales_bom):
 	# sales bom item
 	buying_amount = 0.0
 	for bom_item in item_sales_bom[item_code]:
 		if bom_item.get("parent_detail_docname")==voucher_detail_no:
-			buying_amount += get_buying_amount(voucher_type, voucher_no, voucher_detail_no, 
+			buying_amount += get_buying_amount(voucher_type, voucher_no, voucher_detail_no,
 				stock_ledger_entries.get((bom_item.item_code, warehouse), []))
 
 	return buying_amount
-		
+
 def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 	# IMP NOTE
-	# stock_ledger_entries should already be filtered by item_code and warehouse and 
+	# stock_ledger_entries should already be filtered by item_code and warehouse and
 	# sorted by posting_date desc, posting_time desc
 	for i, sle in enumerate(stock_ledger_entries):
 		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
 			sle.voucher_detail_no == item_row:
 				previous_stock_value = len(stock_ledger_entries) > i+1 and \
 					flt(stock_ledger_entries[i+1].stock_value) or 0.0
-				buying_amount =  previous_stock_value - flt(sle.stock_value)						
-				
+				buying_amount =  previous_stock_value - flt(sle.stock_value)
+
 				return buying_amount
 	return 0.0
-	
+
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
 	if getattr(webnotes.local, "auto_indent", None) is None:
 		webnotes.local.auto_indent = cint(webnotes.conn.get_value('Stock Settings', None, 'auto_indent'))
-	
+
 	if webnotes.local.auto_indent:
 		material_requests = {}
 		bin_list = webnotes.conn.sql("""select item_code, warehouse, projected_qty
 			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
-			and exists (select name from `tabItem` 
+			and exists (select name from `tabItem`
 				where `tabItem`.name = `tabBin`.item_code and is_stock_item='Yes' and
 				(ifnull(end_of_life, '')='' or end_of_life > now()))""", as_dict=True)
 		for bin in bin_list:
 			#check if re-order is required
-			item_reorder = webnotes.conn.get("Item Reorder", 
+			item_reorder = webnotes.conn.get("Item Reorder",
 				{"parent": bin.item_code, "warehouse": bin.warehouse})
 			if item_reorder:
 				reorder_level = item_reorder.warehouse_reorder_level
@@ -274,15 +275,15 @@ def reorder_item():
 				reorder_level, reorder_qty = webnotes.conn.get_value("Item", bin.item_code,
 					["re_order_level", "re_order_qty"])
 				material_request_type = "Purchase"
-		
+
 			if flt(reorder_level) and flt(bin.projected_qty) < flt(reorder_level):
 				if flt(reorder_level) - flt(bin.projected_qty) > flt(reorder_qty):
 					reorder_qty = flt(reorder_level) - flt(bin.projected_qty)
-					
+
 				company = webnotes.conn.get_value("Warehouse", bin.warehouse, "company") or \
 					webnotes.defaults.get_defaults()["company"] or \
 					webnotes.conn.sql("""select name from tabCompany limit 1""")[0][0]
-					
+
 				material_requests.setdefault(material_request_type, webnotes._dict()).setdefault(
 					company, []).append(webnotes._dict({
 						"item_code": bin.item_code,
@@ -290,7 +291,7 @@ def reorder_item():
 						"reorder_qty": reorder_qty
 					})
 				)
-		
+
 		create_material_request(material_requests)
 
 def create_material_request(material_requests):
@@ -306,7 +307,7 @@ def create_material_request(material_requests):
 				items = material_requests[request_type][company]
 				if not items:
 					continue
-					
+
 				mr = [{
 					"doctype": "Material Request",
 					"company": company,
@@ -314,7 +315,7 @@ def create_material_request(material_requests):
 					"transaction_date": nowdate(),
 					"material_request_type": request_type
 				}]
-			
+
 				for d in items:
 					item = webnotes.doc("Item", d.item_code)
 					mr.append({
@@ -331,7 +332,7 @@ def create_material_request(material_requests):
 						"qty": d.reorder_qty,
 						"brand": item.brand,
 					})
-			
+
 				mr_bean = webnotes.bean(mr)
 				mr_bean.insert()
 				mr_bean.submit()
@@ -346,24 +347,24 @@ def create_material_request(material_requests):
 
 	if mr_list:
 		if getattr(webnotes.local, "reorder_email_notify", None) is None:
-			webnotes.local.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None, 
+			webnotes.local.reorder_email_notify = cint(webnotes.conn.get_value('Stock Settings', None,
 				'reorder_email_notify'))
-			
+
 		if(webnotes.local.reorder_email_notify):
 			send_email_notification(mr_list)
 
 	if exceptions_list:
 		notify_errors(exceptions_list)
-		
+
 def send_email_notification(mr_list):
 	""" Notify user about auto creation of indent"""
-	
-	email_list = webnotes.conn.sql_list("""select distinct r.parent 
+
+	email_list = webnotes.conn.sql_list("""select distinct r.parent
 		from tabUserRole r, tabProfile p
 		where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
-		and r.role in ('Purchase Manager','Material Manager') 
+		and r.role in ('Purchase Manager','Material Manager')
 		and p.name not in ('Administrator', 'All', 'Guest')""")
-	
+
 	msg="""<h3>Following Material Requests has been raised automatically \
 		based on item reorder level:</h3>"""
 	for mr in mr_list:
@@ -374,13 +375,13 @@ def send_email_notification(mr_list):
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"
 	sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
-	
+
 def notify_errors(exceptions_list):
 	subject = "[Important] [ERPNext] Error(s) while creating Material Requests based on Re-order Levels"
 	msg = """Dear System Manager,
 
 		An error occured for certain Items while creating Material Requests based on Re-order level.
-		
+
 		Please rectify these issues:
 		---
 

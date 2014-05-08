@@ -9,7 +9,7 @@ from webnotes.model.bean import getlist
 from webnotes.model.code import get_obj
 from webnotes import msgprint
 
-	
+
 from controllers.buying_controller import BuyingController
 class DocType(BuyingController):
 	def __init__(self, doc, doclist=[]):
@@ -28,15 +28,15 @@ class DocType(BuyingController):
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
 		}]
-		
+
 	def validate(self):
 		super(DocType, self).validate()
-		
+
 		if not self.doc.status:
 			self.doc.status = "Draft"
 
 		import utilities
-		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped", 
+		utilities.validate_status(self.doc.status, ["Draft", "Submitted", "Stopped",
 			"Cancelled"])
 
 		pc_obj = get_obj(dt='Purchase Common')
@@ -48,8 +48,8 @@ class DocType(BuyingController):
 
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied("po_raw_material_details")
-		
+		self.create_raw_materials_supplied("po_raw_material_details")
+
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
 			"Supplier Quotation": {
@@ -58,7 +58,7 @@ class DocType(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="], 
+				"compare_fields": [["import_rate", "="], ["project_name", "="], ["item_code", "="],
 					["uom", "="]],
 				"is_child_table": True
 			}
@@ -69,11 +69,11 @@ class DocType(BuyingController):
 			if d.prevdoc_detail_docname and not d.schedule_date:
 				d.schedule_date = webnotes.conn.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
-	
+
 	def get_last_purchase_rate(self):
 		get_obj('Purchase Common').get_last_purchase_rate(self)
 
-	# Check for Stopped status 
+	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
 		check_list =[]
 		for d in getlist(self.doclist, 'po_details'):
@@ -81,7 +81,7 @@ class DocType(BuyingController):
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 
-		
+
 	def update_bin(self, is_submit, is_stopped = 0):
 		from stock.utils import update_bin
 		pc_obj = get_obj('Purchase Common')
@@ -91,29 +91,29 @@ class DocType(BuyingController):
 				# this happens when item is changed from non-stock to stock item
 				if not d.warehouse:
 					continue
-				
+
 				ind_qty, po_qty = 0, flt(d.qty) * flt(d.conversion_factor)
 				if is_stopped:
 					po_qty = flt(d.qty) > flt(d.received_qty) and \
-						flt( flt(flt(d.qty) - flt(d.received_qty))*flt(d.conversion_factor)) or 0 
-				
+						flt( flt(flt(d.qty) - flt(d.received_qty))*flt(d.conversion_factor)) or 0
+
 				# No updates in Material Request on Stop / Unstop
 				if cstr(d.prevdoc_doctype) == 'Material Request' and not is_stopped:
-					# get qty and pending_qty of prevdoc 
+					# get qty and pending_qty of prevdoc
 					curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
-					 	d.prevdoc_detail_docname, 'Material Request Item', 
+					 	d.prevdoc_detail_docname, 'Material Request Item',
 						'Material Request - Purchase Order', self.doc.name)
 					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
 					 	flt(curr_ref_qty.split('~~~')[0]), 0
-					
+
 					if flt(qty) + flt(po_qty) > flt(max_qty):
 						curr_qty = flt(max_qty) - flt(qty)
-						# special case as there is no restriction 
-						# for Material Request - Purchase Order 
+						# special case as there is no restriction
+						# for Material Request - Purchase Order
 						curr_qty = curr_qty > 0 and curr_qty or 0
 					else:
 						curr_qty = flt(po_qty)
-					
+
 					ind_qty = -flt(curr_qty)
 
 				# Update ordered_qty and indented_qty in bin
@@ -125,11 +125,11 @@ class DocType(BuyingController):
 					"posting_date": self.doc.transaction_date
 				}
 				update_bin(args)
-				
+
 	def check_modified_date(self):
 		mod_db = webnotes.conn.sql("select modified from `tabPurchase Order` where name = '%s'" % self.doc.name)
 		date_diff = webnotes.conn.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
-		
+
 		if date_diff and date_diff[0][0]:
 			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
 			raise Exception
@@ -147,21 +147,21 @@ class DocType(BuyingController):
 
 	def on_submit(self):
 		purchase_controller = webnotes.get_obj("Purchase Common")
-		
+
 		self.update_prevdoc_status()
 		self.update_bin(is_submit = 1, is_stopped = 0)
-		
-		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype, 
+
+		get_obj('Authorization Control').validate_approving_authority(self.doc.doctype,
 			self.doc.company, self.doc.grand_total)
-		
+
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
-		
+
 		webnotes.conn.set(self.doc,'status','Submitted')
-	 
+
 	def on_cancel(self):
-		pc_obj = get_obj(dt = 'Purchase Common')		
+		pc_obj = get_obj(dt = 'Purchase Common')
 		self.check_for_stopped_status(pc_obj)
-		
+
 		# Check if Purchase Receipt has been submitted against current Purchase Order
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.doc.name, detail_doctype = 'Purchase Receipt Item')
 
@@ -175,14 +175,14 @@ class DocType(BuyingController):
 		self.update_prevdoc_status()
 		self.update_bin( is_submit = 0, is_stopped = 0)
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
-				
+
 	def on_update(self):
 		pass
-		
+
 @webnotes.whitelist()
 def make_purchase_receipt(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
-	
+
 	def set_missing_values(source, target):
 		bean = webnotes.bean(target)
 		bean.run_method("set_missing_values")
@@ -195,33 +195,33 @@ def make_purchase_receipt(source_name, target_doclist=None):
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {
-			"doctype": "Purchase Receipt", 
+			"doctype": "Purchase Receipt",
 			"validation": {
 				"docstatus": ["=", 1],
 			}
-		}, 
+		},
 		"Purchase Order Item": {
-			"doctype": "Purchase Receipt Item", 
+			"doctype": "Purchase Receipt Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname", 
-				"parent": "prevdoc_docname", 
-				"parenttype": "prevdoc_doctype", 
+				"name": "prevdoc_detail_docname",
+				"parent": "prevdoc_docname",
+				"parenttype": "prevdoc_doctype",
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.received_qty < doc.qty
-		}, 
+		},
 		"Purchase Taxes and Charges": {
-			"doctype": "Purchase Taxes and Charges", 
+			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
 		}
 	}, target_doclist, set_missing_values)
 
 	return [d.fields for d in doclist]
-	
+
 @webnotes.whitelist()
 def make_purchase_invoice(source_name, target_doclist=None):
 	from webnotes.model.mapper import get_mapped_doclist
-	
+
 	def set_missing_values(source, target):
 		bean = webnotes.bean(target)
 		bean.run_method("set_missing_values")
@@ -235,23 +235,23 @@ def make_purchase_invoice(source_name, target_doclist=None):
 
 	doclist = get_mapped_doclist("Purchase Order", source_name,	{
 		"Purchase Order": {
-			"doctype": "Purchase Invoice", 
+			"doctype": "Purchase Invoice",
 			"validation": {
 				"docstatus": ["=", 1],
 			}
-		}, 
+		},
 		"Purchase Order Item": {
-			"doctype": "Purchase Invoice Item", 
+			"doctype": "Purchase Invoice Item",
 			"field_map": {
-				"name": "po_detail", 
-				"parent": "purchase_order", 
+				"name": "po_detail",
+				"parent": "purchase_order",
 				"purchase_rate": "rate"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.import_amount 
-		}, 
+			"condition": lambda doc: doc.amount==0 or doc.billed_amt < doc.import_amount
+		},
 		"Purchase Taxes and Charges": {
-			"doctype": "Purchase Taxes and Charges", 
+			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
 		}
 	}, target_doclist, set_missing_values)
