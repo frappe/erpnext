@@ -2,7 +2,7 @@
  {
   "creation": "2013-02-22 01:27:42", 
   "docstatus": 0, 
-  "modified": "2013-07-25 16:34:11", 
+  "modified": "2014-05-08 12:29:40", 
   "modified_by": "Administrator", 
   "owner": "wasim@webnotestech.com"
  }, 
@@ -65,7 +65,8 @@
   "in_list_view": 1, 
   "label": "Raw Material Item Code", 
   "oldfieldname": "rm_item_code", 
-  "oldfieldtype": "Data"
+  "oldfieldtype": "Data", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -96,7 +97,8 @@
   "label": "Consumed Qty", 
   "oldfieldname": "consumed_qty", 
   "oldfieldtype": "Currency", 
-  "reqd": 1
+  "read_only": 1, 
+  "reqd": 0
  }, 
  {
   "doctype": "DocField", 
@@ -105,7 +107,8 @@
   "label": "Rate", 
   "oldfieldname": "rate", 
   "oldfieldtype": "Currency", 
-  "options": "Company:company:default_currency"
+  "options": "Company:company:default_currency", 
+  "read_only": 1
  }, 
  {
   "doctype": "DocField", 
@@ -141,9 +144,26 @@
   "doctype": "DocField", 
   "fieldname": "current_stock", 
   "fieldtype": "Float", 
+  "hidden": 1, 
   "label": "Current Stock", 
   "oldfieldname": "current_stock", 
   "oldfieldtype": "Currency", 
   "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Text", 
+  "label": "Serial No", 
+  "no_copy": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "batch_no", 
+  "fieldtype": "Link", 
+  "label": "Batch No", 
+  "no_copy": 1, 
+  "options": "Batch"
  }
 ]
