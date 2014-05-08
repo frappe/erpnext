@@ -39,3 +39,4 @@ execute:frappe.db.sql("update `tabJournal Voucher` set voucher_type='Journal Ent
 execute:frappe.delete_doc("DocType", "Grade")
 erpnext.patches.4_0.remove_india_specific_fields
 execute:frappe.delete_doc_if_exists("DocType", "Warehouse User")
+execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
