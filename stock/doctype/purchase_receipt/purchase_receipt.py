@@ -63,7 +63,7 @@ class DocType(BuyingController):
 
 		# sub-contracting
 		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied("pr_raw_material_details")
+		self.create_raw_materials_supplied("pr_raw_material_details")
 
 		self.update_valuation_rate("purchase_receipt_details")
 
