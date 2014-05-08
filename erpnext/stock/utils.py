@@ -79,8 +79,7 @@ def get_incoming_rate(args):
 			if not previous_sle:
 				return 0.0
 			previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
-			in_rate = previous_stock_queue and \
-				get_fifo_rate(previous_stock_queue, args.get("qty") or 0) or 0
+			in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
 
@@ -107,24 +106,25 @@ def get_fifo_rate(previous_stock_queue, qty):
 		total = sum(f[0] for f in previous_stock_queue)
 		return total and sum(f[0] * f[1] for f in previous_stock_queue) / flt(total) or 0.0
 	else:
-		outgoing_cost = 0
+		available_qty_for_outgoing, outgoing_cost = 0, 0
 		qty_to_pop = abs(qty)
 		while qty_to_pop and previous_stock_queue:
 			batch = previous_stock_queue[0]
 			if 0 < batch[0] <= qty_to_pop:
 				# if batch qty > 0
 				# not enough or exactly same qty in current batch, clear batch
+				available_qty_for_outgoing += flt(batch[0])
 				outgoing_cost += flt(batch[0]) * flt(batch[1])
 				qty_to_pop -= batch[0]
 				previous_stock_queue.pop(0)
 			else:
 				# all from current batch
+				available_qty_for_outgoing += flt(qty_to_pop)
 				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
 				batch[0] -= qty_to_pop
 				qty_to_pop = 0
 
-		# if queue gets blank and qty_to_pop remaining, get average rate of full queue
-		return outgoing_cost / (abs(qty) - qty_to_pop)
+		return outgoing_cost / available_qty_for_outgoing
 
 def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	"""split serial nos, validate and return list of valid serial nos"""

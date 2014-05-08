@@ -106,6 +106,11 @@ class StockReconciliation(StockController):
 			if item.has_serial_no == "Yes":
 				raise frappe.ValidationError, _("Serialized Item {0} cannot be updated using Stock Reconciliation").format(item_code)
 
+			# item managed batch-wise not allowed
+			if item.has_batch_no == "Yes":
+				frappe.throw(_("Item: {0} managed batch-wise, can not be reconciled using \
+					Stock Reconciliation, instead use Stock Entry").format(item_code))
+
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
 

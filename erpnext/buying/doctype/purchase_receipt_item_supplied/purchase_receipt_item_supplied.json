@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:42.000000", 
+ "creation": "2013-02-22 01:27:42", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -36,6 +36,21 @@
    "width": "300px"
   }, 
   {
+   "fieldname": "batch_no", 
+   "fieldtype": "Link", 
+   "label": "Batch No", 
+   "no_copy": 1, 
+   "options": "Batch", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "serial_no", 
+   "fieldtype": "Text", 
+   "label": "Serial No", 
+   "no_copy": 1, 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -57,6 +72,7 @@
    "oldfieldname": "consumed_qty", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
+   "read_only": 1, 
    "reqd": 1
   }, 
   {
@@ -137,9 +153,12 @@
  "hide_toolbar": 0, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-13 11:29:35.000000", 
+ "modified": "2014-05-08 18:37:42.966473", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Receipt Item Supplied", 
- "owner": "wasim@webnotestech.com"
+ "owner": "wasim@webnotestech.com", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }
