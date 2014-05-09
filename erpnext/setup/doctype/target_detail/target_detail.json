@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:58.000000", 
+ "creation": "2013-02-22 01:27:58", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -19,13 +19,13 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
@@ -54,9 +54,12 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:51.000000", 
+ "modified": "2014-05-09 02:16:41.436257", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Target Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

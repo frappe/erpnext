@@ -24,13 +24,13 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Link", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -72,7 +72,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:38.738033", 
+ "modified": "2014-05-09 02:16:38.887266", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Holiday List", 
@@ -91,5 +91,7 @@
    "submit": 0, 
    "write": 1
   }
- ]
+ ], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

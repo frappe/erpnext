@@ -405,10 +405,10 @@
   }, 
   {
    "fieldname": "company", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Company", 
-   "options": "link:Company", 
+   "options": "Company", 
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 1, 
@@ -418,7 +418,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-05-04 00:47:20.443476", 
+ "modified": "2014-05-09 02:16:41.833590", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 
@@ -466,5 +466,7 @@
    "write": 0
   }
  ], 
- "search_fields": "item_code,status"
+ "search_fields": "item_code,status", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

@@ -1,7 +1,7 @@
 {
  "allow_attach": 1, 
  "autoname": "LAP/.#####", 
- "creation": "2013-02-20 11:18:11.000000", 
+ "creation": "2013-02-20 11:18:11", 
  "description": "Apply / Approve Leaves", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -20,18 +20,18 @@
   {
    "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
    "fieldname": "leave_approver", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Leave Approver", 
-   "options": "link:User", 
+   "options": "User", 
    "permlevel": 0
   }, 
   {
    "fieldname": "leave_type", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Leave Type", 
-   "options": "link:Leave Type", 
+   "options": "Leave Type", 
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
@@ -135,10 +135,10 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1, 
@@ -182,7 +182,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-01-20 17:48:56.000000", 
+ "modified": "2014-05-09 02:17:13.936705", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
@@ -263,5 +263,7 @@
    "write": 1
   }
  ], 
- "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year"
+ "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

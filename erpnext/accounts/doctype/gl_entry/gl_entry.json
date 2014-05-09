@@ -1,6 +1,6 @@
 {
  "autoname": "GL.#######", 
- "creation": "2013-01-10 16:34:06.000000", 
+ "creation": "2013-01-10 16:34:06", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -8,6 +8,7 @@
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Posting Date", 
    "oldfieldname": "posting_date", 
    "oldfieldtype": "Date", 
@@ -17,6 +18,7 @@
   {
    "fieldname": "transaction_date", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Transaction Date", 
    "oldfieldname": "transaction_date", 
    "oldfieldtype": "Date", 
@@ -26,6 +28,7 @@
    "fieldname": "aging_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Aging Date", 
    "oldfieldname": "aging_date", 
    "oldfieldtype": "Date", 
@@ -36,6 +39,7 @@
    "fieldname": "account", 
    "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Account", 
    "oldfieldname": "account", 
    "oldfieldtype": "Link", 
@@ -47,6 +51,7 @@
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Cost Center", 
    "oldfieldname": "cost_center", 
    "oldfieldtype": "Link", 
@@ -157,12 +162,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "search_index": 0
   }, 
@@ -181,7 +186,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2013-12-20 19:24:08.000000", 
+ "modified": "2014-05-09 02:16:29.981405", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 
@@ -225,5 +230,7 @@
    "write": 0
   }
  ], 
- "search_fields": "voucher_no,account,posting_date,against_voucher"
+ "search_fields": "voucher_no,account,posting_date,against_voucher", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }
