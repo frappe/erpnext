@@ -106,13 +106,13 @@ class DocType(StockController):
 
 			# item should not be serialized
 			if item.has_serial_no == "Yes":
-				frappe.throw(_("Serialized item: {0} can not be managed using Stock Reconciliation, \
-					use Stock Entry instead").format(item_code))
+				raise webnotes.ValidationError, (_("Serialized item: {0} can not be managed \
+					using Stock Reconciliation, use Stock Entry instead").format(item_code))
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no == "Yes":
-				frappe.throw(_("Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry").format(item_code))
+				raise webnotes.ValidationError, (_("Item: {0} managed batch-wise, can not be \
+					reconciled using Stock Reconciliation, instead use Stock Entry").format(item_code))
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
