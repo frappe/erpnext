@@ -15,6 +15,7 @@ import install_fixtures
 
 @frappe.whitelist()
 def setup_account(args=None):
+	frappe.clear_cache()
 
 	if frappe.db.sql("select name from tabCompany"):
 		frappe.throw(_("Setup Already Complete!!"))
