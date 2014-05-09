@@ -86,7 +86,9 @@ def add_employee_restrictions_to_leave_approver():
 			where `tabEmployee Leave Approver`.parent=`tabEmployee`.name)
 		or ifnull(`reports_to`, '')!=''"""):
 		
-		frappe.get_doc("Employee", employee).save()
+		emp = frappe.get_doc("Employee", employee)
+		emp.ignore_links = True
+		emp.save()
 
 def update_permissions():
 	# clear match conditions other than owner
