@@ -563,9 +563,9 @@
   {
    "allow_on_submit": 1, 
    "fieldname": "letter_head", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Letter Head", 
-   "options": "link:Letter Head", 
+   "options": "Letter Head", 
    "permlevel": 0, 
    "print_hide": 1
   }, 
@@ -602,12 +602,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_width": "150px", 
@@ -754,7 +754,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-07 05:40:51.109407", 
+ "modified": "2014-05-09 02:17:29.990590", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
@@ -820,5 +820,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "status, posting_date, supplier"
+ "search_fields": "status, posting_date, supplier", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

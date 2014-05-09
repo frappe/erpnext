@@ -1,6 +1,6 @@
 {
  "autoname": "PCE/.###", 
- "creation": "2013-01-10 16:34:07.000000", 
+ "creation": "2013-01-10 16:34:07", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -14,6 +14,7 @@
   {
    "fieldname": "transaction_date", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Transaction Date", 
    "oldfieldname": "transaction_date", 
    "oldfieldtype": "Date", 
@@ -22,6 +23,7 @@
   {
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Posting Date", 
    "oldfieldname": "posting_date", 
    "oldfieldtype": "Date", 
@@ -30,11 +32,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Closing Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -42,6 +45,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
    "ignore_restrictions": 1, 
+   "in_list_view": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -51,11 +55,11 @@
   }, 
   {
    "fieldname": "company", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Company", 
    "oldfieldname": "company", 
    "oldfieldtype": "Select", 
-   "options": "link:Company", 
+   "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -97,7 +101,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-20 17:48:59.000000", 
+ "modified": "2014-05-09 02:16:36.920034", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Period Closing Voucher", 
@@ -132,5 +136,7 @@
    "write": 1
   }
  ], 
- "search_fields": "posting_date, fiscal_year"
+ "search_fields": "posting_date, fiscal_year", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

@@ -94,23 +94,23 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1
   }, 
   {
    "fieldname": "company", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Company", 
    "oldfieldname": "company", 
    "oldfieldtype": "Link", 
-   "options": "link:Company", 
+   "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -129,7 +129,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-06 08:20:11.263301", 
+ "modified": "2014-05-09 02:16:37.761770", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Attendance", 
@@ -175,5 +175,7 @@
    "write": 1
   }
  ], 
- "search_fields": "employee, employee_name, att_date, status"
+ "search_fields": "employee, employee_name, att_date, status", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }
