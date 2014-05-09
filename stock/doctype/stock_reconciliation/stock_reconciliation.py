@@ -67,7 +67,10 @@ class DocType(StockController):
 				item_warehouse_combinations.append([row[0], row[1]])
 
 			self.validate_item(row[0], row_num+head_row_no+2)
-			# note: warehouse will be validated through link validation
+
+			# validate warehouse
+			if not webnotes.conn.get_value("Warehouse", row[1]):
+				self.validation_messages.append(_get_msg(row_num, "Warehouse not found in the system"))
 
 			# if both not specified
 			if row[2] == "" and row[3] == "":
@@ -99,6 +102,8 @@ class DocType(StockController):
 
 		try:
 			item = webnotes.doc("Item", item_code)
+			if not item:
+				raise webnotes.ValidationError, (_("Item: {0} not found in the system").format(item_code))
 
 			# end of life and stock item
 			validate_end_of_life(item_code, item.end_of_life, verbose=0)
@@ -106,13 +111,13 @@ class DocType(StockController):
 
 			# item should not be serialized
 			if item.has_serial_no == "Yes":
-				frappe.throw(_("Serialized item: {0} can not be managed using Stock Reconciliation, \
-					use Stock Entry instead").format(item_code))
+				raise webnotes.ValidationError, (_("Serialized item: {0} can not be managed \
+					using Stock Reconciliation, use Stock Entry instead").format(item_code))
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no == "Yes":
-				frappe.throw(_("Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry").format(item_code))
+				raise webnotes.ValidationError, (_("Item: {0} managed batch-wise, can not be \
+					reconciled using Stock Reconciliation, instead use Stock Entry").format(item_code))
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)

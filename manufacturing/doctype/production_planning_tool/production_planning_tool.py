@@ -135,8 +135,8 @@ class DocType:
 			and so_item.parent in (%s) and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0)
 			and exists (select * from `tabItem` item where item.name=pi.item_code
 				and (ifnull(item.is_pro_applicable, 'No') = 'Yes'
-					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes'))""" % \
-			(", ".join(["%s"] * len(so_list))), tuple(so_list), as_dict=1)
+					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes')) %s""" % \
+			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		return items + packed_items
 
