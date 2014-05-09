@@ -248,7 +248,7 @@ class BuyingController(StockController):
 			rm.amount = required_qty * flt(bom_item.rate)
 			rm.idx = rm_supplied_idx
 
-			if self.doc.doctype == "Purchase Receipt":
+			if self.doctype == "Purchase Receipt":
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
 				if item.batch_no and not rm.batch_no:
