@@ -23,7 +23,7 @@ def execute():
 				"item_group": item_group,
 				"applicable_for": "Customer",
 				"customer": d.parent,
-				"price_or_discount": "Discount",
+				"price_or_discount": "Discount Percentage",
 				"discount_percentage": d.discount
 			}).insert()
 	
