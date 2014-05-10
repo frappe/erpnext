@@ -155,6 +155,8 @@ class Employee(Document):
 			throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self):
+		if not self.status == 'Active':
+			return
 		enabled = frappe.db.sql("""select name from `tabUser` where
 			name=%s and enabled=1""", self.user_id)
 		if not enabled:

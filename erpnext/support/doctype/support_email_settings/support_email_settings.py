@@ -17,7 +17,7 @@ class SupportEmailSettings(Document):
 			Checks support ticket email settings
 		"""
 		if self.sync_support_mails and self.mail_server:
-			inc_email = frappe.get_doc('Incoming Email Settings')
+			inc_email = frappe._dict(self.as_dict())
 			# inc_email.encode()
 			inc_email.host = self.mail_server
 			inc_email.use_ssl = self.use_ssl
