@@ -8,6 +8,7 @@ import frappe.defaults
 
 def execute():
 	frappe.reload_doc("core", "doctype", "docperm")
+	frappe.reload_doc("hr", "doctype", "employee")
 	update_user_properties()
 	update_user_match()
 	add_employee_restrictions_to_leave_approver()
@@ -82,13 +83,11 @@ def add_employee_restrictions_to_leave_approver():
 	
 	# add Employee restrictions (in on_update method)
 	for employee in frappe.db.sql_list("""select name from `tabEmployee`
-		where exists(select leave_approver from `tabEmployee Leave Approver`
+		where (exists(select leave_approver from `tabEmployee Leave Approver`
 			where `tabEmployee Leave Approver`.parent=`tabEmployee`.name)
-		or ifnull(`reports_to`, '')!=''"""):
+		or ifnull(`reports_to`, '')!='') and docstatus<2 and status='Active'"""):
 		
-		emp = frappe.get_doc("Employee", employee)
-		emp.ignore_links = True
-		emp.save()
+		frappe.get_doc("Employee", employee).save()
 
 def update_permissions():
 	# clear match conditions other than owner
