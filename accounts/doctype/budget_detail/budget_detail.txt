@@ -1,0 +1,61 @@
+[
+ {
+  "creation": "2013-03-07 11:55:04", 
+  "docstatus": 0, 
+  "modified": "2013-08-22 17:27:59", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "CBD/.######", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Budget Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Budget Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Account", 
+  "oldfieldname": "account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "budget_allocated", 
+  "fieldtype": "Currency", 
+  "label": "Budget Allocated", 
+  "oldfieldname": "budget_allocated", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "search_index": 1
+ }
+]

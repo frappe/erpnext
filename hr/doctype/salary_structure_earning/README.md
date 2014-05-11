@@ -1,0 +1,1 @@
+Earning details in parent Salary Structure.

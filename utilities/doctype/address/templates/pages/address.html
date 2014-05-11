@@ -1,0 +1,114 @@
+{% extends base_template %}
+
+{% set title=doc and doc.name or "New Address" %}
+{% set docname=(doc and doc.name or "") %}
+
+{% macro render_fields(docfields) -%}
+{% for df in docfields -%}
+	{% if df.fieldtype in ["Data", "Link"] -%}
+	<fieldset>
+		<label>{{ df.label }}</label>
+		<input class="form-control" type="text" placeholder="Type {{ df.label }}" 
+			data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}"
+			{% if doc and doc.fields.get(df.fieldname) -%} value="{{ doc.fields[df.fieldname] }}" {%- endif %}>
+	</fieldset>
+	{% elif df.fieldtype == "Check" -%}
+	<fieldset class="checkbox">
+		<label><input type="checkbox" data-fieldname="{{ df.fieldname }}" 
+			data-fieldtype="{{ df.fieldtype }}" 
+			{% if doc and cint(doc.fields.get(df.fieldname)) -%} checked="checked" {%- endif %}> 
+			{{ df.label }}</label>
+	</fieldset>
+	{% elif df.fieldtype == "Select" -%}
+	<fieldset>
+		<label>{{ df.label }}</label>
+		<select class="form-control" data-fieldname="{{ df.fieldname }}" data-fieldtype="{{ df.fieldtype }}">
+			{% for value in df.options.split("\n") -%}
+			{% if doc and doc.fields.get(df.fieldname) == value -%}
+			<option selected="selected">{{ value }}</option>
+			{% else -%}
+			<option>{{ value }}</option>
+			{%- endif %}
+			{%- endfor %}
+		</select>
+	</fieldset>
+	{%- endif %}
+{%- endfor %}
+{%- endmacro %}
+
+{% block content %}
+<div class="container content">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a></li>
+    	<li><a href="addresses">My Addresses</a></li>
+    	<li class="active"><i class="icon-map-marker icon-fixed-width"></i> {{ title }}</li>
+    </ul>
+	<h3><i class="icon-map-marker icon-fixed-width"></i> {{ title }}</h3>
+	<button type="button" class="btn btn-primary pull-right" id="address-save"><i class="icon-ok"></i> 
+		{{ doc and "Save" or "Insert" }}</button>
+	<div class="clearfix"></div>
+	<hr>
+	<div id="address-error" class="alert alert-danger" style="display: none;"></div>
+	<form autocomplete="on">
+		<div class="row">
+			<section class="col-md-6">
+				{{ render_fields(meta.left_fields) }}
+			</section>
+			<section class="col-md-6">
+				{{ render_fields(meta.right_fields) }}
+			</section>
+		</section>
+	</form>
+</div>
+
+<script>
+;(function() {
+	$(document).ready(function() {
+		bind_save();
+	});
+	
+	var bind_save = function() {
+		$("#address-save").on("click", function() {
+			var fields = {
+				name: "{{ docname }}"
+			};
+
+			$("form").find("[data-fieldname]").each(function(i, input) {
+				var $input = $(input);
+				var fieldname = $(input).attr("data-fieldname");
+				var fieldtype = $(input).attr("data-fieldtype");
+				
+				if(fieldtype == "Check") {
+					fields[fieldname] = $input.is(":checked") ? 1 : 0;
+				} else {
+					fields[fieldname] = $input.val();
+				}
+			});
+			
+			wn.call({
+				btn: $(this),
+				type: "POST",
+				method: "selling.utils.cart.save_address",
+				args: { fields: fields, address_fieldname: get_url_arg("address_fieldname") },
+				callback: function(r) {
+					if(r.exc) {
+						var msg = "";
+						if(r._server_messages) {
+							msg = JSON.parse(r._server_messages || []).join("<br>");
+						}
+						
+						$("#address-error")
+							.html(msg || "Something went wrong!")
+							.toggle(true);
+					} else if(get_url_arg("address_fieldname")) {
+						window.location.href = "cart";
+					} else {
+						window.location.href = "address?name=" + encodeURIComponent(r.message);
+					}
+				}
+			});
+		});
+	};
+})();
+</script>
+{% endblock %}

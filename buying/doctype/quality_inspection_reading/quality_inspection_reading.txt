@@ -1,0 +1,141 @@
+[
+ {
+  "creation": "2013-02-22 01:27:43", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:18", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "QASD/.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Buying", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Quality Inspection Reading", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Quality Inspection Reading"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "specification", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Parameter", 
+  "oldfieldname": "specification", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "value", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Acceptance Criteria", 
+  "oldfieldname": "value", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_1", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Reading 1", 
+  "oldfieldname": "reading_1", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_2", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Reading 2", 
+  "oldfieldname": "reading_2", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_3", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Reading 3", 
+  "oldfieldname": "reading_3", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_4", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Reading 4", 
+  "oldfieldname": "reading_4", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_5", 
+  "fieldtype": "Data", 
+  "label": "Reading 5", 
+  "oldfieldname": "reading_5", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_6", 
+  "fieldtype": "Data", 
+  "label": "Reading 6", 
+  "oldfieldname": "reading_6", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_7", 
+  "fieldtype": "Data", 
+  "label": "Reading 7", 
+  "oldfieldname": "reading_7", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_8", 
+  "fieldtype": "Data", 
+  "label": "Reading 8", 
+  "oldfieldname": "reading_8", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_9", 
+  "fieldtype": "Data", 
+  "label": "Reading 9", 
+  "oldfieldname": "reading_9", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reading_10", 
+  "fieldtype": "Data", 
+  "label": "Reading 10", 
+  "oldfieldname": "reading_10", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "default": "Accepted", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "label": "Status", 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "Accepted\nRejected"
+ }
+]

@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2013-11-29 17:08:23", 
+  "docstatus": 0, 
+  "modified": "2013-11-29 17:28:15", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report_name": "Stock Ledger", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Stock Ledger"
+ }
+]

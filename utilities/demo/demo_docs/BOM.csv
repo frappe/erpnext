@@ -1,0 +1,47 @@
+Data Import Template,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Table:,BOM,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Notes:,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Please do not change the template headings.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+First data column must be blank.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"If you are uploading new records, leave the ""name"" (ID) column blank.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"If you are uploading new records, ""Naming Series"" becomes mandatory, if present.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Only mandatory fields are necessary for new records. You can delete non-mandatory columns if you wish.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"For updating, you can update only selective columns.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+You can only upload upto 5000 records in one go. (may be less in some cases),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+DocType:,BOM,,,,,,,,,,,,,,,~,BOM Operation,bom_operations,,,,,,~,BOM Item,bom_materials,,,,,,,,,~,BOM Explosion Item,flat_bom_details,,,,,,
+Column Labels:,ID,Item,Quantity,Is Active,Is Default,With Operations,Rate Of Materials Based On,Price List,Total Cost,Total Raw Material Cost,Total Operating Cost,Item UOM,Project Name,Item Desription,Amended From,,ID,Operation No,Operation Description,Workstation,Hour Rate,Operation Time (mins),Operating Cost,,ID,Item Code,Qty,Stock UOM,Operation No,BOM No,Rate,Amount,Scrap %,Item Description,,ID,Item Code,Description,Qty,Rate,Amount,Stock UOM,Qty Consumed Per Unit
+Column Name:,name,item,quantity,is_active,is_default,with_operations,rm_cost_as_per,buying_price_list,total_cost,raw_material_cost,operating_cost,uom,project_name,description,amended_from,~,name,operation_no,opn_description,workstation,hour_rate,time_in_mins,operating_cost,~,name,item_code,qty,stock_uom,operation_no,bom_no,rate,amount,scrap,description,~,name,item_code,description,qty,rate,amount,stock_uom,qty_consumed_per_unit
+Mandatory:,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,No,No,No,,Yes,Yes,Yes,No,No,No,No,,Yes,Yes,Yes,Yes,No,No,No,No,No,No,,Yes,No,No,No,No,No,No,No
+Type:,Data (text),Link,Float,Check,Check,Check,Select,Link,Float,Float,Float,Select,Link,Small Text,Link,,Data,Data,Text,Link,Float,Float,Float,,Data,Link,Float,Link,Select,Link,Float,Float,Float,Text,,Data,Link,Text,Float,Float,Float,Link,Float
+Info:,,Valid Item,,0 or 1,0 or 1,0 or 1,"One of: Valuation Rate, Last Purchase Rate, Price List",Valid Price List,,,,Valid UOM,Valid Project,,Valid BOM,,Leave blank for new records,,,Valid Workstation,,,,,Leave blank for new records,Valid Item,,Valid UOM,,Valid BOM,,,,,,Leave blank for new records,Valid Item,,,,,Valid UOM,
+Start entering data below this line,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,BOM/Bearing Assembly/001,Bearing Assembly,1,1,1,,Price List,Standard Buying,130,130,0,Nos,,Bearing Assembly,,,,,,,,,,,,Base Bearing Plate,1,Nos,,,15,15,,1/4 in. x 6 in. x 6 in. Mild Steel Plate,,,Bearing Pipe,1.5 in. Diameter x 36 in. Mild Steel Tubing,1,15,15,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Block,1,Nos,,,10,10,,"CAST IRON, MCMASTER PART NO. 3710T13",,,Bearing Collar,1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar,2,20,40,Nos,2
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Collar,2,Nos,,,20,40,,1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar,,,Bearing Block,"CAST IRON, MCMASTER PART NO. 3710T13",1,10,10,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Pipe,1,Nos,,,15,15,,1.5 in. Diameter x 36 in. Mild Steel Tubing,,,Upper Bearing Plate,3/16 in. x 6 in. x 6 in. Low Carbon Steel Plate,1,50,50,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Upper Bearing Plate,1,Nos,,,50,50,,3/16 in. x 6 in. x 6 in. Low Carbon Steel Plate,,,Base Bearing Plate,1/4 in. x 6 in. x 6 in. Mild Steel Plate,1,15,15,Nos,1
+,BOM/Wind Mill A Series/001,Wind Mill A Series,1,1,1,,Price List,Standard Buying,223,223,0,Nos,,Wind Mill A Series for Home Use 9ft,,,,,,,,,,,,Base Bearing Plate,1,Nos,,,15,15,,1/4 in. x 6 in. x 6 in. Mild Steel Plate,,,Shaft,1.25 in. Diameter x 6 ft. Mild Steel Tubing,1,30,30,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Base Plate,1,Nos,,,20,20,,3/4 in. x 2 ft. x 4 ft. Pine Plywood,,,Base Bearing Plate,1/4 in. x 6 in. x 6 in. Mild Steel Plate,1,15,15,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Block,1,Nos,,,10,10,,"CAST IRON, MCMASTER PART NO. 3710T13",,,External Disc,15/32 in. x 4 ft. x 8 ft. 3-Ply Rtd Sheathing,1,45,45,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Pipe,1,Nos,,,15,15,,1.5 in. Diameter x 36 in. Mild Steel Tubing,,,Bearing Pipe,1.5 in. Diameter x 36 in. Mild Steel Tubing,1,15,15,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,External Disc,1,Nos,,,45,45,,15/32 in. x 4 ft. x 8 ft. 3-Ply Rtd Sheathing,,,Wing Sheet,1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet,4,22,88,Nos,4
+,,,,,,,,,,,,,,,,,,,,,,,,,,Shaft,1,Nos,,,30,30,,1.25 in. Diameter x 6 ft. Mild Steel Tubing,,,Base Plate,3/4 in. x 2 ft. x 4 ft. Pine Plywood,1,20,20,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Wing Sheet,4,Nos,,,22,88,,1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet,,,Bearing Block,"CAST IRON, MCMASTER PART NO. 3710T13",1,10,10,Nos,1
+,BOM/Wind MIll C Series/001,Wind MIll C Series,1,1,1,,Price List,Standard Buying,314,314,0,Nos,,Wind Mill C Series for Commercial Use 18ft,,,,,,,,,,,,Base Plate,2,Nos,,,20,40,,3/4 in. x 2 ft. x 4 ft. Pine Plywood,,,Base Bearing Plate,1/4 in. x 6 in. x 6 in. Mild Steel Plate,1,15,15,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Internal Disc,1,Nos,,,33,33,,For Bearing Collar,,,Bearing Collar,1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar,2,20,40,Nos,2
+,,,,,,,,,,,,,,,,,,,,,,,,,,External Disc,1,Nos,,,45,45,,15/32 in. x 4 ft. x 8 ft. 3-Ply Rtd Sheathing,,,Base Plate,3/4 in. x 2 ft. x 4 ft. Pine Plywood,2,20,40,Nos,2
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Assembly,1,Nos,,BOM/Bearing Assembly/001,130,130,,Bearing Assembly,,,Bearing Pipe,1.5 in. Diameter x 36 in. Mild Steel Tubing,1,15,15,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Wing Sheet,3,Nos,,,22,66,,1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet,,,Internal Disc,For Bearing Collar,1,33,33,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Upper Bearing Plate,3/16 in. x 6 in. x 6 in. Low Carbon Steel Plate,1,50,50,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Wing Sheet,1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet,3,22,66,Nos,3
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,External Disc,15/32 in. x 4 ft. x 8 ft. 3-Ply Rtd Sheathing,1,45,45,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Block,"CAST IRON, MCMASTER PART NO. 3710T13",1,10,10,Nos,1
+,BOM/Wind Turbine/001,Wind Turbine,1,1,1,,Price List,Standard Buying,139,139,0,Nos,,Small Wind Turbine for Home Use,,,,,,,,,,,,Base Bearing Plate,1,Nos,,,15,15,,1/4 in. x 6 in. x 6 in. Mild Steel Plate,,,Shaft,1.25 in. Diameter x 6 ft. Mild Steel Tubing,1,30,30,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Base Plate,1,Nos,,,20,20,,3/4 in. x 2 ft. x 4 ft. Pine Plywood,,,Bearing Collar,1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar,1,20,20,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Bearing Collar,1,Nos,,,20,20,,1 in. x 3 in. x 1 ft. Multipurpose Al Alloy Bar,,,Base Plate,3/4 in. x 2 ft. x 4 ft. Pine Plywood,1,20,20,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Blade Rib,1,Nos,,,10,10,,1/2 in. x 2 ft. x 4 ft. Pine Plywood,,,Base Bearing Plate,1/4 in. x 6 in. x 6 in. Mild Steel Plate,1,15,15,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Shaft,1,Nos,,,30,30,,1.25 in. Diameter x 6 ft. Mild Steel Tubing,,,Blade Rib,1/2 in. x 2 ft. x 4 ft. Pine Plywood,1,10,10,Nos,1
+,,,,,,,,,,,,,,,,,,,,,,,,,,Wing Sheet,2,Nos,,,22,44,,1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet,,,Wing Sheet,1/32 in. x 24 in. x 47 in. HDPE Opaque Sheet,2,22,44,Nos,2

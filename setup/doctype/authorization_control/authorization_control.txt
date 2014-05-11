@@ -1,0 +1,19 @@
+[
+ {
+  "creation": "2012-03-27 14:36:18", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:03", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Authorization Control"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-07-30 18:35:10", 
+  "docstatus": 0, 
+  "modified": "2013-07-31 11:46:57", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select\n    `tabPurchase Receipt`.`name` as \"Purchase Receipt:Link/Purchase Receipt:120\",\n    `tabPurchase Receipt`.`supplier` as \"Supplier:Link/Supplier:120\",\n\t`tabPurchase Receipt`.`posting_date` as \"Date:Date\",\n\t`tabPurchase Receipt Item`.`project_name` as \"Project\",\n\t`tabPurchase Receipt Item`.`item_code` as \"Item:Link/Item:120\",\n\t(`tabPurchase Receipt Item`.`qty` - ifnull((select sum(qty) from `tabPurchase Invoice Item` \n\t    where `tabPurchase Invoice Item`.purchase_receipt = `tabPurchase Receipt`.name and\n\t        `tabPurchase Invoice Item`.pr_detail = `tabPurchase Receipt Item`.name), 0))\n\t\tas \"Qty:Float:110\",\n\t(`tabPurchase Receipt Item`.`amount` - ifnull((select sum(amount) from `tabPurchase Invoice Item` \n        where `tabPurchase Invoice Item`.purchase_receipt = `tabPurchase Receipt`.name and\n            `tabPurchase Invoice Item`.pr_detail = `tabPurchase Receipt Item`.name), 0))\n\t\tas \"Amount:Currency:110\",\n\t`tabPurchase Receipt Item`.`item_name` as \"Item Name::150\",\n\t`tabPurchase Receipt Item`.`description` as \"Description::200\"\nfrom `tabPurchase Receipt`, `tabPurchase Receipt Item`\nwhere\n    `tabPurchase Receipt`.docstatus = 1 and\n\t`tabPurchase Receipt`.`status` != \"Stopped\" and\n    `tabPurchase Receipt`.name = `tabPurchase Receipt Item`.parent and\n    (`tabPurchase Receipt Item`.qty > ifnull((select sum(qty) from `tabPurchase Invoice Item` \n        where `tabPurchase Invoice Item`.purchase_receipt = `tabPurchase Receipt`.name and\n            `tabPurchase Invoice Item`.pr_detail = `tabPurchase Receipt Item`.name), 0))\norder by `tabPurchase Receipt`.`name` desc", 
+  "ref_doctype": "Purchase Invoice", 
+  "report_name": "Received Items To Be Billed", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Received Items To Be Billed"
+ }
+]

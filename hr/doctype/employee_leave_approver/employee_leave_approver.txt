@@ -1,0 +1,40 @@
+[
+ {
+  "creation": "2013-04-12 06:56:15", 
+  "docstatus": 0, 
+  "modified": "2013-08-05 14:15:44", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 0, 
+  "autoname": "LAPPR-/.#####", 
+  "description": "Users who can approve a specific employee's leave applications", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_approver", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Leave Approver", 
+  "name": "__common__", 
+  "parent": "Employee Leave Approver", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "width": "200"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Employee Leave Approver"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

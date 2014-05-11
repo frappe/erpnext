@@ -1,0 +1,121 @@
+[
+ {
+  "creation": "2013-02-22 01:27:51", 
+  "docstatus": 0, 
+  "modified": "2013-10-10 17:02:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "IID/.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Installation Note Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Installation Note Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Data", 
+  "print_width": "300px", 
+  "read_only": 1, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Serial No", 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "180px", 
+  "width": "180px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_detail_docname", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Against Document Detail No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_docname", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Against Document No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_doctype", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Document Type", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_doctype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Installed Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1
+ }
+]

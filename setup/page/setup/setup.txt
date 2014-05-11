@@ -1,0 +1,32 @@
+[
+ {
+  "creation": "2012-06-14 15:07:28", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:04", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-cog", 
+  "module": "Setup", 
+  "name": "__common__", 
+  "page_name": "Setup", 
+  "standard": "Yes"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "Setup", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "Setup"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

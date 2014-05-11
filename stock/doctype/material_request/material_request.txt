@@ -1,0 +1,283 @@
+[
+ {
+  "creation": "2013-03-07 14:48:38", 
+  "docstatus": 0, 
+  "modified": "2013-11-03 15:30:49", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "allow_import": 1, 
+  "allow_print": 0, 
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "icon": "icon-ticket", 
+  "is_submittable": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only_onload": 1, 
+  "search_fields": "status,transaction_date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Material Request", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Material Request", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Material Request"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "type_section", 
+  "fieldtype": "Section Break", 
+  "label": "Basic Info", 
+  "options": "icon-pushpin"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "material_request_type", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Type", 
+  "options": "Purchase\nTransfer", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "MREQ-\nIDT", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "description": "Select the relevant company name if you have multiple companies", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "indent_details", 
+  "fieldtype": "Table", 
+  "label": "Material Request Items", 
+  "no_copy": 0, 
+  "oldfieldname": "indent_details", 
+  "oldfieldtype": "Table", 
+  "options": "Material Request Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "requested_by", 
+  "fieldtype": "Data", 
+  "label": "Requested For"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Transaction Date", 
+  "no_copy": 1, 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
+  "print_width": "100px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nStopped\nCancelled", 
+  "print_hide": 1, 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "label": "Print Heading", 
+  "options": "Print Heading", 
+  "print_hide": 1
+ }, 
+ {
+  "description": "% of materials ordered against this Material Request", 
+  "doctype": "DocField", 
+  "fieldname": "per_ordered", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "% Completed", 
+  "no_copy": 1, 
+  "oldfieldname": "per_ordered", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Terms and Conditions", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "label": "Terms", 
+  "oldfieldname": "tc_name", 
+  "oldfieldtype": "Link", 
+  "options": "Terms and Conditions", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms", 
+  "fieldtype": "Text Editor", 
+  "label": "Terms and Conditions Content", 
+  "oldfieldname": "terms", 
+  "oldfieldtype": "Text Editor"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }
+]

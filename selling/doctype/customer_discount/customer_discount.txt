@@ -1,0 +1,43 @@
+[
+ {
+  "creation": "2013-07-22 12:43:40", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 19:41:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Customer Discount", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Customer Discount"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "label": "Item Group", 
+  "options": "Item Group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "discount", 
+  "fieldtype": "Float", 
+  "label": "Discount (%)"
+ }
+]

@@ -1,0 +1,61 @@
+[
+ {
+  "creation": "2013-02-22 01:27:48", 
+  "docstatus": 0, 
+  "modified": "2013-08-06 17:11:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 0, 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Salary Structure Earning", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Structure Earning"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_type", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Type", 
+  "oldfieldname": "e_type", 
+  "oldfieldtype": "Data", 
+  "options": "Earning Type", 
+  "print_width": "200px", 
+  "reqd": 1, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "modified_value", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Amount", 
+  "oldfieldname": "modified_value", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "depend_on_lwp", 
+  "fieldtype": "Check", 
+  "in_list_view": 0, 
+  "label": "Reduce Earning for Leave Without Pay (LWP)", 
+  "oldfieldname": "depend_on_lwp", 
+  "oldfieldtype": "Check"
+ }
+]

@@ -1,0 +1,56 @@
+[
+ {
+  "creation": "2013-01-10 16:34:14", 
+  "docstatus": 0, 
+  "modified": "2013-07-26 15:24:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:grade_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-star-half-empty", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grade_name", 
+  "fieldtype": "Data", 
+  "label": "Grade", 
+  "name": "__common__", 
+  "oldfieldname": "grade_name", 
+  "oldfieldtype": "Data", 
+  "parent": "Grade", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Grade", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Grade"
+ }, 
+ {
+  "doctype": "DocField"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

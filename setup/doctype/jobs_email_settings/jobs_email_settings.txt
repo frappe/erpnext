@@ -1,0 +1,90 @@
+[
+ {
+  "creation": "2013-01-15 16:50:01", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:43:39", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Email settings for jobs email id \"jobs@example.com\"", 
+  "doctype": "DocType", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Jobs Email Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Jobs Email Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Jobs Email Settings"
+ }, 
+ {
+  "description": "Settings to extract Job Applicants from a mailbox e.g. \"jobs@example.com\"", 
+  "doctype": "DocField", 
+  "fieldname": "pop3_mail_settings", 
+  "fieldtype": "Section Break", 
+  "label": "POP3 Mail Settings"
+ }, 
+ {
+  "description": "Check to activate", 
+  "doctype": "DocField", 
+  "fieldname": "extract_emails", 
+  "fieldtype": "Check", 
+  "label": "Extract Emails"
+ }, 
+ {
+  "description": "Email Id where a job applicant will email e.g. \"jobs@example.com\"", 
+  "doctype": "DocField", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "label": "Email Id"
+ }, 
+ {
+  "description": "POP3 server e.g. (pop.gmail.com)", 
+  "doctype": "DocField", 
+  "fieldname": "host", 
+  "fieldtype": "Data", 
+  "label": "Host"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "use_ssl", 
+  "fieldtype": "Check", 
+  "label": "Use SSL"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "username", 
+  "fieldtype": "Data", 
+  "label": "Username"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "password", 
+  "fieldtype": "Password", 
+  "label": "Password"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

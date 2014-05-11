@@ -1,0 +1,106 @@
+[
+ {
+  "creation": "2013-06-25 10:25:16", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:58:56", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Settings for Selling Module", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Selling Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Selling Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Selling Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cust_master_name", 
+  "fieldtype": "Select", 
+  "label": "Customer Naming By", 
+  "options": "Customer Name\nNaming Series"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "label": "Default Customer Group", 
+  "options": "Customer Group"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "label": "Default Territory", 
+  "options": "Territory"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling_price_list", 
+  "fieldtype": "Link", 
+  "label": "Default Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_5", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "so_required", 
+  "fieldtype": "Select", 
+  "label": "Sales Order Required", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dn_required", 
+  "fieldtype": "Select", 
+  "label": "Delivery Note Required", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "maintain_same_sales_rate", 
+  "fieldtype": "Check", 
+  "label": "Maintain Same Rate Throughout Sales Cycle"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "editable_price_list_rate", 
+  "fieldtype": "Check", 
+  "label": "Allow user to edit Price List Rate in transactions"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

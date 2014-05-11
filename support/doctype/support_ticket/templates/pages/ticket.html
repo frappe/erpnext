@@ -1,0 +1,121 @@
+{% extends base_template %}
+
+{% set title=doc.name %}
+
+{% set status_label = {
+	"Open": "label-success",
+	"To Reply": "label-danger",
+	"Closed": "label-default"
+} %}
+
+{% block content %}
+<div class="container content">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a></li>
+    	<li><a href="tickets">My Tickets</a></li>
+    	<li class="active"><i class="icon-ticket icon-fixed-width"></i> {{ doc.name }}</li>
+    </ul>
+	<h3><i class="icon-ticket icon-fixed-width"></i> {{ doc.name }}</h3>
+	{% if doc.name == "Not Allowed" -%}
+		<script>ask_to_login();</script>
+	{% else %}
+	<hr>
+	{%- if doc.status -%}
+	{% if doc.status == "Waiting for Customer" -%}
+		{% set status = "To Reply" %}
+	{% else %}
+		{% set status = doc.status %}
+	{%- endif -%}
+	<div class="row">
+		<div class="col-md-2" style="margin-bottom: 7px;">
+			<span class="label {{ status_label.get(status) or 'label-default' }}">{{ status }}</span>
+		</div>
+		<div class="col-md-8">
+			<div class="row col-md-12">{{ doc.subject }}</div>
+		</div>
+		<div class="col-md-2">
+			<span class="text-muted pull-right">{{ utils.formatdate(doc.creation) }}</span>
+		</div>
+	</div>
+	<div class="row">
+		<h4 class="col-xs-6">Messages</h4>
+		<div class="col-xs-6">
+			 <button class="btn btn-sm btn-primary pull-right" id="ticket-reply">
+				  <i class="icon-envelope icon-fixed-width"></i> Reply</button>
+			 <button class="btn btn-sm btn-success pull-right hide" id="ticket-reply-send">
+				  <i class="icon-arrow-right icon-fixed-width"></i> Send</button>
+		</div>
+	</div>
+	<p id="ticket-alert" class="alert alert-danger" 
+		style="display: none;">&nbsp;</p>
+	{%- if doclist.get({"doctype":"Communication"}) -%}
+	<div>
+		<table class="table table-bordered table-striped" id="ticket-thread">
+			<tbody>
+				{%- for comm in 
+					(doclist.get({"doctype":"Communication"})|sort(reverse=True, attribute="creation")) %}
+				<tr>
+					<td>
+					<h5 style="text-transform: none">
+						{{ comm.sender }} on {{ utils.formatdate(comm.creation) }}</h5>
+					<hr>
+					<p>{{ webnotes.utils.is_html(comm.content) and comm.content or
+						comm.content.replace("\n", "<br>")}}</p>
+					</td>
+				</tr>
+				{% endfor -%}
+			</tbody>
+		</table>
+	</div>
+	{%- else -%}
+	<div class="alert">No messages</div>
+	{%- endif -%}
+	{%- endif -%}
+	{% endif -%}
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+	$("#ticket-reply").on("click", function() {
+		if(!$("#ticket-reply-editor").length) {
+			$('<tr id="ticket-reply-editor"><td>\
+				<h5 style="text-transform: none">Reply</h5>\
+				<hr>\
+				<textarea rows=10 class="form-control" style="resize: vertical;"></textarea>\
+			</td></tr>').prependTo($("#ticket-thread").find("tbody"));
+			$("#ticket-reply").addClass("hide");
+			$("#ticket-reply-send").removeClass("hide");
+		}
+	});
+	
+	$("#ticket-reply-send").on("click", function() {
+		var reply = $("#ticket-reply-editor").find("textarea").val().trim();
+		if(!reply) {
+			msgprint("Please write something in reply!");
+		} else {
+			wn.call({
+				type: "POST",
+				method: "support.doctype.support_ticket.templates.pages.ticket.add_reply",
+				btn: this,
+				args: { ticket: "{{ doc.name }}", message: reply },
+				callback: function(r) {
+					if(r.exc) {
+						msgprint(r._server_messages 
+							? JSON.parse(r._server_messages).join("<br>")
+							: "Something went wrong!");
+					} else {
+						window.location.reload();
+					}
+				}
+			})
+		}
+	});
+});
+
+var msgprint = function(txt) {
+	if(txt) $("#ticket-alert").html(txt).toggle(true);
+}
+</script>
+{% endblock %}

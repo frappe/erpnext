@@ -1,0 +1,85 @@
+[
+ {
+  "creation": "2013-05-24 13:41:00", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:47:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_print": 0, 
+  "allow_rename": 1, 
+  "description": "Note is a free page where users can share documents / notes", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-file-text", 
+  "module": "Utilities", 
+  "name": "__common__", 
+  "read_only_onload": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Note", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Note", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "All", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Note"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "title", 
+  "fieldtype": "Data", 
+  "label": "Title", 
+  "print_hide": 1
+ }, 
+ {
+  "description": "Help: To link to another record in the system, use \"#Form/Note/[Note Name]\" as the Link URL. (don't use \"http://\")", 
+  "doctype": "DocField", 
+  "fieldname": "content", 
+  "fieldtype": "Text Editor", 
+  "in_list_view": 0, 
+  "label": "Content"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "share", 
+  "fieldtype": "Section Break", 
+  "label": "Share"
+ }, 
+ {
+  "description": "Everyone can read", 
+  "doctype": "DocField", 
+  "fieldname": "public", 
+  "fieldtype": "Check", 
+  "label": "Public", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "share_with", 
+  "fieldtype": "Table", 
+  "label": "Share With", 
+  "options": "Note User", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

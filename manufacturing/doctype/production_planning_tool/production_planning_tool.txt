@@ -1,0 +1,194 @@
+[
+ {
+  "creation": "2013-01-21 12:03:47", 
+  "docstatus": 0, 
+  "modified": "2013-08-08 12:01:02", 
+  "modified_by": "Administrator", 
+  "owner": "jai@webnotestech.com"
+ }, 
+ {
+  "default_print_format": "Standard", 
+  "doctype": "DocType", 
+  "icon": "icon-calendar", 
+  "in_create": 1, 
+  "issingle": 1, 
+  "module": "Manufacturing", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Production Planning Tool", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Production Planning Tool", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "Manufacturing User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Production Planning Tool"
+ }, 
+ {
+  "description": "Select Sales Orders from which you want to create Production Orders.", 
+  "doctype": "DocField", 
+  "fieldname": "select_sales_orders", 
+  "fieldtype": "Section Break", 
+  "label": "Select Sales Orders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fg_item", 
+  "fieldtype": "Link", 
+  "label": "Filter based on item", 
+  "options": "Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "label": "Filter based on customer", 
+  "options": "Customer"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "label": "From Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "label": "To Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "description": "Pull sales orders (pending to deliver) based on the above criteria", 
+  "doctype": "DocField", 
+  "fieldname": "get_sales_orders", 
+  "fieldtype": "Button", 
+  "label": "Get Sales Orders", 
+  "options": "get_open_sales_orders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pp_so_details", 
+  "fieldtype": "Table", 
+  "label": "Production Plan Sales Orders", 
+  "options": "Production Plan Sales Order"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "items_for_production", 
+  "fieldtype": "Section Break", 
+  "label": "Select Items"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_items_from_so", 
+  "fieldtype": "Button", 
+  "label": "Get Items From Sales Orders", 
+  "options": "get_items_from_so"
+ }, 
+ {
+  "default": "1", 
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "doctype": "DocField", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check", 
+  "label": "Use Multi-Level BOM", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pp_details", 
+  "fieldtype": "Table", 
+  "label": "Production Plan Items", 
+  "options": "Production Plan Item"
+ }, 
+ {
+  "description": "Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.", 
+  "doctype": "DocField", 
+  "fieldname": "create_production_orders", 
+  "fieldtype": "Section Break", 
+  "label": "Production Orders"
+ }, 
+ {
+  "description": "Separate production order will be created for each finished good item.", 
+  "doctype": "DocField", 
+  "fieldname": "raise_production_order", 
+  "fieldtype": "Button", 
+  "label": "Create Production Orders", 
+  "options": "raise_production_order"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb5", 
+  "fieldtype": "Section Break", 
+  "label": "Material Requirement"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "purchase_request_for_warehouse", 
+  "fieldtype": "Link", 
+  "label": "Material Request For Warehouse", 
+  "options": "Warehouse"
+ }, 
+ {
+  "description": "Items to be requested which are \"Out of Stock\" considering all warehouses based on projected qty and minimum order qty", 
+  "doctype": "DocField", 
+  "fieldname": "raise_purchase_request", 
+  "fieldtype": "Button", 
+  "label": "Create Material Requests", 
+  "options": "raise_purchase_request"
+ }, 
+ {
+  "description": "Download a report containing all raw materials with their latest inventory status", 
+  "doctype": "DocField", 
+  "fieldname": "download_materials_required", 
+  "fieldtype": "Button", 
+  "label": "Download Materials Required"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

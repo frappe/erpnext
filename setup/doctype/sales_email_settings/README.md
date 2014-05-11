@@ -1,0 +1,1 @@
+Settings for creating new Communication, Leads from sales inbox like "sales@example.com" via POP3.

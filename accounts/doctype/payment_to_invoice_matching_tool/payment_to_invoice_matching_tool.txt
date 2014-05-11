@@ -1,0 +1,196 @@
+[
+ {
+  "creation": "2013-01-30 12:49:46", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:31:00", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "hide_toolbar": 1, 
+  "icon": "icon-magic", 
+  "issingle": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Payment to Invoice Matching Tool", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Payment to Invoice Matching Tool", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Payment to Invoice Matching Tool"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account", 
+  "fieldtype": "Link", 
+  "label": "Account", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account_type", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Account Type", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Company", 
+  "options": "Company", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_type", 
+  "fieldtype": "Select", 
+  "label": "Voucher Type", 
+  "options": "Sales Invoice\nPurchase Invoice\nJournal Voucher", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_no", 
+  "fieldtype": "Link", 
+  "label": "Voucher No", 
+  "options": "[Select]", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pull_payment_entries", 
+  "fieldtype": "Button", 
+  "label": "Pull Payment Entries", 
+  "options": "get_payment_entries"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "label": "Total Amount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pending_amt_to_reconcile", 
+  "fieldtype": "Currency", 
+  "label": "Outstanding Amount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "payment_entries", 
+  "fieldtype": "Section Break", 
+  "label": "Payment Entries"
+ }, 
+ {
+  "description": "Update allocated amount in the above table and then click \"Allocate\" button", 
+  "doctype": "DocField", 
+  "fieldname": "ir_payment_details", 
+  "fieldtype": "Table", 
+  "label": "Payment Entries", 
+  "options": "Payment to Invoice Matching Tool Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reconcile", 
+  "fieldtype": "Button", 
+  "label": "Allocate", 
+  "options": "reconcile"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "label": "Filter By Date", 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "label": "From Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "label": "To Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "help_html", 
+  "fieldtype": "HTML", 
+  "label": "Help HTML", 
+  "options": "Click \"Pull Payment Entries\" to refresh the table with filters."
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "label": "Filter By Amount", 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amt_greater_than", 
+  "fieldtype": "Data", 
+  "label": "Amount >="
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amt_less_than", 
+  "fieldtype": "Data", 
+  "label": "Amount <="
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }
+]

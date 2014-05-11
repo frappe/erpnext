@@ -1,0 +1,399 @@
+[
+ {
+  "creation": "2013-01-10 16:34:15", 
+  "docstatus": 0, 
+  "modified": "2013-08-02 19:23:13", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "icon": "icon-file-text", 
+  "is_submittable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Salary Slip", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Salary Slip", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Slip"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Employee Name", 
+  "oldfieldname": "employee_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "department", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Department", 
+  "oldfieldname": "department", 
+  "oldfieldtype": "Link", 
+  "options": "Department", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "designation", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Designation", 
+  "oldfieldname": "designation", 
+  "oldfieldtype": "Link", 
+  "options": "Designation", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Branch", 
+  "oldfieldname": "branch", 
+  "oldfieldtype": "Link", 
+  "options": "Branch", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grade", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Grade", 
+  "oldfieldname": "grade", 
+  "oldfieldtype": "Link", 
+  "options": "Grade", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pf_no", 
+  "fieldtype": "Data", 
+  "label": "PF No.", 
+  "oldfieldname": "pf_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "esic_no", 
+  "fieldtype": "Data", 
+  "label": "ESIC No.", 
+  "oldfieldname": "esic_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Link", 
+  "label": "Letter Head", 
+  "options": "Letter Head"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Data", 
+  "options": "Fiscal Year", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "options": "link:Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "month", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Month", 
+  "oldfieldname": "month", 
+  "oldfieldtype": "Select", 
+  "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12", 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "37%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_days_in_month", 
+  "fieldtype": "Data", 
+  "label": "Total Working Days In The Month", 
+  "oldfieldname": "total_days_in_month", 
+  "oldfieldtype": "Int", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_without_pay", 
+  "fieldtype": "Float", 
+  "label": "Leave Without Pay", 
+  "oldfieldname": "leave_without_pay", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "payment_days", 
+  "fieldtype": "Float", 
+  "label": "Payment Days", 
+  "oldfieldname": "payment_days", 
+  "oldfieldtype": "Float", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bank_name", 
+  "fieldtype": "Data", 
+  "label": "Bank Name", 
+  "oldfieldname": "bank_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bank_account_no", 
+  "fieldtype": "Data", 
+  "label": "Bank Account No.", 
+  "oldfieldname": "bank_account_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "email_check", 
+  "fieldtype": "Check", 
+  "label": "Email", 
+  "no_copy": 1, 
+  "oldfieldname": "email_check", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "earning_deduction", 
+  "fieldtype": "Section Break", 
+  "label": "Earning & Deduction", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "earning", 
+  "fieldtype": "Column Break", 
+  "label": "Earning", 
+  "oldfieldtype": "Column Break", 
+  "reqd": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "earning_details", 
+  "fieldtype": "Table", 
+  "label": "Salary Structure Earnings", 
+  "oldfieldname": "earning_details", 
+  "oldfieldtype": "Table", 
+  "options": "Salary Slip Earning"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "deduction", 
+  "fieldtype": "Column Break", 
+  "label": "Deduction", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "deduction_details", 
+  "fieldtype": "Table", 
+  "label": "Deductions", 
+  "oldfieldname": "deduction_details", 
+  "oldfieldtype": "Table", 
+  "options": "Salary Slip Deduction"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "totals", 
+  "fieldtype": "Section Break", 
+  "label": "Totals", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "arrear_amount", 
+  "fieldtype": "Currency", 
+  "label": "Arrear Amount", 
+  "oldfieldname": "arrear_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_encashment_amount", 
+  "fieldtype": "Currency", 
+  "label": "Leave Encashment Amount", 
+  "oldfieldname": "encashment_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gross_pay", 
+  "fieldtype": "Currency", 
+  "label": "Gross Pay", 
+  "oldfieldname": "gross_pay", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_deduction", 
+  "fieldtype": "Currency", 
+  "label": "Total Deduction", 
+  "oldfieldname": "total_deduction", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "Gross Pay + Arrear Amount +Encashment Amount - Total Deduction", 
+  "doctype": "DocField", 
+  "fieldname": "net_pay", 
+  "fieldtype": "Currency", 
+  "label": "Net Pay", 
+  "oldfieldname": "net_pay", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rounded_total", 
+  "fieldtype": "Currency", 
+  "label": "Rounded Total", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "description": "Net Pay (in words) will be visible once you save the Salary Slip.", 
+  "doctype": "DocField", 
+  "fieldname": "total_in_words", 
+  "fieldtype": "Data", 
+  "label": "Total in words", 
+  "oldfieldname": "net_pay_in_words", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

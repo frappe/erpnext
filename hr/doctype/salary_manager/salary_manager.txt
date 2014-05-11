@@ -1,0 +1,185 @@
+[
+ {
+  "creation": "2012-03-27 14:35:59", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:22:58", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Salary Manager", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Salary Manager", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "HR Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Manager"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "document_description", 
+  "fieldtype": "HTML", 
+  "label": "Document Description", 
+  "options": "<div class=\"field_description\">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "label": "Company", 
+  "options": "link:Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Link", 
+  "label": "Branch", 
+  "options": "Branch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "department", 
+  "fieldtype": "Link", 
+  "label": "Department", 
+  "options": "Department"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "designation", 
+  "fieldtype": "Link", 
+  "label": "Designation", 
+  "options": "Designation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grade", 
+  "fieldtype": "Select", 
+  "label": "Grade", 
+  "options": "link:Grade"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "label": "Fiscal Year", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "month", 
+  "fieldtype": "Select", 
+  "label": "Month", 
+  "options": "\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12", 
+  "reqd": 1
+ }, 
+ {
+  "description": "Check if you want to send salary slip in mail to each employee while submitting salary slip", 
+  "doctype": "DocField", 
+  "fieldname": "send_email", 
+  "fieldtype": "Check", 
+  "label": "Send Email"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "Creates salary slip for above mentioned criteria.", 
+  "doctype": "DocField", 
+  "fieldname": "create_salary_slip", 
+  "fieldtype": "Button", 
+  "label": "Create Salary Slip"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "width": "25%"
+ }, 
+ {
+  "description": "Submit all salary slips for the above selected criteria", 
+  "doctype": "DocField", 
+  "fieldname": "submit_salary_slip", 
+  "fieldtype": "Button", 
+  "label": "Submit Salary Slip"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "width": "25%"
+ }, 
+ {
+  "description": "Create Bank Voucher for the total salary paid for the above selected criteria", 
+  "doctype": "DocField", 
+  "fieldname": "make_bank_voucher", 
+  "fieldtype": "Button", 
+  "label": "Make Bank Voucher"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break2", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "activity_log", 
+  "fieldtype": "HTML", 
+  "label": "Activity Log"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

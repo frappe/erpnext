@@ -1,0 +1,75 @@
+[
+ {
+  "creation": "2013-01-22 16:50:30", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:25:14", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:deduction_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-flag", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Deduction Type", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Deduction Type", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Deduction Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "deduction_name", 
+  "fieldtype": "Data", 
+  "label": "Name", 
+  "oldfieldname": "deduction_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

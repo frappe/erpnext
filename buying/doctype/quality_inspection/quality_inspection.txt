@@ -1,0 +1,243 @@
+[
+ {
+  "creation": "2013-04-30 13:13:03", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:05:38", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "icon": "icon-search", 
+  "is_submittable": 1, 
+  "module": "Buying", 
+  "name": "__common__", 
+  "search_fields": "item_code, report_date, purchase_receipt_no, delivery_note_no"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Quality Inspection", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Quality Inspection", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Quality Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Quality Inspection"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qa_inspection", 
+  "fieldtype": "Section Break", 
+  "label": "QA Inspection", 
+  "no_copy": 0, 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "options": "\nQAI/11-12/", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "inspection_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Inspection Type", 
+  "oldfieldname": "inspection_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nIncoming\nOutgoing\nIn Process", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "report_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Report Date", 
+  "oldfieldname": "report_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sample_size", 
+  "fieldtype": "Float", 
+  "in_filter": 0, 
+  "label": "Sample Size", 
+  "oldfieldname": "sample_size", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "in_filter": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "search_index": 0, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_serial_no", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "label": "Item Serial No", 
+  "oldfieldname": "item_serial_no", 
+  "oldfieldtype": "Link", 
+  "options": "Serial No", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "batch_no", 
+  "fieldtype": "Link", 
+  "label": "Batch No", 
+  "oldfieldname": "batch_no", 
+  "oldfieldtype": "Link", 
+  "options": "Batch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "purchase_receipt_no", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Purchase Receipt No", 
+  "oldfieldname": "purchase_receipt_no", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Receipt", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "delivery_note_no", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Delivery Note No", 
+  "oldfieldname": "delivery_note_no", 
+  "oldfieldtype": "Link", 
+  "options": "Delivery Note", 
+  "print_hide": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "inspected_by", 
+  "fieldtype": "Data", 
+  "label": "Inspected By", 
+  "oldfieldname": "inspected_by", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "remarks", 
+  "fieldtype": "Text", 
+  "label": "Remarks", 
+  "no_copy": 1, 
+  "oldfieldname": "remarks", 
+  "oldfieldtype": "Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "verified_by", 
+  "fieldtype": "Data", 
+  "label": "Verified By", 
+  "oldfieldname": "verified_by", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "specification_details", 
+  "fieldtype": "Section Break", 
+  "label": "Specification Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_specification_details", 
+  "fieldtype": "Button", 
+  "label": "Get Specification Details", 
+  "options": "get_item_specification_details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qa_specification_details", 
+  "fieldtype": "Table", 
+  "label": "Quality Inspection Readings", 
+  "oldfieldname": "qa_specification_details", 
+  "oldfieldtype": "Table", 
+  "options": "Quality Inspection Reading"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

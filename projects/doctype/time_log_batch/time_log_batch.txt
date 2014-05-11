@@ -1,0 +1,122 @@
+[
+ {
+  "creation": "2013-02-28 17:57:33", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:05:45", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "naming_series:", 
+  "description": "Batch Time Logs for Billing.", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-time", 
+  "is_submittable": 1, 
+  "module": "Projects", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Time Log Batch", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Time Log Batch", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Projects User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Time Log Batch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "options": "TLB-", 
+  "reqd": 1
+ }, 
+ {
+  "description": "For Sales Invoice", 
+  "doctype": "DocField", 
+  "fieldname": "rate", 
+  "fieldtype": "Currency", 
+  "label": "Rate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "default": "Draft", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "options": "Draft\nSubmitted\nBilled\nCancelled", 
+  "read_only": 1
+ }, 
+ {
+  "description": "Will be updated after Sales Invoice is Submitted.", 
+  "doctype": "DocField", 
+  "fieldname": "sales_invoice", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Sales Invoice", 
+  "options": "Sales Invoice", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_5", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "time_log_batch_details", 
+  "fieldtype": "Table", 
+  "label": "Time Log Batch Details", 
+  "options": "Time Log Batch Detail", 
+  "reqd": 1
+ }, 
+ {
+  "description": "In Hours", 
+  "doctype": "DocField", 
+  "fieldname": "total_hours", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Total Hours", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Time Log Batch", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

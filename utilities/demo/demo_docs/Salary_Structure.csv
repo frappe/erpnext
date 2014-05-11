@@ -1,0 +1,24 @@
+Data Import Template,,,,,,,,,,,,,,,,,,,,,,,,
+Table:,Salary Structure,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+Notes:,,,,,,,,,,,,,,,,,,,,,,,,
+Please do not change the template headings.,,,,,,,,,,,,,,,,,,,,,,,,
+First data column must be blank.,,,,,,,,,,,,,,,,,,,,,,,,
+"If you are uploading new records, leave the ""name"" (ID) column blank.",,,,,,,,,,,,,,,,,,,,,,,,
+"If you are uploading new records, ""Naming Series"" becomes mandatory, if present.",,,,,,,,,,,,,,,,,,,,,,,,
+Only mandatory fields are necessary for new records. You can delete non-mandatory columns if you wish.,,,,,,,,,,,,,,,,,,,,,,,,
+"For updating, you can update only selective columns.",,,,,,,,,,,,,,,,,,,,,,,,
+You can only upload upto 5000 records in one go. (may be less in some cases),,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+DocType:,Salary Structure,,,,,,,,,,,,,,~,Salary Structure Earning,earning_details,,,~,Salary Structure Deduction,deduction_details,,
+Column Labels:,ID,Employee,Is Active,From Date,Company,Employee Name,Branch,Designation,Department,Grade,To Date,Total Earning,Total Deduction,Net Pay,,ID,Type,Amount,Reduce Earning for Leave Without Pay (LWP),,ID,Type,Amount,Reduce Deduction for Leave Without Pay (LWP)
+Column Name:,name,employee,is_active,from_date,company,employee_name,branch,designation,department,grade,to_date,total_earning,total_deduction,net_pay,~,name,e_type,modified_value,depend_on_lwp,~,name,d_type,d_modified_amt,depend_on_lwp
+Mandatory:,Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,,Yes,Yes,No,No,,Yes,Yes,No,No
+Type:,Data (text),Link,Select,Date,Select,Data,Select,Select,Select,Select,Date,Currency,Currency,Currency,,Data,Link,Currency,Check,,Data,Link,Currency,Check
+Info:,,Valid Employee,"One of: Yes, No",,Valid Company,,Valid Branch,Valid Designation,Valid Department,Valid Grade,,,,,,Leave blank for new records,Valid Earning Type,,0 or 1,,Leave blank for new records,Valid Deduction Type,,0 or 1
+Start entering data below this line,,,,,,,,,,,,,,,,,,,,,,,,
+,,EMP/0001,Yes,2013-08-06,Wind Power LLC,Dikman Shervashidze Shervashidze,,,,,,5000,400,4600,,,Basic,5000,,,,Income Tax,400,
+,,EMP/0002,Yes,2013-08-06,Wind Power LLC,Zukutakitoteka,,,,,,6700,400,6300,,,Basic,6700,,,,Income Tax,400,
+,,EMP/0003,Yes,2013-08-06,Wind Power LLC,Hatsue Kashiwagi,,,,,,3400,400,3000,,,Basic,3400,,,,Income Tax,400,
+,,EMP/0004,Yes,2013-08-06,Wind Power LLC,Nuran Verkleij,,,,,,6990,566,6424,,,Basic,6990,,,,Income Tax,566,

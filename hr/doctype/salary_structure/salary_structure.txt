@@ -1,0 +1,282 @@
+[
+ {
+  "creation": "2013-03-07 18:50:29", 
+  "docstatus": 0, 
+  "modified": "2013-08-06 17:15:53", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "doctype": "DocType", 
+  "icon": "icon-file-text", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Salary Structure", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Salary Structure", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Structure"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_name", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Employee Name", 
+  "oldfieldname": "employee_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Branch", 
+  "oldfieldname": "branch", 
+  "oldfieldtype": "Select", 
+  "options": "link:Branch", 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "designation", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Designation", 
+  "oldfieldname": "designation", 
+  "oldfieldtype": "Select", 
+  "options": "link:Designation", 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "department", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Department", 
+  "oldfieldname": "department", 
+  "oldfieldtype": "Select", 
+  "options": "link:Department", 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grade", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Grade", 
+  "oldfieldname": "grade", 
+  "oldfieldtype": "Select", 
+  "options": "link:Grade", 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "default": "Yes", 
+  "doctype": "DocField", 
+  "fieldname": "is_active", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Is Active", 
+  "oldfieldname": "is_active", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "From Date", 
+  "oldfieldname": "from_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "To Date", 
+  "oldfieldname": "to_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "options": "link:Company", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Salary breakup based on Earning and Deduction.", 
+  "doctype": "DocField", 
+  "fieldname": "earning_deduction", 
+  "fieldtype": "Section Break", 
+  "label": "Monthly Earning & Deduction", 
+  "oldfieldname": "earning_deduction", 
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "earning", 
+  "fieldtype": "Column Break", 
+  "hidden": 0, 
+  "label": "Earning", 
+  "oldfieldname": "col_brk2", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "earning_details", 
+  "fieldtype": "Table", 
+  "hidden": 0, 
+  "label": "Earning1", 
+  "oldfieldname": "earning_details", 
+  "oldfieldtype": "Table", 
+  "options": "Salary Structure Earning", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "deduction", 
+  "fieldtype": "Column Break", 
+  "hidden": 0, 
+  "label": "Deduction", 
+  "oldfieldname": "col_brk3", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "deduction_details", 
+  "fieldtype": "Table", 
+  "hidden": 0, 
+  "label": "Deduction1", 
+  "oldfieldname": "deduction_details", 
+  "oldfieldtype": "Table", 
+  "options": "Salary Structure Deduction", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "options": "Simple", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_earning", 
+  "fieldtype": "Currency", 
+  "label": "Total Earning", 
+  "oldfieldname": "total_earning", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_deduction", 
+  "fieldtype": "Currency", 
+  "label": "Total Deduction", 
+  "oldfieldname": "total_deduction", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_pay", 
+  "fieldtype": "Currency", 
+  "label": "Net Pay", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

@@ -1,0 +1,83 @@
+[
+ {
+  "creation": "2013-06-24 15:49:57", 
+  "docstatus": 0, 
+  "modified": "2013-09-24 11:52:58", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Settings for Accounts", 
+  "doctype": "DocType", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Accounts Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Accounts Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Accounts Settings"
+ }, 
+ {
+  "default": "1", 
+  "description": "If enabled, the system will post accounting entries for inventory automatically.", 
+  "doctype": "DocField", 
+  "fieldname": "auto_accounting_for_stock", 
+  "fieldtype": "Check", 
+  "label": "Make Accounting Entry For Every Stock Movement"
+ }, 
+ {
+  "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 
+  "doctype": "DocField", 
+  "fieldname": "acc_frozen_upto", 
+  "fieldtype": "Date", 
+  "label": "Accounts Frozen Upto"
+ }, 
+ {
+  "description": "Users with this role are allowed to create / modify accounting entry before frozen date", 
+  "doctype": "DocField", 
+  "fieldname": "bde_auth_role", 
+  "fieldtype": "Link", 
+  "label": "Allowed Role to Edit Entries Before Frozen Date", 
+  "options": "Role"
+ }, 
+ {
+  "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts", 
+  "doctype": "DocField", 
+  "fieldname": "frozen_accounts_modifier", 
+  "fieldtype": "Link", 
+  "label": "Frozen Accounts Modifier", 
+  "options": "Role"
+ }, 
+ {
+  "description": "Role that is allowed to submit transactions that exceed credit limits set.", 
+  "doctype": "DocField", 
+  "fieldname": "credit_controller", 
+  "fieldtype": "Link", 
+  "label": "Credit Controller", 
+  "options": "Role"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

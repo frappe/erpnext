@@ -1,0 +1,363 @@
+[
+ {
+  "creation": "2013-04-10 08:35:39", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:24:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:company_name", 
+  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-building", 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Company", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Company", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Company"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "details", 
+  "fieldtype": "Section Break", 
+  "label": "Company Details", 
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data", 
+  "label": "Company", 
+  "no_copy": 0, 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
+  "doctype": "DocField", 
+  "fieldname": "abbr", 
+  "fieldtype": "Data", 
+  "label": "Abbr", 
+  "no_copy": 0, 
+  "oldfieldname": "abbr", 
+  "oldfieldtype": "Data", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "domain", 
+  "fieldtype": "Select", 
+  "label": "Domain", 
+  "options": "Distribution\nManufacturing\nRetail\nServices", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Default Settings", 
+  "oldfieldtype": "Section Break", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "default_bank_account", 
+  "fieldtype": "Link", 
+  "label": "Default Bank Account", 
+  "no_copy": 1, 
+  "oldfieldname": "default_bank_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_cash_account", 
+  "fieldtype": "Link", 
+  "label": "Default Cash Account", 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "receivables_group", 
+  "fieldtype": "Link", 
+  "label": "Receivables Group", 
+  "no_copy": 1, 
+  "oldfieldname": "receivables_group", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "payables_group", 
+  "fieldtype": "Link", 
+  "label": "Payables Group", 
+  "no_copy": 1, 
+  "oldfieldname": "payables_group", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_expense_account", 
+  "fieldtype": "Link", 
+  "label": "Default Expense Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_income_account", 
+  "fieldtype": "Link", 
+  "label": "Default Income Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "options": "Currency", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "no_copy": 1, 
+  "options": "Cost Center"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "credit_days", 
+  "fieldtype": "Int", 
+  "label": "Credit Days", 
+  "oldfieldname": "credit_days", 
+  "oldfieldtype": "Int", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "credit_limit", 
+  "fieldtype": "Currency", 
+  "label": "Credit Limit", 
+  "oldfieldname": "credit_limit", 
+  "oldfieldtype": "Currency", 
+  "options": "default_currency", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "yearly_bgt_flag", 
+  "fieldtype": "Select", 
+  "label": "If Yearly Budget Exceeded", 
+  "oldfieldname": "yearly_bgt_flag", 
+  "oldfieldtype": "Select", 
+  "options": "\nWarn\nIgnore\nStop", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "monthly_bgt_flag", 
+  "fieldtype": "Select", 
+  "label": "If Monthly Budget Exceeded", 
+  "oldfieldname": "monthly_bgt_flag", 
+  "oldfieldtype": "Select", 
+  "options": "\nWarn\nIgnore\nStop", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "auto_accounting_for_stock_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Auto Accounting For Stock Settings", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_received_but_not_billed", 
+  "fieldtype": "Link", 
+  "label": "Stock Received But Not Billed", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_adjustment_account", 
+  "fieldtype": "Link", 
+  "label": "Stock Adjustment Account", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expenses_included_in_valuation", 
+  "fieldtype": "Link", 
+  "label": "Expenses Included In Valuation", 
+  "no_copy": 1, 
+  "options": "Account", 
+  "read_only": 0
+ }, 
+ {
+  "description": "For reference only.", 
+  "doctype": "DocField", 
+  "fieldname": "company_info", 
+  "fieldtype": "Section Break", 
+  "label": "Company Info", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address", 
+  "fieldtype": "Small Text", 
+  "label": "Address", 
+  "oldfieldname": "address", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "phone_no", 
+  "fieldtype": "Data", 
+  "label": "Phone No", 
+  "oldfieldname": "phone_no", 
+  "oldfieldtype": "Data", 
+  "options": "Phone", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fax", 
+  "fieldtype": "Data", 
+  "label": "Fax", 
+  "oldfieldname": "fax", 
+  "oldfieldtype": "Data", 
+  "options": "Phone", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "email", 
+  "fieldtype": "Data", 
+  "label": "Email", 
+  "oldfieldname": "email", 
+  "oldfieldtype": "Data", 
+  "options": "Email", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "website", 
+  "fieldtype": "Data", 
+  "label": "Website", 
+  "oldfieldname": "website", 
+  "oldfieldtype": "Data", 
+  "read_only": 0
+ }, 
+ {
+  "description": "Company registration numbers for your reference. Example: VAT Registration Numbers etc.", 
+  "doctype": "DocField", 
+  "fieldname": "registration_info", 
+  "fieldtype": "Section Break", 
+  "label": "Registration Info", 
+  "oldfieldtype": "Section Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "description": "Company registration numbers for your reference. Tax numbers etc.", 
+  "doctype": "DocField", 
+  "fieldname": "registration_details", 
+  "fieldtype": "Code", 
+  "label": "Registration Details", 
+  "oldfieldname": "registration_details", 
+  "oldfieldtype": "Code", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "no_copy": 1, 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All"
+ }
+]

@@ -1,0 +1,109 @@
+[
+ {
+  "creation": "2013-02-21 09:55:58", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:32:07", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:leave_type_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-flag", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Leave Type", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Leave Type", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Leave Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_type_name", 
+  "fieldtype": "Data", 
+  "label": "Leave Type Name", 
+  "oldfieldname": "leave_type_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "max_days_allowed", 
+  "fieldtype": "Data", 
+  "label": "Max Days Leave Allowed", 
+  "oldfieldname": "max_days_allowed", 
+  "oldfieldtype": "Data", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_carry_forward", 
+  "fieldtype": "Check", 
+  "label": "Is Carry Forward", 
+  "oldfieldname": "is_carry_forward", 
+  "oldfieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_encash", 
+  "fieldtype": "Check", 
+  "hidden": 1, 
+  "label": "Is Encash", 
+  "oldfieldname": "is_encash", 
+  "oldfieldtype": "Check", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_lwp", 
+  "fieldtype": "Check", 
+  "label": "Is LWP"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_negative", 
+  "fieldtype": "Check", 
+  "label": "Allow Negative Balance"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

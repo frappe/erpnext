@@ -1,0 +1,234 @@
+[
+ {
+  "creation": "2013-04-11 15:32:24", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:05:59", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "PS.#######", 
+  "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-suitcase", 
+  "is_submittable": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only_onload": 1, 
+  "search_fields": "delivery_note"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Packing Slip", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Packing Slip", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Packing Slip"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "packing_slip_details", 
+  "fieldtype": "Section Break", 
+  "label": "Packing Slip Items", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "description": "Indicates that the package is a part of this delivery", 
+  "doctype": "DocField", 
+  "fieldname": "delivery_note", 
+  "fieldtype": "Link", 
+  "label": "Delivery Note", 
+  "options": "Delivery Note", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 0, 
+  "options": "PS", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "description": "Identification of the package for the delivery (for print)", 
+  "doctype": "DocField", 
+  "fieldname": "from_case_no", 
+  "fieldtype": "Data", 
+  "label": "From Package No.", 
+  "no_copy": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "width": "50px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "description": "If more than one package of the same type (for print)", 
+  "doctype": "DocField", 
+  "fieldname": "to_case_no", 
+  "fieldtype": "Data", 
+  "label": "To Package No.", 
+  "no_copy": 1, 
+  "read_only": 0, 
+  "width": "50px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "package_item_details", 
+  "fieldtype": "Section Break", 
+  "label": "Package Item Details", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_items", 
+  "fieldtype": "Button", 
+  "label": "Get Items"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_details", 
+  "fieldtype": "Table", 
+  "label": "Items", 
+  "options": "Packing Slip Item", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "package_weight_details", 
+  "fieldtype": "Section Break", 
+  "label": "Package Weight Details", 
+  "read_only": 0
+ }, 
+ {
+  "description": "The net weight of this package. (calculated automatically as sum of net weight of items)", 
+  "doctype": "DocField", 
+  "fieldname": "net_weight_pkg", 
+  "fieldtype": "Float", 
+  "label": "Net Weight", 
+  "no_copy": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_weight_uom", 
+  "fieldtype": "Link", 
+  "label": "Net Weight UOM", 
+  "no_copy": 1, 
+  "options": "UOM", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "description": "The gross weight of the package. Usually net weight + packaging material weight. (for print)", 
+  "doctype": "DocField", 
+  "fieldname": "gross_weight_pkg", 
+  "fieldtype": "Float", 
+  "label": "Gross Weight", 
+  "no_copy": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gross_weight_uom", 
+  "fieldtype": "Link", 
+  "label": "Gross Weight UOM", 
+  "no_copy": 1, 
+  "options": "UOM", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "misc_details", 
+  "fieldtype": "Section Break", 
+  "label": "Misc Details", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Packing Slip", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Master Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Manager"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-02-21 14:26:44", 
+  "docstatus": 0, 
+  "modified": "2013-02-22 15:53:01", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select \n `tabSales Order`.`name` as \"Sales Order:Link/Sales Order:120\",\n `tabSales Order`.`customer` as \"Customer:Link/Customer:120\",\n `tabSales Order`.`status` as \"Status\",\n `tabSales Order`.`transaction_date` as \"Date:Date\",\n `tabSales Order`.`project_name` as \"Project\",\n `tabSales Order Item`.item_code as \"Item:Link/Item:120\",\n `tabSales Order Item`.amount as \"Amount:Currency:110\",\n (`tabSales Order Item`.billed_amt * ifnull(`tabSales Order`.conversion_rate, 1)) as \"Billed Amount:Currency:110\",\n (ifnull(`tabSales Order Item`.amount, 0) - (ifnull(`tabSales Order Item`.billed_amt, 0) * ifnull(`tabSales Order`.conversion_rate, 1))) as \"Pending Amount:Currency:120\",\n `tabSales Order Item`.item_name as \"Item Name::150\",\n `tabSales Order Item`.description as \"Description::200\"\nfrom\n `tabSales Order`, `tabSales Order Item`\nwhere\n `tabSales Order Item`.`parent` = `tabSales Order`.`name`\n and `tabSales Order`.docstatus = 1\n and `tabSales Order`.status != \"Stopped\"\n and ifnull(`tabSales Order Item`.billed_amt,0) < ifnull(`tabSales Order Item`.export_amount,0)\norder by `tabSales Order`.transaction_date asc", 
+  "ref_doctype": "Sales Invoice", 
+  "report_name": "Ordered Items To Be Billed", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Ordered Items To Be Billed"
+ }
+]

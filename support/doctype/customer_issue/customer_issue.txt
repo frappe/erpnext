@@ -1,0 +1,424 @@
+[
+ {
+  "creation": "2013-01-10 16:34:30", 
+  "docstatus": 0, 
+  "modified": "2014-01-14 15:56:22", 
+  "modified_by": "Administrator", 
+  "owner": "harshada@webnotestech.com"
+ }, 
+ {
+  "allow_import": 1, 
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "icon": "icon-bug", 
+  "is_submittable": 0, 
+  "module": "Support", 
+  "name": "__common__", 
+  "search_fields": "status,customer,customer_name,allocated_to,allocated_on, territory"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Customer Issue", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Customer Issue", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Maintenance User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Customer Issue"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "in_filter": 0, 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "\nCI/2010-2011/", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "default": "Open", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nOpen\nClosed\nWork In Progress\nCancelled", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "default": "Today", 
+  "doctype": "DocField", 
+  "fieldname": "complaint_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Issue Date", 
+  "oldfieldname": "complaint_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Link", 
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "issue_details", 
+  "fieldtype": "Section Break", 
+  "label": "Issue Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-ticket"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "complaint", 
+  "fieldtype": "Small Text", 
+  "label": "Issue", 
+  "no_copy": 1, 
+  "oldfieldname": "complaint", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 1
+ }, 
+ {
+  "description": "Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.", 
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "Serial No", 
+  "options": "Serial No"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "depends_on": "eval:doc.item_code", 
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "eval:doc.item_code", 
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warranty_amc_status", 
+  "fieldtype": "Select", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Warranty / AMC Status", 
+  "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warranty_expiry_date", 
+  "fieldtype": "Date", 
+  "label": "Warranty Expiry Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amc_expiry_date", 
+  "fieldtype": "Date", 
+  "label": "AMC Expiry Date"
+ }, 
+ {
+  "description": "To assign this issue, use the \"Assign\" button in the sidebar.", 
+  "doctype": "DocField", 
+  "fieldname": "resolution_section", 
+  "fieldtype": "Section Break", 
+  "label": "Resolution", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-thumbs-up"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "resolution_date", 
+  "fieldtype": "Datetime", 
+  "in_filter": 1, 
+  "label": "Resolution Date", 
+  "no_copy": 1, 
+  "oldfieldname": "resolution_date", 
+  "oldfieldtype": "Date", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "resolved_by", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Resolved By", 
+  "no_copy": 1, 
+  "oldfieldname": "resolved_by", 
+  "oldfieldtype": "Link", 
+  "options": "Profile", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "resolution_details", 
+  "fieldtype": "Text", 
+  "label": "Resolution Details", 
+  "no_copy": 1, 
+  "oldfieldname": "resolution_details", 
+  "oldfieldtype": "Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_info", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "label": "Customer Name", 
+  "read_only": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "print_hide": 1, 
+  "reqd": 0
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "label": "Address", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break4", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Data", 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Data", 
+  "label": "Contact Email", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "service_address", 
+  "fieldtype": "Small Text", 
+  "label": "Service Address", 
+  "oldfieldname": "service_address", 
+  "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "options": "icon-file-text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break5", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break6", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "complaint_raised_by", 
+  "fieldtype": "Data", 
+  "label": "Raised By", 
+  "oldfieldname": "complaint_raised_by", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_company", 
+  "fieldtype": "Data", 
+  "label": "From Company", 
+  "oldfieldname": "from_company", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

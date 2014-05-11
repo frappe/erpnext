@@ -1,0 +1,3754 @@
+ (Half Day),（半天）
+ .You can not assign / modify / remove Master Name,你不能指派/修改/刪除主名稱
+ Quantity should be greater than 0.,量應大於0。
+ View,視圖
+ after this transaction.,本次交易後。
+ against sales order,對銷售訂單
+ against same operation,針對相同的操作
+ already marked,已標記
+ and year: ,和年份：
+ as it is stock Item or packing item,因為它是現貨產品或包裝物品
+ at warehouse: ,在倉庫：
+ budget ,預算
+ by Role ,按角色
+ can not be created/modified against stopped Sales Order ,不能創建/修改對停止銷售訂單
+ can not be made.,不能進行。
+ can not be marked as a ledger as it has existing child,不能被標記為總賬，因為它已經存在的子
+ can not be received twice,不能被接受兩次
+ can only be debited/credited through Stock transactions,只能借記/貸記通過股票的交易
+ does not belong to ,不屬於
+ does not belong to Warehouse,不屬於倉庫
+ does not belong to the company,不屬於該公司
+ for account ,帳戶
+ has already been submitted.,已經提交。
+ is a frozen account. ,是冷凍的帳戶。
+ is a frozen account. \				Either make the account active or assign role in Accounts Settings \				who can create / modify entries against this account,是冷凍的帳戶。 \要么使該帳戶活動或在指定賬戶設置角色\誰可以創建/修改詞條對這個帳號
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item",小於等於零時在系統中，\估值比率是強制性的資料
+ is mandatory,是強制性的
+ is mandatory for GL Entry,是強制性的GL報名
+ is mandatory. Maybe Currency Exchange record is not created for ,是強制性的。也許外幣兌換記錄沒有建立
+ is not set,沒有設置
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,現在是默認的財政年度。 \請刷新您的瀏覽器，以使更改生效。
+ is present in one or many Active BOMs,存在於一個或多個活躍的BOM
+ not active or does not exists in the system,不活躍或不存在於系統中
+ not submitted,未提交
+ or the BOM is cancelled or inactive,或物料清單被取消或不活動
+ should be 'Yes'. As Item: ,應該是&#39;是&#39;。作為項目：
+ to ,至
+ will be ,將
+ will be over-billed against mentioned ,將過嘴對著提到的
+ will exceed by ,將超過
+"""Company History""",“公司歷史”
+"""Team Members"" or ""Management""",“團隊成員”或“管理”
+%  Delivered,％交付
+% Amount Billed,（％）金額帳單
+% Billed,％帳單
+% Completed,％已完成
+% Delivered,％交付
+% Installed,％安裝
+% Received,收到％
+% of materials billed against this Purchase Order.,％的材料嘴對這種採購訂單。
+% of materials billed against this Sales Order,％的嘴對這種銷售訂單物料
+% of materials delivered against this Delivery Note,％的交付對本送貨單材料
+% of materials delivered against this Sales Order,％的交付對這個銷售訂單物料
+% of materials ordered against this Material Request,％的下令對這種材料申請材料
+% of materials received against this Purchase Order,％的材料收到反對這個採購訂單
+%(conversion_rate_label)s is mandatory. Maybe Currency Exchange \			record is not created for %(from_currency)s to %(to_currency)s,％（conversion_rate_label）s是強制性的。也許外幣兌換\記錄沒有創建％（from_currency）s到％（to_currency）■
+' in Company: ,“在公司名稱：
+'To Case No.' cannot be less than 'From Case No.',“要案件編號”不能少於&#39;從案號“
+(Total) Net Weight value. Make sure that Net Weight of each item is,（總）淨重值。確保每個項目的淨重是
+* Will be calculated in the transaction.,*將被計算在該交易。
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",**預算分配**可以幫助你發布你的預算橫跨個月，如果你有季節性你business.To使用這種分配分配預算，設置這個**預算分配**的**成本中心**
+**Currency** Master,*貨幣**大師
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,**財政年度**代表財政年度。所有的會計分錄和其他重大交易進行跟踪打擊**財政年度**。
+. Max allowed ,。最大允許的
+. Outstanding cannot be less than zero. \			 	Please match exact outstanding.,。傑出不能小於零。 \請精確匹配突出。
+. Please set status of the employee as 'Left',。請將僱員的地位，“左”
+. You can not mark his attendance as 'Present',。你不能紀念他的出席情況“出席”
+"000 is black, fff is white",000是黑色的，FFF是白色的
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1貨幣= [？] FractionFor如1美元= 100美分
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1。為了保持客戶明智的項目代碼，並使其搜索根據自己的代碼中使用這個選項
+12px,12px的
+13px,13px的
+14px,14px的
+15px,15px的
+16px,16px的
+2 days ago,3天前
+: Duplicate row from same ,：從相同的重複行
+: Mandatory for a Recurring Invoice.,：強制性的經常性發票。
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">添加/編輯</a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">添加/編輯</a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">添加/編輯</a>"
+"<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank"">[?]</a>","<a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" target=""_blank"">[？]</a>"
+"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">命名選項</a>"
+<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>取消</b>允許你通過取消他們和修改他們改變提交的文件。
+A Customer exists with same name,一位顧客存在具有相同名稱
+A Lead with this email id should exist,與此電子郵件id一個鉛應該存在
+"A Product or a Service that is bought, sold or kept in stock.",A產品或者是買入，賣出或持有的股票服務。
+A Supplier exists with same name,A供應商存在具有相同名稱
+A condition for a Shipping Rule,對於送貨規則的條件
+A logical Warehouse against which stock entries are made.,一個合乎邏輯的倉庫抵銷股票條目進行。
+A new popup will open that will ask you to select further conditions.,一個新的彈出窗口將打開，將要求您選擇其他條件。
+A symbol for this currency. For e.g. $,符號的這種貨幣。對於如$
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,第三方分銷商/經銷商/代理商/分支機構/經銷商誰銷售公司產品的佣金。
+A user can have multiple values for a property.,一個用戶可以有一個屬性的多個值。
+A+,A +
+A-,A-
+AB+,AB +
+AB-,AB-
+AMC Expiry Date,AMC到期時間
+AMC expiry date and maintenance status mismatched,AMC的到期日及維護狀態不匹配
+ATT,ATT
+Abbr,縮寫
+About,關於
+About ERPNext,關於ERPNext
+About Us Settings,關於我們設置
+About Us Team Member,關於我們團隊成員
+Above Value,上述值
+Absent,缺席
+Acceptance Criteria,驗收標準
+Accepted,接受
+Accepted Quantity,接受數量
+Accepted Warehouse,接受倉庫
+Account,帳戶
+Account Balance,賬戶餘額
+Account Details,帳戶明細
+Account Head,帳戶頭
+Account Id,帳戶ID
+Account Name,帳戶名稱
+Account Type,賬戶類型
+Account expires on,帳戶到期
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,賬戶倉庫（永續盤存）將在該帳戶下創建。
+Account for this ,佔本
+Accounting,會計
+Accounting Entries are not allowed against groups.,會計分錄是不允許反對團體。
+"Accounting Entries can be made against leaf nodes, called",會計分錄可以對葉節點進行，稱為
+Accounting Ledger,總賬會計
+Accounting Year.,會計年度。
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",會計分錄凍結截至目前為止，沒有人可以做/修改除以下指定角色條目。
+Accounting journal entries.,會計日記帳分錄。
+Accounts,賬戶
+Accounts Frozen Upto,賬戶被凍結到...為止
+Accounts Payable,應付帳款
+Accounts Receivable,應收帳款
+Accounts Settings,賬戶設置
+Action,行動
+Actions,操作
+Active,活躍
+Active: Will extract emails from ,主動：請問從郵件中提取
+Activity,活動
+Activity Log,活動日誌
+Activity Type,活動類型
+Actual,實際
+Actual Budget,實際預算
+Actual Completion Date,實際完成日期
+Actual Date,實際日期
+Actual End Date,實際結束日期
+Actual Invoice Date,實際發票日期
+Actual Posting Date,實際發布日期
+Actual Qty,實際數量
+Actual Qty (at source/target),實際的數量（在源/目標）
+Actual Qty After Transaction,實際數量交易後
+Actual Qty: Quantity available in the warehouse.,實際的數量：在倉庫可用數量。
+Actual Quantity,實際數量
+Actual Start Date,實際開始日期
+Add,加
+Add / Edit Taxes and Charges,添加/編輯稅金及費用
+Add A New Rule,添加新的規則
+Add A Property,添加屬性
+Add Attachments,添加附件
+Add Bookmark,添加書籤
+Add CSS,添加CSS
+Add Child,添加子
+Add Column,添加列
+Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.,添加谷歌Analytics（分析）ID：例如。 UA-89XXX57-1。請搜索在谷歌Analytics（分析）幫助以獲取更多信息。
+Add Message,發表留言
+Add New Permission Rule,添加新的權限規則
+Add Reply,添加回复
+Add Serial No,添加序列號
+Add Taxes,加稅
+Add Taxes and Charges,增加稅收和收費
+Add Total Row,添加總計行
+Add a banner to the site. (small banners are usually good),添加一個橫幅掛在了網站上。 （小橫幅通常是很好的）
+Add attachment,添加附件
+Add code as &lt;script&gt;,添加代碼為&lt;SCRIPT&gt;
+Add new row,添加新行
+Add or Deduct,添加或扣除
+Add rows to set annual budgets on Accounts.,添加行上的帳戶設置年度預算。
+"Add the name of <a href=""http://google.com/webfonts"" target=""_blank"">Google Web Font</a> e.g. ""Open Sans""","新增的名稱<a href=""http://google.com/webfonts"" target=""_blank"">谷歌網頁字體</a>如“打開三世”"
+Add to To Do,添加到待辦事項
+Add to To Do List of,添加到待辦事項列表
+Add to calendar on this date,添加到日曆在此日期
+Add/Remove Recipients,添加/刪除收件人
+Additional Info,附加信息
+Address,地址
+Address & Contact,地址及聯繫方式
+Address & Contacts,地址及聯繫方式
+Address Desc,地址倒序
+Address Details,詳細地址
+Address HTML,地址HTML
+Address Line 1,地址行1
+Address Line 2,地址行2
+Address Title,地址名稱
+Address Type,地址類型
+Address and other legal information you may want to put in the footer.,地址和其他法律信息，你可能要放在頁腳。
+Address to be displayed on the Contact Page,地址作為聯繫頁面上顯示
+Adds a custom field to a DocType,添加一個自定義字段，以一個DOCTYPE
+Adds a custom script (client or server) to a DocType,添加一個自定義腳本（客戶端或服務器），以一個DOCTYPE
+Advance Amount,提前量
+Advance amount,提前量
+Advanced Settings,高級設置
+Advances,進展
+Advertisement,廣告
+After Sale Installations,銷售後安裝
+Against,針對
+Against Account,針對帳戶
+Against Docname,可採用DocName反對
+Against Doctype,針對文檔類型
+Against Document Detail No,對文件詳細說明暫無
+Against Document No,對文件無
+Against Expense Account,對費用帳戶
+Against Income Account,對收入賬戶
+Against Journal Voucher,對日記帳憑證
+Against Purchase Invoice,對採購發票
+Against Sales Invoice,對銷售發票
+Against Sales Order,對銷售訂單
+Against Voucher,反對券
+Against Voucher Type,對憑證類型
+Ageing Based On,老齡化基於
+Agent,代理人
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials",總組**項目**到另一個**項目**。如果你是捆綁一定的**項目**成一個包，你保持包裝的**項目的股票**，而不是總**項目**這是有用的。包**項目**將有“是庫存項目”為“否”和“是銷售項目”為“是”，例如：如果你是賣筆記本電腦和背包分開，並有一個特殊的價格，如果客戶購買兩個，那麼筆記本電腦+背包將是一個新的銷售BOM Item.Note：物料BOM =比爾
+Aging Date,老化時間
+All Addresses.,所有地址。
+All Contact,所有聯繫
+All Contacts.,所有聯繫人。
+All Customer Contact,所有的客戶聯繫
+All Day,全日
+All Employee (Active),所有員工（活動）
+All Lead (Open),所有鉛（開放）
+All Products or Services.,所有的產品或服務。
+All Sales Partner Contact,所有的銷售合作夥伴聯繫
+All Sales Person,所有的銷售人員
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,所有銷售交易，可以用來標記針對多個銷售** **的人，這樣你可以設置和監控目標。
+All Supplier Contact,所有供應商聯繫
+All Supplier Types,所有供應商類型
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",在所有可像貨幣，轉換率，進出口總額，出口總計出口等相關領域<br>送貨單，POS機，報價單，銷售發票，銷售訂單等。
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.",在所有可像貨幣，轉換率，總進口，進口總計進口等相關領域<br>外購入庫單，供應商報價單，採購發票，採購訂單等。
+"All possible Workflow States and roles of the workflow. <br>Docstatus Options: 0 is""Saved"", 1 is ""Submitted"" and 2 is ""Cancelled""",所有可能的工作流程狀態和工作流的角色。 <br> Docstatus選項：0是“保存”，1“已提交”和2“取消”
+Allocate,分配
+Allocate leaves for the year.,分配葉子的一年。
+Allocated Amount,分配金額
+Allocated Budget,分配預算
+Allocated amount,分配量
+Allow Attach,允許連接
+Allow Bill of Materials,材料讓比爾
+Allow Dropbox Access,讓Dropbox的訪問
+Allow For Users,允許用戶
+Allow Google Drive Access,允許谷歌驅動器訪問
+Allow Import,允許進口
+Allow Import via Data Import Tool,允許通過數據導入工具導入
+Allow Negative Balance,允許負平衡
+Allow Negative Stock,允許負庫存
+Allow Production Order,讓生產訂單
+Allow Rename,允許重新命名
+Allow User,允許用戶
+Allow Users,允許用戶
+Allow on Submit,允許在提交
+Allow the following users to approve Leave Applications for block days.,允許以下用戶批准許可申請的區塊天。
+Allow user to edit Price List Rate in transactions,允許用戶編輯價目表率的交易
+Allow user to login only after this hour (0-24),允許用戶僅這一小時後登陸（0-24）
+Allow user to login only before this hour (0-24),允許用戶僅在此之前登錄小時（0-24）
+Allowance Percent,津貼百分比
+Allowed,寵物
+Allowed Role to Edit Entries Before Frozen Date,寵物角色來編輯文章前冷凍日期
+Already Registered,已註冊
+Always use above Login Id as sender,請務必使用上述登錄ID作為發件人
+Amend,修改
+Amended From,從修訂
+Amount,量
+Amount (Company Currency),金額（公司貨幣）
+Amount <=,量&lt;=
+Amount >=,金額&gt; =
+Amount to Bill,帳單數額
+"An active Salary Structure already exists. \						If you want to create new one, please ensure that no active \						Salary Structure exists for this Employee. \						Go to the active Salary Structure and set \",一個積極的薪酬結構已經存在。 \如果你想創建新的，請確保沒有主動\薪酬結構存在此員工。 \進入活躍薪酬結構和設置\
+"An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a>]","一個圖標文件，擴展名為。ico。應該是16×16像素。使用的favicon生成器生成。 [ <a href=""http://favicon-generator.org/"" target=""_blank"">網站圖標- generator.org</a> ]"
+Analytics,Analytics（分析）
+Another Period Closing Entry,另一個期末入口
+Another Salary Structure '%s' is active for employee '%s'. 				Please make its status 'Inactive' to proceed.,另一種薪酬結構&#39;％s&#39;的活躍員工&#39;％s&#39;的。請其狀態“無效”繼續。
+"Any other comments, noteworthy effort that should go in the records.",任何其他意見，值得注意的努力，應該在記錄中。
+Applicable Holiday List,適用假期表
+Applicable Territory,適用領地
+Applicable To (Designation),適用於（指定）
+Applicable To (Employee),適用於（員工）
+Applicable To (Role),適用於（角色）
+Applicable To (User),適用於（用戶）
+Applicant Name,申請人名稱
+Applicant for a Job,申請人的工作
+Applicant for a Job.,申請人的工作。
+Applications for leave.,申請許可。
+Applies to Company,適用於公司
+Apply / Approve Leaves,申請/審批葉
+Appraisal,評價
+Appraisal Goal,考核目標
+Appraisal Goals,考核目標
+Appraisal Template,評估模板
+Appraisal Template Goal,考核目標模板
+Appraisal Template Title,評估模板標題
+Approval Status,審批狀態
+Approved,批准
+Approver,贊同者
+Approving Role,審批角色
+Approving User,批准用戶
+Are you sure you want to STOP ,您確定要停止
+Are you sure you want to UNSTOP ,您確定要UNSTOP
+Are you sure you want to delete the attachment?,您確定要刪除的附件？
+Arial,宋體
+Arrear Amount,欠款金額
+"As a best practice, do not assign the same set of permission rule to different Roles instead set multiple Roles to the User",作為最佳實踐，不要在同一組的權限規則分配給不同的角色，而不是設置多個角色的用戶
+As existing qty for item: ,至於項目現有數量：
+As per Stock UOM,按庫存計量單位
+"As there are existing stock transactions for this \							item, you can not change the values of 'Has Serial No', \							'Is Stock Item' and 'Valuation Method'",由於有現有的股票交易這個\項目，你不能改變的&#39;有序列號“的價值觀，\&#39;是庫存項目”和“評估方法”
+Ascending,升序
+Assign To,分配給
+Assigned By,通過分配
+Assigned To,分配給
+Atleast one warehouse is mandatory,ATLEAST一間倉庫是強制性的
+Attach Document Print,附加文檔打印
+Attach as web link,附加為網站鏈接
+Attached To DocType,附著的DocType
+Attached To Name,單身者姓名
+Attachments,附件
+Attendance,護理
+Attendance Date,考勤日期
+Attendance Details,考勤詳情
+Attendance From Date,考勤起始日期
+Attendance From Date and Attendance To Date is mandatory,考勤起始日期和出席的日期，是強制性的
+Attendance To Date,出席會議日期
+Attendance can not be marked for future dates,考勤不能標記為未來的日期
+Attendance for the employee: ,出席的員工：
+Attendance record.,考勤記錄。
+Attributions,歸屬
+Authorization Control,授權控制
+Authorization Rule,授權規則
+Auto Accounting For Stock Settings,汽車佔股票設置
+Auto Email Id,自動電子郵件Id
+Auto Material Request,汽車材料要求
+Auto Name,自動名稱
+Auto generated,自動生成
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,自動加註材料要求，如果數量低於再訂購水平在一個倉庫
+Automatically extract Leads from a mail box e.g.,從一個信箱，例如自動提取信息
+Automatically updated via Stock Entry of type Manufacture/Repack,通過股票輸入型製造/重新包裝的自動更新
+Autoreply when a new mail is received,在接收到新郵件時自動回复
+Available,可用的
+Available Qty at Warehouse,有貨數量在倉庫
+Available Stock for Packing Items,可用庫存包裝項目
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet",可在物料清單，送貨單，採購發票，生產訂單，採購訂單，採購入庫單，銷售發票，銷售訂單，股票入門，時間表
+Avatar,阿凡達
+Average Age,平均年齡
+Average Commission Rate,平均佣金率
+Average Discount,平均折扣
+B+,B +
+B-,B-
+BILL,條例草案
+BILLJ,BILLJ
+BOM,BOM
+BOM Detail No,BOM表詳細說明暫無
+BOM Explosion Item,BOM爆炸物品
+BOM Item,BOM項目
+BOM No,BOM無
+BOM No. for a Finished Good Item,BOM編號為成品產品
+BOM Operation,BOM的操作
+BOM Operations,BOM的操作
+BOM Replace Tool,BOM替換工具
+BOM replaced,BOM取代
+Background Color,背景顏色
+Background Image,背景圖片
+Backup Manager,備份管理器
+Backup Right Now,備份即刻
+Backups will be uploaded to,備份將被上傳到
+Balance Qty,餘額數量
+Balance Value,平衡值
+"Balances of Accounts of type ""Bank or Cash""",鍵入“銀行或現金”的賬戶餘額
+Bank,銀行
+Bank A/C No.,銀行A / C號
+Bank Account,銀行帳戶
+Bank Account No.,銀行賬號
+Bank Accounts,銀行賬戶
+Bank Clearance Summary,銀行結算摘要
+Bank Name,銀行名稱
+Bank Reconciliation,銀行對帳
+Bank Reconciliation Detail,銀行對帳詳細
+Bank Reconciliation Statement,銀行對帳表
+Bank Voucher,銀行券
+Bank or Cash,銀行或現金
+Bank/Cash Balance,銀行/現金結餘
+Banner,旗幟
+Banner HTML,橫幅的HTML
+Banner Image,橫幅圖片
+Banner is above the Top Menu Bar.,旗幟就是上面的頂部菜單欄。
+Barcode,條碼
+Based On,基於
+Basic Info,基本信息
+Basic Information,基本信息
+Basic Rate,基礎速率
+Basic Rate (Company Currency),基本速率（公司貨幣）
+Batch,批量
+Batch (lot) of an Item.,一批該產品的（很多）。
+Batch Finished Date,批完成日期
+Batch ID,批次ID
+Batch No,批號
+Batch Started Date,批處理開始日期
+Batch Time Logs for Billing.,批處理的時間記錄進行計費。
+Batch Time Logs for billing.,批處理的時間記錄進行計費。
+Batch-Wise Balance History,間歇式平衡歷史
+Batched for Billing,批量計費
+"Before proceeding, please create Customer from Lead",在繼續操作之前，請從鉛創建客戶
+Begin this page with a slideshow of images,開始這個頁面圖像的幻燈片
+Belongs to,屬於
+Better Prospects,更好的前景
+Bill Date,比爾日期
+Bill No,匯票否
+Bill of Material to be considered for manufacturing,物料清單被視為製造
+Bill of Materials,材料清單
+Bill of Materials (BOM),材料清單（BOM）
+Billable,計費
+Billed,計費
+Billed Amount,賬單金額
+Billed Amt,已結算額
+Billing,計費
+Billing Address,帳單地址
+Billing Address Name,帳單地址名稱
+Billing Status,計費狀態
+Bills raised by Suppliers.,由供應商提出的法案。
+Bills raised to Customers.,提高對客戶的賬單。
+Bin,箱子
+Bio,生物
+Birth Date,出生日期
+Birthday,生日
+Block Date,座日期
+Block Days,天座
+Block Holidays on important days.,塊上重要的日子假期。
+Block leave applications by department.,按部門封鎖許可申請。
+Blog Category,博客分類
+Blog Intro,博客介紹
+Blog Introduction,博客簡介
+Blog Post,博客公告
+Blog Settings,博客設置
+Blog Subscriber,博客用戶
+Blog Title,博客標題
+Blogger,博客
+Blood Group,血型
+Bookmarks,書籤
+Both Income and Expense balances are zero. \				No Need to make Period Closing Entry.,收入和支出結餘為零。 \沒有必要讓時間截止報名。
+Both Warehouse must belong to same Company,這兩個倉庫必須屬於同一個公司
+Branch,支
+Brand,牌
+Brand HTML,品牌的HTML
+Brand Name,商標名稱
+"Brand is what appears on the top-right of the toolbar. If it is an image, make sure ithas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px",品牌是什麼出現在工具欄的右上角。如果它是一個形象，確保它的身體透明背景，並使用&lt;img /&gt;標籤。保持大小為200px x 30像素
+Brand master.,品牌大師。
+Brands,品牌
+Breakdown,擊穿
+Budget,預算
+Budget Allocated,分配的預算
+Budget Detail,預算案詳情
+Budget Details,預算案詳情
+Budget Distribution,預算分配
+Budget Distribution Detail,預算分配明細
+Budget Distribution Details,預算分配詳情
+Budget Variance Report,預算差異報告
+Build Modules,構建模塊
+Build Pages,構建頁面
+Build Report,建立舉報
+Build Server API,建立服務器API
+Build Sitemap,建立網站地圖
+Bulk Email,大量電子郵件
+Bulk Email records.,大量電子郵件記錄。
+Bulk Rename,批量重命名
+Bummer! There are more holidays than working days this month.,壞消息！還有比這個月工作日更多的假期。
+Bundle items at time of sale.,捆綁項目在銷售時。
+Button,鈕
+Buyer of Goods and Services.,採購貨物和服務。
+Buying,求購
+Buying Amount,客戶買入金額
+Buying Settings,求購設置
+By,通過
+C-FORM/,C-FORM /
+C-Form,C-表
+C-Form Applicable,C-表格適用
+C-Form Invoice Detail,C-形式發票詳細信息
+C-Form No,C-表格編號
+C-Form records,C-往績紀錄
+CI/2010-2011/,CI/2010-2011 /
+COMM-,COMM-
+CSS,CSS
+CUST,CUST
+CUSTMUM,CUSTMUM
+Calculate Based On,計算的基礎上
+Calculate Total Score,計算總分
+Calendar,日曆
+Calendar Events,日曆事件
+Call,通話
+Campaign,運動
+Campaign Name,活動名稱
+Can only be exported by users with role 'Report Manager',只能由用戶與角色“報表管理器”導出
+Cancel,取消
+Cancel permission also allows the user to delete a document (if it is not linked to any other document).,取消許可還允許用戶刪除一個文件（如果它不與任何其他文件）。
+Cancelled,註銷
+Cancelling this Stock Reconciliation will nullify its effect.,取消這個股票和解將抵消其影響。
+Cannot ,不能
+Cannot Cancel Opportunity as Quotation Exists,無法取消的機遇，報價存在
+Cannot Update: Incorrect / Expired Link.,無法更新：不正確的/過期的鏈接。
+Cannot Update: Incorrect Password,無法更新：不正確的密碼
+Cannot approve leave as you are not authorized to approve leaves on Block Dates.,因為你無權批准樹葉座日期不能批准休假。
+Cannot change Year Start Date and Year End Date \					once the Fiscal Year is saved.,不能改變年開學日期，一旦財政年度保存年度日期\。
+Cannot change from,不能改變
+Cannot continue.,無法繼續。
+"Cannot declare as lost, because Quotation has been made.",不能聲明為丟失，因為報價已經取得進展。
+"Cannot delete Serial No in warehouse. \				First remove from warehouse, then delete.",無法刪除序列號的倉庫。 \首先從倉庫中取出，然後將其刪除。
+Cannot edit standard fields,不能編輯標準字段
+Cannot map because following condition fails: ,無法對應，因為以下條件失敗：
+Cannot set as Lost as Sales Order is made.,不能設置為失落的銷售訂單而成。
+"Cannot update a non-exiting record, try inserting.",無法更新非退出記錄，請嘗試插入。
+Capacity,容量
+Capacity Units,容量單位
+Carry Forward,發揚
+Carry Forwarded Leaves,進行轉發葉
+Case No. cannot be 0,案號不能為0
+Cash,現金
+Cash Voucher,現金券
+Cash/Bank Account,現金/銀行賬戶
+Category,類別
+Category Name,分類名稱
+Cell Number,手機號碼
+Center,中心
+"Certain documents should not be changed once final, like an Invoice for example. The final state for such documents is called <b>Submitted</b>. You can restrict which roles can Submit.",某些文件不應該改變最後一次，像發票為例。對這些文件的最後狀態被稱為<b>提交</b> 。您可以限制哪些角色可以提交。
+Change UOM for an Item.,更改為計量單位的商品。
+Change the starting / current sequence number of an existing series.,更改現有系列的開始/當前的序列號。
+Channel Partner,渠道合作夥伴
+Charge,收費
+Chargeable,收費
+Chart of Accounts,科目表
+Chart of Cost Centers,成本中心的圖
+Chat,聊天
+Check,查
+Check / Uncheck roles assigned to the Profile. Click on the Role to find out what permissions that Role has.,查看/取消選中分配給個人的角色。點擊角色，找出哪些權限的角色了。
+Check all the items below that you want to send in this digest.,檢查下面要發送此摘要中的所有項目。
+Check how the newsletter looks in an email by sending it to your email.,如何檢查的通訊通過其發送到您的郵箱中查找電子郵件。
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date",檢查經常性發票，取消，停止經常性或將適當的結束日期
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",檢查是否需要自動週期性發票。提交任何銷售發票後，經常性部分可見。
+Check if you want to send salary slip in mail to each employee while submitting salary slip,檢查您要發送工資單郵件給每個員工，同時提交工資單
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,如果要強制用戶在保存之前選擇了一系列檢查。將不會有默認的，如果你檢查這個。
+Check this if you want to send emails as this id only (in case of restriction by your email provider).,如果您要發送的郵件，因為這ID只（如果限制您的電子郵件提供商）進行檢查。
+Check this if you want to show in website,檢查這一點，如果你想在顯示網頁
+Check this to disallow fractions. (for Nos),選中此選項禁止分數。 （對於NOS）
+Check this to make this the default letter head in all prints,勾選這個來讓這個默認的信頭中的所有打印
+Check this to pull emails from your mailbox,檢查這從你的郵箱的郵件拉
+Check to activate,檢查啟動
+Check to make Shipping Address,檢查並送貨地址
+Check to make primary address,檢查以主地址
+Checked,檢查
+Cheque,支票
+Cheque Date,支票日期
+Cheque Number,支票號碼
+Child Tables are shown as a Grid in other DocTypes.,子表中顯示為其他文檔類型的Grid。
+City,城市
+City/Town,市/鎮
+Claim Amount,索賠金額
+Claims for company expense.,索賠費用由公司負責。
+Class / Percentage,類/百分比
+Classic,經典
+Classification of Customers by region,客戶按地區分類
+Clear Cache & Refresh,清除緩存和刷新
+Clear Table,明確表
+Clearance Date,清拆日期
+Click here to buy subscription.,點擊這裡購買訂閱。
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,單擊“製作銷售發票”按鈕來創建一個新的銷售發票。
+Click on a link to get options to expand get options ,點擊一個鏈接以獲取股權以擴大獲取選項
+Click on button in the 'Condition' column and select the option 'User is the creator of the document',點擊在“條件”列按鈕，並選擇選項“用戶是文件的創建者”
+Click on row to edit.,單擊要編輯的行。
+Click to Expand / Collapse,點擊展開/折疊
+Client,客戶
+Close,關閉
+Close Balance Sheet and book Profit or Loss.,關閉資產負債表和賬面利潤或虧損。
+Closed,關閉
+Closing (Cr),關閉（CR）
+Closing (Dr),關閉（博士）
+Closing Account Head,關閉帳戶頭
+Closing Date,截止日期
+Closing Fiscal Year,截止會計年度
+Closing Qty,期末庫存
+Closing Value,收盤值
+CoA Help,輔酶幫助
+Code,碼
+Cold Calling,自薦
+Color,顏色
+Column Break,分欄符
+Comma separated list of email addresses,逗號分隔的電子郵件地址列表
+Comment,評論
+Comment By,評論人
+Comment By Fullname,評論人全名
+Comment Date,評論日期
+Comment Docname,可採用DocName評論
+Comment Doctype,註釋文檔類型
+Comment Time,評論時間
+Comments,評論
+Commission Rate,佣金率
+Commission Rate (%),佣金率（％）
+Commission partners and targets,委員會的合作夥伴和目標
+Commit Log,提交日誌
+Communication,通訊
+Communication HTML,溝通的HTML
+Communication History,通信歷史記錄
+Communication Medium,通信介質
+Communication log.,通信日誌。
+Communications,通訊
+Company,公司
+Company Abbreviation,公司縮寫
+Company Details,公司詳細信息
+Company Email,企業郵箱
+Company History,公司歷史
+Company Info,公司信息
+Company Introduction,公司簡介
+Company Master.,公司碩士學位。
+Company Name,公司名稱
+Company Settings,公司設置
+Company branches.,公司分支機構。
+Company departments.,公司各部門。
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,公司註冊號碼，供大家參考。例如：增值稅註冊號碼等
+Company registration numbers for your reference. Tax numbers etc.,公司註冊號碼，供大家參考。稅務號碼等
+Complaint,抱怨
+Complete,完整
+Complete By,完成
+Completed,已完成
+Completed Production Orders,完成生產訂單
+Completed Qty,完成數量
+Completion Date,完成日期
+Completion Status,完成狀態
+Condition Field,條件字段
+Confirmation Date,確認日期
+Confirmed orders from Customers.,確認訂單的客戶。
+Consider Tax or Charge for,考慮稅收或收費
+Considered as Opening Balance,視為期初餘額
+Considered as an Opening Balance,視為期初餘額
+Consultant,顧問
+Consumable Cost,耗材成本
+Consumable cost per hour,每小時可消耗成本
+Consumed Qty,消耗的數量
+Contact,聯繫
+Contact Control,接觸控制
+Contact Desc,聯繫倒序
+Contact Details,聯繫方式
+Contact Email,聯絡電郵
+Contact HTML,聯繫HTML
+Contact Info,聯繫方式
+Contact Mobile No,聯繫手機號碼
+Contact Name,聯繫人姓名
+Contact No.,聯絡電話
+Contact Person,聯繫人
+Contact Type,觸點類型：
+Contact Us Settings,聯繫我們設置
+"Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.",聯繫人選項，如“銷售查詢，支持查詢”等每一個新行或以逗號分隔。
+Content,內容
+Content Type,內容類型
+Content in markdown format that appears on the main side of your page,在降價格式的內容，在頁面的主側出現
+Contra Voucher,魂斗羅券
+Contract End Date,合同結束日期
+Contribution (%),貢獻（％）
+Contribution to Net Total,貢獻合計淨
+Control Panel,控制面板
+Controller,調節器
+Conversion Factor,轉換因子
+Conversion Factor of UOM: %s should be equal to 1. 						As UOM: %s is Stock UOM of Item: %s.,計量單位的換算係數：％s應該是等於1。由於計量單位：％s是股票UOM貨號：％s的。
+Convert into Recurring Invoice,轉換成週期性發票
+Convert to Group,轉換為集團
+Convert to Ledger,轉換到總帳
+Converted,轉換
+Copy,複製
+Copy From Item Group,複製從項目組
+Copyright,版權
+Core,核心
+Cost Center,成本中心
+Cost Center Details,成本中心詳情
+Cost Center Name,成本中心名稱
+Cost Center must be specified for PL Account: ,成本中心必須為特等賬戶指定：
+Costing,成本核算
+Count,算
+Country,國家
+Country Name,國家名稱
+"Country, Timezone and Currency",國家，時區和貨幣
+Create,創建
+Create Bank Voucher for the total salary paid for the above selected criteria,創建銀行券為支付上述選擇的標準工資總額
+Create Customer,創建客戶
+Create Material Requests,創建材料要求
+Create New,創建新
+Create Opportunity,創造機會
+Create Production Orders,創建生產訂單
+Create Quotation,創建報價
+Create Receiver List,創建接收器列表
+Create Salary Slip,建立工資單
+Create Stock Ledger Entries when you submit a Sales Invoice,創建庫存總帳條目當您提交銷售發票
+Create and Send Newsletters,創建和發送簡訊
+Created Account Head: ,創建帳戶頭：
+Created By,創建人
+Created Customer Issue,創建客戶問題
+Created Group ,創建群組
+Created Opportunity,創造機會
+Created Support Ticket,創建支持票
+Creates salary slip for above mentioned criteria.,建立工資單上面提到的標準。
+Creation Date,創建日期
+Creation Document No,文檔創建無
+Creation Document Type,創建文件類型
+Creation Time,創作時間
+Credentials,證書
+Credit,信用
+Credit Amt,信用額
+Credit Card Voucher,信用卡券
+Credit Controller,信用控制器
+Credit Days,信貸天
+Credit Limit,信用額度
+Credit Note,信用票據
+Credit To,信貸
+Credited account (Customer) is not matching with Sales Invoice,存入帳戶（客戶）不與銷售發票匹配
+Cross Listing of Item in multiple groups,項目的多組交叉上市
+Currency,貨幣
+Currency Exchange,外幣兌換
+Currency Format,貨幣格式
+Currency Name,貨幣名稱
+Currency Settings,貨幣設置
+Currency and Price List,貨幣和價格表
+Currency is missing for Price List,貨幣是缺少價格表
+Current Address,當前地址
+Current Address Is,當前地址是
+Current BOM,當前BOM表
+Current Fiscal Year,當前會計年度
+Current Stock,當前庫存
+Current Stock UOM,目前的庫存計量單位
+Current Value,當前值
+Current status,現狀
+Custom,習俗
+Custom Autoreply Message,自定義自動回复消息
+Custom CSS,自定義CSS
+Custom Field,自定義字段
+Custom Message,自定義消息
+Custom Reports,自定義報告
+Custom Script,自定義腳本
+Custom Startup Code,自定義啟動代碼
+Custom?,自定義？
+Customer,顧客
+Customer (Receivable) Account,客戶（應收）帳
+Customer / Item Name,客戶/項目名稱
+Customer / Lead Address,客戶/鉛地址
+Customer Account,客戶帳戶
+Customer Account Head,客戶帳戶頭
+Customer Acquisition and Loyalty,客戶獲得和忠誠度
+Customer Address,客戶地址
+Customer Addresses And Contacts,客戶的地址和聯繫方式
+Customer Code,客戶代碼
+Customer Codes,客戶代碼
+Customer Details,客戶詳細信息
+Customer Discount,客戶折扣
+Customer Discounts,客戶折扣
+Customer Feedback,客戶反饋
+Customer Group,集團客戶
+Customer Group / Customer,集團客戶/客戶
+Customer Group Name,客戶群組名稱
+Customer Intro,客戶簡介
+Customer Issue,客戶問題
+Customer Issue against Serial No.,客戶對發行序列號
+Customer Name,客戶名稱
+Customer Naming By,客戶通過命名
+Customer classification tree.,客戶分類樹。
+Customer database.,客戶數據庫。
+Customer's Item Code,客戶的產品編號
+Customer's Purchase Order Date,客戶的採購訂單日期
+Customer's Purchase Order No,客戶的採購訂單號
+Customer's Purchase Order Number,客戶的採購訂單編號
+Customer's Vendor,客戶的供應商
+Customers Not Buying Since Long Time,客戶不買，因為很長時間
+Customers Not Buying Since Long Time ,客戶不買，因為很長時間
+Customerwise Discount,Customerwise折扣
+Customization,定制
+Customize,定制
+Customize Form,自定義表單
+Customize Form Field,自定義表單域
+"Customize Label, Print Hide, Default etc.",自定義標籤，打印隱藏，默認值等。
+Customize the Notification,自定義通知
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,自定義去作為郵件的一部分的介紹文字。每筆交易都有一個單獨的介紹性文字。
+DN,DN
+DN Detail,DN詳細
+Daily,每日
+Daily Event Digest is sent for Calendar Events where reminders are set.,每日賽事精華被送往何處提醒設置日曆事件。
+Daily Time Log Summary,每日時間記錄匯總
+Danger,危險
+Data,數據
+Data Import,數據導入
+Database Folder ID,數據庫文件夾的ID
+Database of potential customers.,數據庫的潛在客戶。
+Date,日期
+Date Format,日期格式
+Date Of Retirement,日退休
+Date and Number Settings,日期和編號設置
+Date is repeated,日期重複
+Date must be in format,日期格式必須是
+Date of Birth,出生日期
+Date of Issue,發行日期
+Date of Joining,加入日期
+Date on which lorry started from supplier warehouse,日期從供應商的倉庫上貨車開始
+Date on which lorry started from your warehouse,日期從倉庫上貨車開始
+Dates,日期
+Datetime,日期時間
+Days Since Last Order,天自上次訂購
+Days for which Holidays are blocked for this department.,天的假期被封鎖這個部門。
+Dealer,零售商
+Dear,親愛
+Debit,借方
+Debit Amt,借記額
+Debit Note,繳費單
+Debit To,借記
+Debit and Credit not equal for this voucher: Diff (Debit) is ,借記和信用為這個券不等於：差異（借記）是
+Debit or Credit,借記卡或信用卡
+Debited account (Supplier) is not matching with \					Purchase Invoice,借記賬戶（供應商）不與\採購發票匹配
+Deduct,扣除
+Deduction,扣除
+Deduction Type,扣類型
+Deduction1,Deduction1
+Deductions,扣除
+Default,默認
+Default Account,默認帳戶
+Default BOM,默認的BOM
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,默認銀行/現金帳戶將被自動在POS機發票時選擇此模式更新。
+Default Bank Account,默認銀行賬戶
+Default Buying Price List,默認情況下採購價格表
+Default Cash Account,默認的現金賬戶
+Default Company,默認公司
+Default Cost Center,默認的成本中心
+Default Cost Center for tracking expense for this item.,默認的成本中心跟踪支出為這個項目。
+Default Currency,默認貨幣
+Default Customer Group,默認用戶組
+Default Expense Account,默認費用帳戶
+Default Home Page,默認主頁
+Default Home Pages,默認主頁
+Default Income Account,默認情況下收入賬戶
+Default Item Group,默認項目組
+Default Price List,默認價格表
+Default Print Format,默認打印格式
+Default Purchase Account in which cost of the item will be debited.,默認帳戶購買該項目的成本將被扣除。
+Default Settings,默認設置
+Default Source Warehouse,默認信號源倉庫
+Default Stock UOM,默認的庫存計量單位
+Default Supplier,默認的供應商
+Default Supplier Type,默認的供應商類別
+Default Target Warehouse,默認目標倉庫
+Default Territory,默認領地
+Default UOM updated in item ,在項目的默認計量單位更新
+Default Unit of Measure,缺省的計量單位
+"Default Unit of Measure can not be changed directly \					because you have already made some transaction(s) with another UOM.\n \					To change default UOM, use 'UOM Replace Utility' tool under Stock module.",缺省的計量單位，不能直接更改\，因為你已經做了一些交易（S）與另一個計量單位。\ N \要更改默認的度量單位，使用“計量單位替換工具”下的庫存模塊的工具。
+Default Valuation Method,默認的估值方法
+Default Value,默認值
+Default Warehouse,默認倉庫
+Default Warehouse is mandatory for Stock Item.,默認倉庫是強制性的股票項目。
+Default settings for Shopping Cart,對於購物車默認設置
+"Default: ""Contact Us""",默認：“聯繫我們”
+DefaultValue,默認值
+Defaults,默認
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","定義預算這個成本中心。要設置預算行動，見<a href=""#!List/Company"">公司主</a>"
+Defines actions on states and the next step and allowed roles.,定義了國家行動和下一步和允許的角色。
+Defines workflow states and rules for a document.,定義了文檔工作流狀態和規則。
+Delete,刪除
+Delete Row,刪除行
+Delivered,交付
+Delivered Items To Be Billed,交付項目要被收取
+Delivered Qty,交付數量
+Delivered Serial No ,交付序列號
+Delivery Date,交貨日期
+Delivery Details,交貨細節
+Delivery Document No,交貨證明文件號碼
+Delivery Document Type,交付文件類型
+Delivery Note,送貨單
+Delivery Note Item,送貨單項目
+Delivery Note Items,送貨單項目
+Delivery Note Message,送貨單留言
+Delivery Note No,送貨單號
+Delivery Note Required,要求送貨單
+Delivery Note Trends,送貨單趨勢
+Delivery Status,交貨狀態
+Delivery Time,交貨時間
+Delivery To,為了交付
+Department,部門
+Depends On,取決於
+Depends on LWP,依賴於LWP
+Descending,降
+Description,描述
+Description HTML,說明HTML
+"Description for listing page, in plain text, only a couple of lines. (max 140 characters)",說明列表頁面，在純文本中，只有幾行。 （最多140個字符）
+Description for page header.,描述頁面標題。
+Description of a Job Opening,空缺職位說明
+Designation,指定
+Desktop,桌面
+Detailed Breakup of the totals,總計詳細分手
+Details,詳細信息
+Did not add.,沒加。
+Did not cancel,沒有取消
+Did not save,沒救了
+Difference,差異
+Difference Account,差異帳戶
+"Different ""States"" this document can exist in. Like ""Open"", ""Pending Approval"" etc.",不同的“國家”這個文件可以存在。像“打開”，“待批准”等。
+Different UOM for items will lead to incorrect,不同計量單位的項目會導致不正確的
+Disable Customer Signup link in Login page,禁止在登錄頁面客戶註冊鏈接
+Disable Rounded Total,禁用圓角總
+Disable Signup,禁止註冊
+Disabled,殘
+Discount  %,折扣％
+Discount %,折扣％
+Discount (%),折讓（％）
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice",折扣場將在採購訂單，採購入庫單，採購發票
+Discount(%),折讓（％）
+Display Settings,顯示設置
+Display all the individual items delivered with the main items,顯示所有交付使用的主要項目的單個項目
+Distinct unit of an Item,該產品的獨特單位
+Distribute transport overhead across items.,分佈到項目的傳輸開銷。
+Distribution,分配
+Distribution Id,分配標識
+Distribution Name,分配名稱
+Distributor,經銷商
+Divorced,離婚
+Do Not Contact,不要聯繫
+Do not show any symbol like $ etc next to currencies.,不要顯示，如$等任何符號旁邊貨幣。
+Do really want to unstop production order: ,難道真的要unstop生產訂單：
+Do you really want to STOP this Material Request?,你真的要停止這種材料要求？
+Do you really want to UNSTOP this Material Request?,難道你真的想要UNSTOP此材料要求？
+Do you really want to stop production order: ,你真的要停止生產訂單：
+Doc Name,文件名稱
+Doc Status,文件狀態
+Doc Type,文件類型
+DocField,DocField
+DocPerm,DocPerm
+DocType,的DocType
+DocType Details,的DocType詳情
+DocType can not be merged,DocType文檔類型不能合併
+DocType is a Table / Form in the application.,的DocType是一個表/表格中的應用。
+DocType on which this Workflow is applicable.,DocType文檔類型上這個工作流是適用的。
+DocType or Field,的DocType或現場
+Docname,可採用DocName
+Document,文件
+Document Description,文檔說明
+Document Status transition from ,從文檔狀態過渡
+Document Type,文件類型
+Document Types,文檔類型
+Document is only editable by users of role,文件只有通過編輯角色的用戶
+Documentation,文檔
+Documentation Generator Console,文檔生成器控制台
+Documentation Tool,文檔工具
+Documents,文件
+Domain,域
+Don't send Employee Birthday Reminders,不要送員工生日提醒
+Download Backup,下載備份
+Download Materials Required,下載所需材料
+Download Reconcilation Data,下載Reconcilation數據
+Download Template,下載模板
+Download a report containing all raw materials with their latest inventory status,下載一個包含所有原料一份報告，他們最新的庫存狀態
+"Download the Template, fill appropriate data and \					attach the modified file.",下載模板，填寫相應的數據和\附上修改後的文件。
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records",下載模板，填寫相應的數據，並附加修飾file.All日期和員工組合在選定的期限會在模板中，與現有的考勤記錄
+Draft,草案
+Drafts,草稿箱
+Drag to sort columns,拖動進行排序的列
+Dropbox,Dropbox的
+Dropbox Access Allowed,Dropbox的允許訪問
+Dropbox Access Key,Dropbox的訪問鍵
+Dropbox Access Secret,Dropbox的訪問秘密
+Due Date,到期日
+Duplicate Item,重複項目
+EMP/,EMP /
+ERPNext Setup,ERPNext設置
+ERPNext Setup Guide,ERPNext安裝指南
+"ERPNext is an open-source web based ERP made by Web Notes Technologies Pvt Ltd.\		to provide an integrated tool to manage most processes in a small organization.\		For more information about Web Notes, or to buy hosting servies, go to ",ERPNext是一個開源的基於Web的ERP系統通過網絡注技術私人有限公司\下，提供一個集成的工具來管理一個小型組織大多數進程。\有關Web註釋的詳細信息，或者購買主機楝，去
+ESIC CARD No,ESIC卡無
+ESIC No.,ESIC號
+Earliest,最早
+Earning,盈利
+Earning & Deduction,收入及扣除
+Earning Type,收入類型
+Earning1,Earning1
+Edit,編輯
+Editable,編輯
+Educational Qualification,學歷
+Educational Qualification Details,學歷詳情
+Eg. smsgateway.com/api/send_sms.cgi,例如：。 smsgateway.com / API / send_sms.cgi
+Electricity Cost,電力成本
+Electricity cost per hour,每小時電費
+Email,電子郵件
+Email Digest,電子郵件摘要
+Email Digest Settings,電子郵件摘要設置
+Email Digest: ,電子郵件摘要：
+Email Host,電子郵件主機
+Email Id,電子郵件Id
+"Email Id must be unique, already exists for: ",電子郵件ID必須是唯一的，已經存在：
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",電子郵件Id其中一個應聘者的電子郵件，例如“jobs@example.com”
+Email Id where users will send support request e.g. support@example.com,電子郵件Id，用戶將發送支持請求，例如support@example.com
+Email Login,郵箱登錄
+Email Password,電子郵件密碼
+Email Sent,郵件發送
+Email Sent?,郵件發送？
+Email Settings,電子郵件設置
+Email Settings for Outgoing and Incoming Emails.,電子郵件設置傳出和傳入的電子郵件。
+Email Signature,電子郵件簽名
+Email Use SSL,電子郵件使用SSL
+"Email addresses, separted by commas",電子郵件地址，以逗號separted
+Email ids separated by commas.,電子郵件ID，用逗號分隔。
+"Email settings for jobs email id ""jobs@example.com""",電子郵件設置工作電子郵件ID“jobs@example.com”
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",電子郵件設置，以銷售電子郵件ID，例如“sales@example.com”提取信息
+Email...,電子郵件...
+Emergency Contact,緊急聯絡人
+Emergency Contact Details,緊急聯繫方式
+Emergency Phone,緊急電話
+Employee,僱員
+Employee Birthday,員工生日
+Employee Designation.,員工名稱。
+Employee Details,員工詳細信息
+Employee Education,員工教育
+Employee External Work History,員工對外工作歷史
+Employee Information,僱員資料
+Employee Internal Work History,員工內部工作經歷
+Employee Internal Work Historys,員工內部工作Historys
+Employee Leave Approver,員工請假審批
+Employee Leave Balance,員工休假餘額
+Employee Name,員工姓名
+Employee Number,員工人數
+Employee Records to be created by,員工紀錄的創造者
+Employee Settings,員工設置
+Employee Setup,員工設置
+Employee Type,員工類型
+Employee grades,員工成績
+Employee record is created using selected field. ,使用所選字段創建員工記錄。
+Employee records.,員工記錄。
+Employee: ,員工人數：
+Employees Email Id,員工的電子郵件ID
+Employment Details,就業信息
+Employment Type,就業類型
+Enable / Disable Email Notifications,啟用/禁用電子郵件通知
+Enable Comments,啟用評論
+Enable Shopping Cart,啟用的購物車
+Enabled,啟用
+Encashment Date,兌現日期
+End Date,結束日期
+End date of current invoice's period,當前發票的期限的最後一天
+End of Life,壽命結束
+Ends on,結束於
+Enter Form Type,輸入表單類型
+Enter Row,輸入行
+Enter Verification Code,輸入驗證碼
+Enter campaign name if the source of lead is campaign.,輸入活動名稱，如果鉛的來源是運動。
+"Enter default value fields (keys) and values. If you add multiple values for a field, the first one will be picked. These defaults are also used to set ""match"" permission rules. To see list of fields, go to <a href=""#Form/Customize Form/Customize Form"">Customize Form</a>.","輸入默認值字段（鍵）和值。如果你對一個字段中添加多個值，則第一個將有所回升。這些默認值也可用來設置“匹配”的權限規則。要查看字段的列表，請訪問<a href=""#Form/Customize Form/Customize Form"">自定義表單</a> 。"
+Enter department to which this Contact belongs,輸入部門的這種聯繫是屬於
+Enter designation of this Contact,輸入該聯繫人指定
+"Enter email id separated by commas, invoice will be mailed automatically on particular date",輸入電子郵件ID用逗號隔開，發票會自動在特定的日期郵寄
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,輸入您想要提高生產訂單或下載的原材料進行分析的項目和計劃數量。
+Enter name of campaign if source of enquiry is campaign,輸入活動的名稱，如果查詢來源是運動
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)",在這裡輸入靜態URL參數（如稱發件人= ERPNext，用戶名= ERPNext，密碼= 1234等）
+Enter the company name under which Account Head will be created for this Supplier,輸入據此帳戶總的公司名稱將用於此供應商建立
+Enter url parameter for message,輸入url參數的消息
+Enter url parameter for receiver nos,輸入URL參數的接收器號
+Entries,項
+Entries are not allowed against this Fiscal Year if the year is closed.,參賽作品不得對本財年，如果當年被關閉。
+Equals,等號
+Error,錯誤
+Error for,錯誤
+Error: Document has been modified after you have opened it,錯誤：你已經打開了它之後，文件已被修改
+Estimated Material Cost,預計材料成本
+Event,事件
+Event End must be after Start,活動結束必須開始後，
+Event Individuals,個人事件
+Event Role,事件角色
+Event Roles,事件角色
+Event Type,事件類型
+Event User,事件用戶
+Events In Today's Calendar,活動在今天的日曆
+Every Day,天天
+Every Month,每月
+Every Week,每一周
+Every Year,每年
+Everyone can read,每個人都可以閱讀
+Example:,例如：
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",例如：ABCD＃＃＃＃＃如果串聯設置和序列號沒有在交易中提到，然後自動序列號將基於該系列被創建。如果你總是想明確提到串行NOS為這個項目。留空。
+Exchange Rate,匯率
+Excise Page Number,消費頁碼
+Excise Voucher,消費券
+Exemption Limit,免稅限額
+Exhibition,展覽
+Existing Customer,現有客戶
+Exit,出口
+Exit Interview Details,退出面試細節
+Expected,預期
+Expected Delivery Date,預計交貨日期
+Expected End Date,預計結束日期
+Expected Start Date,預計開始日期
+Expense Account,費用帳戶
+Expense Account is mandatory,費用帳戶是必需的
+Expense Claim,報銷
+Expense Claim Approved,報銷批准
+Expense Claim Approved Message,報銷批准的消息
+Expense Claim Detail,報銷詳情
+Expense Claim Details,報銷詳情
+Expense Claim Rejected,費用索賠被拒絕
+Expense Claim Rejected Message,報銷拒絕消息
+Expense Claim Type,費用報銷型
+Expense Date,犧牲日期
+Expense Details,費用詳情
+Expense Head,總支出
+Expense account is mandatory for item,交際費是強制性的項目
+Expense/Difference account is mandatory for item: ,費用/差異帳戶是強制性的項目：
+Expenses Booked,支出預訂
+Expenses Included In Valuation,支出計入估值
+Expenses booked for the digest period,預訂了消化期間費用
+Expiry Date,到期時間
+Export,出口
+Exports,出口
+External,外部
+Extract Emails,提取電子郵件
+FCFS Rate,FCFS率
+FIFO,FIFO
+Facebook Share,Facebook分享
+Failed: ,失敗：
+Family Background,家庭背景
+FavIcon,網站圖標
+Fax,傳真
+Features Setup,功能設置
+Feed,飼料
+Feed Type,飼料類型
+Feedback,反饋
+Female,女
+Fetch exploded BOM (including sub-assemblies),取爆炸BOM（包括子組件）
+Field Description,字段說明
+Field Name,字段名稱
+Field Type,字段類型
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order",在送貨單，報價單，銷售發票，銷售訂單可用字段
+"Field that represents the Workflow State of the transaction (if field is not present, a new hidden Custom Field will be created)",現場，代表交易的工作流狀態（如果域不存在，一個新的隱藏的自定義字段將被創建）
+Fieldname,字段名
+Fields,領域
+"Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box",字段用逗號（，）分隔將被納入<br /> <b>搜索</b>的搜索對話框列表
+File,文件
+File Data,文件數據
+File Name,文件名
+File Size,文件大小
+File URL,文件的URL
+File size exceeded the maximum allowed size,文件大小超過了允許的最大尺寸
+Files Folder ID,文件夾的ID
+Fill the form and save it,填寫表格，並將其保存
+Filter,過濾器
+Filter By Amount,過濾器以交易金額計算
+Filter By Date,篩選通過日期
+Filter based on customer,過濾器可根據客戶
+Filter based on item,根據項目篩選
+Financial Analytics,財務分析
+Financial Statements,財務報表附註
+Finder,發現者
+Finished Goods,成品
+First Name,名字
+First Responded On,首先作出回應
+Fiscal Year,財政年度
+Fixed Asset Account,固定資產帳戶
+Float,浮動
+Float Precision,float精度
+Follow via Email,通過電子郵件跟隨
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",下表將顯示值，如果項目有子 - 簽約。這些值將被從子的“材料清單”的主人進賬 - 已簽約的項目。
+Font (Heading),字體（標題）
+Font (Text),字體（文字）
+Font Size (Text),字體大小（文本）
+Fonts,字體
+Footer,頁腳
+Footer Items,頁腳項目
+For All Users,對於所有用戶
+For Company,對於公司
+For DocType,為的DocType
+For Employee,對於員工
+For Employee Name,對於員工姓名
+"For Links, enter the DocType as rangeFor Select, enter list of Options separated by comma",對於鏈接，進入文檔類型為rangeFor選擇，進入選項列表以逗號分隔
+For Production,對於生產
+For Reference Only.,僅供參考。
+For Sales Invoice,對於銷售發票
+For Server Side Print Formats,對於服務器端打印的格式
+For UOM,對於計量單位
+For Warehouse,對於倉​​庫
+"For comparative filters, start with",對於比較器，開始
+"For e.g. 2012, 2012-13",對於例如2012，2012-13
+For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,例如，如果你取消及修訂“INV004”它將成為一個新的文檔&#39;INV004-1&#39;。這可以幫助您跟踪每一項修正案。
+For example: You want to restrict users to transactions marked with a certain property called 'Territory',例如：你想限制用戶到標有某種屬性叫做&#39;領地&#39;交易
+For opening balance entry account can not be a PL account,對於期初餘額進入帳戶不能是一個PL帳戶
+For ranges,對於範圍
+For reference,供參考
+For reference only.,僅供參考。
+For row,對於行
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",為方便客戶，這些代碼可以在打印格式，如發票和送貨單使用
+Form,表格
+Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,格式：HH：一小時期滿組為01:00毫米的例子。最大到期將是72小時。默認值為24小時
+Forum,論壇
+Forward To Email Address,轉發到郵件地址
+Fraction,分數
+Fraction Units,部分單位
+Freeze Stock Entries,凍結庫存條目
+Friday,星期五
+From,從
+From Bill of Materials,從材料清單
+From Company,從公司
+From Currency,從貨幣
+From Currency and To Currency cannot be same,從貨幣和貨幣不能相同
+From Customer,從客戶
+From Date,從日期
+From Date must be before To Date,從日期必須是之前日期
+From Delivery Note,從送貨單
+From Employee,從員工
+From Lead,從鉛
+From Opportunity,從機會
+From Package No.,從包號
+From Purchase Order,從採購訂單
+From Purchase Receipt,從採購入庫單
+From Quotation,從報價
+From Sales Order,從銷售訂單
+From Time,從時間
+From Value,從價值
+From Value should be less than To Value,從數值應小於To值
+Frozen,凍結的
+Frozen Accounts Modifier,凍結帳戶修改
+Fulfilled,適合
+Full Name,全名
+Fully Completed,全面完成
+"Further accounts can be made under Groups,",進一步帳戶可以根據組進行，
+Further nodes can be only created under 'Group' type nodes,此外節點可以在&#39;集團&#39;類型的節點上創建
+GL Entry,GL報名
+GL Entry: Debit or Credit amount is mandatory for ,GL錄入：借方或貸方金額是強制性的
+GRN,GRN
+Gantt Chart,甘特圖
+Gantt chart of all tasks.,甘特圖的所有任務。
+Gender,性別
+General,一般
+General Ledger,總帳
+General Ledger: ,總帳：
+Generate Description HTML,生成的HTML說明
+Generate Material Requests (MRP) and Production Orders.,生成材料要求（MRP）和生產訂單。
+Generate Salary Slips,生成工資條
+Generate Schedule,生成時間表
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",生成裝箱單的包交付。用於通知包號，包裝內容和它的重量。
+Generates HTML to include selected image in the description,生成HTML，包括所選圖像的描述
+Generator,發電機
+Georgia,格魯吉亞
+Get,得到
+Get Advances Paid,獲取有償進展
+Get Advances Received,取得進展收稿
+Get Current Stock,獲取當前庫存
+Get From ,得到
+Get Items,找項目
+Get Items From Sales Orders,獲取項目從銷售訂單
+Get Items from BOM,獲取項目從物料清單
+Get Last Purchase Rate,獲取最新預訂價
+Get Non Reconciled Entries,獲取非對帳項目
+Get Outstanding Invoices,獲取未付發票
+Get Sales Orders,獲取銷售訂單
+Get Specification Details,獲取詳細規格
+Get Stock and Rate,獲取股票和速率
+Get Template,獲取模板
+Get Terms and Conditions,獲取條款和條件
+Get Weekly Off Dates,獲取每週關閉日期
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.",獲取估值率和可用庫存在上提到過賬日期 - 時間源/目標倉庫。如果序列化的項目，請輸入序列號後，按下此按鈕。
+GitHub Issues,GitHub的問題
+Global Defaults,全球默認值
+Global Settings / Default Values,全局設置/默認值
+Go to Setup > <a href='#user-properties'>User Properties</a> to set \			'territory' for diffent Users.,進入設置&gt; <a href='#user-properties'>用戶屬性</a>設置\&#39;領土&#39;的diffent用戶。
+Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts),轉至相應的組（通常申請基金&gt;貨幣資產的&gt;銀行賬戶）
+Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties),轉至相應的組（通常資金來源&gt;流動負債&gt;稅和關稅）
+Goal,目標
+Goals,目標
+Goods received from Suppliers.,從供應商收到貨。
+Google Analytics ID,谷歌Analytics（分析）的ID
+Google Drive,谷歌驅動器
+Google Drive Access Allowed,谷歌驅動器允許訪問
+Google Plus One,谷歌加一
+Google Web Font (Heading),谷歌網頁字體（標題）
+Google Web Font (Text),谷歌網頁字體（文字）
+Grade,等級
+Graduate,畢業生
+Grand Total,累計
+Grand Total (Company Currency),總計（公司貨幣）
+Gratuity LIC ID,酬金LIC ID
+Greater or equals,大於或等於
+Greater than,大於
+"Grid """,電網“
+Gross Margin %,毛利率％
+Gross Margin Value,毛利率價值
+Gross Pay,工資總額
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,工資總額+欠費​​金額​​+兌現金額 - 扣除項目金額
+Gross Profit,毛利
+Gross Profit (%),毛利率（％）
+Gross Weight,毛重
+Gross Weight UOM,毛重計量單位
+Group,組
+Group By,分組依據
+Group by Ledger,集團以總帳
+Group by Voucher,集團透過券
+Group or Ledger,集團或Ledger
+Groups,組
+HR,人力資源
+HR Settings,人力資源設置
+HTML,HTML
+HTML / Banner that will show on the top of product list.,HTML /橫幅，將顯示在產品列表的頂部。
+Half Day,半天
+Half Yearly,半年度
+Half-yearly,每半年一次
+Happy Birthday!,祝你生日快樂！
+Has Batch No,有批號
+Has Child Node,有子節點
+Has Serial No,有序列號
+Header,頭
+Heading,標題
+Heading Text As,標題文字作為
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,頭（或組）對其中的會計分錄是由與平衡得以維持。
+Health Concerns,健康問題
+Health Details,健康細節
+Held On,舉行
+Help,幫助
+Help HTML,HTML幫助
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")",說明：要鏈接到另一個記錄在系統中，使用“＃表單/注意/ [注名]”的鏈接網址。 （不使用的“http://”）
+Helvetica Neue,Helvetica Neue字體
+"Here you can maintain family details like name and occupation of parent, spouse and children",在這裡，您可以維繫家庭的詳細信息，如姓名的父母，配偶和子女及職業
+"Here you can maintain height, weight, allergies, medical concerns etc",在這裡，你可以保持身高，體重，過敏，醫療問題等
+Hey! All these items have already been invoiced.,嘿！所有這些項目已開具發票。
+Hey! There should remain at least one System Manager,嘿！應該保持至少一個系統管理器
+Hidden,隱
+Hide Actions,隱藏操作
+Hide Copy,隱藏副本
+Hide Currency Symbol,隱藏貨幣符號
+Hide Email,隱藏電子郵件
+Hide Heading,隱藏標題
+Hide Print,隱藏打印
+Hide Toolbar,隱藏工具欄
+High,高
+Highlight,突出
+History,歷史
+History In Company,歷史在公司
+Hold,持有
+Holiday,節日
+Holiday List,假日列表
+Holiday List Name,假日列表名稱
+Holidays,假期
+Home,家
+Home Page,首頁
+Home Page is Products,首頁產品是
+Home Pages,主頁
+Host,主持人
+"Host, Email and Password required if emails are to be pulled",主機，電子郵件和密碼必需的，如果郵件是被拉到
+Hour Rate,小時率
+Hour Rate Labour,小時勞動率
+Hours,小時
+How frequently?,多久？
+"How should this currency be formatted? If not set, will use system defaults",應如何貨幣進行格式化？如果沒有設置，將使用系統默認
+Human Resource,人力資源
+Human Resources,人力資源
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,華友世紀！在天在你申請許可\與節假日（S）相吻合。你不需要申請許可。
+I,我
+ID (name) of the entity whose property is to be set,其屬性是要設置的實體的ID（名稱）
+IDT,IDT
+II,二
+III,三
+IN,在
+INV,投資
+INV/10-11/,INV/10-11 /
+ITEM,項目
+IV,四
+Icon,圖標
+Icon will appear on the button,圖標將顯示在按鈕上
+Identification of the package for the delivery (for print),包送貨上門鑑定（用於打印）
+If Income or Expense,如果收入或支出
+If Monthly Budget Exceeded,如果每月超出預算
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order",如果銷售BOM定義，該包的實際BOM在送貨單和銷售訂單顯示為table.Available
+"If Supplier Part Number exists for given Item, it gets stored here",如果供應商零件編號存在給定的項目，它被存放在這裡
+If Yearly Budget Exceeded,如果年度預算超出
+"If a User does not have access at Level 0, then higher levels are meaningless",如果用戶無權訪問級別為0級，那麼更高的水平是沒有意義的
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.",如果選中，則BOM的子裝配項目將被視為獲取原料。否則，所有的子組件件，將被視為一個原料。
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",如果選中，則總數。工作日將包括節假日，這將縮短每天的工資的價值
+"If checked, all other workflows become inactive.",如果選中，所有其他的工作流程變得無效。
+"If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.",如果選中，則帶有附加的HTML格式的電子郵件會被添加到電子郵件正文的一部分，以及作為附件。如果只作為附件發送，請取消勾選此。
+"If checked, the Home page will be the default Item Group for the website.",如果選中，主頁將是默認的項目組的網站上。
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",如果選中，納稅額將被視為已包括在打印速度/打印量
+"If disable, 'Rounded Total' field will not be visible in any transaction",如果禁用，“圓角總計”字段將不可見的任何交易
+"If enabled, the system will post accounting entries for inventory automatically.",如果啟用，系統將自動為發布庫存會計分錄。
+"If image is selected, color will be ignored (attach first)",如果圖像被選中，顏色將被忽略（先附上）
+If more than one package of the same type (for print),如果不止一個包相同類型的（用於打印）
+"If no change in either Quantity or Valuation Rate, leave the cell blank.",如果在任一數量或估價率沒有變化，離開細胞的空白。
+If non standard port (e.g. 587),如果非標準端口（如587）
+If not applicable please enter: NA,如果不適用，請輸入：不適用
+"If not checked, the list will have to be added to each Department where it has to be applied.",如果未選中，則列表將被添加到每個部門，在那裡它被應用。
+"If not, create a",如果沒有，請創建一個
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.",如果設置，數據輸入只允許指定的用戶。否則，條目允許具備必要權限的所有用戶。
+"If specified, send the newsletter using this email address",如果指定了，使用這個電子郵件地址發送電子報
+"If the 'territory' Link Field exists, it will give you an option to select it",如果&#39;領土&#39;鏈接字段存在，它會給你一個選項，選擇它
+"If the account is frozen, entries are allowed to restricted users.",如果帳戶被凍結，條目被允許受限制的用戶。
+"If these instructions where not helpful, please add in your suggestions at <a href='https://github.com/webnotes/wnframework/issues'>GitHub Issues</a>",如果這些指令，其中沒有幫助，請在您的建議添加<a href='https://github.com/webnotes/wnframework/issues'>GitHub的問題</a>
+"If this Account represents a Customer, Supplier or Employee, set it here.",如果該帳戶代表一個客戶，供應商或員工，在這裡設置。
+If you follow Quality Inspection<br>Enables item QA Required and QA No in Purchase Receipt,如果你遵循質量檢驗<br>使項目所需的質量保證和質量保證在沒有採購入庫單
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,如果你有銷售團隊和銷售合作夥伴（渠道合作夥伴），他們可以被標記，並維持其在銷售貢獻活動
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.",如果您在購置稅和費法師創建一個標準的模板，選擇一個，然後點擊下面的按鈕。
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.",如果你已經在銷售稅金及費用法師創建一個標準的模板，選擇一個，然後點擊下面的按鈕。
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page",如果你有很長的打印格式，這個功能可以被用來分割要打印多個頁面，每個頁面上的所有頁眉和頁腳的頁
+If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,如果您在製造業活動涉及<br>使<b>產品製造</b>
+"If you set this, this Item will come in a drop-down under the selected parent.",如果你設置這個，這個項目會在一個下拉菜單中選定父下。
+Ignore,忽略
+Ignored: ,忽略：
+Image,圖像
+Image Link,圖片鏈接
+Image View,圖像查看
+Implementation Partner,實施合作夥伴
+Import,進口
+Import Attendance,進口出席
+Import Failed!,導入失敗！
+Import Log,導入日誌
+Import Successful!,導入成功！
+Imports,進口
+In,在
+In Dialog,在對話框
+In Filter,在過濾器
+In Hours,以小時為單位
+In List View,在列表視圖
+In Process,在過程
+In Qty,在數量
+In Report Filter,在報表篩選
+In Row,在排
+In Value,在價值
+In Words,中字
+In Words (Company Currency),在字（公司貨幣）
+In Words (Export) will be visible once you save the Delivery Note.,在字（出口）將是可見的，一旦你保存送貨單。
+In Words will be visible once you save the Delivery Note.,在詞將是可見的，一旦你保存送貨單。
+In Words will be visible once you save the Purchase Invoice.,在詞將是可見的，一旦你保存購買發票。
+In Words will be visible once you save the Purchase Order.,在詞將是可見的，一旦你保存採購訂單。
+In Words will be visible once you save the Purchase Receipt.,在詞將是可見的，一旦你保存購買收據。
+In Words will be visible once you save the Quotation.,在詞將是可見的，一旦你保存報價。
+In Words will be visible once you save the Sales Invoice.,在詞將是可見的，一旦你保存銷售發票。
+In Words will be visible once you save the Sales Order.,在詞將是可見的，一旦你保存銷售訂單。
+In response to,響應於
+"In the Permission Manager, click on the button in the 'Condition' column for the Role you want to restrict.",在權限管理器中，單擊在“狀態”列中的按鈕為要限制的作用。
+Incentives,獎勵
+Incharge,Incharge
+Incharge Name,Incharge名稱
+Include holidays in Total no. of Working Days,包括節假日的總數。工作日
+Income / Expense,收入/支出
+Income Account,收入賬戶
+Income Booked,收入預訂
+Income Year to Date,收入年初至今
+Income booked for the digest period,收入入賬的消化期
+Incoming,來
+Incoming / Support Mail Setting,來電/支持郵件設置
+Incoming Rate,傳入速率
+Incoming quality inspection.,來料質量檢驗。
+Index,指數
+Indicates that the package is a part of this delivery,表示該包是這個傳遞的一部分
+Individual,個人
+Individuals,個人
+Industry,行業
+Industry Type,行業類型
+Info,信息
+Insert After,插入後
+Insert Below,下面插入
+Insert Code,插入代碼
+Insert Row,插入行
+Insert Style,插入式
+Inspected By,視察
+Inspection Criteria,檢驗標準
+Inspection Required,需要檢驗
+Inspection Type,檢驗類型
+Installation Date,安裝日期
+Installation Note,安裝注意事項
+Installation Note Item,安裝注意項
+Installation Status,安裝狀態
+Installation Time,安裝時間
+Installation record for a Serial No.,對於一個序列號安裝記錄
+Installed Qty,安裝數量
+Instructions,說明
+Int,詮釋
+Integrations,集成
+Interested,有興趣
+Internal,內部
+Introduce your company to the website visitor.,介紹貴公司的網站訪客。
+Introduction,介紹
+Introductory information for the Contact Us Page,介紹信息的聯繫我們頁面
+Invalid Barcode,無效的條碼
+Invalid Delivery Note. Delivery Note should exist and should be in 				draft state. Please rectify and try again.,無效的送貨單。送貨單應該存在，應該是在草稿狀態。請糾正，然後再試一次。
+Invalid Email,無效的電子郵件
+Invalid Email Address,無效的電子郵件地址
+Invalid Leave Approver,無效休假審批
+Invalid quantity specified for item ,為項目指定了無效的數量
+Inventory,庫存
+Inverse,逆
+Invoice Date,發票日期
+Invoice Details,發票明細
+Invoice No,發票號碼
+Invoice Period From Date,發票日期開始日期
+Invoice Period To Date,發票日期終止日期
+Invoiced Amount (Exculsive Tax),發票金額（Exculsive稅）
+Is Active,為活躍
+Is Advance,為進
+Is Asset Item,是資產項目
+Is Cancelled,被註銷
+Is Carry Forward,是弘揚
+Is Child Table,是子表
+Is Default,是默認
+Is Encash,為兌現
+Is LWP,是LWP
+Is Mandatory Field,是必須填寫
+Is Opening,是開幕
+Is Opening Entry,是開放報名
+Is PL Account,是PL賬戶
+Is POS,是POS機
+Is Primary Contact,是主要聯絡人
+Is Purchase Item,是購買項目
+Is Sales Item,是銷售項目
+Is Service Item,是服務項目
+Is Single,單人
+Is Standard,為標準
+Is Stock Item,是庫存項目
+Is Sub Contracted Item,是次簽約項目
+Is Subcontracted,轉包
+Is Submittable,是Submittable
+Is this Tax included in Basic Rate?,包括在基本速率此稅？
+Issue,問題
+Issue Date,發行日期
+Issue Details,問題詳情
+Issued Items Against Production Order,發出對項目生產訂單
+It can also be used to create opening stock entries and to fix stock value.,它也可以用來創建期初存貨項目和解決股票價值。
+It is needed to fetch Item Details.,這是需要獲取產品的詳細信息。
+Item,項目
+Item Advanced,項目高級
+Item Barcode,商品條碼
+Item Batch Nos,項目批NOS
+Item Classification,產品分類
+Item Code,產品編號
+Item Code (item_code) is mandatory because Item naming is not sequential.,產品編碼（item_code）是強制性的，因為產品的命名是不連續的。
+Item Code and Warehouse should already exist.,產品編號和倉庫應該已經存在。
+Item Code cannot be changed for Serial No.,產品編號不能為序列號改變
+Item Customer Detail,項目客戶詳細
+Item Description,項目說明
+Item Desription,項目Desription
+Item Details,產品詳細信息
+Item Group,項目組
+Item Group Name,項目組名稱
+Item Groups in Details,在詳細信息產品組
+Item Image (if not slideshow),產品圖片（如果不是幻燈片）
+Item Name,項目名稱
+Item Naming By,產品命名規則
+Item Price,商品價格
+Item Prices,產品價格
+Item Quality Inspection Parameter,產品質量檢驗參數
+Item Reorder,項目重新排序
+Item Serial No,產品序列號
+Item Serial Nos,產品序列號
+Item Shortage Report,商品短缺報告
+Item Supplier,產品供應商
+Item Supplier Details,產品供應商詳細信息
+Item Tax,產品稅
+Item Tax Amount,項目稅額
+Item Tax Rate,項目稅率
+Item Tax1,項目Tax1
+Item To Manufacture,產品製造
+Item UOM,項目計量單位
+Item Website Specification,項目網站規格
+Item Website Specifications,項目網站產品規格
+Item Wise Tax Detail ,項目智者稅制明細
+Item classification.,項目分類。
+Item is neither Sales nor Service Item,項目既不是銷售，也不服務項目
+Item must have 'Has Serial No' as 'Yes',項目必須有&#39;有序列號&#39;為&#39;是&#39;
+Item table can not be blank,項目表不能為空
+Item to be manufactured or repacked,產品被製造或重新包裝
+Item will be saved by this name in the data base.,項目將通過此名稱在數據庫中保存。
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.",當選擇序號項目，擔保，資產管理公司（常年維護保養合同）的詳細信息將自動獲取。
+Item-wise Last Purchase Rate,項目明智的最後付款價
+Item-wise Price List Rate,項目明智的價目表率
+Item-wise Purchase History,項目明智的購買歷史
+Item-wise Purchase Register,項目明智的購買登記
+Item-wise Sales History,項目明智的銷售歷史
+Item-wise Sales Register,項目明智的銷售登記
+Items,項目
+Items To Be Requested,項目要請求
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty",這是“缺貨”的項目被要求考慮根據預計數量和最小起訂量為所有倉庫
+Items which do not exist in Item master can also be entered on customer's request,不中主項存在的項目也可以根據客戶的要求進入
+Itemwise Discount,Itemwise折扣
+Itemwise Recommended Reorder Level,Itemwise推薦級別重新排序
+JSON,JSON
+JV,合資公司
+JavaScript Format: wn.query_reports['REPORTNAME'] = {},JavaScript的格式：wn.query_reports [&#39;REPORTNAME&#39;] = {}
+Javascript,使用Javascript
+Job Applicant,求職者
+Job Opening,招聘開幕
+Job Profile,工作簡介
+Job Title,職位
+"Job profile, qualifications required etc.",所需的工作概況，學歷等。
+Jobs Email Settings,喬布斯郵件設置
+Journal Entries,日記帳分錄
+Journal Entry,日記帳分錄
+Journal Voucher,期刊券
+Journal Voucher Detail,日記帳憑證詳細信息
+Journal Voucher Detail No,日記帳憑證詳細說明暫無
+KRA,KRA
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",保持銷售計劃的軌道。跟踪信息，報價，銷售訂單等從競選衡量投資回報。
+Keep a track of all communications,保持跟踪所有通信
+Keep a track of communication related to this enquiry which will help for future reference.,保持跟踪的溝通與此相關的調查，這將有助於以供將來參考。
+Key,關鍵
+Key Performance Area,關鍵績效區
+Key Responsibility Area,關鍵責任區
+LEAD,鉛
+LEAD/10-11/,LEAD/10-11 /
+LEAD/MUMBAI/,鉛/孟買/
+LR Date,LR日期
+LR No,LR無
+Label,標籤
+Label Help,標籤說明
+Lacs,紫膠
+Landed Cost Item,到岸成本項目
+Landed Cost Items,到岸成本項目
+Landed Cost Purchase Receipt,到岸成本外購入庫單
+Landed Cost Purchase Receipts,到岸成本外購入庫單
+Landed Cost Wizard,到岸成本嚮導
+Landing Page,著陸頁
+Language,語
+Language preference for user interface (only if available).,語言首選項的用戶界面（僅如果有的話）。
+Last IP,最後一個IP
+Last Login,上次登錄
+Last Name,姓
+Last Purchase Rate,最後預訂價
+Last updated by,最後更新由
+Lastmod,LASTMOD
+Latest,最新
+Latest Updates,最新更新
+Lato,拉托
+Lead,鉛
+Lead Details,鉛詳情
+Lead Id,鉛標識
+Lead Name,鉛名稱
+Lead Owner,鉛所有者
+Lead Source,鉛源
+Lead Status,鉛狀態
+Lead Time Date,交貨時間日期
+Lead Time Days,交貨期天
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,交貨期天是天由該項目預計將在您的倉庫的數量。這天是在申請材料中取出，當你選擇這個項目。
+Lead Type,引線型
+Leave Allocation,離開分配
+Leave Allocation Tool,離開配置工具
+Leave Application,離開應用
+Leave Approver,離開審批
+Leave Approver can be one of,離開審批者可以是一個
+Leave Approvers,離開審批
+Leave Balance Before Application,離開平衡應用前
+Leave Block List,離開塊列表
+Leave Block List Allow,離開阻止列表允許
+Leave Block List Allowed,離開封鎖清單寵物
+Leave Block List Date,留座日期表
+Leave Block List Dates,留座日期表
+Leave Block List Name,離開塊列表名稱
+Leave Blocked,離開封鎖
+Leave Control Panel,離開控制面板
+Leave Encashed?,離開兌現？
+Leave Encashment Amount,假期兌現金額
+Leave Setup,離開設定
+Leave Type,離開類型
+Leave Type Name,離開類型名稱
+Leave Without Pay,無薪假
+Leave allocations.,離開分配。
+Leave application has been approved.,休假申請已被批准。
+Leave application has been rejected.,休假申請已被拒絕。
+Leave blank if considered for all branches,離開，如果考慮所有分支空白
+Leave blank if considered for all departments,離開，如果考慮各部門的空白
+Leave blank if considered for all designations,離開，如果考慮所有指定空白
+Leave blank if considered for all employee types,離開，如果考慮所有的員工類型空白
+Leave blank if considered for all grades,離開，如果考慮所有級別空白
+Leave blank to repeat always,留空將總是重複
+"Leave can be approved by users with Role, ""Leave Approver""",離開可以通過用戶與角色的批准，“給審批”
+Ledger,萊傑
+Ledgers,總帳
+Left,左
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,法人/附屬賬戶與一個單獨的表屬於該組織。
+Less or equals,小於或等於
+Less than,小於
+Letter Head,信頭
+Letter Head Image,信頭圖片
+Letter Head Name,信頭名
+Letter Head in HTML,信頭中的HTML
+Level,級別
+"Level 0 is for document level permissions, higher levels for field level permissions.",0級是文件級權限，更高層次字段級權限。
+Lft,LFT
+Like,喜歡
+Link,鏈接
+Link Name,鏈接名稱
+Link to other pages in the side bar and next section,鏈接到側欄和下一節其他頁面
+Link to the page you want to open,鏈接到你想打開的網頁
+Linked In Share,反向鏈接分享
+Linked With,掛具
+List,表
+List a few of your customers. They could be organizations or individuals.,列出一些你的客戶。他們可以是組織或個人。
+List a few of your suppliers. They could be organizations or individuals.,列出一些你的供應商。他們可以是組織或個人。
+"List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them.",列出你從你的供應商或供應商買幾個產品或服務。如果這些是與您的產品，那麼就不要添加它們。
+List items that form the package.,形成包列表項。
+List of holidays.,假期表。
+List of patches executed,執行補丁列表
+List of users who can edit a particular Note,誰可以編輯特定票據的用戶列表
+List this Item in multiple groups on the website.,列出這個項目在網站上多個組。
+"List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start.",列出您的產品或服務，你賣你的客戶。確保當你開始檢查項目組，測量及其他物業單位。
+"List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later.",列出你的頭稅（如增值稅，消費稅）（截至3）和它們的標準費率。這將創建一個標準的模板，您可以編輯和更多的稍後添加。
+Live Chat,即時聊天
+Loading,載入中
+Loading Report,加載報表
+Loading...,載入中...
+Log,登錄
+"Log of Activities performed by users against Tasks that can be used for tracking time, billing.",通過對用戶的任務，可用於跟踪時間，計費進行活動的日誌。
+Log of Scheduler Errors,調度程序錯誤日誌
+Login After,登錄後
+Login Before,登錄前
+Login Id,登錄ID
+Login with your new User ID,與你的新的用戶ID登錄
+Logo,標誌
+Logo and Letter Heads,標誌和信頭
+Logout,註銷
+Long Text,長文本
+Lost,丟失
+Lost Reason,失落的原因
+Low,低
+Lower Income,較低的收入
+Lucida Grande,龍力大
+MIS Control,MIS控制
+MREQ-,MREQ  -
+MTN Details,MTN詳情
+Mail Footer,郵件頁腳
+Mail Password,郵件密碼
+Mail Port,郵件端口
+Mail Server,郵件服務器
+Main Reports,主報告
+Main Section,主科
+Maintain Same Rate Throughout Sales Cycle,保持同樣的速度在整個銷售週期
+Maintain same rate throughout purchase cycle,在整個採購週期保持同樣的速度
+Maintenance,保養
+Maintenance Date,維修日期
+Maintenance Details,保養細節
+Maintenance Schedule,維護計劃
+Maintenance Schedule Detail,維護計劃細節
+Maintenance Schedule Item,維護計劃項目
+Maintenance Schedules,保養時間表
+Maintenance Status,維修狀態
+Maintenance Time,維護時間
+Maintenance Type,維護型
+Maintenance Visit,維護訪問
+Maintenance Visit Purpose,維護訪問目的
+Major/Optional Subjects,大/選修課
+Make ,使
+Make Accounting Entry For Every Stock Movement,做會計分錄為每股份轉移
+Make Bank Voucher,使銀行券
+Make Credit Note,使信貸注
+Make Debit Note,讓繳費單
+Make Delivery,使交貨
+Make Difference Entry,使不同入口
+Make Excise Invoice,使消費稅發票
+Make Installation Note,使安裝注意事項
+Make Invoice,使發票
+Make Maint. Schedule,讓MAINT。時間表
+Make Maint. Visit,讓MAINT。訪問
+Make Packing Slip,使裝箱單
+Make Payment Entry,使付款輸入
+Make Purchase Invoice,做出購買發票
+Make Purchase Order,做採購訂單
+Make Salary Slip,使工資單
+Make Salary Structure,使薪酬結構
+Make Sales Invoice,做銷售發票
+Make Sales Order,使銷售訂單
+Make Supplier Quotation,讓供應商報價
+Make Time Log Batch,做時間記錄批
+Make a new,創建一個新的
+Make sure that the transactions you want to restrict have a Link field 'territory' that maps to a 'Territory' master.,請確保您要限制的交易有一個鏈接字段&#39;領土&#39;映射到一個&#39;領地&#39;師父。
+Male,男性
+Manage 3rd Party Backups,管理第三方備份
+Manage cost of operations,管理運營成本
+Manage exchange rates for currency conversion,管理匯率貨幣兌換
+Mandatory,強制性
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",如果股票的強制性項目為“是”。也是默認倉庫，保留數量從銷售訂單設置。
+Manufacture against Sales Order,對製造銷售訂單
+Manufacture/Repack,製造/重新包裝
+Manufactured Qty,生產數量
+Manufactured quantity will be updated in this warehouse,生產量將在這個倉庫進行更新
+Manufacturer,生產廠家
+Manufacturer Part Number,製造商零件編號
+Manufacturing,製造業
+Manufacturing Quantity,生產數量
+Margin,餘量
+Marital Status,婚姻狀況
+Market Segment,市場分類
+Married,已婚
+Mass Mailing,郵件群發
+Master,主
+Master Data,主數據
+Master Name,主名稱
+Master Name is mandatory if account type is Warehouse,主名稱是強制性的，如果帳戶類型為倉庫
+Master Type,碩士
+Masters,大師
+Match,比賽
+Match non-linked Invoices and Payments.,匹配非聯的發票和付款。
+Material Issue,材料問題
+Material Receipt,材料收據
+Material Request,材料要求
+Material Request Detail No,材料要求詳細說明暫無
+Material Request For Warehouse,申請材料倉庫
+Material Request Item,材料要求項
+Material Request Items,材料要求項
+Material Request No,材料請求無
+Material Request Type,材料請求類型
+Material Request used to make this Stock Entry,材料要求用來做這個股票輸入
+Material Requests for which Supplier Quotations are not created,對於沒有被創建供應商報價的材料要求
+Material Requirement,物料需求
+Material Transfer,材料轉讓
+Materials,物料
+Materials Required (Exploded),所需材料（分解）
+Max 500 rows only.,最大500行而已。
+Max Attachments,最大附件
+Max Days Leave Allowed,最大天假寵物
+Max Discount (%),最大折讓（％）
+"Meaning of Submit, Cancel, Amend",的含義提交，取消，修改
+Medium,中
+"Menu items in the Top Bar. For setting the color of the Top Bar, go to <a href=""#Form/Style Settings"">Style Settings</a>","在頂欄菜單項。設置最上面一欄的顏色，去<a href=""#Form/Style Settings"">樣式設置</a>"
+Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,合併是唯一可能的組到組或分類帳到總帳
+"Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account",合併是唯一可能的，如果下面的\屬性是相同的兩個記錄。集團或Ledger，借方或貸方，是特等帳戶
+Message,信息
+Message Parameter,消息參數
+Message Sent,發送消息
+Message greater than 160 character will be splitted into multiple mesage,消息大於160字符將被分裂成多個mesage
+Messages,消息
+Method,方法
+Middle Income,中等收入
+Middle Name (Optional),中間名（可選）
+Milestone,里程碑
+Milestone Date,里程碑日期
+Milestones,里程碑
+Milestones will be added as Events in the Calendar,里程碑將被添加為日曆事件
+Millions,百萬
+Min Order Qty,最小訂貨量
+Minimum Order Qty,最低起訂量
+Misc,雜項
+Misc Details,其它詳細信息
+Miscellaneous,雜項
+Miscelleneous,Miscelleneous
+Missing Currency Exchange Rates for,缺少貨幣匯率
+Missing Values Required,所需遺漏值
+Mobile No,手機號碼
+Mobile No.,手機號碼
+Mode of Payment,付款方式
+Modern,現代
+Modified Amount,修改金額
+Modified by,改性
+Module,模
+Module Def,模塊高清
+Module Name,模塊名稱
+Modules,模塊
+Monday,星期一
+Month,月
+Monthly,每月一次
+Monthly Attendance Sheet,每月考勤表
+Monthly Earning & Deduction,每月入息和扣除
+Monthly Salary Register,月薪註冊
+Monthly salary statement.,月薪聲明。
+Monthly salary template.,月薪模板。
+More,更多
+More Details,更多詳情
+More Info,更多信息
+More content for the bottom of the page.,更多的內容的頁面的底部。
+Moving Average,移動平均線
+Moving Average Rate,移動平均房價
+Mr,先生
+Ms,女士
+Multiple Item prices.,多個項目的價格。
+Multiple Price list.,多重價格清單。
+Must be Whole Number,必須是整數
+Must have report permission to access this report.,必須具有報告權限訪問此報告。
+Must specify a Query to run,必須指定一個查詢運行
+My Settings,我的設置
+NL-,NL-
+Name,名稱
+Name Case,案例名稱
+Name Exists,名稱存在
+Name and Description,名稱和說明
+Name and Employee ID,姓名和僱員ID
+Name is required,名稱是必需的
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers,",新帳戶的名稱。注：請不要創建帳戶客戶和供應商，
+Name of person or organization that this address belongs to.,的人或組織該地址所屬的命名。
+Name of the Budget Distribution,在預算分配的名稱
+Naming Series,命名系列
+Naming Series mandatory,命名系列強制性
+Negative balance is not allowed for account ,負平衡是不允許的帳戶
+Net Pay,淨收費
+Net Pay (in words) will be visible once you save the Salary Slip.,淨收費（字）將會看到，一旦你保存工資單。
+Net Total,總淨
+Net Total (Company Currency),總淨值（公司貨幣）
+Net Weight,淨重
+Net Weight UOM,淨重計量單位
+Net Weight of each Item,每個項目的淨重
+Net pay can not be negative,淨工資不能為負
+Never,從來沒有
+New,新
+New ,新
+New Account,新帳號
+New Account Name,新帳號名稱
+New BOM,新的物料清單
+New Communications,新通訊
+New Company,新公司
+New Cost Center,新的成本中心
+New Cost Center Name,新的成本中心名稱
+New Delivery Notes,新交付票據
+New Enquiries,新的查詢
+New Leads,新信息
+New Leave Application,新假期申請
+New Leaves Allocated,分配新葉
+New Leaves Allocated (In Days),分配（天）新葉
+New Material Requests,新材料的要求
+New Password,新密碼
+New Projects,新項目
+New Purchase Orders,新的採購訂單
+New Purchase Receipts,新的購買收據
+New Quotations,新語錄
+New Record,新記錄
+New Sales Orders,新的銷售訂單
+New Serial No cannot have Warehouse. Warehouse must be \				set by Stock Entry or Purchase Receipt,新的序列號不能有倉庫。倉庫必須由股票輸入或外購入庫單進行\設置
+New Stock Entries,新貨條目
+New Stock UOM,新的庫存計量單位
+New Supplier Quotations,新供應商報價
+New Support Tickets,新的客服支援回報單
+New Workplace,職場新人
+New value to be set,新的值被設置
+Newsletter,通訊
+Newsletter Content,通訊內容
+Newsletter Status,通訊狀態
+"Newsletters to contacts, leads.",通訊，聯繫人，線索。
+Next Communcation On,下一步通信電子在
+Next Contact By,接著聯繫到
+Next Contact Date,下一步聯絡日期
+Next Date,下一個日期
+Next State,下一狀態
+Next actions,下一步行動
+Next email will be sent on:,接下來的電子郵件將被發送：
+No,無
+No Action,無動作
+No Cache,無緩存
+No Communication tagged with this ,無標籤的通信與此
+No Copy,沒有複製
+No Customer Accounts found.,沒有客戶帳戶發現。
+No Customer Accounts found. Customer Accounts are identified based on \			'Master Type' value in account record.,沒有客戶帳戶發現。客戶帳戶的基礎上確定的帳戶記錄\&#39;碩士&#39;的值。
+No Item found with ,序號項目與發現
+No Items to Pack,無項目包
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.,沒有請假審批。請指定&#39;休假審批的角色，以ATLEAST一個用戶。
+No Permission,無權限
+No Permission to ,沒有權限
+No Permissions set for this criteria.,沒有權限設置此標準。
+No Report Loaded. Please use query-report/[Report Name] to run a report.,無報告加載。請使用查詢報告/ [報告名稱]運行報告。
+No Sitemap,沒有網站地圖
+No Supplier Accounts found. Supplier Accounts are identified based on \			'Master Type' value in account record.,沒有供應商帳戶發現。供應商賬戶的基礎上確定的帳戶記錄\&#39;碩士&#39;的值。
+No User Properties found.,沒有用戶屬性中找到。
+No accounting entries for following warehouses,沒有對下述倉庫會計分錄
+No addresses created,沒有發起任何地址
+No contacts created,沒有發起任何接觸
+No default BOM exists for item: ,沒有默認的BOM存在項目：
+No further records,沒有進一步的記錄
+No of Requested SMS,無的請求短信
+No of Sent SMS,沒有發送短信
+No of Visits,沒有訪問量的
+No one,沒有人
+No permission to edit,無權限進行編輯
+No permission to write / remove.,沒有權限寫入/刪除。
+No record found,沒有資料
+No records tagged.,沒有記錄標記。
+No salary slip found for month: ,沒有工資單上發現的一個月：
+None,無
+None: End of Workflow,無：結束的工作流程
+Not,不
+Not Active,不活躍
+Not Applicable,不適用
+Not Available,不可用
+Not Billed,不發單
+Not Delivered,未交付
+Not Found,未找到
+Not Linked to any record.,不鏈接到任何記錄。
+Not Permitted,不允許
+Not Set,沒有設置
+Not allowed entry in Warehouse,在倉庫不准入境
+Not allowed for: ,不允許：
+Not equals,不等於
+Note,注
+Note User,注意用戶
+Note is a free page where users can share documents / notes,Note是一款免費的網頁，用戶可以共享文件/筆記
+Note:,注意：
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.",注意：備份和文件不會從Dropbox的刪除，你將不得不手動刪除它們。
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.",注意：備份和文件不能從谷歌驅動器中刪除，你將不得不手動刪除它們。
+Note: Email will not be sent to disabled users,注：電子郵件將不會被發送到用戶禁用
+"Note: For best results, images must be of the same size and width must be greater than height.",注意：為達到最佳效果，圖像必須具有相同的尺寸和寬度必須大於高度。
+Note: Other permission rules may also apply,注：其它權限規則也可申請
+Note: maximum attachment size = 1mb,注：附件大小上限= 1MB
+Notes,筆記
+Notes:,注意事項：
+Nothing to show,沒有顯示
+Nothing to show for this selection,沒什麼可顯示該選擇
+Notice (days),通告（天）
+Notification Control,通知控制
+Notification Count,通知計數
+Notification Email Address,通知電子郵件地址
+Notify By Email,通知通過電子郵件
+Notify by Email on creation of automatic Material Request,在創建自動材料通知要求通過電子郵件
+Number Format,數字格式
+O+,O +
+O-,O-
+OPPT,OPPT
+Offer Date,要約日期
+Office,辦公室
+Old Parent,老家長
+On,上
+On Net Total,在總淨
+On Previous Row Amount,在上一行金額
+On Previous Row Total,在上一行共
+"Once you have set this, the users will only be able access documents with that property.",一旦你設置這個，用戶將只能訪問文檔與該屬性。
+Only Administrator allowed to create Query / Script Reports,只有管​​理員可以創建查詢/報告的腳本
+Only Administrator can save a standard report. Please rename and save.,只有管​​理員可以保存一個標準的報告。請重新命名並保存。
+Only Allow Edit For,只允許編輯
+"Only Serial Nos with status ""Available"" can be delivered.",只有串行NOS與狀態“可用”可交付使用。
+Only Stock Items are allowed for Stock Entry,只股票項目所允許的股票輸入
+Only System Manager can create / edit reports,只有系統管理員可以創建/編輯報導
+Only leaf nodes are allowed in transaction,只有葉節點中允許交易
+Open,開
+Open Count,打開計數
+Open Production Orders,清生產訂單
+Open Sans,開放三世
+Open Tickets,開放門票
+Opening,開盤
+Opening (Cr),開幕（CR）
+Opening (Dr),開幕（博士）
+Opening Accounting Entries,開幕會計分錄
+Opening Accounts and Stock,開戶和股票
+Opening Date,開幕日期
+Opening Date and Closing Date should be within same Fiscal Year,開幕日期和截止日期應在同一會計年度
+Opening Date should be before Closing Date,開幕日期應該是截止日期之前
+Opening Entry,開放報名
+Opening Qty,開放數量
+Opening Time,開放時間
+Opening Value,開度值
+Opening for a Job.,開放的工作。
+Operating Cost,營業成本
+Operation Description,操作說明
+Operation No,操作無
+Operation Time (mins),操作時間（分鐘）
+Operations,操作
+Opportunity,機會
+Opportunity Date,日期機會
+Opportunity From,從機會
+Opportunity Item,項目的機會
+Opportunity Items,項目的機會
+Opportunity Lost,失去的機會
+Opportunity Type,機會型
+Optional. This setting will be used to filter in various transactions.,可選。此設置將被應用於各種交易進行過濾。
+Options,選項
+Options Help,選項幫助
+Order Type,訂單類型
+Ordered,訂購
+Ordered Items To Be Billed,訂購物品被標榜
+Ordered Items To Be Delivered,訂購項目交付
+Ordered Qty,訂購數量
+"Ordered Qty: Quantity ordered for purchase, but not received.",訂購數量：訂購數量的報價，但沒有收到。
+Ordered Quantity,訂購數量
+Orders released for production.,發布生產訂單。
+Org History,組織歷史
+Org History Heading,組織歷史航向
+Organization,組織
+Organization Name,組織名稱
+Organization Profile,組織簡介
+Original Message,原始消息
+Other,其他
+Other Details,其他詳細信息
+Out,出
+Out Qty,輸出數量
+Out Value,出價值
+Out of AMC,出資產管理公司
+Out of Warranty,超出保修期
+Outgoing,傳出
+Outgoing Email Settings,傳出電子郵件設置
+Outgoing Mail Server,發送郵件服務器
+Outgoing Mails,傳出郵件
+Outstanding Amount,未償還的金額
+Outstanding for Voucher ,傑出的優惠券
+Overhead,開銷
+Overheads,費用
+Overview,概觀
+Owned,資
+Owner,業主
+PAN Number,潘號碼
+PF No.,PF號
+PF Number,PF數
+PI/2011/,PI/2011 /
+PIN,密碼
+PL or BS,PL或BS
+PO,PO
+PO Date,PO日期
+PO No,訂單號碼
+POP3 Mail Server,POP3郵件服務器
+POP3 Mail Server (e.g. pop.gmail.com),POP3郵件服務器（如：pop.gmail.com）
+POP3 Mail Settings,POP3郵件設定
+POP3 mail server (e.g. pop.gmail.com),POP3郵件服務器（如：pop.gmail.com）
+POP3 server e.g. (pop.gmail.com),POP3服務器如（pop.gmail.com）
+POS Setting,POS機設置
+POS View,POS機查看
+PR Detail,PR詳細
+PR Posting Date,公關寄發日期
+PRO,PRO
+PS,PS
+Package Item Details,包裝物品詳情
+Package Items,包裝產品
+Package Weight Details,包裝重量詳情
+Packed Item,盒裝產品
+Packing Details,裝箱明細
+Packing Detials,包裝往績詳情
+Packing List,包裝清單
+Packing Slip,裝箱單
+Packing Slip Item,裝箱單項目
+Packing Slip Items,裝箱單項目
+Packing Slip(s) Cancelled,裝箱單（S）已註銷
+Page,頁面
+Page Background,頁面背景
+Page Border,頁面邊框
+Page Break,分頁符
+Page HTML,頁面的HTML
+Page Headings,頁面標題
+Page Links,網頁鏈接
+Page Name,網頁名稱
+Page Name Field,頁面名稱字段
+Page Role,第角色
+Page Text,頁面文字
+Page already exists,頁面已經存在
+Page content,頁面內容
+Page not found,找不到網頁
+Page or Generator,頁或生成
+Page to show on the website,頁面顯示在網站上
+"Page url name (auto-generated) (add "".html"")",頁面的URL名稱（自動生成）（加上“。的HTML”）
+Paid,支付
+Paid Amount,支付的金額
+Parameter,參數
+Parent Account,父帳戶
+Parent Cost Center,父成本中心
+Parent Customer Group,母公司集團客戶
+Parent Detail docname,家長可採用DocName細節
+Parent Item,父項目
+Parent Item Group,父項目組
+Parent Label,父標籤
+Parent Sales Person,母公司銷售人員
+Parent Territory,家長領地
+Parent is required.,家長是必需的。
+Parenttype,Parenttype
+Partially Billed,部分帳單
+Partially Completed,部分完成
+Partially Delivered,部分交付
+Participants,參與者
+Partly Billed,天色帳單
+Partly Delivered,部分交付
+Partner Target Detail,合作夥伴目標詳細信息
+Partner Type,合作夥伴類型
+Partner's Website,合作夥伴的網站
+Passive,被動
+Passport Number,護照號碼
+Password,密碼
+Password Expires in (days),在（天）密碼過期
+Password Updated,密碼更新
+Patch,補丁
+Patch Log,補丁日誌
+Pay To / Recd From,支付/ RECD從
+Payables,應付賬款
+Payables Group,集團的應付款項
+Payment Collection With Ageing,代收貨款隨著老齡化
+Payment Days,金天
+Payment Due Date,付款到期日
+Payment Entries,付款項
+Payment Entry has been modified after you pulled it. 			Please pull it again.,付款輸入已修改你拉後。請重新拉。
+Payment Made With Ageing,支付MADE WITH老齡化
+Payment Reconciliation,付款對賬
+Payment cannot be made for empty cart,付款方式不能為空購物車製造
+Payment to Invoice Matching Tool,付款發票匹配工具
+Payment to Invoice Matching Tool Detail,付款發票匹配工具詳細介紹
+Payments,付款
+Payments Made,支付的款項
+Payments Received,收到付款
+Payments made during the digest period,在消化期間支付的款項
+Payments received during the digest period,在消化期間收到付款
+Payroll Settings,薪資設置
+Payroll Setup,薪資設定
+Pending,有待
+Pending Amount,待審核金額
+Pending Review,待審核
+Pending SO Items For Purchase Request,待處理的SO項目對於採購申請
+Percent,百分之
+Percent Complete,完成百分比
+Percentage Allocation,百分比分配
+Percentage Allocation should be equal to ,百分比分配應等於
+Percentage variation in quantity to be allowed while receiving or delivering this item.,同時接收或傳送資料被允許在數量上的變化百分比。
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,百分比你被允許接收或傳遞更多針對訂購的數量。例如：如果您訂購100個單位。和你的津貼是10％，那麼你被允許接收110個單位。
+Performance appraisal.,績效考核。
+Period,期
+Period Closing Voucher,期末券
+Periodicity,週期性
+Perm Level,權限等級
+Permanent Address,永久地址
+Permanent Address Is,永久地址
+Permission,允許
+Permission Level,權限級別
+Permission Levels,權限級別
+Permission Manager,權限管理
+Permission Rules,權限規則
+Permissions,權限
+Permissions Settings,權限設置
+Permissions are automatically translated to Standard Reports and Searches,權限會自動轉換為標準報表和搜索
+"Permissions are set on Roles and Document Types (called DocTypes) by restricting read, edit, make new, submit, cancel, amend and report rights.",權限是通過限制讀取，編輯，做出新的，提交，取消，修改和報告權的角色和文件類型（稱為文檔類型）設置。
+Permissions at higher levels are 'Field Level' permissions. All Fields have a 'Permission Level' set against them and the rules defined at that permissions apply to the field. This is useful incase you want to hide or make certain field read-only.,在更高級別的權限是“現場級”的權限。所有欄位有一個“權限級別”設置對他們和那個權限應用到該字段中定義的規則。櫃面你想要隱藏或使某些領域只讀這是有用的。
+"Permissions at level 0 are 'Document Level' permissions, i.e. they are primary for access to the document.",在0級權限是“文件級”的權限，也就是說，它們是主要用於訪問文件。
+Permissions translate to Users based on what Role they are assigned,權限轉化為基於什麼樣的角色，他們被分配用戶
+Person,人
+Personal,個人
+Personal Details,個人資料
+Personal Email,個人電子郵件
+Phone,電話
+Phone No,電話號碼
+Phone No.,電話號碼
+Pick Columns,摘列
+Pincode,PIN代碼
+Place of Issue,簽發地點
+Plan for maintenance visits.,規劃維護訪問。
+Planned Qty,計劃數量
+"Planned Qty: Quantity, for which, Production Order has been raised,",計劃數量：數量，為此，生產訂單已經提高，
+Planned Quantity,計劃數量
+Plant,廠
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,請輸入縮寫或簡稱恰當，因為它會被添加為後綴的所有帳戶頭。
+Please Select Company under which you want to create account head,請選擇公司要在其下創建賬戶頭
+Please attach a file first.,請附上文件第一。
+Please attach a file or set a URL,請附上一個文件或設置一個URL
+Please change the value,請更改該值
+Please check,請檢查
+Please create new account from Chart of Accounts.,請從科目表創建新帳戶。
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,請不要用於客戶及供應商建立的帳戶（總帳）。他們直接從客戶/供應商創造的主人。
+Please enter Cost Center,請輸入成本中心
+Please enter Default Unit of Measure,請輸入缺省的計量單位
+Please enter Delivery Note No or Sales Invoice No to proceed,請輸入送貨單號或銷售發票號碼進行
+Please enter Employee Id of this sales parson,請輸入本銷售牧師的員工標識
+Please enter Expense Account,請輸入您的費用帳戶
+Please enter Item Code to get batch no,請輸入產品編號，以獲得批號
+Please enter Item Code.,請輸入產品編號。
+Please enter Production Item first,請先輸入生產項目
+Please enter Purchase Receipt No to proceed,請輸入外購入庫單沒有進行
+Please enter Reserved Warehouse for item ,請輸入預留倉庫的項目
+Please enter account group under which account \					for warehouse ,請輸入下佔\倉庫帳戶組
+Please enter company first,請先輸入公司
+Please enter company name first,請先輸入公司名稱
+Please install dropbox python module,請安裝Dropbox的Python模塊
+Please make sure that there are no empty columns in the file.,請確保沒有空列在文件中。
+Please mention default value for ',請提及默認值&#39;
+Please reduce qty.,請減少數量。
+Please refresh to get the latest document.,請刷新以獲得最新的文檔。
+Please save the Newsletter before sending.,請發送之前保存的通訊。
+Please select Bank Account,請選擇銀行帳戶
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,請選擇結轉，如果你還需要包括上一會計年度的資產負債葉本財年
+Please select Date on which you want to run the report,請選擇您要運行報告日期
+Please select Price List,請選擇價格表
+Please select Time Logs.,請選擇時間記錄。
+Please select a,請選擇一個
+Please select a csv file,請選擇一個csv文件
+Please select a file or url,請選擇一個文件或URL
+Please select a service item or change the order type to Sales.,請選擇服務項目，或更改訂單類型銷售。
+Please select a sub-contracted item or do not sub-contract the transaction.,請選擇一個分包項目或不分包交易。
+Please select a valid csv file with data.,請選擇與數據的有效csv文件。
+"Please select an ""Image"" first",請選擇“圖像”第一
+Please select month and year,請選擇年份和月份
+Please select options and click on Create,請選擇選項並點擊Create
+Please select the document type first,請選擇文檔類型第一
+Please select: ,請選擇：
+Please set Dropbox access keys in,請設置Dropbox的訪問鍵
+Please set Google Drive access keys in,請設置谷歌驅動器的訪問鍵
+Please setup Employee Naming System in Human Resource > HR Settings,請設置員工命名系統中的人力資源&gt;人力資源設置
+Please setup your chart of accounts before you start Accounting Entries,請設置您的會計科目表你開始會計分錄前
+Please specify,請註明
+Please specify Company,請註明公司
+Please specify Company to proceed,請註明公司進行
+Please specify Default Currency in Company Master \			and Global Defaults,請在公司主\和全球默認指定默認貨幣
+Please specify a,請指定一個
+Please specify a Price List which is valid for Territory,請指定一個價格表，有效期為領地
+Please specify a valid,請指定一個有效
+Please specify a valid 'From Case No.',請指定一個有效的“從案號”
+Please specify currency in Company,請公司指定的貨幣
+Please submit to update Leave Balance.,請提交更新休假餘額。
+Please write something,請寫東西
+Please write something in subject and message!,請寫東西的主題和消息！
+Plot,情節
+Plot By,陰謀
+Plugin,插件
+Point of Sale,銷售點
+Point-of-Sale Setting,銷售點的設置
+Post Graduate,研究生
+Post Publicly,公開發布
+Post Topic,發表帖子
+Postal,郵政
+Posting Date,發布日期
+Posting Date Time cannot be before,發文日期時間不能前
+Posting Time,發布時間
+Posts,帖子
+Potential Sales Deal,潛在的銷售新政
+Potential opportunities for selling.,潛在的機會賣。
+"Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3",精度浮點字段（數量，折扣，百分比等）。花車將四捨五入到指定的小數。默認值= 3
+Preferred Billing Address,首選帳單地址
+Preferred Shipping Address,首選送貨地址
+Prefix,字首
+Present,現
+Prevdoc DocType,Prevdoc的DocType
+Prevdoc Doctype,Prevdoc文檔類型
+Previous Work Experience,以前的工作經驗
+Price List,價格表
+Price List Country,價格表國家
+Price List Currency,價格表貨幣
+Price List Exchange Rate,價目表匯率
+Price List Master,價格表主
+Price List Name,價格列表名稱
+Price List Rate,價格列表費率
+Price List Rate (Company Currency),價格列表費率（公司貨幣）
+Primary,初級
+Print,打印
+Print Format,打印格式
+Print Format Style,打印格式樣式
+Print Format Type,打印格式類型
+Print Heading,打印標題
+Print Hide,打印隱藏
+Print Width,打印寬度
+Print Without Amount,打印量不
+Print...,打印...
+Printing,印花
+Priority,優先
+Private,私人
+Process Payroll,處理工資
+Produced,生產
+Produced Quantity,生產的產品數量
+Product Enquiry,產品查詢
+Production Order,生產訂單
+Production Order must be submitted,生產訂單必須提交
+Production Orders,生產訂單
+Production Orders in Progress,在建生產訂單
+Production Plan Item,生產計劃項目
+Production Plan Items,生產計劃項目
+Production Plan Sales Order,生產計劃銷售訂單
+Production Plan Sales Orders,生產計劃銷售訂單
+Production Planning (MRP),生產計劃（MRP）
+Production Planning Tool,生產規劃工具
+Products or Services You Buy,產品或服務您選購
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.",產品將重量年齡在默認搜索排序。更多的重量，年齡，更高的產品會出現在列表中。
+Profile,輪廓
+Profile Defaults,簡介默認
+Profile Represents a User in the system.,資料表示系統中的一個用戶。
+Profile of a Blogger,是Blogger的個人資料
+Project,項目
+Project Costing,項目成本核算
+Project Details,項目詳情
+Project Milestone,項目里程碑
+Project Milestones,項目里程碑
+Project Name,項目名稱
+Project Start Date,項目開始日期
+Project Type,項目類型
+Project Value,項目價值
+Project activity / task.,項目活動/任務。
+Project master.,項目主。
+Project will get saved and will be searchable with project name given,項目將得到保存，並會搜索與項目名稱定
+Project wise Stock Tracking,項目明智的庫存跟踪
+Project wise Stock Tracking ,項目明智的庫存跟踪
+Projected,預計
+Projected Qty,預計數量
+Projects,項目
+Prompt for Email on Submission of,提示電子郵件的提交
+Properties,屬性
+Property,屬性
+Property Setter,屬性setter
+Property Setter overrides a standard DocType or Field property,屬性setter覆蓋一個標準的DocType或Field屬性
+Property Type,物業類型
+Provide email id registered in company,提供的電子郵件ID在公司註冊
+Public,公
+Published,發布時間
+Published On,發表於
+Pull Emails from the Inbox and attach them as Communication records (for known contacts).,從收件箱拉電子郵件，並將它們附加的通信記錄（稱為觸點）。
+Pull Payment Entries,拉付款項
+Pull sales orders (pending to deliver) based on the above criteria,基於上述標準拉銷售訂單（待定提供）
+Purchase,採購
+Purchase / Manufacture Details,採購/製造詳細信息
+Purchase Analytics,購買Analytics（分析）
+Purchase Common,購買普通
+Purchase Details,購買詳情
+Purchase Discounts,購買折扣
+Purchase In Transit,購買運輸
+Purchase Invoice,購買發票
+Purchase Invoice Advance,購買發票提前
+Purchase Invoice Advances,採購發票進展
+Purchase Invoice Item,採購發票項目
+Purchase Invoice Trends,購買發票趨勢
+Purchase Order,採購訂單
+Purchase Order Date,採購訂單日期
+Purchase Order Item,採購訂單項目
+Purchase Order Item No,採購訂單編號
+Purchase Order Item Supplied,採購訂單項目提供
+Purchase Order Items,採購訂單項目
+Purchase Order Items Supplied,採購訂單項目提供
+Purchase Order Items To Be Billed,採購訂單的項目被標榜
+Purchase Order Items To Be Received,採購訂單項目可收
+Purchase Order Message,採購訂單的消息
+Purchase Order Required,購貨訂單要求
+Purchase Order Trends,採購訂單趨勢
+Purchase Orders given to Suppliers.,購買給供應商的訂單。
+Purchase Receipt,外購入庫單
+Purchase Receipt Item,採購入庫項目
+Purchase Receipt Item Supplied,採購入庫項目提供
+Purchase Receipt Item Supplieds,採購入庫項目Supplieds
+Purchase Receipt Items,採購入庫項目
+Purchase Receipt Message,外購入庫單信息
+Purchase Receipt No,購買收據號碼
+Purchase Receipt Required,外購入庫單要求
+Purchase Receipt Trends,購買收據趨勢
+Purchase Register,購買註冊
+Purchase Return,採購退貨
+Purchase Returned,進貨退出
+Purchase Taxes and Charges,購置稅和費
+Purchase Taxes and Charges Master,購置稅及收費碩士
+Purpose,目的
+Purpose must be one of ,目的必須是一個
+Python Module Name,Python的模塊名稱
+QA Inspection,質素保證視學
+QAI/11-12/,QAI/11-12 /
+QTN,QTN
+Qty,數量
+Qty Consumed Per Unit,數量消耗每單位
+Qty To Manufacture,數量製造
+Qty as per Stock UOM,數量按庫存計量單位
+Qty to Deliver,數量交付
+Qty to Order,數量訂購
+Qty to Receive,數量來接收
+Qty to Transfer,數量轉移到
+Qualification,合格
+Quality,質量
+Quality Inspection,質量檢驗
+Quality Inspection Parameters,質量檢驗參數
+Quality Inspection Reading,質量檢驗閱讀
+Quality Inspection Readings,質量檢驗讀物
+Quantity,數量
+Quantity Requested for Purchase,需求數量的購買
+Quantity and Rate,數量和速率
+Quantity and Warehouse,數量和倉庫
+Quantity cannot be a fraction.,量不能是一小部分。
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,製造/從原材料數量給予重新包裝後獲得的項目數量
+Quantity should be equal to Manufacturing Quantity. ,數量應等於生產數量。
+Quarter,季
+Quarterly,季刊
+Query,詢問
+Query Options,查詢選項
+Query Report,查詢報表
+Query must be a SELECT,查詢必須是一個SELECT
+Quick Help,快速幫助
+Quick Help for Setting Permissions,快速幫助設置權限
+Quick Help for User Properties,快速幫助用戶屬性
+Quotation,行情
+Quotation Date,報價日期
+Quotation Item,產品報價
+Quotation Items,報價產品
+Quotation Lost Reason,報價遺失原因
+Quotation Message,報價信息
+Quotation Series,系列報價
+Quotation To,報價要
+Quotation Trend,行情走勢
+Quotation Trends,報價趨勢
+Quotation is cancelled.,報價將被取消。
+Quotations received from Suppliers.,從供應商收到的報價。
+Quotes to Leads or Customers.,行情到引線或客戶。
+Raise Material Request when stock reaches re-order level,提高材料時，申請股票達到再訂購水平
+Raised By,提出
+Raised By (Email),提出（電子郵件）
+Random,隨機
+Range,範圍
+Rate,率
+Rate ,率
+Rate (Company Currency),率（公司貨幣）
+Rate Of Materials Based On,率材料的基礎上
+Rate and Amount,率及金額
+Rate at which Customer Currency is converted to customer's base currency,速率客戶貨幣轉換成客戶的基礎貨幣
+Rate at which Price list currency is converted to company's base currency,速率價目表貨幣轉換為公司的基礎貨幣
+Rate at which Price list currency is converted to customer's base currency,速率價目表貨幣轉換成客戶的基礎貨幣
+Rate at which customer's currency is converted to company's base currency,速率客戶的貨幣轉換為公司的基礎貨幣
+Rate at which supplier's currency is converted to company's base currency,速率供應商的貨幣轉換為公司的基礎貨幣
+Rate at which this tax is applied,速率此稅適用
+Raw Material Item Code,原料產品編號
+Raw Materials Supplied,提供原料
+Raw Materials Supplied Cost,原料提供成本
+Re-Order Level,再訂購水平
+Re-Order Qty,重新訂購數量
+Re-order,重新排序
+Re-order Level,再訂購水平
+Re-order Qty,再訂購數量
+Read,閱讀
+Read Only,只讀
+Reading 1,閱讀1
+Reading 10,閱讀10
+Reading 2,閱讀2
+Reading 3,閱讀3
+Reading 4,4閱讀
+Reading 5,閱讀5
+Reading 6,6閱讀
+Reading 7,7閱讀
+Reading 8,閱讀8
+Reading 9,9閱讀
+Reason,原因
+Reason for Leaving,離職原因
+Reason for Resignation,原因辭職
+Reason for losing,原因丟失
+Recd Quantity,RECD數量
+Receivable / Payable account will be identified based on the field Master Type,應收/應付帳款的帳戶將基於字段碩士識別
+Receivables,應收賬款
+Receivables / Payables,應收/應付賬款
+Receivables Group,應收賬款集團
+Received,收到
+Received Date,收稿日期
+Received Items To Be Billed,收到的項目要被收取
+Received Qty,收到數量
+Received and Accepted,收到並接受
+Receiver List,接收器列表
+Receiver Parameter,接收機參數
+Recipient,接受者
+Recipients,受助人
+Reconciliation Data,數據對賬
+Reconciliation HTML,和解的HTML
+Reconciliation JSON,JSON對賬
+Record item movement.,記錄項目的運動。
+Recurring Id,經常性標識
+Recurring Invoice,經常性發票
+Recurring Type,經常性類型
+Reduce Deduction for Leave Without Pay (LWP),減少扣除停薪留職（LWP）
+Reduce Earning for Leave Without Pay (LWP),降低盈利停薪留職（LWP）
+Ref Code,參考代碼
+Ref DocType,參考的DocType
+Ref Name,樓盤名稱
+Ref SQ,參考SQ
+Ref Type,樓盤類型
+Reference,參考
+Reference Date,參考日期
+Reference DocName,可採用DocName參考
+Reference DocType,參考的DocType
+Reference Name,參考名稱
+Reference Number,參考號碼
+Reference Type,參考類型
+Refresh,刷新
+Refreshing....,清爽....
+Registered but disabled.,註冊但被禁用。
+Registration Details,報名詳情
+Registration Details Emailed.,報名資料通過電子郵件發送。
+Registration Info,註冊信息
+Rejected,拒絕
+Rejected Quantity,拒絕數量
+Rejected Serial No,拒絕序列號
+Rejected Warehouse,拒絕倉庫
+Rejected Warehouse is mandatory against regected item,拒絕倉庫是必須反對regected項目
+Relation,關係
+Relieving Date,解除日期
+Relieving Date of employee is ,減輕員工的日期是
+Remark,備註
+Remarks,備註
+Remove Bookmark,刪除書籤
+Rename,重命名
+Rename Log,重命名日誌
+Rename Tool,重命名工具
+Rename...,重命名...
+Rent Cost,租金成本
+Rent per hour,每小時租
+Rented,租
+Repeat On,重複開
+Repeat Till,重複直到
+Repeat on Day of Month,重複上月的日
+Repeat this Event,重複此事件
+Replace,更換
+Replace Item / BOM in all BOMs,更換項目/物料清單中的所有材料明細表
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM",在它被使用的所有其他的BOM替換特定的物料清單。它會取代舊的BOM鏈接，更新成本，並重新生成“物料清單爆炸物品”表按照新的物料清單
+Replied,回答
+Report,報告
+Report Builder,報表生成器
+Report Builder reports are managed directly by the report builder. Nothing to do.,報表生成器報表直接由報表生成器來管理。無事可做。
+Report Date,報告日期
+Report Hide,報告隱藏
+Report Name,報告名稱
+Report Type,報告類型
+Report issues at,在報告問題
+Report was not saved (there were errors),報告沒有被保存（有錯誤）
+Reports,報告
+Reports to,報告以
+Represents the states allowed in one document and role assigned to change the state.,代表一個文檔，並分配到改變國家角色允許的狀態。
+Reqd,REQD
+Reqd By Date,REQD按日期
+Request Type,請求類型
+Request for Information,索取資料
+Request for purchase.,請求您的報價。
+Requested,要求
+Requested For,對於要求
+Requested Items To Be Ordered,要求項目要訂購
+Requested Items To Be Transferred,要求要傳輸的項目
+Requested Qty,請求數量
+"Requested Qty: Quantity requested for purchase, but not ordered.",要求的數量：數量要求的報價，但沒有下令。
+Requests for items.,請求的項目。
+Required By,必選
+Required Date,所需時間
+Required Qty,所需數量
+Required only for sample item.,只對樣品項目所需。
+Required raw materials issued to the supplier for producing a sub - contracted item.,發給供應商，生產子所需的原材料 - 承包項目。
+Reseller,經銷商
+Reserved,保留的
+Reserved Qty,保留數量
+"Reserved Qty: Quantity ordered for sale, but not delivered.",版權所有數量：訂購數量出售，但未交付。
+Reserved Quantity,保留數量
+Reserved Warehouse,保留倉庫
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,在銷售訂單/成品倉庫保留倉庫
+Reserved Warehouse is missing in Sales Order,保留倉庫在銷售訂單失踪
+Reset Filters,重設過濾器
+Reset Password Key,重設密碼鑰匙
+Resignation Letter Date,辭職信日期
+Resolution,決議
+Resolution Date,決議日期
+Resolution Details,詳細解析
+Resolved By,議決
+Restrict IP,限制IP
+Restrict user from this IP address only. Multiple IP addresses can be added by separating with commas. Also accepts partial IP addresses like (111.111.111),僅此IP地址限制用戶。多個IP地址，可以通過用逗號分隔的補充。也接受像（111.111.111）部分的IP地址
+Restricting By User,通過限制用戶
+Retail,零售
+Retailer,零售商
+Review Date,評論日期
+Rgt,RGT
+Right,右邊
+Role,角色
+Role Allowed to edit frozen stock,角色可以編輯凍結股票
+Role Name,角色名稱
+Role that is allowed to submit transactions that exceed credit limits set.,作用是允許提交超過設定信用額度交易的。
+Roles,角色
+Roles Assigned,角色分配
+Roles Assigned To User,角色分配給用戶
+Roles HTML,角色的HTML
+Root ,根
+Root cannot have a parent cost center,根本不能有一個父成本中心
+Rounded Total,總圓角
+Rounded Total (Company Currency),圓潤的總計（公司貨幣）
+Row,排
+Row ,排
+Row #,行＃
+Row # ,行＃
+Rules defining transition of state in the workflow.,規則定義的工作流狀態的過渡。
+"Rules for how states are transitions, like next state and which role is allowed to change state etc.",規則的狀態是如何過渡，就像下一個狀態以及作用是允許改變狀態等。
+Rules to calculate shipping amount for a sale,規則來計算銷售運輸量
+S.O. No.,SO號
+SMS,短信
+SMS Center,短信中心
+SMS Control,短信控制
+SMS Gateway URL,短信網關的URL
+SMS Log,短信日誌
+SMS Parameter,短信參數
+SMS Sender Name,短信發送者名稱
+SMS Settings,短信設置
+SMTP Server (e.g. smtp.gmail.com),SMTP服務器（如smtp.gmail.com）
+SO,SO
+SO Date,SO日期
+SO Pending Qty,SO待定數量
+SO Qty,SO數量
+SO/10-11/,SO/10-11 /
+SO1112,SO1112
+SQTN,SQTN
+STE,STE
+SUP,SUP
+SUPP,人聯黨
+SUPP/10-11/,SUPP/10-11 /
+Salary,薪水
+Salary Information,薪資信息
+Salary Manager,薪資管理
+Salary Mode,薪酬模式
+Salary Slip,工資單
+Salary Slip Deduction,工資單上扣除
+Salary Slip Earning,工資單盈利
+Salary Structure,薪酬結構
+Salary Structure Deduction,薪酬結構演繹
+Salary Structure Earning,薪酬結構盈利
+Salary Structure Earnings,薪酬結構盈利
+Salary breakup based on Earning and Deduction.,工資分手基於盈利和演繹。
+Salary components.,工資組成部分。
+Sales,銷售
+Sales Analytics,銷售分析
+Sales BOM,銷售BOM
+Sales BOM Help,銷售BOM幫助
+Sales BOM Item,銷售BOM項目
+Sales BOM Items,銷售BOM項目
+Sales Details,銷售信息
+Sales Discounts,銷售折扣
+Sales Email Settings,銷售電子郵件設置
+Sales Extras,額外銷售
+Sales Funnel,銷售漏斗
+Sales Invoice,銷售發票
+Sales Invoice Advance,銷售發票提前
+Sales Invoice Item,銷售發票項目
+Sales Invoice Items,銷售發票項目
+Sales Invoice Message,銷售發票信息
+Sales Invoice No,銷售發票號碼
+Sales Invoice Trends,銷售發票趨勢
+Sales Order,銷售訂單
+Sales Order Date,銷售訂單日期
+Sales Order Item,銷售訂單項目
+Sales Order Items,銷售訂單項目
+Sales Order Message,銷售訂單信息
+Sales Order No,銷售訂單號
+Sales Order Required,銷售訂單所需
+Sales Order Trend,銷售訂單趨勢
+Sales Order Trends,銷售訂單趨勢
+Sales Partner,銷售合作夥伴
+Sales Partner Name,銷售合作夥伴名稱
+Sales Partner Target,銷售目標的合作夥伴
+Sales Partners Commission,銷售合作夥伴委員會
+Sales Person,銷售人員
+Sales Person Incharge,銷售人員Incharge
+Sales Person Name,銷售人員的姓名
+Sales Person Target Variance (Item Group-Wise),銷售人員目標方差（項目組明智）
+Sales Person Target Variance Item Group-Wise,銷售人員目標差異項目組，智者
+Sales Person Targets,銷售人員目標
+Sales Person-wise Transaction Summary,銷售人員明智的交易匯總
+Sales Register,銷售登記
+Sales Return,銷售退貨
+Sales Returned,銷售退回
+Sales Taxes and Charges,銷售稅金及費用
+Sales Taxes and Charges Master,銷售稅金及收費碩士
+Sales Team,銷售團隊
+Sales Team Details,銷售團隊詳細
+Sales Team1,銷售TEAM1
+Sales and Purchase,買賣
+Sales campaigns,銷售活動
+Sales persons and targets,銷售人員和目標
+Sales taxes template.,銷售稅模板。
+Sales territories.,銷售地區。
+Salutation,招呼
+Same Serial No,同樣的序列號
+Same file has already been attached to the record,相同的文件已經被連接到記錄
+Sample Size,樣本大小
+Sanctioned Amount,制裁金額
+Saturday,星期六
+Save,節省
+Schedule,時間表
+Schedule Date,時間表日期
+Schedule Details,計劃詳細信息
+Scheduled,預定
+Scheduled Date,預定日期
+Scheduler Log,調度日誌
+School/University,學校/大學
+Score (0-5),得分（0-5）
+Score Earned,獲得得分
+Scrap %,廢鋼％
+Script,腳本
+Script Report,腳本報告
+Script Type,腳本類型
+Script to attach to all web pages.,腳本附加到所有的網頁。
+Search,搜索
+Search Fields,搜索字段
+Seasonality for setting budgets.,季節性設定預算。
+Section Break,分節符
+Security Settings,安全設置
+"See ""Rate Of Materials Based On"" in Costing Section",見“率材料基於”在成本核算節
+Select,選擇
+"Select ""Yes"" for sub - contracting items",選擇“是”子 - 承包項目
+"Select ""Yes"" if this item is used for some internal purpose in your company.",選擇“Yes”如果此項目被用於一些內部的目的在你的公司。
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.",選擇“是”，如果此項目表示類似的培訓，設計，諮詢等一些工作
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.",選擇“是”，如果你保持這個項目的股票在你的庫存。
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",選擇“是”，如果您對供應原料給供應商，製造資料。
+Select All,全選
+Select Attachments,選擇附件
+Select Budget Distribution to unevenly distribute targets across months.,選擇預算分配跨個月呈不均衡分佈的目標。
+"Select Budget Distribution, if you want to track based on seasonality.",選擇預算分配，如果你要根據季節來跟踪。
+Select Digest Content,選擇精華內容
+Select DocType,選擇的DocType
+Select Document Type,選擇文件類型
+Select Document Type or Role to start.,選擇文件類型或角色開始。
+Select Items,選擇項目
+Select Module,選擇模塊
+Select Print Format,選擇打印格式
+Select Purchase Receipts,選擇外購入庫單
+Select Report Name,選擇報告名稱
+Select Role,選擇角色
+Select Sales Orders,選擇銷售訂單
+Select Sales Orders from which you want to create Production Orders.,要從創建生產訂單選擇銷售訂單。
+Select Time Logs and Submit to create a new Sales Invoice.,選擇時間日誌和提交創建一個新的銷售發票。
+Select Transaction,選擇交易
+Select Type,選擇類型
+Select User or Property to start.,選擇用戶或物業開始。
+Select account head of the bank where cheque was deposited.,選取支票存入該銀行賬戶的頭。
+Select an image of approx width 150px with a transparent background for best results.,選擇約寬150像素的透明背景以獲得最佳效果的圖像。
+Select company name first.,先選擇公司名稱。
+Select dates to create a new ,選擇日期以創建一個新的
+Select or drag across time slots to create a new event.,選擇或拖動整個時隙，以創建一個新的事件。
+"Select target = ""_blank"" to open in a new page.",選擇目標=“_blank”在新頁面中打開。
+Select template from which you want to get the Goals,選擇您想要得到的目標模板
+Select the Employee for whom you are creating the Appraisal.,選擇要為其創建的考核員工。
+Select the label after which you want to insert new field.,之後要插入新字段中選擇的標籤。
+Select the period when the invoice will be generated automatically,當選擇發票會自動生成期間
+Select the relevant company name if you have multiple companies,選擇相關的公司名稱，如果您有多個公司
+Select the relevant company name if you have multiple companies.,如果您有多個公司選擇相關的公司名稱。
+Select who you want to send this newsletter to,選擇您想要這份電子報發送給誰
+Select your home country and check the timezone and currency.,選擇您的國家和檢查時區和貨幣。
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.",選擇“是”將允許這個項目出現在採購訂單，採購入庫單。
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note",選擇“是”將允許這資料圖在銷售訂單，送貨單
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",選擇“是”將允許您創建物料清單，顯示原材料和產生製造這個項目的運營成本。
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",選擇“是”將允許你做一個生產訂單為這個項目。
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",選擇“Yes”將提供一個獨特的身份，以這個項目的每個實體可在序列號主觀看。
+Selling,銷售
+Selling Settings,銷售設置
+Send,發送
+Send As Email,發送電子郵件
+Send Autoreply,發送自動回复
+Send Bulk SMS to Leads / Contacts,發送大量短信信息/聯繫我們
+Send Email,發送電子郵件
+Send From,從發送
+Send Me A Copy,給我發一份
+Send Notifications To,發送通知給
+Send Now,立即發送
+Send Print in Body and Attachment,發送打印的正文和附件
+Send SMS,發送短信
+Send To,發送到
+Send To Type,發送到輸入
+Send an email reminder in the morning,發送電子郵件提醒，早上
+Send automatic emails to Contacts on Submitting transactions.,自動發送電子郵件到上提交事務聯繫。
+Send enquiries to this email address,發送諮詢到這個郵箱地址
+Send mass SMS to your contacts,發送群發短信到您的聯繫人
+Send regular summary reports via Email.,通過電子郵件發送定期匯總報告。
+Send to this list,發送到這個列表
+Sender,寄件人
+Sender Name,發件人名稱
+Sent,發送
+Sent Mail,發送郵件
+Sent On,在發送
+Sent Quotation,發送報價
+Sent or Received,發送或接收
+Separate production order will be created for each finished good item.,獨立的生產訂單將每個成品項目被創建。
+Serial No,序列號
+Serial No / Batch,序列號/批次
+Serial No Details,序列號信息
+Serial No Service Contract Expiry,序號服務合同到期
+Serial No Status,序列號狀態
+Serial No Warranty Expiry,序列號保修到期
+Serial No created,創建序列號
+Serial No does not belong to Item,序列號不屬於項目
+Serial No must exist to transfer out.,序列號必須存在轉讓出去。
+Serial No qty cannot be a fraction,序號數量不能是分數
+Serial No status must be 'Available' to Deliver,序列號狀態必須為“有空”提供
+Serial Nos do not match with qty,序列號不匹配數量
+Serial Number Series,序列號系列
+Serialized Item: ',序列化的項目：&#39;
+Series,系列
+Series List for this Transaction,系列對表本交易
+Server,服務器
+Service Address,服務地址
+Services,服務
+Session Expired. Logging you out,會話過期。您的退出
+Session Expires in (time),會話過期的（時間）
+Session Expiry,會話過期
+Session Expiry in Hours e.g. 06:00,會話過期的時間，例如06:00
+Set Banner from Image,從圖像設置橫幅
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,設置這個領地項目組間的預算。您還可以包括季節性通過設置分發。
+Set Link,設置鏈接
+Set Login and Password if authentication is required.,如果需要身份驗證設置登錄名和密碼。
+Set Password,設置密碼
+Set Value,設定值
+Set as Default,設置為默認
+Set as Lost,設為失落
+Set prefix for numbering series on your transactions,為你的交易編號序列設置的前綴
+Set targets Item Group-wise for this Sales Person.,設定目標項目組間的這種銷售人員。
+"Set your background color, font and image (tiled)",設置背景顏色，字體和圖像（平鋪）
+"Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.",這裡設置你的外發郵件的SMTP設置。所有生成的系統通知，電子郵件會從這個郵件服務器。如果你不知道，離開這個空白使用ERPNext服務器（郵件仍然會從您的電子郵件ID發送）或聯繫您的電子郵件提供商。
+Setting Account Type helps in selecting this Account in transactions.,設置帳戶類型有助於在交易中選擇該帳戶。
+Setting up...,設置...
+Settings,設置
+Settings for Accounts,設置帳戶
+Settings for Buying Module,設置購買模塊
+Settings for Contact Us Page,設置聯繫我們頁面
+Settings for Selling Module,設置銷售模塊
+Settings for Stock Module,設置庫存模塊
+Settings for the About Us Page,設置關於我們頁面
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",設置從一個郵箱，例如“jobs@example.com”解壓求職者
+Setup,設置
+Setup Already Complete!!,安裝已經完成！
+Setup Complete!,設置完成！
+Setup Completed,安裝完成
+Setup Series,設置系列
+Setup of Shopping Cart.,設置的購物車。
+Setup to pull emails from support email account,安裝程序從支持的電子郵件帳戶的郵件拉
+Share,共享
+Share With,分享
+Shipments to customers.,發貨給客戶。
+Shipping,航運
+Shipping Account,送貨賬戶
+Shipping Address,送貨地址
+Shipping Amount,航運量
+Shipping Rule,送貨規則
+Shipping Rule Condition,送貨規則條件
+Shipping Rule Conditions,送貨規則條件
+Shipping Rule Label,送貨規則標籤
+Shipping Rules,送貨規則
+Shop,店
+Shopping Cart,購物車
+Shopping Cart Price List,購物車價格表
+Shopping Cart Price Lists,購物車價目表
+Shopping Cart Settings,購物車設置
+Shopping Cart Shipping Rule,購物車運費規則
+Shopping Cart Shipping Rules,購物車運費規則
+Shopping Cart Taxes and Charges Master,購物車稅收和收費碩士
+Shopping Cart Taxes and Charges Masters,購物車稅收和收費碩士
+Short Bio,個人簡介
+Short Name,簡稱
+Short biography for website and other publications.,短的傳記的網站和其他出版物。
+Shortcut,捷徑
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",顯示“有貨”或“無貨”的基礎上股票在這個倉庫有。
+Show / Hide Features,顯示/隱藏功能
+Show / Hide Modules,顯示/隱藏模塊
+Show Breadcrumbs,顯示麵包屑
+Show Details,顯示詳細信息
+Show In Website,顯示在網站
+Show Print First,顯示打印首
+Show Table of Contents,顯示內容表格
+Show Tags,顯示標籤
+Show Title,顯示標題
+Show a slideshow at the top of the page,顯示幻燈片在頁面頂部
+Show in Website,顯示在網站
+Show rows with zero values,秀行與零值
+Show this slideshow at the top of the page,這顯示在幻燈片頁面頂部
+Showing only for,僅顯示為
+Signature,簽名
+Signature to be appended at the end of every email,簽名在每封電子郵件的末尾追加
+Single,單
+Single Types have only one record no tables associated. Values are stored in tabSingles,單一類型只有一個記錄關聯的表。值被存儲在tabSingles
+Single unit of an Item.,該產品的一個單元。
+Sit tight while your system is being setup. This may take a few moments.,穩坐在您的系統正在安裝。這可能需要一些時間。
+Sitemap Domain,網站導航域名
+Slideshow,連續播放
+Slideshow Items,幻燈片項目
+Slideshow Name,幻燈片放映名稱
+Slideshow like display for the website,像幻燈片顯示的網站
+Small Text,小文
+Solid background color (default light gray),純色背景色（默認淺灰色）
+Sorry we were unable to find what you were looking for.,對不起，我們無法找到您所期待的。
+Sorry you are not permitted to view this page.,對不起，您沒有權限瀏覽這個頁面。
+"Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency.",對不起！你不能改變公司的預設貨幣，因為有現有的交易反對。您將需要取消的交易，如果你想改變默認貨幣。
+"Sorry, Serial Nos cannot be merged",對不起，序列號無法合併
+"Sorry, companies cannot be merged",對不起，企業不能合併
+Sort By,排序
+Source,源
+Source Warehouse,源代碼倉庫
+Source and Target Warehouse cannot be same,源和目標倉庫不能相同
+Spartan,斯巴達
+Special Characters,特殊字符
+Special Characters ,特殊字符
+Specification Details,詳細規格
+Specify Exchange Rate to convert one currency into another,指定的匯率將一種貨幣兌換成另一種
+"Specify a list of Territories, for which, this Price List is valid",指定領土的名單，為此，本價格表是有效的
+"Specify a list of Territories, for which, this Shipping Rule is valid",新界指定一個列表，其中，該運費規則是有效的
+"Specify a list of Territories, for which, this Taxes Master is valid",新界指定一個列表，其中，該稅金法師是有效的
+Specify conditions to calculate shipping amount,指定條件計算運輸量
+Split Delivery Note into packages.,分裂送貨單成包。
+Standard,標準
+Standard Rate,標準房價
+"Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.",標準條款和條件，可以添加到銷售和Purchases.Examples：1。有效性offer.1的。付款方式（在前進，在信貸，部分提前等）.1。什麼是多餘的（或應付客戶）.1。安全/使用warning.1。保修如果any.1。返回Policy.1。航運條款中，如果applicable.1。為解決糾紛，賠償，責任，等1種方法。地址和公司聯繫。
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.10. Add or Deduct: Whether you want to add or deduct the tax.",可應用於所有採購交易標準稅率模板。這個模板可以包含稅元首，也像“送貨”，“保險”等費用首腦名單，“處理”等你在這裡定義＃＃＃＃NoteThe稅率將標準稅率對所有**項目** 。如果有**項目**有不同的利率，他們必須在**產品稅加**表中**項目**大師。＃＃＃＃Columns1的說明。計算類型： - 這可以是在**網**總（即基本量的總和）。 -  **在上一行合計/金額**（對於累計稅收或費用）。如果選擇此選項，稅收將作為前行的百分比（在稅率表）量或總被應用。 -  **實際**（見上文）.2。賬戶頭：總賬下，這項稅收將被booked3。成本中心：如果稅/費這項收入（如運費）或支出它需要對成本Center.4預訂。說明：稅收的說明（將要在發票/報價印刷）.5。率：稅務rate.6。金額：稅務amount.7。總計：累計總該point.8。輸入行：如果根據“上一行共”，您可以選擇將被視為對本計算（默認值是前行）0.9基本的行數。考慮稅收或支出：在本部分中，您可以指定，如果稅務/充電僅適用於估值（總共不一部分），或只為總（不增加價值的項目）或both.10。添加或減去：無論你想添加或扣除的稅款。
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",可應用於所有銷售交易稅的標準模板。這個模板可以包含稅元首列表，還像“送貨”其他支出/收入的頭，“保險”，“處理”等你在這裡定義＃＃＃＃NoteThe稅率將標準稅率對所有項目** **。如果有**項目**有不同的利率，他們必須在**產品稅加**表中**項目**大師。＃＃＃＃Columns1的說明。計算類型： - 這可以是在**網**總（即基本量的總和）。 -  **在上一行合計/金額**（對於累計稅收或費用）。如果選擇此選項，稅收將作為前行的百分比（在稅率表）量或總被應用。 -  **實際**（見上文）.2。賬戶頭：總賬下，這項稅收將被booked3。成本中心：如果稅/費這項收入（如運費）或支出它需要對成本Center.4預訂。說明：稅收的說明（將要在發票/報價印刷）.5。率：稅務rate.6。金額：稅務amount.7。總計：累計總該point.8。輸入行：如果根據“上一行共”，您可以選擇將被視為對本計算（默認值是前行）0.9基本的行數。這是含稅的基本價格：？如果您檢查這一點，就意味著這個稅不會顯示在項目表中，但在你的主項表將被納入基本速率。你想要給一個單位價格（包括所有稅費）的價格為顧客這是有用的。
+Start,開始
+Start Date,開始日期
+Start Report For,啟動年報
+Start date of current invoice's period,啟動電流發票的日期內
+Starting up...,啟動...
+Starts on,開始於
+Startup,啟動
+State,態
+States,國家
+Static Parameters,靜態參數
+Status,狀態
+Status must be one of ,狀態必須為之一
+Status should be Submitted,狀態應提交
+Statutory info and other general information about your Supplier,法定的信息和你的供應商等一般資料
+Stock,股票
+Stock Adjustment Account,庫存調整賬戶
+Stock Ageing,股票老齡化
+Stock Analytics,股票分析
+Stock Balance,庫存餘額
+Stock Entries already created for Production Order ,庫存項目已為生產訂單創建
+Stock Entry,股票入門
+Stock Entry Detail,股票入門詳情
+Stock Frozen Upto,股票凍結到...為止
+Stock Ledger,庫存總帳
+Stock Ledger Entry,庫存總帳條目
+Stock Level,庫存水平
+Stock Qty,庫存數量
+Stock Queue (FIFO),股票隊列（FIFO）
+Stock Received But Not Billed,庫存接收，但不標榜
+Stock Reconcilation Data,股票Reconcilation數據
+Stock Reconcilation Template,股票Reconcilation模板
+Stock Reconciliation,庫存對賬
+"Stock Reconciliation can be used to update the stock on a particular date, ",庫存調節可用於更新在某一特定日期的股票，
+Stock Settings,股票設置
+Stock UOM,庫存計量單位
+Stock UOM Replace Utility,庫存計量單位更換工具
+Stock Uom,庫存計量單位
+Stock Value,股票價值
+Stock Value Difference,股票價值差異
+Stock transactions exist against warehouse ,股票交易針對倉庫存在
+Stop,停止
+Stop Birthday Reminders,停止生日提醒
+Stop Material Request,停止材料要求
+Stop users from making Leave Applications on following days.,作出許可申請在隨後的日子裡阻止用戶。
+Stop!,住手！
+Stopped,停止
+Structure cost centers for budgeting.,對預算編制結構成本中心。
+Structure of books of accounts.,的會計賬簿結構。
+Style,風格
+Style Settings,樣式設置
+"Style represents the button color: Success - Green, Danger - Red, Inverse - Black, Primary - Dark Blue, Info - Light Blue, Warning - Orange",風格代表按鈕的顏色：成功 - 綠色，危險 - 紅，逆 - 黑色，而小學 - 深藍色，信息 - 淺藍，警告 - 橙
+"Sub-currency. For e.g. ""Cent""",子貨幣。對於如“美分”
+Sub-domain provided by erpnext.com,由erpnext.com提供的子域
+Subcontract,轉包
+Subdomain,子域名
+Subject,主題
+Submit,提交
+Submit Salary Slip,提交工資單
+Submit all salary slips for the above selected criteria,提交所有工資單的上面選擇標準
+Submit this Production Order for further processing.,提交此生產訂單進行進一步的處理。
+Submitted,提交
+Submitted Record cannot be deleted,提交記錄無法刪除
+Subsidiary,副
+Success,成功
+Successful: ,成功：
+Suggestion,建議
+Suggestions,建議
+Sunday,星期天
+Supplier,提供者
+Supplier (Payable) Account,供應商（應付）帳
+Supplier (vendor) name as entered in supplier master,供應商（供應商）的名稱在供應商主進入
+Supplier Account,供應商帳戶
+Supplier Account Head,供應商帳戶頭
+Supplier Address,供應商地址
+Supplier Addresses And Contacts,供應商的地址和聯繫方式
+Supplier Addresses and Contacts,供應商的地址和聯繫方式
+Supplier Details,供應商詳細信息
+Supplier Intro,供應商介紹
+Supplier Invoice Date,供應商發票日期
+Supplier Invoice No,供應商發票號碼
+Supplier Name,供應商名稱
+Supplier Naming By,供應商通過命名
+Supplier Part Number,供應商零件編號
+Supplier Quotation,供應商報價
+Supplier Quotation Item,供應商報價項目
+Supplier Reference,信用參考
+Supplier Shipment Date,供應商出貨日期
+Supplier Shipment No,供應商出貨無
+Supplier Type,供應商類型
+Supplier Type / Supplier,供應商類型/供應商
+Supplier Warehouse,供應商倉庫
+Supplier Warehouse mandatory subcontracted purchase receipt,供應商倉庫強制性分包購買收據
+Supplier classification.,供應商分類。
+Supplier database.,供應商數據庫。
+Supplier of Goods or Services.,供應商的商品或服務。
+Supplier warehouse where you have issued raw materials for sub - contracting,供應商的倉庫，你已發出原材料子 - 承包
+Support,支持
+Support Analtyics,支持Analtyics
+Support Analytics,支持Analytics（分析）
+Support Email,電子郵件支持
+Support Email Id,支持電子郵件Id
+Support Email Settings,支持電子郵件設置
+Support Password,支持密碼
+Support Ticket,支持票
+Support queries from customers.,客戶支持查詢。
+Symbol,符號
+Sync Inbox,同步收件箱
+Sync Support Mails,同步支持郵件
+Sync with Dropbox,同步與Dropbox
+Sync with Google Drive,同步與谷歌驅動器
+System,系統
+System Administration,系統管理
+System Defaults,系統默認值
+System Scheduler Errors,系統調度錯誤
+System Settings,系統設置
+System User,系統用戶
+"System User (login) ID. If set, it will become default for all HR forms.",系統用戶（登錄）的標識。如果設置，這將成為默認的所有人力資源的形式。
+System for managing Backups,系統管理備份
+System generated mails will be sent from this email id.,系統生成的郵件將被從這個電子郵件ID發送。
+TL-,TL-
+TLB-,TLB-
+Table,表
+Table for Item that will be shown in Web Site,表將在網站被顯示項目
+Table of Contents,目錄
+Tag,標籤
+Tag Name,標籤名稱
+Tags,標籤
+Tahoma,宋體
+Target,目標
+Target  Amount,目標金額
+Target Detail,目標詳細信息
+Target Details,目標詳細信息
+Target Details1,目標點評詳情
+Target Distribution,目標分佈
+Target On,目標在
+Target Qty,目標數量
+Target Warehouse,目標倉庫
+Task,任務
+Task Details,任務詳細信息
+Tax,稅
+Tax Accounts,稅收佔
+Tax Calculation,計稅
+Tax Category can not be 'Valuation' or 'Valuation and Total' 					as all items are non-stock items,稅務類別不能為&#39;估值&#39;或&#39;估值及總，因為所有的項目都是非庫存產品
+Tax Master,稅務碩士
+Tax Rate,稅率
+Tax Template for Purchase,對於購置稅模板
+Tax Template for Sales,對於銷售稅模板
+Tax and other salary deductions.,稅務及其他薪金中扣除。
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,從項目主稅的細節表讀取為字符串，並存儲在這個field.Used的稅費和費用
+Taxable,應課稅
+Taxes,稅
+Taxes and Charges,稅收和收費
+Taxes and Charges Added,稅費上架
+Taxes and Charges Added (Company Currency),稅收和收費上架（公司貨幣）
+Taxes and Charges Calculation,稅費計算
+Taxes and Charges Deducted,稅收和費用扣除
+Taxes and Charges Deducted (Company Currency),稅收和扣除（公司貨幣）
+Taxes and Charges Total,稅費總計
+Taxes and Charges Total (Company Currency),營業稅金及費用合計（公司貨幣）
+Team Members,團隊成員
+Team Members Heading,小組成員標題
+Template Path,模板路徑
+Template for employee performance appraisals.,模板員工績效考核。
+Template of terms or contract.,模板條款或合同。
+Term Details,長期詳情
+Terms,條款
+Terms and Conditions,條款和條件
+Terms and Conditions Content,條款及細則內容
+Terms and Conditions Details,條款及細則詳情
+Terms and Conditions Template,條款及細則範本
+Terms and Conditions1,條款及條件1
+Terretory,Terretory
+Territory,領土
+Territory / Customer,區域/客戶
+Territory Manager,區域經理
+Territory Name,地區名稱
+Territory Target Variance (Item Group-Wise),境內目標方差（項目組明智）
+Territory Target Variance Item Group-Wise,境內目標差異項目組，智者
+Territory Targets,境內目標
+Test,測試
+Test Email Id,測試電子郵件Id
+Test Runner,測試運行
+Test the Newsletter,測試通訊
+Text,文本
+Text Align,文本對齊
+Text Editor,文本編輯器
+"The ""Web Page"" that is the website home page",在“網頁”，也就是在網站首頁
+The BOM which will be replaced,這將被替換的物料清單
+The First User: You,第一個用戶：您
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",代表包裝的項目。該項目必須有“是股票項目”為“否”和“是銷售項目”為“是”
+The Organization,本組織
+"The account head under Liability, in which Profit/Loss will be booked",根據責任賬號頭，其中利潤/虧損將被黃牌警告
+The date on which next invoice will be generated. It is generated on submit.,在其旁邊的發票將生成的日期。它是在提交生成的。
+The date on which recurring invoice will be stop,在其經常性發票將被停止日期
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",這個月的日子，汽車發票將會產生如05，28等
+The first Leave Approver in the list will be set as the default Leave Approver,該列表中的第一個休假審批將被設置為默認請假審批
+The first user will become the System Manager (you can change that later).,第一個用戶將成為系統管理器（您可以在以後更改）。
+The gross weight of the package. Usually net weight + packaging material weight. (for print),包的總重量。通常淨重+包裝材料的重量。 （用於打印）
+The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,您的公司/網站的，你想要顯示在瀏覽器標題欄中的名稱。所有頁面都會有這樣的前綴稱號。
+The name of your company for which you are setting up this system.,您的公司要為其設立這個系統的名稱。
+The net weight of this package. (calculated automatically as sum of net weight of items),淨重這個包。 （當項目的淨重量總和自動計算）
+The new BOM after replacement,更換後的新物料清單
+The rate at which Bill Currency is converted into company's base currency,在該條例草案的貨幣轉換成公司的基礎貨幣的比率
+"The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions",該系統提供了預先定義的角色，但你可以<a href='#List/Role'>添加新角色</a>設定更精細的權限
+The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID來跟踪所有的經常性發票。它是在提交生成的。
+Then By (optional),再由（可選）
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,有一個錯誤。一個可能的原因可能是因為您沒有保存的形式。請聯繫support@erpnext.com如果問題仍然存在。
+There were errors.,有錯誤。
+These properties are Link Type fields from all Documents.,這些屬性是由所有文件鏈接類型字段。
+"These properties can also be used to 'assign' a particular document, whose property matches with the User's property to a User. These can be set using the <a href='#permission-manager'>Permission Manager</a>",這些屬性也可以用來&#39;分配&#39;一個特定的文件，其屬性與用戶的屬性相匹配的用戶。這些可以通過設置<a href='#permission-manager'>權限管理</a>
+These properties will appear as values in forms that contain them.,這些屬性將顯示為包含這些形式的值。
+These values will be automatically updated in transactions and also will be useful to restrict permissions for this user on transactions containing these values.,這些值將在交易中自動更新，也將是有益的權限限制在含有這些值交易這個用戶。
+This ERPNext subscription,這ERPNext訂閱
+This Leave Application is pending approval. Only the Leave Apporver can update status.,這個假期申請正在等待批准。只有離開Apporver可以更新狀態。
+This Time Log Batch has been billed.,此時日誌批量一直標榜。
+This Time Log Batch has been cancelled.,此時日誌批次已被取消。
+This Time Log conflicts with,這個時間日誌與衝突
+This field will appear only if the fieldname defined here has value OR the rules are true (examples): <br>myfieldeval:doc.myfield=='My Value'<br>eval:doc.age>18,此字段將顯示只有這裡定義的字段名有值或規則是真實的（例子）： <br> myfieldeval：doc.myfield ==&#39;我的價值“ <br> EVAL：doc.age&gt; 18
+This goes above the slideshow.,這正好幻燈片上面。
+This is PERMANENT action and you cannot undo. Continue?,這是永久性的行動，你不能撤消。要繼續嗎？
+This is a root account and cannot be edited.,這是一個root帳戶，不能被編輯。
+This is permanent action and you cannot undo. Continue?,這是永久的行動，你不能撤消。要繼續嗎？
+This is the number of the last created transaction with this prefix,這就是以這個前綴的最後一個創建的事務數
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,此工具可幫助您更新或修復系統的數量和股票估值。它通常被用於同步系統值和實際存在於您的倉庫。
+This will be used for setting rule in HR module,這將用於在人力資源模塊的設置規則
+Thread HTML,主題HTML
+Thursday,星期四
+Time,時間
+Time Log,時間日誌
+Time Log Batch,時間日誌批
+Time Log Batch Detail,時間日誌批量詳情
+Time Log Batch Details,時間日誌批量詳情
+Time Log Batch status must be 'Submitted',時間日誌批次狀態必須是&#39;提交&#39;
+Time Log Status must be Submitted.,時間日誌狀態必須被提交。
+Time Log for tasks.,時間日誌中的任務。
+Time Log is not billable,時間日誌是不計費
+Time Log must have status 'Submitted',時間日誌的狀態必須為“已提交”
+Time Zone,時區
+Time Zones,時區
+Time and Budget,時間和預算
+Time at which items were delivered from warehouse,時間在哪個項目是從倉庫運送
+Time at which materials were received,收到材料在哪個時間
+Title,標題
+Title / headline of your page,你的頁面標題/標題
+Title Case,標題案例
+Title Prefix,標題前綴
+To,至
+To Currency,以貨幣
+To Date,至今
+To Date should be same as From Date for Half Day leave,日期應該是一樣的起始日期為半天假
+To Discuss,為了討論
+To Do,要不要
+To Do List,待辦事項列表
+To Package No.,以包號
+To Pay,支付方式
+To Produce,以生產
+To Time,要時間
+To Value,To值
+To Warehouse,到倉庫
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.",要添加子節點，探索樹，然後單擊要在其中添加更多節點的節點上。
+"To assign this issue, use the ""Assign"" button in the sidebar.",要分配這個問題，請使用“分配”按鈕，在側邊欄。
+"To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.",從您的接收郵件自動創建支持票，在此設置您的POP3設置。你必須非常創建一個單獨的電子郵件ID為ERP系統，使所有電子郵件都將來自該郵件ID被同步到系統中。如果您不能確定，請聯繫您的電子郵件提供商。
+"To create / edit transactions against this account, you need role",要禁止該帳戶創建/編輯事務，你需要角色
+To create a Bank Account:,要創建一個銀行帳號：
+To create a Tax Account:,要創建一個納稅帳戶：
+"To create an Account Head under a different company, select the company and save customer.",要創建一個帳戶頭在不同的公司，選擇該公司，並保存客戶。
+To enable <b>Point of Sale</b> features,為了使<b>銷售點</b>功能
+To enable <b>Point of Sale</b> view,為了使<b>銷售點</b>看法
+"To fetch items again, click on 'Get Items' button \						or update the Quantity manually.",再取物品，點擊“獲取信息”按鈕\或手動更新的數量。
+"To format columns, give column labels in the query.",要格式化列，給列標籤在查詢中。
+"To further restrict permissions based on certain values in a document, use the 'Condition' settings.",為了進一步限制基於文檔中的某些價值觀的權限，使用&#39;條件&#39;的設置。
+To get Item Group in details table,為了讓項目組在詳細信息表
+"To merge, following properties must be same for both items",若要合併，以下屬性必須為這兩個項目是相同的
+"To report an issue, go to ",要報告問題，請至
+To restrict a User of a particular Role to documents that are explicitly assigned to them,要限制某一特定角色的用戶來顯式分配給他們的文件
+To restrict a User of a particular Role to documents that are only self-created.,要限制某一特定角色的用戶到只有自己創建的文檔。
+"To set this Fiscal Year as Default, click on 'Set as Default'",要設置這個財政年度為默認值，點擊“設為默認”
+"To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.",要設置用戶角色，只要進入<a href='#List/Profile'>設置&gt;用戶</a> ，然後單擊分配角色的用戶。
+To track any installation or commissioning related work after sales,跟踪銷售後的任何安裝或調試相關工作
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",在以下文件跟踪品牌<br>送貨單，Enuiry，材料要求，項目，採購訂單，購買憑證，買方收據，報價單，銷售發票，銷售物料，銷售訂單，序列號
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,在基於其序列號的銷售和採購文件跟踪的項目。這也可以用來跟踪商品的保修細節。
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,為了跟踪與批次號在銷售和採購文件的項目<br> <b>首選行業：化工等</b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,要使用條形碼跟踪項目。您將能夠通過掃描物品條碼，進入交貨單和銷售發票的項目。
+ToDo,待辦事項
+Tools,工具
+Top,頂部
+Top Bar,頂欄
+Top Bar Background,頂欄背景
+Top Bar Item,頂欄項目
+Top Bar Items,頂欄項目
+Top Bar Text,頂欄文本
+Total,總
+Total (sum of) points distribution for all goals should be 100.,總計（總和）點的分佈對所有的目標應該是100。
+Total Advance,總墊款
+Total Amount,總金額
+Total Amount To Pay,支付總計
+Total Amount in Words,總金額詞
+Total Billing This Year: ,總帳單今年：
+Total Claimed Amount,總索賠額
+Total Commission,總委員會
+Total Cost,總成本
+Total Credit,總積分
+Total Debit,總借記
+Total Deduction,扣除總額
+Total Earning,總盈利
+Total Experience,總經驗
+Total Hours,總時數
+Total Hours (Expected),總時數（預期）
+Total Invoiced Amount,發票總金額
+Total Leave Days,總休假天數
+Total Leaves Allocated,分配的總葉
+Total Manufactured Qty can not be greater than Planned qty to manufacture,總計製造數量不能大於計劃數量製造
+Total Operating Cost,總營運成本
+Total Points,總得分
+Total Raw Material Cost,原材料成本總額
+Total SMS Sent,共發送短信
+Total Sanctioned Amount,總被制裁金額
+Total Score (Out of 5),總分（滿分5分）
+Total Tax (Company Currency),總稅（公司貨幣）
+Total Taxes and Charges,總營業稅金及費用
+Total Taxes and Charges (Company Currency),總稅費和費用（公司貨幣）
+Total Working Days In The Month,總工作日的月份
+Total amount of invoices received from suppliers during the digest period,的過程中消化期間向供應商收取的發票總金額
+Total amount of invoices sent to the customer during the digest period,的過程中消化期間發送給客戶的發票總金額
+Total in words,總字
+Total production order qty for item,總生產量的項目
+Totals,總計
+Track separate Income and Expense for product verticals or divisions.,跟踪單獨的收入和支出進行產品垂直或部門。
+Track this Delivery Note against any Project,跟踪此送貨單反對任何項目
+Track this Sales Order against any Project,跟踪對任何項目這個銷售訂單
+Transaction,交易
+Transaction Date,交易日期
+Transaction not allowed against stopped Production Order,交易不反對停止生產訂單允許
+Transfer,轉讓
+Transfer Material,轉印材料
+Transfer Raw Materials,轉移原材料
+Transferred Qty,轉讓數量
+Transition Rules,過渡規則
+Transporter Info,轉運信息
+Transporter Name,轉運名稱
+Transporter lorry number,轉運貨車數量
+Trash Reason,垃圾桶原因
+Tree Type,樹類型
+Tree of item classification,項目分類樹
+Trial Balance,試算表
+Tuesday,星期二
+Tweet will be shared via your user account (if specified),推文將通過您的用戶帳戶共享（如果指定）
+Twitter Share,Twitter分享
+Twitter Share via,Twitter分享通過
+Type,類型
+Type of document to rename.,的文件類型進行重命名。
+Type of employment master.,就業主人的類型。
+"Type of leaves like casual, sick etc.",葉似漫不經心，生病等類型
+Types of Expense Claim.,報銷的類型。
+Types of activities for Time Sheets,活動的考勤表類型
+UOM,計量單位
+UOM Conversion Detail,計量單位換算詳細
+UOM Conversion Details,計量單位換算詳情
+UOM Conversion Factor,計量單位換算係數
+UOM Conversion Factor is mandatory,計量單位換算係數是強制性的
+UOM Name,計量單位名稱
+UOM Replace Utility,計量單位更換工具
+UPPER CASE,大寫
+UPPERCASE,大寫
+URL,網址
+Unable to complete request: ,無法完成請求：
+Unable to load,無法加載
+Under AMC,在AMC
+Under Graduate,根據研究生
+Under Warranty,在保修期
+Unit of Measure,計量單位
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).",這資料（如公斤，單位，不，一對）的測量單位。
+Units/Hour,單位/小時
+Units/Shifts,單位/位移
+"Unknown file encoding. Tried utf-8, windows-1250, windows-1252.",未知文件編碼。嘗試UTF-8，windows-1250訪問，windows-1252訪問。
+Unmatched Amount,無與倫比的金額
+Unpaid,未付
+Unread Messages,未讀消息
+Unscheduled,計劃外
+Unstop,Unstop
+Unstop Material Request,Unstop材料要求
+Unsubscribed,退訂
+Upcoming Events for Today,近期活動今日
+Update,更新
+Update Clearance Date,更新日期間隙
+Update Cost,更新成本
+Update Field,更新域
+Update Finished Goods,更新成品
+Update Landed Cost,更新到岸成本
+Update Numbering Series,更新編號系列
+Update Series,更新系列
+Update Series Number,更新序列號
+Update Stock,庫存更新
+Update Stock should be checked.,更新庫存應該進行檢查。
+Update Value,更新值
+"Update allocated amount in the above table and then click ""Allocate"" button",更新量分配在上表中，然後單擊“分配”按鈕
+Update bank payment dates with journals.,更新與期刊銀行付款日期。
+Updated,更新
+Updated Birthday Reminders,更新生日提醒
+Upload,上載
+Upload Attachment,上傳附件
+Upload Attendance,上傳出席
+Upload Backups to Dropbox,上傳備份到Dropbox
+Upload Backups to Google Drive,上傳備份到谷歌驅動器
+Upload HTML,上傳HTML
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,上傳一個csv文件有兩列：舊名稱和新名稱。最大500行。
+Upload a file,上傳文件
+Upload and Import,上傳和導入
+Upload attendance from a .csv file,從。csv文件上傳考勤
+Upload stock balance via csv.,通過CSV上傳庫存餘額。
+Upload your letter head and logo - you can edit them later.,上傳你的信頭和標誌 - 你可以在以後對其進行編輯。
+Uploaded File Attachments,上傳文件附件
+Uploading...,上載...
+Upper Income,高收入
+Urgent,急
+Use Multi-Level BOM,採用多級物料清單
+Use SSL,使用SSL
+Use TLS,使用TLS
+User,用戶
+User Cannot Create,用戶無法創建
+User Cannot Search,用戶不能搜索
+User ID,用戶ID
+User Image,用戶圖片
+User Name,用戶名
+User Properties,用戶屬性
+User Remark,用戶備註
+User Remark will be added to Auto Remark,用戶備註將被添加到自動注
+User Tags,用戶標籤
+User Type,用戶類型
+User must always select,用戶必須始終選擇
+User not allowed to delete.,用戶不允許刪除。
+User settings for Point-of-sale (POS),用戶設置的銷售點終端（POS）
+UserRole,的UserRole
+Username,用戶名
+Users and Permissions,用戶和權限
+Users who can approve a specific employee's leave applications,用戶誰可以批准特定員工的休假申請
+Users with this role are allowed to create / modify accounting entry before frozen date,具有此角色的用戶可以創建/修改凍結日期前會計分錄
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,具有此角色的用戶可以設置凍結帳戶，並創建/修改對凍結賬戶的會計分錄
+Utilities,公用事業
+Utility,效用
+Valid For Territories,適用於新界
+Valid Upto,到...為止有效
+Valid for Buying or Selling?,有效的買入或賣出？
+Valid for Territories,適用於新界
+Validate,驗證
+Valuation,計價
+Valuation Method,估值方法
+Valuation Rate,估值率
+Valuation and Total,估值與總
+Value,值
+Value missing for,缺少值
+Value or Qty,價值或數量
+Vehicle Dispatch Date,車輛調度日期
+Vehicle No,車輛無
+Verdana,宋體
+Verified By,認證機構
+View,視圖
+View Ledger,查看總帳
+View Now,立即觀看
+Visit,訪問
+Visit report for maintenance call.,訪問報告維修電話。
+Voucher Detail No,券詳細說明暫無
+Voucher ID,優惠券編號
+Voucher No,無憑證
+Voucher Type,憑證類型
+Voucher Type and Date,憑證類型和日期
+WIP Warehouse required before Submit,提交所需WIP倉庫前
+Walk In,走在
+Warehouse,倉庫
+Warehouse Contact Info,倉庫聯繫方式
+Warehouse Detail,倉庫的詳細信息
+Warehouse Name,倉庫名稱
+Warehouse Type,倉庫類型
+Warehouse User,倉庫用戶
+Warehouse Users,倉庫用戶
+Warehouse and Reference,倉庫及參考
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,倉庫只能通過股票輸入/送貨單/外購入庫單變
+Warehouse cannot be changed for Serial No.,倉庫不能為序列號改變
+Warehouse does not belong to company.,倉庫不屬於公司。
+Warehouse is missing in Purchase Order,倉庫在採購訂單失踪
+Warehouse where you are maintaining stock of rejected items,倉庫你在哪裡維護拒絕的項目庫存
+Warehouse-Wise Stock Balance,倉庫明智的股票結餘
+Warehouse-wise Item Reorder,倉庫明智的項目重新排序
+Warehouses,倉庫
+Warn,警告
+Warning,警告
+Warning: Leave application contains following block dates,警告：離開應用程序包含以下模塊日期
+Warning: Material Requested Qty is less than Minimum Order Qty,警告：材料要求的數量低於最低起訂量
+Warranty / AMC Details,保修/ AMC詳情
+Warranty / AMC Status,保修/ AMC狀態
+Warranty Expiry Date,保證期到期日
+Warranty Period (Days),保修期限（天數）
+Warranty Period (in days),保修期限（天數）
+Warranty expiry date and maintenance status mismatched,保修期滿日期及維護狀態不匹配
+Web Page,網頁
+Website,網站
+Website Description,網站簡介
+Website Item Group,網站項目組
+Website Item Groups,網站項目組
+Website Script,網站腳本
+Website Settings,網站設置
+Website Sitemap,網站地圖
+Website Sitemap Config,網站地圖配置
+Website Slideshow,網站連續播放
+Website Slideshow Item,網站幻燈片項目
+Website User,網站用戶
+Website Warehouse,網站倉庫
+Wednesday,星期三
+Weekly,周刊
+Weekly Off,每週關閉
+Weight UOM,重量計量單位
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too",重被提及，\ n請別說“重量計量單位”太
+Weightage,權重
+Weightage (%),權重（％）
+Welcome Email Sent,歡迎發送電子郵件
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,歡迎來到ERPNext。在接下來的幾分鐘裡，我們將幫助您設置您的ERPNext帳戶。嘗試並填寫盡可能多的信息，你有，即使它需要多一點的時間。這將節省您大量的時間。祝你好運！
+What does it do?,它有什麼作用？
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.",當任何選中的交易都是“已提交”，郵件彈出窗口自動打開，在該事務發送電子郵件到相關的“聯繫”，與交易作為附件。用戶可能會或可能不會發送電子郵件。
+"When submitted, the system creates difference entries ",提交時，系統會創建差異的條目
+"When you <b>Amend</b> a document after cancel and save it, it will get a new number that is a version of the old number.",當您<b>修改</b>一個文件後，取消和保存，它會得到一個新的數字，是一個版本的舊號碼。
+Where items are stored.,項目的存儲位置。
+Where manufacturing operations are carried out.,凡製造業務進行。
+Widowed,寡
+Width,寬度
+Will be calculated automatically when you enter the details,當你輸入詳細信息將自動計算
+Will be updated after Sales Invoice is Submitted.,之後銷售發票已提交將被更新。
+Will be updated when batched.,批處理時將被更新。
+Will be updated when billed.,計費時將被更新。
+Will be used in url (usually first name).,在URL（通常是第一個名字）將被使用。
+With Operations,隨著運營
+With period closing entry,隨著期末入門
+Work Details,作品詳細信息
+Work Done,工作完成
+Work In Progress,工作進展
+Work-in-Progress Warehouse,工作在建倉庫
+Workflow,工作流程
+Workflow Action,工作流操作
+Workflow Action Master,工作流操作主
+Workflow Action Name,工作流操作名稱
+Workflow Document State,工作流文檔狀態
+Workflow Document States,工作流文檔國
+Workflow Name,工作流名稱
+Workflow State,工作流狀態
+Workflow State Field,工作流狀態字段
+Workflow Transition,工作流程轉換
+Workflow Transitions,工作流程轉換
+Workflow state represents the current state of a document.,工作流狀態表示文檔的當前狀態。
+Workflow will start after saving.,保存後的工作流程將啟動。
+Working,工作的
+Workstation,工作站
+Workstation Name,工作站名稱
+Write,寫
+Write Off Account,核銷帳戶
+Write Off Amount,核銷金額
+Write Off Amount <=,核銷金額&lt;=
+Write Off Based On,核銷的基礎上
+Write Off Cost Center,沖銷成本中心
+Write Off Outstanding Amount,核銷額（億元）
+Write Off Voucher,核銷券
+Write a Python file in the same folder where this is saved and return column and result.,寫一個Python文件，在這個被保存在同一文件夾中，並返回列和結果。
+Write a SELECT query. Note result is not paged (all data is sent in one go).,寫一個SELECT查詢。注結果不分頁（所有數據都一氣呵成發送）。
+Write sitemap.xml,寫的sitemap.xml
+Writers Introduction,作家簡介
+Wrong Template: Unable to find head row.,錯誤的模板：找不到頭排。
+Year,年
+Year Closed,年度關閉
+Year End Date,年結日
+Year Name,今年名稱
+Year Start Date,今年開始日期
+Year Start Date and Year End Date are already \						set in Fiscal Year: ,年開學日期及年結日已\在財政年度設定：
+Year Start Date and Year End Date are not within Fiscal Year.,今年開始日期和年份結束日期是不是在會計年度。
+Year Start Date should not be greater than Year End Date,今年開始日期不應大於年度日期
+Year of Passing,路過的一年
+Yearly,每年
+Yes,是的
+Yesterday,昨天
+You are not allowed to reply to this ticket.,你不允許回复此票。
+You are not authorized to do/modify back dated entries before ,您無權做/修改之前追溯項目
+You are not authorized to set Frozen value,您無權設定值凍結
+You are the Leave Approver for this record. Please Update the 'Status' and Save,您是第休假審批此記錄。請更新“狀態”並保存
+You can enter any date manually,您可以手動輸入任何日期
+You can enter the minimum quantity of this item to be ordered.,您可以輸入資料到訂購的最小數量。
+You can not change rate if BOM mentioned agianst any item,你不能改變速度，如果BOM中提到反對的任何項目
+You can not enter both Delivery Note No and Sales Invoice No. \					Please enter any one.,你不能同時輸入送貨單號及銷售發票號\請輸入任何一個。
+You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,您可以設置不同的“屬性”，以用戶設置的默認值，並基於各種形式的這些屬性值的權限規則。
+You can start by selecting backup frequency and \					granting access for sync,您可以通過選擇備份頻率和\授予訪問權限的同步啟動
+You can submit this Stock Reconciliation.,您可以提交該股票對賬。
+You can update either Quantity or Valuation Rate or both.,你可以更新數量或估值速率或兩者兼而有之。
+You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,您可以使用<a href='#Form/Customize Form'>自定義表單</a>上欄位設定水平。
+You cannot give more than ,你不能給超過
+You have entered duplicate items. Please rectify and try again.,您輸入重複的項目。請糾正，然後再試一次。
+You may need to update: ,你可能需要更新：
+You must ,你必須
+Your Customer's TAX registration numbers (if applicable) or any general information,你的客戶的稅務登記證號碼（如適用）或任何股東信息
+Your Customers,您的客戶
+Your ERPNext subscription will,您ERPNext訂閱將
+Your Products or Services,您的產品或服務
+Your Suppliers,您的供應商
+"Your download is being built, this may take a few moments...",您的下載正在修建，這可能需要一些時間......
+Your sales person who will contact the customer in future,你的銷售人員誰將會聯繫客戶在未來
+Your sales person will get a reminder on this date to contact the customer,您的銷售人員將獲得在此日期提醒聯繫客戶
+Your setup is complete. Refreshing...,你的設置就完成了。清爽...
+Your support email id - must be a valid email - this is where your emails will come!,您的支持電子郵件ID  - 必須是一個有效的電子郵件 - 這就是你的郵件會來！
+[Label]:[Field Type]/[Options]:[Width],[標籤]：[字段類型] / [選項]：[寬]
+add your own CSS (careful!),添加您自己的CSS（careful!）
+adjust,調整
+align-center,對準中心
+align-justify,對齊對齊
+align-left,對齊左
+align-right,對齊，右
+already available in Price List,在價格表已經存在
+and,和
+"and create a new Account Ledger (by clicking on Add Child) of type ""Bank or Cash""",並創建一個新的帳戶總帳型“銀行或現金”的（通過點擊添加子）
+"and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.",並創建一個新的帳戶分類帳類型“稅”（點擊添加子），並且還提到了稅率。
+are not allowed for,不允許使用
+are not allowed for ,不允許使用
+arrow-down,箭頭向下
+arrow-left,箭頭左
+arrow-right,箭頭向右
+arrow-up,向上箭頭
+assigned by,由分配
+asterisk,星號
+backward,落後
+ban-circle,禁令圈
+barcode,條形碼
+bell,鐘
+bold,膽大
+book,書
+bookmark,書籤
+briefcase,公文包
+bullhorn,擴音器
+but entries can be made against Ledger,但項可以對總帳進行
+but is pending to be manufactured.,但是有待被製造。
+calendar,日曆
+camera,相機
+cannot be greater than 100,不能大於100
+cannot be included in Item's rate,不能包含在項目的速度
+cannot start with,無法開始
+certificate,證書
+check,查
+chevron-down,雪佛龍跌
+chevron-left,人字形左
+chevron-right,雪佛龍 - 右
+chevron-up,雪佛龍達
+circle-arrow-down,圓圈箭頭向下
+circle-arrow-left,圓圈箭頭向左
+circle-arrow-right,圓圈箭頭向右
+circle-arrow-up,圓圈箭頭行動
+cog,COG
+comment,評論
+create a Custom Field of type Link (Profile) and then use the 'Condition' settings to map that field to the Permission rule.,創建類型鏈接（配置文件）的自定義字段，然後使用“條件”設置到該字段映射到權限規則。
+dd-mm-yyyy,日 - 月 - 年
+dd/mm/yyyy,日/月/年
+deactivate,關閉
+discount on Item Code,在產品編號的折扣
+does not belong to BOM: ,不屬於BOM：
+does not have role 'Leave Approver',沒有作用“休假審批&#39;
+download,下載
+download-alt,下載的Alt
+"e.g. Bank, Cash, Credit Card",例如：銀行，現金，信用卡
+"e.g. Kg, Unit, Nos, m",如公斤，單位，NOS，M
+edit,編輯
+eg. Cheque Number,例如：。支票號碼
+eject,噴射
+envelope,信封
+example: Next Day Shipping,例如：次日發貨
+example: http://help.erpnext.com,例如：http://help.erpnext.com
+exclamation-sign,驚嘆號標誌
+eye-close,眼睛閉
+eye-open,眼開
+facetime-video,FaceTime的視頻
+fast-backward,快退
+fast-forward,快進
+file,文件
+film,電影
+filter,過濾器
+fire,火
+flag,旗
+folder-close,文件夾閉
+folder-open,文件夾打開
+font,字形
+forward,向前
+fullscreen,全屏
+gift,禮物
+glass,玻璃
+globe,地球
+hand-down,用手向下
+hand-left,手左
+hand-right,手右
+hand-up,手機
+has been made after posting date,已發表日期之後
+have a common territory,有一個共同的領土
+hdd,硬盤
+headphones,頭戴耳機
+heart,心臟
+home,家
+icon,圖標
+in,在
+in the same UOM.,在相同的計量單位。
+inbox,收件箱
+indent-left,縮進左
+indent-right,縮進，右
+info-sign,信息符號
+is linked in,在鏈接
+is not allowed.,是不允許的。
+italic,斜體
+leaf,葉
+lft,LFT
+list,表
+list-alt,列表ALT
+lock,鎖
+lowercase,小寫
+magnet,磁鐵
+map-marker,地圖標記物
+minus,減
+minus-sign,減號
+mm-dd-yyyy,MM-DD-YYYY
+mm/dd/yyyy,月/日/年
+move,移動
+music,音樂
+must be a Liability account,必須是一個負債帳戶
+must be one of,必須是1
+not a service item.,不是一個服務項目。
+not a sub-contracted item.,不是一個分包項目。
+not in,不
+not within Fiscal Year,不屬於會計年度
+off,離
+ok,行
+ok-circle,OK-圈
+ok-sign,OK-跡象
+old_parent,old_parent
+or,或
+pause,暫停
+pencil,鉛筆
+picture,圖片
+plane,機
+play,玩
+play-circle,玩圈
+plus,加
+plus-sign,加號
+print,打印
+qrcode,QRcode的
+question-sign,問題符號
+random,隨機
+refresh,刷新
+remove,清除
+remove-circle,刪除圈
+remove-sign,刪除符號
+repeat,重複
+resize-full,調整滿
+resize-horizontal,調整大小，水平
+resize-small,調整大小小
+resize-vertical,調整垂直
+retweet,轉推
+rgt,RGT
+road,道路
+screenshot,屏幕截圖
+search,搜索
+share,共享
+share-alt,股份ALT
+shopping-cart,購物推車
+should be 100%,應為100％
+signal,信號
+star,明星
+star-empty,明星空
+step-backward,一步落後
+step-forward,步向前
+stop,停止
+subject,主題
+tag,標籤
+tags,標籤
+"target = ""_blank""",目標=“_blank”
+tasks,任務
+text-height,文字高度
+text-width,文字寬度
+th,日
+th-large,TH-大
+th-list,日列表
+they are created automatically from the Customer and Supplier master,它們從客戶和供應商的主站自動創建
+thumbs-down,拇指向下
+thumbs-up,豎起大拇指
+time,時間
+tint,色彩
+to,至
+"to be included in Item's rate, it is required that: ",被包括在物品的速率，它是必需的：
+to set the given stock and valuation on this date.,設置給定的股票及估值對這個日期。
+trash,垃圾
+upload,上載
+user,用戶
+user_image_show,user_image_show
+usually as per physical inventory.,通常按照實際庫存。
+volume-down,容積式
+volume-off,體積過
+volume-up,容積式
+warning-sign,警告符號
+website page link,網站頁面的鏈接
+which is greater than sales order qty ,這是大於銷售訂單數量
+wrench,扳手
+yyyy-mm-dd,年 - 月 - 日
+zoom-in,放大式
+zoom-out,拉遠

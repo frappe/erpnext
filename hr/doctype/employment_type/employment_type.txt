@@ -1,0 +1,69 @@
+[
+ {
+  "creation": "2013-01-10 16:34:14", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:31:58", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:employee_type_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-flag", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Employment Type", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Employment Type", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Employment Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_type_name", 
+  "fieldtype": "Data", 
+  "label": "Employment Type", 
+  "oldfieldname": "employee_type_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

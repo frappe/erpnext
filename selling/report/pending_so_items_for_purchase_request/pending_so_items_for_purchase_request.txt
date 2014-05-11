@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-06-21 16:46:45", 
+  "docstatus": 0, 
+  "modified": "2013-06-21 16:55:54", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select \n so_item.item_code as \"Item Code:Link/Item:120\",\n so_item.item_name as \"Item Name::120\",\n so_item.description as \"Description::120\",\n so.`name` as \"S.O. No.:Link/Sales Order:120\",\n so.`transaction_date` as \"Date:Date:120\",\n mr.name as \"Material Request:Link/Material Request:120\",\n so.customer as \"Customer:Link/Customer:120\",\n so.territory as \"Terretory:Link/Territory:120\",\n sum(so_item.qty) as \"SO Qty:Float:100 \",\n sum(mr_item.qty) as \"Requested Qty:Float:100\"\nfrom\n `tabSales Order` so, `tabSales Order Item` so_item, \n `tabMaterial Request` mr, `tabMaterial Request Item` mr_item\nwhere\n so_item.`parent` = so.`name` and mr_item.sales_order_no = so.name\n and mr_item.parent = mr.name \n and so.docstatus = 1 and so.status != \"Stopped\" \n and mr.docstatus = 1 and mr.status != \"Stopped\"\ngroup by so.name, so_item.item_code\norder by so.name desc, so_item.item_code asc", 
+  "ref_doctype": "Sales Order", 
+  "report_name": "Pending SO Items For Purchase Request", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Pending SO Items For Purchase Request"
+ }
+]

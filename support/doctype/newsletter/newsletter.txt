@@ -1,0 +1,175 @@
+[
+ {
+  "creation": "2013-01-10 16:34:31", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:06:04", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "naming_series:", 
+  "description": "Create and Send Newsletters", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "icon": "icon-envelope", 
+  "module": "Support", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Newsletter", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Newsletter", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Newsletter"
+ }, 
+ {
+  "description": "Select who you want to send this newsletter to", 
+  "doctype": "DocField", 
+  "fieldname": "send_to", 
+  "fieldtype": "Section Break", 
+  "label": "Send To"
+ }, 
+ {
+  "default": "NL-", 
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "options": "NL-", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "send_to_type", 
+  "fieldtype": "Select", 
+  "label": "Send To Type", 
+  "options": "Lead\nContact\nCustom"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Lead\"", 
+  "doctype": "DocField", 
+  "fieldname": "lead_source", 
+  "fieldtype": "Select", 
+  "label": "Lead Source"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Lead\"", 
+  "doctype": "DocField", 
+  "fieldname": "lead_status", 
+  "fieldtype": "Select", 
+  "label": "Lead Status"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Contact\"", 
+  "doctype": "DocField", 
+  "fieldname": "contact_type", 
+  "fieldtype": "Select", 
+  "label": "Contact Type", 
+  "options": "Customer\nSupplier\nCustom"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to_type==\"Custom\"", 
+  "description": "Comma separated list of email addresses", 
+  "doctype": "DocField", 
+  "fieldname": "email_list", 
+  "fieldtype": "Text", 
+  "label": "Send to this list"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "newsletter_content", 
+  "fieldtype": "Section Break", 
+  "label": "Newsletter Content"
+ }, 
+ {
+  "description": "If specified, send the newsletter using this email address", 
+  "doctype": "DocField", 
+  "fieldname": "send_from", 
+  "fieldtype": "Data", 
+  "label": "Send From", 
+  "no_copy": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "subject", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Subject", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "message", 
+  "fieldtype": "Text Editor", 
+  "label": "Message", 
+  "reqd": 0
+ }, 
+ {
+  "description": "Check how the newsletter looks in an email by sending it to your email.", 
+  "doctype": "DocField", 
+  "fieldname": "test_the_newsletter", 
+  "fieldtype": "Section Break", 
+  "label": "Test the Newsletter"
+ }, 
+ {
+  "description": "A Lead with this email id should exist", 
+  "doctype": "DocField", 
+  "fieldname": "test_email_id", 
+  "fieldtype": "Data", 
+  "label": "Test Email Id"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "test_send", 
+  "fieldtype": "Button", 
+  "label": "Test", 
+  "options": "test_send"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "newsletter_status", 
+  "fieldtype": "Section Break", 
+  "label": "Newsletter Status"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "email_sent", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Email Sent?", 
+  "no_copy": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Support Manager"
+ }
+]

@@ -1,0 +1,41 @@
+[
+ {
+  "creation": "2012-09-21 20:15:12", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:43:59", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-bar-chart", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "page_name": "sales-analytics", 
+  "standard": "Yes", 
+  "title": "Sales Analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "sales-analytics", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "sales-analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Sales Manager"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Maintenance Manager"
+ }
+]

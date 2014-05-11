@@ -1,0 +1,33 @@
+[
+ {
+  "creation": "2013-01-04 15:31:45", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:24", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-bar-chart", 
+  "module": "Support", 
+  "name": "__common__", 
+  "page_name": "support-analytics", 
+  "standard": "Yes", 
+  "title": "Support Analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "support-analytics", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "Support Team"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "support-analytics"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

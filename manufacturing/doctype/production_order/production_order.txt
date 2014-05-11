@@ -1,0 +1,263 @@
+[
+ {
+  "creation": "2013-01-10 16:34:16", 
+  "docstatus": 0, 
+  "modified": "2013-12-18 13:22:14", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "icon": "icon-cogs", 
+  "in_create": 0, 
+  "is_submittable": 1, 
+  "module": "Manufacturing", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Production Order", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Production Order", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Manufacturing User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Production Order"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item", 
+  "fieldtype": "Section Break", 
+  "label": "Item", 
+  "options": "icon-gift"
+ }, 
+ {
+  "default": "PRO", 
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "options": "\nPRO", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "production_item", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item To Manufacture", 
+  "oldfieldname": "production_item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "production_item", 
+  "description": "Bill of Material to be considered for manufacturing", 
+  "doctype": "DocField", 
+  "fieldname": "bom_no", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "BOM No", 
+  "oldfieldname": "bom_no", 
+  "oldfieldtype": "Link", 
+  "options": "BOM", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "default": "1", 
+  "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+  "doctype": "DocField", 
+  "fieldname": "use_multi_level_bom", 
+  "fieldtype": "Check", 
+  "label": "Use Multi-Level BOM"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "description": "Manufacture against Sales Order", 
+  "doctype": "DocField", 
+  "fieldname": "sales_order", 
+  "fieldtype": "Link", 
+  "label": "Sales Order", 
+  "options": "Sales Order", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "production_item", 
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Qty To Manufacture", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:doc.docstatus==1", 
+  "description": "Automatically updated via Stock Entry of type Manufacture/Repack", 
+  "doctype": "DocField", 
+  "fieldname": "produced_qty", 
+  "fieldtype": "Float", 
+  "label": "Manufactured Qty", 
+  "no_copy": 1, 
+  "oldfieldname": "produced_qty", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "sales_order", 
+  "doctype": "DocField", 
+  "fieldname": "expected_delivery_date", 
+  "fieldtype": "Date", 
+  "label": "Expected Delivery Date", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouses", 
+  "fieldtype": "Section Break", 
+  "label": "Warehouses", 
+  "options": "icon-building"
+ }, 
+ {
+  "depends_on": "production_item", 
+  "description": "Manufactured quantity will be updated in this warehouse", 
+  "doctype": "DocField", 
+  "fieldname": "fg_warehouse", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "For Warehouse", 
+  "options": "Warehouse", 
+  "read_only": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_12", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "wip_warehouse", 
+  "fieldtype": "Link", 
+  "label": "Work-in-Progress Warehouse", 
+  "options": "Warehouse", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "options": "icon-file-text", 
+  "read_only": 0
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nStopped\nIn Process\nCompleted\nCancelled", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Item Description", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project_name", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "oldfieldtype": "Link", 
+  "options": "Project", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "depends_on": "production_item", 
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "options": "UOM", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

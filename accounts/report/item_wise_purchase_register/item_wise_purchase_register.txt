@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-06-05 15:37:30", 
+  "docstatus": 0, 
+  "modified": "2013-06-05 15:37:30", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Purchase Invoice", 
+  "report_name": "Item-wise Purchase Register", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Item-wise Purchase Register"
+ }
+]

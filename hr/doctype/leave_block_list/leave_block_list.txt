@@ -1,0 +1,103 @@
+[
+ {
+  "creation": "2013-02-18 17:43:12", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:44:45", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:leave_block_list_name", 
+  "description": "Block Holidays on important days.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-calendar", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Leave Block List", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Leave Block List", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "HR User", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Leave Block List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_block_list_name", 
+  "fieldtype": "Data", 
+  "label": "Leave Block List Name", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "year", 
+  "fieldtype": "Link", 
+  "label": "Year", 
+  "options": "Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "description": "If not checked, the list will have to be added to each Department where it has to be applied.", 
+  "doctype": "DocField", 
+  "fieldname": "applies_to_all_departments", 
+  "fieldtype": "Check", 
+  "label": "Applies to Company"
+ }, 
+ {
+  "description": "Stop users from making Leave Applications on following days.", 
+  "doctype": "DocField", 
+  "fieldname": "block_days", 
+  "fieldtype": "Section Break", 
+  "label": "Block Days"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_block_list_dates", 
+  "fieldtype": "Table", 
+  "label": "Leave Block List Dates", 
+  "options": "Leave Block List Date"
+ }, 
+ {
+  "description": "Allow the following users to approve Leave Applications for block days.", 
+  "doctype": "DocField", 
+  "fieldname": "allow_list", 
+  "fieldtype": "Section Break", 
+  "label": "Allow Users"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_block_list_allowed", 
+  "fieldtype": "Table", 
+  "label": "Leave Block List Allowed", 
+  "options": "Leave Block List Allow"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

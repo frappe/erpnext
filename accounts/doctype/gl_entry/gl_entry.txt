@@ -1,0 +1,232 @@
+[
+ {
+  "creation": "2013-01-10 16:34:06", 
+  "docstatus": 0, 
+  "modified": "2013-11-03 14:14:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "GL.#######", 
+  "doctype": "DocType", 
+  "icon": "icon-list", 
+  "in_create": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "voucher_no,account,posting_date,against_voucher"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "GL Entry", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "GL Entry", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "GL Entry"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "label": "Transaction Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "aging_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Aging Date", 
+  "oldfieldname": "aging_date", 
+  "oldfieldtype": "Date", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Account", 
+  "oldfieldname": "account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Cost Center", 
+  "oldfieldname": "cost_center", 
+  "oldfieldtype": "Link", 
+  "options": "Cost Center", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "debit", 
+  "fieldtype": "Currency", 
+  "label": "Debit Amt", 
+  "oldfieldname": "debit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit", 
+  "fieldtype": "Currency", 
+  "label": "Credit Amt", 
+  "oldfieldname": "credit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "against", 
+  "fieldtype": "Text", 
+  "in_filter": 1, 
+  "label": "Against", 
+  "oldfieldname": "against", 
+  "oldfieldtype": "Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "against_voucher", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Against Voucher", 
+  "oldfieldname": "against_voucher", 
+  "oldfieldtype": "Data", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "against_voucher_type", 
+  "fieldtype": "Data", 
+  "in_filter": 0, 
+  "label": "Against Voucher Type", 
+  "oldfieldname": "against_voucher_type", 
+  "oldfieldtype": "Data", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Voucher Type", 
+  "oldfieldname": "voucher_type", 
+  "oldfieldtype": "Select", 
+  "options": "Journal Voucher\nSales Invoice\nPurchase Invoice", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_no", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Voucher No", 
+  "oldfieldname": "voucher_no", 
+  "oldfieldtype": "Data", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "remarks", 
+  "fieldtype": "Text", 
+  "in_filter": 1, 
+  "label": "Remarks", 
+  "no_copy": 1, 
+  "oldfieldname": "remarks", 
+  "oldfieldtype": "Text", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_opening", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Is Opening", 
+  "oldfieldname": "is_opening", 
+  "oldfieldtype": "Select", 
+  "options": "No\nYes", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_advance", 
+  "fieldtype": "Select", 
+  "in_filter": 0, 
+  "label": "Is Advance", 
+  "oldfieldname": "is_advance", 
+  "oldfieldtype": "Select", 
+  "options": "No\nYes", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "search_index": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }
+]

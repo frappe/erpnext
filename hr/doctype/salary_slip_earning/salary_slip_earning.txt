@@ -1,0 +1,62 @@
+[
+ {
+  "creation": "2013-02-22 01:27:48", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:27:56", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Salary Slip Earning", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Slip Earning"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_type", 
+  "fieldtype": "Link", 
+  "label": "Type", 
+  "oldfieldname": "e_type", 
+  "oldfieldtype": "Data", 
+  "options": "Earning Type", 
+  "print_width": "200px", 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_amount", 
+  "fieldtype": "Currency", 
+  "label": "Amount", 
+  "oldfieldname": "e_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_modified_amount", 
+  "fieldtype": "Currency", 
+  "label": "Modified Amount", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "e_depends_on_lwp", 
+  "fieldtype": "Check", 
+  "label": "Depends on LWP"
+ }
+]

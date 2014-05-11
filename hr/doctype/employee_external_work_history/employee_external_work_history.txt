@@ -1,0 +1,77 @@
+[
+ {
+  "creation": "2013-02-22 01:27:45", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:08", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Employee External Work History", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Employee External Work History"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company_name", 
+  "fieldtype": "Data", 
+  "label": "Company", 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "designation", 
+  "fieldtype": "Data", 
+  "label": "Designation", 
+  "oldfieldname": "designation", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "salary", 
+  "fieldtype": "Currency", 
+  "label": "Salary", 
+  "oldfieldname": "salary", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address", 
+  "fieldtype": "Small Text", 
+  "label": "Address", 
+  "oldfieldname": "address", 
+  "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact", 
+  "fieldtype": "Data", 
+  "label": "Contact", 
+  "oldfieldname": "contact", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_experience", 
+  "fieldtype": "Data", 
+  "label": "Total Experience", 
+  "oldfieldname": "total_experience", 
+  "oldfieldtype": "Data"
+ }
+]

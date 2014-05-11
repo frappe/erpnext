@@ -1,0 +1,28 @@
+<div class="container" style="margin-bottom: 7px;">
+	<form class="form-inline form-search row">
+		<div class="input-group col-md-4 col-md-offset-8">
+			<input class="form-control" type="text" id="product-search" placeholder="Product Search...">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" id="btn-product-search">
+					<i class="icon-search"></i></button>
+			</span>
+		</div>
+	</form>
+	<script>
+		// redirect to product search page
+		$(document).ready(function() {
+			$('.dropdown-toggle').dropdown();
+			$("#btn-product-search").click(function() {
+				var txt = $("#product-search").val();
+				if(txt) {
+					window.location.href="product_search?q=" + txt;
+				}
+				return false;
+			});
+			$("#product-search").keypress(function(e) {
+				if(e.which==13) $("#btn-product-search").click();
+			});
+			$(".form-search").on("submit", function() { return false; });
+		});
+	</script>
+</div>

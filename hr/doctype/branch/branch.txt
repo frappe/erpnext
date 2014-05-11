@@ -1,0 +1,70 @@
+[
+ {
+  "creation": "2013-01-10 16:34:13", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:30:08", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:branch", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-code-fork", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Branch", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Branch", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Branch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Data", 
+  "label": "Branch", 
+  "oldfieldname": "branch", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

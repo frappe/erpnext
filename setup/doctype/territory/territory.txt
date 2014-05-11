@@ -1,0 +1,195 @@
+[
+ {
+  "creation": "2013-01-10 16:34:24", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:59:08", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:territory_name", 
+  "description": "Classification of Customers by region", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-map-marker", 
+  "in_create": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "name_case": "Title Case", 
+  "read_only": 1, 
+  "search_fields": "name,parent_territory,territory_manager"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Territory", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Territory", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Territory"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "territory_name", 
+  "fieldtype": "Data", 
+  "label": "Territory Name", 
+  "no_copy": 1, 
+  "oldfieldname": "territory_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "parent_territory", 
+  "fieldtype": "Link", 
+  "label": "Parent Territory", 
+  "oldfieldname": "parent_territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "reqd": 0
+ }, 
+ {
+  "description": "Only leaf nodes are allowed in transaction", 
+  "doctype": "DocField", 
+  "fieldname": "is_group", 
+  "fieldtype": "Select", 
+  "label": "Has Child Node", 
+  "oldfieldname": "is_group", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "For reference", 
+  "doctype": "DocField", 
+  "fieldname": "territory_manager", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Territory Manager", 
+  "oldfieldname": "territory_manager", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Person", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lft", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "lft", 
+  "no_copy": 1, 
+  "oldfieldname": "lft", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rgt", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "rgt", 
+  "no_copy": 1, 
+  "oldfieldname": "rgt", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 0, 
+  "search_index": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "old_parent", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "old_parent", 
+  "no_copy": 1, 
+  "oldfieldname": "old_parent", 
+  "oldfieldtype": "Data", 
+  "options": "Territory", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "description": "Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.", 
+  "doctype": "DocField", 
+  "fieldname": "target_details_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Territory Targets", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "target_details", 
+  "fieldtype": "Table", 
+  "label": "Target Details", 
+  "oldfieldname": "target_details", 
+  "oldfieldtype": "Table", 
+  "options": "Target Detail"
+ }, 
+ {
+  "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+  "doctype": "DocField", 
+  "fieldname": "distribution_id", 
+  "fieldtype": "Link", 
+  "label": "Target Distribution", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Link", 
+  "options": "Budget Distribution"
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }
+]

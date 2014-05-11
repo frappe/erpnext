@@ -1,0 +1,78 @@
+[
+ {
+  "creation": "2013-08-02 13:45:23", 
+  "docstatus": 0, 
+  "modified": "2013-10-02 15:44:38", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "HR Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "HR Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "HR Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Employee Settings"
+ }, 
+ {
+  "description": "Employee record is created using selected field. ", 
+  "doctype": "DocField", 
+  "fieldname": "emp_created_by", 
+  "fieldtype": "Select", 
+  "label": "Employee Records to be created by", 
+  "options": "Naming Series\nEmployee Number"
+ }, 
+ {
+  "description": "Don't send Employee Birthday Reminders", 
+  "doctype": "DocField", 
+  "fieldname": "stop_birthday_reminders", 
+  "fieldtype": "Check", 
+  "label": "Stop Birthday Reminders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "payroll_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Payroll Settings"
+ }, 
+ {
+  "description": "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day", 
+  "doctype": "DocField", 
+  "fieldname": "include_holidays_in_total_working_days", 
+  "fieldtype": "Check", 
+  "label": "Include holidays in Total no. of Working Days"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

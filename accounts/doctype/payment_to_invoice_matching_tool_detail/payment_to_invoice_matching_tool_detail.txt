@@ -1,0 +1,101 @@
+[
+ {
+  "creation": "2013-02-22 01:27:39", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Payment to Invoice Matching Tool Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Payment to Invoice Matching Tool Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_no", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Voucher No", 
+  "options": "Journal Voucher", 
+  "print_width": "140px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "140px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amt_due", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Unmatched Amount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amt_to_be_reconciled", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Allocated Amount", 
+  "options": "Company:company:default_currency", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Posting Date", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_amt", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Total Amount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "against_account", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Against Account", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "remarks", 
+  "fieldtype": "Small Text", 
+  "label": "Remarks", 
+  "print_width": "200px", 
+  "read_only": 1, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_detail_no", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Voucher Detail No", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0
+ }
+]

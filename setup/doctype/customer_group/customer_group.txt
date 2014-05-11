@@ -1,0 +1,159 @@
+[
+ {
+  "creation": "2013-01-10 16:34:23", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:52:51", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:customer_group_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-sitemap", 
+  "in_create": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 1, 
+  "search_fields": "name,parent_customer_group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Customer Group", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Customer Group", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Customer Group"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_group_name", 
+  "fieldtype": "Data", 
+  "label": "Customer Group Name", 
+  "no_copy": 1, 
+  "oldfieldname": "customer_group_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "parent_customer_group", 
+  "fieldtype": "Link", 
+  "label": "Parent Customer Group", 
+  "oldfieldname": "parent_customer_group", 
+  "oldfieldtype": "Link", 
+  "options": "Customer Group", 
+  "reqd": 0
+ }, 
+ {
+  "description": "Only leaf nodes are allowed in transaction", 
+  "doctype": "DocField", 
+  "fieldname": "is_group", 
+  "fieldtype": "Select", 
+  "label": "Has Child Node", 
+  "oldfieldname": "is_group", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "label": "Default Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lft", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "label": "lft", 
+  "no_copy": 1, 
+  "oldfieldname": "lft", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rgt", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "label": "rgt", 
+  "no_copy": 1, 
+  "oldfieldname": "rgt", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "search_index": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "old_parent", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "old_parent", 
+  "no_copy": 1, 
+  "oldfieldname": "old_parent", 
+  "oldfieldtype": "Data", 
+  "options": "Customer Group", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }
+]

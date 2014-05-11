@@ -1,0 +1,19 @@
+[
+ {
+  "creation": "2012-03-27 14:35:49", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:11", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "issingle": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "MIS Control"
+ }
+]

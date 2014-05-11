@@ -1,0 +1,79 @@
+[
+ {
+  "creation": "2012-07-03 13:30:39", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:25:14", 
+  "modified_by": "Administrator", 
+  "owner": "ashwini@webnotestech.com"
+ }, 
+ {
+  "autoname": "field:kra_title", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-file-text", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Appraisal Template", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Appraisal Template", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Appraisal Template"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "kra_title", 
+  "fieldtype": "Data", 
+  "label": "Appraisal Template Title", 
+  "oldfieldname": "kra_title", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "kra_sheet", 
+  "fieldtype": "Table", 
+  "label": "Appraisal Template Goal", 
+  "oldfieldname": "kra_sheet", 
+  "oldfieldtype": "Table", 
+  "options": "Appraisal Template Goal"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_points", 
+  "fieldtype": "Int", 
+  "label": "Total Points"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

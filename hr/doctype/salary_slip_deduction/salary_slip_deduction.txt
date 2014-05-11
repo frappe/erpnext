@@ -1,0 +1,62 @@
+[
+ {
+  "creation": "2013-02-22 01:27:48", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:27:44", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Salary Slip Deduction", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Salary Slip Deduction"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "d_type", 
+  "fieldtype": "Link", 
+  "label": "Type", 
+  "oldfieldname": "d_type", 
+  "oldfieldtype": "Data", 
+  "options": "Deduction Type", 
+  "print_width": "200px", 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "d_amount", 
+  "fieldtype": "Currency", 
+  "label": "Amount", 
+  "oldfieldname": "d_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "d_modified_amount", 
+  "fieldtype": "Currency", 
+  "label": "Modified Amount", 
+  "options": "Company:company:default_currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "d_depends_on_lwp", 
+  "fieldtype": "Check", 
+  "label": "Depends on LWP"
+ }
+]

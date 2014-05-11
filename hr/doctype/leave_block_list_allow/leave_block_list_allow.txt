@@ -1,0 +1,38 @@
+[
+ {
+  "creation": "2013-02-22 01:27:47", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:10", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_user", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Allow User", 
+  "name": "__common__", 
+  "options": "Profile", 
+  "parent": "Leave Block List Allow", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "print_width": "200px", 
+  "reqd": 1, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Leave Block List Allow"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

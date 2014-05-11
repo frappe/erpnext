@@ -1,0 +1,127 @@
+[
+ {
+  "creation": "2013-06-19 15:57:32", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:58:56", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Default settings for Shopping Cart", 
+  "doctype": "DocType", 
+  "icon": "icon-shopping-cart", 
+  "issingle": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Shopping Cart Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Shopping Cart Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "Website Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Shopping Cart Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "label": "Enable Shopping Cart"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_2", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "default_territory", 
+  "fieldtype": "Link", 
+  "label": "Default Territory", 
+  "options": "Territory", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_4", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "default_customer_group", 
+  "fieldtype": "Link", 
+  "label": "Default Customer Group", 
+  "options": "Customer Group", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quotation_series", 
+  "fieldtype": "Select", 
+  "label": "Quotation Series", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_6", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_lists", 
+  "fieldtype": "Table", 
+  "label": "Shopping Cart Price Lists", 
+  "options": "Shopping Cart Price List", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_rules", 
+  "fieldtype": "Table", 
+  "label": "Shopping Cart Shipping Rules", 
+  "options": "Shopping Cart Shipping Rule", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_10", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_taxes_and_charges_masters", 
+  "fieldtype": "Table", 
+  "label": "Shopping Cart Taxes and Charges Masters", 
+  "options": "Shopping Cart Taxes and Charges Master", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

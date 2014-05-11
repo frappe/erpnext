@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2012-02-21 13:23:22", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:44:17", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-th", 
+  "module": "Stock", 
+  "name": "__common__", 
+  "page_name": "stock-home", 
+  "standard": "Yes", 
+  "title": "Stock Home"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "stock-home"
+ }
+]

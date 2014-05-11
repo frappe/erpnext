@@ -1,0 +1,497 @@
+[
+ {
+  "creation": "2013-03-25 10:53:52", 
+  "docstatus": 0, 
+  "modified": "2013-11-03 14:11:33", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "icon": "icon-file-text", 
+  "is_submittable": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "read_only_onload": 1, 
+  "search_fields": "voucher_type,posting_date, due_date, cheque_no"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Journal Voucher", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Journal Voucher", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Journal Voucher"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_type_and_date", 
+  "fieldtype": "Section Break", 
+  "label": "Voucher Type and Date", 
+  "options": "icon-flag"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "JV", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Voucher Type", 
+  "oldfieldname": "voucher_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nJournal Entry\nBank Voucher\nCash Voucher\nCredit Card Voucher\nDebit Note\nCredit Note\nContra Voucher\nExcise Voucher\nWrite Off Voucher\nOpening Entry", 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Posting Date", 
+  "no_copy": 1, 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "2_add_edit_gl_entries", 
+  "fieldtype": "Section Break", 
+  "label": "Journal Entries", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-table", 
+  "read_only": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "entries", 
+  "fieldtype": "Table", 
+  "label": "Entries", 
+  "oldfieldname": "entries", 
+  "oldfieldtype": "Table", 
+  "options": "Journal Voucher Detail", 
+  "print_hide": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break99", 
+  "fieldtype": "Section Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_debit", 
+  "fieldtype": "Currency", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Total Debit", 
+  "no_copy": 1, 
+  "oldfieldname": "total_debit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_credit", 
+  "fieldtype": "Currency", 
+  "in_filter": 1, 
+  "label": "Total Credit", 
+  "no_copy": 1, 
+  "oldfieldname": "total_credit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break99", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "difference", 
+  "fieldtype": "Currency", 
+  "label": "Difference", 
+  "no_copy": 1, 
+  "oldfieldname": "difference", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_balance", 
+  "fieldtype": "Button", 
+  "label": "Make Difference Entry", 
+  "oldfieldtype": "Button", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "reference", 
+  "fieldtype": "Section Break", 
+  "label": "Reference", 
+  "options": "icon-pushpin", 
+  "read_only": 0
+ }, 
+ {
+  "description": "eg. Cheque Number", 
+  "doctype": "DocField", 
+  "fieldname": "cheque_no", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Reference Number", 
+  "no_copy": 1, 
+  "oldfieldname": "cheque_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cheque_date", 
+  "fieldtype": "Date", 
+  "label": "Reference Date", 
+  "no_copy": 1, 
+  "oldfieldname": "cheque_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "clearance_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Clearance Date", 
+  "no_copy": 1, 
+  "oldfieldname": "clearance_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break98", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "user_remark", 
+  "fieldtype": "Small Text", 
+  "in_filter": 1, 
+  "label": "User Remark", 
+  "no_copy": 1, 
+  "oldfieldname": "user_remark", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 0
+ }, 
+ {
+  "description": "User Remark will be added to Auto Remark", 
+  "doctype": "DocField", 
+  "fieldname": "remark", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 0, 
+  "label": "Remark", 
+  "no_copy": 1, 
+  "oldfieldname": "remark", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bill_no", 
+  "fieldtype": "Data", 
+  "in_list_view": 0, 
+  "label": "Bill No", 
+  "oldfieldname": "bill_no", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bill_date", 
+  "fieldtype": "Date", 
+  "label": "Bill Date", 
+  "oldfieldname": "bill_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "due_date", 
+  "fieldtype": "Date", 
+  "label": "Due Date", 
+  "oldfieldname": "due_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "addtional_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "default": "No", 
+  "description": "Considered as Opening Balance", 
+  "doctype": "DocField", 
+  "fieldname": "is_opening", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Is Opening", 
+  "oldfieldname": "is_opening", 
+  "oldfieldtype": "Select", 
+  "options": "No\nYes", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "search_index": 1
+ }, 
+ {
+  "description": "Actual Posting Date", 
+  "doctype": "DocField", 
+  "fieldname": "aging_date", 
+  "fieldtype": "Date", 
+  "label": "Aging Date", 
+  "no_copy": 0, 
+  "oldfieldname": "aging_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "default": "Accounts Receivable", 
+  "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
+  "doctype": "DocField", 
+  "fieldname": "write_off_based_on", 
+  "fieldtype": "Select", 
+  "label": "Write Off Based On", 
+  "options": "Accounts Receivable\nAccounts Payable", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
+  "doctype": "DocField", 
+  "fieldname": "write_off_amount", 
+  "fieldtype": "Currency", 
+  "label": "Write Off Amount <=", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "depends_on": "eval:doc.voucher_type == 'Write Off Voucher'", 
+  "doctype": "DocField", 
+  "fieldname": "get_outstanding_invoices", 
+  "fieldtype": "Button", 
+  "label": "Get Outstanding Invoices", 
+  "options": "get_outstanding_invoices", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Link", 
+  "label": "Letter Head", 
+  "options": "Letter Head"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "read_only": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pay_to_recd_from", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Pay To / Recd From", 
+  "no_copy": 1, 
+  "print_hide": 0, 
+  "read_only": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Total Amount", 
+  "no_copy": 1, 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_amount_in_words", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Total Amount in Words", 
+  "no_copy": 1, 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "label": "Print Heading", 
+  "no_copy": 1, 
+  "oldfieldname": "select_print_heading", 
+  "oldfieldtype": "Link", 
+  "options": "Print Heading", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Link", 
+  "options": "Journal Voucher", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Auditor", 
+  "submit": 0, 
+  "write": 0
+ }
+]

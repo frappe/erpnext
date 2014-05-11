@@ -1,0 +1,23 @@
+[
+ {
+  "creation": "2013-05-03 14:55:53", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 12:28:00", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select\n    po_item.item_code as \"Item Code:Link/Item:120\",\n\tpo_item.item_name as \"Item Name::120\",\n\tpo_item.description as \"Description::150\",\n\tpo_item.qty as \"Qty:Float:100\",\n\tpo_item.stock_uom as \"UOM:Link/UOM:80\",\n\tpo_item.purchase_rate as \"Rate:Currency:120\",\n\tpo_item.amount as \"Amount:Currency:120\",\n\tpo.name as \"Purchase Order:Link/Purchase Order:120\",\n\tpo.transaction_date as \"Transaction Date:Date:140\",\n\tpo.supplier as \"Supplier:Link/Supplier:130\",\n\tpo_item.project_name as \"Project:Link/Project:130\",\n\tifnull(po_item.received_qty, 0) as \"Received Qty:Float:120\"\nfrom\n\t`tabPurchase Order` po, `tabPurchase Order Item` po_item\nwhere\n\tpo.name = po_item.parent and po.docstatus = 1\norder by po.name desc", 
+  "ref_doctype": "Purchase Order", 
+  "report_name": "Item-wise Purchase History", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Item-wise Purchase History"
+ }
+]

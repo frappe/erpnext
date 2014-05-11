@@ -1,0 +1,115 @@
+[
+ {
+  "creation": "2013-01-25 11:35:08", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:46:46", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Set prefix for numbering series on your transactions", 
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 1, 
+  "icon": "icon-sort-by-order", 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Naming Series", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Naming Series", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Naming Series"
+ }, 
+ {
+  "description": "Set prefix for numbering series on your transactions", 
+  "doctype": "DocField", 
+  "fieldname": "setup_series", 
+  "fieldtype": "Section Break", 
+  "label": "Setup Series"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "select_doc_for_series", 
+  "fieldtype": "Select", 
+  "label": "Select Transaction"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "help_html", 
+  "fieldtype": "HTML", 
+  "label": "Help HTML", 
+  "options": "<div class=\"well\">\nEdit list of Series in the box below. Rules:\n<ul>\n<li>Each Series Prefix on a new line.</li>\n<li>Allowed special characters are \"/\" and \"-\"</li>\n<li>Optionally, set the number of digits in the series using dot (.) followed by hashes (#). For example, \".####\" means that the series will have four digits. Default is five digits.</li>\n</ul>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\nINV-.####<br>\n</div>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "set_options", 
+  "fieldtype": "Text", 
+  "label": "Series List for this Transaction"
+ }, 
+ {
+  "description": "Check this if you want to force the user to select a series before saving. There will be no default if you check this.", 
+  "doctype": "DocField", 
+  "fieldname": "user_must_always_select", 
+  "fieldtype": "Check", 
+  "label": "User must always select"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "update", 
+  "fieldtype": "Button", 
+  "label": "Update"
+ }, 
+ {
+  "description": "Change the starting / current sequence number of an existing series.", 
+  "doctype": "DocField", 
+  "fieldname": "update_series", 
+  "fieldtype": "Section Break", 
+  "label": "Update Series"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prefix", 
+  "fieldtype": "Select", 
+  "label": "Prefix"
+ }, 
+ {
+  "description": "This is the number of the last created transaction with this prefix", 
+  "doctype": "DocField", 
+  "fieldname": "current_value", 
+  "fieldtype": "Int", 
+  "label": "Current Value"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "update_series_start", 
+  "fieldtype": "Button", 
+  "label": "Update Series Number", 
+  "options": "update_series_start"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

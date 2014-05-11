@@ -1,0 +1,20 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2011-08-23 16:49:40", 
+  "modified_by": "Administrator", 
+  "modified": "2011-10-19 14:12:11"
+ }, 
+ {
+  "name": "__common__", 
+  "module": "Stock", 
+  "standard": "Yes", 
+  "html": "<html>\n<head>\n\n<script>\nfunction replaceAll(s,s1,s2){ return s.split(s1).join(s2);}\n\nfunction get_letter_head() {\n\t// add letter head\n\tvar cp = locals['Control Panel']['Control Panel'];\n\tif(doc.letter_head)\n\t\tvar lh= cstr(_p.letter_heads[doc.letter_head]);\n\telse if(cp.letter_head)\n\t\tvar lh= cp.letter_head;\n\telse \n\t\tvar lh= '';\n\t\t\n\treturn lh;\n}\n\n</script>\n<style>\n.cust_tbl { border-collapse:collapse; }\n.cust_tbl td { border:1px solid #848484; font-size: 13px}\n.large_font td {font-size: 13px}\n</style>\n</head>\n\n<body>\n<script>\nreplaceAll(doc.print_packing_slip,'[HEADER GOES HERE]',get_letter_head());\n</script>\n</body>\n</html>", 
+  "doctype": "Print Format"
+ }, 
+ {
+  "name": "Delivery Note Packing List Wise", 
+  "doctype": "Print Format"
+ }
+]

@@ -1,0 +1,2134 @@
+{
+ "name": "Portugal - Template do Plano de Contas SNC", 
+ "root": {
+  "children": [
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Resultado l\u00edquido", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Imposto estimado para o per\u00edodo", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Imposto diferido", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Impostos sobre o rendimento do per\u00edodo", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Resultado antes de impostos", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Resultado l\u00edquido do per\u00edodo", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Dividendos antecipados", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Resultados"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Edif\u00edcios e outras constru\u00e7\u00f5es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Deprecia\u00e7\u00f5es acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Terrenos e recursos naturais", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Outras propriedades de investimento", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Propriedades de investimento", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Terrenos e recursos naturais", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipamento administrativo", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipamento de transporte", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipamento b\u00e1sico", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Edif\u00edcios e outras constru\u00e7\u00f5es", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Equipamentos biol\u00f3gicos", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Deprecia\u00e7\u00f5es acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Outros activos fixos tang\u00edveis", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Activo fixos tang\u00edveis", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Detidos at\u00e9 \u00e0 maturidade", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Ac\u00e7\u00f5es da sgm (6500x1,00)", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Outros investimentos financeiros", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Participa\u00e7\u00f5es de capital", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Investimentos noutras empresas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Investimentos em entidades conjuntamente controladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Investimentos em associadas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Empr\u00e9stimos concedidos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital outros m\u00e9todos", 
+          "root_type": "Asset"
+         }, 
+         {
+          "name": "Participa\u00e7\u00f5es de capital m\u00e9todo da equiv. patrimonial", 
+          "root_type": "Asset"
+         }
+        ], 
+        "name": "Investimentos em subsidi\u00e1rias", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Investimentos financeiros", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Activos n\u00e3o correntes detidos para venda", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos intang\u00edveis em curso", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Activos fixos tang\u00edveis em curso", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Propriedades de investimento em curso", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Investimentos financeiros em curso", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Adiantamentos por conta de investimentos", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Investimentos em curso", 
+      "root_type": "Asset"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Outros activos intang\u00edveis", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Goodwill", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Projectos de desenvolvimento", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Programas de computador", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Deprecia\u00e7\u00f5es acumuladas", 
+        "root_type": "Asset"
+       }, 
+       {
+        "name": "Propriedade industrial", 
+        "root_type": "Asset"
+       }
+      ], 
+      "name": "Activos intang\u00edveis", 
+      "root_type": "Asset"
+     }
+    ], 
+    "name": "Investimentos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Activos financeiros"
+         }, 
+         {
+          "name": "Passivos financeiros"
+         }
+        ], 
+        "name": "Instrumentos financeiros detidos para negocia\u00e7\u00e3o"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Potencialmente desfavor\u00e1veis"
+         }, 
+         {
+          "name": "Potencialmente favor\u00e1veis"
+         }
+        ], 
+        "name": "Derivados"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros activos financeiros"
+         }, 
+         {
+          "name": "Outros passivos financeiros"
+         }
+        ], 
+        "name": "Outros activos e passivos financeiros"
+       }
+      ], 
+      "name": "Outros instrumentos financeiros"
+     }, 
+     {
+      "name": "Caixa"
+     }, 
+     {
+      "name": "Dep\u00f3sitos \u00e0 ordem"
+     }, 
+     {
+      "name": "Outros dep\u00f3sitos banc\u00e1rios"
+     }
+    ], 
+    "name": "Meios financeiros l\u00edquidos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mercadorias em tr\u00e2nsito", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mercadorias em poder de terceiros", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Mercadorias", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Produtos e trabalhos em curso", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Produtos e trabalhos em curso", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Produtos acabados e interm\u00e9dios", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mercadorias", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Reclassifica\u00e7\u00e3o e regular. de invent. e activos biol\u00f3g.", 
+      "root_type": "Expense"
+     }, 
+     {
+      "name": "Adiantamentos por conta de compras", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mat\u00e9rias subsidi\u00e1rias", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Embalagens", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Materiais diversos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mat\u00e9rias em tr\u00e2nsito", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mat\u00e9rias primas", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Devolu\u00e7\u00f5es de compras", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Descontos e abatimentos em compras", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mercadorias", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Compras", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Produtos em poder de terceiros", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Produtos acabados e interm\u00e9dios", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Subprodutos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Desperd\u00edcios, res\u00edduos e refugos", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Animais", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Plantas", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Consum\u00edveis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Plantas", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Animais", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "De produ\u00e7\u00e3o", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Activos biol\u00f3gicos", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Invent\u00e1rios e activos biol\u00f3gicos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Outros servi\u00e7os", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Limpeza, higiene e conforto", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Contencioso e notariado", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Royalties", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Seguros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Rendas e alugueres", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Comunica\u00e7\u00e3o", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Despesas de representa\u00e7\u00e3o", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Servi\u00e7os diversos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Subcontratos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Electricidade", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Combust\u00edveis", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "\u00c1gua", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Energia e flu\u00eddos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Transporte de pessoal", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Transportes de mercadorias", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Desloca\u00e7\u00f5es e estadas", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Desloca\u00e7\u00f5es, estadas e transportes", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Publicidade e propaganda", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Conserva\u00e7\u00e3o e repara\u00e7\u00e3o", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Comiss\u00f5es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Honor\u00e1rios", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Vigil\u00e2ncia e seguran\u00e7a", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Trabalhos especializados", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Trabalhos especializados", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Livros de documenta\u00e7\u00e3o t\u00e9cnica", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Material de escrit\u00f3rio", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Artigos de oferta", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Ferramentas e utens\u00edlios de desgaste r\u00e1pido", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Materiais", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Fornecimentos e servi\u00e7os externos", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Mercadorias", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos (compras)", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mat\u00e9rias primas, subsidi\u00e1rias e de consumo", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Custo das mercadorias vendidas e mat\u00e9rias consumidas", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Gastos de ac\u00e7\u00e3o social", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Seguros de acidentes no trabalho e doen\u00e7as profissionais", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Encargos sobre remunera\u00e7\u00f5es", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Indemniza\u00e7\u00f5es", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Outros gastos com o pessoal", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Remunera\u00e7\u00f5es dos \u00f3rg\u00e3os sociais", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Remunera\u00e7\u00f5es do pessoal", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Pr\u00e9mios para pens\u00f5es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros benef\u00edcios", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Benef\u00edcios p\u00f3s emprego", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Gastos com o pessoal", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Em activos n\u00e3o correntes detidos para venda", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em activos fixos tang\u00edveis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em propriedades de investimento", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em investimentos em curso", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em invent\u00e1rios", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em investimentos financeiros", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros devedores", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Clientes", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Em d\u00edvidas a receber", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em activos intang\u00edveis", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Perdas por imparidade", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos fixos tang\u00edveis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Activos intang\u00edveis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Propriedades de investimento", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Gastos de deprecia\u00e7\u00e3o e de amortiza\u00e7\u00e3o", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Impostos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Contratos onerosos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Garantias a clientes", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Reestrutura\u00e7\u00e3o", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Outras provis\u00f5es", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Processos judiciais em curso", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Mat\u00e9rias ambientais", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Acidentes de trabalho e doen\u00e7as profissionais", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Provis\u00f5es do per\u00edodo", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Em activos biol\u00f3gicos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em instrumentos financeiros", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em investimentos financeiros", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Em propriedades de investimento", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Perdas por redu\u00e7\u00f5es de justo valor", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Outros juros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Juros de financiamento obtidos", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Juros suportados", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outras", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Relativos a financiamentos obtidos", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Diferen\u00e7as de c\u00e2mbio desfavor\u00e1veis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Relativos a financiamentos obtidos", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Outros gastos e perdas de financiamento", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Gastos e perdas de financiamento", 
+      "root_type": "Expense"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Taxas", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Impostos directos", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Impostos indirectos", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Impostos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Gastos em propriedades de investimento", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Abates", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sinistros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros gastos e perdas", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Gastos e perdas em investimentos n\u00e3o financeiros", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outras perdas", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Quebras", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Sinistros", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Perdas em invent\u00e1rios", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros gastos e perdas", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Cobertura de preju\u00edzos", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Gastos e perdas em subsid. , assoc. e empreend. conjuntos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "D\u00edvidas incobr\u00e1veis", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ofertas e amostras de invent\u00e1rios", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Quotiza\u00e7\u00f5es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros n\u00e3o especificados", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Donativos", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Perdas em instrumentos financeiros", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Insufici\u00eancia da estimativa para impostos", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Outros", 
+        "root_type": "Expense"
+       }, 
+       {
+        "name": "Descontos de pronto pagamento concedidos", 
+        "root_type": "Expense"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Cobertura de preju\u00edzos", 
+          "root_type": "Expense"
+         }, 
+         {
+          "name": "Outros gastos e perdas", 
+          "root_type": "Expense"
+         }
+        ], 
+        "name": "Gastos e perdas nos restantes investimentos financeiros", 
+        "root_type": "Expense"
+       }
+      ], 
+      "name": "Outros gastos e perdas", 
+      "root_type": "Expense"
+     }
+    ], 
+    "name": "Gastos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Desempenho de cargos sociais noutras empresas", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Estudos, projectos e assist\u00eancia tecnol\u00f3gica", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Aluguer de equipamento", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Servi\u00e7os sociais", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Outros rendimentos suplementares", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Royalties", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Rendimentos suplementares", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros rendimentos e ganhos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Rendas e outros rendimentos em propriedades de investimento", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sinistros", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Rendimentos e ganhos em investimentos n\u00e3o financeiros", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Diferen\u00e7as de c\u00e2mbio favor\u00e1veis", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Outros rendimentos e ganhos", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Rendimentos e ganhos nos restantes activos financeiros", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aplica\u00e7\u00e3o do m\u00e9todo da equival\u00eancia patrimonial", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Aliena\u00e7\u00f5es", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Outros rendimentos e ganhos", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Rendimentos e ganhos em subsidi\u00e1rias, associadas e empr", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Recupera\u00e7\u00e3o de d\u00edvidas a receber", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Descontos de pronto pagamento obtidos", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Sinistros", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Sobras", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Outros ganhos", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Ganhos em invent\u00e1rios", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Correc\u00e7\u00f5es relativas a per\u00edodos anteriores", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Ganhos em outros instrumentos financeiros", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Restitui\u00e7\u00e3o de impostos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Outros n\u00e3o especificados", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Excesso da estimativa para impostos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Imputa\u00e7\u00e3o de subs\u00eddios para investimentos", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Outros", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Outros rendimentos e ganhos", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Em activos fixos tang\u00edveis", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Em propriedades de investimento", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Em activos intang\u00edveis", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Em investimentos em curso", 
+          "root_type": "Income"
+         }, 
+         {
+          "children": [
+           {
+            "name": "Outros devedores", 
+            "root_type": "Income"
+           }, 
+           {
+            "name": "Clientes", 
+            "root_type": "Income"
+           }
+          ], 
+          "name": "Em d\u00edvidas a receber", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Em invent\u00e1rios", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Em investimentos financeiros", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Em activos n\u00e3o correntes detidos para venda", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "De perdas por imparidade", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Activos intang\u00edveis", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Activos fixos tang\u00edveis", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Propriedades de investimento", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "De deprecia\u00e7\u00f5es e de amortiza\u00e7\u00f5es", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Impostos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Acidentes no trabalho e doen\u00e7as profissionais", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Outras provis\u00f5es", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Processos judiciais em curso", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Garantias a clientes", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Reestrutura\u00e7\u00e3o", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Contratos onerosos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "Mat\u00e9rias ambientais", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "De provis\u00f5es", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Revers\u00f5es", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Em activos biol\u00f3gicos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Em investimentos financeiros", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Em propriedades de investimento", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Em instrumentos financeiros", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Ganhos por aumentos de justo valor", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Mercadoria", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Produtos acabados e interm\u00e9dios", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Descontos e abatimentos em vendas", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Iva das vendas com imposto inclu\u00eddo", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Devolu\u00e7\u00f5es de vendas", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Vendas", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Servi\u00e7os secund\u00e1rios", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Iva dos servi\u00e7os com imposto inclu\u00eddo", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Servi\u00e7o a", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Servi\u00e7o b", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Descontos e abatimentos", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Presta\u00e7\u00f5es de servi\u00e7os", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos biol\u00f3gicos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Subprodutos, desperd\u00edcios, res\u00edduos e refugos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Produtos e trabalhos em curso", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Produtos acabados e interm\u00e9dios", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Varia\u00e7\u00f5es nos invent\u00e1rios da produ\u00e7\u00e3o", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Activos por gastos diferidos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Activos intang\u00edveis", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Activos fixos tang\u00edveis", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Propriedades de investimento", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Trabalhos para a pr\u00f3pria entidade", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Outras", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De subsidi\u00e1rias", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De associadas e empreendimentos conjuntos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De aplica\u00e7\u00f5es de meios financeiros l\u00edquidos", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Dividendos obtidos", 
+        "root_type": "Income"
+       }, 
+       {
+        "children": [
+         {
+          "name": "De outras aplica\u00e7\u00f5es de meios financeiros l\u00edquidos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De financiamentos concedidos a associadas e emp. conjun", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De dep\u00f3sitos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De outros financiamentos obtidos", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De financiamentos concedidos a subsidi\u00e1rias", 
+          "root_type": "Income"
+         }, 
+         {
+          "name": "De financiamentos obtidos", 
+          "root_type": "Income"
+         }
+        ], 
+        "name": "Juros obtidos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Outros rendimentos similares", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Juros, dividendos e outros rendimentos similares", 
+      "root_type": "Income"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Subs\u00eddios do estado e outros entes p\u00fablicos", 
+        "root_type": "Income"
+       }, 
+       {
+        "name": "Subs\u00eddios de outras entidades", 
+        "root_type": "Income"
+       }
+      ], 
+      "name": "Subs\u00eddios \u00e0 explora\u00e7\u00e3o", 
+      "root_type": "Income"
+     }
+    ], 
+    "name": "Rendimentos"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "name": "Lucros dispon\u00edveis", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Empr\u00e9stimos concedidos empresa m\u00e3e", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Accionistas c. subscri\u00e7\u00e3o", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Quotas n\u00e3o liberadas", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Adiantamentos por conta de lucros", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Resultados atribu\u00eddos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outras opera\u00e7\u00f5es", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Accionistas/s\u00f3cios", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Tributos das autarquias locais", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outras tributa\u00e7\u00f5es", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Reten\u00e7\u00e3o de impostos sobre rendimentos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Iva a recuperar", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva apuramento", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva liquida\u00e7\u00f5es oficiosas", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva reembolsos pedidos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva dedut\u00edvel", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva suportado", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva a pagar", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva regulariza\u00e7\u00f5es", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Iva liquidado", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Imposto sobre o valor acrescentado", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Imposto sobre o rendimento", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outros impostos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Contribui\u00e7\u00f5es para a seguran\u00e7a social", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Estado e outros entes p\u00fablicos", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Acidentes de trabalho e doen\u00e7as profissionais", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Impostos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Contratos onerosos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Processos judiciais em curso", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outras provis\u00f5es", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Garantias a clientes", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Mat\u00e9rias ambientais", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Reestrutura\u00e7\u00e3o", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Provis\u00f5es", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Rendimentos a reconhecer", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Gastos a reconhecer", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Diferimentos", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Adiantamentos de clientes"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Clientes empresas associadas"
+         }, 
+         {
+          "name": "Clientes gerais"
+         }, 
+         {
+          "name": "Clientes empresas subsidi\u00e1rias"
+         }, 
+         {
+          "name": "Clientes empresa m\u00e3e"
+         }, 
+         {
+          "name": "Clientes empreendimentos conjuntos"
+         }, 
+         {
+          "name": "Clientes outras partes relacionadas"
+         }
+        ], 
+        "name": "Clientes c/c"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Clientes gerais"
+         }, 
+         {
+          "name": "Clientes empresa m\u00e3e"
+         }, 
+         {
+          "name": "Clientes empresas subsidi\u00e1rias"
+         }, 
+         {
+          "name": "Clientes outras partes relacionadas"
+         }, 
+         {
+          "name": "Clientes empresas associadas"
+         }, 
+         {
+          "name": "Clientes empreendimentos conjuntos"
+         }
+        ], 
+        "name": "Clientes t\u00edtulos a receber"
+       }
+      ], 
+      "name": "Clientes"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Com o pessoal"
+         }, 
+         {
+          "name": "Com os \u00f3rg\u00e3os sociais"
+         }
+        ], 
+        "name": "Outras opera\u00e7\u00f5es"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Aos \u00f3rg\u00e3os sociais"
+         }, 
+         {
+          "name": "Ao pessoal"
+         }
+        ], 
+        "name": "Adiantamentos"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Ao pessoal"
+         }, 
+         {
+          "name": "Aos \u00f3rg\u00e3os sociais"
+         }
+        ], 
+        "name": "Remunera\u00e7\u00f5es a pagar"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Do pessoal"
+         }, 
+         {
+          "name": "Dos \u00f3rg\u00e3os sociais"
+         }
+        ], 
+        "name": "Cau\u00e7\u00f5es"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas"
+       }
+      ], 
+      "name": "Pessoal"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Fornecedores gerais"
+         }, 
+         {
+          "name": "Fornecedores empresas subsidi\u00e1rias"
+         }, 
+         {
+          "name": "Fornecedores outras partes relacionadas"
+         }, 
+         {
+          "name": "Fornecedores empreendimentos conjuntos"
+         }, 
+         {
+          "name": "Fornecedores empresa m\u00e3e"
+         }, 
+         {
+          "name": "Fornecedores empresas associadas"
+         }
+        ], 
+        "name": "Fornecedores c/c"
+       }, 
+       {
+        "name": "Adiantamentos a fornecedores"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas"
+       }, 
+       {
+        "name": "Facturas em recep\u00e7\u00e3o e confer\u00eancia"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Fornecedores outras partes relacionadas"
+         }, 
+         {
+          "name": "Fornecedores empreendimentos conjuntos"
+         }, 
+         {
+          "name": "Fornecedores empresas subsidi\u00e1rias"
+         }, 
+         {
+          "name": "Fornecedores empresa m\u00e3e"
+         }, 
+         {
+          "name": "Fornecedores gerais"
+         }, 
+         {
+          "name": "Fornecedores empresas associadas"
+         }
+        ], 
+        "name": "Fornecedores t\u00edtulos a pagar"
+       }
+      ], 
+      "name": "Fornecedores"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Empr\u00e9stimos banc\u00e1rios", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Loca\u00e7\u00f5es financeiras", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Descobertos banc\u00e1rios", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Institui\u00e7\u00f5es de cr\u00e9dito e sociedades financeiras", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Outros participantes suprimentos e outros m\u00fatuos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Empresa m\u00e3e suprimentos e outros m\u00fatuos", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Participantes de capital", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Empr\u00e9stimos por obriga\u00e7\u00f5es", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Mercado de valores mobili\u00e1rios", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outros financiadores", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Subsidi\u00e1rias, associadas e empreendimentos conjuntos", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Financiamentos obtidos", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Outros devedores e credores", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Perdas por imparidade acumuladas", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Credores por subscri\u00e7\u00f5es n\u00e3o liberadas", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Benef\u00edcios p\u00f3s emprego", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Adiantamentos a fornecedores de investimentos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Facturas em recep\u00e7\u00e3o e confer\u00eancia", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Fornecedores de investimentos contas gerais", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Fornecedores de investimentos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Credores por acr\u00e9scimos de gastos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Devedores por acr\u00e9scimo de rendimentos", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Devedores e credores por acr\u00e9scimos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Adiantamentos por conta de vendas", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Activos por impostos diferidos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Passivos por impostos diferidos", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Impostos diferidos", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Outras contas a receber e a pagar", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Contas a receber e a pagar"
+   }, 
+   {
+    "children": [
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Antes de imposto sobre o rendimento", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Impostos diferidos", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Reavalia\u00e7\u00f5es decorrentes de diplomas legais", 
+        "root_type": "Liability"
+       }, 
+       {
+        "children": [
+         {
+          "name": "Impostos diferidos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Antes de imposto sobre o rendimento", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Outros excedentes", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Excedentes de revalor. de activos fixos tang\u00edveis e int", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Doa\u00e7\u00f5es", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Ajustamentos por impostos diferidos", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Subs\u00eddios", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outras", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Diferen\u00e7as de convers\u00e3o de demonstra\u00e7\u00f5es financeiras", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Outras varia\u00e7\u00f5es no capital pr\u00f3prio", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Outros instrumentos de capital pr\u00f3prio", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Resultados transitados", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Capital", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Outras reservas", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Reservas legais", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Reservas", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "children": [
+         {
+          "name": "Lucros n\u00e3o atribu\u00eddos", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Decorrentes de outras varia\u00e7\u00f5es nos capitais pr\u00f3prios d", 
+          "root_type": "Liability"
+         }, 
+         {
+          "name": "Ajustamentos de transi\u00e7\u00e3o", 
+          "root_type": "Liability"
+         }
+        ], 
+        "name": "Relacionados com o m\u00e9todo da equival\u00eancia patrimonial", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Outros", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Ajustamentos em activos financeiros", 
+      "root_type": "Liability"
+     }, 
+     {
+      "children": [
+       {
+        "name": "Descontos e pr\u00e9mios", 
+        "root_type": "Liability"
+       }, 
+       {
+        "name": "Valor nominal", 
+        "root_type": "Liability"
+       }
+      ], 
+      "name": "Ac\u00e7\u00f5es (quotas) pr\u00f3prias", 
+      "root_type": "Liability"
+     }, 
+     {
+      "name": "Pr\u00e9mios de emiss\u00e3o", 
+      "root_type": "Liability"
+     }
+    ], 
+    "name": "Capital, reservas e resultados transitados"
+   }
+  ], 
+  "name": "SNC Portugal"
+ }
+}

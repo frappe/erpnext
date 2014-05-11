@@ -1,0 +1,94 @@
+[
+ {
+  "creation": "2013-01-10 16:34:24", 
+  "docstatus": 0, 
+  "modified": "2013-09-10 17:20:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "icon": "icon-cog", 
+  "in_create": 0, 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "SMS Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "SMS Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "SMS Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "Eg. smsgateway.com/api/send_sms.cgi", 
+  "doctype": "DocField", 
+  "fieldname": "sms_gateway_url", 
+  "fieldtype": "Data", 
+  "label": "SMS Gateway URL", 
+  "reqd": 1
+ }, 
+ {
+  "description": "Enter url parameter for message", 
+  "doctype": "DocField", 
+  "fieldname": "message_parameter", 
+  "fieldtype": "Data", 
+  "label": "Message Parameter", 
+  "reqd": 1
+ }, 
+ {
+  "description": "Enter url parameter for receiver nos", 
+  "doctype": "DocField", 
+  "fieldname": "receiver_parameter", 
+  "fieldtype": "Data", 
+  "label": "Receiver Parameter", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "static_parameters", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)", 
+  "doctype": "DocField", 
+  "fieldname": "static_parameter_details", 
+  "fieldtype": "Table", 
+  "label": "Static Parameters", 
+  "options": "SMS Parameter"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

@@ -1,0 +1,177 @@
+[
+ {
+  "creation": "2013-02-20 19:10:38", 
+  "docstatus": 0, 
+  "modified": "2013-12-12 17:41:52", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_import": 1, 
+  "autoname": "LAL/.#####", 
+  "doctype": "DocType", 
+  "icon": "icon-ok", 
+  "is_submittable": 1, 
+  "module": "HR", 
+  "name": "__common__", 
+  "search_fields": "employee,employee_name,leave_type,total_leaves_allocated,fiscal_year"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Leave Allocation", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Leave Allocation", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Leave Allocation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Employee Name", 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Leave Type", 
+  "oldfieldname": "leave_type", 
+  "oldfieldtype": "Link", 
+  "options": "link:Leave Type", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "default": "Today", 
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "hidden": 0, 
+  "label": "Posting Date", 
+  "no_copy": 1, 
+  "oldfieldname": "date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Data", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "hidden": 0, 
+  "label": "Description", 
+  "oldfieldname": "reason", 
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "carry_forward", 
+  "fieldtype": "Check", 
+  "label": "Carry Forward"
+ }, 
+ {
+  "depends_on": "carry_forward", 
+  "doctype": "DocField", 
+  "fieldname": "carry_forwarded_leaves", 
+  "fieldtype": "Float", 
+  "label": "Carry Forwarded Leaves", 
+  "read_only": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "new_leaves_allocated", 
+  "fieldtype": "Float", 
+  "label": "New Leaves Allocated"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_leaves_allocated", 
+  "fieldtype": "Float", 
+  "label": "Total Leaves Allocated", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "owner", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-05-13 14:04:03", 
+  "docstatus": 0, 
+  "modified": "2013-05-13 14:32:42", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 0, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Attendance", 
+  "report_name": "Monthly Attendance Sheet", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Monthly Attendance Sheet"
+ }
+]

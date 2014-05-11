@@ -1,0 +1,73 @@
+[
+ {
+  "creation": "2013-02-05 11:48:26", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:25:03", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:department_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-sitemap", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Department", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Department", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Department"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "department_name", 
+  "fieldtype": "Data", 
+  "label": "Department", 
+  "oldfieldname": "department_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "description": "Days for which Holidays are blocked for this department.", 
+  "doctype": "DocField", 
+  "fieldname": "leave_block_list", 
+  "fieldtype": "Link", 
+  "label": "Leave Block List", 
+  "options": "Leave Block List"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

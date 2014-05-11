@@ -1,0 +1,48 @@
+[
+ {
+  "creation": "2013-02-22 01:28:01", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "IISD/.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "oldfieldtype": "Data", 
+  "parent": "Item Quality Inspection Parameter", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Quality Inspection Parameter"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "specification", 
+  "in_filter": 0, 
+  "label": "Parameter", 
+  "oldfieldname": "specification", 
+  "print_width": "200px", 
+  "reqd": 1, 
+  "search_index": 0, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "value", 
+  "label": "Acceptance Criteria", 
+  "oldfieldname": "value"
+ }
+]

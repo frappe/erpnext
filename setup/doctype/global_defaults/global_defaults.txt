@@ -1,0 +1,194 @@
+[
+ {
+  "creation": "2013-05-02 17:53:24", 
+  "docstatus": 0, 
+  "modified": "2013-10-23 18:06:04", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "hide_toolbar": 0, 
+  "icon": "icon-cog", 
+  "in_create": 1, 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Global Defaults", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Global Defaults", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Global Defaults"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "date_and_number_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Date and Number Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "date_format", 
+  "fieldtype": "Select", 
+  "label": "Date Format", 
+  "options": "yyyy-mm-dd\ndd-mm-yyyy\ndd/mm/yyyy\nmm/dd/yyyy\nmm-dd-yyyy", 
+  "read_only": 0
+ }, 
+ {
+  "default": "This is the default number format. For currencies, please set the number format in the currency master.", 
+  "doctype": "DocField", 
+  "fieldname": "number_format", 
+  "fieldtype": "Select", 
+  "label": "Number Format", 
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###", 
+  "read_only": 0
+ }, 
+ {
+  "default": "3", 
+  "description": "Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3", 
+  "doctype": "DocField", 
+  "fieldname": "float_precision", 
+  "fieldtype": "Select", 
+  "label": "Float Precision", 
+  "options": "\n2\n3\n4\n5\n6", 
+  "read_only": 0
+ }, 
+ {
+  "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
+  "doctype": "DocField", 
+  "fieldname": "disable_rounded_total", 
+  "fieldtype": "Check", 
+  "label": "Disable Rounded Total", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency_settings", 
+  "fieldtype": "Section Break", 
+  "label": "Currency Settings"
+ }, 
+ {
+  "default": "INR", 
+  "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "options": "Currency", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Do not show any symbol like $ etc next to currencies.", 
+  "doctype": "DocField", 
+  "fieldname": "hide_currency_symbol", 
+  "fieldtype": "Select", 
+  "label": "Hide Currency Symbol", 
+  "options": "\nNo\nYes", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Section Break", 
+  "label": "Company Settings", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_company", 
+  "fieldtype": "Link", 
+  "label": "Default Company", 
+  "options": "Company", 
+  "read_only": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "current_fiscal_year", 
+  "fieldtype": "Link", 
+  "label": "Current Fiscal Year", 
+  "options": "Fiscal Year", 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "system", 
+  "fieldtype": "Section Break", 
+  "label": "System Settings", 
+  "read_only": 0
+ }, 
+ {
+  "description": "Session Expiry in Hours e.g. 06:00", 
+  "doctype": "DocField", 
+  "fieldname": "session_expiry", 
+  "fieldtype": "Data", 
+  "label": "Session Expiry", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "country", 
+  "fieldtype": "Select", 
+  "label": "Country", 
+  "options": "link:Country"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sms_sender_name", 
+  "fieldtype": "Data", 
+  "label": "SMS Sender Name", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break", 
+  "read_only": 0
+ }, 
+ {
+  "description": "For Server Side Print Formats", 
+  "doctype": "DocField", 
+  "fieldname": "print_style", 
+  "fieldtype": "Select", 
+  "label": "Print Format Style", 
+  "options": "Standard\nClassic\nModern\nSpartan", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "time_zone", 
+  "fieldtype": "Select", 
+  "label": "Time Zone"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

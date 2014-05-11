@@ -1,0 +1,15 @@
+<!-- TODO product listing -->
+<div class="container content">
+	<div style="height: 120px; overflow: hidden;">
+		<a href="{{ page_name }}">
+		{%- if website_image -%}
+		<img class="product-image" style="width: 80%; margin: auto;" src="{{ website_image }}">
+		{%- else -%}
+		{% include 'app/website/templates/html/product_missing_image.html' %}
+		{%- endif -%}
+		</a>
+	</div>
+	<div style="height: 100px; overflow: hidden; font-size: 80%;">
+		<h4 style="margin-bottom: 2px;"><a href="{{ page_name }}">{{ item_name }}</a></h4>
+	</div>
+</div>

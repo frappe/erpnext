@@ -1,0 +1,108 @@
+[
+ {
+  "creation": "2013-02-22 01:27:37", 
+  "docstatus": 0, 
+  "modified": "2013-11-03 14:11:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "no_copy": 0, 
+  "parent": "Bank Reconciliation Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Bank Reconciliation Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_id", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Voucher ID", 
+  "oldfieldname": "voucher_id", 
+  "oldfieldtype": "Link", 
+  "options": "Journal Voucher"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "against_account", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Against Account", 
+  "oldfieldname": "against_account", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "clearance_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Clearance Date", 
+  "oldfieldname": "clearance_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cheque_number", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Cheque Number", 
+  "oldfieldname": "cheque_number", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cheque_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Cheque Date", 
+  "oldfieldname": "cheque_date", 
+  "oldfieldtype": "Date", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "debit", 
+  "fieldtype": "Currency", 
+  "label": "Debit", 
+  "oldfieldname": "debit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit", 
+  "fieldtype": "Currency", 
+  "label": "Credit", 
+  "oldfieldname": "credit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }
+]

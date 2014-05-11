@@ -1,0 +1,91 @@
+[
+ {
+  "creation": "2013-06-25 11:04:03", 
+  "docstatus": 0, 
+  "modified": "2013-08-09 14:38:46", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Settings for Buying Module", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "Buying", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Buying Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Buying Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Buying Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supp_master_name", 
+  "fieldtype": "Select", 
+  "label": "Supplier Naming By", 
+  "options": "Supplier Name\nNaming Series"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_type", 
+  "fieldtype": "Link", 
+  "label": "Default Supplier Type", 
+  "options": "Supplier Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying_price_list", 
+  "fieldtype": "Link", 
+  "label": "Default Buying Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "maintain_same_rate", 
+  "fieldtype": "Check", 
+  "label": "Maintain same rate throughout purchase cycle"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "po_required", 
+  "fieldtype": "Select", 
+  "label": "Purchase Order Required", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "pr_required", 
+  "fieldtype": "Select", 
+  "label": "Purchase Receipt Required", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

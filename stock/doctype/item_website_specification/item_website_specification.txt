@@ -1,0 +1,45 @@
+[
+ {
+  "creation": "2013-02-22 01:28:01", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:10", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Table for Item that will be shown in Web Site", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Item Website Specification", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Website Specification"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "label", 
+  "fieldtype": "Data", 
+  "label": "Label", 
+  "print_width": "150px", 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "label": "Description", 
+  "print_width": "300px", 
+  "width": "300px"
+ }
+]

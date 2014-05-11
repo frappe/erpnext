@@ -1,0 +1,86 @@
+[
+ {
+  "creation": "2013-01-10 16:34:30", 
+  "docstatus": 0, 
+  "modified": "2013-07-25 17:39:14", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "icon": "icon-magic", 
+  "in_create": 0, 
+  "issingle": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Stock UOM Replace Utility", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Stock UOM Replace Utility", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Stock UOM Replace Utility"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "label": "Item", 
+  "options": "Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "current_stock_uom", 
+  "fieldtype": "Link", 
+  "label": "Current Stock UOM", 
+  "options": "UOM", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_stock_uom", 
+  "fieldtype": "Link", 
+  "label": "New Stock UOM", 
+  "options": "UOM"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "conversion_factor", 
+  "fieldtype": "Float", 
+  "label": "Conversion Factor"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "update", 
+  "fieldtype": "Button", 
+  "label": "Update", 
+  "options": "update_stock_uom"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Master Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Material Manager"
+ }
+]

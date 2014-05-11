@@ -1,0 +1,21 @@
+[
+ {
+  "creation": "2012-05-01 12:46:31", 
+  "docstatus": 0, 
+  "modified": "2013-01-21 18:40:20", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doc_type": "Journal Voucher", 
+  "doctype": "Print Format", 
+  "html": "<h3 align=\"center\"><script>doc.select_print_heading || \"Payment Receipt Note\"</script></h3>\n\n<table class='simpletable'>\n<tr>\n<td><b> Receipt No.: </b></td>\n<td><script>doc.name</script></td>\n</tr>\n<tr>\n<td><b> Date : </b></td>\n<td><script>date.str_to_user(doc.voucher_date)</script></td>\n</tr>      \n<tr>\n<td><b> Remark: </b></td>\n<td><script> doc.remark </script></td>\n</tr>\n<tr>\n<td><b> Received From: </b></td>\n<td><b><script> doc.pay_to_recd_from </script></b></td>\n</tr>\n</table>\n<br>\n\n<div><b><script>doc.total_amount</script></b> </td></div><br>\n<div style=\"text-align:left\"><b><script>doc.total_amount_in_words</script></b></div><br>\n<br>\n<table class=\"noborder\">\n<tr>\n<td style = \"text-align = right;\"><h3>For <script>doc.company</script>,</h3><br><div>(Authorised Signatory)</div></td>\n</tr>\n</table>", 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "standard": "Yes"
+ }, 
+ {
+  "doctype": "Print Format", 
+  "name": "Payment Receipt Voucher"
+ }
+]

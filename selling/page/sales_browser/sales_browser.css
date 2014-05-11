@@ -1,0 +1,14 @@
+span.tree-node-toolbar {
+	padding: 2px;
+	margin-left: 15px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	background-color: #ddd;
+}
+
+.tree-area a.selected {
+	font-weight: bold;
+	text-decoration: underline;
+}

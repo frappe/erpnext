@@ -1,0 +1,165 @@
+[
+ {
+  "creation": "2013-01-10 16:34:17", 
+  "docstatus": 0, 
+  "modified": "2013-10-28 15:42:38", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_email": 0, 
+  "autoname": "field:workstation_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-wrench", 
+  "module": "Manufacturing", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Workstation", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Workstation", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Manufacturing User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Workstation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "workstation_name", 
+  "fieldtype": "Data", 
+  "label": "Workstation Name", 
+  "oldfieldname": "workstation_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "capacity", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Capacity", 
+  "oldfieldname": "capacity", 
+  "oldfieldtype": "Data", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "capacity_units", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Capacity Units", 
+  "oldfieldname": "capacity_units", 
+  "oldfieldtype": "Select", 
+  "options": "\nUnits/Shifts\nUnits/Hour", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hour_rate_labour", 
+  "fieldtype": "Float", 
+  "label": "Hour Rate Labour", 
+  "oldfieldname": "hour_rate_labour", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "over_heads", 
+  "fieldtype": "Section Break", 
+  "label": "Overheads", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "description": "Electricity cost per hour", 
+  "doctype": "DocField", 
+  "fieldname": "hour_rate_electricity", 
+  "fieldtype": "Float", 
+  "label": "Electricity Cost", 
+  "oldfieldname": "hour_rate_electricity", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "description": "Consumable cost per hour", 
+  "doctype": "DocField", 
+  "fieldname": "hour_rate_consumable", 
+  "fieldtype": "Float", 
+  "label": "Consumable Cost", 
+  "oldfieldname": "hour_rate_consumable", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "description": "Rent per hour", 
+  "doctype": "DocField", 
+  "fieldname": "hour_rate_rent", 
+  "fieldtype": "Float", 
+  "label": "Rent Cost", 
+  "oldfieldname": "hour_rate_rent", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "overhead", 
+  "fieldtype": "Float", 
+  "label": "Overhead", 
+  "oldfieldname": "overhead", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hour_rate_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Hour Rate", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hour_rate", 
+  "fieldtype": "Float", 
+  "label": "Hour Rate", 
+  "oldfieldname": "hour_rate", 
+  "oldfieldtype": "Currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

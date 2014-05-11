@@ -1,0 +1,927 @@
+[
+ {
+  "creation": "2013-06-18 12:39:59", 
+  "docstatus": 0, 
+  "modified": "2013-11-03 14:20:16", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "allow_import": 1, 
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-file-text", 
+  "is_submittable": 1, 
+  "issingle": 0, 
+  "module": "Selling", 
+  "name": "__common__", 
+  "read_only_onload": 1, 
+  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Sales Order", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sales Order", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Sales Order"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "in_filter": 0, 
+  "oldfieldtype": "Column Break", 
+  "search_index": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "PI/2011/\nSO\nSO/10-11/\nSO1112", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Name", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Address", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "Contact Email", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "default": "Sales", 
+  "doctype": "DocField", 
+  "fieldname": "order_type", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Order Type", 
+  "oldfieldname": "order_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nSales\nMaintenance", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "description": "Select the relevant company name if you have multiple companies.", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "default": "Today", 
+  "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Sales Order Date", 
+  "no_copy": 1, 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "160px"
+ }, 
+ {
+  "depends_on": "eval:doc.order_type == 'Sales'", 
+  "doctype": "DocField", 
+  "fieldname": "delivery_date", 
+  "fieldtype": "Date", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Delivery Date", 
+  "oldfieldname": "delivery_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1, 
+  "width": "160px"
+ }, 
+ {
+  "description": "Customer's Purchase Order Number", 
+  "doctype": "DocField", 
+  "fieldname": "po_no", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "PO No", 
+  "oldfieldname": "po_no", 
+  "oldfieldtype": "Data", 
+  "print_hide": 0, 
+  "reqd": 0, 
+  "width": "100px"
+ }, 
+ {
+  "depends_on": "eval:doc.po_no", 
+  "description": "Customer's Purchase Order Date", 
+  "doctype": "DocField", 
+  "fieldname": "po_date", 
+  "fieldtype": "Date", 
+  "hidden": 0, 
+  "label": "PO Date", 
+  "oldfieldname": "po_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 0, 
+  "reqd": 0, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address_name", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "Shipping Address", 
+  "options": "Address", 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_address", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "in_filter": 0, 
+  "label": "Shipping Address", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sec_break45", 
+  "fieldtype": "Section Break", 
+  "label": "Currency and Price List", 
+  "options": "icon-tag"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "oldfieldname": "currency", 
+  "oldfieldtype": "Select", 
+  "options": "Currency", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "description": "Rate at which customer's currency is converted to company's base currency", 
+  "doctype": "DocField", 
+  "fieldname": "conversion_rate", 
+  "fieldtype": "Float", 
+  "label": "Exchange Rate", 
+  "oldfieldname": "conversion_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Select", 
+  "options": "Price List", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list_currency", 
+  "fieldtype": "Link", 
+  "label": "Price List Currency", 
+  "options": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Rate at which Price list currency is converted to company's base currency", 
+  "doctype": "DocField", 
+  "fieldname": "plc_conversion_rate", 
+  "fieldtype": "Float", 
+  "label": "Price List Exchange Rate", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "sales_order_details", 
+  "fieldtype": "Table", 
+  "label": "Sales Order Items", 
+  "oldfieldname": "sales_order_details", 
+  "oldfieldtype": "Table", 
+  "options": "Sales Order Item", 
+  "print_hide": 0, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Display all the individual items delivered with the main items", 
+  "doctype": "DocField", 
+  "fieldname": "packing_list", 
+  "fieldtype": "Section Break", 
+  "hidden": 0, 
+  "label": "Packing List", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-suitcase", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "packing_details", 
+  "fieldtype": "Table", 
+  "label": "Packing Details", 
+  "oldfieldname": "packing_details", 
+  "oldfieldtype": "Table", 
+  "options": "Packed Item", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_31", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Net Total", 
+  "options": "currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_33", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Company Currency)", 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "taxes", 
+  "fieldtype": "Section Break", 
+  "label": "Taxes", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "charge", 
+  "fieldtype": "Link", 
+  "label": "Tax Master", 
+  "oldfieldname": "charge", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Taxes and Charges Master", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_38", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_rule", 
+  "fieldtype": "Link", 
+  "label": "Shipping Rule", 
+  "oldfieldtype": "Button", 
+  "options": "Shipping Rule", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_40", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges", 
+  "fieldtype": "Table", 
+  "label": "Sales Taxes and Charges", 
+  "oldfieldname": "other_charges", 
+  "oldfieldtype": "Table", 
+  "options": "Sales Taxes and Charges"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_calculation", 
+  "fieldtype": "HTML", 
+  "label": "Taxes and Charges Calculation", 
+  "oldfieldtype": "HTML", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_43", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Total", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_46", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_total", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Total (Company Currency)", 
+  "oldfieldname": "other_charges_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "totals", 
+  "fieldtype": "Section Break", 
+  "label": "Totals", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grand_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Grand Total", 
+  "oldfieldname": "grand_total_export", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rounded_total_export", 
+  "fieldtype": "Currency", 
+  "label": "Rounded Total", 
+  "oldfieldname": "rounded_total_export", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "in_words_export", 
+  "fieldtype": "Data", 
+  "label": "In Words", 
+  "oldfieldname": "in_words_export", 
+  "oldfieldtype": "Data", 
+  "print_hide": 0, 
+  "read_only": 1, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 1, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "label": "Grand Total (Company Currency)", 
+  "oldfieldname": "grand_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rounded_total", 
+  "fieldtype": "Currency", 
+  "label": "Rounded Total (Company Currency)", 
+  "oldfieldname": "rounded_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "description": "In Words will be visible once you save the Sales Order.", 
+  "doctype": "DocField", 
+  "fieldname": "in_words", 
+  "fieldtype": "Data", 
+  "label": "In Words (Company Currency)", 
+  "oldfieldname": "in_words", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Terms and Conditions", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "label": "Terms", 
+  "oldfieldname": "tc_name", 
+  "oldfieldtype": "Link", 
+  "options": "Terms and Conditions", 
+  "print_hide": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms", 
+  "fieldtype": "Text Editor", 
+  "label": "Terms and Conditions Details", 
+  "oldfieldname": "terms", 
+  "oldfieldtype": "Text Editor", 
+  "print_hide": 0
+ }, 
+ {
+  "depends_on": "customer", 
+  "doctype": "DocField", 
+  "fieldname": "contact_info", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break45", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Territory", 
+  "options": "Territory", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break46", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
+  "print_hide": 1
+ }, 
+ {
+  "description": "Track this Sales Order against any Project", 
+  "doctype": "DocField", 
+  "fieldname": "project_name", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "oldfieldtype": "Link", 
+  "options": "Project", 
+  "search_index": 1
+ }, 
+ {
+  "depends_on": "eval:doc.source == 'Campaign'", 
+  "doctype": "DocField", 
+  "fieldname": "campaign", 
+  "fieldtype": "Link", 
+  "label": "Campaign", 
+  "oldfieldname": "campaign", 
+  "oldfieldtype": "Link", 
+  "options": "Campaign", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "source", 
+  "fieldtype": "Select", 
+  "label": "Source", 
+  "oldfieldname": "source", 
+  "oldfieldtype": "Select", 
+  "options": "\nExisting Customer\nReference\nAdvertisement\nCold Calling\nExhibition\nSupplier Reference\nMass Mailing\nCustomer's Vendor\nCampaign", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 1, 
+  "width": "50%"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "label": "Print Heading", 
+  "no_copy": 1, 
+  "oldfieldname": "select_print_heading", 
+  "oldfieldtype": "Link", 
+  "options": "Print Heading", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_78", 
+  "fieldtype": "Section Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 1, 
+  "width": "50%"
+ }, 
+ {
+  "default": "Draft", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nStopped\nCancelled", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "delivery_status", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Delivery Status", 
+  "no_copy": 1, 
+  "options": "Delivered\nNot Delivered\nPartly Delivered\nClosed\nNot Applicable", 
+  "print_hide": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "% of materials delivered against this Sales Order", 
+  "doctype": "DocField", 
+  "fieldname": "per_delivered", 
+  "fieldtype": "Percent", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "%  Delivered", 
+  "no_copy": 1, 
+  "oldfieldname": "per_delivered", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_81", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "% of materials billed against this Sales Order", 
+  "doctype": "DocField", 
+  "fieldname": "per_billed", 
+  "fieldtype": "Percent", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "% Amount Billed", 
+  "no_copy": 1, 
+  "oldfieldname": "per_billed", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "billing_status", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Billing Status", 
+  "no_copy": 1, 
+  "options": "Billed\nNot Billed\nPartly Billed\nClosed", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_team_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Sales Team", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-group", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_partner", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Sales Partner", 
+  "oldfieldname": "sales_partner", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Partner", 
+  "print_hide": 1, 
+  "search_index": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break7", 
+  "fieldtype": "Column Break", 
+  "print_hide": 1, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "commission_rate", 
+  "fieldtype": "Float", 
+  "label": "Commission Rate", 
+  "oldfieldname": "commission_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_commission", 
+  "fieldtype": "Currency", 
+  "label": "Total Commission", 
+  "oldfieldname": "total_commission", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_team", 
+  "fieldtype": "Table", 
+  "label": "Sales Team1", 
+  "oldfieldname": "sales_team", 
+  "oldfieldtype": "Table", 
+  "options": "Sales Team", 
+  "print_hide": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
+  "role": "Sales User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
+  "role": "Maintenance User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "customer", 
+  "role": "Customer"
+ }
+]

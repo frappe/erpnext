@@ -1,0 +1,700 @@
+[
+ {
+  "creation": "2013-05-21 16:16:39", 
+  "docstatus": 0, 
+  "modified": "2013-11-22 17:20:58", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "allow_import": 1, 
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-file-text", 
+  "is_submittable": 1, 
+  "module": "Buying", 
+  "name": "__common__", 
+  "read_only_onload": 1, 
+  "search_fields": "status, transaction_date, supplier,grand_total"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Purchase Order", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Purchase Order", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Purchase Order"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_section", 
+  "fieldtype": "Section Break", 
+  "label": "Supplier", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "\nPO", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Supplier (vendor) name as entered in supplier master", 
+  "doctype": "DocField", 
+  "fieldname": "supplier", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Supplier", 
+  "oldfieldname": "supplier", 
+  "oldfieldtype": "Link", 
+  "options": "Supplier", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_name", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "in_list_view": 1, 
+  "label": "Name", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Address", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "Contact Email", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 0, 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Purchase Order Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 0
+ }, 
+ {
+  "description": "Select the relevant company name if you have multiple companies", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "no_copy": 0, 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list_and_currency", 
+  "fieldtype": "Section Break", 
+  "label": "Currency and Price List", 
+  "options": "icon-tag"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb_currency", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "no_copy": 0, 
+  "oldfieldname": "currency", 
+  "oldfieldtype": "Select", 
+  "options": "Currency", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Rate at which supplier's currency is converted to company's base currency", 
+  "doctype": "DocField", 
+  "fieldname": "conversion_rate", 
+  "fieldtype": "Float", 
+  "hidden": 0, 
+  "label": "Exchange Rate", 
+  "no_copy": 0, 
+  "oldfieldname": "conversion_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb_price_list", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "price_list_currency", 
+  "fieldtype": "Link", 
+  "label": "Price List Currency", 
+  "options": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "plc_conversion_rate", 
+  "fieldtype": "Float", 
+  "label": "Price List Exchange Rate", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "po_details", 
+  "fieldtype": "Table", 
+  "label": "Purchase Order Items", 
+  "no_copy": 0, 
+  "oldfieldname": "po_details", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Order Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb_last_purchase", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total_import", 
+  "fieldtype": "Currency", 
+  "label": "Net Total", 
+  "no_copy": 0, 
+  "oldfieldname": "net_total_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_last_purchase_rate", 
+  "fieldtype": "Button", 
+  "label": "Get Last Purchase Rate", 
+  "oldfieldtype": "Button", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_26", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total (Company Currency)", 
+  "no_copy": 1, 
+  "oldfieldname": "net_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "taxes", 
+  "fieldtype": "Section Break", 
+  "label": "Taxes", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money", 
+  "print_hide": 0
+ }, 
+ {
+  "description": "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.", 
+  "doctype": "DocField", 
+  "fieldname": "purchase_other_charges", 
+  "fieldtype": "Link", 
+  "label": "Tax Master", 
+  "no_copy": 0, 
+  "oldfieldname": "purchase_other_charges", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Taxes and Charges Master", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "purchase_tax_details", 
+  "fieldtype": "Table", 
+  "label": "Purchase Taxes and Charges", 
+  "no_copy": 0, 
+  "oldfieldname": "purchase_tax_details", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Taxes and Charges"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tax_calculation", 
+  "fieldtype": "HTML", 
+  "label": "Tax Calculation", 
+  "no_copy": 1, 
+  "oldfieldtype": "HTML", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "totals", 
+  "fieldtype": "Section Break", 
+  "label": "Totals", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_added_import", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Added", 
+  "no_copy": 0, 
+  "oldfieldname": "other_charges_added_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_deducted_import", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Deducted", 
+  "no_copy": 0, 
+  "oldfieldname": "other_charges_deducted_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grand_total_import", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Grand Total", 
+  "no_copy": 0, 
+  "oldfieldname": "grand_total_import", 
+  "oldfieldtype": "Currency", 
+  "options": "currency", 
+  "print_hide": 0, 
+  "read_only": 1, 
+  "report_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "in_words_import", 
+  "fieldtype": "Data", 
+  "label": "In Words", 
+  "oldfieldname": "in_words_import", 
+  "oldfieldtype": "Data", 
+  "print_hide": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_added", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Added (Company Currency)", 
+  "no_copy": 0, 
+  "oldfieldname": "other_charges_added", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "other_charges_deducted", 
+  "fieldtype": "Currency", 
+  "label": "Taxes and Charges Deducted (Company Currency)", 
+  "no_copy": 0, 
+  "oldfieldname": "other_charges_deducted", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_tax", 
+  "fieldtype": "Currency", 
+  "label": "Total Tax (Company Currency)", 
+  "no_copy": 1, 
+  "oldfieldname": "total_tax", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "label": "Grand Total (Company Currency)", 
+  "no_copy": 1, 
+  "oldfieldname": "grand_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rounded_total", 
+  "fieldtype": "Currency", 
+  "label": "Rounded Total (Company Currency)", 
+  "oldfieldname": "rounded_total", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "description": "In Words will be visible once you save the Purchase Order.", 
+  "doctype": "DocField", 
+  "fieldname": "in_words", 
+  "fieldtype": "Data", 
+  "label": "In Words (Company Currency)", 
+  "oldfieldname": "in_words", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Terms and Conditions", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-legal"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tc_name", 
+  "fieldtype": "Link", 
+  "label": "Terms", 
+  "oldfieldname": "tc_name", 
+  "oldfieldtype": "Link", 
+  "options": "Terms and Conditions", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "terms", 
+  "fieldtype": "Text Editor", 
+  "label": "Terms and Conditions", 
+  "oldfieldname": "terms", 
+  "oldfieldtype": "Text Editor"
+ }, 
+ {
+  "depends_on": "supplier", 
+  "doctype": "DocField", 
+  "fieldname": "contact_section", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_address", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Supplier Address", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb_contact", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nStopped\nCancelled", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "default": "No", 
+  "doctype": "DocField", 
+  "fieldname": "is_subcontracted", 
+  "fieldtype": "Select", 
+  "label": "Is Subcontracted", 
+  "options": "\nYes\nNo", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "ref_sq", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Ref SQ", 
+  "no_copy": 1, 
+  "oldfieldname": "ref_sq", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "letter_head", 
+  "fieldtype": "Select", 
+  "label": "Letter Head", 
+  "oldfieldname": "letter_head", 
+  "oldfieldtype": "Select", 
+  "options": "link:Letter Head", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "no_copy": 0, 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "select_print_heading", 
+  "fieldtype": "Link", 
+  "label": "Print Heading", 
+  "no_copy": 1, 
+  "oldfieldname": "select_print_heading", 
+  "oldfieldtype": "Link", 
+  "options": "Print Heading", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break5", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "print_hide": 1, 
+  "print_width": "50%", 
+  "width": "50%"
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "% of materials received against this Purchase Order", 
+  "doctype": "DocField", 
+  "fieldname": "per_received", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "% Received", 
+  "no_copy": 1, 
+  "oldfieldname": "per_received", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "description": "% of materials billed against this Purchase Order.", 
+  "doctype": "DocField", 
+  "fieldname": "per_billed", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "% Billed", 
+  "no_copy": 1, 
+  "oldfieldname": "per_billed", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "description": "Required raw materials issued to the supplier for producing a sub - contracted item.", 
+  "doctype": "DocField", 
+  "fieldname": "raw_material_details", 
+  "fieldtype": "Section Break", 
+  "label": "Raw Materials Supplied", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-truck", 
+  "print_hide": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "po_raw_material_details", 
+  "fieldtype": "Table", 
+  "label": "Purchase Order Items Supplied", 
+  "no_copy": 0, 
+  "oldfieldname": "po_raw_material_details", 
+  "oldfieldtype": "Table", 
+  "options": "Purchase Order Item Supplied", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "submit": 0, 
+  "write": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "supplier", 
+  "role": "Supplier"
+ }
+]

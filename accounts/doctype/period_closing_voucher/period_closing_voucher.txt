@@ -1,0 +1,141 @@
+[
+ {
+  "creation": "2013-01-10 16:34:07", 
+  "docstatus": 0, 
+  "modified": "2013-08-12 17:13:23", 
+  "modified_by": "Administrator", 
+  "owner": "jai@webnotestech.com"
+ }, 
+ {
+  "autoname": "PCE/.###", 
+  "doctype": "DocType", 
+  "icon": "icon-file-text", 
+  "is_submittable": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "posting_date, fiscal_year"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Period Closing Voucher", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Period Closing Voucher", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Period Closing Voucher"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "label": "Transaction Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "label": "Closing Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Select", 
+  "options": "link:Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break"
+ }, 
+ {
+  "description": "The account head under Liability, in which Profit/Loss will be booked", 
+  "doctype": "DocField", 
+  "fieldname": "closing_account_head", 
+  "fieldtype": "Link", 
+  "label": "Closing Account Head", 
+  "oldfieldname": "closing_account_head", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "coa_help", 
+  "fieldtype": "HTML", 
+  "label": "CoA Help", 
+  "oldfieldtype": "HTML", 
+  "options": "<a href=\"#!Accounts Browser/Account\">To manage Account Head, click here</a>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "remarks", 
+  "fieldtype": "Small Text", 
+  "label": "Remarks", 
+  "oldfieldname": "remarks", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
+ }
+]

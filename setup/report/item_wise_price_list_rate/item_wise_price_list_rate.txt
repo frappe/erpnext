@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-09-25 10:21:15", 
+  "docstatus": 0, 
+  "modified": "2013-10-21 16:06:22", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "json": "{\"filters\":[[\"Item Price\",\"price_list\",\"like\",\"%\"],[\"Item Price\",\"item_code\",\"like\",\"%\"]],\"columns\":[[\"name\",\"Item Price\"],[\"price_list\",\"Item Price\"],[\"item_code\",\"Item Price\"],[\"item_name\",\"Item Price\"],[\"item_description\",\"Item Price\"],[\"ref_rate\",\"Item Price\"],[\"buying_or_selling\",\"Item Price\"],[\"currency\",\"Item Price\"]],\"sort_by\":\"Item Price.modified\",\"sort_order\":\"desc\",\"sort_by_next\":\"\",\"sort_order_next\":\"desc\"}", 
+  "name": "__common__", 
+  "ref_doctype": "Price List", 
+  "report_name": "Item-wise Price List Rate", 
+  "report_type": "Report Builder"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Item-wise Price List Rate"
+ }
+]

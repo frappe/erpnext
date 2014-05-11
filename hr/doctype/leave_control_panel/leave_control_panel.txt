@@ -1,0 +1,141 @@
+[
+ {
+  "creation": "2013-01-10 16:34:15", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:44:50", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 0, 
+  "icon": "icon-cog", 
+  "issingle": 1, 
+  "module": "HR", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Leave Control Panel", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Leave Control Panel", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Leave Control Panel"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "Leave blank if considered for all employee types", 
+  "doctype": "DocField", 
+  "fieldname": "employee_type", 
+  "fieldtype": "Select", 
+  "label": "Employee Type", 
+  "options": "link:Employment Type"
+ }, 
+ {
+  "description": "Leave blank if considered for all branches", 
+  "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Select", 
+  "label": "Branch", 
+  "options": "link:Branch"
+ }, 
+ {
+  "description": "Leave blank if considered for all departments", 
+  "doctype": "DocField", 
+  "fieldname": "department", 
+  "fieldtype": "Select", 
+  "label": "Department", 
+  "options": "link:Department"
+ }, 
+ {
+  "description": "Leave blank if considered for all designations", 
+  "doctype": "DocField", 
+  "fieldname": "designation", 
+  "fieldtype": "Select", 
+  "label": "Designation", 
+  "options": "link:Designation"
+ }, 
+ {
+  "description": "Leave blank if considered for all grades", 
+  "doctype": "DocField", 
+  "fieldname": "grade", 
+  "fieldtype": "Select", 
+  "label": "Grade", 
+  "options": "link:Grade"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_type", 
+  "fieldtype": "Select", 
+  "label": "Leave Type", 
+  "options": "link:Leave Type", 
+  "reqd": 1
+ }, 
+ {
+  "description": "Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year", 
+  "doctype": "DocField", 
+  "fieldname": "carry_forward", 
+  "fieldtype": "Check", 
+  "label": "Carry Forward"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "no_of_days", 
+  "fieldtype": "Float", 
+  "label": "New Leaves Allocated (In Days)", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allocate", 
+  "fieldtype": "Button", 
+  "label": "Allocate", 
+  "options": "allocate_leave"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

@@ -1,0 +1,188 @@
+[
+ {
+  "creation": "2013-03-25 17:53:21", 
+  "docstatus": 0, 
+  "modified": "2013-12-06 13:12:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "description": "Email Settings for Outgoing and Incoming Emails.", 
+  "doctype": "DocType", 
+  "icon": "icon-cog", 
+  "in_create": 1, 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Email Settings", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Email Settings", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Email Settings"
+ }, 
+ {
+  "description": "Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.", 
+  "doctype": "DocField", 
+  "fieldname": "outgoing_mails", 
+  "fieldtype": "Section Break", 
+  "label": "Outgoing Mails"
+ }, 
+ {
+  "description": "SMTP Server (e.g. smtp.gmail.com)", 
+  "doctype": "DocField", 
+  "fieldname": "outgoing_mail_server", 
+  "fieldtype": "Data", 
+  "label": "Outgoing Mail Server"
+ }, 
+ {
+  "description": "<a href=\"https://en.wikipedia.org/wiki/Transport_Layer_Security\" target=\"_blank\">[?]</a>", 
+  "doctype": "DocField", 
+  "fieldname": "use_ssl", 
+  "fieldtype": "Check", 
+  "label": "Use TLS"
+ }, 
+ {
+  "description": "If non standard port (e.g. 587)", 
+  "doctype": "DocField", 
+  "fieldname": "mail_port", 
+  "fieldtype": "Int", 
+  "label": "Mail Port"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Set Login and Password if authentication is required.", 
+  "doctype": "DocField", 
+  "fieldname": "mail_login", 
+  "fieldtype": "Data", 
+  "label": "Login Id"
+ }, 
+ {
+  "description": "Check this if you want to send emails as this id only (in case of restriction by your email provider).", 
+  "doctype": "DocField", 
+  "fieldname": "always_use_login_id_as_sender", 
+  "fieldtype": "Check", 
+  "label": "Always use above Login Id as sender"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "mail_password", 
+  "fieldtype": "Password", 
+  "label": "Mail Password"
+ }, 
+ {
+  "description": "System generated mails will be sent from this email id.", 
+  "doctype": "DocField", 
+  "fieldname": "auto_email_id", 
+  "fieldtype": "Data", 
+  "label": "Auto Email Id"
+ }, 
+ {
+  "default": "1", 
+  "description": "If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.", 
+  "doctype": "DocField", 
+  "fieldname": "send_print_in_body_and_attachment", 
+  "fieldtype": "Check", 
+  "label": "Send Print in Body and Attachment"
+ }, 
+ {
+  "description": "To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.", 
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "label": "Incoming / Support Mail Setting"
+ }, 
+ {
+  "description": "Check this to pull emails from your mailbox", 
+  "doctype": "DocField", 
+  "fieldname": "sync_support_mails", 
+  "fieldtype": "Check", 
+  "label": "Sync Support Mails"
+ }, 
+ {
+  "description": "Your support email id - must be a valid email - this is where your emails will come!", 
+  "doctype": "DocField", 
+  "fieldname": "support_email", 
+  "fieldtype": "Data", 
+  "label": "Support Email"
+ }, 
+ {
+  "description": "POP3 mail server (e.g. pop.gmail.com)", 
+  "doctype": "DocField", 
+  "fieldname": "support_host", 
+  "fieldtype": "Data", 
+  "label": "POP3 Mail Server"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "support_use_ssl", 
+  "fieldtype": "Check", 
+  "label": "Use SSL"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "support_username", 
+  "fieldtype": "Data", 
+  "label": "User Name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "support_password", 
+  "fieldtype": "Password", 
+  "label": "Support Password"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Signature to be appended at the end of every email", 
+  "doctype": "DocField", 
+  "fieldname": "support_signature", 
+  "fieldtype": "Text", 
+  "label": "Signature"
+ }, 
+ {
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "send_autoreply", 
+  "fieldtype": "Check", 
+  "label": "Send Autoreply"
+ }, 
+ {
+  "description": "Autoreply when a new mail is received", 
+  "doctype": "DocField", 
+  "fieldname": "support_autoreply", 
+  "fieldtype": "Text", 
+  "label": "Custom Autoreply Message"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

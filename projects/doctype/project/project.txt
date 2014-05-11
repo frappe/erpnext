@@ -1,0 +1,306 @@
+[
+ {
+  "creation": "2013-03-07 11:55:07", 
+  "docstatus": 0, 
+  "modified": "2013-11-06 15:13:55", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "allow_import": 1, 
+  "autoname": "field:project_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-puzzle-piece", 
+  "max_attachments": 4, 
+  "module": "Projects", 
+  "name": "__common__", 
+  "search_fields": "customer, status, priority, is_active"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Project", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Project", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Project"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "overview", 
+  "fieldtype": "Section Break", 
+  "label": "Overview", 
+  "options": "icon-file"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb_project_status", 
+  "fieldtype": "Column Break", 
+  "label": "Status"
+ }, 
+ {
+  "description": "Project will get saved and will be searchable with project name given", 
+  "doctype": "DocField", 
+  "fieldname": "project_name", 
+  "fieldtype": "Data", 
+  "label": "Project Name", 
+  "no_copy": 0, 
+  "oldfieldname": "project_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "default": "Open", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "Open\nCompleted\nCancelled", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_active", 
+  "fieldtype": "Select", 
+  "label": "Is Active", 
+  "no_copy": 0, 
+  "oldfieldname": "is_active", 
+  "oldfieldtype": "Select", 
+  "options": "Yes\nNo", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "priority", 
+  "fieldtype": "Select", 
+  "label": "Priority", 
+  "no_copy": 0, 
+  "oldfieldname": "priority", 
+  "oldfieldtype": "Select", 
+  "options": "Medium\nLow\nHigh", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb_project_dates", 
+  "fieldtype": "Column Break", 
+  "label": "Dates"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project_start_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Project Start Date", 
+  "no_copy": 0, 
+  "oldfieldname": "project_start_date", 
+  "oldfieldtype": "Date", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "completion_date", 
+  "fieldtype": "Date", 
+  "label": "Completion Date", 
+  "no_copy": 0, 
+  "oldfieldname": "completion_date", 
+  "oldfieldtype": "Date", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "act_completion_date", 
+  "fieldtype": "Date", 
+  "label": "Actual Completion Date", 
+  "no_copy": 0, 
+  "oldfieldname": "act_completion_date", 
+  "oldfieldtype": "Date", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project_type", 
+  "fieldtype": "Select", 
+  "label": "Project Type", 
+  "no_copy": 0, 
+  "oldfieldname": "project_type", 
+  "oldfieldtype": "Data", 
+  "options": "Internal\nExternal\nOther", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb_milestones", 
+  "fieldtype": "Section Break", 
+  "label": "Milestones", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-flag"
+ }, 
+ {
+  "description": "Milestones will be added as Events in the Calendar", 
+  "doctype": "DocField", 
+  "fieldname": "project_milestones", 
+  "fieldtype": "Table", 
+  "label": "Project Milestones", 
+  "no_copy": 0, 
+  "oldfieldname": "project_milestones", 
+  "oldfieldtype": "Table", 
+  "options": "Project Milestone", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "label": "Project Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-list"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "notes", 
+  "fieldtype": "Text Editor", 
+  "label": "Notes", 
+  "no_copy": 0, 
+  "oldfieldname": "notes", 
+  "oldfieldtype": "Text Editor", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "percent_complete", 
+  "fieldtype": "Percent", 
+  "in_list_view": 1, 
+  "label": "Percent Complete", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project_details", 
+  "fieldtype": "Section Break", 
+  "label": "Project Costing", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-money"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project_value", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Project Value", 
+  "no_copy": 0, 
+  "oldfieldname": "project_value", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "est_material_cost", 
+  "fieldtype": "Currency", 
+  "label": "Estimated Material Cost", 
+  "no_copy": 0, 
+  "oldfieldname": "est_material_cost", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "label": "Margin", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gross_margin_value", 
+  "fieldtype": "Currency", 
+  "label": "Gross Margin Value", 
+  "no_copy": 0, 
+  "oldfieldname": "gross_margin_value", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "per_gross_margin", 
+  "fieldtype": "Currency", 
+  "label": "Gross Margin %", 
+  "no_copy": 0, 
+  "oldfieldname": "per_gross_margin", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_details", 
+  "fieldtype": "Section Break", 
+  "label": "Customer Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Customer", 
+  "no_copy": 0, 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer", 
+  "print_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Projects User", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "All"
+ }
+]

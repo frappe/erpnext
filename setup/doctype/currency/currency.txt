@@ -1,0 +1,120 @@
+[
+ {
+  "creation": "2013-01-28 10:06:02", 
+  "docstatus": 0, 
+  "modified": "2013-07-23 12:05:26", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:currency_name", 
+  "description": "**Currency** Master", 
+  "doctype": "DocType", 
+  "icon": "icon-bitcoin", 
+  "in_create": 0, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Currency", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Currency", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "currency_name", 
+  "fieldtype": "Data", 
+  "label": "Currency Name", 
+  "oldfieldname": "currency_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Enabled"
+ }, 
+ {
+  "description": "Sub-currency. For e.g. \"Cent\"", 
+  "doctype": "DocField", 
+  "fieldname": "fraction", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Fraction"
+ }, 
+ {
+  "description": "1 Currency = [?] Fraction\nFor e.g. 1 USD = 100 Cent", 
+  "doctype": "DocField", 
+  "fieldname": "fraction_units", 
+  "fieldtype": "Int", 
+  "in_list_view": 1, 
+  "label": "Fraction Units"
+ }, 
+ {
+  "description": "A symbol for this currency. For e.g. $", 
+  "doctype": "DocField", 
+  "fieldname": "symbol", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Symbol"
+ }, 
+ {
+  "description": "How should this currency be formatted? If not set, will use system defaults", 
+  "doctype": "DocField", 
+  "fieldname": "number_format", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Number Format", 
+  "options": "\n#,###.##\n#.###,##\n# ###.##\n#,###.###\n#,##,###.##\n#.###\n#,###"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All"
+ }
+]

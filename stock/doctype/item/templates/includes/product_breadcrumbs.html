@@ -1,0 +1,10 @@
+{% if obj.parent_groups and (obj.parent_groups|length) > 1 %}
+<div class="container">
+	<ul class="breadcrumb">
+		{% for ig in obj.parent_groups[:-1] %}
+		<li><a href="{{ ig.page_name }}.html">{{ ig.name }}</a></li>
+		{% endfor %}
+		<li class="active">{{ obj.parent_groups[-1].name }}</li>
+	</ul>
+</div>
+{% endif %}

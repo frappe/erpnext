@@ -1,0 +1,38 @@
+[
+ {
+  "creation": "2013-02-22 01:28:05", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:25", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "user", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "User", 
+  "name": "__common__", 
+  "options": "Profile", 
+  "parent": "Warehouse User", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "print_width": "200px", 
+  "width": "200px"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Warehouse User"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

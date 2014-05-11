@@ -1,0 +1,42 @@
+[
+ {
+  "creation": "2013-02-22 01:27:58", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:23", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "SMS Parameter", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "SMS Parameter"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "parameter", 
+  "label": "Parameter"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "value", 
+  "label": "Value"
+ }
+]

@@ -1,0 +1,176 @@
+[
+ {
+  "creation": "2013-04-30 12:58:38", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:26:02", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "System for managing Backups", 
+  "doctype": "DocType", 
+  "document_type": "System", 
+  "icon": "icon-cloud-upload", 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Backup Manager", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Backup Manager", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Backup Manager"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "setup", 
+  "fieldtype": "Section Break", 
+  "label": "Setup"
+ }, 
+ {
+  "description": "Email ids separated by commas.", 
+  "doctype": "DocField", 
+  "fieldname": "send_notifications_to", 
+  "fieldtype": "Data", 
+  "label": "Send Notifications To", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "backup_right_now", 
+  "fieldtype": "Button", 
+  "hidden": 1, 
+  "label": "Backup Right Now", 
+  "read_only": 1
+ }, 
+ {
+  "description": "Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.", 
+  "doctype": "DocField", 
+  "fieldname": "sync_with_dropbox", 
+  "fieldtype": "Section Break", 
+  "label": "Sync with Dropbox"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_backups_to_dropbox", 
+  "fieldtype": "Select", 
+  "label": "Upload Backups to Dropbox", 
+  "options": "Never\nWeekly\nDaily"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dropbox_access_key", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Dropbox Access Key", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dropbox_access_secret", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Dropbox Access Secret", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "dropbox_access_allowed", 
+  "fieldtype": "Check", 
+  "hidden": 1, 
+  "label": "Dropbox Access Allowed", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_dropbox_access", 
+  "fieldtype": "Button", 
+  "label": "Allow Dropbox Access"
+ }, 
+ {
+  "description": "Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.", 
+  "doctype": "DocField", 
+  "fieldname": "sync_with_gdrive", 
+  "fieldtype": "Section Break", 
+  "hidden": 1, 
+  "label": "Sync with Google Drive"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_backups_to_gdrive", 
+  "fieldtype": "Select", 
+  "label": "Upload Backups to Google Drive", 
+  "options": "Never\nDaily\nWeekly"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allow_gdrive_access", 
+  "fieldtype": "Button", 
+  "label": "Allow Google Drive Access"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "verification_code", 
+  "fieldtype": "Data", 
+  "label": "Enter Verification Code"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "validate_gdrive", 
+  "fieldtype": "Button", 
+  "label": "Validate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gdrive_access_allowed", 
+  "fieldtype": "Check", 
+  "hidden": 1, 
+  "label": "Google Drive Access Allowed", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "gdrive_credentials", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "label": "Credentials", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "database_folder_id", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Database Folder ID", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "files_folder_id", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Files Folder ID", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

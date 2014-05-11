@@ -1,0 +1,142 @@
+[
+ {
+  "creation": "2013-02-22 01:28:06", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:10", 
+  "modified_by": "Administrator", 
+  "owner": "ashwini@webnotestech.com"
+ }, 
+ {
+  "autoname": "MVD.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Support", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Maintenance Visit Purpose", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Maintenance Visit Purpose"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Serial No", 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
+  "reqd": 1, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "work_details", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Work Details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "service_person", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Sales Person", 
+  "oldfieldname": "service_person", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Person", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "work_done", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Work Done", 
+  "oldfieldname": "work_done", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_docname", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Against Document No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "160px", 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_detail_docname", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Against Document Detail No", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_detail_docname", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "160px", 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "prevdoc_doctype", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "label": "Document Type", 
+  "no_copy": 1, 
+  "oldfieldname": "prevdoc_doctype", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "150px"
+ }
+]

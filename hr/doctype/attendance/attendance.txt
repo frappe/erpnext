@@ -1,0 +1,175 @@
+[
+ {
+  "creation": "2013-01-10 16:34:13", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:05:42", 
+  "modified_by": "Administrator", 
+  "owner": "ashwini@webnotestech.com"
+ }, 
+ {
+  "autoname": "naming_series:", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-ok", 
+  "is_submittable": 1, 
+  "module": "HR", 
+  "name": "__common__", 
+  "search_fields": "employee, employee_name, att_date, status"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Attendance", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Attendance", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Attendance"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "attendance_details", 
+  "fieldtype": "Section Break", 
+  "label": "Attendance Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "ATT", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_name", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Employee Name", 
+  "oldfieldname": "employee_name", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "default": "Present", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nPresent\nAbsent\nHalf Day", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "leave_type", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_list_view": 1, 
+  "label": "Leave Type", 
+  "oldfieldname": "leave_type", 
+  "oldfieldtype": "Link", 
+  "options": "Leave Type", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "att_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Attendance Date", 
+  "oldfieldname": "att_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "link:Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Attendance", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "HR Manager"
+ }
+]

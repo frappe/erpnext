@@ -1,0 +1,303 @@
+[
+ {
+  "creation": "2013-01-29 19:25:42", 
+  "docstatus": 0, 
+  "modified": "2013-11-03 14:11:43", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "autoname": "SLE/.########", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "hide_toolbar": 1, 
+  "icon": "icon-list", 
+  "in_create": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Stock Ledger Entry", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Stock Ledger Entry", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Stock Ledger Entry"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Text", 
+  "in_filter": 0, 
+  "label": "Serial No", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "batch_no", 
+  "fieldtype": "Data", 
+  "label": "Batch No", 
+  "oldfieldname": "batch_no", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_time", 
+  "fieldtype": "Time", 
+  "in_filter": 0, 
+  "label": "Posting Time", 
+  "oldfieldname": "posting_time", 
+  "oldfieldtype": "Time", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_type", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Voucher Type", 
+  "oldfieldname": "voucher_type", 
+  "oldfieldtype": "Data", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_no", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Voucher No", 
+  "oldfieldname": "voucher_no", 
+  "oldfieldtype": "Data", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "voucher_detail_no", 
+  "fieldtype": "Data", 
+  "label": "Voucher Detail No", 
+  "oldfieldname": "voucher_detail_no", 
+  "oldfieldtype": "Data", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "actual_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 1, 
+  "label": "Actual Quantity", 
+  "oldfieldname": "actual_qty", 
+  "oldfieldtype": "Currency", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "incoming_rate", 
+  "fieldtype": "Currency", 
+  "label": "Incoming Rate", 
+  "oldfieldname": "incoming_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "options": "UOM", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty_after_transaction", 
+  "fieldtype": "Float", 
+  "in_filter": 1, 
+  "label": "Actual Qty After Transaction", 
+  "oldfieldname": "bin_aqat", 
+  "oldfieldtype": "Currency", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "valuation_rate", 
+  "fieldtype": "Currency", 
+  "label": "Valuation Rate", 
+  "oldfieldname": "valuation_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_value", 
+  "fieldtype": "Currency", 
+  "label": "Stock Value", 
+  "oldfieldname": "stock_value", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_value_difference", 
+  "fieldtype": "Currency", 
+  "label": "Stock Value Difference", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_queue", 
+  "fieldtype": "Text", 
+  "hidden": 1, 
+  "in_filter": 0, 
+  "label": "Stock Queue (FIFO)", 
+  "oldfieldname": "fcfs_stack", 
+  "oldfieldtype": "Text", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project", 
+  "fieldtype": "Link", 
+  "label": "Project", 
+  "options": "Project"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Data", 
+  "options": "link:Company", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Data", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_cancelled", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "label": "Is Cancelled", 
+  "options": "\nNo\nYes", 
+  "report_hide": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "write": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager"
+ }
+]

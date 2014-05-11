@@ -1,0 +1,115 @@
+[
+ {
+  "creation": "2013-01-10 16:34:05", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:26:22", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "hide_heading": 1, 
+  "hide_toolbar": 1, 
+  "icon": "icon-check", 
+  "issingle": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Bank Reconciliation", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Bank Reconciliation", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "Accounts User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Bank Reconciliation"
+ }, 
+ {
+  "description": "Select account head of the bank where cheque was deposited.", 
+  "doctype": "DocField", 
+  "fieldname": "bank_account", 
+  "fieldtype": "Link", 
+  "label": "Bank Account", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "Company", 
+  "options": "Company", 
+  "print_hide": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_date", 
+  "fieldtype": "Date", 
+  "label": "From Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_date", 
+  "fieldtype": "Date", 
+  "label": "To Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "get_non_reconciled_entries", 
+  "fieldtype": "Button", 
+  "label": "Get Non Reconciled Entries", 
+  "options": "get_details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "entries", 
+  "fieldtype": "Table", 
+  "label": "Entries", 
+  "options": "Bank Reconciliation Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "update_clearance_date", 
+  "fieldtype": "Button", 
+  "label": "Update Clearance Date", 
+  "options": "update_details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_amount", 
+  "fieldtype": "Currency", 
+  "label": "Total Amount", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

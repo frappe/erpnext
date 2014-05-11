@@ -1,0 +1,56 @@
+[
+ {
+  "creation": "2013-03-08 15:37:16", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "ITEMCUST/.#####", 
+  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
+  "doctype": "DocType", 
+  "in_create": 0, 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Item Customer Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Customer Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Link", 
+  "label": "Customer Name", 
+  "oldfieldname": "price_list_name", 
+  "oldfieldtype": "Select", 
+  "options": "Customer", 
+  "print_width": "180px", 
+  "width": "180px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "ref_code", 
+  "fieldtype": "Data", 
+  "label": "Ref Code", 
+  "oldfieldname": "ref_rate", 
+  "oldfieldtype": "Currency", 
+  "print_width": "120px", 
+  "width": "120px"
+ }
+]

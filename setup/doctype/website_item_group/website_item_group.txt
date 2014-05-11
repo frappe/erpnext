@@ -1,0 +1,38 @@
+[
+ {
+  "creation": "2013-02-22 01:28:09", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 19:41:38", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "Cross Listing of Item in multiple groups", 
+  "doctype": "DocType", 
+  "document_type": "Other", 
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item Group", 
+  "name": "__common__", 
+  "options": "Item Group", 
+  "parent": "Website Item Group", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Website Item Group"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

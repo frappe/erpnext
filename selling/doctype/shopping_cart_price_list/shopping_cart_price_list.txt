@@ -1,0 +1,36 @@
+[
+ {
+  "creation": "2013-06-20 16:00:18", 
+  "docstatus": 0, 
+  "modified": "2013-08-09 14:47:15", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling_price_list", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Price List", 
+  "name": "__common__", 
+  "options": "Price List", 
+  "parent": "Shopping Cart Price List", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Shopping Cart Price List"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

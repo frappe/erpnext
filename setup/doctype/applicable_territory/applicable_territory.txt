@@ -1,0 +1,37 @@
+[
+ {
+  "creation": "2013-06-20 12:48:38", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:58:57", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Territory", 
+  "name": "__common__", 
+  "options": "Territory", 
+  "parent": "Applicable Territory", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Applicable Territory"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

@@ -1,0 +1,77 @@
+[
+ {
+  "creation": "2013-02-22 01:27:44", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:03", 
+  "modified_by": "Administrator", 
+  "owner": "ashwini@webnotestech.com"
+ }, 
+ {
+  "autoname": "APRSLD.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Appraisal Goal", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Appraisal Goal"
+ }, 
+ {
+  "description": "Key Responsibility Area", 
+  "doctype": "DocField", 
+  "fieldname": "kra", 
+  "fieldtype": "Small Text", 
+  "label": "Goal", 
+  "oldfieldname": "kra", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "240px", 
+  "reqd": 1, 
+  "width": "240px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "per_weightage", 
+  "fieldtype": "Float", 
+  "label": "Weightage (%)", 
+  "oldfieldname": "per_weightage", 
+  "oldfieldtype": "Currency", 
+  "print_width": "70px", 
+  "reqd": 1, 
+  "width": "70px"
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "doctype": "DocField", 
+  "fieldname": "score", 
+  "fieldtype": "Float", 
+  "label": "Score (0-5)", 
+  "no_copy": 1, 
+  "oldfieldname": "score", 
+  "oldfieldtype": "Select", 
+  "options": "\n0\n1\n2\n3\n4\n5", 
+  "print_width": "70px", 
+  "width": "70px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "score_earned", 
+  "fieldtype": "Float", 
+  "label": "Score Earned", 
+  "no_copy": 1, 
+  "oldfieldname": "score_earned", 
+  "oldfieldtype": "Currency", 
+  "print_width": "70px", 
+  "read_only": 1, 
+  "width": "70px"
+ }
+]

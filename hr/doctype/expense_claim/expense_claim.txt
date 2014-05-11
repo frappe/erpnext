@@ -1,0 +1,240 @@
+[
+ {
+  "creation": "2013-01-10 16:34:14", 
+  "docstatus": 0, 
+  "modified": "2013-09-25 11:36:11", 
+  "modified_by": "Administrator", 
+  "owner": "harshada@webnotestech.com"
+ }, 
+ {
+  "autoname": "EXP.######", 
+  "doctype": "DocType", 
+  "icon": "icon-money", 
+  "is_submittable": 1, 
+  "module": "HR", 
+  "name": "__common__", 
+  "search_fields": "approval_status,employee,employee_name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Expense Claim", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Expense Claim", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Expense Claim"
+ }, 
+ {
+  "default": "Draft", 
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "approval_status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Approval Status", 
+  "no_copy": 1, 
+  "oldfieldname": "approval_status", 
+  "oldfieldtype": "Select", 
+  "options": "Draft\nApproved\nRejected", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "exp_approver", 
+  "fieldtype": "Select", 
+  "label": "Approver", 
+  "oldfieldname": "exp_approver", 
+  "oldfieldtype": "Select", 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_claimed_amount", 
+  "fieldtype": "Currency", 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Total Claimed Amount", 
+  "no_copy": 1, 
+  "oldfieldname": "total_claimed_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_sanctioned_amount", 
+  "fieldtype": "Currency", 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Total Sanctioned Amount", 
+  "no_copy": 1, 
+  "oldfieldname": "total_sanctioned_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "read_only": 1, 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expense_details", 
+  "fieldtype": "Section Break", 
+  "label": "Expense Details", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "expense_voucher_details", 
+  "fieldtype": "Table", 
+  "label": "Expense Claim Details", 
+  "oldfieldname": "expense_voucher_details", 
+  "oldfieldtype": "Table", 
+  "options": "Expense Claim Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb1", 
+  "fieldtype": "Section Break", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "From Employee", 
+  "oldfieldname": "employee", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Employee Name", 
+  "oldfieldname": "employee_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "link:Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "posting_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Posting Date", 
+  "oldfieldname": "posting_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "remark", 
+  "fieldtype": "Small Text", 
+  "label": "Remark", 
+  "no_copy": 1, 
+  "oldfieldname": "remark", 
+  "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Employees Email Id", 
+  "oldfieldname": "email_id", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "report_hide": 1, 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "match": "owner", 
+  "role": "Employee"
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "doctype": "DocPerm", 
+  "match": "exp_approver:user", 
+  "role": "Expense Approver", 
+  "submit": 1
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "doctype": "DocPerm", 
+  "role": "HR User", 
+  "submit": 1
+ }
+]

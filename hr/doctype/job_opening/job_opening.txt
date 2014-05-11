@@ -1,0 +1,68 @@
+[
+ {
+  "creation": "2013-01-15 16:13:36", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:43:35", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:job_title", 
+  "description": "Description of a Job Opening", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-bookmark", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Job Opening", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Job Opening", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Job Opening"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "job_title", 
+  "fieldtype": "Data", 
+  "label": "Job Title", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "label": "Status", 
+  "options": "Open\nClosed"
+ }, 
+ {
+  "description": "Job profile, qualifications required etc.", 
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text Editor", 
+  "label": "Description"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

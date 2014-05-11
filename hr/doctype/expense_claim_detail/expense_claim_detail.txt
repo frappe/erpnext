@@ -1,0 +1,86 @@
+[
+ {
+  "creation": "2013-02-22 01:27:46", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "harshada@webnotestech.com"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Expense Claim Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Expense Claim Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expense_date", 
+  "fieldtype": "Date", 
+  "label": "Expense Date", 
+  "oldfieldname": "expense_date", 
+  "oldfieldtype": "Date", 
+  "print_width": "150px", 
+  "reqd": 0, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expense_type", 
+  "fieldtype": "Select", 
+  "label": "Expense Claim Type", 
+  "oldfieldname": "expense_type", 
+  "oldfieldtype": "Link", 
+  "options": "link:Expense Claim Type", 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "300px", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "claim_amount", 
+  "fieldtype": "Currency", 
+  "label": "Claim Amount", 
+  "oldfieldname": "claim_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "150px", 
+  "reqd": 1, 
+  "width": "150px"
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "sanctioned_amount", 
+  "fieldtype": "Currency", 
+  "label": "Sanctioned Amount", 
+  "no_copy": 1, 
+  "oldfieldname": "sanctioned_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "150px", 
+  "width": "150px"
+ }
+]

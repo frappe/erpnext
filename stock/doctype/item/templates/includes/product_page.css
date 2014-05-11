@@ -1,0 +1,13 @@
+	<style>
+		.item-main-image {
+			max-width: 100%;
+			margin: auto;
+		}
+		.web-long-description {
+			font-size: 18px;
+			line-height: 200%;
+		}
+		.item-stock {
+			margin-bottom: 10px !important;
+		}
+	</style>

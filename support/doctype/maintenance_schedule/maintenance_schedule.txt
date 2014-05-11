@@ -1,0 +1,257 @@
+[
+ {
+  "creation": "2013-01-10 16:34:30", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:59:23", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "MS.#####", 
+  "doctype": "DocType", 
+  "icon": "icon-calendar", 
+  "is_submittable": 1, 
+  "module": "Support", 
+  "name": "__common__", 
+  "search_fields": "status,customer,customer_name, sales_order_no"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Maintenance Schedule", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Maintenance Schedule", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Maintenance Manager", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Maintenance Schedule"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_details", 
+  "fieldtype": "Section Break", 
+  "label": "Customer Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Link", 
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Customer Name", 
+  "oldfieldname": "customer_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Address", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Contact Email", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "transaction_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "label": "Transaction Date", 
+  "oldfieldname": "transaction_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "default": "Draft", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "\nDraft\nSubmitted\nCancelled", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "items", 
+  "fieldtype": "Section Break", 
+  "label": "Items", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-shopping-cart"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_maintenance_detail", 
+  "fieldtype": "Table", 
+  "label": "Maintenance Schedule Item", 
+  "oldfieldname": "item_maintenance_detail", 
+  "oldfieldtype": "Table", 
+  "options": "Maintenance Schedule Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "schedule", 
+  "fieldtype": "Section Break", 
+  "label": "Schedule", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-time"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "generate_schedule", 
+  "fieldtype": "Button", 
+  "label": "Generate Schedule", 
+  "oldfieldtype": "Button"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "maintenance_schedule_detail", 
+  "fieldtype": "Table", 
+  "label": "Maintenance Schedule Detail", 
+  "oldfieldname": "maintenance_schedule_detail", 
+  "oldfieldtype": "Table", 
+  "options": "Maintenance Schedule Detail", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

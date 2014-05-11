@@ -1,0 +1,44 @@
+[
+ {
+  "creation": "2013-02-22 01:27:46", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Holiday", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Holiday"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "print_width": "300px", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "holiday_date", 
+  "fieldtype": "Date", 
+  "label": "Date", 
+  "oldfieldname": "holiday_date", 
+  "oldfieldtype": "Date"
+ }
+]

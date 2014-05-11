@@ -1,0 +1,132 @@
+[
+ {
+  "creation": "2013-01-10 16:34:22", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:55:36", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 0, 
+  "allow_copy": 1, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 0, 
+  "icon": "icon-mobile-phone", 
+  "in_create": 0, 
+  "issingle": 1, 
+  "module": "Selling", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "SMS Center", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "SMS Center", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "SMS Center"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "send_to", 
+  "fieldtype": "Select", 
+  "label": "Send To", 
+  "options": "\nAll Contact\nAll Customer Contact\nAll Supplier Contact\nAll Sales Partner Contact\nAll Lead (Open)\nAll Employee (Active)\nAll Sales Person"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to=='All Customer Contact'", 
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "label": "Customer", 
+  "options": "Customer"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to=='All Supplier Contact'", 
+  "doctype": "DocField", 
+  "fieldname": "supplier", 
+  "fieldtype": "Link", 
+  "label": "Supplier", 
+  "options": "Supplier"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to=='All Employee (Active)'", 
+  "doctype": "DocField", 
+  "fieldname": "department", 
+  "fieldtype": "Select", 
+  "label": "Department", 
+  "options": "link:Department"
+ }, 
+ {
+  "depends_on": "eval:doc.send_to=='All Employee (Active)'", 
+  "doctype": "DocField", 
+  "fieldname": "branch", 
+  "fieldtype": "Select", 
+  "label": "Branch", 
+  "options": "link:Branch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "create_receiver_list", 
+  "fieldtype": "Button", 
+  "label": "Create Receiver List", 
+  "options": "create_receiver_list"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "receiver_list", 
+  "fieldtype": "Code", 
+  "label": "Receiver List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break9", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "description": "Messages greater than 160 characters will be split into multiple messages", 
+  "doctype": "DocField", 
+  "fieldname": "message", 
+  "fieldtype": "Text", 
+  "label": "Message", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "send_sms", 
+  "fieldtype": "Button", 
+  "label": "Send SMS", 
+  "options": "send_sms"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

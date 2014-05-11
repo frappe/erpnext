@@ -1,0 +1,162 @@
+[
+ {
+  "creation": "2013-01-10 16:34:22", 
+  "docstatus": 0, 
+  "modified": "2013-08-07 14:44:52", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "AR.####", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-shield", 
+  "module": "Setup", 
+  "name": "__common__", 
+  "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Authorization Rule", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Authorization Rule", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Authorization Rule"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 0, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "transaction", 
+  "fieldtype": "Select", 
+  "label": "Transaction", 
+  "oldfieldname": "transaction", 
+  "oldfieldtype": "Select", 
+  "options": "\nDelivery Note\nPurchase Invoice\nPurchase Order\nPurchase Receipt\nQuotation\nSales Invoice\nSales Order\nAppraisal", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "based_on", 
+  "fieldtype": "Select", 
+  "label": "Based On", 
+  "oldfieldname": "based_on", 
+  "oldfieldtype": "Select", 
+  "options": "\nGrand Total\nAverage Discount\nCustomerwise Discount\nItemwise Discount\nNot Applicable", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "master_name", 
+  "fieldtype": "Link", 
+  "label": "Customer / Item Name", 
+  "oldfieldname": "master_name", 
+  "oldfieldtype": "Link", 
+  "options": "[Select]"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "system_role", 
+  "fieldtype": "Link", 
+  "label": "Applicable To (Role)", 
+  "oldfieldname": "system_role", 
+  "oldfieldtype": "Link", 
+  "options": "Role"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "system_user", 
+  "fieldtype": "Link", 
+  "label": "Applicable To (User)", 
+  "oldfieldname": "system_user", 
+  "oldfieldtype": "Link", 
+  "options": "Profile"
+ }, 
+ {
+  "description": "This will be used for setting rule in HR module", 
+  "doctype": "DocField", 
+  "fieldname": "to_emp", 
+  "fieldtype": "Link", 
+  "label": "Applicable To (Employee)", 
+  "oldfieldname": "to_emp", 
+  "oldfieldtype": "Link", 
+  "options": "Employee", 
+  "search_index": 0
+ }, 
+ {
+  "description": "This will be used for setting rule in HR module", 
+  "doctype": "DocField", 
+  "fieldname": "to_designation", 
+  "fieldtype": "Link", 
+  "label": "Applicable To (Designation)", 
+  "oldfieldname": "to_designation", 
+  "oldfieldtype": "Link", 
+  "options": "Designation", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "approving_role", 
+  "fieldtype": "Link", 
+  "label": "Approving Role", 
+  "oldfieldname": "approving_role", 
+  "oldfieldtype": "Link", 
+  "options": "Role"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "approving_user", 
+  "fieldtype": "Link", 
+  "label": "Approving User", 
+  "oldfieldname": "approving_user", 
+  "oldfieldtype": "Link", 
+  "options": "Profile"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "value", 
+  "fieldtype": "Float", 
+  "label": "Above Value", 
+  "oldfieldname": "value", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

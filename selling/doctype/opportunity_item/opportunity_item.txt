@@ -1,0 +1,126 @@
+[
+ {
+  "creation": "2013-02-22 01:27:51", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 19:41:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Selling", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Opportunity Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Opportunity Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "reqd": 1, 
+  "width": "300px"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "item_group", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Item Group", 
+  "oldfieldname": "item_group", 
+  "oldfieldtype": "Link", 
+  "options": "Item Group", 
+  "print_hide": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "brand", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Brand", 
+  "oldfieldname": "brand", 
+  "oldfieldtype": "Link", 
+  "options": "Brand", 
+  "print_hide": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "quantity_and_rate", 
+  "fieldtype": "Section Break", 
+  "in_list_view": 0, 
+  "label": "Quantity and Rate"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "basic_rate", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Basic Rate", 
+  "oldfieldname": "basic_rate", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "uom", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "UOM", 
+  "oldfieldname": "uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM", 
+  "search_index": 0
+ }
+]

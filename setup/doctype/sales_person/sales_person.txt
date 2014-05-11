@@ -1,0 +1,193 @@
+[
+ {
+  "creation": "2013-01-10 16:34:24", 
+  "docstatus": 0, 
+  "modified": "2013-09-10 10:53:28", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:sales_person_name", 
+  "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-user", 
+  "in_create": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "search_fields": "name,parent_sales_person"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Sales Person", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sales Person", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Sales Person"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "name_and_employee_id", 
+  "fieldtype": "Section Break", 
+  "label": "Name and Employee ID", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_person_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Sales Person Name", 
+  "oldfieldname": "sales_person_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "description": "Select company name first.", 
+  "doctype": "DocField", 
+  "fieldname": "parent_sales_person", 
+  "fieldtype": "Link", 
+  "label": "Parent Sales Person", 
+  "oldfieldname": "parent_sales_person", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Person", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_group", 
+  "fieldtype": "Select", 
+  "label": "Has Child Node", 
+  "oldfieldname": "is_group", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "employee", 
+  "fieldtype": "Link", 
+  "label": "Employee", 
+  "options": "Employee", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lft", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "lft", 
+  "no_copy": 1, 
+  "oldfieldname": "lft", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rgt", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "rgt", 
+  "no_copy": 1, 
+  "oldfieldname": "rgt", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "old_parent", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "old_parent", 
+  "no_copy": 1, 
+  "oldfieldname": "old_parent", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1
+ }, 
+ {
+  "description": "Set targets Item Group-wise for this Sales Person.", 
+  "doctype": "DocField", 
+  "fieldname": "target_details_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Sales Person Targets", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-bullseye"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "target_details", 
+  "fieldtype": "Table", 
+  "label": "Target Details1", 
+  "oldfieldname": "target_details", 
+  "oldfieldtype": "Table", 
+  "options": "Target Detail"
+ }, 
+ {
+  "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+  "doctype": "DocField", 
+  "fieldname": "distribution_id", 
+  "fieldtype": "Link", 
+  "label": "Target Distribution", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Link", 
+  "options": "Budget Distribution", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication", 
+  "print_hide": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }
+]

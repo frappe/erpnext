@@ -1,0 +1,3462 @@
+ (Half Day),(Poludnevni)
+ against sales order,protiv prodajnog naloga
+ against same operation,protiv istog radu
+ already marked,Već obilježena
+ and year: ,i godina:
+ as it is stock Item or packing item,kao što je dionica artikla ili pakiranje stavku
+ at warehouse: ,na skladištu:
+ by Role ,prema ulozi
+ can not be made.,ne može biti.
+ can not be marked as a ledger as it has existing child,"Ne može biti označena kao knjigu, kao da ima postojeće dijete"
+ cannot be 0,ne može biti 0
+ cannot be deleted.,nije moguće izbrisati.
+ does not belong to the company,ne pripadaju tvrtki
+ has already been submitted.,je već poslan.
+ has been freezed. ,je freezed.
+ has been freezed. \				Only Accounts Manager can do transaction against this account,je freezed. \ Samo računi vlasnici mogu učiniti transakciju protiv tog računa
+" is less than equals to zero in the system, \						valuation rate is mandatory for this item","je manje nego jednaka nuli u sustavu, \ stopa za vrednovanje je obvezna za tu stavku"
+ is mandatory,je obavezno
+ is mandatory for GL Entry,je obvezna za upis GL
+ is not a ledger,nije knjiga
+ is not active,nije aktivan
+ is not set,nije postavljen
+ is now the default Fiscal Year. \			Please refresh your browser for the change to take effect.,Sada je zadana Fiskalna godina. \ Osvježite svoj preglednik za promjene stupiti na snagu.
+ is present in one or many Active BOMs,prisutan je u jednom ili više aktivnih sastavnicama
+ not active or does not exists in the system,Nije aktivan ili ne postoji u sustavu
+ not submitted,nije podnesen
+ or the BOM is cancelled or inactive,ili BOM je otkazan ili neaktivne
+ should be 'Yes'. As Item: ,trebao biti &#39;Da&#39;. Kao točke:
+ should be same as that in ,bi trebao biti isti kao u
+ was on leave on ,bio na dopustu na
+ will be ,biti
+ will be over-billed against mentioned ,će biti više-naplaćeno protiv spomenuto
+ will become ,će postati
+"""Company History""",&quot;Povijest tvrtke&quot;
+"""Team Members"" or ""Management""",&quot;Članovi tima&quot; ili &quot;upravljanje&quot;
+%  Delivered,Isporučena%
+% Amount Billed,% Iznos Naplaćeno
+% Billed,Naplaćeno%
+% Completed,Završen%
+% Installed,Instalirani%
+% Received,% Pozicija
+% of materials billed against this Purchase Order.,% Materijala naplaćeno protiv ove narudžbenice.
+% of materials billed against this Sales Order,% Materijala naplaćeno protiv ovog prodajnog naloga
+% of materials delivered against this Delivery Note,% Materijala dostavljenih protiv ove otpremnici
+% of materials delivered against this Sales Order,% Materijala dostavljenih od ovog prodajnog naloga
+% of materials ordered against this Material Request,% Materijala naredio protiv ovog materijala Zahtjeva
+% of materials received against this Purchase Order,% Materijala dobio protiv ove narudžbenice
+"' can not be managed using Stock Reconciliation.\					You can add/delete Serial No directly, \					to modify stock of this item.","&#39;Ne može se upravljati pomoću Stock pomirenja. \ Možete dodati / izbrisati Serijski Ne izravno, \ mijenjati dionice ove stavke."
+' in Company: ,&#39;U tvrtki:
+'To Case No.' cannot be less than 'From Case No.',&#39;Za Predmet br&#39; ne može biti manja od &#39;Od Predmet br&#39;
+* Will be calculated in the transaction.,* Hoće li biti izračunata u transakciji.
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**","Proračun ** Distribucija ** vam pomaže distribuirati svoj proračun preko mjeseca, ako imate sezonalnost u vašem business.To distribuirati proračun koristeći ovu distribuciju, postavite ovu ** Budget Distribution ** u ** troška **"
+**Currency** Master,Valuta ** ** Master
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,Fiskalna godina ** ** predstavlja financijsku godinu. Svi računovodstvene unose i druge glavne transakcije su praćeni od ** fiskalnu godinu **.
+. Outstanding cannot be less than zero. \				 	Please match exact outstanding.,. Izvanredna ne može biti manji od nule. \ Molimo odgovaraju točno izvanredan.
+. Please set status of the employee as 'Left',. Molimo postavite status zaposlenika kao &#39;lijevi&#39;
+. You can not mark his attendance as 'Present',. Ne možete označiti svoj dolazak kao &quot;sadašnjost&quot;
+"000 is black, fff is white","000 je crno, FFF je bijela"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 valuta = [?] FractionFor npr. 1 USD = 100 centi
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Za održavanje kupaca mudar Šifra i kako bi ih pretraživati ​​na temelju svog koda koristiti ovu opciju
+12px,12px
+13px,13px
+14px,14px
+15px,15px
+16px,16px
+2 days ago,Prije 2 dana
+: Duplicate row from same ,: Dvostruki red od istog
+: It is linked to other active BOM(s),: To je povezano s drugom aktivnom BOM (e)
+: Mandatory for a Recurring Invoice.,: Obvezni za Ponavljajući fakture.
+"<a href=""#!Sales Browser/Customer Group"">To manage Customer Groups, click here</a>","<a href=""#!Sales Browser/Customer Group"">Za upravljati skupine kupaca, kliknite ovdje</a>"
+"<a href=""#!Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#!Sales Browser/Item Group"">Upravljanje Stavka Grupe</a>"
+"<a href=""#!Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#!Sales Browser/Territory"">Za upravljanje Territory, kliknite ovdje</a>"
+"<a href=""#Sales Browser/Customer Group"">Manage Customer Groups</a>","<a href=""#Sales Browser/Customer Group"">Upravljanje skupine kupaca</a>"
+"<a href=""#Sales Browser/Customer Group"">To manage Territory, click here</a>","<a href=""#Sales Browser/Customer Group"">Za upravljanje Territory, kliknite ovdje</a>"
+"<a href=""#Sales Browser/Item Group"">Manage Item Groups</a>","<a href=""#Sales Browser/Item Group"">Upravljanje Stavka grupe</a>"
+"<a href=""#Sales Browser/Territory"">Territory</a>","<a href=""#Sales Browser/Territory"">Teritorija</a>"
+"<a href=""#Sales Browser/Territory"">To manage Territory, click here</a>","<a href=""#Sales Browser/Territory"">Za upravljanje Territory, kliknite ovdje</a>"
+"<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Naming Options</a>","<a onclick=""msgprint('<ol>\<li><b>field:[fieldname]</b> - By Field\<li><b>naming_series:</b> - By Naming Series (field called naming_series must be present\<li><b>eval:[expression]</b> - Evaluate an expression in python (self is doc)\<li><b>Prompt</b> - Prompt user for a name\<li><b>[series]</b> - Series by prefix (separated by a dot); for example PRE.#####\</ol>')"">Imenovanje Opcije</a>"
+<b>Cancel</b> allows you change Submitted documents by cancelling them and amending them.,<b>Odustani</b> vam promijeniti Poslao dokumente tako da ih otkazivanjem i njihovih izmjena i dopuna.
+"<span class=""sys_manager"">To setup, please go to Setup > Naming Series</span>","<span class=""sys_manager"">Za postavljanje, molimo idite na Postavke&gt; Naming serije</span>"
+A Customer exists with same name,Kupac postoji s istim imenom
+A Lead with this email id should exist,Olovo s ovom e-mail id trebala postojati
+"A Product or a Service that is bought, sold or kept in stock.","Proizvod ili usluga koji je kupio, prodao ili čuva u skladištu."
+A Supplier exists with same name,Dobavljač postoji s istim imenom
+A condition for a Shipping Rule,Uvjet za otprema pravilu
+A logical Warehouse against which stock entries are made.,Logično Skladište protiv kojih dionica unosi su napravili.
+A new popup will open that will ask you to select further conditions.,Novi popup će se otvoriti koji će od vas tražiti da odaberete dodatne uvjete.
+A symbol for this currency. For e.g. $,Simbol za ovu valutu. Za npr. $
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,Treća strana distributer / prodavač / komisionar / suradnik / prodavač koji prodaje tvrtke proizvode za proviziju.
+A user can have multiple values for a property.,Korisnik može imati više vrijednosti za imovinu.
+A+,+
+A-,-
+AB+,AB +
+AB-,AB-
+AMC Expiry Date,AMC Datum isteka
+ATT,ATT
+Abbr,Abbr
+About,Oko
+About Us Settings,O nama Postavke
+About Us Team Member,O nama reprezentativka
+Above Value,Iznad Vrijednost
+Absent,Odsutan
+Acceptance Criteria,Kriterij prihvaćanja
+Accepted,Primljen
+Accepted Quantity,Prihvaćeno Količina
+Accepted Warehouse,Prihvaćeno galerija
+Account,Račun
+Account Balance,Stanje računa
+Account Details,Account Details
+Account Head,Račun voditelj
+Account Id,ID računa
+Account Name,Naziv računa
+Account Type,Vrsta računa
+Account for this ,Račun za to
+Accounting,Računovodstvo
+Accounting Year.,Računovodstvo godina.
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Knjiženje zamrznuta do tog datuma, nitko ne može učiniti / mijenjati ulazak, osim uloge naveden u nastavku."
+Accounting journal entries.,Računovodstvo unosi u dnevnik.
+Accounts,Računi
+Accounts Frozen Upto,Računi Frozen Upto
+Accounts Payable,Računi naplativo
+Accounts Receivable,Potraživanja
+Accounts Settings,Računi Postavke
+Action,Akcija
+Active,Aktivan
+Active: Will extract emails from ,Aktivno: Hoće li izdvojiti e-pošte iz
+Activity,Djelatnost
+Activity Log,Aktivnost Prijava
+Activity Type,Aktivnost Tip
+Actual,Stvaran
+Actual Budget,Stvarni proračun
+Actual Completion Date,Stvarni datum dovršenja
+Actual Date,Stvarni datum
+Actual End Date,Stvarni Datum završetka
+Actual Invoice Date,Stvarni Datum fakture
+Actual Posting Date,Stvarni datum knjiženja
+Actual Qty,Stvarni Kol
+Actual Qty (at source/target),Stvarni Kol (na izvoru / ciljne)
+Actual Qty After Transaction,Stvarni Kol Nakon transakcije
+Actual Quantity,Stvarni Količina
+Actual Start Date,Stvarni datum početka
+Add,Dodati
+Add / Edit Taxes and Charges,Dodaj / Uredi poreza i pristojbi
+Add A New Rule,Dodaj novo pravilo
+Add A Property,Dodaj nekretninu
+Add Attachments,Dodaj privitke
+Add Bookmark,Dodaj Bookmark
+Add CSS,Dodaj CSS
+Add Column,Dodaj stupac
+Add Comment,Dodaj komentar
+Add Google Analytics ID: eg. UA-89XXX57-1. Please search help on Google Analytics for more information.,Dodaj Google Analytics ID: npr.. UA-89XXX57-1. Molimo potražiti pomoć na Google Analytics za više informacija.
+Add Message,Dodaj poruku
+Add New Permission Rule,Dodati novo pravilo dozvolu
+Add Reply,Dodaj Odgovor
+Add Terms and Conditions for the Material Request. You can also prepare a Terms and Conditions Master and use the Template,Dodaj Uvjete za materijal zahtjev. Također možete pripremiti Uvjeti i odredbe svladati i koristiti predložak
+Add Terms and Conditions for the Purchase Receipt. You can also prepare a Terms and Conditions Master and use the Template.,Dodaj Uvjete za kupnju primitka. Također možete pripremiti Uvjeti i odredbe Master i koristiti predložak.
+"Add Terms and Conditions for the Quotation like Payment Terms, Validity of Offer etc. You can also prepare a Terms and Conditions Master and use the Template","Dodaj Uvjete za kotaciju poput plaćanja, trajanje ponude, itd. Također možete pripremiti Uvjeti i odredbe Master i koristiti predložak"
+Add Total Row,Dodaj Ukupno Row
+Add a banner to the site. (small banners are usually good),Dodaj banner na licu mjesta. (Mali banneri su obično dobar)
+Add attachment,Dodaj privitak
+Add code as &lt;script&gt;,Dodaj kod kao &lt;script&gt;
+Add new row,Dodaj novi redak
+Add or Deduct,Dodavanje ili Oduzmite
+Add rows to set annual budgets on Accounts.,Dodavanje redaka postaviti godišnje proračune na računima.
+"Add the name of <a href=""http://google.com/webfonts"" target=""_blank"">Google Web Font</a> e.g. ""Open Sans""","Dodaj ime <a href=""http://google.com/webfonts"" target=""_blank"">Google Web slova</a> npr. &quot;Otvoreni Sans&quot;"
+Add to To Do,Dodaj u Raditi
+Add to To Do List of,Dodaj u napraviti popis od
+Add/Remove Recipients,Dodaj / Ukloni primatelja
+Additional Info,Dodatne informacije
+Address,Adresa
+Address & Contact,Adresa &amp; Kontakt
+Address & Contacts,Adresa i kontakti
+Address Desc,Adresa Desc
+Address Details,Adresa Detalji
+Address HTML,Adresa HTML
+Address Line 1,Adresa Linija 1
+Address Line 2,Adresa Linija 2
+Address Title,Adresa Naslov
+Address Type,Adresa Tip
+Address and other legal information you may want to put in the footer.,Adresa i druge pravne informacije koje svibanj želite staviti u podnožje.
+Address to be displayed on the Contact Page,Adresa biti prikazana na Kontakt stranici
+Adds a custom field to a DocType,Dodaje prilagođeni polja DOCTYPE
+Adds a custom script (client or server) to a DocType,Dodaje prilagođeni scenarij (klijent ili poslužitelj) na DOCTYPE
+Advance Amount,Predujam Iznos
+Advance amount,Predujam iznos
+Advanced Scripting,Napredna Scripting
+Advanced Settings,Napredne postavke
+Advances,Napredak
+Advertisement,Reklama
+After Sale Installations,Nakon prodaje postrojenja
+Against,Protiv
+Against Account,Protiv računa
+Against Docname,Protiv Docname
+Against Doctype,Protiv DOCTYPE
+Against Document Date,Protiv dokumenta Datum
+Against Document Detail No,Protiv dokumenta Detalj No
+Against Document No,Protiv dokumentu nema
+Against Expense Account,Protiv Rashodi račun
+Against Income Account,Protiv računu dohotka
+Against Journal Voucher,Protiv Journal Voucheru
+Against Purchase Invoice,Protiv Kupnja fakture
+Against Sales Invoice,Protiv prodaje fakture
+Against Voucher,Protiv Voucheru
+Against Voucher Type,Protiv voucher vrsti
+Agent,Agent
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials","Agregat skupina ** stavki ** u drugoj točki ** **. To je korisno ako ste vezanje određene artikle ** ** u paketu i održavanje zalihe pakiran ** stavki ** a ne agregata ** artikla **. Paket ** artikla ** će &quot;Je kataloški Stavka&quot; kao &quot;Ne&quot; i &quot;Je li prodaja artikla&quot; kao &quot;Da&quot;, na primjer:. Ako prodajete Prijenosna računala i Ruksaci odvojeno i imaju posebnu cijenu ako kupac kupuje oboje , onda laptop + ruksak će biti novi Prodaja BOM Item.Note: BOM = Bill materijala"
+Aging Date,Starenje Datum
+All Addresses.,Sve adrese.
+All Contact,Sve Kontakt
+All Contacts.,Svi kontakti.
+All Customer Contact,Sve Kupac Kontakt
+All Day,All Day
+All Employee (Active),Sve zaposlenika (aktivna)
+All Lead (Open),Sve Olovo (Otvoreno)
+All Products or Services.,Svi proizvodi i usluge.
+All Sales Partner Contact,Sve Kontakt Prodaja partner
+All Sales Person,Sve Prodaje Osoba
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,"Sve transakcije prodaje mogu biti označene protiv više osoba ** prodajnim **, tako da možete postaviti i pratiti ciljeve."
+All Supplier Contact,Sve Dobavljač Kontakt
+"All account columns should be after \							standard columns and on the right.							If you entered it properly, next probable reason \							could be wrong account name.							Please rectify it in the file and try again.","Svi stupovi račun bi trebao biti poslije \ standardnim stupcima, a na desnoj strani. Ako ste ga unijeli ispravno, vjerojatno iduće \ razlog može biti pogrešno ime računa. Molimo to ispraviti u spisu i pokušajte ponovno."
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Svi izvoz srodnih područja kao što su valute, stopa pretvorbe, izvoz, izvoz ukupno Sveukupno itd su dostupni u <br> Otpremnica, POS, citat, prodaja Račun, prodajnog naloga i sl."
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Sve uvozne srodnih područja kao što su valute, stopa pretvorbe, uvoz, uvoz ukupno Sveukupno itd su dostupni u <br> Kupnja Primitak, Dobavljač citat, Otkup fakture, Narudžbenica itd."
+All items have already been transferred \				for this Production Order.,Svi predmeti su već prenesena \ ovoj proizvodnji Reda.
+"All possible Workflow States and roles of the workflow. <br>Docstatus Options: 0 is""Saved"", 1 is ""Submitted"" and 2 is ""Cancelled""","Sve moguće Workflow Države i uloge tijeka rada. <br> Docstatus Opcije: 0 je &quot;Spremljeno&quot;, jedan je &quot;Zaprimljeno&quot; i 2. &quot;Otkazano&quot;"
+All posts by,Svi postovi by
+Allocate,Dodijeliti
+Allocate leaves for the year.,Dodjela lišće za godinu dana.
+Allocated Amount,Dodijeljeni iznos
+Allocated Budget,Dodijeljeni proračuna
+Allocated amount,Dodijeljeni iznos
+Allow Attach,Dopustite Priloži
+Allow Bill of Materials,Dopustite Bill materijala
+Allow Dropbox Access,Dopusti pristup Dropbox
+Allow Editing of Frozen Accounts For,Dopusti uređivanje zamrznutih računa za
+Allow Google Drive Access,Dopusti pristup Google Drive
+Allow Import,Dopustite Uvoz
+Allow Import via Data Import Tool,Dopustite uvoz preko Data Import Alat
+Allow Negative Balance,Dopustite negativan saldo
+Allow Negative Stock,Dopustite negativnu Stock
+Allow Production Order,Dopustite proizvodnom nalogu
+Allow Rename,Dopustite Preimenuj
+Allow Samples,Dopustite Uzorci
+Allow User,Dopusti korisnika
+Allow Users,Omogućiti korisnicima
+Allow on Submit,Dopusti na Submit
+Allow the following users to approve Leave Applications for block days.,Dopusti sljedeći korisnici odobriti ostavite aplikacije za blok dana.
+Allow user to edit Price List Rate in transactions,Dopustite korisniku da uredite Ocijenite cjeniku u prometu
+Allow user to login only after this hour (0-24),Dopustite korisniku da prijavite tek nakon tog vremena (0-24)
+Allow user to login only before this hour (0-24),Dopustite korisniku se prijaviti samo prije tog vremena (0-24)
+Allowance Percent,Dodatak posto
+Allowed,Dozvoljen
+Already Registered,Već registracije
+Always use Login Id as sender,Uvijek koristite lozinka za rad kao pošiljatelj
+Amend,Ispraviti
+Amended From,Izmijenjena Od
+Amount,Iznos
+Amount (Company Currency),Iznos (Društvo valuta)
+Amount <=,Iznos &lt;=
+Amount >=,Iznos&gt; =
+"An icon file with .ico extension. Should be 16 x 16 px. Generated using a favicon generator. [<a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a>]","Ikona datoteke s nastavkom. Ico. Treba biti 16 x 16 px. Generirano pomoću favicon generator. [ <a href=""http://favicon-generator.org/"" target=""_blank"">favicon-generator.org</a> ]"
+Analytics,Analitika
+Another Salary Structure '%s' is active for employee '%s'. 				Please make its status 'Inactive' to proceed.,Drugi strukture plaća &#39;% s&#39; je aktivna zaposlenika &#39;% s&#39;. Provjerite svoj status &#39;Neaktivan&#39; za nastavak.
+"Any other comments, noteworthy effort that should go in the records.","Svi ostali komentari, značajan napor da bi trebao ići u evidenciji."
+Applicable Holiday List,Primjenjivo odmor Popis
+Applicable To (Designation),Odnosi se na (Oznaka)
+Applicable To (Employee),Odnosi se na (Radnik)
+Applicable To (Role),Odnosi se na (uloga)
+Applicable To (User),Odnosi se na (Upute)
+Applicant Name,Podnositelj zahtjeva Ime
+Applicant for a Job,Podnositelj zahtjeva za posao
+Applicant for a Job.,Podnositelj prijave za posao.
+Applications for leave.,Prijave za odmor.
+Applies to Company,Odnosi se na Društvo
+Apply / Approve Leaves,Nanesite / Odobri lišće
+Apply Shipping Rule,Primijeni pravilo otprema
+Apply Taxes and Charges Master,Nanesite poreze i troškove Master
+Appraisal,Procjena
+Appraisal Goal,Procjena gol
+Appraisal Goals,Ocjenjivanje Golovi
+Appraisal Template,Procjena Predložak
+Appraisal Template Goal,Procjena Predložak cilja
+Appraisal Template Title,Procjena Predložak Naslov
+Approval Status,Status odobrenja
+Approved,Odobren
+Approver,Odobritelj
+Approving Role,Odobravanje ulogu
+Approving User,Odobravanje korisnika
+Are you sure you want to delete the attachment?,Jeste li sigurni da želite izbrisati privitak?
+Arial,Arial
+Arrear Amount,Iznos unatrag
+"As a best practice, do not assign the same set of permission rule to different Roles instead set multiple Roles to the User","Kao najbolje prakse, ne dodijeliti isti skup dozvola pravilu se različitim ulogama umjesto postaviti više uloge Korisniku"
+As existing qty for item: ,Kao postojeće Qty za stavke:
+As per Stock UOM,Kao po burzi UOM
+"As there are existing stock transactions for this \							item, you can not change the values of 'Has Serial No', \							'Is Stock Item' and 'Valuation Method'","Kao što već postoje zalihe transakcija za ovaj \ točke, ne možete mijenjati vrijednosti &quot;Ima Serial Ne &#39;, \&#39; Je Stock artikla &#39;i&#39; metoda vrednovanja &#39;"
+Ascending,Uzlazni
+Assign To,Dodijeliti
+Assigned By,Dodijeljen od strane
+Assignment,Dodjela
+Assignments,Zadaci
+Associate a DocType to the Print Format,Povežite DOCTYPE za ispis formatu
+Atleast one warehouse is mandatory,Atleast jednom skladištu je obavezno
+Attach,Pričvrstiti
+Attach Document Print,Priloži dokument Ispis
+Attached To DocType,U prilogu vrstu dokumenata
+Attached To Name,U prilogu naziv
+Attachment,Vezanost
+Attachments,Privitci
+Attempted to Contact,Pokušaj Kontakt
+Attendance,Pohađanje
+Attendance Date,Gledatelja Datum
+Attendance Details,Gledatelja Detalji
+Attendance From Date,Gledatelja Od datuma
+Attendance To Date,Gledatelja do danas
+Attendance can not be marked for future dates,Gledatelji ne može biti označena za budući datum
+Attendance for the employee: ,Gledatelja za zaposlenika:
+Attendance record.,Gledatelja rekord.
+Attributions,Pripisivanje
+Authorization Control,Odobrenje kontrole
+Authorization Rule,Autorizacija Pravilo
+Auto Email Id,Auto E-mail ID
+Auto Inventory Accounting,Auto Inventar Računovodstvo
+Auto Inventory Accounting Settings,Auto Inventar Računovodstvo Postavke
+Auto Material Request,Auto Materijal Zahtjev
+Auto Name,Auto Ime
+Auto generated,Automatski generirano
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-podizanje Materijal zahtjev ako se količina ide ispod ponovno bi razinu u skladištu
+Automatically updated via Stock Entry of type Manufacture/Repack,Automatski ažurira putem burze Unos tipa Proizvodnja / prepakirati
+Autoreply when a new mail is received,Automatski kad nova pošta je dobila
+Available Qty at Warehouse,Dostupno Kol na galeriju
+Available Stock for Packing Items,Dostupno Stock za pakiranje artikle
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Dostupan u BOM, otpremnici, Otkup fakture, Proizvodnja Red, Narudžbenica, Otkup Potvrda, prodaja Račun, prodajnog naloga, Stock Stupanje, timesheet"
+Avatar,Avatar
+Average Discount,Prosječna Popust
+B+,B +
+B-,B-
+BILL,Bill
+BILLJ,BILLJ
+BOM,BOM
+BOM Detail No,BOM Detalj Ne
+BOM Explosion Item,BOM eksplozije artikla
+BOM Item,BOM artikla
+BOM No,BOM Ne
+BOM No. for a Finished Good Item,BOM broj za Gotovi Dobar točki
+BOM Operation,BOM Operacija
+BOM Operations,BOM operacije
+BOM Replace Tool,BOM Zamijenite alat
+BOM replaced,BOM zamijeniti
+Background Color,Boja pozadine
+Background Image,Pozadina slike
+Backup Manager,Backup Manager
+Backup Right Now,Backup Right Now
+Backups will be uploaded to,Sigurnosne kopije će biti učitane
+"Balances of Accounts of type ""Bank or Cash""",Sredstva računi tipa &quot;banke ili u gotovini&quot;
+Bank,Banka
+Bank A/C No.,Banka / C br
+Bank Account,Žiro račun
+Bank Account No.,Žiro račun broj
+Bank Clearance Summary,Razmak banka Sažetak
+Bank Name,Ime banke
+Bank Reconciliation,Banka pomirenje
+Bank Reconciliation Detail,Banka Pomirenje Detalj
+Bank Reconciliation Statement,Izjava banka pomirenja
+Bank Voucher,Banka bon
+Bank or Cash,Banka ili gotovina
+Bank/Cash Balance,Banka / saldo
+Banner,Zastava
+Banner HTML,Banner HTML
+Banner Image,Banner slika
+Banner is above the Top Menu Bar.,Banner je iznad gornjem izborniku.
+Barcode,Barkod
+Based On,Na temelju
+Basic Info,Osnovne informacije
+Basic Information,Osnovne informacije
+Basic Rate,Osnovna stopa
+Basic Rate (Company Currency),Osnovna stopa (Društvo valuta)
+Batch,Serija
+Batch (lot) of an Item.,Hrpa (puno) od točke.
+Batch Finished Date,Hrpa Završio Datum
+Batch ID,Hrpa ID
+Batch No,Hrpa Ne
+Batch Started Date,Hrpa Autor Date
+Batch Time Logs for Billing.,Hrpa Vrijeme Trupci za naplatu.
+Batch Time Logs for billing.,Hrpa Vrijeme Trupci za naplatu.
+Batch-Wise Balance History,Batch-Wise bilanca Povijest
+Batched for Billing,Izmiješane za naplatu
+Be the first one to comment,Budite prvi koji će komentirati
+Begin this page with a slideshow of images,Počnite ovu stranicu s slideshow slika
+Better Prospects,Bolji izgledi
+Bill Date,Bill Datum
+Bill No,Bill Ne
+Bill of Material to be considered for manufacturing,Bill of material treba uzeti u obzir za proizvodnju
+Bill of Materials,Bill materijala
+Bill of Materials (BOM),Bill materijala (BOM)
+Billable,Naplatu
+Billed,Naplaćeno
+Billed Amt,Naplaćeno Amt
+Billing,Naplata
+Billing Address,Adresa za naplatu
+Billing Address Name,Adresa za naplatu Ime
+Billing Status,Naplata Status
+Bills raised by Suppliers.,Mjenice podigao dobavljače.
+Bills raised to Customers.,Mjenice podignuta na kupce.
+Bin,Kanta
+Bio,Bio
+Bio will be displayed in blog section etc.,Bio će biti prikazan u sekciji bloga itd.
+Birth Date,Datum rođenja
+Blob,Grudvica
+Block Date,Blok Datum
+Block Days,Blok Dani
+Block Holidays on important days.,Blok Odmor o važnim dana.
+Block leave applications by department.,Blok ostaviti aplikacija odjelu.
+Blog Category,Blog Kategorija
+Blog Intro,Blog Intro
+Blog Introduction,Blog Uvod
+Blog Post,Blog post
+Blog Settings,Blog Postavke
+Blog Subscriber,Blog Pretplatnik
+Blog Title,Blog Naslov
+Blogger,Blogger
+Blood Group,Krv Grupa
+Bookmarks,Favoriti
+Branch,Grana
+Brand,Marka
+Brand HTML,Marka HTML
+Brand Name,Brand Name
+"Brand is what appears on the top-right of the toolbar. If it is an image, make sure ithas a transparent background and use the &lt;img /&gt; tag. Keep size as 200px x 30px","Brand je ono što se pojavljuje na gornjem desnom kutu alatne trake. Ako je to slika, pobrinite ithas transparentan pozadini i koristiti &lt;img /&gt; oznaku. Držite veličinu 200px x 30px"
+Brand master.,Marka majstor.
+Brands,Marke
+Breakdown,Slom
+Budget,Budžet
+Budget Allocated,Proračun Dodijeljeni
+Budget Control,Proračun kontrola
+Budget Detail,Proračun Detalj
+Budget Details,Proračunski Detalji
+Budget Distribution,Proračun Distribucija
+Budget Distribution Detail,Proračun Distribucija Detalj
+Budget Distribution Details,Proračun raspodjele Detalji
+Budget Variance Report,Proračun varijance Prijavi
+Build Modules,Izgradite modula
+Build Pages,Izgradite stranice
+Build Server API,Izgradite Server API
+Build Sitemap,Izgradite Sitemap
+Bulk Email,Bulk Email
+Bulk Email records.,Bulk Email Records.
+Bummer! There are more holidays than working days this month.,Sori! Postoji više od blagdana radnih dana ovog mjeseca.
+Bundle items at time of sale.,Bala stavke na vrijeme prodaje.
+Button,Dugme
+Buyer of Goods and Services.,Kupac robe i usluga.
+Buying,Kupovina
+Buying Amount,Kupnja Iznos
+Buying Settings,Kupnja postavki
+By,Po
+C-FORM/,C-FORM /
+C-Form,C-Form
+C-Form Applicable,C-obrascu
+C-Form Invoice Detail,C-Obrazac Račun Detalj
+C-Form No,C-Obrazac br
+CI/2010-2011/,CI/2010-2011 /
+COMM-,COMM-
+CSS,CSS
+CUST,Cust
+CUSTMUM,CUSTMUM
+Calculate Based On,Izračunajte Na temelju
+Calculate Total Score,Izračunajte ukupni rezultat
+Calendar,Kalendar
+Calendar Events,Kalendar događanja
+Call,Nazvati
+Campaign,Kampanja
+Campaign Name,Naziv kampanje
+Can only be exported by users with role 'Report Manager',Može biti samo izvoze od strane korisnika s ulogom &#39;Report Manager&#39;
+Cancel,Otkazati
+Cancel permission also allows the user to delete a document (if it is not linked to any other document).,Odustani dozvola također omogućuje korisniku da izbrisati dokument (ako nije povezan s bilo kojim drugim dokumentom).
+Cancelled,Otkazan
+Cannot ,Ne mogu
+Cannot approve leave as you are not authorized to approve leaves on Block Dates.,Ne može odobriti ostaviti kao što nisu ovlašteni za odobravanje ostavlja na Block Datumi.
+Cannot change from,Ne mogu promijeniti iz
+Cannot continue.,Ne može se nastaviti.
+Cannot have two prices for same Price List,Ne možete imati dvije cijene za isti Cjenika
+Cannot map because following condition fails: ,Ne mogu mapirati jer sljedeći uvjet ne uspije:
+Capacity,Kapacitet
+Capacity Units,Kapacitet jedinice
+Carry Forward,Prenijeti
+Carry Forwarded Leaves,Nosi proslijeđen lišće
+Case No(s) already in use. Please rectify and try again.				Recommended <b>From Case No. = %s</b>,Slučaj br (i) već u uporabi. Molimo ispraviti i pokušajte ponovno. Preporučio <b>Od Predmet br =% s</b>
+Cash,Gotovina
+Cash Voucher,Novac bon
+Cash/Bank Account,Novac / bankovni račun
+Categorize blog posts.,Kategorizacija blogu.
+Category,Kategorija
+Category Name,Naziv kategorije
+Category of customer as entered in Customer master,Kategorija klijenta ušao u Customer gospodara
+Cell Number,Mobitel Broj
+Center,Centar
+"Certain documents should not be changed once final, like an Invoice for example. The final state for such documents is called <b>Submitted</b>. You can restrict which roles can Submit.","Određene dokumente ne treba mijenjati jednom finalu, kao i račun za primjer. Konačno stanje za takvim dokumentima se zove <b>Postavio.</b> Možete ograničiti koje uloge mogu Submit."
+Change UOM for an Item.,Promjena UOM za predmet.
+Change the starting / current sequence number of an existing series.,Promjena polaznu / tekući redni broj postojeće serije.
+Channel Partner,Channel Partner
+Charge,Naboj
+Chargeable,Naplativ
+Chart of Accounts,Kontnog
+Chart of Cost Centers,Grafikon troškovnih centara
+Chat,Razgovor
+Check,Provjeriti
+Check / Uncheck roles assigned to the Profile. Click on the Role to find out what permissions that Role has.,Provjerite / Odznačite uloge dodijeljene profil. Kliknite na ulozi saznati što dozvole da uloga.
+Check all the items below that you want to send in this digest.,Provjerite sve stavke u nastavku koje želite poslati u ovom svariti.
+Check how the newsletter looks in an email by sending it to your email.,Pogledajte kako izgleda newsletter u e-mail tako da ga šalju na e-mail.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","Provjerite je li ponavljajući fakture, poništite zaustaviti ponavljajući ili staviti odgovarajući datum završetka"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Provjerite ako trebate automatske ponavljajuće fakture. Nakon odavanja prodaje fakturu, ponavljajućih sekcija će biti vidljiv."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,"Provjerite ako želite poslati plaće slip u pošti svakom zaposleniku, dok podnošenje plaće slip"
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,Označite ovo ako želite prisiliti korisniku odabir seriju prije spremanja. Tu će biti zadana ako to provjerili.
+Check this if you want to send emails as this id only (in case of restriction by your email provider).,"Provjerite to, ako želite poslati e-mail, jer to samo ID (u slučaju ograničenja po vašem e-mail usluga)."
+Check this if you want to show in website,Označite ovo ako želite pokazati u web
+Check this to disallow fractions. (for Nos),Provjerite to da ne dopušta frakcija. (Za br)
+Check this to make this the default letter head in all prints,Provjerite to napraviti ovu glavu zadani slovo u svim otisaka
+Check this to pull emails from your mailbox,Provjerite to povući e-pošte iz poštanskog sandučića
+Check to activate,Provjerite za aktiviranje
+Check to make Shipping Address,Provjerite otprema adresu
+Check to make primary address,Provjerite primarnu adresu
+Checked,Provjeren
+Cheque,Ček
+Cheque Date,Ček Datum
+Cheque Number,Ček Broj
+Child Tables are shown as a Grid in other DocTypes.,Dijete Tablice su prikazane kao Grid u drugim DocTypes.
+City,Grad
+City/Town,Grad / Mjesto
+Claim Amount,Iznos štete
+Claims for company expense.,Potraživanja za tvrtke trošak.
+Class / Percentage,Klasa / Postotak
+Classic,Klasik
+Classification of Customers by region,Klasifikacija kupaca po regiji
+Clear Cache & Refresh,Clear Cache &amp; Osvježi
+Clear Table,Jasno Tablica
+Clearance Date,Razmak Datum
+"Click on ""Get Latest Updates""",Kliknite na &quot;dobiti najnovija ažuriranja&quot;
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Kliknite na &quot;Make prodaje Račun &#39;gumb za stvaranje nove prodaje fakture.
+Click on button in the 'Condition' column and select the option 'User is the creator of the document',Kliknite na gumb u &#39;hotela&#39; stupcu i odaberite opciju &#39;Korisnik je kreator dokument&#39;
+Click to Expand / Collapse,Kliknite na Proširi / Sažmi
+Client,Klijent
+Close,Zatvoriti
+Closed,Zatvoreno
+Closing Account Head,Zatvaranje računa šefa
+Closing Date,Datum zatvaranja
+Closing Fiscal Year,Zatvaranje Fiskalna godina
+CoA Help,CoA Pomoć
+Code,Šifra
+Cold Calling,Hladno pozivanje
+Color,Boja
+Column Break,Kolona Break
+Comma separated list of email addresses,Zarez odvojen popis e-mail adrese
+Comment,Komentirati
+Comment By,Komentar
+Comment By Fullname,Komentar FULLNAME
+Comment Date,Komentar Datum
+Comment Docname,Komentar Docname
+Comment Doctype,Komentar DOCTYPE
+Comment Time,Komentar Vrijeme
+Comments,Komentari
+Commission Rate,Komisija Stopa
+Commission Rate (%),Komisija stopa (%)
+Commission partners and targets,Komisija partneri i ciljevi
+Communication,Komunikacija
+Communication HTML,Komunikacija HTML
+Communication History,Komunikacija Povijest
+Communication Medium,Komunikacija srednje
+Communication log.,Komunikacija dnevnik.
+Company,Društvo
+Company Details,Tvrtka Detalji
+Company History,Povijest tvrtke
+Company History Heading,Povijest tvrtke Naslov
+Company Info,Podaci o tvrtki
+Company Introduction,Tvrtka Uvod
+Company Master.,Tvrtka Master.
+Company Name,Ime tvrtke
+Company Settings,Tvrtka Postavke
+Company branches.,Tvrtka grane.
+Company departments.,Tvrtka odjeli.
+Company is missing or entered incorrect value,Tvrtka je nestao ili je ušao netočne vrijednosti
+Company mismatch for Warehouse,Tvrtka Neslaganje za skladište
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,Tvrtka registracijski brojevi za svoju referencu. Primjer: PDV registracijski brojevi i sl.
+Company registration numbers for your reference. Tax numbers etc.,Tvrtka registracijski brojevi za svoju referencu. Porezni brojevi itd.
+Complaint,Prigovor
+Complete,Dovršiti
+Complete By,Kompletan Do
+Completed,Dovršen
+Completed Qty,Završen Kol
+Completion Date,Završetak Datum
+Completion Status,Završetak Status
+Confirmed orders from Customers.,Potvrđeno narudžbe od kupaca.
+Consider Tax or Charge for,Razmislite poreza ili pristojbi za
+"Consider this Price List for fetching rate. (only which have ""For Buying"" as checked)",Razmislite ovom cjeniku za dobavljanje stopu. (Samo što su &quot;Za kupnju&quot; kao provjereni)
+Considered as Opening Balance,Smatra početnog stanja
+Considered as an Opening Balance,Smatra se kao početno stanje
+Consultant,Konzultant
+Consumed Qty,Potrošeno Kol
+Contact,Kontaktirati
+Contact Control,Kontaktirajte kontrolu
+Contact Desc,Kontakt ukratko
+Contact Details,Kontakt podaci
+Contact Email,Kontakt e
+Contact HTML,Kontakt HTML
+Contact Info,Kontakt Informacije
+Contact Mobile No,Kontaktirajte Mobile Nema
+Contact Name,Kontakt Naziv
+Contact No.,Kontakt broj
+Contact Person,Kontakt osoba
+Contact Type,Vrsta kontakta
+Contact Us Settings,Kontaktirajte nas Settings
+Contact in Future,Kontakt u budućnosti
+"Contact options, like ""Sales Query, Support Query"" etc each on a new line or separated by commas.","Kontakt opcije, poput &quot;Sales Query, Podrška upit&quot; itd jedni na novoj liniji ili odvojene zarezima."
+Contacted,Kontaktirao
+Content,Sadržaj
+Content Type,Vrsta sadržaja
+Content in markdown format that appears on the main side of your page,Sadržaj u smanjenje formatu koji se pojavljuje na glavnoj strani stranice
+Content web page.,Sadržaj web stranica.
+Contra Voucher,Contra bon
+Contract End Date,Ugovor Datum završetka
+Contribution (%),Doprinos (%)
+Contribution to Net Total,Doprinos neto Ukupno
+Control Panel,Upravljačka ploča
+Conversion Factor,Konverzijski faktor
+Conversion Rate,Stopa konverzije
+Convert into Recurring Invoice,Pretvori u Ponavljajući fakture
+Converted,Pretvoreno
+Copy,Kopirajte
+Copy From Item Group,Primjerak iz točke Group
+Copyright,Autorsko pravo
+Core,Srž
+Cost Center,Troška
+Cost Center Details,Troška Detalji
+Cost Center Name,Troška Name
+Cost Center is mandatory for item: ,Troška je obavezan za stavke:
+Cost Center must be specified for PL Account: ,Troška mora biti navedeno za PL račun:
+Costing,Koštanje
+Country,Zemlja
+Country Name,Država Ime
+Create,Stvoriti
+Create Bank Voucher for the total salary paid for the above selected criteria,Stvaranje Bank bon za ukupne plaće isplaćene za gore odabranih kriterija
+Create Material Requests,Stvaranje materijalni zahtijevi
+Create Production Orders,Stvaranje radne naloge
+Create Receiver List,Stvaranje Receiver popis
+Create Salary Slip,Stvaranje plaće Slip
+Create Stock Ledger Entries when you submit a Sales Invoice,Otvori Stock stavke knjige kada podnijeti prodaje fakture
+"Create a price list from Price List master and enter standard ref rates against each of them. On selection of a price list in Quotation, Sales Order or Delivery Note, corresponding ref rate will be fetched for this item.","Stvaranje cjenik iz Cjenika gospodara i unijeti standardne Ref. stope jedni protiv njih. Na izboru cjeniku u ponudu, prodajnog naloga ili otpremnici, odgovara ref stopa će biti preuzeta za tu stavku."
+Create and Send Newsletters,Stvaranje i slati newslettere
+Created Account Head: ,Objavljeno račun Voditelj:
+Created By,Stvorio
+Created Customer Issue,Objavljeno Kupac Issue
+Created Group ,Objavljeno Group
+Created Opportunity,Objavljeno Opportunity
+Created Support Ticket,Objavljeno Podrška karata
+Creates salary slip for above mentioned criteria.,Stvara plaće slip za gore navedene kriterije.
+Credentials,Svjedodžba
+Credit,Kredit
+Credit Amt,Kreditne Amt
+Credit Card Voucher,Kreditne kartice bon
+Credit Controller,Kreditne kontroler
+Credit Days,Kreditne Dani
+Credit Limit,Kreditni limit
+Credit Note,Kreditne Napomena
+Credit To,Kreditne Da
+Cross Listing of Item in multiple groups,Križ Oglas stavke u više grupa
+Currency,Valuta
+Currency Exchange,Mjenjačnica
+Currency Format,Valuta Format
+Currency Name,Valuta Ime
+Currency Settings,Valuta Postavke
+Currency and Price List,Valuta i cjenik
+Currency does not match Price List Currency for Price List,Valuta ne odgovara Valuta cijene iz cjenika za Cjenika
+Current Accommodation Type,Trenutni Tip smještaja
+Current Address,Trenutna adresa
+Current BOM,Trenutni BOM
+Current Fiscal Year,Tekuće fiskalne godine
+Current Stock,Trenutni Stock
+Current Stock UOM,Trenutni kataloški UOM
+Current Value,Trenutna vrijednost
+Current status,Trenutni status
+Custom,Običaj
+Custom Autoreply Message,Prilagođena Automatski Poruka
+Custom CSS,Prilagođena CSS
+Custom Field,Prilagođena polja
+Custom Message,Prilagođena poruka
+Custom Reports,Prilagođena izvješća
+Custom Script,Prilagođena skripta
+Custom Startup Code,Prilagođena Pokretanje Šifra
+Custom?,Prilagođena?
+Customer,Kupac
+Customer (Receivable) Account,Kupac (Potraživanja) račun
+Customer / Item Name,Kupac / Stavka Ime
+Customer Account,Kupac račun
+Customer Account Head,Kupac račun Head
+Customer Address,Kupac Adresa
+Customer Addresses And Contacts,Kupac adrese i kontakti
+Customer Code,Kupac Šifra
+Customer Codes,Kupac Kodovi
+Customer Details,Korisnički podaci
+Customer Discount,Kupac Popust
+Customer Discounts,Kupac Popusti
+Customer Feedback,Kupac Ocjena
+Customer Group,Kupac Grupa
+Customer Group Name,Kupac Grupa Ime
+Customer Intro,Kupac Uvod
+Customer Issue,Kupac Issue
+Customer Issue against Serial No.,Kupac izdavanja protiv serijski broj
+Customer Name,Naziv klijenta
+Customer Naming By,Kupac Imenovanje By
+Customer Type,Vrsta klijenta
+Customer classification tree.,Kupac klasifikacija stablo.
+Customer database.,Kupac baze.
+Customer's Currency,Kupca valuta
+Customer's Item Code,Kupca Stavka Šifra
+Customer's Purchase Order Date,Kupca narudžbenice Datum
+Customer's Purchase Order No,Kupca Narudžbenica br
+Customer's Vendor,Kupca Prodavatelj
+Customer's currency,Kupca valuta
+"Customer's currency - If you want to select a currency that is not the default currency, then you must also specify the Currency Conversion Rate.","Kupca valuta - Ako želite odabrati valutu koja nije zadana valuta, onda morate odrediti stopu pretvorbe valuta."
+Customers Not Buying Since Long Time,Kupci ne kupuju jer dugo vremena
+Customerwise Discount,Customerwise Popust
+Customize,Prilagodite
+Customize Form,Prilagodite obrazac
+Customize Form Field,Prilagodba polja obrasca
+"Customize Label, Print Hide, Default etc.","Prilagodite oznaku, print sakriti, Zadani itd."
+Customize the Notification,Prilagodite Obavijest
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,Prilagodite uvodni tekst koji ide kao dio tog e-maila. Svaka transakcija ima zaseban uvodni tekst.
+DN,DN
+DN Detail,DN Detalj
+Daily,Svakodnevno
+Daily Event Digest is sent for Calendar Events where reminders are set.,"Dnevni događaji Digest je poslan za kalendar događanja, gdje su postavljene podsjetnici."
+Daily Time Log Summary,Dnevno vrijeme Log Profila
+Danger,Opasnost
+Data,Podaci
+Data missing in table,Podaci koji nedostaju u tablici
+Database,Baza podataka
+Database Folder ID,Baza mapa ID
+Database of potential customers.,Baza potencijalnih kupaca.
+Date,Datum
+Date Format,Datum Format
+Date Of Retirement,Datum odlaska u mirovinu
+Date and Number Settings,Datum i broj Postavke
+Date is repeated,Datum se ponavlja
+Date must be in format,Datum mora biti u obliku
+Date of Birth,Datum rođenja
+Date of Issue,Datum izdavanja
+Date of Joining,Datum Ulazak
+Date on which lorry started from supplier warehouse,Datum na koji je kamion počeo od dobavljača skladištu
+Date on which lorry started from your warehouse,Datum na koji je kamion počeo iz skladišta
+Date on which the lead was last contacted,Datum na koji je vodstvo zadnje kontaktirao
+Dates,Termini
+Datetime,Datetime
+Days for which Holidays are blocked for this department.,Dani za koje Praznici su blokirane za ovaj odjel.
+Dealer,Trgovac
+Dear,Drag
+Debit,Zaduženje
+Debit Amt,Rashodi Amt
+Debit Note,Rashodi Napomena
+Debit To,Rashodi za
+Debit or Credit,Itnim
+Deduct,Odbiti
+Deduction,Odbitak
+Deduction Type,Odbitak Tip
+Deduction1,Deduction1
+Deductions,Odbici
+Default,Zadani
+Default Account,Zadani račun
+Default BOM,Zadani BOM
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,"Zadani banka / Novčani račun će se automatski ažuriraju u POS računu, kada je ovaj mod odabran."
+Default Bank Account,Zadani bankovni račun
+Default Cash Account,Default Novac račun
+Default Commission Rate,Zadani komisija Ocijenite
+Default Company,Zadani Tvrtka
+Default Cost Center,Zadani troška
+Default Cost Center for tracking expense for this item.,Zadani troška za praćenje trošak za tu stavku.
+Default Currency,Zadani valuta
+Default Customer Group,Zadani Korisnik Grupa
+Default Expense Account,Zadani Rashodi račun
+Default Home Page,Zadani Početna stranica
+Default Home Pages,Zadani Početna stranica
+Default Income Account,Zadani Prihodi račun
+Default Item Group,Zadani artikla Grupa
+Default Price List,Zadani Cjenik
+Default Print Format,Zadani Ispis Format
+Default Purchase Account in which cost of the item will be debited.,Zadani Kupnja računa na koji trošak stavke će biti terećen.
+Default Sales Partner,Zadani Prodaja partner
+Default Settings,Tvorničke postavke
+Default Source Warehouse,Zadani Izvor galerija
+Default Stock UOM,Zadani kataloški UOM
+Default Supplier,Default Dobavljač
+Default Supplier Type,Zadani Dobavljač Tip
+Default Target Warehouse,Zadani Ciljana galerija
+Default Territory,Zadani Regija
+Default Unit of Measure,Zadani Jedinica mjere
+Default Valuation Method,Zadani metoda vrednovanja
+Default Value,Zadana vrijednost
+Default Warehouse,Default Warehouse
+Default Warehouse is mandatory for Stock Item.,Default skladišta obvezan je za Stock točke.
+Default settings for Shopping Cart,Zadane postavke za Košarica
+"Default: ""Contact Us""",Default: &quot;Kontaktirajte nas&quot;
+DefaultValue,DefaultValue
+Defaults,Zadani
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Odredite proračun za ovu troška. Da biste postavili proračuna akciju, vidi <a href=""#!List/Company"">Tvrtka Master</a>"
+Defines actions on states and the next step and allowed roles.,Definira aktivnosti na članicama i sljedeći korak i dopušteni uloge.
+Defines workflow states and rules for a document.,Definira tijeka stanja i pravila za dokument.
+Delete,Izbrisati
+Delete Row,Izbriši redak
+Delivered,Isporučena
+Delivered Items To Be Billed,Isporučena Proizvodi se naplaćuje
+Delivered Qty,Isporučena Kol
+Delivery Address,Dostava Adresa
+Delivery Date,Dostava Datum
+Delivery Details,Detalji o isporuci
+Delivery Document No,Dostava Dokument br
+Delivery Document Type,Dostava Document Type
+Delivery Note,Obavještenje o primanji pošiljke
+Delivery Note Item,Otpremnica artikla
+Delivery Note Items,Način Napomena Stavke
+Delivery Note Message,Otpremnica Poruka
+Delivery Note No,Dostava Napomena Ne
+Packed Item,Dostava Napomena Pakiranje artikla
+Delivery Note Required,Dostava Napomena Obavezno
+Delivery Note Trends,Otpremnici trendovi
+Delivery Status,Status isporuke
+Delivery Time,Vrijeme isporuke
+Delivery To,Dostava na
+Department,Odsjek
+Depends On,Ovisi o
+Depends on LWP,Ovisi o lwp
+Descending,Spuštanje
+Description,Opis
+Description HTML,Opis HTML
+"Description for listing page, in plain text, only a couple of lines. (max 140 characters)","Opis za unos stranici, kao običan tekst, samo par redaka. (Max 140 znakova)"
+Description for page header.,Opis za zaglavlje stranice.
+Description of a Job Opening,Opis posla otvorenje
+Designation,Oznaka
+Desktop,Desktop
+Detailed Breakup of the totals,Detaljni raspada ukupnim
+Details,Detalji
+Deutsch,Deutsch
+Did not add.,Nije li dodati.
+Did not cancel,Nije li otkazati
+Did not save,Nije li spremiti
+Difference,Razlika
+"Different ""States"" this document can exist in. Like ""Open"", ""Pending Approval"" etc.","Različite &quot;Države&quot;, ovaj dokument može postojati u. Kao &quot;Otvoreno&quot;, &quot;na čekanju za odobrenje&quot;, itd."
+Disable Customer Signup link in Login page,Bez Korisnička prijavom vezu u stranicu za prijavu
+Disable Rounded Total,Bez Zaobljeni Ukupno
+Disable Signup,Bez Prijava
+Disabled,Onesposobljen
+Discount  %,Popust%
+Discount %,Popust%
+Discount (%),Popust (%)
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Popust Polja će biti dostupan u narudžbenice, Otkup primitka, Otkup fakturu"
+Discount(%),Popust (%)
+Display,Prikaz
+Display Settings,Postavke prikaza
+Display all the individual items delivered with the main items,Prikaži sve pojedinačne stavke isporučuju s glavnim stavkama
+Distinct unit of an Item,Razlikovna jedinica stavku
+Distribute transport overhead across items.,Podijeliti prijevoz pretek preko stavke.
+Distribution,Distribucija
+Distribution Id,Distribucija Id
+Distribution Name,Distribucija Ime
+Distributor,Distributer
+Divorced,Rastavljen
+Do not show any symbol like $ etc next to currencies.,Ne pokazuju nikakav simbol kao $ itd uz valutama.
+Doc Name,Doc Ime
+Doc Status,Doc Status
+Doc Type,Doc Tip
+DocField,DocField
+DocPerm,DocPerm
+DocType,DOCTYPE
+DocType Details,DOCTYPE Detalji
+DocType is a Table / Form in the application.,DOCTYPE je tablica / Forma u primjeni.
+DocType on which this Workflow is applicable.,DOCTYPE na koje se ovaj tijek je primjenjivo.
+DocType or Field,DOCTYPE ili polja
+Document,Dokument
+Document Description,Dokument Opis
+Document Numbering Series,Numeriranje Serija
+Document Status transition from ,Dokument Status prijelaz iz
+Document Type,Document Type
+Document is only editable by users of role,Dokument je samo uređivati ​​korisnika ulozi
+Documentation,Dokumentacija
+Documentation Generator Console,Dokumentacija Generator konzole
+Documentation Tool,Dokumentacija alat
+Documents,Dokumenti
+Domain,Domena
+Download Backup,Preuzmite Backup
+Download Materials Required,Preuzmite Materijali za
+Download Template,Preuzmite predložak
+Download a report containing all raw materials with their latest inventory status,Preuzmite izvješće koje sadrži sve sirovine sa svojim najnovijim inventara statusa
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Preuzmite predložak, ispunite odgovarajuće podatke i priložiti izmijenjene file.All datume i zaposlenika kombinacija u odabranom razdoblju će doći u predlošku, s postojećim pohađanje zapisa"
+Draft,Skica
+Drafts,Nacrti
+Drag to sort columns,Povuci za sortiranje stupaca
+Dropbox,Dropbox
+Dropbox Access Allowed,Dropbox Pristup dopuštenih
+Dropbox Access Key,Dropbox Pristupna tipka
+Dropbox Access Secret,Dropbox Pristup Secret
+Due Date,Datum dospijeća
+EMP/,EMP /
+ESIC CARD No,ESIC KARTICA Ne
+ESIC No.,ESIC broj
+Earning,Zarada
+Earning & Deduction,Zarada &amp; Odbitak
+Earning Type,Zarada Vid
+Earning1,Earning1
+Edit,Uredi
+Editable,Uređivati
+Educational Qualification,Obrazovne kvalifikacije
+Educational Qualification Details,Obrazovni Pojedinosti kvalifikacije
+Eg. smsgateway.com/api/send_sms.cgi,Npr.. smsgateway.com / api / send_sms.cgi
+Email,E-mail
+Email (By company),E-mail (Po mjestu)
+Email Digest,E-pošta
+Email Digest Settings,E-pošta Postavke
+Email Host,E-mail Host
+Email Id,E-mail ID
+"Email Id must be unique, already exists for: ","E-mail Id mora biti jedinstven, već postoji za:"
+"Email Id where a job applicant will email e.g. ""jobs@example.com""",E-mail Id gdje posao zahtjeva će e-mail npr. &quot;jobs@example.com&quot;
+Email Login,E-mail Prijava
+Email Password,E-mail Lozinka
+Email Sent,E-mail poslan
+Email Sent?,E-mail poslan?
+Email Settings,Postavke e-pošte
+Email Settings for Outgoing and Incoming Emails.,Postavke e-pošte za odlazne i dolazne e-pošte.
+Email Signature,E-mail potpis
+Email Use SSL,Pošaljite Use
+"Email addresses, separted by commas","E-mail adrese, separted zarezom"
+Email ids separated by commas.,E-mail ids odvojene zarezima.
+"Email settings for jobs email id ""jobs@example.com""",E-mail postavke za poslove email id &quot;jobs@example.com&quot;
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""",E-mail postavke za izdvajanje vodi od prodaje email id npr. &quot;sales@example.com&quot;
+Email...,E-mail ...
+Embed image slideshows in website pages.,Postavi slikovne prezentacije u web stranicama.
+Emergency Contact Details,Hitna Kontaktni podaci
+Emergency Phone Number,Hitna Telefonski broj
+Employee,Zaposlenik
+Employee Birthday,Zaposlenik Rođendan
+Employee Designation.,Zaposlenik Imenovanje.
+Employee Details,Zaposlenih Detalji
+Employee Education,Zaposlenik Obrazovanje
+Employee External Work History,Zaposlenik Vanjski Rad Povijest
+Employee Information,Zaposlenik informacije
+Employee Internal Work History,Zaposlenik Unutarnji Rad Povijest
+Employee Internal Work Historys,Zaposlenih unutarnji rad Historys
+Employee Leave Approver,Zaposlenik dopust Odobritelj
+Employee Leave Balance,Zaposlenik napuste balans
+Employee Name,Zaposlenik Ime
+Employee Number,Zaposlenik Broj
+Employee Records to be created by,Zaposlenik Records bi se stvorili
+Employee Setup,Zaposlenik konfiguracija
+Employee Type,Zaposlenik Tip
+Employee grades,Zaposlenih razreda
+Employee record is created using selected field. ,Zaposlenika rekord je stvorio pomoću odabranog polja.
+Employee records.,Zaposlenih evidencija.
+Employee: ,Zaposlenik:
+Employees Email Id,Zaposlenici Email ID
+Employment Details,Zapošljavanje Detalji
+Employment Type,Zapošljavanje Tip
+Enable Auto Inventory Accounting,Omogućite Računovodstvo zaliha Auto
+Enable Shopping Cart,Omogućite Košarica
+Enabled,Omogućeno
+Enables <b>More Info.</b> in all documents,Omogućuje <b>Vise Informacija.</b> U svim dokumentima
+Encashment Date,Encashment Datum
+End Date,Datum završetka
+End date of current invoice's period,Kraj datum tekućeg razdoblja dostavnice
+End of Life,Kraj života
+Ends on,Završava
+Enter Email Id to receive Error Report sent by users.E.g.: support@iwebnotes.com,Unesite Email ID primiti izvješće o pogrešci poslao users.Eg: support@iwebnotes.com
+Enter Form Type,Unesite Obrazac Vid
+Enter Row,Unesite Row
+Enter Verification Code,Unesite kod za provjeru
+Enter campaign name if the source of lead is campaign.,Unesite naziv kampanje ukoliko izvor olova je kampanja.
+"Enter default value fields (keys) and values. If you add multiple values for a field, the first one will be picked. These defaults are also used to set ""match"" permission rules. To see list of fields, go to <a href=""#Form/Customize Form/Customize Form"">Customize Form</a>.","Unesite polja zadane vrijednosti (ključevi) i vrijednosti. Ako ste dodali više vrijednosti za polje, prvi će se podići. Ove postavke su također koristi za postavljanje &quot;match&quot; dozvola pravila. Da biste vidjeli popis polja, idite na <a href=""#Form/Customize Form/Customize Form"">Prilagodi obrazac</a> ."
+Enter department to which this Contact belongs,Unesite odjel na koji se ovaj Kontakt pripada
+Enter designation of this Contact,Upišite oznaku ove Kontakt
+"Enter email id separated by commas, invoice will be mailed automatically on particular date","Unesite e-mail ID odvojena zarezima, račun će automatski biti poslan na određeni datum"
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,Unesite stavke i planirani Količina za koje želite povećati proizvodne naloge ili preuzimanje sirovine za analizu.
+Enter name of campaign if source of enquiry is campaign,"Unesite naziv kampanje, ako je izvor upit je kampanja"
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Unesite statičke parametre URL ovdje (npr. pošiljatelj = ERPNext, username = ERPNext, lozinkom = 1234 itd.)"
+Enter the company name under which Account Head will be created for this Supplier,Unesite naziv tvrtke pod kojima računa Voditelj će biti stvoren za tu dobavljača
+Enter the date by which payments from customer is expected against this invoice.,Unesite datum do kojeg isplate kupca se očekuje protiv ovog računa.
+Enter url parameter for message,Unesite URL parametar za poruke
+Enter url parameter for receiver nos,Unesite URL parametar za prijemnike br
+Entries,Prijave
+Entries are not allowed against this Fiscal Year if the year is closed.,"Prijave nisu dozvoljeni protiv ove fiskalne godine, ako se godina zatvoren."
+Error,Pogreška
+Error for,Pogreška za
+Error: Document has been modified after you have opened it,Pogreška: Dokument je promijenjen nakon što ste ga otvorili
+Estimated Material Cost,Procjena troškova materijala
+Event,Događaj
+Event End must be after Start,Događaj Kraj mora biti nakon početnog
+Event Individuals,Događaj Pojedinci
+Event Role,Događaj Uloga
+Event Roles,Događaj Uloge
+Event Type,Vrsta događaja
+Event User,Događaj Upute
+Events In Today's Calendar,Događanja u današnjem kalendaru
+Every Day,Svaki dan
+Every Month,Svaki mjesec
+Every Week,Svaki tjedan
+Every Year,Svaki Godina
+Everyone can read,Svatko može pročitati
+Example:,Primjer:
+Exchange Rate,Tečaj
+Excise Page Number,Trošarina Broj stranice
+Excise Voucher,Trošarina bon
+Exemption Limit,Izuzeće granica
+Exhibition,Izložba
+Existing Customer,Postojeći Kupac
+Exit,Izlaz
+Exit Interview Details,Izlaz Intervju Detalji
+Expected,Očekivana
+Expected Delivery Date,Očekivani rok isporuke
+Expected End Date,Očekivani Datum završetka
+Expected Start Date,Očekivani datum početka
+Expense Account,Rashodi račun
+Expense Account is mandatory,Rashodi račun je obvezna
+Expense Claim,Rashodi polaganja
+Expense Claim Approved,Rashodi Zahtjev odobren
+Expense Claim Approved Message,Rashodi Zahtjev Odobren poruku
+Expense Claim Detail,Rashodi Zahtjev Detalj
+Expense Claim Details,Rashodi Pojedinosti o polaganju
+Expense Claim Rejected,Rashodi Zahtjev odbijen
+Expense Claim Rejected Message,Rashodi Zahtjev odbijen poruku
+Expense Claim Type,Rashodi Vrsta polaganja
+Expense Date,Rashodi Datum
+Expense Details,Rashodi Detalji
+Expense Head,Rashodi voditelj
+Expense account is mandatory for item: ,Rashodi račun je obvezna za stavke:
+Expense/Adjustment Account,Rashodi / Prilagodba račun
+Expenses Booked,Rashodi Rezervirani
+Expenses Included In Valuation,Troškovi uključeni u vrednovanje
+Expenses booked for the digest period,Troškovi rezerviranih za razdoblje digest
+Expiry Date,Datum isteka
+Export,Izvoz
+Exports,Izvoz
+External,Vanjski
+Extract Emails,Ekstrakt e-pošte
+FCFS Rate,FCFS Stopa
+FIFO,FIFO
+Facebook Share,Facebook Share
+Failed: ,Nije uspjelo:
+Family Background,Obitelj Pozadina
+FavIcon,Favicon
+Fax,Fax
+Features Setup,Značajke konfiguracija
+Feed,Hraniti
+Feed Type,Pasi Vid
+Feedback,Povratna veza
+Female,Ženski
+Fetch lead which will be converted into customer.,Fetch vodstvo koje će se pretvoriti u kupca.
+Field Description,Opis polja
+Field Name,Naziv polja
+Field Type,Vrsta polja
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","Polje dostupan u otpremnicu, ponudu, prodaje fakture, prodaja reda"
+"Field that represents the Workflow State of the transaction (if field is not present, a new hidden Custom Field will be created)","Područje koje predstavlja tijeka državu transakcije (ako polje nije prisutan, novi skriveno Custom Field će biti stvoren)"
+Fieldname,"Podataka, Naziv Polja"
+Fields,Polja
+"Fields separated by comma (,) will be included in the<br /><b>Search By</b> list of Search dialog box","Polja odvojene zarezom (,) će biti uključen u <br /> <b>Traži po</b> popisu Pretraživanje dijaloškom okviru"
+File,File
+File Data,File Podaci
+File Name,File Name
+File Size,Veličina
+File URL,URL datoteke
+File size exceeded the maximum allowed size,Veličina premašila maksimalnu dopuštenu veličinu
+Files Folder ID,Files ID
+Filing in Additional Information about the Opportunity will help you analyze your data better.,Podnošenje u dodatne informacije o Prilika će vam pomoći da analizirati podatke bolje.
+Filing in Additional Information about the Purchase Receipt will help you analyze your data better.,Podnošenje u dodatne informacije o kupoprodaji prijemu će vam pomoći da analizirati podatke bolje.
+Filling in Additional Information about the Delivery Note will help you analyze your data better.,Ispunjavanje Dodatne informacije o otpremnici će vam pomoći da analizirati podatke bolje.
+Filling in additional information about the Quotation will help you analyze your data better.,Ispunjavanje dodatne informacije o kotaciju će vam pomoći da analizirati podatke bolje.
+Filling in additional information about the Sales Order will help you analyze your data better.,Ispunjavanje dodatne informacije o prodaji Reda će vam pomoći da analizirati podatke bolje.
+Filter,Filter
+Filter By Amount,Filtriraj po visini
+Filter By Date,Filter By Date
+Filter based on customer,Filter temelji se na kupca
+Filter based on item,Filtrirati na temelju točki
+Final Confirmation Date,Konačna potvrda Datum
+Financial Analytics,Financijski Analytics
+Financial Statements,Financijska izvješća
+First Name,Ime
+First Responded On,Prvo Odgovorili Na
+Fiscal Year,Fiskalna godina
+Fixed Asset Account,Dugotrajne imovine račun
+Float,Plutati
+Float Precision,Float Precision
+Follow via Email,Slijedite putem e-maila
+Following Journal Vouchers have been created automatically,Nakon Časopis bon stvoreni su automatski
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Nakon stol će pokazati vrijednosti ako su stavke pod - ugovoreno. Ove vrijednosti će biti preuzeta od zapovjednika &quot;Bill of Materials&quot; pod - ugovoreni stavke.
+Font (Heading),Font (Heading)
+Font (Text),Font (Tekst)
+Font Size (Text),Veličina fonta (Tekst)
+Fonts,Fontovi
+Footer,Footer
+Footer Items,Footer Proizvodi
+For All Users,Za sve korisnike
+For Company,Za tvrtke
+For Employee,Za zaposlenom
+For Employee Name,Za ime zaposlenika
+For Item ,Za točku
+"For Links, enter the DocType as rangeFor Select, enter list of Options separated by comma","Za Linkovi, unesite DOCTYPE kao rangeFor Select, unesite popisu opcija odvojenih zarezom"
+For Production,Za proizvodnju
+For Reference Only.,Samo za referencu.
+For Sales Invoice,Za prodaju fakture
+For Server Side Print Formats,Za Server formati stranom za ispis
+For Territory,Za Territory
+For UOM,Za UOM
+For Warehouse,Za galeriju
+"For comparative filters, start with","Za komparativne filtera, početi s"
+"For e.g. 2012, 2012-13","Za npr. 2012, 2012-13"
+For example if you cancel and amend 'INV004' it will become a new document 'INV004-1'. This helps you to keep track of each amendment.,"Na primjer, ako ste odustali i dopune &#39;INV004&#39; postat će novi dokument &#39;INV004-1&#39;. To vam pomaže pratiti svaku izmjenu i dopunu."
+For example: You want to restrict users to transactions marked with a certain property called 'Territory',Na primjer: Vi želite ograničiti korisnike transakcija označena s određenom objektu koji se zove &#39;teritorij&#39;
+For opening balance entry account can not be a PL account,Za otvaranje računa bilance ulaz ne može biti PL račun
+For ranges,Za raspone
+For reference,Za referencu
+For reference only.,Za samo kao referenca.
+For row,Za zaredom
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Za praktičnost kupaca, te kodovi mogu se koristiti u tiskanim formata kao što su fakture i otpremnice"
+Form,Oblik
+Format: hh:mm example for one hour expiry set as 01:00. Max expiry will be 72 hours. Default is 24 hours,Format: hh: mm primjer za jedan sat isteka postavljen kao 01:00. Maks isteka će biti 72 sati. Default je 24 sati
+Forum,Forum
+Fraction,Frakcija
+Fraction Units,Frakcije Jedinice
+Freeze Stock Entries,Zamrzavanje Stock Unosi
+Friday,Petak
+From,Od
+From Bill of Materials,Od Bill of Materials
+From Company,Iz Društva
+From Currency,Od novca
+From Currency and To Currency cannot be same,Od valute i valuta ne mogu biti isti
+From Customer,Od kupca
+From Date,Od datuma
+From Date must be before To Date,Od datuma mora biti prije do danas
+From Delivery Note,Od otpremnici
+From Employee,Od zaposlenika
+From Lead,Od Olovo
+From PR Date,Iz PR Datum
+From Package No.,Iz paketa broj
+From Purchase Order,Od narudžbenice
+From Purchase Receipt,Od Račun kupnje
+From Sales Order,Od prodajnog naloga
+From Time,S vremena
+From Value,Od Vrijednost
+From Value should be less than To Value,Iz vrijednost treba biti manja od vrijednosti za
+Frozen,Zaleđeni
+Fulfilled,Ispunjena
+Full Name,Ime i prezime
+Fully Completed,Potpuno Završeni
+GL Entry,GL Stupanje
+GL Entry: Debit or Credit amount is mandatory for ,GL Ulaz: debitna ili kreditna iznos je obvezno za
+GRN,GRN
+Gantt Chart,Gantogram
+Gantt chart of all tasks.,Gantogram svih zadataka.
+Gender,Rod
+General,Opći
+General Ledger,Glavna knjiga
+Generate Description HTML,Generiranje Opis HTML
+Generate Material Requests (MRP) and Production Orders.,Generirajte Materijal Upiti (MRP) i radne naloge.
+Generate Salary Slips,Generiranje plaće gaćice
+Generate Schedule,Generiranje Raspored
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","Generirajte pakiranje gaćice za pakete koji će biti isporučen. Rabljeni obavijestiti paket broj, sadržaj paketa i njegovu težinu."
+Generates HTML to include selected image in the description,Stvara HTML uključuju odabrane slike u opisu
+Georgia,Gruzija
+Get,Dobiti
+Get Advances Paid,Nabavite plaćenim avansima
+Get Advances Received,Get Napredak pozicija
+Get Current Stock,Nabavite trenutne zalihe
+Get From ,Nabavite Od
+Get Items,Nabavite artikle
+Get Items From Sales Orders,Get artikle iz narudžbe
+Get Last Purchase Rate,Nabavite Zadnji Ocijeni Kupnja
+Get Non Reconciled Entries,Get Non pomirio tekstova
+Get Outstanding Invoices,Nabavite neplaćene račune
+Get Purchase Receipt,Get Kupnja Račun
+Get Sales Orders,Nabavite narudžbe
+Get Specification Details,Nabavite Specifikacija Detalji
+Get Stock and Rate,Nabavite Stock i stopa
+Get Template,Nabavite predloška
+Get Terms and Conditions,Nabavite Uvjeti i pravila
+Get Weekly Off Dates,Nabavite Tjedno Off datumi
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Nabavite stopa za vrednovanje i dostupni zaliha na izvor / cilj skladištu na spomenuti datum knjiženja radno vrijeme. Ako serijaliziranom stavku, molimo pritisnite ovu tipku nakon ulaska serijskih brojeva."
+Give additional details about the indent.,Daj dodatne pojedinosti o alineje.
+Global Defaults,Globalni Zadano
+Go back to home,Vrati se kući
+Go to Setup > <a href='#user-properties'>User Properties</a> to set \			'territory' for diffent Users.,Idite na Setup&gt; <a href='#user-properties'>Svojstva korisnika</a> za postavljanje \ &#39;teritorij&#39; za diffent korisnike.
+Goal,Cilj
+Goals,Golovi
+Goods received from Suppliers.,Roba dobio od dobavljače.
+Google Analytics ID,Google Analytics ID
+Google Drive,Google Drive
+Google Drive Access Allowed,Google Drive Pristup dopuštenih
+Google Plus One,Google Plus One
+Google Web Font (Heading),Google Web Font (Heading)
+Google Web Font (Text),Google Web Font (Tekst)
+Grade,Razred
+Graduate,Diplomski
+Grand Total,Sveukupno
+Grand Total (Company Currency),Sveukupno (Društvo valuta)
+Gratuity LIC ID,Poklon LIC ID
+Gross Margin %,Bruto marža%
+Gross Margin Value,Bruto marža vrijednost
+Gross Pay,Bruto plaće
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,Bruto plaće + + zaostatak Iznos Iznos Encashment - Ukupno Odbitak
+Gross Profit,Ukupan profit
+Gross Profit (%),Bruto dobit (%)
+Gross Weight,Bruto težina
+Gross Weight UOM,Bruto težina UOM
+Group,Grupa
+Group or Ledger,Grupa ili knjiga
+Groups,Grupe
+HR,HR
+HR Settings,HR Postavke
+HTML,HTML
+HTML / Banner that will show on the top of product list.,HTML / bannera koji će se prikazivati ​​na vrhu liste proizvoda.
+Half Day,Pola dana
+Half Yearly,Pola Godišnji
+Half-yearly,Polugodišnje
+Has Batch No,Je Hrpa Ne
+Has Child Node,Je li čvor dijete
+Has Serial No,Ima Serial Ne
+Header,Kombajn
+Heading,Naslov
+Heading Text As,Naslov teksta koji je
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,Šefovi (ili skupine) protiv kojih Računovodstvo upisi su izrađene i sredstva su održavani.
+Health Concerns,Zdravlje Zabrinutost
+Health Details,Zdravlje Detalji
+Held On,Održanoj
+Help,Pomoći
+Help HTML,Pomoć HTML
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Pomoć: Za povezivanje na drugi zapis u sustavu, koristite &quot;# Forma / Napomena / [Napomena ime]&quot; kao URL veze. (Ne koristite &quot;http://&quot;)"
+Helvetica Neue,Helvetica Neue
+"Hence, maximum allowed Manufacturing Quantity","Dakle, maksimalno dopuštena količina proizvodnje"
+"Here you can maintain family details like name and occupation of parent, spouse and children","Ovdje možete održavati obiteljske pojedinosti kao što su ime i okupacije roditelja, supružnika i djecu"
+"Here you can maintain height, weight, allergies, medical concerns etc","Ovdje možete održavati visina, težina, alergije, medicinske brige itd."
+Hey there! You need to put at least one item in \				the item table.,Hej tamo! Vi trebate da stavite barem jednu stavku u \ tablicu artikala.
+Hey! All these items have already been invoiced.,Hej! Svi ti predmeti su već fakturirana.
+Hey! There should remain at least one System Manager,Hej! Tu bi trebao ostati barem jedan Manager sustav
+Hidden,Skriven
+Hide Actions,Sakrij Akcije
+Hide Copy,Sakrij Copy
+Hide Currency Symbol,Sakrij simbol valute
+Hide Email,Sakrij e
+Hide Heading,Sakrij Naslov
+Hide Print,Sakrij Ispis
+Hide Toolbar,Sakrij alatne trake
+High,Visok
+Highlight,Istaknuti
+History,Povijest
+History In Company,Povijest U Društvu
+Hold,Držati
+Holiday,Odmor
+Holiday List,Turistička Popis
+Holiday List Name,Turistička Popis Ime
+Holidays,Praznici
+Home,Dom
+Home Page,Početna stranica
+Home Page is Products,Početna stranica je proizvodi
+Home Pages,Početna stranica
+Host,Domaćin
+"Host, Email and Password required if emails are to be pulled","Domaćin, e-mail i lozinka potrebni ako e-mailove su se izvukao"
+Hour Rate,Sat Ocijenite
+Hour Rate Consumable,Sat Ocijenite Potrošni
+Hour Rate Electricity,Sat Ocijenite Struja
+Hour Rate Labour,Sat Ocijenite rada
+Hour Rate Rent,Sat Ocijenite Najam
+Hours,Sati
+How frequently?,Kako često?
+"How should this currency be formatted? If not set, will use system defaults","Kako bi se to valuta biti formatiran? Ako nije postavljeno, koristit će zadane postavke sustava"
+How to upload,Kako prenijeti
+Hrvatski,Hrvatski
+Human Resources,Ljudski resursi
+Hurray! The day(s) on which you are applying for leave \					coincide with holiday(s). You need not apply for leave.,Ura! Dan (e) na koje se prijavljuje za ostaviti \ podudara s odmora (s). Vi ne trebate podnijeti zahtjev za dopust.
+I,Ja
+ID (name) of the entity whose property is to be set,ID (ime) subjekta čiji je objekt se postaviti
+IDT,IDT
+II,II
+III,III
+IN,U
+INV,INV
+INV/10-11/,INV/10-11 /
+ITEM,ITEM
+IV,IV
+Icon,Ikona
+Icon will appear on the button,Ikona će se pojaviti na gumb
+Id of the profile will be the email.,Id profilu će biti e-mail.
+Identification of the package for the delivery (for print),Identifikacija paketa za dostavu (za tisak)
+If Income or Expense,Ako prihoda i rashoda
+If Monthly Budget Exceeded,Ako Mjesečni proračun Exceeded
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table.Available in Delivery Note and Sales Order","Ako Prodaja BOM definiran, stvarna BOM od Pack prikazuje se kao table.Available u otpremnici i prodajnog naloga"
+"If Supplier Part Number exists for given Item, it gets stored here","Ako Dobavljač Broj dijela postoji za određeni predmet, to dobiva pohranjen ovdje"
+If Yearly Budget Exceeded,Ako Godišnji proračun Exceeded
+"If a User does not have access at Level 0, then higher levels are meaningless","Ako korisnik ne imati pristup na razini 0, onda je viša razina su besmislene"
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","Ako je označeno, BOM za pod-zbor stavke će biti uzeti u obzir za dobivanje sirovine. Inače, sve pod-montaža stavke će biti tretirani kao sirovinu."
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Ako je označeno, Ukupan broj. radnih dana će uključiti odmor, a to će smanjiti vrijednost plaća po danu"
+"If checked, all other workflows become inactive.","Ako je označeno, svi ostali tijekovi postaju neaktivne."
+"If checked, an email with an attached HTML format will be added to part of the EMail body as well as attachment. To only send as attachment, uncheck this.","Ako je označeno, e-mail s priloženom HTML formatu će biti dodan u dijelu u tijelo, kao i privrženosti. Za samo poslati kao privitak, isključite ovu."
+"If checked, the Home page will be the default Item Group for the website.","Ako je označeno, stranica Home će biti zadana Grupa za web stranice predmeta."
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","Ako je označeno, iznos poreza će se smatrati već uključena u Print Rate / Ispis Iznos"
+"If disable, 'Rounded Total' field will not be visible in any transaction","Ako onemogućite, &#39;Ukupno&#39; Zaobljeni polje neće biti vidljiv u bilo kojoj transakciji"
+"If enabled, the system will post accounting entries for inventory automatically.","Ako je omogućeno, sustav će objaviti računovodstvene stavke za popis automatski."
+"If image is selected, color will be ignored (attach first)","Ako je slika odabrana, boja će biti ignoriran (priložiti prvi)"
+If more than one package of the same type (for print),Ako je više od jedan paket od iste vrste (za tisak)
+If non standard port (e.g. 587),Ako ne standardni ulaz (npr. 587)
+If not applicable please enter: NA,Ako ne odnosi unesite: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.","Ako nije označeno, popis će biti dodan u svakom odjela gdje se mora primjenjivati."
+"If not, create a","Ako ne, stvoriti"
+"If set, data entry is only allowed for specified users. Else, entry is allowed for all users with requisite permissions.","Ako skup, unos podataka je dopušteno samo za određene korisnike. Inače, ulaz je dozvoljen za sve korisnike sa potrebnim dozvolama."
+"If specified, send the newsletter using this email address","Ako je navedeno, pošaljite newsletter koristeći ovu e-mail adresu"
+"If the 'territory' Link Field exists, it will give you an option to select it","Ako &#39;teritoriju&#39; Link Polje postoji, to će vam dati mogućnost da ga odabrali"
+"If the account is frozen, entries are allowed for the ""Account Manager"" only.","Ako je račun zamrznut, unosi su dozvoljeni za &quot;Account Manager&quot; jedini."
+"If this Account represents a Customer, Supplier or Employee, set it here.","Ako se to računa predstavlja kupac, dobavljač ili zaposlenik, postavite ga ovdje."
+If you follow Quality Inspection<br>Enables item QA Required and QA No in Purchase Receipt,Ako slijedite Inspekcija kvalitete <br> Omogućuje stavku QA potrebno i QA nema u kupoprodaji primitka
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,Ako imate prodajnog tima i prodaja partnerima (partneri) mogu biti označene i održavati svoj doprinos u prodajne aktivnosti
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","Ako ste stvorili standardni predložak za kupnju poreze i pristojbe magisterij, odaberite jednu i kliknite na gumb ispod."
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","Ako ste stvorili standardni predložak u prodaji poreze i pristojbe magisterij, odaberite jednu i kliknite na gumb ispod."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","Ako ste dugo ispis formata, ova značajka može se koristiti za podijeliti stranicu na koju se ispisuje više stranica sa svim zaglavljima i podnožjima na svakoj stranici"
+If you involve in manufacturing activity<br>Enables item <b>Is Manufactured</b>,Ako uključiti u proizvodnju aktivnosti <br> Omogućuje predmet <b>je proizveden</b>
+Ignore,Ignorirati
+Ignored: ,Zanemareni:
+Image,Slika
+Image Link,Slika Link
+Image View,Slika Pogledaj
+Implementation Partner,Provedba partner
+Import,Uvoz
+Import Attendance,Uvoz posjećenost
+Import Log,Uvoz Prijavite
+Important dates and commitments in your project life cycle,Važni datumi i obveze u svoj ciklus projekta života
+Imports,Uvoz
+In Dialog,U Dialog
+In Filter,U filtru
+In Hours,U sati
+In List View,U prikazu popisa
+In Process,U procesu
+In Report Filter,U Prijavi Filter
+In Row,U nizu
+In Store,U trgovini
+In Words,U riječi
+In Words (Company Currency),U riječi (Društvo valuta)
+In Words (Export) will be visible once you save the Delivery Note.,U riječi (izvoz) će biti vidljiv nakon što spremite otpremnici.
+In Words will be visible once you save the Delivery Note.,U riječi će biti vidljiv nakon što spremite otpremnici.
+In Words will be visible once you save the Purchase Invoice.,U riječi će biti vidljiv nakon što spremite ulazne fakture.
+In Words will be visible once you save the Purchase Order.,U riječi će biti vidljiv nakon što spremite narudžbenice.
+In Words will be visible once you save the Purchase Receipt.,U riječi će biti vidljiv nakon što spremite kupiti primitka.
+In Words will be visible once you save the Quotation.,U riječi će biti vidljiv nakon što spremite ponudu.
+In Words will be visible once you save the Sales Invoice.,U riječi će biti vidljiv nakon što spremite prodaje fakture.
+In Words will be visible once you save the Sales Order.,U riječi će biti vidljiv nakon što spremite prodajnog naloga.
+In response to,U odgovoru na
+"In the Permission Manager, click on the button in the 'Condition' column for the Role you want to restrict.","U dozvole Manager, kliknite na gumb u &#39;hotela&#39; stupcu za ulogu želite ograničiti."
+Incentives,Poticaji
+Incharge Name,Incharge Name
+Include holidays in Total no. of Working Days,Uključi odmor u ukupnom. radnih dana
+Income / Expense,Prihodi / rashodi
+Income Account,Prihodi račun
+Income Booked,Prihodi Rezervirani
+Income Year to Date,Prihodi godine do danas
+Income booked for the digest period,Prihodi rezervirano za razdoblje digest
+Incoming,Dolazni
+Incoming / Support Mail Setting,Dolazni / Podrška Mail Podešavanje
+Incoming Rate,Dolazni Stopa
+Incoming Time,Dolazni Vrijeme
+Incoming quality inspection.,Dolazni kvalitete inspekcije.
+Index,Indeks
+Indicates that the package is a part of this delivery,Ukazuje na to da je paket dio ovog poroda
+Individual,Pojedinac
+Individuals,Pojedinci
+Industry,Industrija
+Industry Type,Industrija Tip
+Info,Info
+Insert After,Umetni Nakon
+Insert Below,Umetnite Ispod
+Insert Code,Umetnite kod
+Insert Row,Umetnite Row
+Insert Style,Umetni stil
+Inspected By,Pregledati
+Inspection Criteria,Inspekcijski Kriteriji
+Inspection Required,Inspekcija Obvezno
+Inspection Type,Inspekcija Tip
+Installation Date,Instalacija Datum
+Installation Note,Instalacija Napomena
+Installation Note Item,Instalacija Napomena artikla
+Installation Status,Instalacija Status
+Installation Time,Instalacija Vrijeme
+Installation record for a Serial No.,Instalacija rekord za serijski broj
+Installed Qty,Instalirani Kol
+Instructions,Instrukcije
+Int,Interesi
+Integrations,Integracije
+Interested,Zainteresiran
+Internal,Interni
+Introduce your company to the website visitor.,Uvesti svoju tvrtku za web stranice posjetitelja.
+Introduction,Uvod
+Introductory information for the Contact Us Page,Uvodni podaci za kontaktiranje stranice
+Invalid Delivery Note. Delivery Note should exist and should be in 				draft state. Please rectify and try again.,Nevažeći Otpremnica. Otpremnica mora postojati i treba biti u stanju nacrta. Molimo ispraviti i pokušajte ponovno.
+Invalid Email,Nevažeći Email
+Invalid Email Address,Neispravan e-mail adresu
+Invalid Item or Warehouse Data,Nevalja ili skladište podataka
+Invalid Leave Approver,Nevažeći Ostavite Odobritelj
+Inventory,Inventar
+Inverse,Inverzan
+Invoice Date,Račun Datum
+Invoice Details,Pojedinosti dostavnice
+Invoice No,Račun br
+Invoice Period From Date,Račun Razdoblje od datuma
+Invoice Period To Date,Račun razdoblju do datuma
+Is Active,Je aktivna
+Is Advance,Je Predujam
+Is Asset Item,Je imovinom artikla
+Is Cancelled,Je Otkazan
+Is Carry Forward,Je Carry Naprijed
+Is Child Table,Je Dijete Tablica
+Is Default,Je Default
+Is Encash,Je li unovčiti
+Is LWP,Je lwp
+Is Mandatory Field,Je Obvezno polje
+Is Opening,Je Otvaranje
+Is Opening Entry,Je Otvaranje unos
+Is PL Account,Je PL račun
+Is POS,Je POS
+Is Primary Contact,Je Primarna Kontakt
+Is Purchase Item,Je Kupnja artikla
+Is Sales Item,Je Prodaja artikla
+Is Service Item,Je li usluga artikla
+Is Single,Je Samac
+Is Standard,Je Standardni
+Is Stock Item,Je kataloški artikla
+Is Sub Contracted Item,Je Sub Ugovoreno artikla
+Is Subcontracted,Je podugovarati
+Is Submittable,Je Submittable
+Is it a Custom DocType created by you?,Je li Custom DOCTYPE stvorio vas?
+Is this Tax included in Basic Rate?,Je li ovo pristojba uključena u osnovne stope?
+Issue,Izdanje
+Issue Date,Datum izdavanja
+Issue Details,Issue Detalji
+Issued Items Against Production Order,Izdana Proizvodi prema proizvodnji Reda
+It is needed to fetch Item Details.,To je potrebno kako bi dohvatili Stavka Brodu.
+It was raised because the (actual + ordered + indented - reserved) 						quantity reaches re-order level when the following record was created,To je zbog toga podigao (stvarna + + naredio razvedena - rezervirana) količina dosegne ponovno bi razinu kada se sljedeći zapis nastao
+Item,Stavka
+Item Advanced,Stavka Napredna
+Item Barcode,Stavka Barkod
+Item Batch Nos,Stavka Batch Nos
+Item Classification,Stavka klasifikacija
+Item Code,Stavka Šifra
+Item Code (item_code) is mandatory because Item naming is not sequential.,Šifra (item_code) je obvezno jer Stavka imena nije sekvencijalno.
+Item Customer Detail,Stavka Kupac Detalj
+Item Description,Stavka Opis
+Item Desription,Stavka Desription
+Item Details,Stavka Detalji
+Item Group,Stavka Grupa
+Item Group Name,Stavka Ime grupe
+Item Groups in Details,Stavka Grupe u detaljima
+Item Image (if not slideshow),Stavka slike (ako ne Slideshow)
+Item Name,Stavka Ime
+Item Naming By,Stavka nazivanje
+Item Price,Stavka Cijena
+Item Prices,Stavka Cijene
+Item Quality Inspection Parameter,Stavka Provera kvaliteta parametara
+Item Reorder,Stavka redoslijeda
+Item Serial No,Stavka rednim brojem
+Item Serial Nos,Stavka Serijski br
+Item Supplier,Stavka Dobavljač
+Item Supplier Details,Stavka Supplier Detalji
+Item Tax,Stavka poreza
+Item Tax Amount,Stavka Iznos poreza
+Item Tax Rate,Stavka Porezna stopa
+Item Tax1,Stavka Tax1
+Item To Manufacture,Stavka za proizvodnju
+Item UOM,Stavka UOM
+Item Website Specification,Stavka Web Specifikacija
+Item Website Specifications,Stavka Website Specifikacije
+Item Wise Tax Detail ,Stavka Wise Porezna Detalj
+Item classification.,Stavka klasifikacija.
+Item to be manufactured or repacked,Stavka biti proizvedeni ili prepakirani
+Item will be saved by this name in the data base.,Stavka će biti spremljena pod ovim imenom u bazi podataka.
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","Stavka, jamstvo, AMC (Godišnje održavanje Ugovor) pojedinosti će biti automatski dohvatio kada serijski broj je odabran."
+Item-Wise Price List,Stavka-Wise Cjenik
+Item-wise Last Purchase Rate,Stavka-mudar Zadnja Kupnja Ocijenite
+Item-wise Purchase History,Stavka-mudar Kupnja Povijest
+Item-wise Purchase Register,Stavka-mudar Kupnja Registracija
+Item-wise Sales History,Stavka-mudar Prodaja Povijest
+Item-wise Sales Register,Stavka-mudri prodaja registar
+Items,Proizvodi
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty",Proizvodi se traži što su &quot;Out of Stock&quot; s obzirom na sve skladišta na temelju projicirane Qty i minimalne narudžbe Kol
+Items which do not exist in Item master can also be entered on customer's request,Proizvodi koji ne postoje u artikla gospodara također može unijeti na zahtjev kupca
+Itemwise Discount,Itemwise Popust
+Itemwise Recommended Reorder Level,Itemwise Preporučio redoslijeda Level
+JSON,JSON
+JV,JV
+Javascript,Javascript
+Javascript to append to the head section of the page.,Javascript da doda glave dijelu stranice.
+Job Applicant,Posao podnositelj
+Job Opening,Posao Otvaranje
+Job Profile,Posao Profil
+Job Title,Titula
+"Job profile, qualifications required etc.","Posao profil, kvalifikacije potrebne, itd."
+Jobs Email Settings,Poslovi Postavke e-pošte
+Journal Entries,Časopis upisi
+Journal Entry,Časopis Stupanje
+Journal Entry for inventory that is received but not yet invoiced,"Časopis Ulaz za popis koji je dobila, ali još nisu fakturirani"
+Journal Voucher,Časopis bon
+Journal Voucher Detail,Časopis bon Detalj
+Journal Voucher Detail No,Časopis bon Detalj Ne
+KRA,KRA
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ","Pratite prodaje kampanje. Pratite ponude, ponuda, prodajnog naloga itd. iz kampanje radi vrjednovanja povrat na investiciju."
+Keep a track of all communications,Držite praćenje svih komunikacija
+Keep a track of communication related to this enquiry which will help for future reference.,Držite pratiti komunikacije vezane uz ovaj upit koji će vam pomoći za buduću referencu.
+Key,Ključ
+Key Performance Area,Key Performance Area
+Key Responsibility Area,Ključ Odgovornost Površina
+LEAD,OLOVO
+LEAD/10-11/,LEAD/10-11 /
+LEAD/MUMBAI/,OLOVO / MUMBAI /
+LR Date,LR Datum
+LR No,LR Ne
+Label,Oznaka
+Label Help,Oznaka Pomoć
+Lacs,Lacs
+Landed Cost Item,Sletio Troškovi artikla
+Landed Cost Items,Sletio troškova Proizvodi
+Landed Cost Purchase Receipt,Sletio Trošak Kupnja Potvrda
+Landed Cost Purchase Receipts,Sletio troškova kupnje Primici
+Landed Cost Wizard,Sletio Trošak Čarobnjak
+Landing Page,Odredišna stranica
+Language,Jezik
+Language preference for user interface (only if available).,Jezik sklonost za korisničko sučelje (samo ako je dostupan).
+Last Contact Date,Zadnji kontakt Datum
+Last IP,Posljednja IP
+Last Login,Zadnji Login
+Last Name,Prezime
+Last Purchase Rate,Zadnja Kupnja Ocijenite
+Lato,Lato
+Lead,Dovesti
+Lead Details,Olovo Detalji
+Lead Lost,Olovo Lost
+Lead Name,Olovo Ime
+Lead Owner,Olovo Vlasnik
+Lead Source,Olovo Source
+Lead Status,Olovo Status
+Lead Time Date,Olovo Time Date
+Lead Time Days,Olovo vrijeme Dane
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,Olovo vrijeme dana je broj dana koji ovaj predmet se očekuje u skladištu. Ovih dana je preuzeta u Materijal Zahtjev kada odaberete ovu stavku.
+Lead Type,Olovo Vid
+Leave Allocation,Ostavite Raspodjela
+Leave Allocation Tool,Ostavite raspodjele alat
+Leave Application,Ostavite aplikaciju
+Leave Approver,Ostavite odobravatelju
+Leave Approver can be one of,Ostavite Odobritelj može biti jedan od
+Leave Approvers,Ostavite odobravateljima
+Leave Balance Before Application,Ostavite Balance Prije primjene
+Leave Block List,Ostavite Block List
+Leave Block List Allow,Ostavite Blok Popis Dopustite
+Leave Block List Allowed,Ostavite Block List dopuštenih
+Leave Block List Date,Ostavite Date Popis Block
+Leave Block List Dates,Ostavite datumi lista blokiranih
+Leave Block List Name,Ostavite popis imena Block
+Leave Blocked,Ostavite blokirani
+Leave Control Panel,Ostavite Upravljačka ploča
+Leave Encashed?,Ostavite Encashed?
+Leave Encashment Amount,Ostavite Encashment Iznos
+Leave Setup,Ostavite Setup
+Leave Type,Ostavite Vid
+Leave Type Name,Ostavite ime tipa
+Leave Without Pay,Ostavite bez plaće
+Leave allocations.,Ostavite izdvajanja.
+Leave blank if considered for all branches,Ostavite prazno ako smatra za sve grane
+Leave blank if considered for all departments,Ostavite prazno ako smatra za sve odjele
+Leave blank if considered for all designations,Ostavite prazno ako smatra za sve oznake
+Leave blank if considered for all employee types,Ostavite prazno ako smatra za sve tipove zaposlenika
+Leave blank if considered for all grades,Ostavite prazno ako smatra za sve razrede
+Leave blank if you have not decided the end date.,Ostavite prazno ako niste odlučili datum završetka.
+Leave by,Ostavite po
+"Leave can be approved by users with Role, ""Leave Approver""","Ostavite može biti odobren od strane korisnika s uloge, &quot;Ostavite odobravatelju&quot;"
+Ledger,Glavna knjiga
+Left,Lijevo
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,Pravna osoba / Podružnica s odvojenim kontnom planu pripadaju organizaciji.
+Letter Head,Pismo Head
+Letter Head Image,Pismo Head slike
+Letter Head Name,Pismo Head Ime
+Level,Nivo
+"Level 0 is for document level permissions, higher levels for field level permissions.","Razina 0 je za dokument na razini dozvole, višim razinama za terenske razine dozvola."
+Lft,LFT
+Link,Link
+Link to other pages in the side bar and next section,Link na drugim stranicama na strani bar i sljedeću sekciju
+Linked In Share,Podijeli povezane
+Linked With,Povezan s
+List,Popis
+List items that form the package.,Popis stavki koje čine paket.
+List of holidays.,Popis blagdana.
+List of patches executed,Popis zakrpe izvršenih
+List of records in which this document is linked,Popis zapisa u kojoj je ovaj dokument povezanih
+List of users who can edit a particular Note,Popis korisnika koji mogu urediti posebnu napomenu
+List this Item in multiple groups on the website.,Popis ovaj predmet u više grupa na web stranici.
+Live Chat,Live Chat
+Load Print View on opening of an existing form,Učitaj Print Pogled na otvaranju postojećem obliku
+Loading,Utovar
+Loading Report,Učitavanje izvješće
+Log,Klada
+"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","Prijavite aktivnosti provedenih od strane korisnika od zadataka koji se mogu koristiti za praćenje vremena, naplate."
+Log of Scheduler Errors,Prijavite od Raspoređivač pogrešaka
+Login After,Prijavite Nakon
+Login Before,Prijavite Prije
+Login Id,Prijavite Id
+Logo,Logo
+Logout,Odjava
+Long Text,Dugo Tekst
+Lost Reason,Izgubili Razlog
+Low,Nisko
+Lower Income,Donja Prihodi
+Lucida Grande,Lucidi Grande
+MIS Control,MIS kontrola
+MREQ-,MREQ-
+MTN Details,MTN Detalji
+Mail Footer,Mail Footer
+Mail Password,Mail Lozinka
+Mail Port,Mail luci
+Mail Server,Mail Server
+Main Reports,Glavni Izvješća
+Main Section,Glavni Odjeljak
+Maintain Same Rate Throughout Sales Cycle,Održavati ista stopa Tijekom cijele prodajni ciklus
+Maintain same rate throughout purchase cycle,Održavanje istu stopu tijekom kupnje ciklusa
+Maintenance,Održavanje
+Maintenance Date,Održavanje Datum
+Maintenance Details,Održavanje Detalji
+Maintenance Schedule,Održavanje Raspored
+Maintenance Schedule Detail,Održavanje Raspored Detalj
+Maintenance Schedule Item,Održavanje Raspored predmeta
+Maintenance Schedules,Održavanje Raspored
+Maintenance Status,Održavanje statusa
+Maintenance Time,Održavanje Vrijeme
+Maintenance Type,Održavanje Tip
+Maintenance Visit,Održavanje Posjetite
+Maintenance Visit Purpose,Održavanje Posjetite Namjena
+Major/Optional Subjects,Glavni / Izborni predmeti
+Make Bank Voucher,Napravite Bank bon
+Make Difference Entry,Čine razliku Entry
+Make Time Log Batch,Provjerite Hrpa prijavite vrijeme
+Make a new,Napravite novi
+Make sure that the transactions you want to restrict have a Link field 'territory' that maps to a 'Territory' master.,Pobrinite se da su transakcije želite ograničiti imati vezu polje &#39;teritorij&#39; koji mapira u &#39;teritorij&#39; gospodara.
+Male,Muški
+Manage cost of operations,Upravljanje troškove poslovanja
+Manage exchange rates for currency conversion,Upravljanje tečajeve za pretvorbu valuta
+Mandatory,Obavezan
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",Obvezni ako Stock Stavka je &quot;Da&quot;. Također zadano skladište gdje je zadržana količina se postaviti od prodajnog naloga.
+Manufacture against Sales Order,Proizvodnja protiv prodaje Reda
+Manufacture/Repack,Proizvodnja / Ponovno pakiranje
+Manufactured Qty,Proizvedeno Kol
+Manufactured quantity will be updated in this warehouse,Proizvedeno količina će biti ažurirana u ovom skladištu
+Manufacturer,Proizvođač
+Manufacturer Part Number,Proizvođač Broj dijela
+Manufacturing,Proizvodnja
+Manufacturing Quantity,Proizvodnja Količina
+Margin,Marža
+Marital Status,Bračni status
+Market Segment,Tržišni segment
+Married,Oženjen
+Mass Mailing,Misa mailing
+Master,Majstor
+Master Name,Učitelj Ime
+Master Type,Majstor Tip
+Masters,Majstori
+Match,Odgovarati
+Match non-linked Invoices and Payments.,Klađenje na ne-povezane faktura i plaćanja.
+Material Issue,Materijal Issue
+Material Receipt,Materijal Potvrda
+Material Request,Materijal zahtjev
+Material Request Date,Materijal Zahtjev Datum
+Material Request Detail No,Materijal Zahtjev Detalj Ne
+Material Request For Warehouse,Materijal Zahtjev za galeriju
+Material Request Item,Materijal Zahtjev artikla
+Material Request Items,Materijalni Zahtjev Proizvodi
+Material Request No,Materijal Zahtjev Ne
+Material Request Type,Materijal Zahtjev Tip
+Material Request used to make this Stock Entry,Materijal Zahtjev se koristi da bi se ova Stock unos
+Material Requirement,Materijal Zahtjev
+Material Transfer,Materijal transfera
+Materials,Materijali
+Materials Required (Exploded),Materijali Obavezno (eksplodirala)
+Max 500 rows only.,Max 500 redaka jedini.
+Max Attachments,Max Privitci
+Max Days Leave Allowed,Max Dani Ostavite dopuštenih
+Max Discount (%),Maks Popust (%)
+"Meaning of Submit, Cancel, Amend","Značenje Podnijeti, Odustani, Izmijeniti"
+Medium,Srednji
+"Menu items in the Top Bar. For setting the color of the Top Bar, go to <a href=""#Form/Style Settings"">Style Settings</a>","Opcije izbornika u gornjoj traci. Za postavljanje boju Top Baru, idite na <a href=""#Form/Style Settings"">Postavke stila</a>"
+Merge,Spojiti
+Merge Into,Spoji u
+Merge Warehouses,Spoji skladišta
+Merging is only possible between Group-to-Group or 					Ledger-to-Ledger,Spajanje je moguće samo između Group-to-grupe ili Ledger-to-Ledger
+"Merging is only possible if following \					properties are same in both records.					Group or Ledger, Debit or Credit, Is PL Account","Spajanje je moguće samo ako se slijedi \ svojstva su isti u oba zapisa. Grupa ili knjiga, debitne ili kreditne, Je PL račun"
+Message,Poruka
+Message Parameter,Poruka parametra
+Messages greater than 160 characters will be split into multiple messages,Poruka veća od 160 karaktera će biti split u više mesage
+Messages,Poruke
+Method,Način
+Middle Income,Srednji Prihodi
+Middle Name (Optional),Krsno ime (opcionalno)
+Milestone,Prekretnica
+Milestone Date,Prekretnica Datum
+Milestones,Dostignuća
+Milestones will be added as Events in the Calendar,Dostignuća će biti dodan kao Događanja u kalendaru
+Millions,Milijuni
+Min Order Qty,Min Red Kol
+Minimum Order Qty,Minimalna narudžba Količina
+Misc,Ostalo
+Misc Details,Razni podaci
+Miscellaneous,Razni
+Miscelleneous,Miscelleneous
+Mobile No,Mobitel Nema
+Mobile No.,Mobitel broj
+Mode of Payment,Način plaćanja
+Modern,Moderna
+Modified Amount,Promijenio Iznos
+Modified by,Izmijenio
+Module,Modul
+Module Def,Modul Def
+Module Name,Modul Ime
+Modules,Moduli
+Monday,Ponedjeljak
+Month,Mjesec
+Monthly,Mjesečno
+Monthly Attendance Sheet,Mjesečna posjećenost list
+Monthly Earning & Deduction,Mjesečna zarada &amp; Odbitak
+Monthly Salary Register,Mjesečna plaća Registracija
+Monthly salary statement.,Mjesečna plaća izjava.
+Monthly salary template.,Mjesečna plaća predložak.
+More,Više
+More Details,Više pojedinosti
+More Info,Više informacija
+More content for the bottom of the page.,Više sadržaja za dnu stranice.
+Moving Average,Moving Average
+Moving Average Rate,Premještanje prosječna stopa
+Mr,G.
+Ms,Gospođa
+Multiple Item Prices,Više Stavka Cijene
+Multiple root nodes not allowed.,Više korijen čvorovi nisu dopušteni.
+Mupltiple Item prices.,Mupltiple Stavka cijene.
+Must be Whole Number,Mora biti cijeli broj
+Must have report permission to access this report.,Mora imati izvješće dozvolu za pristup ovom izvješću.
+Must specify a Query to run,Mora se odrediti upita za pokretanje
+My Settings,Moje postavke
+NL-,NL-
+Name,Ime
+Name Case,Ime slučaja
+Name and Description,Naziv i opis
+Name and Employee ID,Ime i zaposlenika ID
+Name as entered in Sales Partner master,Ime kao ušao u prodajni partner gospodara
+Name is required,Ime je potrebno
+Name of organization from where lead has come,Naziv organizacije odakle je došao olovo
+Name of person or organization that this address belongs to.,Ime osobe ili organizacije koje ova adresa pripada.
+Name of the Budget Distribution,Ime distribucije proračuna
+Name of the entity who has requested for the Material Request,Naziv subjekta koji je podnio zahtjev za materijal Zahtjev
+Naming,Imenovanje
+Naming Series,Imenovanje serije
+Naming Series mandatory,Imenovanje serije obaveznu
+Negative balance is not allowed for account ,Negativna bilanca nije dopušten na račun
+Net Pay,Neto Pay
+Net Pay (in words) will be visible once you save the Salary Slip.,Neto plaća (u riječima) će biti vidljiv nakon što spremite plaće Slip.
+Net Total,Neto Ukupno
+Net Total (Company Currency),Neto Ukupno (Društvo valuta)
+Net Weight,Neto težina
+Net Weight UOM,Težina UOM
+Net Weight of each Item,Težina svake stavke
+Net pay can not be negative,Neto plaća ne može biti negativan
+Never,Nikad
+New,Novi
+New BOM,Novi BOM
+New Communications,Novi komunikacije
+New Delivery Notes,Novi otpremnice
+New Enquiries,Novi Upiti
+New Leads,Nova vodi
+New Leave Application,Novi dopust Primjena
+New Leaves Allocated,Novi Leaves Dodijeljeni
+New Leaves Allocated (In Days),Novi Lišće alociran (u danima)
+New Material Requests,Novi materijal Zahtjevi
+New Password,Novi Lozinka
+New Projects,Novi projekti
+New Purchase Orders,Novi narudžbenice
+New Purchase Receipts,Novi Kupnja Primici
+New Quotations,Novi Citati
+New Record,Novi rekord
+New Sales Orders,Nove narudžbe
+New Stock Entries,Novi Stock upisi
+New Stock UOM,Novi kataloški UOM
+New Supplier Quotations,Novi dobavljač Citati
+New Support Tickets,Novi Podrška Ulaznice
+New Workplace,Novi radnom mjestu
+New value to be set,Nova vrijednost treba postaviti
+Newsletter,Bilten
+Newsletter Content,Newsletter Sadržaj
+Newsletter Status,Newsletter Status
+"Newsletters to contacts, leads.","Brošure za kontakte, vodi."
+Next Communcation On,Sljedeća komunikacijski Na
+Next Contact By,Sljedeća Kontakt Do
+Next Contact Date,Sljedeća Kontakt Datum
+Next Date,Sljedeća Datum
+Next State,Sljedeća država
+Next actions,Sljedeći akcije
+Next email will be sent on:,Sljedeća e-mail će biti poslan na:
+No,Ne
+"No Account found in csv file, 							May be company abbreviation is not correct","Ne računa se u CSV datoteku, može se tvrtka kratica nije ispravan"
+No Action,Nema Akcija
+No Communication tagged with this ,Ne Komunikacija označio s ovim
+No Copy,Ne Kopirajte
+No Customer Accounts found. Customer Accounts are identified based on \			'Master Type' value in account record.,Nema kupaca račune pronađena. Kupac Računi su identificirani na temelju \ &#39;Master&#39; tip vrijednosti u računu rekord.
+No Item found with Barcode,Nema artikla naći s Barcode
+No Items to Pack,Nema stavki za pakiranje
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user.,Ne Ostavite odobravateljima. Molimo dodijeliti &#39;Ostavite Odobritelj&#39; Uloga da atleast jednom korisniku.
+No Permission,Bez dozvole
+No Permission to ,Nema dozvole za
+No Permissions set for this criteria.,Nema dozvole postavljen za ove kriterije.
+No Report Loaded. Please use query-report/[Report Name] to run a report.,Ne Izvješće Loaded. Molimo koristite upita izvješće / [Prijavi Ime] pokrenuti izvješće.
+No Supplier Accounts found. Supplier Accounts are identified based on \			'Master Type' value in account record.,Nema Supplier Računi pronađena. Supplier Računi su identificirani na temelju \ &#39;Master&#39; tip vrijednosti u računu rekord.
+No User Properties found.,Nema Svojstva korisnika pronađena.
+No default BOM exists for item: ,Ne postoji zadani troškovnik za predmet:
+No further records,Nema daljnjih zapisi
+No of Requested SMS,Nema traženih SMS
+No of Sent SMS,Ne poslanih SMS
+No of Visits,Bez pregleda
+No one,Niko
+No permission to write / remove.,Nema dozvole za pisanje / uklanjanje.
+No record found,Ne rekord naći
+No records tagged.,Nema zapisa tagged.
+No salary slip found for month: ,Bez plaće slip naći za mjesec dana:
+"No table is created for Single DocTypes, all values are stored in tabSingles as a tuple.","Nema stol je stvoren za jednokrevetnu DocTypes, sve vrijednosti su pohranjene u tabSingles što tuple."
+None,Nijedan
+None: End of Workflow,Ništa: Kraj Workflow
+Not,Ne
+Not Active,Ne aktivna
+Not Applicable,Nije primjenjivo
+Not Billed,Ne Naplaćeno
+Not Delivered,Ne Isporučeno
+Not Found,Not Found
+Not Linked to any record.,Nije povezan s bilo rekord.
+Not Permitted,Nije dopušteno
+Not allowed for: ,Nije dopušteno:
+Not enough permission to see links.,Nije dovoljno dozvolu za vidjeti linkove.
+Not in Use,Nije u uporabi
+Not interested,Ne zanima
+Not linked,Ne povezan
+Note,Primijetiti
+Note User,Napomena Upute
+Note is a free page where users can share documents / notes,Napomena je besplatno stranicu na kojoj korisnici mogu dijeliti dokumente / bilješke
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.","Napomena: Backup i datoteke se ne brišu na Dropbox, morat ćete ih izbrisati ručno."
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.","Napomena: Backup i datoteke se ne brišu na Google Drive, morat ćete ih izbrisati ručno."
+Note: Email will not be sent to disabled users,Napomena: E-mail neće biti poslan invalide
+"Note: For best results, images must be of the same size and width must be greater than height.","Napomena: Za najbolje rezultate, slike moraju biti iste veličine i širine mora biti veća od visine."
+Note: Other permission rules may also apply,Napomena: Ostala pravila dozvole također može primijeniti
+Note: You Can Manage Multiple Address or Contacts via Addresses & Contacts,Napomena: možete upravljati s više adresa ili kontakti preko adrese i kontakti
+Note: maximum attachment size = 1mb,Napomena: maksimalna veličina privitka = 1MB
+Notes,Bilješke
+Nothing to show,Ništa pokazati
+Notice - Number of Days,Obavijest - Broj dana
+Notification Control,Obavijest kontrola
+Notification Email Address,Obavijest E-mail adresa
+Notify By Email,Obavijesti e-poštom
+Notify by Email on creation of automatic Material Request,Obavijesti putem e-pošte na stvaranje automatskog Materijal Zahtjeva
+Number Format,Broj Format
+O+,O +
+O-,O-
+OPPT,OPPT
+Office,Ured
+Old Parent,Stari Roditelj
+On,Na
+On Net Total,Na Net Total
+On Previous Row Amount,Na prethodnu Row visini
+On Previous Row Total,Na prethodni redak Ukupno
+"Once you have set this, the users will only be able access documents with that property.","Nakon što ste postavili ovo, korisnici će moći pristupom dokumentima s tom imovinom."
+Only Administrator allowed to create Query / Script Reports,Samo administrator dopustio stvaranje upita / Skripta Izvješća
+Only Administrator can save a standard report. Please rename and save.,Samo administrator može uštedjeti standardne izvješće. Molimo preimenovati i spasiti.
+Only Allow Edit For,Samo Dopusti Uredi za
+Only Stock Items are allowed for Stock Entry,Samo Stock Predmeti su dopuštene za upis dionica
+Only System Manager can create / edit reports,Samo Manager sustav može stvoriti / uređivati ​​izvješća
+Only leaf nodes are allowed in transaction,Samo leaf čvorovi su dozvoljeni u transakciji
+Open,Otvoreno
+Open Sans,Otvoreni Sans
+Open Tickets,Otvoreni Ulaznice
+Opening Date,Otvaranje Datum
+Opening Entry,Otvaranje unos
+Opening Time,Radno vrijeme
+Opening for a Job.,Otvaranje za posao.
+Operating Cost,Operativni troškovi
+Operation Description,Operacija Opis
+Operation No,Operacija Ne
+Operation Time (mins),Operacija Vrijeme (min)
+Operations,Operacije
+Opportunity,Prilika
+Opportunity Date,Prilika Datum
+Opportunity From,Prilika Od
+Opportunity Item,Prilika artikla
+Opportunity Items,Prilika Proizvodi
+Opportunity Lost,Prilika Izgubili
+Opportunity Type,Prilika Tip
+Options,Mogućnosti
+Options Help,Opcije Pomoć
+Order Confirmed,Red Potvrđeno
+Order Lost,Red Izgubili
+Order Type,Vrsta narudžbe
+Ordered Items To Be Billed,Naručeni Stavke biti naplaćeno
+Ordered Items To Be Delivered,Naručeni Proizvodi se dostavljaju
+Ordered Quantity,Količina Ž
+Orders released for production.,Narudžbe objavljen za proizvodnju.
+Organization Profile,Organizacija Profil
+Original Message,Izvorni Poruka
+Other,Drugi
+Other Details,Ostali podaci
+Out,Van
+Out of AMC,Od AMC
+Out of Warranty,Od jamstvo
+Outgoing,Društven
+Outgoing Mail Server,Odlazni Mail Server
+Outgoing Mails,Odlazni mailova
+Outstanding Amount,Izvanredna Iznos
+Outstanding for Voucher ,Izvanredna za bon
+Over Heads,Više od šefova
+Overhead,Dometnut
+Overlapping Conditions found between,Preklapanje Uvjeti naći između
+Owned,U vlasništvu
+PAN Number,PAN Broj
+PF No.,PF broj
+PF Number,PF Broj
+PI/2011/,PI/2011 /
+PIN,PIN
+PO,PO
+POP3 Mail Server,POP3 Mail Server
+POP3 Mail Server (e.g. pop.gmail.com),POP3 Mail Server (npr. pop.gmail.com)
+POP3 Mail Settings,POP3 Mail Postavke
+POP3 mail server (e.g. pop.gmail.com),POP3 mail server (npr. pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),POP3 poslužitelj npr. (pop.gmail.com)
+POS Setting,POS Podešavanje
+POS View,POS Pogledaj
+PR Detail,PR Detalj
+PRO,PRO
+PS,PS
+Package Item Details,Paket Stavka Detalji
+Package Items,Paket Proizvodi
+Package Weight Details,Paket Težina Detalji
+Packing Details,Pakiranje Detalji
+Packing Detials,Pakiranje detials
+Packing List,Pakiranje Popis
+Packing Slip,Odreskom
+Packing Slip Item,Odreskom predmet
+Packing Slip Items,Odreskom artikle
+Packing Slip(s) Cancelled,Odreskom (e) Otkazano
+Page,Stranica
+Page Background,Page Pozadinska
+Page Border,Stranica granica
+Page Break,Prijelom stranice
+Page HTML,Stranica HTML
+Page Headings,Stranica Naslovi
+Page Links,Stranica Linkovi
+Page Name,Stranica Ime
+Page Role,Stranica Uloga
+Page Text,Stranica Tekst
+Page content,Sadržaj stranice
+Page not found,Stranica nije pronađena
+Page text and background is same color. Please change.,Stranica tekst i pozadina iste boje. Molimo promijeniti.
+Page to show on the website,Stranica pokazati na web stranici
+"Page url name (auto-generated) (add "".html"")",Stranica url ime (automatski generirani) (dodaj &quot;. Html&quot;)
+Paid Amount,Plaćeni iznos
+Parameter,Parametar
+Parent Account,Roditelj račun
+Parent Cost Center,Roditelj troška
+Parent Customer Group,Roditelj Kupac Grupa
+Parent Detail docname,Roditelj Detalj docname
+Parent Item,Roditelj artikla
+Parent Item Group,Roditelj artikla Grupa
+Parent Label,Roditelj Label
+Parent Sales Person,Roditelj Prodaja Osoba
+Parent Territory,Roditelj Regija
+Parent is required.,Roditelj je potrebno.
+Parenttype,Parenttype
+Partially Completed,Djelomično Završeni
+Participants,Sudionici
+Partly Billed,Djelomično Naplaćeno
+Partly Delivered,Djelomično Isporučeno
+Partner Target Detail,Partner Ciljana Detalj
+Partner Type,Partner Tip
+Partner's Website,Web stranica partnera
+Passive,Pasivan
+Passport Number,Putovnica Broj
+Password,Lozinka
+Password Expires in (days),Lozinka Istječe (dana)
+Patch,Zakrpa
+Patch Log,Patch Prijava
+Pay To / Recd From,Platiti Da / RecD Od
+Payables,Obveze
+Payables Group,Obveze Grupa
+Payment Collection With Ageing,Plaćanje Collection S Starenje
+Payment Days,Plaćanja Dana
+Payment Entries,Plaćanja upisi
+Payment Entry has been modified after you pulled it. 			Please pull it again.,Plaćanje Stupanje je izmijenjen nakon što ga je izvukao. Molimo povucite ga opet.
+Payment Made With Ageing,Uplaćeno S Starenje
+Payment Reconciliation,Plaćanje pomirenje
+Payment Terms,Uvjeti plaćanja
+Payment to Invoice Matching Tool,Plaćanje fakture podudaranje alat
+Payment to Invoice Matching Tool Detail,Plaćanje fakture podudaranje alat Detalj
+Payments,Plaćanja
+Payments Made,Uplate Izrađen
+Payments Received,Uplate primljeni
+Payments made during the digest period,Plaćanja tijekom razdoblja digest
+Payments received during the digest period,Uplate primljene tijekom razdoblja digest
+Payroll Setup,Plaće za postavljanje
+Pending,Čekanju
+Pending Review,U tijeku pregled
+Pending SO Items For Purchase Request,Otvorena SO Proizvodi za zahtjev za kupnju
+Percent,Postotak
+Percent Complete,Postotak Cijela
+Percentage Allocation,Postotak Raspodjela
+Percentage Allocation should be equal to ,Postotak Raspodjela treba biti jednaka
+Percentage variation in quantity to be allowed while receiving or delivering this item.,Postotak varijacije u količini biti dopušteno dok prima ili isporuku ovu stavku.
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,Postotak koju smiju primiti ili isporučiti više od naručene količine. Na primjer: Ako ste naručili 100 jedinica. i tvoj ispravak je 10% onda se smiju primati 110 jedinica.
+Performance appraisal.,Ocjenjivanje.
+Period Closing Voucher,Razdoblje Zatvaranje bon
+Periodicity,Periodičnost
+Perm Level,Perm Level
+Permanent Accommodation Type,Stalni Tip smještaja
+Permanent Address,Stalna adresa
+Permission,Dopuštenje
+Permission Level,Dopuštenje Razina
+Permission Levels,Razine dozvola
+Permission Manager,Dopuštenje Manager
+Permission Rules,Dopuštenje Pravila
+Permissions,Dopuštenja
+Permissions Settings,Dozvole Postavke
+Permissions are automatically translated to Standard Reports and Searches,Dozvole automatski su prevedeni na standardnih izvješća i traži
+"Permissions are set on Roles and Document Types (called DocTypes) by restricting read, edit, make new, submit, cancel, amend and report rights.","Dozvole su postavljene na ulogama i vrstama dokumenata (zove DocTypes) ograničavanjem čitati, uređivati, napraviti novi, podnijeti, otkazati, izmijeniti i prijaviti prava."
+Permissions at higher levels are 'Field Level' permissions. All Fields have a 'Permission Level' set against them and the rules defined at that permissions apply to the field. This is useful incase you want to hide or make certain field read-only.,Dozvole na višim razinama &#39;terenu&#39; dozvole. Svi Polja imaju &#39;razinu dozvole&#39; set protiv njih i pravilima definiranim u to dozvole primjenjuju se na terenu. To je korisno obložiti želite sakriti ili napraviti određenu polje samo za čitanje.
+"Permissions at level 0 are 'Document Level' permissions, i.e. they are primary for access to the document.","Dozvole na razini 0 su &#39;dokument razini&#39; dozvole, odnosno oni su primarni za pristup dokumentu."
+Permissions translate to Users based on what Role they are assigned,Dozvole prevesti na korisnike na temelju onoga što Uloga im se dodjeljuju
+Person,Osoba
+Person To Be Contacted,Osoba biti kontaktirani
+Personal,Osobno
+Personal Details,Osobni podaci
+Personal Email,Osobni e
+Phone,Telefon
+Phone No,Telefonski broj
+Phone No.,Telefonski broj
+Pick Columns,Pick stupce
+Pincode,Pincode
+Place of Issue,Mjesto izdavanja
+Plan for maintenance visits.,Plan održavanja posjeta.
+Planned Qty,Planirani Kol
+Planned Quantity,Planirana količina
+Plant,Biljka
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Molimo unesite Skraćenica ili skraćeni naziv ispravno jer će biti dodan kao sufiks na sve računa šefova.
+Please Update Stock UOM with the help of Stock UOM Replace Utility.,Obnovite Stock UOM uz pomoć burze UOM Zamijeni Utility.
+Please attach a file first.,Molimo priložite datoteku prva.
+Please attach a file or set a URL,Molimo priložite datoteku ili postaviti URL
+Please check,Molimo provjerite
+Please enter Default Unit of Measure,Unesite Zadana jedinica mjere
+Please enter Delivery Note No or Sales Invoice No to proceed,Unesite otpremnica br ili prodaja Račun br postupiti
+Please enter Employee Number,Unesite broj zaposlenika
+Please enter Expense Account,Unesite trošak računa
+Please enter Expense/Adjustment Account,Unesite Rashodi / Prilagodba račun
+Please enter Purchase Receipt No to proceed,Unesite kupiti primitka No za nastavak
+Please enter Reserved Warehouse for item ,Unesite Rezervirano skladište za stavku
+Please enter valid,Unesite vrijede
+Please enter valid ,Unesite vrijede
+Please install dropbox python module,Molimo instalirajte Dropbox piton modul
+Please make sure that there are no empty columns in the file.,Molimo provjerite da nema praznih stupaca u datoteci.
+Please mention default value for ',Molimo spomenuti zadanu vrijednost za &#39;
+Please reduce qty.,Molimo smanjiti Qty.
+Please refresh to get the latest document.,Osvježite se dobiti najnovije dokument.
+Please save the Newsletter before sending.,Molimo spremite Newsletter prije slanja.
+Please select Bank Account,Odaberite bankovni račun
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Molimo odaberite prenositi ako želite uključiti prethodnoj fiskalnoj godini je ravnoteža ostavlja na ovoj fiskalnoj godini
+Please select Date on which you want to run the report,Molimo odaberite datum na koji želite pokrenuti izvješće
+Please select Naming Neries,Molimo odaberite Imenovanje Neries
+Please select Price List,Molimo odaberite Cjenik
+Please select Time Logs.,Molimo odaberite vrijeme Evidencije.
+Please select a,Molimo odaberite
+Please select a csv file,Odaberite CSV datoteku
+Please select a file or url,Molimo odaberite datoteku ili url
+Please select a service item or change the order type to Sales.,Molimo odaberite stavku usluga ili promijeniti vrstu naloga za prodaju.
+Please select a sub-contracted item or do not sub-contract the transaction.,Molimo odaberite sklopljen ugovor stavku ili ne podugovaranje transakciju.
+Please select a valid csv file with data.,Odaberite valjanu CSV datoteke s podacima.
+Please select month and year,Molimo odaberite mjesec i godinu
+Please select the document type first,Molimo odaberite vrstu dokumenta prvi
+Please select: ,Molimo odaberite:
+Please set Dropbox access keys in,Molimo postavite Dropbox pristupne ključeve
+Please set Google Drive access keys in,Molimo postavite Google Drive pristupne tipke u
+Please setup Employee Naming System in Human Resource > HR Settings,Molimo postavljanje zaposlenika sustav imenovanja u ljudskim resursima&gt; HR Postavke
+Please specify,Navedite
+Please specify Company,Navedite tvrtke
+Please specify Company to proceed,Navedite Tvrtka postupiti
+Please specify Default Currency in Company Master \			and Global Defaults,Navedite Default valutu u trgovačkim društvima Master \ i Global defaultno
+Please specify a,Navedite
+Please specify a Price List which is valid for Territory,Navedite cjenik koji vrijedi za teritoriju
+Please specify a valid,Navedite važeći
+Please specify a valid 'From Case No.',Navedite važeću &#39;iz Predmet br&#39;
+Please specify currency in Company,Navedite valutu u Društvu
+Point of Sale,Point of Sale
+Point-of-Sale Setting,Point-of-Sale Podešavanje
+Post Graduate,Post diplomski
+Post Topic,Post Tema
+Postal,Poštanski
+Posting Date,Objavljivanje Datum
+Posting Date Time cannot be before,Datum postanja vrijeme ne može biti prije
+Posting Time,Objavljivanje Vrijeme
+Posts,Postovi
+Potential Sales Deal,Potencijal Prodaja Deal
+Potential opportunities for selling.,Potencijalni mogućnosti za prodaju.
+"Precision for Float fields (quantities, discounts, percentages etc). Floats will be rounded up to specified decimals. Default = 3","Precision za plutaju polja (količine, popusti, postoci i sl.). Pluta će se zaokružuje na navedenim decimala. Default = 3"
+Preferred Billing Address,Željena adresa za naplatu
+Preferred Shipping Address,Željena Dostava Adresa
+Prefix,Prefiks
+Present,Sadašnje
+Prevdoc DocType,Prevdoc DOCTYPE
+Prevdoc Doctype,Prevdoc DOCTYPE
+Preview,Prikaz
+Previous Work Experience,Radnog iskustva
+Price,Cijena
+Price List,Cjenik
+Price List Currency,Cjenik valuta
+Price List Currency Conversion Rate,Cjenik valuta pretvorbe Stopa
+Price List Exchange Rate,Cjenik tečajna
+Price List Master,Cjenik Master
+Price List Name,Cjenik Ime
+Price List Rate,Cjenik Stopa
+Price List Rate (Company Currency),Cjenik stopa (Društvo valuta)
+Price List for Costing,Cjenik za obračun troškova
+Price Lists and Rates,Cjenike i cijene
+Primary,Osnovni
+Print Format,Ispis formata
+Print Format Style,Print Format Style
+Print Format Type,Ispis formatu
+Print Heading,Ispis Naslov
+Print Hide,Ispis Sakrij
+Print Width,Širina ispisa
+Print Without Amount,Ispis Bez visini
+Print...,Ispis ...
+Priority,Prioritet
+Private,Privatan
+Proceed to Setup,Nastavite Postava
+Process,Proces
+Process Payroll,Proces plaće
+Produced Quantity,Proizveden Količina
+Product Enquiry,Na upit
+Production Order,Proizvodnja Red
+Production Orders,Nalozi
+Production Plan Item,Proizvodnja plan artikla
+Production Plan Items,Plan proizvodnje Proizvodi
+Production Plan Sales Order,Proizvodnja plan prodajnog naloga
+Production Plan Sales Orders,Plan proizvodnje narudžbe
+Production Planning (MRP),Planiranje proizvodnje (MRP)
+Production Planning Tool,Planiranje proizvodnje alat
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Proizvodi će biti razvrstani po težine dobi u zadane pretraživanja. Više težina-dob, veća proizvod će se pojaviti na popisu."
+Profile,Profil
+Profile Defaults,Profil Zadano
+Profile Represents a User in the system.,Profil Predstavlja korisnika u sustavu.
+Profile of a Blogger,Profil od Bloggeru
+Profile of a blog writer.,Profil blog pisac.
+Project,Projekt
+Project Costing,Projekt Costing
+Project Details,Projekt Detalji
+Project Milestone,Projekt Prekretnica
+Project Milestones,Projekt Dostignuća
+Project Name,Naziv projekta
+Project Start Date,Projekt datum početka
+Project Type,Vrsta projekta
+Project Value,Projekt Vrijednost
+Project activity / task.,Projekt aktivnost / zadatak.
+Project master.,Projekt majstor.
+Project will get saved and will be searchable with project name given,Projekt će biti spašen i da će se moći pretraživati ​​s projektom ime dano
+Project wise Stock Tracking,Projekt mudar Stock Praćenje
+Projected Qty,Predviđen Kol
+Projects,Projekti
+Prompt for Email on Submission of,Pitaj za e-poštu na podnošenje
+Properties,Nekretnine
+Property,Vlasništvo
+Property Setter,Nekretnine seter
+Property Setter overrides a standard DocType or Field property,Nekretnine seter nadjačava standardni DOCTYPE ili polja nekretnine
+Property Type,Vrsta nekretnine
+Provide email id registered in company,Osigurati e id registriran u tvrtki
+Public,Javni
+Published,Objavljen
+Published On,Objavljeno Dana
+Pull Emails from the Inbox and attach them as Communication records (for known contacts).,"Povucite e-pošte iz mape Primljeno, te ih priložiti kao Communication zapisa (za poznate kontakte)."
+Pull Payment Entries,Povucite plaćanja tekstova
+Pull sales orders (pending to deliver) based on the above criteria,Povucite prodajne naloge (na čekanju za isporuku) na temelju navedenih kriterija
+Purchase,Kupiti
+Purchase Analytics,Kupnja Analytics
+Purchase Common,Kupnja Zajednička
+Purchase Date,Kupnja Datum
+Purchase Details,Kupnja Detalji
+Purchase Discounts,Kupnja Popusti
+Purchase Document No,Kupnja Dokument br
+Purchase Document Type,Kupnja Document Type
+Purchase In Transit,Kupnja u tranzitu
+Purchase Invoice,Kupnja fakture
+Purchase Invoice Advance,Kupnja fakture Predujam
+Purchase Invoice Advances,Kupnja fakture Napredak
+Purchase Invoice Item,Kupnja fakture predmet
+Purchase Invoice Trends,Trendovi kupnje proizvoda
+Purchase Order,Narudžbenica
+Purchase Order Date,Narudžbenica Datum
+Purchase Order Item,Narudžbenica predmet
+Purchase Order Item No,Narudžbenica Br.
+Purchase Order Item Supplied,Narudžbenica artikla Isporuka
+Purchase Order Items,Narudžbenica artikle
+Purchase Order Items Supplied,Narudžbenica Proizvodi Isporuka
+Purchase Order Items To Be Billed,Narudžbenica Proizvodi se naplaćuje
+Purchase Order Items To Be Received,Narudžbenica Proizvodi treba primiti
+Purchase Order Message,Narudžbenica poruku
+Purchase Order Required,Narudžbenica Obvezno
+Purchase Order Trends,Narudžbenica trendovi
+Purchase Order sent by customer,Narudžbenica poslao kupca
+Purchase Orders given to Suppliers.,Kupnja naloge koje je dao dobavljače.
+Purchase Receipt,Račun kupnje
+Purchase Receipt Item,Kupnja Potvrda predmet
+Purchase Receipt Item Supplied,Kupnja Prijem artikla Isporuka
+Purchase Receipt Item Supplieds,Kupnja Supplieds Stavka primitka
+Purchase Receipt Items,Kupnja primitka artikle
+Purchase Receipt Message,Kupnja Potvrda poruku
+Purchase Receipt No,Račun kupnje Ne
+Purchase Receipt Required,Kupnja Potvrda Obvezno
+Purchase Receipt Trends,Račun kupnje trendovi
+Purchase Register,Kupnja Registracija
+Purchase Return,Kupnja Povratak
+Purchase Returned,Kupnja Vraćeno
+Purchase Taxes and Charges,Kupnja Porezi i naknade
+Purchase Taxes and Charges Master,Kupnja Porezi i naknade Master
+Purpose,Svrha
+Purpose must be one of ,Svrha mora biti jedan od
+Python Module Name,Python modula Naziv
+QA Inspection,QA Inspekcija
+QAI/11-12/,QAI/11-12 /
+QTN,QTN
+Qty,Kol
+Qty Consumed Per Unit,Kol Potrošeno po jedinici
+Qty To Manufacture,Količina za proizvodnju
+Qty as per Stock UOM,Količina po burzi UOM
+Qualification,Kvalifikacija
+Quality,Kvalitet
+Quality Inspection,Provera kvaliteta
+Quality Inspection Parameters,Inspekcija kvalitete Parametri
+Quality Inspection Reading,Kvaliteta Inspekcija čitanje
+Quality Inspection Readings,Inspekcija kvalitete Čitanja
+Quantity,Količina
+Quantity Requested for Purchase,Količina Traženi za kupnju
+Quantity already manufactured,Količina je već proizvedeni
+Quantity and Rate,Količina i stopa
+Quantity and Warehouse,Količina i skladišta
+Quantity cannot be a fraction.,Količina ne može biti dio.
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Količina predmeta dobije nakon proizvodnju / pakiranje od navedenih količina sirovina
+Quantity should be equal to Manufacturing Quantity. ,Količina trebala biti jednaka količina proizvodnju.
+Quarter,Četvrtina
+Quarterly,Tromjesečni
+Query,Pitanje
+Query Options,Upita Mogućnosti
+Query Report,Izvješće upita
+Query must be a SELECT,Upit mora biti SELECT
+Quick Help for Setting Permissions,Brza pomoć za postavljanje dopuštenja
+Quick Help for User Properties,Brza pomoć za korisnike Nekretnine
+Quotation,Citat
+Quotation Date,Ponuda Datum
+Quotation Item,Citat artikla
+Quotation Items,Kotaciji Proizvodi
+Quotation Lost Reason,Citat Izgubili razlog
+Quotation Message,Citat Poruka
+Quotation Sent,Citat Sent
+Quotation Series,Ponuda Serija
+Quotation To,Ponuda za
+Quotation Trend,Citat Trend
+Quotations received from Suppliers.,Citati dobio od dobavljače.
+Quotes to Leads or Customers.,Citati na vodi ili kupaca.
+Raise Material Request when stock reaches re-order level,Podignite Materijal Zahtjev kad dionica dosegne ponovno poredak razinu
+Raised By,Povišena Do
+Raised By (Email),Povišena Do (e)
+Random,Slučajan
+Range,Domet
+Rate,Stopa
+Rate ,Stopa
+Rate (Company Currency),Ocijeni (Društvo valuta)
+Rate Of Materials Based On,Stopa materijali na temelju
+Rate and Amount,Kamatna stopa i iznos
+Rate at which Customer Currency is converted to customer's base currency,Stopa po kojoj Kupac valuta se pretvaraju u kupca osnovne valute
+Rate at which Price list currency is converted to company's base currency,Stopa po kojoj Cjenik valute se pretvaraju u tvrtke bazne valute
+Rate at which Price list currency is converted to customer's base currency,Stopa po kojoj Cjenik valute se pretvaraju u kupca osnovne valute
+Rate at which customer's currency is converted to company's base currency,Stopa po kojoj se valuta klijenta se pretvaraju u tvrtke bazne valute
+Rate at which supplier's currency is converted to company's base currency,Stopa po kojoj supplier valuta se pretvaraju u tvrtke bazne valute
+Rate at which this tax is applied,Stopa po kojoj je taj porez se primjenjuje
+Raw Material Item Code,Sirovine Stavka Šifra
+Raw Materials Supplied,Sirovine nabavlja
+Raw Materials Supplied Cost,Sirovine Isporuka Troškovi
+Re-Order Level,Re-Order Razina
+Re-Order Qty,Re-Order Kol
+Re-order,Ponovno bi
+Re-order Level,Ponovno bi Razina
+Re-order Qty,Ponovno bi Kol
+Read,Čitati
+Read Only,Read Only
+Reading 1,Čitanje 1
+Reading 10,Čitanje 10
+Reading 2,Čitanje 2
+Reading 3,Čitanje 3
+Reading 4,Čitanje 4
+Reading 5,Čitanje 5
+Reading 6,Čitanje 6
+Reading 7,Čitanje 7
+Reading 8,Čitanje 8
+Reading 9,Čitanje 9
+Reason,Razlog
+Reason for Leaving,Razlog za odlazak
+Reason for Resignation,Razlog za ostavku
+Recd Quantity,RecD Količina
+Receivable / Payable account will be identified based on the field Master Type,Potraživanja / obveze prema dobavljačima račun će se utvrditi na temelju vrsti terenu Master
+Receivables,Potraživanja
+Receivables / Payables,Potraživanja / obveze
+Receivables Group,Potraživanja Grupa
+Received Date,Datum pozicija
+Received Items To Be Billed,Primljeni Proizvodi se naplaćuje
+Received Qty,Pozicija Kol
+Received and Accepted,Primljeni i prihvaćeni
+Receiver List,Prijemnik Popis
+Receiver Parameter,Prijemnik parametra
+Recipient,Primalac
+Recipients,Primatelji
+Reconciliation Data,Pomirenje podataka
+Reconciliation HTML,Pomirenje HTML
+Reconciliation JSON,Pomirenje JSON
+Record item movement.,Zabilježite stavku pokret.
+Recurring Id,Ponavljajući Id
+Recurring Invoice,Ponavljajući Račun
+Recurring Type,Ponavljajući Tip
+Reduce Deduction for Leave Without Pay (LWP),Smanjite odbitak za ostaviti bez plaća (lwp)
+Reduce Earning for Leave Without Pay (LWP),Smanjenje plaća za ostaviti bez plaće (lwp)
+Ref Code,Ref. Šifra
+Ref Date is Mandatory if Ref Number is specified,Ref. Datum obvezni ako Ref. broj je navedeno
+Ref DocType,Ref. DOCTYPE
+Ref Name,Ref. Ime
+Ref Rate,Ref. Stopa
+Ref SQ,Ref. SQ
+Ref Type,Ref. Tip
+Reference,Upućivanje
+Reference Date,Referentni datum
+Reference DocName,Referentna DocName
+Reference DocType,Referentna DOCTYPEhtml
+Reference Name,Referenca Ime
+Reference Number,Referentni broj
+Reference Type,Referentna Tip
+Refresh,Osvježiti
+Registered but disabled.,Registrirani ali onemogućen.
+Registration Details,Registracija Brodu
+Registration Details Emailed.,Registracija Detalji Poslano.
+Registration Info,Registracija Info
+Rejected,Odbijen
+Rejected Quantity,Odbijen Količina
+Rejected Serial No,Odbijen Serijski br
+Rejected Warehouse,Odbijen galerija
+Relation,Odnos
+Relieving Date,Rasterećenje Datum
+Relieving Date of employee is ,Rasterećenje Datum zaposleniku
+Remark,Primjedba
+Remarks,Primjedbe
+Remove Bookmark,Uklonite Bookmark
+Rename Log,Preimenovanje Prijavite
+Rename Tool,Preimenovanje alat
+Rename...,Promjena naziva ...
+Rented,Iznajmljuje
+Repeat On,Ponovite Na
+Repeat Till,Ponovite Do
+Repeat on Day of Month,Ponovite na dan u mjesecu
+Repeat this Event,Ponovite ovaj događaj
+Replace,Zamijeniti
+Replace Item / BOM in all BOMs,Zamijenite predmet / BOM u svim sastavnicama
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM","Zamijenite određeni BOM u svim drugim sastavnicama gdje se koriste. To će zamijeniti staru vezu BOM, ažurirati troškove i regenerirati &quot;BOM eksploziju predmeta&quot; stol kao i po novom BOM"
+Replied,Odgovorio
+Report,Prijavi
+Report Builder,Report Builder
+Report Builder reports are managed directly by the report builder. Nothing to do.,Report Builder izvješća se izravno upravlja Report Builder. Ništa učiniti.
+Report Date,Prijavi Datum
+Report Hide,Prijavi Sakrij
+Report Name,Naziv izvješća
+Report Type,Prijavi Vid
+Report was not saved (there were errors),Izvješće nije spašen (bilo pogrešaka)
+Reports,Izvješća
+Reports to,Izvješća
+Represents the states allowed in one document and role assigned to change the state.,Predstavlja stanja dopušteni u jednom dokumentu i uloge dodijeljene promijeniti stanje.
+Reqd,Reqd
+Reqd By Date,Reqd Po datumu
+Request Type,Zahtjev Tip
+Request for Information,Zahtjev za informacije
+Request for purchase.,Zahtjev za kupnju.
+Requested By,Traženi Do
+Requested Items To Be Ordered,Traženi Proizvodi se mogu naručiti
+Requested Items To Be Transferred,Traženi stavki za prijenos
+Requests for items.,Zahtjevi za stavke.
+Required By,Potrebna Do
+Required Date,Potrebna Datum
+Required Qty,Potrebna Kol
+Required only for sample item.,Potrebna je samo za primjer stavke.
+Required raw materials issued to the supplier for producing a sub - contracted item.,Potrebna sirovina izdane dobavljač za proizvodnju pod - ugovoreni predmet.
+Reseller,Prodavač
+Reserved Quantity,Rezervirano Količina
+Reserved Warehouse,Rezervirano galerija
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,Rezervirano Warehouse u prodajni nalog / skladišta gotovih proizvoda
+Reserved Warehouse is missing in Sales Order,Rezervirano Warehouse nedostaje u prodajni nalog
+Resignation Letter Date,Ostavka Pismo Datum
+Resolution,Rezolucija
+Resolution Date,Rezolucija Datum
+Resolution Details,Rezolucija o Brodu
+Resolved By,Riješen Do
+Restrict IP,Zabraniti IP
+Restrict user from this IP address only. Multiple IP addresses can be added by separating with commas. Also accepts partial IP addresses like (111.111.111),Zabraniti korisnika iz ove IP adrese samo. Višestruki IP adrese može biti dodan odvajajući zarezima. Također prihvaća djelomične IP adrese kao što su (111.111.111)
+Restricting By User,Ograničavanje strane korisnika
+Retail,Maloprodaja
+Retailer,Prodavač na malo
+Review Date,Recenzija Datum
+Rgt,Ustaša
+Right,Desno
+Role,Uloga
+Role Allowed to edit frozen stock,Uloga dopuštenih urediti smrznute zalihe
+Role Name,Uloga Ime
+Role that is allowed to submit transactions that exceed credit limits set.,Uloga koja je dopušteno podnijeti transakcije koje premašuju kreditnih ograničenja postavljena.
+Roles,Uloge
+Roles Assigned,Uloge Dodijeljeni
+Roles Assigned To User,Uloge dodijeljena Korisniku
+Roles HTML,Uloge HTML
+Root ,Korijen
+Root cannot have a parent cost center,Korijen ne mogu imati središte troškova roditelj
+Rounded Total,Zaobljeni Ukupno
+Rounded Total (Company Currency),Zaobljeni Ukupno (Društvo valuta)
+Row,Red
+Row ,Red
+Row #,Redak #
+Row # ,Redak #
+Rules defining transition of state in the workflow.,Pravila definiraju prijelaz stanja u tijek rada.
+"Rules for how states are transitions, like next state and which role is allowed to change state etc.","Pravila za koliko su države prijelaza, kao i sljedeći države i koja uloga je dozvoljeno da promijeni stanje itd."
+Rules to calculate shipping amount for a sale,Pravila za izračun shipping iznos za prodaju
+SLE Exists,SLE Exists
+SMS,SMS
+SMS Center,SMS centar
+SMS Control,SMS kontrola
+SMS Gateway URL,SMS Gateway URL
+SMS Log,SMS Prijava
+SMS Parameter,SMS parametra
+SMS Parameters,SMS Parametri
+SMS Sender Name,SMS Sender Ime
+SMS Settings,Postavke SMS
+SMTP Server (e.g. smtp.gmail.com),SMTP poslužitelj (npr. smtp.gmail.com)
+SO,SO
+SO Date,SO Datum
+SO Pending Qty,SO čekanju Kol
+SO/10-11/,SO/10-11 /
+SO1112,SO1112
+SQTN,SQTN
+STE,Ste
+SUP,SUP
+SUPP,Supp
+SUPP/10-11/,SUPP/10-11 /
+Salary,Plata
+Salary Information,Plaća informacije
+Salary Manager,Plaća Manager
+Salary Mode,Plaća način
+Salary Slip,Plaća proklizavanja
+Salary Slip Deduction,Plaća proklizavanja Odbitak
+Salary Slip Earning,Plaća proklizavanja Zarada
+Salary Structure,Plaća Struktura
+Salary Structure Deduction,Plaća Struktura Odbitak
+Salary Structure Earning,Plaća Struktura Zarada
+Salary Structure Earnings,Plaća Struktura Zarada
+Salary breakup based on Earning and Deduction.,Plaća raspada temelju zarađivati ​​i odbitka.
+Salary components.,Plaća komponente.
+Sales,Prodajni
+Sales Analytics,Prodaja Analitika
+Sales BOM,Prodaja BOM
+Sales BOM Help,Prodaja BOM Pomoć
+Sales BOM Item,Prodaja BOM artikla
+Sales BOM Items,Prodaja BOM Proizvodi
+Sales Common,Prodaja Zajedničke
+Sales Details,Prodaja Detalji
+Sales Discounts,Prodaja Popusti
+Sales Email Settings,Prodaja Postavke e-pošte
+Sales Extras,Prodaja Dodaci
+Sales Invoice,Prodaja fakture
+Sales Invoice Advance,Prodaja Račun Predujam
+Sales Invoice Item,Prodaja Račun artikla
+Sales Invoice Items,Prodaja stavke računa
+Sales Invoice Message,Prodaja Račun Poruka
+Sales Invoice No,Prodaja Račun br
+Sales Invoice Trends,Prodaja Račun trendovi
+Sales Order,Prodajnog naloga
+Sales Order Date,Prodaja Datum narudžbe
+Sales Order Item,Prodajnog naloga artikla
+Sales Order Items,Prodaja Narudžbe Proizvodi
+Sales Order Message,Prodajnog naloga Poruka
+Sales Order No,Prodajnog naloga Ne
+Sales Order Required,Prodajnog naloga Obvezno
+Sales Order Trend,Prodaja Naručite Trend
+Sales Partner,Prodaja partner
+Sales Partner Name,Prodaja Ime partnera
+Sales Partner Target,Prodaja partner Target
+Sales Partners Commission,Prodaja Partneri komisija
+Sales Person,Prodaja Osoba
+Sales Person Incharge,Prodaja Osoba Incharge
+Sales Person Name,Prodaja Osoba Ime
+Sales Person Target Variance (Item Group-Wise),Prodaja Osoba Target varijance (točka Group-Wise)
+Sales Person Targets,Prodaje osobi Mete
+Sales Person-wise Transaction Summary,Prodaja Osobne mudar Transakcija Sažetak
+Sales Register,Prodaja Registracija
+Sales Return,Prodaje Povratak
+Sales Taxes and Charges,Prodaja Porezi i naknade
+Sales Taxes and Charges Master,Prodaja Porezi i naknade Master
+Sales Team,Prodaja Team
+Sales Team Details,Prodaja Team Detalji
+Sales Team1,Prodaja Team1
+Sales and Purchase,Prodaja i kupnja
+Sales campaigns,Prodaja kampanje
+Sales persons and targets,Prodaja osobe i ciljevi
+Sales taxes template.,Prodaja porezi predložak.
+Sales territories.,Prodaja teritoriji.
+Salutation,Pozdrav
+Same file has already been attached to the record,Sve file već priključen na zapisnik
+Sample Size,Veličina uzorka
+Sanctioned Amount,Iznos kažnjeni
+Saturday,Subota
+Save,Spasiti
+Schedule,Raspored
+Schedule Details,Raspored Detalji
+Scheduled,Planiran
+Scheduled Confirmation Date,Planirano Potvrda Datum
+Scheduled Date,Planirano Datum
+Scheduler Log,Planer Prijava
+School/University,Škola / Sveučilište
+Score (0-5),Ocjena (0-5)
+Score Earned,Ocjena Zarađeni
+Scrap %,Otpad%
+Script,Skripta
+Script Report,Skripta Prijavi
+Script Type,Skripta Tip
+Script to attach to all web pages.,Skripta se priključiti na svim web stranicama.
+Search,Traži
+Search Fields,Search Polja
+Seasonality for setting budgets.,Sezonalnost za postavljanje proračuna.
+Section Break,Odjeljak Break
+Security Settings,Sigurnosne postavke
+"See ""Rate Of Materials Based On"" in Costing Section",Pogledajte &quot;stopa materijali na temelju troškova&quot; u odjeljak
+Select,Odabrati
+"Select ""Yes"" for sub - contracting items",Odaberite &quot;Da&quot; za pod - ugovorne stavke
+"Select ""Yes"" if this item is to be sent to a customer or received from a supplier as a sample. Delivery notes and Purchase Receipts will update stock levels but there will be no invoice against this item.","Odaberite &quot;Da&quot; ako je ova stavka će biti poslan na kupca ili dobio od dobavljača kao uzorak. Otpremnice i kupnju primitke će ažurirati burzovne razinama, ali neće biti faktura protiv ove stavke."
+"Select ""Yes"" if this item is used for some internal purpose in your company.",Odaberite &quot;Da&quot; ako ova stavka se koristi za neke unutarnje potrebe u vašoj tvrtki.
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Odaberite &quot;Da&quot; ako ova stavka predstavlja neki posao poput treninga, projektiranje, konzalting i sl."
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.",Odaberite &quot;Da&quot; ako ste održavanju zaliha ove točke u vašem inventaru.
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",Odaberite &quot;Da&quot; ako opskrbu sirovina na svoj dobavljača za proizvodnju ovu stavku.
+Select All,Odaberite sve
+Select Attachments,Odaberite privitke
+Select Budget Distribution to unevenly distribute targets across months.,Odaberite Budget distribuciju neravnomjerno raspodijeliti ciljeve diljem mjeseci.
+"Select Budget Distribution, if you want to track based on seasonality.","Odaberite Budget Distribution, ako želite pratiti na temelju sezonalnosti."
+Select Customer,Izaberite klijenta
+Select Digest Content,Odaberite Digest sadržaj
+Select DocType,Odaberite DOCTYPE
+Select Document Type,Odaberite vrstu dokumenta
+Select Document Type or Role to start.,Odaberite vrstu dokumenta ili ulogu za početak.
+Select Items,Odaberite stavke
+Select PR,Odaberite PR
+Select Print Format,Odaberite Print Format
+Select Print Heading,Odaberite Ispis Naslov
+Select Report Name,Odaberite Naziv izvješća
+Select Role,Odaberite Uloga
+Select Sales Orders,Odaberite narudžbe
+Select Sales Orders from which you want to create Production Orders.,Odaberite narudžbe iz koje želite stvoriti radne naloge.
+Select Terms and Conditions,Odaberite Uvjeti i pravila
+Select Time Logs and Submit to create a new Sales Invoice.,Odaberite vrijeme Evidencije i slanje stvoriti novi prodajni fakture.
+Select Transaction,Odaberite transakcija
+Select Type,Odaberite Vid
+Select User or Property to start.,Odaberite korisnika ili imovina za početak.
+Select a Banner Image first.,Odaberite Slika Banner prvi.
+Select account head of the bank where cheque was deposited.,Odaberite račun šefa banke gdje je ček bio pohranjen.
+Select an image of approx width 150px with a transparent background for best results.,Odaberite sliku od cca 150px širine s transparentnom pozadinom za najbolje rezultate.
+Select company name first.,Odaberite naziv tvrtke prvi.
+Select dates to create a new ,Odaberite datume za stvaranje nove
+Select name of Customer to whom project belongs,Odaberite ime kupca kojem projekt pripada
+Select or drag across time slots to create a new event.,Odaberite ili povucite preko minutaže stvoriti novi događaj.
+Select template from which you want to get the Goals,Odaberite predložak s kojeg želite dobiti ciljeva
+Select the Employee for whom you are creating the Appraisal.,Odaberite zaposlenika za koga se stvara procjene.
+Select the currency in which price list is maintained,Odaberite valutu u kojoj cjenik održava
+Select the label after which you want to insert new field.,Odaberite oznaku nakon što želite umetnuti novo polje.
+Select the period when the invoice will be generated automatically,Odaberite razdoblje kada faktura će biti generiran automatski
+"Select the price list as entered in ""Price List"" master. This will pull the reference rates of items against this price list as specified in ""Item"" master.",Odaberite cjenik kao ušao u &quot;Cjenik&quot; gospodara. To će povući referentne stope predmeta protiv ove cjeniku kao što je navedeno u &quot;artikla&quot; gospodara.
+Select the relevant company name if you have multiple companies,Odaberite odgovarajući naziv tvrtke ako imate više tvrtki
+Select the relevant company name if you have multiple companies.,Odaberite odgovarajući naziv tvrtke ako imate više tvrtki.
+Select who you want to send this newsletter to,Odaberite koji želite poslati ovu newsletter
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","Odabir &quot;Da&quot; omogućit će ovu stavku da se pojavi u narudžbenice, Otkup primitka."
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","Odabir &quot;Da&quot; omogućit će ovaj predmet shvatiti u prodajni nalog, otpremnici"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",Odabir &quot;Da&quot; će vam omogućiti da stvorite Bill materijala pokazuje sirovina i operativne troškove nastale za proizvodnju ovu stavku.
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",Odabir &quot;Da&quot; će vam omogućiti da napravite proizvodnom nalogu za tu stavku.
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",Odabir &quot;Da&quot; će dati jedinstveni identitet svakog entiteta ove točke koja se može vidjeti u rednim brojem učitelja.
+Selling,Prodaja
+Selling Settings,Prodaja postavki
+Send,Poslati
+Send Autoreply,Pošalji Automatski
+Send Email,Pošaljite e-poštu
+Send From,Pošalji Iz
+Send Invite Email,Pošalji pozivnicu e
+Send Me A Copy,Pošaljite mi kopiju
+Send Notifications To,Slanje obavijesti
+Send Print in Body and Attachment,Pošalji Ispis u tijelu i privrženosti
+Send SMS,Pošalji SMS
+Send To,Pošalji
+Send To Type,Pošalji Upišite
+Send an email reminder in the morning,Pošaljite e-mail podsjetnik u jutarnjim satima
+Send automatic emails to Contacts on Submitting transactions.,Pošalji automatske poruke u Kontakte o podnošenju transakcije.
+Send mass SMS to your contacts,Pošalji masovne SMS svojim kontaktima
+Send regular summary reports via Email.,Pošalji redovite sažetak izvješća putem e-pošte.
+Send to this list,Pošalji na ovom popisu
+Sender,Pošiljalac
+Sender Name,Pošiljatelj Ime
+"Sending newsletters is not allowed for Trial users, \				to prevent abuse of this feature.","Slanje biltene nije dopušteno za suđenje korisnike, \ spriječiti zloupotrebe ove značajke."
+Sent Mail,Poslana pošta
+Sent On,Poslan Na
+Sent Quotation,Sent Ponuda
+Separate production order will be created for each finished good item.,Poseban proizvodnja kako će biti izrađen za svakog gotovog dobrom stavke.
+Serial No,Serijski br
+Serial No Details,Serijski nema podataka
+Serial No Service Contract Expiry,Serijski Bez isteka Ugovor o pružanju usluga
+Serial No Status,Serijski Bez Status
+Serial No Warranty Expiry,Serijski Nema jamstva isteka
+Serialized Item: ',Serijaliziranom artikla: &#39;
+Series List for this Transaction,Serija Popis za ovu transakciju
+Server,Server
+Service Address,Usluga Adresa
+Services,Usluge
+Session Expired. Logging you out,Sjednica je istekao. Odjavljivanje
+Session Expires in (time),Sjednica Istječe u (vrijeme)
+Session Expiry,Sjednica isteka
+Session Expiry in Hours e.g. 06:00,Sjednica Rok u Hours npr. 06:00
+Set Banner from Image,Postavite banner sa slike
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,Postavite Stavka Grupa-mudre proračune na ovom području. Također možete uključiti sezonalnost postavljanjem Distribution.
+Set Login and Password if authentication is required.,"Postavite prijavu i lozinku, ako je autorizacija potrebna."
+Set New Password,Set New Password
+Set Value,Postavite vrijednost
+"Set a new password and ""Save""",Postavite novu lozinku i &quot;Save&quot;
+Set prefix for numbering series on your transactions,Postavite prefiks za numeriranje niza na svoje transakcije
+Set targets Item Group-wise for this Sales Person.,Set cilja predmet Grupa-mudar za ovaj prodavač.
+"Set your background color, font and image (tiled)","Postavite boju pozadine, font i sliku (popločan)"
+"Set your outgoing mail SMTP settings here. All system generated notifications, emails will go from this mail server. If you are not sure, leave this blank to use ERPNext servers (emails will still be sent from your email id) or contact your email provider.","Postavite odlazne postavke SMTP mail ovdje. Svi sustav generira obavijesti, e-mail će otići s ovog poslužitelja e-pošte. Ako niste sigurni, ostavite prazno za korištenje ERPNext poslužitelja (e-mailove i dalje će biti poslan na vaš e-mail id) ili se obratite davatelja usluga."
+Setting Account Type helps in selecting this Account in transactions.,Postavljanje Vrsta računa pomaže u odabiru ovaj račun u prometu.
+Settings,Postavke
+Settings for About Us Page.,Postavke za O nama Page.
+Settings for Accounts,Postavke za račune
+Settings for Buying Module,Postavke za kupnju modul
+Settings for Contact Us Page,Postavke za Kontaktirajte nas stranicu
+Settings for Contact Us Page.,Postavke za Kontaktirajte nas stranicu.
+Settings for Selling Module,Postavke za prodaju modul
+Settings for the About Us Page,Postavke za O nama Page
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",Postavke za izdvajanje posao zahtjeva iz spremnika npr. &quot;jobs@example.com&quot;
+Setup,Postavljanje
+Setup Control,Postavljanje kontrola
+Setup Series,Postavljanje Serija
+Setup of Shopping Cart.,Postavljanje Košarica.
+Setup of fonts and background.,Postavljanje fontova i pozadine.
+"Setup of top navigation bar, footer and logo.","Postavljanje gornjoj navigacijskoj traci, podnožje i logo."
+Setup to pull emails from support email account,Postava povući e-mailove od podrške email računa
+Share,Udio
+Share With,Podijelite s
+Shipments to customers.,Isporuke kupcima.
+Shipping,Utovar
+Shipping Account,Dostava račun
+Shipping Address,Dostava Adresa
+Shipping Address Name,Dostava Adresa Ime
+Shipping Amount,Dostava Iznos
+Shipping Rule,Dostava Pravilo
+Shipping Rule Condition,Dostava Pravilo Stanje
+Shipping Rule Conditions,Dostava Koje uvjete
+Shipping Rule Label,Dostava Pravilo Label
+Shipping Rules,Dostava Pravila
+Shop,Dućan
+Shopping Cart,Košarica
+Shopping Cart Price List,Košarica Cjenik
+Shopping Cart Price Lists,Košarica cjenike
+Shopping Cart Settings,Košarica Postavke
+Shopping Cart Shipping Rule,Košarica Dostava Pravilo
+Shopping Cart Shipping Rules,Košarica Dostava Pravila
+Shopping Cart Taxes and Charges Master,Košarica poreze i troškove Master
+Shopping Cart Taxes and Charges Masters,Košarica Porezi i naknade Masters
+Short Bio,Kratka Biografija
+Short Name,Kratko Ime
+Short biography for website and other publications.,Kratka biografija za web stranice i drugih publikacija.
+Shortcut,Prečac
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Show &quot;na lageru&quot; ili &quot;Nije u skladištu&quot; temelji se na skladištu dostupna u tom skladištu.
+Show Details,Prikaži pojedinosti
+Show In Website,Pokaži Na web stranice
+Show Print First,Pokaži Ispis Prvo
+Show a slideshow at the top of the page,Prikaži slideshow na vrhu stranice
+Show in Website,Prikaži u web
+Show rows with zero values,Prikaži retke s nula vrijednosti
+Show this slideshow at the top of the page,Prikaži ovaj slideshow na vrhu stranice
+Showing only for,Prikaz samo za
+Signature,Potpis
+Signature to be appended at the end of every email,Potpis se dodaje na kraju svakog e
+Single,Singl
+Single Post (article).,Single Post (članak).
+Single unit of an Item.,Jedna jedinica stavku.
+Sitemap Domain,Mapa Domain
+Slideshow,Slideshow
+Slideshow Items,Slideshow Proizvodi
+Slideshow Name,SLIKA Naziv
+Slideshow like display for the website,Slideshow kao prikaz za web
+Small Text,Mali Tekst
+Solid background color (default light gray),Čvrsta boja pozadine (zadano svijetlo siva)
+Sorry we were unable to find what you were looking for.,Nažalost nismo uspjeli pronaći ono što su tražili.
+Sorry you are not permitted to view this page.,Žao nam je što nije dozvoljeno da vidite ovu stranicu.
+Sorry! We can only allow upto 100 rows for Stock Reconciliation.,Žao nam je! Mi samo možemo dopustiti upto 100 redova za burze pomirenja.
+"Sorry! You cannot change company's default currency, because there are existing transactions against it. You will need to cancel those transactions if you want to change the default currency.","Žao mi je! Ne možete promijeniti tvrtke zadanu valutu, jer već postoje transakcija protiv njega. Vi ćete morati odustati od te transakcije, ako želite promijeniti zadanu valutu."
+Sorry. Companies cannot be merged,Žao nam je. Tvrtke ne mogu se spojiti
+Sorry. Serial Nos. cannot be merged,Žao nam je. Serijski broj ne može spojiti
+Sort By,Sortiraj po
+Source,Izvor
+Source Warehouse,Izvor galerija
+Source and Target Warehouse cannot be same,Izvor i Target galerije ne mogu biti isti
+Source of th,Izvor th
+"Source of the lead. If via a campaign, select ""Campaign""","Izvor olova. Ako putem kampanje, odaberite &quot;kampanja&quot;"
+Spartan,Spartanski
+Special Page Settings,Posebni stranica Postavke
+Specification Details,Specifikacija Detalji
+Specify Exchange Rate to convert one currency into another,Navedite tečaju za pretvaranje jedne valute u drugu
+"Specify a list of Territories, for which, this Price List is valid","Navedite popis teritorijima, za koje, ovom cjeniku vrijedi"
+"Specify a list of Territories, for which, this Shipping Rule is valid","Navedite popis teritorijima, za koje, to Dostava Pravilo vrijedi"
+"Specify a list of Territories, for which, this Taxes Master is valid","Navedite popis teritorijima, za koje, to Porezi Master vrijedi"
+Specify conditions to calculate shipping amount,Odredite uvjete za izračun iznosa dostave
+Split Delivery Note into packages.,Split otpremnici u paketima.
+Standard,Standard
+Standard Rate,Standardna stopa
+"Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.","Standardni uvjeti da se može dodati prodaje i Purchases.Examples: 1. Valjanost offer.1. Uvjeti plaćanja (unaprijed, na kredit, dio unaprijed i sl) 0,1. Što je ekstra (ili plaća kupac) 0,1. Sigurnost / korištenje warning.1. Jamstvo ako any.1. Vraća Policy.1. Uvjeti shipping, ako applicable.1. Načinima rješavanja sporova, odšteta, odgovornost, etc.1. Adresu i kontakt vaše tvrtke."
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.10. Add or Deduct: Whether you want to add or deduct the tax.","Standardni porez predložak koji se mogu primijeniti na sve transakcije kupnje. Ovaj predložak može sadržavati popis poreznih glavama i također ostalim troškovima glave poput &quot;brodova&quot;, &quot;osiguranje&quot;, &quot;Rukovanje&quot; itd. # # # # NoteThe porezna stopa možete definirati ovdje će biti standardna stopa poreza za sve stavke ** ** . Ako postoje ** Proizvodi ** koji imaju različite cijene, one moraju biti dodan u ** artikla porezu ** tablice u točki ** ** majstor. # # # # Opis Columns1. Obračun Tip: - To može biti na ** Neto Ukupno ** (koja je zbroj osnovnog iznosa). - ** Na prethodni redak Ukupni / Iznos ** (za kumulativne poreza ili pristojbi). Ako odaberete ovu opciju, porez će se primijeniti kao postotak prethodnog reda (u poreznom tablici) iznos ili ukupno. - ** Stvarni ** (kao što je spomenuto) 0,2. Račun Voditelj: Račun knjiga pod kojima taj porez će biti booked3. Trošak Centar: Ako pristojba / zadužen je prihod (kao shipping) ili rashod to treba biti rezervirano protiv troškova Center.4. Opis: Opis poreza (koji će se tiskati u fakturama / citati) 0,5. Ocijeni: Porezna rate.6. Iznos: Porezna amount.7. Ukupno: Kumulativna ukupno ove point.8. Unesite Row: Ako se temelji na &quot;Prethodni Row Totala&quot; možete odabrati broj retka koji će se uzeti kao osnova za ovaj izračun (default je prethodni redak) 0,9. Razmislite poreza ili pristojbi za: U ovom dijelu možete odrediti ako porez / naknada je samo za vrednovanje (nije dio od ukupnog broja) ili samo za ukupno (ne dodati vrijednost stavke) ili za both.10. Dodavanje ili oduzimamo: želite li dodati ili odbiti porez."
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Standardni porez predložak koji se mogu primijeniti na svim prodajnim transakcijama. Ovaj predložak može sadržavati popis poreznih glavama i također ostali rashodi / prihodi glave poput &quot;brodova&quot;, &quot;osiguranje&quot;, &quot;Rukovanje&quot; itd. # # # # NoteThe porezna stopa možete definirati ovdje će biti standardna stopa poreza za sve stavke ** **. Ako postoje ** Proizvodi ** koji imaju različite cijene, one moraju biti dodan u ** artikla porezu ** tablice u točki ** ** majstor. # # # # Opis Columns1. Obračun Tip: - To može biti na ** Neto Ukupno ** (koja je zbroj osnovnog iznosa). - ** Na prethodni redak Ukupni / Iznos ** (za kumulativne poreza ili pristojbi). Ako odaberete ovu opciju, porez će se primijeniti kao postotak prethodnog reda (u poreznom tablici) iznos ili ukupno. - ** Stvarni ** (kao što je spomenuto) 0,2. Račun Voditelj: Račun knjiga pod kojima taj porez će biti booked3. Trošak Centar: Ako pristojba / zadužen je prihod (kao shipping) ili rashod to treba biti rezervirano protiv troškova Center.4. Opis: Opis poreza (koji će se tiskati u fakturama / citati) 0,5. Ocijeni: Porezna rate.6. Iznos: Porezna amount.7. Ukupno: Kumulativna ukupno ove point.8. Unesite Row: Ako se temelji na &quot;Prethodni Row Totala&quot; možete odabrati broj retka koji će se uzeti kao osnova za ovaj izračun (default je prethodni redak) 0,9. Je li ovo pristojba uključena u osnovne stope:? Ako to provjerili, to znači da taj porez neće biti prikazan ispod točke tablici, ali će biti uključeni u osnovne stope u glavnom točkom tablici. To je korisno gdje želite dati flat cijenu (uključujući sve poreze) cijenu za kupce."
+Start Date,Datum početka
+Start Report For,Početak izvješće za
+Start date of current invoice's period,Početak datum tekućeg razdoblja dostavnice
+Starts on,Počinje na
+Startup,Stavljanje u pogon
+State,Država
+States,Države
+Static Parameters,Statički parametri
+Status,Status
+Status must be one of ,Status mora biti jedan od
+Status should be Submitted,Status treba Prijavljen
+Statutory info and other general information about your Supplier,Zakonska info i druge opće informacije o vašem Dobavljaču
+Stock,Zaliha
+Stock Adjustment Account,Stock Adjustment račun
+Stock Adjustment Cost Center,Stock Adjustment troška
+Stock Ageing,Kataloški Starenje
+Stock Analytics,Stock Analytics
+Stock Balance,Kataloški bilanca
+Stock Entry,Kataloški Stupanje
+Stock Entry Detail,Kataloški Stupanje Detalj
+Stock Frozen Upto,Kataloški Frozen Upto
+Stock In Hand Account,Stock u ruci račun
+Stock Ledger,Stock Ledger
+Stock Ledger Entry,Stock Ledger Stupanje
+Stock Level,Kataloški Razina
+Stock Qty,Kataloški Kol
+Stock Queue (FIFO),Kataloški red (FIFO)
+Stock Received But Not Billed,Stock primljeni Ali ne Naplaćeno
+Stock Reconciliation,Kataloški pomirenje
+Stock Reconciliation file not uploaded,Kataloški Pomirenje datoteka nije ustupio
+Stock Settings,Stock Postavke
+Stock UOM,Kataloški UOM
+Stock UOM Replace Utility,Kataloški UOM Zamjena Utility
+Stock Uom,Kataloški Uom
+Stock Value,Stock vrijednost
+Stock Value Difference,Stock Vrijednost razlika
+Stop,Stop
+Stop users from making Leave Applications on following days.,Prestani korisnike od izrade ostaviti aplikacija na sljedećim danima.
+Stopped,Zaustavljen
+Structure cost centers for budgeting.,Struktura troška za budžetiranja.
+Structure of books of accounts.,Struktura knjige računa.
+Style,Stil
+Style Settings,Stil Postavke
+"Style represents the button color: Success - Green, Danger - Red, Inverse - Black, Primary - Dark Blue, Info - Light Blue, Warning - Orange","Stil predstavlja boju gumba: Uspjeh - zelena, opasnosti - Crvena, Inverzni - crna, Primarni - tamnoplava, info - svjetlo plava, upozorenje - Orange"
+"Sub-currency. For e.g. ""Cent""",Sub-valuta. Za npr. &quot;centi&quot;
+Sub-domain provided by erpnext.com,Pod-domene pruža erpnext.com
+Subcontract,Podugovor
+Subdomain,Poddomena
+Subject,Predmet
+Submit,Podnijeti
+Submit Salary Slip,Slanje plaće Slip
+Submit all salary slips for the above selected criteria,Slanje sve plaće gaćice za gore odabranih kriterija
+Submitted,Prijavljen
+Submitted Record cannot be deleted,Postavio Zapis se ne može izbrisati
+Subsidiary,Podružnica
+Success,Uspjeh
+Successful: ,Uspješna:
+Suggestion,Prijedlog
+Suggestions,Prijedlozi
+Sunday,Nedjelja
+Supplier,Dobavljač
+Supplier (Payable) Account,Dobavljač (Plaća) račun
+Supplier (vendor) name as entered in supplier master,Dobavljač (prodavatelja) ime kao ušao u dobavljača gospodara
+Supplier Account Head,Dobavljač račun Head
+Supplier Address,Dobavljač Adresa
+Supplier Details,Dobavljač Detalji
+Supplier Intro,Dobavljač Uvod
+Supplier Invoice Date,Dobavljač Datum fakture
+Supplier Invoice No,Dobavljač Račun br
+Supplier Name,Dobavljač Ime
+Supplier Naming By,Dobavljač nazivanje
+Supplier Part Number,Dobavljač Broj dijela
+Supplier Quotation,Dobavljač Ponuda
+Supplier Quotation Item,Dobavljač ponudu artikla
+Supplier Reference,Dobavljač Referenca
+Supplier Shipment Date,Dobavljač Pošiljka Datum
+Supplier Shipment No,Dobavljač Pošiljka Nema
+Supplier Type,Dobavljač Tip
+Supplier Warehouse,Dobavljač galerija
+Supplier Warehouse mandatory subcontracted purchase receipt,Dobavljač skladišta obvezni podugovorne Račun kupnje
+Supplier classification.,Dobavljač klasifikacija.
+Supplier database.,Dobavljač baza podataka.
+Supplier of Goods or Services.,Dobavljač robe ili usluga.
+Supplier warehouse where you have issued raw materials for sub - contracting,Dobavljač skladište gdje ste izdali sirovine za pod - ugovaranje
+Supplier's currency,Dobavljačeva valuta
+Support,Podržati
+Support Analytics,Podrška Analytics
+Support Email,Podrška e
+Support Email Id,Podrška Email ID
+Support Password,Podrška Lozinka
+Support Ticket,Podrška karata
+Support queries from customers.,Podrška upite od kupaca.
+Symbol,Simbol
+Sync Inbox,Sync inbox
+Sync Support Mails,Sinkronizacija Podrška mailova
+Sync with Dropbox,Sinkronizacija s Dropbox
+Sync with Google Drive,Sinkronizacija s Google Drive
+System,Sistem
+System Defaults,Sustav Zadano
+System Settings,Postavke sustava
+System User,Sustav Upute
+"System User (login) ID. If set, it will become default for all HR forms.","Sustav Korisničko (login) ID. Ako je postavljen, to će postati zadana za sve HR oblicima."
+System for managing Backups,Sustav za upravljanje sigurnosne kopije
+System generated mails will be sent from this email id.,Sustav generira mailova će biti poslan na ovaj email id.
+TL-,TL-
+TLB-,TLB-
+Table,Stol
+Table for Item that will be shown in Web Site,Tablica za predmet koji će biti prikazan u web stranice
+Tag,Privjesak
+Tag Name,Oznaka Ime
+Tags,Oznake
+Tahoma,Tahoma
+Target,Meta
+Target  Amount,Ciljana Iznos
+Target Detail,Ciljana Detalj
+Target Details,Ciljane Detalji
+Target Details1,Ciljana Details1
+Target Distribution,Ciljana Distribucija
+Target Qty,Ciljana Kol
+Target Warehouse,Ciljana galerija
+Task,Zadatak
+Task Details,Zadatak Detalji
+Tax,Porez
+Tax Calculation,Obračun poreza
+Tax Category can not be 'Valuation' or 'Valuation and Total' 					as all items are non-stock items,Porezna kategorija ne može biti &quot;Procjena&quot; ili &quot;Procjena vrijednosti i Total &#39;kao i svi proizvodi bez dionica stavke
+Tax Master,Porezna Master
+Tax Rate,Porezna stopa
+Tax Template for Purchase,Porezna Predložak za kupnju
+Tax Template for Sales,Porezna Predložak za prodaju
+Tax and other salary deductions.,Porez i drugih isplata plaća.
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Porezna detalj stol preuzeta iz točke majstora kao string i pohranjeni u to field.Used za poreze i pristojbe
+Taxable,Oporeziva
+Taxes,Porezi
+Taxes and Charges,Porezi i naknade
+Taxes and Charges Added,Porezi i naknade Dodano
+Taxes and Charges Added (Company Currency),Porezi i naknade uvrštenja (Društvo valuta)
+Taxes and Charges Calculation,Porezi i naknade Proračun
+Taxes and Charges Deducted,Porezi i naknade oduzeti
+Taxes and Charges Deducted (Company Currency),Porezi i naknade Umanjenja (Društvo valuta)
+Taxes and Charges Total,Porezi i naknade Ukupno
+Taxes and Charges Total (Company Currency),Porezi i naknade Ukupno (Društvo valuta)
+Taxes and Charges1,Porezi i Charges1
+Team Members,Članovi tima
+Team Members Heading,Članovi tima Naslov
+Template for employee performance appraisals.,Predložak za zaposlenika ocjeni rada.
+Template of terms or contract.,Predložak termina ili ugovor.
+Term Details,Oročeni Detalji
+Terms and Conditions,Odredbe i uvjeti
+Terms and Conditions Content,Uvjeti sadržaj
+Terms and Conditions Details,Uvjeti Detalji
+Terms and Conditions Template,Uvjeti predloška
+Terms and Conditions1,Odredbe i Conditions1
+Territory,Teritorija
+Territory Manager,Teritorij Manager
+Territory Name,Regija Ime
+Territory Target Variance (Item Group-Wise),Teritorij Target varijance (točka Group-Wise)
+Territory Targets,Teritorij Mete
+Test,Test
+Test Email Id,Test E-mail ID
+Test Runner,Test Runner
+Test the Newsletter,Test Newsletter
+Text,Tekst
+Text Align,Tekst Poravnajte
+Text Editor,Tekst Editor
+"The ""Web Page"" that is the website home page",&quot;Web stranica&quot; da je stranica web kući
+The BOM which will be replaced,BOM koji će biti zamijenjen
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",Stavka koja predstavlja paket. Ova stavka mora imati &quot;Je kataloški Stavka&quot; kao &quot;Ne&quot; i &quot;Je li prodaja artikla&quot; kao &quot;Da&quot;
+The date at which current entry is made in system.,Datum na koji tekući zapis se sastoji u sustavu.
+The date at which current entry will get or has actually executed.,Datum na koji tekući zapis će dobiti ili zapravo je pogubljen.
+The date on which next invoice will be generated. It is generated on submit.,Datum na koji sljedeći račun će biti generiran. To je generiran na podnijeti.
+The date on which recurring invoice will be stop,Datum na koji se ponavlja faktura će se zaustaviti
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","Dan u mjesecu na koji se automatski faktura će biti generiran npr. 05, 28 itd."
+The first Leave Approver in the list will be set as the default Leave Approver,Prvi dopust Odobritelj na popisu će se postaviti kao zadani Odobritelj dopust
+The gross weight of the package. Usually net weight + packaging material weight. (for print),Bruto težina paketa. Obično neto težina + ambalaža težina. (Za tisak)
+The name of your company / website as you want to appear on browser title bar. All pages will have this as the prefix to the title.,Naziv tvrtke / web stranice kao što želite da se pojavi na naslovnoj traci preglednika. Sve stranice će imati to kao prefiks na naslov.
+The net weight of this package. (calculated automatically as sum of net weight of items),Neto težina tog paketa. (Automatski izračunava kao zbroj neto težini predmeta)
+The new BOM after replacement,Novi BOM nakon zamjene
+The rate at which Bill Currency is converted into company's base currency,Stopa po kojoj Bill valuta pretvara u tvrtke bazne valute
+"The system provides pre-defined roles, but you can <a href='#List/Role'>add new roles</a> to set finer permissions","Sustav pruža unaprijed definiranim ulogama, ali možete <a href='#List/Role'>dodati nove uloge</a> postaviti finije dozvole"
+The unique id for tracking all recurring invoices. It is generated on submit.,Jedinstveni ID za praćenje svih ponavljajući fakture. To je izrađen podnijeti.
+Then By (optional),Zatim Do (opcionalno)
+These properties are Link Type fields from all Documents.,Ta svojstva su Link Tip polja iz svih dokumenata.
+"These properties can also be used to 'assign' a particular document, whose property matches with the User's property to a User. These can be set using the <a href='#permission-manager'>Permission Manager</a>","Ta svojstva se također može koristiti za &#39;dodijeliti&#39; određeni dokument, čija imovina utakmice s Korisničkom imovine korisniku. To se može podesiti pomoću <a href='#permission-manager'>dozvolu Manager</a>"
+These properties will appear as values in forms that contain them.,Ta svojstva će se pojaviti kao vrijednosti u oblicima koji ih sadrže.
+These values will be automatically updated in transactions and also will be useful to restrict permissions for this user on transactions containing these values.,"Ove vrijednosti će se automatski ažuriraju u prometu, te će također biti korisno ograničiti dozvole za ovog korisnika o transakcijama koje sadrže te vrijednosti."
+This Price List will be selected as default for all Customers under this Group.,Ovaj Cjenik će biti odabran kao uobičajeni za sve kupce iz ove skupine.
+This Time Log Batch has been billed.,Ovo Batch Vrijeme Log je naplaćeno.
+This Time Log Batch has been cancelled.,Ovo Batch Vrijeme Log je otkazan.
+This Time Log conflicts with,Ovaj put Prijavite u sukobu s
+This account will be used to maintain value of available stock,Ovaj račun će se koristiti za održavanje vrijednosti zaliha na raspolaganju
+This currency will get fetched in Purchase transactions of this supplier,Ova valuta će se dohvatio u Kupiti transakcija ovog dobavljača
+This currency will get fetched in Sales transactions of this customer,Ova valuta će se dohvatio u prodajnim transakcijama ovog kupca
+"This feature is for merging duplicate warehouses. It will replace all the links of this warehouse by ""Merge Into"" warehouse. After merging you can delete this warehouse, as stock level for this warehouse will be zero.","Ova značajka je za spajanje duple skladišta. Ona će zamijeniti sve linkove ovog skladišta &quot;spojiti u&quot; skladište. Nakon spajanja možete izbrisati ovu skladište, kao dioničko razina u ovoj skladište će biti nula."
+This feature is only applicable to self hosted instances,Ova opcija se primjenjuje samo na sebe domaćin slučajevima
+This field will appear only if the fieldname defined here has value OR the rules are true (examples): <br>myfieldeval:doc.myfield=='My Value'<br>eval:doc.age>18,"Ovo polje će se pojaviti samo ako podataka, Naziv Polja definirana ovdje ima vrijednost ILI pravila su istina (primjeri): <br> myfieldeval: doc.myfield == &#39;Moj Vrijednost&#39; <br> eval: doc.age&gt; 18"
+This goes above the slideshow.,To ide iznad slideshow.
+This is PERMANENT action and you cannot undo. Continue?,"To je stalna akcija, a ne možete poništiti. Nastaviti?"
+This is an auto generated Material Request.,Ovo je automatski generirani Materijal zahtjev.
+This is permanent action and you cannot undo. Continue?,"To je stalna akcija, a ne možete poništiti. Nastaviti?"
+This is the number of the last created transaction with this prefix,To je broj zadnjeg stvorio transakcije s ovim prefiksom
+This message goes away after you create your first customer.,Ova poruka nestaje nakon što stvorite svoj prvi kupac.
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,Ovaj alat pomaže vam da ažurirate ili popraviti količinu i vrednovanja zaliha u sustavu. To se obično koristi za sinkronizaciju sustava vrijednosti i što zapravo postoji u svojim skladištima.
+This will be used for setting rule in HR module,To će se koristiti za postavljanje pravilu u HR modula
+Thread HTML,Temu HTML
+Thursday,Četvrtak
+Time,Vrijeme
+Time Log,Vrijeme Log
+Time Log Batch,Vrijeme Log Hrpa
+Time Log Batch Detail,Vrijeme Log Batch Detalj
+Time Log Batch Details,Time Log Hrpa Brodu
+Time Log Batch status must be 'Submitted',Vrijeme Log Batch status mora biti &#39;Poslao&#39;
+Time Log Status must be Submitted.,Vrijeme Status dnevnika mora biti podnesen.
+Time Log for tasks.,Vrijeme Prijava za zadatke.
+Time Log is not billable,Vrijeme Log nije naplatnih
+Time Log must have status 'Submitted',Vrijeme Prijava mora imati status &#39;Poslao&#39;
+Time Zone,Time Zone
+Time Zones,Vremenske zone
+Time and Budget,Vrijeme i proračun
+Time at which items were delivered from warehouse,Vrijeme na stavke koje su isporučena iz skladišta
+Time at which materials were received,Vrijeme u kojem su materijali primili
+Title,Naslov
+Title / headline of your page,Naslov / naslov vaše stranice
+Title Case,Naslov slučaja
+Title Prefix,Naslov Prefiks
+To,Na
+To Currency,Valutno
+To Date,Za datum
+To Discuss,Za Raspravljajte
+To Do,Raditi
+To Do List,Da li popis
+To PR Date,Za PR Datum
+To Package No.,Za Paket br
+To Reply,Za Odgovor
+To Time,Za vrijeme
+To Value,Za vrijednost
+To Warehouse,Za galeriju
+"To add a tag, open the document and click on ""Add Tag"" on the sidebar","Da biste dodali oznaku, otvorite dokument i kliknite na &quot;Dodaj oznaku&quot; na sidebar"
+"To assign this issue, use the ""Assign"" button in the sidebar.","Za dodjelu taj problem, koristite &quot;dodijeliti&quot; gumb u sidebar."
+"To automatically create Support Tickets from your incoming mail, set your POP3 settings here. You must ideally create a separate email id for the erp system so that all emails will be synced into the system from that mail id. If you are not sure, please contact your EMail Provider.","Da biste automatski stvorili podršku ulaznice iz vašeg dolaznog maila, postaviti POP3 postavke ovdje. Vi idealno mora stvoriti zasebnu e-mail ID za ERP sustava, tako da sve e-mailove će biti sinkronizirane u sustav iz tog mail id. Ako niste sigurni, obratite se davatelju usluge e."
+"To create an Account Head under a different company, select the company and save customer.","Za stvaranje računa glavu pod drugom tvrtkom, odaberite tvrtku i spasiti kupca."
+To enable <b>Point of Sale</b> features,Da biste omogućili <b>Point of Sale</b> značajke
+To enable more currencies go to Setup > Currency,Da biste omogućili više valuta ići na Postavke&gt; Valuta
+"To fetch items again, click on 'Get Items' button \						or update the Quantity manually.","Za preuzimanje stavke opet, kliknite na &quot;Get stavke&quot; gumb \ ili ažurirati Količina ručno."
+"To format columns, give column labels in the query.","Za formatiranje stupaca, daju natpise stupaca u upitu."
+"To further restrict permissions based on certain values in a document, use the 'Condition' settings.","Kako bi se dodatno ograničiti dozvole na temelju određenih vrijednosti u dokumentu, koristite &#39;stanje&#39; postavke."
+To get Item Group in details table,Da biste dobili predmeta Group u tablici pojedinosti
+To manage multiple series please go to Setup > Manage Series,Za upravljati s više niz molimo idite na Postavke&gt; Upravljanje serije
+To restrict a User of a particular Role to documents that are explicitly assigned to them,Da biste ograničili korisnik određenu ulogu na dokumente koji su izričito dodijeljene im
+To restrict a User of a particular Role to documents that are only self-created.,Da biste ograničili korisnik određenu ulogu dokumentima koji su samo self-kreirana.
+"To set reorder level, item must be Purchase Item","Da biste promijenili redoslijed razinu, stavka mora biti Otkup artikla"
+"To set user roles, just go to <a href='#List/Profile'>Setup > Users</a> and click on the user to assign roles.","Da biste postavili korisničke uloge, samo idite na <a href='#List/Profile'>Postavke&gt; Korisnici</a> i kliknite na korisnika dodijeliti uloge."
+To track any installation or commissioning related work after sales,Za praćenje bilo koju instalaciju ili puštanje vezane raditi nakon prodaje
+"To track brand name in the following documents<br>Delivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Za praćenje branda u sljedećim dokumentima <br> Otpremnica, Enuiry, Materijal zahtjev, točka, Narudžbenica, Otkup bon, Kupac Potvrda, citat, prodaja Račun, prodaja BOM, prodajnog naloga, Serijski br"
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Za praćenje stavke u prodaji i kupnji dokumenata na temelju njihovih serijskih br. To je također može koristiti za praćenje jamstvene podatke o proizvodu.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,Za praćenje stavke u prodaji i kupnji dokumenata s batch br <br> <b>Prošle Industrija: Kemikalije itd</b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Za praćenje stavki pomoću barkod. Vi ćete biti u mogućnosti da unesete stavke u otpremnici i prodaje Računa skeniranjem barkod stavke.
+ToDo,ToDo
+Tools,Alat
+Top,Vrh
+Top Bar,Najbolje Bar
+Top Bar Background,Najbolje Bar Pozadina
+Top Bar Item,Najbolje Bar artikla
+Top Bar Items,Top Bar Proizvodi
+Top Bar Text,Top Bar Tekst
+Top Bar text and background is same color. Please change.,Najbolje bar tekst i pozadina iste boje. Molimo promijeniti.
+Total,Ukupan
+Total (sum of) points distribution for all goals should be 100.,Ukupno (zbroj) boda distribucije svih ciljeva trebao biti 100.
+Total Advance,Ukupno Predujam
+Total Amount,Ukupan iznos
+Total Amount To Pay,Ukupan iznos platiti
+Total Amount in Words,Ukupan iznos u riječi
+Total Billing This Year: ,Ukupno naplate Ova godina:
+Total Claimed Amount,Ukupno Zatražio Iznos
+Total Commission,Ukupno komisija
+Total Cost,Ukupan trošak
+Total Credit,Ukupna kreditna
+Total Debit,Ukupno zaduženje
+Total Deduction,Ukupno Odbitak
+Total Earning,Ukupna zarada
+Total Experience,Ukupno Iskustvo
+Total Hours,Ukupno vrijeme
+Total Hours (Expected),Ukupno vrijeme (Očekivani)
+Total Invoiced Amount,Ukupno Iznos dostavnice
+Total Leave Days,Ukupno Ostavite Dani
+Total Leaves Allocated,Ukupno Lišće Dodijeljeni
+Total Operating Cost,Ukupni trošak
+Total Points,Ukupno bodova
+Total Raw Material Cost,Ukupno troškova sirovine
+Total SMS Sent,Ukupno SMS Sent
+Total Sanctioned Amount,Ukupno kažnjeni Iznos
+Total Score (Out of 5),Ukupna ocjena (od 5)
+Total Tax (Company Currency),Ukupno poreza (Društvo valuta)
+Total Taxes and Charges,Ukupno Porezi i naknade
+Total Taxes and Charges (Company Currency),Ukupno Porezi i naknade (Društvo valuta)
+Total Working Days In The Month,Ukupno radnih dana u mjesecu
+Total amount of invoices received from suppliers during the digest period,Ukupan iznos primljenih računa od dobavljača tijekom razdoblja digest
+Total amount of invoices sent to the customer during the digest period,Ukupan iznos računa šalje kupcu tijekom razdoblja digest
+Total in words,Ukupno je u riječima
+Total production order qty for item,Ukupna proizvodnja kako kom za stavku
+Totals,Ukupan rezultat
+Track separate Income and Expense for product verticals or divisions.,Pratite posebnu prihodi i rashodi za proizvode vertikalama ili podjele.
+Track this Delivery Note against any Project,Prati ovu napomenu isporuke protiv bilo Projekta
+Track this Sales Invoice against any Project,Prati ovu Sales fakture protiv bilo Projekta
+Track this Sales Order against any Project,Prati ovu prodajni nalog protiv bilo Projekta
+Transaction,Transakcija
+Transaction Date,Transakcija Datum
+Transfer,Prijenos
+Transition Rules,Prijelazna pravila
+Transporter Info,Transporter Info
+Transporter Name,Transporter Ime
+Transporter lorry number,Transporter kamion broj
+Trash Reason,Otpad Razlog
+Tree of item classification,Stablo točke klasifikaciji
+Trial Balance,Pretresno bilanca
+Tuesday,Utorak
+Tweet will be shared via your user account (if specified),Tweet će se dijeliti putem vašeg korisničkog računa (ako je određeno)
+Twitter Share,Twitter Share
+Twitter Share via,Twitter Podijeli putem
+Type,Vrsta
+Type of document to rename.,Vrsta dokumenta za promjenu naziva.
+Type of employment master.,Vrsta zaposlenja gospodara.
+"Type of leaves like casual, sick etc.","Tip lišća poput casual, bolovanja i sl."
+Types of Expense Claim.,Vrste Rashodi zahtjevu.
+Types of activities for Time Sheets,Vrste aktivnosti za vrijeme listova
+UOM,UOM
+UOM Conversion Detail,UOM pretvorbe Detalj
+UOM Conversion Details,UOM pretvorbe Detalji
+UOM Conversion Factor,UOM konverzijski faktor
+UOM Conversion Factor is mandatory,UOM pretvorbe Factor je obvezna
+UOM Details,UOM Detalji
+UOM Name,UOM Ime
+UOM Replace Utility,UOM Zamjena Utility
+UPPER CASE,Velika slova
+UPPERCASE,Velikim slovima
+URL,URL
+Unable to complete request: ,Nije moguće dovršiti zahtjev:
+Under AMC,Pod AMC
+Under Graduate,Pod diplomski
+Under Warranty,Pod jamstvo
+Unit of Measure,Jedinica mjere
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Jedinica za mjerenje ove točke (npr. kg, Jedinica Ne, Par)."
+Units/Hour,Jedinice / sat
+Units/Shifts,Jedinice / smjene
+Unmatched Amount,Nenadmašan Iznos
+Unpaid,Neplaćen
+Unread Messages,Nepročitane poruke
+Unscheduled,Neplanski
+Unsubscribed,Pretplatu
+Upcoming Events for Today,Buduća događanja za danas
+Update,Ažurirati
+Update Clearance Date,Ažurirajte provjeri datum
+Update Field,Update Field
+Update PR,Update PR
+Update Series,Update serija
+Update Series Number,Update serije Broj
+Update Stock,Ažurirajte Stock
+Update Stock should be checked.,Update Stock treba provjeriti.
+Update Value,Ažurirajte vrijednost
+"Update allocated amount in the above table and then click ""Allocate"" button","Ažurirajte dodijeljeni iznos u gornjoj tablici, a zatim kliknite na &quot;alocirati&quot; gumb"
+Update bank payment dates with journals.,Update banka datum plaćanja s časopisima.
+Update is in progress. This may take some time.,Update je u tijeku. To može potrajati neko vrijeme.
+Updated,Obnovljeno
+Upload Attachment,Prenesi Prilog
+Upload Attendance,Upload Attendance
+Upload Backups to Dropbox,Upload sigurnosne kopije za ispuštanje
+Upload Backups to Google Drive,Upload sigurnosne kopije na Google Drive
+Upload HTML,Prenesi HTML
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,Učitajte CSV datoteku s dva stupca.: Stari naziv i novi naziv. Max 500 redaka.
+Upload a file,Prenesi datoteku
+Upload and Import,Upload i uvoz
+Upload attendance from a .csv file,Prenesi dolazak iz. Csv datoteku
+Upload stock balance via csv.,Prenesi dionica ravnotežu putem CSV.
+Uploading...,Prijenos ...
+Upper Income,Gornja Prihodi
+Urgent,Hitan
+Use Multi-Level BOM,Koristite multi-level BOM
+Use SSL,Koristite SSL
+User,Korisnik
+User Cannot Create,Korisnik ne može stvoriti
+User Cannot Search,Korisnik ne može tražiti
+User ID,Korisnički ID
+User Image,Upute slike
+User Name,Korisničko ime
+User Remark,Upute Zabilješka
+User Remark will be added to Auto Remark,Upute Napomena će biti dodan Auto Napomena
+User Tags,Upute Tags
+User Type,Vrsta korisnika
+User must always select,Korisničko uvijek mora odabrati
+User not allowed entry in the Warehouse,Korisnik ne smije ulaz u galeriju
+User not allowed to delete.,Korisnik ne smije izbrisati.
+UserRole,UserRole
+Username,Korisničko ime
+Users who can approve a specific employee's leave applications,Korisnici koji može odobriti određenog zaposlenika dopust aplikacija
+Users with this role are allowed to do / modify accounting entry before frozen date,Korisnici s tom ulogom smiju raditi / mijenjati računovodstvenu ulazak prije zamrznute dana
+Utilities,Komunalne usluge
+Utility,Korisnost
+Valid For Territories,Vrijedi za teritorijima
+Valid Upto,Vrijedi Upto
+Valid for Buying or Selling?,Vrijedi za kupnju ili prodaju?
+Valid for Territories,Vrijedi za teritorijima
+Validate,Potvrditi
+Valuation,Procjena
+Valuation Method,Vrednovanje metoda
+Valuation Rate,Vrednovanje Stopa
+Valuation and Total,Vrednovanje i Total
+Value,Vrijednost
+Value missing for,Vrijednost nestao
+Vehicle Dispatch Date,Vozilo Dispatch Datum
+Vehicle No,Ne vozila
+Verdana,Verdana
+Verified By,Ovjeren od strane
+Visit,Posjetiti
+Visit report for maintenance call.,Posjetite izvješće za održavanje razgovora.
+Voucher Detail No,Bon Detalj Ne
+Voucher ID,Bon ID
+Voucher Import Tool,Bon Uvoz alat
+Voucher No,Bon Ne
+Voucher Type,Bon Tip
+Voucher Type and Date,Tip bon i datum
+WIP Warehouse required before Submit,WIP skladišta potrebno prije Podnijeti
+Waiting for Customer,Čeka kupca
+Walk In,Šetnja u
+Warehouse,Skladište
+Warehouse Contact Info,Skladište Kontakt Info
+Warehouse Detail,Skladište Detalj
+Warehouse Name,Skladište Ime
+Warehouse User,Skladište Upute
+Warehouse Users,Skladište Korisnika
+Warehouse and Reference,Skladište i upute
+Warehouse does not belong to company.,Skladište ne pripadaju tvrtki.
+Warehouse where you are maintaining stock of rejected items,Skladište gdje ste održavanju zaliha odbijenih stavki
+Warehouse-Wise Stock Balance,Skladište-Wise Stock Balance
+Warehouse-wise Item Reorder,Warehouse-mudar Stavka redoslijeda
+Warehouses,Skladišta
+Warn,Upozoriti
+Warning,Upozorenje
+Warning: Leave application contains following block dates,Upozorenje: Ostavite program sadrži sljedeće blok datume
+Warranty / AMC Details,Jamstveni / AMC Brodu
+Warranty / AMC Status,Jamstveni / AMC Status
+Warranty Expiry Date,Jamstvo Datum isteka
+Warranty Period (Days),Jamstveno razdoblje (dani)
+Warranty Period (in days),Jamstveno razdoblje (u danima)
+Web Content,Web sadržaj
+Web Page,Web stranica
+Website,Website
+Website Description,Web stranica Opis
+Website Item Group,Web stranica artikla Grupa
+Website Item Groups,Website Stavka Grupe
+Website Overall Settings,Website Ukupni Postavke
+Website Script,Web Skripta
+Website Settings,Website Postavke
+Website Slideshow,Web Slideshow
+Website Slideshow Item,Web Slideshow artikla
+Website User,Web User
+Website Warehouse,Web stranica galerije
+Wednesday,Srijeda
+Weekly,Tjedni
+Weekly Off,Tjedni Off
+Weight UOM,Težina UOM
+Weightage,Weightage
+Weightage (%),Weightage (%)
+Welcome,Dobrodošli
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Kada bilo koji od provjerenih transakcija &quot;Postavio&quot;, e-mail pop-up automatski otvorio poslati e-mail na povezane &quot;Kontakt&quot; u toj transakciji, s transakcijom u privitku. Korisnik može ili ne može poslati e-mail."
+"When you <b>Amend</b> a document after cancel and save it, it will get a new number that is a version of the old number.","Kada <b>Izmijeniti</b> dokument nakon otkazati i spasiti ga, on će dobiti novi broj koji je verzija starog broja."
+Where items are stored.,Gdje predmeti su pohranjeni.
+Where manufacturing operations are carried out.,Gdje proizvodni postupci provode.
+Widowed,Udovički
+Width,Širina
+Will be calculated automatically when you enter the details,Hoće li biti izračunata automatski kada unesete podatke
+Will be fetched from Customer,Hoće li biti preuzeta od kupca
+Will be updated after Sales Invoice is Submitted.,Hoće li se obnavljaju nakon prodaje fakture je Prijavljen.
+Will be updated when batched.,Hoće li biti ažurirani kada izmiješane.
+Will be updated when billed.,Hoće li biti promjena kada je naplaćeno.
+Will be used in url (usually first name).,Hoće li se koristi u URL-u (obično ime).
+With Operations,Uz operacije
+Work Details,Radni Brodu
+Work Done,Rad Done
+Work In Progress,Radovi u tijeku
+Work-in-Progress Warehouse,Rad u tijeku Warehouse
+Workflow,Workflow
+Workflow Action,Workflow Akcija
+Workflow Action Master,Workflow Akcija Master
+Workflow Action Name,Workflow Akcija Ime
+Workflow Document State,Workflow dokument Država
+Workflow Document States,Workflow dokument Države
+Workflow Name,Workflow ime
+Workflow State,Workflow država
+Workflow State Field,Workflow Državna polja
+Workflow State Name,Workflow Država Ime
+Workflow Transition,Tijek tranzicije
+Workflow Transitions,Workflow Prijelazi
+Workflow state represents the current state of a document.,Workflow država predstavlja trenutno stanje dokumenta.
+Workflow will start after saving.,Workflow će početi nakon štednje.
+Working,Rad
+Workstation,Workstation
+Workstation Name,Ime Workstation
+Write,Pisati
+Write Off Account,Napišite Off račun
+Write Off Amount,Napišite paušalni iznos
+Write Off Amount <=,Otpis Iznos &lt;=
+Write Off Based On,Otpis na temelju
+Write Off Cost Center,Otpis troška
+Write Off Outstanding Amount,Otpisati preostali iznos
+Write Off Voucher,Napišite Off bon
+Write a Python file in the same folder where this is saved and return column and result.,Napišite Python datoteku u istu mapu gdje je spremljena i povratka stupcu i rezultat.
+Write a SELECT query. Note result is not paged (all data is sent in one go).,Napišite SELECT upita. Napomena rezultat nije zvao (svi podaci se šalju u jednom potezu).
+Write sitemap.xml,Napišite sitemap.xml
+Write titles and introductions to your blog.,Napišite naslova i uvoda u svoj blog.
+Writers Introduction,Pisci Uvod
+Wrong Template: Unable to find head row.,Pogrešna Predložak: Nije moguće pronaći glave red.
+Year,Godina
+Year Closed,Godina Zatvoreno
+Year Name,Godina Ime
+Year Start Date,Godina Datum početka
+Year of Passing,Godina Prolazeći
+Yearly,Godišnje
+Yes,Da
+Yesterday,Jučer
+You are not authorized to do/modify back dated entries before ,Niste ovlašteni za to / mijenjati vratiti prije nadnevaka
+You can enter any date manually,Možete unijeti bilo koji datum ručno
+You can enter the minimum quantity of this item to be ordered.,Možete unijeti minimalnu količinu ove točke biti naređeno.
+You can not enter both Delivery Note No and Sales Invoice No. \					Please enter any one.,Ne možete ući i bilješku isporuke Ne i prodaja Račun br \ Unesite bilo jedno.
+You can set various 'properties' to Users to set default values and apply permission rules based on the value of these properties in various forms.,Možete postaviti različite &#39;Properties&#39; za korisnike postaviti zadane vrijednosti i primjenjivati ​​pravila dozvola na temelju vrijednosti tih svojstava u različitim oblicima.
+You can start by selecting backup frequency and \					granting access for sync,Možete početi odabirom sigurnosnu frekvenciju i \ davanje pristupa za sinkronizaciju
+You can use <a href='#Form/Customize Form'>Customize Form</a> to set levels on fields.,Možete koristiti <a href='#Form/Customize Form'>Prilagodite obrazac</a> za postavljanje razine na poljima.
+You may need to update: ,Možda ćete morati ažurirati:
+Your Customer's TAX registration numbers (if applicable) or any general information,Vaš klijent je poreznoj registraciji brojevi (ako je primjenjivo) ili bilo opće informacije
+"Your download is being built, this may take a few moments...","Vaš preuzimanje se gradi, to može potrajati nekoliko trenutaka ..."
+Your letter head content,Vaše pismo glava sadržaj
+Your sales person who will contact the customer in future,Vaš prodaje osobi koja će kontaktirati kupca u budućnosti
+Your sales person who will contact the lead in future,Vaš prodaje osobi koja će kontaktirati vodstvo u budućnosti
+Your sales person will get a reminder on this date to contact the customer,Vaš prodavač će dobiti podsjetnik na taj datum kontaktirati kupca
+Your sales person will get a reminder on this date to contact the lead,Vaš prodavač će dobiti podsjetnik na taj datum da se obratite vodstvo
+Your support email id - must be a valid email - this is where your emails will come!,Vaša podrška e-mail id - mora biti valjana e-mail - ovo je mjesto gdje svoje e-mailove će doći!
+[Error],[Error]
+[Label]:[Field Type]/[Options]:[Width],[Label]: [Field Type] / [Options]: [Širina]
+add your own CSS (careful!),dodati svoj vlastiti CSS (careful!)
+adjust,prilagoditi
+align-center,poravnajte-centar
+align-justify,poravnajte-opravdati
+align-left,poravnajte-lijevo
+align-right,poravnati desno
+also be included in Item's rate,također biti uključeni u stavku je stopa
+and,i
+arrow-down,strelica prema dolje
+arrow-left,strelica lijevo
+arrow-right,Strelica desno
+arrow-up,strelica prema gore
+assigned by,dodjeljuje
+asterisk,zvjezdica
+backward,natrag
+ban-circle,zabrana-krug
+barcode,barkod
+bell,zvono
+bold,odvažan
+book,knjiga
+bookmark,bookmark
+briefcase,aktovka
+bullhorn,bullhorn
+calendar,kalendar
+camera,kamera
+cancel,otkazati
+cannot be 0,ne može biti 0
+cannot be empty,ne može biti prazan
+cannot be greater than 100,ne može biti veća od 100
+cannot be included in Item's rate,Ne mogu biti uključeni u stavke stope
+"cannot have a URL, because it has child item(s)","ne može imati URL, jer ima dijete stavku (e)"
+cannot start with,Ne mogu početi s
+certificate,certifikat
+check,provjeriti
+chevron-down,Chevron-dolje
+chevron-left,Chevron-lijevo
+chevron-right,Chevron-desno
+chevron-up,Chevron-up
+circle-arrow-down,krug sa strelicom prema dolje
+circle-arrow-left,krug sa strelicom nalijevo
+circle-arrow-right,krug sa strelicom desno
+circle-arrow-up,krug sa strelicom prema gore
+cog,vršak
+comment,komentirati
+create a Custom Field of type Link (Profile) and then use the 'Condition' settings to map that field to the Permission rule.,"stvoriti Custom Field tipa Link (Profil), a zatim koristiti &#39;stanje&#39; postavke na karti koje polje na dozvole vladavine."
+dd-mm-yyyy,dd-mm-yyyy
+dd/mm/yyyy,dd / mm / gggg
+deactivate,deaktivirati
+does not belong to BOM: ,ne pripadaju sastavnice:
+does not exist,ne postoji
+does not have role 'Leave Approver',nema ulogu &#39;ostaviti Odobritelj&#39;
+does not match,ne odgovara
+download,preuzimanje
+download-alt,download-alt
+"e.g. Bank, Cash, Credit Card","npr. banka, gotovina, kreditne kartice"
+"e.g. Kg, Unit, Nos, m","npr. kg, Jedinica, br, m"
+edit,urediti
+eg. Cheque Number,npr.. Ček Broj
+eject,izbaciti
+english,engleski
+envelope,omotnica
+español,Español
+example: Next Day Shipping,Primjer: Sljedeći dan Dostava
+example: http://help.erpnext.com,Primjer: http://help.erpnext.com
+exclamation-sign,usklik-znak
+eye-close,oka u blizini
+eye-open,oku-otvaranje
+facetime-video,FaceTime-video
+fast-backward,brzo unatrag
+fast-forward,brzo naprijed
+file,file
+film,film
+filter,filtriranje
+fire,vatra
+flag,zastava
+folder-close,mapa-blizu
+folder-open,mapa otvoriti
+font,krstionica
+forward,naprijed
+français,français
+fullscreen,fullscreen
+gift,dar
+glass,staklo
+globe,globus
+hand-down,rukom prema dolje
+hand-left,ruka-lijeva
+hand-right,ruka-desna
+hand-up,ruka-up
+has been entered atleast twice,je ušao atleast dva puta
+have a common territory,imaju zajednički teritorij
+have the same Barcode,imaju isti barkod
+hdd,HDD
+headphones,slušalice
+heart,srce
+home,dom
+icon,ikona
+in,u
+inbox,inbox
+indent-left,alineje-lijevo
+indent-right,alineje-desno
+info-sign,info-znak
+is a cancelled Item,je otkazan artikla
+is linked in,je povezan u
+is not a Stock Item,nije kataloški artikla
+is not allowed.,nije dopušteno.
+italic,kurzivan
+leaf,list
+lft,LFT
+list,popis
+list-alt,popis-alt
+lock,zaključati
+lowercase,malim slovima
+magnet,magnet
+map-marker,Karta marker
+minus,minus
+minus-sign,minus znak
+mm-dd-yyyy,dd-mm-yyyy
+mm/dd/yyyy,dd / mm / gggg
+move,premjestiti
+music,glazba
+must be one of,mora biti jedan od
+nederlands,Nederlands
+not a purchase item,Ne kupnju stavke
+not a sales item,Ne prodaje stavku
+not a service item.,Ne usluga stavku.
+not a sub-contracted item.,Ne pod-ugovori stavku.
+not in,nije u
+not within Fiscal Year,nije u fiskalnoj godini
+of,od
+of type Link,tipa Link
+off,isključen
+ok,u redu
+ok-circle,ok-krug
+ok-sign,ok-prijava
+old_parent,old_parent
+or,ili
+pause,stanka
+pencil,olovka
+picture,slika
+plane,avion
+play,igrati
+play-circle,play-krug
+plus,plus
+plus-sign,plus-potpisati
+português,Português
+português brasileiro,Português Brasileiro
+print,tiskati
+qrcode,qrcode
+question-sign,pitanje-prijava
+random,slučajan
+reached its end of life on,dosegla svoj kraj života na
+refresh,osvježiti
+remove,ukloniti
+remove-circle,uklanjanje-krug
+remove-sign,uklanjanje-potpisati
+repeat,ponoviti
+resize-full,resize-pun
+resize-horizontal,resize-horizontalna
+resize-small,resize-mala
+resize-vertical,resize-vertikalna
+retweet,retweet
+rgt,ustaša
+road,cesta
+screenshot,slike
+search,traženje
+share,udio
+share-alt,Udio-alt
+shopping-cart,shopping-cart
+should be 100%,bi trebao biti 100%
+signal,signal
+star,zvijezda
+star-empty,zvijezda-prazna
+step-backward,korak unatrag
+step-forward,korak naprijed
+stop,zaustaviti
+tag,privjesak
+tags,oznake
+"target = ""_blank""",target = &quot;_blank&quot;
+tasks,zadaci
+text-height,tekst-visina
+text-width,tekst širine
+th,og
+th-large,og veliki
+th-list,og-popis
+thumbs-down,palac dolje
+thumbs-up,palac gore
+time,vrijeme
+tint,nijansa
+to,na
+"to be included in Item's rate, it is required that: ","koji će biti uključeni u stavke stope, potrebno je da:"
+trash,smeće
+upload,upload
+user,korisnik
+user_image_show,user_image_show
+values and dates,Vrijednosti i datumi
+volume-down,glasnoće prema dolje
+volume-off,volumen-off
+volume-up,glasnoće prema gore
+warning-sign,upozorenje-znak
+website page link,web stranica vode
+which is greater than sales order qty ,što je više od prodajnog naloga Kol
+wrench,ključ
+yyyy-mm-dd,gggg-mm-dd
+zoom-in,zoom-u
+zoom-out,zoom-out

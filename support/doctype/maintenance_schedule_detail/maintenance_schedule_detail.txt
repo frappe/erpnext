@@ -1,0 +1,108 @@
+[
+ {
+  "creation": "2013-02-22 01:28:05", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:10", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "MSD.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Support", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Maintenance Schedule Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Maintenance Schedule Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "read_only": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_name", 
+  "fieldtype": "Data", 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Item Name", 
+  "oldfieldname": "item_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "scheduled_date", 
+  "fieldtype": "Date", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Scheduled Date", 
+  "oldfieldname": "scheduled_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "actual_date", 
+  "fieldtype": "Date", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Actual Date", 
+  "no_copy": 1, 
+  "oldfieldname": "actual_date", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "read_only": 0, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "incharge_name", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Incharge Name", 
+  "oldfieldname": "incharge_name", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Person", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "serial_no", 
+  "fieldtype": "Small Text", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Serial No", 
+  "no_copy": 0, 
+  "oldfieldname": "serial_no", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "160px", 
+  "read_only": 1, 
+  "search_index": 0, 
+  "width": "160px"
+ }
+]

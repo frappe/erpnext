@@ -1,0 +1,251 @@
+[
+ {
+  "creation": "2012-12-20 12:50:49", 
+  "docstatus": 0, 
+  "modified": "2013-12-24 11:40:19", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "icon": "icon-glass", 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "name_case": "Title Case"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Features Setup", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Features Setup", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Features Setup"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "materials", 
+  "fieldtype": "Section Break", 
+  "label": "Materials"
+ }, 
+ {
+  "description": "To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.", 
+  "doctype": "DocField", 
+  "fieldname": "fs_item_serial_nos", 
+  "fieldtype": "Check", 
+  "label": "Item Serial Nos"
+ }, 
+ {
+  "description": "To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>", 
+  "doctype": "DocField", 
+  "fieldname": "fs_item_batch_nos", 
+  "fieldtype": "Check", 
+  "label": "Item Batch Nos"
+ }, 
+ {
+  "description": "To track brand name in the following documents<br>\nDelivery Note, Enuiry, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No", 
+  "doctype": "DocField", 
+  "fieldname": "fs_brands", 
+  "fieldtype": "Check", 
+  "label": "Brands"
+ }, 
+ {
+  "description": "To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.", 
+  "doctype": "DocField", 
+  "fieldname": "fs_item_barcode", 
+  "fieldtype": "Check", 
+  "label": "Item Barcode"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "1. To maintain the customer wise item code and to make them searchable based on their code use this option", 
+  "doctype": "DocField", 
+  "fieldname": "fs_item_advanced", 
+  "fieldtype": "Check", 
+  "label": "Item Advanced"
+ }, 
+ {
+  "description": "If Sale BOM is defined, the actual BOM of the Pack is displayed as table.\nAvailable in Delivery Note and Sales Order", 
+  "doctype": "DocField", 
+  "fieldname": "fs_packing_details", 
+  "fieldtype": "Check", 
+  "label": "Packing Details"
+ }, 
+ {
+  "description": "To get Item Group in details table", 
+  "doctype": "DocField", 
+  "fieldname": "fs_item_group_in_details", 
+  "fieldtype": "Check", 
+  "label": "Item Groups in Details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_and_purchase", 
+  "fieldtype": "Section Break", 
+  "label": "Sales and Purchase"
+ }, 
+ {
+  "description": "All export related fields like currency, conversion rate, export total, export grand total etc are available in <br>\nDelivery Note, POS, Quotation, Sales Invoice, Sales Order etc.", 
+  "doctype": "DocField", 
+  "fieldname": "fs_exports", 
+  "fieldtype": "Check", 
+  "label": "Exports"
+ }, 
+ {
+  "description": "All import related fields like currency, conversion rate, import total, import grand total etc are available in <br>\nPurchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.", 
+  "doctype": "DocField", 
+  "fieldname": "fs_imports", 
+  "fieldtype": "Check", 
+  "label": "Imports"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order", 
+  "doctype": "DocField", 
+  "fieldname": "fs_discounts", 
+  "fieldtype": "Check", 
+  "label": "Sales Discounts"
+ }, 
+ {
+  "description": "Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice", 
+  "doctype": "DocField", 
+  "fieldname": "fs_purchase_discounts", 
+  "fieldtype": "Check", 
+  "label": "Purchase Discounts"
+ }, 
+ {
+  "description": "To track any installation or commissioning related work after sales", 
+  "doctype": "DocField", 
+  "fieldname": "fs_after_sales_installations", 
+  "fieldtype": "Check", 
+  "label": "After Sale Installations"
+ }, 
+ {
+  "description": "Available in \nBOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet", 
+  "doctype": "DocField", 
+  "fieldname": "fs_projects", 
+  "fieldtype": "Check", 
+  "label": "Projects"
+ }, 
+ {
+  "description": "If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity", 
+  "doctype": "DocField", 
+  "fieldname": "fs_sales_extras", 
+  "fieldtype": "Check", 
+  "label": "Sales Extras"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "accounts", 
+  "fieldtype": "Section Break", 
+  "label": "Accounts"
+ }, 
+ {
+  "description": "Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.", 
+  "doctype": "DocField", 
+  "fieldname": "fs_recurring_invoice", 
+  "fieldtype": "Check", 
+  "label": "Recurring Invoice"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "To enable <b>Point of Sale</b> features", 
+  "doctype": "DocField", 
+  "fieldname": "fs_pos", 
+  "fieldtype": "Check", 
+  "label": "Point of Sale"
+ }, 
+ {
+  "description": "To enable <b>Point of Sale</b> view", 
+  "doctype": "DocField", 
+  "fieldname": "fs_pos_view", 
+  "fieldtype": "Check", 
+  "label": "POS View"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "production", 
+  "fieldtype": "Section Break", 
+  "label": "Manufacturing"
+ }, 
+ {
+  "description": "If you involve in manufacturing activity<br>\nEnables item <b>Is Manufactured</b>", 
+  "doctype": "DocField", 
+  "fieldname": "fs_manufacturing", 
+  "fieldtype": "Check", 
+  "label": "Manufacturing"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "If you follow Quality Inspection<br>\nEnables item QA Required and QA No in Purchase Receipt", 
+  "doctype": "DocField", 
+  "fieldname": "fs_quality", 
+  "fieldtype": "Check", 
+  "label": "Quality"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "miscelleneous", 
+  "fieldtype": "Section Break", 
+  "label": "Miscelleneous"
+ }, 
+ {
+  "description": "If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page", 
+  "doctype": "DocField", 
+  "fieldname": "fs_page_break", 
+  "fieldtype": "Check", 
+  "label": "Page Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break4", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fs_more_info", 
+  "fieldtype": "Check", 
+  "label": "More Info"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Administrator"
+ }
+]

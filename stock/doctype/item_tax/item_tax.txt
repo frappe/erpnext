@@ -1,0 +1,47 @@
+[
+ {
+  "creation": "2013-02-22 01:28:01", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Item Tax", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Tax"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tax_type", 
+  "fieldtype": "Link", 
+  "label": "Tax", 
+  "oldfieldname": "tax_type", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "tax_rate", 
+  "fieldtype": "Float", 
+  "label": "Tax Rate", 
+  "oldfieldname": "tax_rate", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
+ }
+]

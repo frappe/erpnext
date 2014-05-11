@@ -1,0 +1,52 @@
+@-webkit-keyframes pulse {
+  from {
+    opacity: 0.7;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.7;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+.splash {
+	margin: auto;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 30px;
+	width: 160px;
+	height: 160px;
+	text-align: center;
+	color: #888;
+	
+	animation-duration: 1s;
+	animation-name: pulse;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+
+	-webkit-animation-duration: 1s;
+	-webkit-animation-name: pulse;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-direction: alternate;
+}
+
+.splash:after {
+	content: "erpnext";
+	font-size: 30px;
+	font-weight: 300;
+	font-family: Helvetica, Arial, sans-serif;
+	position: relative;
+	top: -30px;
+}

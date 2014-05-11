@@ -1,0 +1,278 @@
+[
+ {
+  "creation": "2013-01-22 15:11:38", 
+  "docstatus": 0, 
+  "modified": "2013-12-09 16:25:50", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 0, 
+  "allow_copy": 0, 
+  "allow_email": 0, 
+  "allow_print": 0, 
+  "allow_rename": 0, 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "hide_heading": 0, 
+  "hide_toolbar": 0, 
+  "icon": "icon-sitemap", 
+  "in_create": 0, 
+  "is_submittable": 1, 
+  "issingle": 0, 
+  "istable": 0, 
+  "module": "Manufacturing", 
+  "name": "__common__", 
+  "read_only": 0, 
+  "search_fields": "item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "BOM", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "BOM", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "BOM"
+ }, 
+ {
+  "description": "Item to be manufactured or repacked", 
+  "doctype": "DocField", 
+  "fieldname": "item", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 0, 
+  "label": "Item", 
+  "oldfieldname": "item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "is_active", 
+  "fieldtype": "Check", 
+  "hidden": 0, 
+  "in_list_view": 1, 
+  "label": "Is Active", 
+  "no_copy": 1, 
+  "oldfieldname": "is_active", 
+  "oldfieldtype": "Select", 
+  "reqd": 0
+ }, 
+ {
+  "allow_on_submit": 1, 
+  "default": "1", 
+  "doctype": "DocField", 
+  "fieldname": "is_default", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Is Default", 
+  "no_copy": 1, 
+  "oldfieldname": "is_default", 
+  "oldfieldtype": "Check"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Manage cost of operations", 
+  "doctype": "DocField", 
+  "fieldname": "with_operations", 
+  "fieldtype": "Check", 
+  "label": "With Operations"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rm_cost_as_per", 
+  "fieldtype": "Select", 
+  "label": "Rate Of Materials Based On", 
+  "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
+ }, 
+ {
+  "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"", 
+  "doctype": "DocField", 
+  "fieldname": "buying_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "depends_on": "with_operations", 
+  "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
+  "doctype": "DocField", 
+  "fieldname": "operations", 
+  "fieldtype": "Section Break", 
+  "label": "Operations", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bom_operations", 
+  "fieldtype": "Table", 
+  "label": "BOM Operations", 
+  "oldfieldname": "bom_operations", 
+  "oldfieldtype": "Table", 
+  "options": "BOM Operation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "materials", 
+  "fieldtype": "Section Break", 
+  "label": "Materials", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "bom_materials", 
+  "fieldtype": "Table", 
+  "label": "BOM Item", 
+  "oldfieldname": "bom_materials", 
+  "oldfieldtype": "Table", 
+  "options": "BOM Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "costing", 
+  "fieldtype": "Section Break", 
+  "label": "Costing", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "total_cost", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Total Cost", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "raw_material_cost", 
+  "fieldtype": "Float", 
+  "label": "Total Raw Material Cost", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "operating_cost", 
+  "fieldtype": "Float", 
+  "label": "Total Operating Cost", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info_section", 
+  "fieldtype": "Section Break", 
+  "label": "More Info"
+ }, 
+ {
+  "default": "1", 
+  "description": "Quantity of item obtained after manufacturing / repacking from given quantities of raw materials", 
+  "doctype": "DocField", 
+  "fieldname": "quantity", 
+  "fieldtype": "Float", 
+  "label": "Quantity", 
+  "oldfieldname": "quantity", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "uom", 
+  "fieldtype": "Select", 
+  "label": "Item UOM", 
+  "options": "link:UOM", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break23", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project_name", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Project Name", 
+  "oldfieldname": "project_name", 
+  "oldfieldtype": "Link", 
+  "options": "Project"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Item Desription", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "BOM", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "hidden": 0, 
+  "label": "Materials Required (Exploded)", 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "flat_bom_details", 
+  "fieldtype": "Table", 
+  "hidden": 0, 
+  "label": "Materials Required (Exploded)", 
+  "no_copy": 1, 
+  "oldfieldname": "flat_bom_details", 
+  "oldfieldtype": "Table", 
+  "options": "BOM Explosion Item", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Manufacturing Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Manufacturing User"
+ }
+]

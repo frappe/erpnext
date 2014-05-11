@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-01-14 10:52:58", 
+  "docstatus": 0, 
+  "modified": "2013-02-22 15:53:01", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "json": "{\"filters\":[[\"Serial No\",\"status\",\"=\",\"Delivered\"]],\"columns\":[[\"name\",\"Serial No\"],[\"item_code\",\"Serial No\"],[\"amc_expiry_date\",\"Serial No\"],[\"maintenance_status\",\"Serial No\"],[\"delivery_document_no\",\"Serial No\"],[\"customer\",\"Serial No\"],[\"customer_name\",\"Serial No\"],[\"item_name\",\"Serial No\"],[\"description\",\"Serial No\"],[\"item_group\",\"Serial No\"],[\"brand\",\"Serial No\"]],\"sort_by\":\"Serial No.amc_expiry_date\",\"sort_order\":\"asc\",\"sort_by_next\":\"\",\"sort_order_next\":\"desc\"}", 
+  "name": "__common__", 
+  "ref_doctype": "Serial No", 
+  "report_name": "Serial No Service Contract Expiry", 
+  "report_type": "Report Builder"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Serial No Service Contract Expiry"
+ }
+]

@@ -1,0 +1,135 @@
+{%- if doc.letter_head -%}
+	{{ webnotes.conn.get_value("Letter Head", doc.letter_head, "content") }}
+{%- endif -%}
+<!-- Page Layout Settings -->
+<div class='common page-header'>
+	<table class='header-table' cellspacing=0>
+		<thead>
+			<tr><td colspan="2"><h1>{{ doc.select_print_heading or 'Invoice' }}</h1></td></tr>
+			<tr><td colspan="2"><h3>{{ doc.name }}</h3></td></tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td width=60%><table width=100% cellspacing=0><tbody>
+					<tr>
+						<td width=39%><b>Name</b></td>
+						<td>{{ doc.customer_name }}</td>
+					</tr>
+					<tr>
+						<td><b>Address</b></td>
+						<td>{{ doc.address_display.replace("\n", "<br>") }}</td>
+					</tr>
+					<tr>
+						<td><b>Contact</b></td>
+						<td>{{ doc.contact_display }}</td>
+					</tr>
+				</tbody></table></td>
+				<td><table width=100% cellspacing=0><tbody>
+					<tr>
+						<td width=40%><b>Invoice Date</b></td>
+						<td>{{ utils.formatdate(doc.posting_date) }}</td>
+					<tr>
+					{%- if doc.convert_into_recurring_invoice and doc.recurring_id -%}
+                    <tr>
+    					<td width=40%><b>Invoice Period</b></td>
+						<td>{{ (utils.formatdate(doc.invoice_period_from_date)) +
+							' to ' + utils.formatdate(doc.invoice_period_to_date) }}</td>
+					<tr>
+					{%- endif -%}
+					<tr>
+						<td><b>Due Date</b></td>
+						<td>{{ utils.formatdate(doc.due_date) }}</td>
+					<tr>					
+				</tbody></table></td>
+			</tr>
+		</tbody>
+		<tfoot>
+		
+		</tfoot>
+	</table>
+</div>
+<div class='common page-body'>
+	<!-- 
+		Page Body will contain
+			+ table 2
+				- Sales Invoice Data
+	-->
+	<table class="table table-bordered">
+		<tbody>
+			<tr>
+				<th>Sr</th>
+				<th>Item Name</th>
+				<th>Description</th>
+				<th>Qty</th>
+				<th>UoM</th>
+				<th>Basic Rate</th>
+				<th>Amount</th>
+			</tr>
+			{%- for row in doclist.get({"doctype":"Sales Invoice Item"}) %}
+			<tr>
+				<td style="width: 3%;">{{ row.idx }}</td>
+				<td style="width: 20%;">{{ row.item_name }}</td>
+				<td style="width: 37%;">{{ row.description }}</td>
+				<td style="width: 5%; text-align: right;">{{ row.qty }}</td>
+				<td style="width: 5%;">{{ row.stock_uom }}</td>
+				<td style="width: 15%; text-align: right;">{{ utils.fmt_money(row.export_rate, currency=doc.currency) }}</td>
+				<td style="width: 15%; text-align: right;">{{ utils.fmt_money(row.export_amount, currency=doc.currency) }}</td>
+			</tr>
+			{% endfor -%}
+		</tbody>
+	</table>
+</div>
+<div class='common page-footer'>
+	<!-- 
+		Page Footer will contain
+			+ table 3
+				- Terms and Conditions
+				- Total Rounded Amount Calculation
+				- Total Rounded Amount in Words
+	-->
+	<table class='footer-table' width=100% cellspacing=0>
+		<thead>
+			
+		</thead>
+		<tbody>
+			<tr>
+				<td width=60% style='padding-right: 10px;'>
+					<b>Terms, Conditions &amp; Other Information:</b><br />
+					{{ doc.terms }}
+				</td>
+				<td>
+					<table cellspacing=0 width=100%>
+					<tbody>
+						<tr>
+							<td>Net Total</td>
+							<td width=40% style="text-align: right;">{{
+								utils.fmt_money(doc.net_total_export, currency=doc.currency)
+							}}</td>
+						</tr>
+						{%- for charge in doclist.get({"doctype":"Sales Taxes and Charges"}) -%}
+						{%- if not charge.included_in_print_rate -%}
+						<tr>
+							<td>{{ charge.description }}</td>
+							<td style="text-align: right;">{{ utils.fmt_money(charge.tax_amount / doc.conversion_rate, currency=doc.currency) }}</td>
+						</tr>
+						{%- endif -%}
+						{%- endfor -%}
+						<tr>
+							<td>Grand Total</td>
+							<td style="text-align: right;">{{ utils.fmt_money(doc.grand_total_export, currency=doc.currency) }}</td>
+						</tr>
+						<tr style='font-weight: bold'>
+							<td>Rounded Total</td>
+							<td style="text-align: right;">{{ utils.fmt_money(doc.rounded_total_export, currency=doc.currency) }}</td>
+						</tr>
+					</tbody>
+					</table>
+					<br /><b>In Words</b><br />
+					<i>{{ doc.in_words_export }}</i>
+				</td>
+			</tr>
+		</tbody>
+		<tfoot>
+		</tfoot>
+	</table>
+</div>

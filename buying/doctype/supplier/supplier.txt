@@ -1,0 +1,223 @@
+[
+ {
+  "creation": "2013-01-10 16:34:11", 
+  "docstatus": 0, 
+  "modified": "2013-11-19 11:31:28", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "naming_series:", 
+  "description": "Supplier of Goods or Services.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-user", 
+  "module": "Buying", 
+  "name": "__common__", 
+  "search_fields": "supplier_name,supplier_type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Supplier", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Supplier", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Supplier"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "label": "Basic Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "oldfieldname": "naming_series", 
+  "oldfieldtype": "Select", 
+  "options": "\nSUPP\nSUPP/10-11/"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_name", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Supplier Name", 
+  "no_copy": 1, 
+  "oldfieldname": "supplier_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_type", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Supplier Type", 
+  "oldfieldname": "supplier_type", 
+  "oldfieldtype": "Link", 
+  "options": "Supplier Type", 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "address_contacts", 
+  "fieldtype": "Section Break", 
+  "label": "Address & Contacts", 
+  "oldfieldtype": "Column Break", 
+  "options": "icon-map-marker"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_html", 
+  "fieldtype": "HTML", 
+  "label": "Address HTML", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_html", 
+  "fieldtype": "HTML", 
+  "label": "Contact HTML", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "communication_history", 
+  "fieldtype": "Section Break", 
+  "label": "Communication History", 
+  "options": "icon-comments", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "label": "Communication HTML", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
+ }, 
+ {
+  "description": "Enter the company name under which Account Head will be created for this Supplier", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Default Currency", 
+  "no_copy": 1, 
+  "options": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit_days", 
+  "fieldtype": "Int", 
+  "label": "Credit Days"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "website", 
+  "fieldtype": "Data", 
+  "label": "Website", 
+  "oldfieldname": "website", 
+  "oldfieldtype": "Data"
+ }, 
+ {
+  "description": "Statutory info and other general information about your Supplier", 
+  "doctype": "DocField", 
+  "fieldname": "supplier_details", 
+  "fieldtype": "Text", 
+  "label": "Supplier Details", 
+  "oldfieldname": "supplier_details", 
+  "oldfieldtype": "Code"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication", 
+  "print_hide": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Master Manager", 
+  "write": 1
+ }
+]

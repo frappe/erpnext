@@ -1,0 +1,320 @@
+[
+ {
+  "creation": "2013-01-30 12:49:46", 
+  "docstatus": 0, 
+  "modified": "2013-09-24 11:22:18", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_rename": 1, 
+  "description": "Heads (or groups) against which Accounting Entries are made and balances are maintained.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-money", 
+  "in_create": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "debit_or_credit, group_or_ledger"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Account", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Account", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Account"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "properties", 
+  "fieldtype": "Section Break", 
+  "label": "Account Details", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Account Name", 
+  "no_copy": 1, 
+  "oldfieldname": "account_name", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "level", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "label": "Level", 
+  "oldfieldname": "level", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "default": "Ledger", 
+  "doctype": "DocField", 
+  "fieldname": "group_or_ledger", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Group or Ledger", 
+  "oldfieldname": "group_or_ledger", 
+  "oldfieldtype": "Select", 
+  "options": "\nLedger\nGroup", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "debit_or_credit", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Debit or Credit", 
+  "oldfieldname": "debit_or_credit", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_pl_account", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Is PL Account", 
+  "oldfieldname": "is_pl_account", 
+  "oldfieldtype": "Select", 
+  "options": "Yes\nNo", 
+  "read_only": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "read_only": 1, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "parent_account", 
+  "fieldtype": "Link", 
+  "label": "Parent Account", 
+  "oldfieldname": "parent_account", 
+  "oldfieldtype": "Link", 
+  "options": "Account", 
+  "search_index": 1
+ }, 
+ {
+  "description": "Setting Account Type helps in selecting this Account in transactions.", 
+  "doctype": "DocField", 
+  "fieldname": "account_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Account Type", 
+  "oldfieldname": "account_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nFixed Asset Account\nBank or Cash\nExpense Account\nTax\nIncome Account\nChargeable\nWarehouse", 
+  "permlevel": 0, 
+  "search_index": 0
+ }, 
+ {
+  "description": "Rate at which this tax is applied", 
+  "doctype": "DocField", 
+  "fieldname": "tax_rate", 
+  "fieldtype": "Float", 
+  "hidden": 0, 
+  "label": "Rate", 
+  "oldfieldname": "tax_rate", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "description": "If the account is frozen, entries are allowed to restricted users.", 
+  "doctype": "DocField", 
+  "fieldname": "freeze_account", 
+  "fieldtype": "Select", 
+  "label": "Frozen", 
+  "oldfieldname": "freeze_account", 
+  "oldfieldtype": "Select", 
+  "options": "No\nYes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit_days", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "label": "Credit Days", 
+  "oldfieldname": "credit_days", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit_limit", 
+  "fieldtype": "Currency", 
+  "hidden": 1, 
+  "label": "Credit Limit", 
+  "oldfieldname": "credit_limit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_hide": 1
+ }, 
+ {
+  "description": "If this Account represents a Customer, Supplier or Employee, set it here.", 
+  "doctype": "DocField", 
+  "fieldname": "master_type", 
+  "fieldtype": "Select", 
+  "label": "Master Type", 
+  "oldfieldname": "master_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nSupplier\nCustomer\nEmployee"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "master_name", 
+  "fieldtype": "Link", 
+  "label": "Master Name", 
+  "oldfieldname": "master_name", 
+  "oldfieldtype": "Link", 
+  "options": "[Select]"
+ }, 
+ {
+  "default": "1", 
+  "depends_on": "eval:doc.group_or_ledger==\"Ledger\"", 
+  "doctype": "DocField", 
+  "fieldname": "allow_negative_balance", 
+  "fieldtype": "Check", 
+  "label": "Allow Negative Balance"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lft", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "label": "Lft", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rgt", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "label": "Rgt", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "old_parent", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Old Parent", 
+  "print_hide": 1, 
+  "read_only": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Accounts User", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Auditor", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Purchase User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Auditor", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 2, 
+  "role": "Accounts User", 
+  "write": 0
+ }
+]

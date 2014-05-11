@@ -1,0 +1,104 @@
+[
+ {
+  "creation": "2013-01-29 19:25:37", 
+  "docstatus": 0, 
+  "modified": "2013-09-10 10:51:51", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "autoname": "field:applicant_name", 
+  "description": "Applicant for a Job", 
+  "doctype": "DocType", 
+  "document_type": "Transaction", 
+  "icon": "icon-user", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Job Applicant", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Job Applicant", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Job Applicant"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "applicant_name", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Applicant Name", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "email_id", 
+  "fieldtype": "Data", 
+  "label": "Email Id"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "options": "Open\nReplied\nRejected\nHold"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "job_opening", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Job Opening", 
+  "options": "Job Opening"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_5", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "thread_html", 
+  "fieldtype": "HTML", 
+  "label": "Thread HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

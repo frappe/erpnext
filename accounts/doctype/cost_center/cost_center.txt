@@ -1,0 +1,196 @@
+[
+ {
+  "creation": "2013-01-23 19:57:17", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:23:10", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_copy": 1, 
+  "allow_rename": 1, 
+  "autoname": "field:cost_center_name", 
+  "description": "Track separate Income and Expense for product verticals or divisions.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-money", 
+  "in_create": 1, 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "search_fields": "name,parent_cost_center"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Cost Center", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Cost Center", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Cost Center"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sb0", 
+  "fieldtype": "Section Break", 
+  "label": "Cost Center Details"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cost_center_name", 
+  "fieldtype": "Data", 
+  "in_filter": 0, 
+  "label": "Cost Center Name", 
+  "no_copy": 1, 
+  "oldfieldname": "cost_center_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "parent_cost_center", 
+  "fieldtype": "Link", 
+  "label": "Parent Cost Center", 
+  "oldfieldname": "parent_cost_center", 
+  "oldfieldtype": "Link", 
+  "options": "Cost Center", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "oldfieldname": "company_name", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cb0", 
+  "fieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "group_or_ledger", 
+  "fieldtype": "Select", 
+  "hidden": 0, 
+  "label": "Group or Ledger", 
+  "no_copy": 1, 
+  "oldfieldname": "group_or_ledger", 
+  "oldfieldtype": "Select", 
+  "options": "\nGroup\nLedger", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "description": "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>", 
+  "doctype": "DocField", 
+  "fieldname": "sb1", 
+  "fieldtype": "Section Break", 
+  "label": "Budget"
+ }, 
+ {
+  "description": "Select Budget Distribution, if you want to track based on seasonality.", 
+  "doctype": "DocField", 
+  "fieldname": "distribution_id", 
+  "fieldtype": "Link", 
+  "label": "Distribution Id", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Link", 
+  "options": "Budget Distribution"
+ }, 
+ {
+  "description": "Add rows to set annual budgets on Accounts.", 
+  "doctype": "DocField", 
+  "fieldname": "budget_details", 
+  "fieldtype": "Table", 
+  "label": "Budget Details", 
+  "oldfieldname": "budget_details", 
+  "oldfieldtype": "Table", 
+  "options": "Budget Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lft", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "lft", 
+  "no_copy": 1, 
+  "oldfieldname": "lft", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rgt", 
+  "fieldtype": "Int", 
+  "hidden": 1, 
+  "in_filter": 1, 
+  "label": "rgt", 
+  "no_copy": 1, 
+  "oldfieldname": "rgt", 
+  "oldfieldtype": "Int", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "reqd": 0, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "old_parent", 
+  "fieldtype": "Link", 
+  "hidden": 1, 
+  "label": "old_parent", 
+  "no_copy": 1, 
+  "oldfieldname": "old_parent", 
+  "oldfieldtype": "Data", 
+  "options": "Cost Center", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Accounts User", 
+  "write": 0
+ }
+]

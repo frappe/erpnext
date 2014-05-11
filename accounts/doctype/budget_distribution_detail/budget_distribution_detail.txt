@@ -1,0 +1,47 @@
+[
+ {
+  "creation": "2013-02-22 01:27:38", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:06", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "BDD/.#####", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Budget Distribution Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Budget Distribution Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "month", 
+  "fieldtype": "Data", 
+  "label": "Month", 
+  "oldfieldname": "month", 
+  "oldfieldtype": "Data", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "percentage_allocation", 
+  "fieldtype": "Float", 
+  "label": "Percentage Allocation", 
+  "oldfieldname": "percentage_allocation", 
+  "oldfieldtype": "Currency"
+ }
+]

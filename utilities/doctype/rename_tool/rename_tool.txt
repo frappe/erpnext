@@ -1,0 +1,70 @@
+[
+ {
+  "creation": "2012-12-03 10:25:59", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:52:51", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 0, 
+  "allow_email": 1, 
+  "allow_print": 1, 
+  "doctype": "DocType", 
+  "hide_heading": 0, 
+  "hide_toolbar": 1, 
+  "icon": "icon-magic", 
+  "issingle": 1, 
+  "max_attachments": 1, 
+  "module": "Utilities", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Rename Tool", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Rename Tool", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Rename Tool"
+ }, 
+ {
+  "description": "Type of document to rename.", 
+  "doctype": "DocField", 
+  "fieldname": "select_doctype", 
+  "fieldtype": "Select", 
+  "label": "Select DocType"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "upload_html", 
+  "fieldtype": "HTML", 
+  "label": "Upload HTML"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rename_log", 
+  "fieldtype": "HTML", 
+  "label": "Rename Log"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

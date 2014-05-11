@@ -1,0 +1,77 @@
+[
+ {
+  "creation": "2013-02-22 01:27:38", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:58:31", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "C-Form Invoice Detail", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "C-Form Invoice Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "invoice_no", 
+  "fieldtype": "Link", 
+  "label": "Invoice No", 
+  "options": "Sales Invoice", 
+  "print_width": "160px", 
+  "width": "160px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "invoice_date", 
+  "fieldtype": "Date", 
+  "label": "Invoice Date", 
+  "print_width": "120px", 
+  "read_only": 1, 
+  "width": "120px"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "label": "Territory", 
+  "options": "Territory", 
+  "print_width": "120px", 
+  "read_only": 1, 
+  "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "net_total", 
+  "fieldtype": "Currency", 
+  "label": "Net Total", 
+  "options": "Company:company:default_currency", 
+  "print_width": "120px", 
+  "read_only": 1, 
+  "width": "120px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "grand_total", 
+  "fieldtype": "Currency", 
+  "label": "Grand Total", 
+  "options": "Company:company:default_currency", 
+  "print_width": "120px", 
+  "read_only": 1, 
+  "width": "120px"
+ }
+]

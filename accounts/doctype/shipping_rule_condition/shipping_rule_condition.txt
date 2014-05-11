@@ -1,0 +1,51 @@
+[
+ {
+  "creation": "2013-06-25 11:54:50", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:22", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "description": "A condition for a Shipping Rule", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Shipping Rule Condition", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Shipping Rule Condition"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_value", 
+  "fieldtype": "Float", 
+  "label": "From Value", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_value", 
+  "fieldtype": "Float", 
+  "label": "To Value", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_amount", 
+  "fieldtype": "Currency", 
+  "label": "Shipping Amount", 
+  "options": "Company:company:default_currency", 
+  "reqd": 1
+ }
+]

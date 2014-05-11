@@ -1,0 +1,93 @@
+[
+ {
+  "creation": "2013-01-22 16:50:25", 
+  "docstatus": 0, 
+  "modified": "2013-11-25 11:40:02", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:year", 
+  "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-calendar", 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Fiscal Year", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Fiscal Year", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Fiscal Year"
+ }, 
+ {
+  "description": "For e.g. 2012, 2012-13", 
+  "doctype": "DocField", 
+  "fieldname": "year", 
+  "fieldtype": "Data", 
+  "label": "Year Name", 
+  "oldfieldname": "year", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "year_start_date", 
+  "fieldtype": "Date", 
+  "label": "Year Start Date", 
+  "no_copy": 1, 
+  "oldfieldname": "year_start_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "year_end_date", 
+  "fieldtype": "Date", 
+  "label": "Year End Date", 
+  "no_copy": 1, 
+  "reqd": 1
+ }, 
+ {
+  "default": "No", 
+  "description": "Entries are not allowed against this Fiscal Year if the year is closed.", 
+  "doctype": "DocField", 
+  "fieldname": "is_fiscal_year_closed", 
+  "fieldtype": "Select", 
+  "label": "Year Closed", 
+  "no_copy": 1, 
+  "oldfieldname": "is_fiscal_year_closed", 
+  "oldfieldtype": "Select", 
+  "options": "\nNo\nYes", 
+  "reqd": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "All"
+ }
+]

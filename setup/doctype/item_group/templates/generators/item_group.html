@@ -1,0 +1,52 @@
+{% extends base_template %}
+
+{% block content %}
+{% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
+{% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
+<div class="container content">
+	{% if slideshow %}<!-- slideshow -->
+	{% include "lib/website/doctype/website_slideshow/templates/includes/slideshow.html" %}
+	{% endif %}
+	{% if description %}<!-- description -->
+	<div itemprop="description">{{ description or ""}}</div>
+	{% else %}
+	<h3>{{ name }}</h3>
+	{% endif %}
+</div>
+<div class="container content">
+	{% if sub_groups %}
+	<hr />
+	<div class="row">
+	{% for d in sub_groups %}
+		<div class="col-md-4">
+			<a href="{{ d.page_name }}">{{ d.name }} ({{ d.count }})</a>
+		</div>
+	{% endfor %}
+	</div>
+	<hr />
+	{% endif %}
+	{% if items %}
+	<div id="search-list" class="row">
+		{% for item in items %}
+			{{ item }}
+		{% endfor %}
+	</div>
+		{% if (items|length)==100 %}
+			<div class="alert alert-info info">Showing top 100 items.</div>
+		{% endif %}
+	{% else %}
+		<div class="alert alert-warning">No items listed.</div>
+	{% endif %}
+</div>
+<script>
+$(function() {
+	if(window.logged_in && getCookie("system_user")==="yes") {
+		wn.has_permission("Item Group", "{{ name }}", "write", function(r) {
+			wn.require("lib/js/wn/website/editable.js");
+			wn.make_editable($('[itemprop="description"]'), "Item Group", "{{ name }}", "description");
+		});
+	}
+});
+</script>
+
+{% endblock %}

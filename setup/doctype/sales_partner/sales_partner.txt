@@ -1,0 +1,241 @@
+[
+ {
+  "creation": "2013-04-12 15:34:06", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:59:04", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:partner_name", 
+  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-user", 
+  "in_create": 0, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Sales Partner", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Sales Partner", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Sales Partner"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "partner_name", 
+  "fieldtype": "Data", 
+  "in_filter": 1, 
+  "label": "Sales Partner Name", 
+  "oldfieldname": "partner_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "partner_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Partner Type", 
+  "oldfieldname": "partner_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nChannel Partner\nDistributor\nDealer\nAgent\nRetailer\nImplementation Partner\nReseller", 
+  "search_index": 0
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "label": "Territory", 
+  "options": "Territory", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "commission_rate", 
+  "fieldtype": "Float", 
+  "label": "Commission Rate", 
+  "oldfieldname": "commission_rate", 
+  "oldfieldtype": "Currency", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_contacts", 
+  "fieldtype": "Section Break", 
+  "label": "Address & Contacts"
+ }, 
+ {
+  "depends_on": "eval:doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "address_desc", 
+  "fieldtype": "HTML", 
+  "label": "Address Desc", 
+  "options": "<em>Addresses will appear only when you save the customer</em>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_html", 
+  "fieldtype": "HTML", 
+  "label": "Address HTML", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "depends_on": "eval:doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "contact_desc", 
+  "fieldtype": "HTML", 
+  "label": "Contact Desc", 
+  "options": "<em>Contact Details will appear only when you save the customer</em>"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_html", 
+  "fieldtype": "HTML", 
+  "label": "Contact HTML", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "partner_target_details_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Sales Partner Target", 
+  "oldfieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "partner_target_details", 
+  "fieldtype": "Table", 
+  "label": "Partner Target Detail", 
+  "oldfieldname": "partner_target_details", 
+  "oldfieldtype": "Table", 
+  "options": "Target Detail", 
+  "reqd": 0
+ }, 
+ {
+  "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+  "doctype": "DocField", 
+  "fieldname": "distribution_id", 
+  "fieldtype": "Link", 
+  "label": "Target Distribution", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Link", 
+  "options": "Budget Distribution"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "website", 
+  "fieldtype": "Section Break", 
+  "label": "Website"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "show_in_website", 
+  "fieldtype": "Check", 
+  "label": "Show In Website"
+ }, 
+ {
+  "depends_on": "eval:cint(doc.show_in_website)", 
+  "doctype": "DocField", 
+  "fieldname": "section_break_17", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "logo", 
+  "fieldtype": "Select", 
+  "label": "Logo", 
+  "options": "attach_files:"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "partner_website", 
+  "fieldtype": "Data", 
+  "label": "Partner's Website"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_20", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "page_name", 
+  "fieldtype": "Data", 
+  "label": "Page Name", 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "eval:cint(doc.show_in_website)", 
+  "doctype": "DocField", 
+  "fieldname": "section_break_22", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "introduction", 
+  "fieldtype": "Text", 
+  "label": "Introduction"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text Editor", 
+  "label": "Description"
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales Manager", 
+  "write": 0
+ }, 
+ {
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Sales User", 
+  "write": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }
+]

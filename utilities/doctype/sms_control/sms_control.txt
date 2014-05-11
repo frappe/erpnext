@@ -1,0 +1,38 @@
+[
+ {
+  "creation": "2013-01-10 16:34:32", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:55:40", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "icon": "icon-mobile-phone", 
+  "in_create": 0, 
+  "issingle": 1, 
+  "module": "Utilities", 
+  "name": "__common__"
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "SMS Control", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "SMS Control"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

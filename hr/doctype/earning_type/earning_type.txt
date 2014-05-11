@@ -1,0 +1,96 @@
+[
+ {
+  "creation": "2013-01-24 11:03:32", 
+  "docstatus": 0, 
+  "modified": "2013-12-09 16:24:07", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:earning_name", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-flag", 
+  "module": "HR", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Earning Type", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Earning Type", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "HR User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Earning Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "earning_name", 
+  "fieldtype": "Data", 
+  "label": "Name", 
+  "oldfieldname": "earning_name", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "reqd": 0, 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "taxable", 
+  "fieldtype": "Select", 
+  "label": "Taxable", 
+  "oldfieldname": "taxable", 
+  "oldfieldtype": "Select", 
+  "options": "\nYes\nNo", 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:doc.taxable=='No'", 
+  "doctype": "DocField", 
+  "fieldname": "exemption_limit", 
+  "fieldtype": "Float", 
+  "hidden": 0, 
+  "label": "Exemption Limit", 
+  "oldfieldname": "exemption_limit", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

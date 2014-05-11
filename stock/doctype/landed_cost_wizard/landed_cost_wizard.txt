@@ -1,0 +1,93 @@
+[
+ {
+  "creation": "2013-01-22 16:50:39", 
+  "docstatus": 0, 
+  "modified": "2013-09-02 19:13:09", 
+  "modified_by": "Administrator", 
+  "owner": "wasim@webnotestech.com"
+ }, 
+ {
+  "doctype": "DocType", 
+  "icon": "icon-magic", 
+  "issingle": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Landed Cost Wizard", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Landed Cost Wizard", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 0, 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Landed Cost Wizard"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "label": "Select Purchase Receipts", 
+  "options": "Simple"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lc_pr_details", 
+  "fieldtype": "Table", 
+  "label": "Landed Cost Purchase Receipts", 
+  "options": "Landed Cost Purchase Receipt"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break1", 
+  "fieldtype": "Section Break", 
+  "label": "Add Taxes and Charges"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "landed_cost_details", 
+  "fieldtype": "Table", 
+  "label": "Landed Cost Items", 
+  "options": "Landed Cost Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "update_landed_cost", 
+  "fieldtype": "Button", 
+  "label": "Update Landed Cost", 
+  "options": "update_landed_cost"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "doctype": "DocPerm", 
+  "role": "Purchase Manager"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }
+]

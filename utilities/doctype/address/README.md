@@ -1,0 +1,1 @@
+Address belonging to a Customer or Supplier.

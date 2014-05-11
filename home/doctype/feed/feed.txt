@@ -1,0 +1,78 @@
+[
+ {
+  "creation": "2012-07-03 13:29:42", 
+  "docstatus": 0, 
+  "modified": "2013-11-15 10:16:00", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "_FEED.#####", 
+  "doctype": "DocType", 
+  "icon": "icon-rss", 
+  "module": "Home", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Feed", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Feed", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Feed"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "feed_type", 
+  "fieldtype": "Select", 
+  "label": "Feed Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "doc_type", 
+  "fieldtype": "Data", 
+  "label": "Doc Type"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "doc_name", 
+  "fieldtype": "Data", 
+  "label": "Doc Name"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "subject", 
+  "fieldtype": "Data", 
+  "label": "Subject"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "color", 
+  "fieldtype": "Data", 
+  "label": "Color"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "full_name", 
+  "fieldtype": "Data", 
+  "label": "Full Name"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

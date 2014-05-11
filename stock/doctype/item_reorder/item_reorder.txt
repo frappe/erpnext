@@ -1,0 +1,60 @@
+[
+ {
+  "creation": "2013-03-07 11:42:59", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "REORD-.#####", 
+  "doctype": "DocType", 
+  "in_create": 1, 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Item Reorder", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Reorder"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "label": "Warehouse", 
+  "options": "Warehouse", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse_reorder_level", 
+  "fieldtype": "Float", 
+  "label": "Re-order Level", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse_reorder_qty", 
+  "fieldtype": "Float", 
+  "label": "Re-order Qty"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "material_request_type", 
+  "fieldtype": "Select", 
+  "label": "Material Request Type", 
+  "options": "Purchase\nTransfer", 
+  "reqd": 1
+ }
+]

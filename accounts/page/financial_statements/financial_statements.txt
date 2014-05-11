@@ -1,0 +1,36 @@
+[
+ {
+  "creation": "2013-01-27 16:30:52", 
+  "docstatus": 0, 
+  "modified": "2013-08-14 12:47:45", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-money", 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "page_name": "Financial Statements", 
+  "standard": "Yes"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "Financial Statements", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "Financial Statements"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Accounts Manager"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Analytics"
+ }
+]

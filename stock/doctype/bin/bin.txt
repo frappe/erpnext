@@ -1,0 +1,200 @@
+[
+ {
+  "creation": "2013-01-10 16:34:25", 
+  "docstatus": 0, 
+  "modified": "2013-08-07 14:45:48", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "BIN/.#######", 
+  "doctype": "DocType", 
+  "hide_toolbar": 1, 
+  "in_create": 1, 
+  "module": "Stock", 
+  "name": "__common__", 
+  "read_only": 0, 
+  "search_fields": "item_code,warehouse"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Bin", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Bin", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Bin"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "warehouse", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Warehouse", 
+  "oldfieldname": "warehouse", 
+  "oldfieldtype": "Link", 
+  "options": "Warehouse", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "search_index": 1
+ }, 
+ {
+  "default": "0.00", 
+  "doctype": "DocField", 
+  "fieldname": "reserved_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Reserved Quantity", 
+  "oldfieldname": "reserved_qty", 
+  "oldfieldtype": "Currency", 
+  "search_index": 0
+ }, 
+ {
+  "default": "0.00", 
+  "doctype": "DocField", 
+  "fieldname": "actual_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Actual Quantity", 
+  "oldfieldname": "actual_qty", 
+  "oldfieldtype": "Currency", 
+  "search_index": 0
+ }, 
+ {
+  "default": "0.00", 
+  "doctype": "DocField", 
+  "fieldname": "ordered_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 0, 
+  "in_list_view": 1, 
+  "label": "Ordered Quantity", 
+  "oldfieldname": "ordered_qty", 
+  "oldfieldtype": "Currency", 
+  "search_index": 0
+ }, 
+ {
+  "default": "0.00", 
+  "doctype": "DocField", 
+  "fieldname": "indented_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 0, 
+  "label": "Quantity Requested for Purchase", 
+  "oldfieldname": "indented_qty", 
+  "oldfieldtype": "Currency", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "planned_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 0, 
+  "label": "Planned Qty", 
+  "oldfieldname": "planned_qty", 
+  "oldfieldtype": "Currency", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "projected_qty", 
+  "fieldtype": "Float", 
+  "in_filter": 0, 
+  "label": "Projected Qty", 
+  "oldfieldname": "projected_qty", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "ma_rate", 
+  "fieldtype": "Float", 
+  "hidden": 1, 
+  "in_filter": 0, 
+  "label": "Moving Average Rate", 
+  "oldfieldname": "ma_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "report_hide": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Data", 
+  "options": "UOM", 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fcfs_rate", 
+  "fieldtype": "Float", 
+  "hidden": 1, 
+  "label": "FCFS Rate", 
+  "oldfieldname": "fcfs_rate", 
+  "oldfieldtype": "Currency", 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "valuation_rate", 
+  "fieldtype": "Float", 
+  "label": "Valuation Rate", 
+  "oldfieldname": "valuation_rate", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_value", 
+  "fieldtype": "Float", 
+  "label": "Stock Value", 
+  "oldfieldname": "stock_value", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Purchase User"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "role": "Material User", 
+  "write": 0
+ }
+]

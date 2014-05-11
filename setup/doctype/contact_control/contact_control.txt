@@ -1,0 +1,61 @@
+[
+ {
+  "creation": "2012-03-27 14:36:19", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:06", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "in_create": 1, 
+  "issingle": 1, 
+  "module": "Setup", 
+  "name": "__common__", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldtype": "Text", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Contact Control", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Contact Control", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "role": "System Manager", 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Contact Control"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "header", 
+  "label": "Header"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_intro", 
+  "label": "Customer Intro"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_intro", 
+  "label": "Supplier Intro"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

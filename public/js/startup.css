@@ -1,0 +1,48 @@
+h1, h2, h3, h4, h5 {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+span, div, td, input, textarea, button, select {
+	font-family: inherit;
+}
+
+.small {
+	font-size: 11.5px;
+}
+
+.erpnext-footer {
+	margin: 11px auto;
+	text-align: center;
+}
+
+.show-all-reports {
+	margin-top: 5px;
+	font-size: 11px;
+}
+
+/* toolbar */
+.toolbar-splash {
+	width: 32px; 
+	height: 32px; 
+	margin: -10px auto;
+}
+
+/* pos */
+.pos-item {
+	height: 200px;
+	overflow: hidden;
+	cursor: pointer;
+	padding-left: 5px !important;
+	padding-right: 5px !important;
+}
+
+.pos-bill {
+	margin-left: -30px;
+	margin-top: -10px;
+	padding: 20px 10px;
+	font-family: Monospace;
+}

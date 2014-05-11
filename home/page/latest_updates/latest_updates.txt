@@ -1,0 +1,33 @@
+[
+ {
+  "creation": "2012-11-19 12:06:54", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:43:20", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-asterisk", 
+  "module": "Home", 
+  "name": "__common__", 
+  "page_name": "latest-updates", 
+  "standard": "Yes", 
+  "title": "Latest Updates"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "latest-updates", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "All"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "latest-updates"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

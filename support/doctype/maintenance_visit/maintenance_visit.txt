@@ -1,0 +1,316 @@
+[
+ {
+  "creation": "2013-01-10 16:34:31", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 16:59:24", 
+  "modified_by": "Administrator", 
+  "owner": "ashwini@webnotestech.com"
+ }, 
+ {
+  "autoname": "MV.#####", 
+  "doctype": "DocType", 
+  "icon": "icon-file-text", 
+  "is_submittable": 1, 
+  "module": "Support", 
+  "name": "__common__", 
+  "search_fields": "status,maintenance_type,customer,customer_name, address,mntc_date,company,fiscal_year"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Maintenance Visit", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Maintenance Visit", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Maintenance User", 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Maintenance Visit"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_details", 
+  "fieldtype": "Section Break", 
+  "label": "Customer Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Customer", 
+  "oldfieldname": "customer", 
+  "oldfieldtype": "Link", 
+  "options": "Customer", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 1, 
+  "label": "Customer Name", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Address", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_display", 
+  "fieldtype": "Small Text", 
+  "hidden": 1, 
+  "label": "Contact", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_mobile", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Mobile No", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_email", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "label": "Contact Email", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "oldfieldtype": "Column Break", 
+  "width": "50%"
+ }, 
+ {
+  "default": "Today", 
+  "doctype": "DocField", 
+  "fieldname": "mntc_date", 
+  "fieldtype": "Date", 
+  "label": "Maintenance Date", 
+  "no_copy": 1, 
+  "oldfieldname": "mntc_date", 
+  "oldfieldtype": "Date", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "mntc_time", 
+  "fieldtype": "Time", 
+  "label": "Maintenance Time", 
+  "no_copy": 1, 
+  "oldfieldname": "mntc_time", 
+  "oldfieldtype": "Time"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "maintenance_details", 
+  "fieldtype": "Section Break", 
+  "label": "Maintenance Details", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-wrench"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "completion_status", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Completion Status", 
+  "oldfieldname": "completion_status", 
+  "oldfieldtype": "Select", 
+  "options": "\nPartially Completed\nFully Completed", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_14", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "default": "Unscheduled", 
+  "doctype": "DocField", 
+  "fieldname": "maintenance_type", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Maintenance Type", 
+  "oldfieldname": "maintenance_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nScheduled\nUnscheduled\nBreakdown", 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break0", 
+  "fieldtype": "Section Break", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-wrench"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "maintenance_visit_details", 
+  "fieldtype": "Table", 
+  "label": "Maintenance Visit Purpose", 
+  "oldfieldname": "maintenance_visit_details", 
+  "oldfieldtype": "Table", 
+  "options": "Maintenance Visit Purpose"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_feedback", 
+  "fieldtype": "Small Text", 
+  "label": "Customer Feedback", 
+  "oldfieldname": "customer_feedback", 
+  "oldfieldtype": "Small Text"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break3", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "default": "Draft", 
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Data", 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Data", 
+  "options": "\nDraft\nCancelled\nSubmitted", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Data", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "oldfieldname": "amended_from", 
+  "oldfieldtype": "Data", 
+  "print_hide": 1, 
+  "read_only": 1, 
+  "width": "150px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Select", 
+  "options": "link:Company", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "print_hide": 1, 
+  "reqd": 1, 
+  "search_index": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_info_section", 
+  "fieldtype": "Section Break", 
+  "label": "Contact Info", 
+  "options": "icon-bullhorn"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_address", 
+  "fieldtype": "Link", 
+  "label": "Customer Address", 
+  "options": "Address", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_person", 
+  "fieldtype": "Link", 
+  "label": "Contact Person", 
+  "options": "Contact", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "col_break4", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "label": "Territory", 
+  "options": "Territory", 
+  "print_hide": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "label": "Customer Group", 
+  "options": "Customer Group", 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

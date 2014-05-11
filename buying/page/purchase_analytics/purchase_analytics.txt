@@ -1,0 +1,37 @@
+[
+ {
+  "creation": "2012-09-21 20:15:16", 
+  "docstatus": 0, 
+  "modified": "2013-07-11 14:43:52", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-bar-chart", 
+  "module": "Buying", 
+  "name": "__common__", 
+  "page_name": "purchase-analytics", 
+  "standard": "Yes", 
+  "title": "Purchase Analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "purchase-analytics", 
+  "parentfield": "roles", 
+  "parenttype": "Page"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "purchase-analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Analytics"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "role": "Purchase Manager"
+ }
+]

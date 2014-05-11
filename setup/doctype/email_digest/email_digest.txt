@@ -1,0 +1,365 @@
+[
+ {
+  "creation": "2013-02-21 14:15:31", 
+  "docstatus": 0, 
+  "modified": "2013-12-16 12:37:43", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "Prompt", 
+  "description": "Send regular summary reports via Email.", 
+  "doctype": "DocType", 
+  "document_type": "System", 
+  "icon": "icon-envelope", 
+  "module": "Setup", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Email Digest", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Email Digest", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1, 
+  "role": "System Manager", 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Email Digest"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "settings", 
+  "fieldtype": "Section Break", 
+  "label": "Email Digest Settings"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "enabled", 
+  "fieldtype": "Check", 
+  "label": "Enabled"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Select", 
+  "label": "For Company", 
+  "options": "link:Company", 
+  "reqd": 1
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "frequency", 
+  "fieldtype": "Select", 
+  "label": "How frequently?", 
+  "options": "Daily\nWeekly\nMonthly", 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:doc.enabled", 
+  "doctype": "DocField", 
+  "fieldname": "next_send", 
+  "fieldtype": "Data", 
+  "label": "Next email will be sent on:", 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "description": "Note: Email will not be sent to disabled users", 
+  "doctype": "DocField", 
+  "fieldname": "recipient_list", 
+  "fieldtype": "Text", 
+  "label": "Recipients", 
+  "read_only": 1, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "addremove_recipients", 
+  "fieldtype": "Button", 
+  "label": "Add/Remove Recipients"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "accounts", 
+  "fieldtype": "Section Break", 
+  "label": "Accounts"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "accounts_module", 
+  "fieldtype": "Column Break", 
+  "label": "Income / Expense"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "income_year_to_date", 
+  "fieldtype": "Check", 
+  "label": "Income Year to Date"
+ }, 
+ {
+  "description": "Balances of Accounts of type \"Bank or Cash\"", 
+  "doctype": "DocField", 
+  "fieldname": "bank_balance", 
+  "fieldtype": "Check", 
+  "label": "Bank/Cash Balance"
+ }, 
+ {
+  "description": "Income booked for the digest period", 
+  "doctype": "DocField", 
+  "fieldname": "income", 
+  "fieldtype": "Check", 
+  "label": "Income Booked"
+ }, 
+ {
+  "description": "Expenses booked for the digest period", 
+  "doctype": "DocField", 
+  "fieldname": "expenses_booked", 
+  "fieldtype": "Check", 
+  "label": "Expenses Booked"
+ }, 
+ {
+  "description": "Receivable / Payable account will be identified based on the field Master Type", 
+  "doctype": "DocField", 
+  "fieldname": "column_break_16", 
+  "fieldtype": "Column Break", 
+  "label": "Receivables / Payables"
+ }, 
+ {
+  "description": "Payments received during the digest period", 
+  "doctype": "DocField", 
+  "fieldname": "collections", 
+  "fieldtype": "Check", 
+  "label": "Payments Received"
+ }, 
+ {
+  "description": "Payments made during the digest period", 
+  "doctype": "DocField", 
+  "fieldname": "payments", 
+  "fieldtype": "Check", 
+  "label": "Payments Made"
+ }, 
+ {
+  "description": "Total amount of invoices sent to the customer during the digest period", 
+  "doctype": "DocField", 
+  "fieldname": "invoiced_amount", 
+  "fieldtype": "Check", 
+  "label": "Receivables"
+ }, 
+ {
+  "description": "Total amount of invoices received from suppliers during the digest period", 
+  "doctype": "DocField", 
+  "fieldname": "payables", 
+  "fieldtype": "Check", 
+  "label": "Payables"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_20", 
+  "fieldtype": "Section Break", 
+  "label": "Buying & Selling"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "buying_module", 
+  "fieldtype": "Column Break", 
+  "label": "Buying"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_purchase_requests", 
+  "fieldtype": "Check", 
+  "label": "New Material Requests"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_supplier_quotations", 
+  "fieldtype": "Check", 
+  "label": "New Supplier Quotations"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_purchase_orders", 
+  "fieldtype": "Check", 
+  "label": "New Purchase Orders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "selling_module", 
+  "fieldtype": "Column Break", 
+  "label": "Selling"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_leads", 
+  "fieldtype": "Check", 
+  "label": "New Leads"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_enquiries", 
+  "fieldtype": "Check", 
+  "label": "New Enquiries"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_quotations", 
+  "fieldtype": "Check", 
+  "label": "New Quotations"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_sales_orders", 
+  "fieldtype": "Check", 
+  "label": "New Sales Orders"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_34", 
+  "fieldtype": "Section Break", 
+  "label": "Inventory & Support"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_module", 
+  "fieldtype": "Column Break", 
+  "label": "Stock"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_delivery_notes", 
+  "fieldtype": "Check", 
+  "label": "New Delivery Notes"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_purchase_receipts", 
+  "fieldtype": "Check", 
+  "label": "New Purchase Receipts"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_stock_entries", 
+  "fieldtype": "Check", 
+  "label": "New Stock Entries"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "support_module", 
+  "fieldtype": "Column Break", 
+  "label": "Support"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_support_tickets", 
+  "fieldtype": "Check", 
+  "label": "New Support Tickets"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "open_tickets", 
+  "fieldtype": "Check", 
+  "label": "Open Tickets"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_communications", 
+  "fieldtype": "Check", 
+  "label": "New Communications"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_40", 
+  "fieldtype": "Section Break", 
+  "label": "Projects & System"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "projects_module", 
+  "fieldtype": "Column Break", 
+  "label": "Projects"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "new_projects", 
+  "fieldtype": "Check", 
+  "label": "New Projects"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "core_module", 
+  "fieldtype": "Column Break", 
+  "label": "System"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "scheduler_errors", 
+  "fieldtype": "Check", 
+  "label": "Scheduler Failed Events"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "user_specific", 
+  "fieldtype": "Section Break", 
+  "label": "User Specific"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "general", 
+  "fieldtype": "Column Break", 
+  "label": "General"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "calendar_events", 
+  "fieldtype": "Check", 
+  "label": "Calendar Events"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "todo_list", 
+  "fieldtype": "Check", 
+  "label": "To Do List"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stub", 
+  "fieldtype": "Column Break", 
+  "label": "Stub"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "write": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 0, 
+  "doctype": "DocPerm", 
+  "permlevel": 1
+ }
+]

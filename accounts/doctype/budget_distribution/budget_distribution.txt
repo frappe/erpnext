@@ -1,0 +1,92 @@
+[
+ {
+  "creation": "2013-01-10 16:34:05", 
+  "docstatus": 0, 
+  "modified": "2013-07-22 15:30:37", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "field:distribution_id", 
+  "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
+  "doctype": "DocType", 
+  "icon": "icon-bar-chart", 
+  "module": "Accounts", 
+  "name": "__common__", 
+  "name_case": "Title Case"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Budget Distribution", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Budget Distribution", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "submit": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Budget Distribution"
+ }, 
+ {
+  "description": "Name of the Budget Distribution", 
+  "doctype": "DocField", 
+  "fieldname": "distribution_id", 
+  "fieldtype": "Data", 
+  "label": "Distribution Name", 
+  "oldfieldname": "distribution_id", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "fiscal_year", 
+  "fieldtype": "Select", 
+  "in_filter": 1, 
+  "label": "Fiscal Year", 
+  "oldfieldname": "fiscal_year", 
+  "oldfieldtype": "Select", 
+  "options": "link:Fiscal Year", 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "budget_distribution_details", 
+  "fieldtype": "Table", 
+  "label": "Budget Distribution Details", 
+  "oldfieldname": "budget_distribution_details", 
+  "oldfieldtype": "Table", 
+  "options": "Budget Distribution Detail"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "trash_reason", 
+  "fieldtype": "Small Text", 
+  "label": "Trash Reason", 
+  "oldfieldname": "trash_reason", 
+  "oldfieldtype": "Small Text", 
+  "read_only": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 2
+ }
+]

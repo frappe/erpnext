@@ -1,0 +1,39 @@
+[
+ {
+  "creation": "2013-02-22 01:28:02", 
+  "docstatus": 0, 
+  "modified": "2013-09-02 13:44:28", 
+  "modified_by": "Administrator", 
+  "owner": "wasim@webnotestech.com"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "purchase_receipt", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Purchase Receipt", 
+  "name": "__common__", 
+  "oldfieldname": "purchase_receipt_no", 
+  "oldfieldtype": "Link", 
+  "options": "Purchase Receipt", 
+  "parent": "Landed Cost Purchase Receipt", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "print_width": "220px", 
+  "width": "220px"
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Landed Cost Purchase Receipt"
+ }, 
+ {
+  "doctype": "DocField"
+ }
+]

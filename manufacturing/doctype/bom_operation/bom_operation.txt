@@ -1,0 +1,84 @@
+[
+ {
+  "creation": "2013-02-22 01:27:49", 
+  "docstatus": 0, 
+  "modified": "2013-12-04 11:18:59", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Manufacturing", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "BOM Operation", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "BOM Operation"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "operation_no", 
+  "fieldtype": "Data", 
+  "label": "Operation No", 
+  "oldfieldname": "operation_no", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "opn_description", 
+  "fieldtype": "Text", 
+  "label": "Operation Description", 
+  "oldfieldname": "opn_description", 
+  "oldfieldtype": "Text", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "workstation", 
+  "fieldtype": "Link", 
+  "label": "Workstation", 
+  "oldfieldname": "workstation", 
+  "oldfieldtype": "Link", 
+  "options": "Workstation", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hour_rate", 
+  "fieldtype": "Float", 
+  "label": "Hour Rate", 
+  "oldfieldname": "hour_rate", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "time_in_mins", 
+  "fieldtype": "Float", 
+  "label": "Operation Time (mins)", 
+  "oldfieldname": "time_in_mins", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
+ }, 
+ {
+  "allow_on_submit": 0, 
+  "doctype": "DocField", 
+  "fieldname": "operating_cost", 
+  "fieldtype": "Float", 
+  "label": "Operating Cost", 
+  "oldfieldname": "operating_cost", 
+  "oldfieldtype": "Currency", 
+  "reqd": 0
+ }
+]

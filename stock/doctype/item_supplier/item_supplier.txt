@@ -1,0 +1,43 @@
+[
+ {
+  "creation": "2013-02-22 01:28:01", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:09", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Item Supplier", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Item Supplier"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier", 
+  "fieldtype": "Link", 
+  "label": "Supplier", 
+  "options": "Supplier"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "supplier_part_no", 
+  "fieldtype": "Data", 
+  "label": "Supplier Part Number", 
+  "print_width": "200px", 
+  "width": "200px"
+ }
+]

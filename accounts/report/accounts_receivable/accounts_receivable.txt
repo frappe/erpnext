@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-04-16 11:31:13", 
+  "docstatus": 0, 
+  "modified": "2013-05-24 12:02:52", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "add_total_row": 1, 
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "ref_doctype": "Sales Invoice", 
+  "report_name": "Accounts Receivable", 
+  "report_type": "Script Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Accounts Receivable"
+ }
+]

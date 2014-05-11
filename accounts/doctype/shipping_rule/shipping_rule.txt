@@ -1,0 +1,155 @@
+[
+ {
+  "creation": "2013-06-25 11:48:03", 
+  "docstatus": 0, 
+  "modified": "2013-10-31 19:24:50", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "Prompt", 
+  "description": "Specify conditions to calculate shipping amount", 
+  "doctype": "DocType", 
+  "icon": "icon-truck", 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Shipping Rule", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Shipping Rule", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Shipping Rule"
+ }, 
+ {
+  "description": "example: Next Day Shipping", 
+  "doctype": "DocField", 
+  "fieldname": "label", 
+  "fieldtype": "Data", 
+  "in_list_view": 1, 
+  "label": "Shipping Rule Label", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_2", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "default": "Net Total", 
+  "doctype": "DocField", 
+  "fieldname": "calculate_based_on", 
+  "fieldtype": "Select", 
+  "hidden": 1, 
+  "in_list_view": 1, 
+  "label": "Calculate Based On", 
+  "options": "Net Total\nNet Weight", 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rule_conditions_section", 
+  "fieldtype": "Section Break", 
+  "label": "Shipping Rule Conditions"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "shipping_rule_conditions", 
+  "fieldtype": "Table", 
+  "label": "Shipping Rule Conditions", 
+  "options": "Shipping Rule Condition", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_6", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "description": "Specify a list of Territories, for which, this Shipping Rule is valid", 
+  "doctype": "DocField", 
+  "fieldname": "valid_for_territories", 
+  "fieldtype": "Table", 
+  "label": "Valid For Territories", 
+  "options": "Applicable Territory", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_8", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "Company", 
+  "options": "Company", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_10", 
+  "fieldtype": "Section Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "account", 
+  "fieldtype": "Link", 
+  "label": "Shipping Account", 
+  "options": "Account", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_12", 
+  "fieldtype": "Column Break"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "cost_center", 
+  "fieldtype": "Link", 
+  "label": "Cost Center", 
+  "options": "Cost Center", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Accounts User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Sales User"
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Accounts Manager", 
+  "write": 1
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }
+]

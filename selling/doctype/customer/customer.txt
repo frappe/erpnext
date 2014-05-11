@@ -1,0 +1,377 @@
+[
+ {
+  "creation": "2013-06-11 14:26:44", 
+  "docstatus": 0, 
+  "modified": "2013-12-25 11:15:05", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_print": 0, 
+  "allow_rename": 1, 
+  "autoname": "naming_series:", 
+  "description": "Buyer of Goods and Services.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-user", 
+  "module": "Selling", 
+  "name": "__common__", 
+  "search_fields": "customer_name,customer_group,territory"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Customer", 
+  "parentfield": "fields", 
+  "parenttype": "DocType"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Customer", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "read": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Customer"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "basic_info", 
+  "fieldtype": "Section Break", 
+  "label": "Basic Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-user", 
+  "permlevel": 0, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "no_copy": 1, 
+  "options": "\nCUST\nCUSTMUM", 
+  "permlevel": 0, 
+  "print_hide": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_name", 
+  "fieldtype": "Data", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "in_list_view": 1, 
+  "label": "Full Name", 
+  "no_copy": 1, 
+  "oldfieldname": "customer_name", 
+  "oldfieldtype": "Data", 
+  "permlevel": 0, 
+  "print_hide": 0, 
+  "report_hide": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_type", 
+  "fieldtype": "Select", 
+  "label": "Type", 
+  "oldfieldname": "customer_type", 
+  "oldfieldtype": "Select", 
+  "options": "\nCompany\nIndividual", 
+  "permlevel": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "lead_name", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "From Lead", 
+  "no_copy": 1, 
+  "oldfieldname": "lead_name", 
+  "oldfieldtype": "Link", 
+  "options": "Lead", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "report_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break0", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0, 
+  "width": "50%"
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "customer_group", 
+  "fieldtype": "Link", 
+  "hidden": 0, 
+  "in_filter": 1, 
+  "label": "Group", 
+  "oldfieldname": "customer_group", 
+  "oldfieldtype": "Link", 
+  "options": "Customer Group", 
+  "permlevel": 0, 
+  "print_hide": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+  "doctype": "DocField", 
+  "fieldname": "territory", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Territory", 
+  "oldfieldname": "territory", 
+  "oldfieldtype": "Link", 
+  "options": "Territory", 
+  "permlevel": 0, 
+  "print_hide": 1, 
+  "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "address_contacts", 
+  "fieldtype": "Section Break", 
+  "label": "Address & Contacts", 
+  "options": "icon-map-marker", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "address_html", 
+  "fieldtype": "HTML", 
+  "label": "Address HTML", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break1", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "contact_html", 
+  "fieldtype": "HTML", 
+  "label": "Contact HTML", 
+  "oldfieldtype": "HTML", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "depends_on": "eval:!doc.__islocal", 
+  "doctype": "DocField", 
+  "fieldname": "communication_history", 
+  "fieldtype": "Section Break", 
+  "label": "Communication History", 
+  "options": "icon-comments", 
+  "permlevel": 0, 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communication_html", 
+  "fieldtype": "HTML", 
+  "label": "Communication HTML", 
+  "permlevel": 0, 
+  "print_hide": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "more_info", 
+  "fieldtype": "Section Break", 
+  "label": "More Info", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-file-text", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break2", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0, 
+  "width": "50%"
+ }, 
+ {
+  "description": "To create an Account Head under a different company, select the company and save customer.", 
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "in_filter": 1, 
+  "label": "Company", 
+  "oldfieldname": "company", 
+  "oldfieldtype": "Link", 
+  "options": "Company", 
+  "permlevel": 0, 
+  "reqd": 1, 
+  "search_index": 1
+ }, 
+ {
+  "description": "Your Customer's TAX registration numbers (if applicable) or any general information", 
+  "doctype": "DocField", 
+  "fieldname": "customer_details", 
+  "fieldtype": "Text", 
+  "label": "Customer Details", 
+  "oldfieldname": "customer_details", 
+  "oldfieldtype": "Code", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0, 
+  "width": "50%"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_currency", 
+  "fieldtype": "Link", 
+  "label": "Currency", 
+  "no_copy": 1, 
+  "options": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_price_list", 
+  "fieldtype": "Link", 
+  "label": "Price List", 
+  "options": "Price List", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit_days", 
+  "fieldtype": "Int", 
+  "label": "Credit Days", 
+  "oldfieldname": "credit_days", 
+  "oldfieldtype": "Int", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "credit_limit", 
+  "fieldtype": "Currency", 
+  "label": "Credit Limit", 
+  "oldfieldname": "credit_limit", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "permlevel": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "website", 
+  "fieldtype": "Data", 
+  "label": "Website", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_team_section_break", 
+  "fieldtype": "Section Break", 
+  "label": "Sales Team", 
+  "oldfieldtype": "Section Break", 
+  "options": "icon-group", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_sales_partner", 
+  "fieldtype": "Link", 
+  "label": "Sales Partner", 
+  "oldfieldname": "default_sales_partner", 
+  "oldfieldtype": "Link", 
+  "options": "Sales Partner", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "default_commission_rate", 
+  "fieldtype": "Float", 
+  "label": "Commission Rate", 
+  "oldfieldname": "default_commission_rate", 
+  "oldfieldtype": "Currency", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "sales_team", 
+  "fieldtype": "Table", 
+  "label": "Sales Team Details", 
+  "oldfieldname": "sales_team", 
+  "oldfieldtype": "Table", 
+  "options": "Sales Team", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_discount_section", 
+  "fieldtype": "Section Break", 
+  "label": "Customer Discount", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "customer_discounts", 
+  "fieldtype": "Table", 
+  "label": "Customer Discounts", 
+  "options": "Customer Discount", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "communications", 
+  "fieldtype": "Table", 
+  "hidden": 1, 
+  "label": "Communications", 
+  "options": "Communication", 
+  "permlevel": 0, 
+  "print_hide": 1
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 0, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Sales User", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales User"
+ }, 
+ {
+  "amend": 0, 
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "permlevel": 0, 
+  "report": 1, 
+  "role": "Sales Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "permlevel": 1, 
+  "role": "Sales Master Manager", 
+  "write": 1
+ }
+]

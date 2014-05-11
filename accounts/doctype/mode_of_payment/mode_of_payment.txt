@@ -1,0 +1,72 @@
+[
+ {
+  "creation": "2012-12-04 17:49:20", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:46:28", 
+  "modified_by": "Administrator", 
+  "owner": "harshada@webnotestech.com"
+ }, 
+ {
+  "allow_rename": 1, 
+  "autoname": "field:mode_of_payment", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-credit-card", 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Mode of Payment", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Mode of Payment", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Accounts Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Mode of Payment"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "mode_of_payment", 
+  "fieldtype": "Data", 
+  "label": "Mode of Payment", 
+  "oldfieldname": "mode_of_payment", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "company", 
+  "fieldtype": "Link", 
+  "label": "Company", 
+  "options": "Company"
+ }, 
+ {
+  "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
+  "doctype": "DocField", 
+  "fieldname": "default_account", 
+  "fieldtype": "Link", 
+  "label": "Default Account", 
+  "options": "Account"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

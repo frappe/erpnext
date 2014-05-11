@@ -1,0 +1,98 @@
+[
+ {
+  "creation": "2013-03-07 11:42:57", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:04", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "autoname": "FBD/.######", 
+  "default_print_format": "Standard", 
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Manufacturing", 
+  "name": "__common__", 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "BOM Explosion Item", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "BOM Explosion Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item_code", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item Code", 
+  "oldfieldname": "item_code", 
+  "oldfieldtype": "Link", 
+  "options": "Item"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Text", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Qty", 
+  "oldfieldname": "qty", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "rate", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Rate", 
+  "oldfieldname": "standard_rate", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amount", 
+  "fieldtype": "Float", 
+  "in_list_view": 1, 
+  "label": "Amount", 
+  "oldfieldname": "amount_as_per_sr", 
+  "oldfieldtype": "Currency"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "stock_uom", 
+  "fieldtype": "Link", 
+  "in_list_view": 0, 
+  "label": "Stock UOM", 
+  "oldfieldname": "stock_uom", 
+  "oldfieldtype": "Link", 
+  "options": "UOM"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "qty_consumed_per_unit", 
+  "fieldtype": "Float", 
+  "hidden": 0, 
+  "in_list_view": 1, 
+  "label": "Qty Consumed Per Unit", 
+  "no_copy": 0
+ }
+]

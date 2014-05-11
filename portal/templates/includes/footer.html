@@ -1,0 +1,42 @@
+{% extends "lib/website/templates/includes/footer.html" %}
+
+{% block powered %}<a href="http://erpnext.org" style="color: #aaa;">ERPNext Powered</a>{% endblock %}
+
+{% block extension %}
+<div class="container">
+	<div class="row">
+		<div class="input-group col-sm-6 col-sm-offset-3" style="margin-top: 7px;">
+			<input class="form-control" type="text" id="footer-subscribe-email" placeholder="Your email address...">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" id="footer-subscribe-button">Stay Updated</button>
+			</span>
+		</div>
+	</div>
+</div>
+<script>
+	$("#footer-subscribe-button").click(function() {
+
+		$("#footer-subscribe-email").attr('disabled', true);
+		$("#footer-subscribe-button").html("Sending...")
+			.attr("disabled", true);
+
+		if($("#footer-subscribe-email").val()) {
+			erpnext.send_message({
+				subject:"Subscribe me",
+				sender: $("#footer-subscribe-email").val(),
+				message: "Subscribe to newsletter (via website footer).",
+				callback: function(r) {
+					if(!r.exc) {
+						$("#footer-subscribe-button").html("Thank You :)")
+							.addClass("btn-success").attr("disabled", true);
+					} else {
+						$("#footer-subscribe-button").html("Error :( Not a valid id?")
+							.addClass("btn-danger").attr("disabled", false);
+						$("#footer-subscribe-email").val("").attr('disabled', false);
+					}
+				}
+			});
+		}
+	});
+</script>
+{% endblock %}

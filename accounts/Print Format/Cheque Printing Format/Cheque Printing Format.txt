@@ -1,0 +1,21 @@
+[
+ {
+  "owner": "Administrator", 
+  "docstatus": 0, 
+  "creation": "2012-04-11 13:16:56", 
+  "modified_by": "Administrator", 
+  "modified": "2012-04-13 12:24:20"
+ }, 
+ {
+  "doc_type": "Journal Voucher", 
+  "name": "__common__", 
+  "module": "Accounts", 
+  "doctype": "Print Format", 
+  "html": "<!--  p.big {line-height: 200%}  .noborder td { border: 0px solid #fff; }   -->\n<div style=\"position: relative;\">\n<h3><script>doc.company</script><br /> <br /> \n<hr />\nPAYMENT ADVICE</h3>\n<table class=\"noborder\" style=\"width: 100%;\">\n<tbody>\n<tr>\n<td style=\"vertical-align: top;\" width=\"50%\">To :<br />\n<script type=\"text/javascript\">// <![CDATA[\ndoc.pay_to_recd_from\n// ]]></script>\n</td>\n<td width=\"50%\">\n<table class=\"noborder\" width=\"100%\">\n<tbody>\n<tr>\n<td width=\"30%\">Voucher No :</td>\n<td width=\"70%\">\n<script type=\"text/javascript\">// <![CDATA[\ndoc.name\n// ]]></script>\n</td>\n</tr>\n<tr>\n<td width=\"30%\">Voucher Date :</td>\n<td width=\"70%\">\n<script type=\"text/javascript\">// <![CDATA[\ndate.str_to_user(doc.voucher_date)\n// ]]></script>\n</td>\n</tr>\n<tr>\n<td width=\"30%\">Cheque No :</td>\n<td width=\"70%\">\n<script type=\"text/javascript\">// <![CDATA[\ndate.str_to_user(doc.cheque_no)\n// ]]></script>\n</td>\n</tr>\n<tr>\n<td width=\"30%\">Cheque Date :</td>\n<td width=\"70%\">\n<script type=\"text/javascript\">// <![CDATA[\ndate.str_to_user(doc.cheque_date)\n// ]]></script>\n</td>\n</tr>\n</tbody>\n</table>\n</td>\n</tr>\n</tbody>\n</table>\n<br /> <strong>We are pleased to enclose our cheque in full/part Settlement of your under noted bills</strong> <br /> \n<hr />\n<table class=\"noborder\" width=\"100%\">\n<tbody>\n<tr>\n<td width=\"70%\">&nbsp;</td>\n<td width=\"15%\">Total :</td>\n<td class=\"pos_left\" width=\"15%\">\n<script type=\"text/javascript\">// <![CDATA[\ndoc.total_amount\n// ]]></script>\n</td>\n</tr>\n<tr>\n<td colspan=\"3\">Narration :\n<script type=\"text/javascript\">// <![CDATA[\nreplace_newlines(doc.remark)\n// ]]></script>\n<br /><br /><br /></td>\n</tr>\n</tbody>\n</table>\n<div style=\"position: absolute; top: 14cm; left: 0cm;\">Prepared By</div>\n<div style=\"position: absolute; top: 14cm; left: 5.5cm;\">Authorised Signatory</div>\n<div style=\"position: absolute; top: 14cm; left: 11cm;\">Received Payment as Above</div>\n<div style=\"position: absolute; top: 16.4cm; left: 5.9cm;\"><strong>_____________</strong></div>\n<div style=\"position: absolute; top: 16.7cm; left: 6cm;\"><strong>A/c Payee</strong></div>\n<div style=\"position: absolute; top: 16.7cm; left: 5.9cm;\"><strong>_____________</strong></div>\n<div style=\"position: absolute; top: 16.9cm; left: 12cm;\">\n<script type=\"text/javascript\">// <![CDATA[\ndate.str_to_user(doc.cheque_date)\n// ]]></script>\n</div>\n<div style=\"position: absolute; top: 17.9cm; left: 1cm;\">\n<script type=\"text/javascript\">// <![CDATA[\ndoc.pay_to_recd_from\n// ]]></script>\n</div>\n<div style=\"position: absolute; top: 18.6cm; left: 1cm; width: 7cm;\">\n<script type=\"text/javascript\">// <![CDATA[\ndoc.total_amount_in_words\n// ]]></script>\n</div>\n<div style=\"position: absolute; top: 19.7cm; left: 12cm;\">\n<script type=\"text/javascript\">// <![CDATA[\ndoc.total_amount\n// ]]></script>\n</div>\n</div>", 
+  "standard": "Yes"
+ }, 
+ {
+  "name": "Cheque Printing Format", 
+  "doctype": "Print Format"
+ }
+]

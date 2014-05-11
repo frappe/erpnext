@@ -1,0 +1,56 @@
+[
+ {
+  "creation": "2013-02-22 01:27:50", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:12", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Projects", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "in_list_view": 1, 
+  "name": "__common__", 
+  "parent": "Project Milestone", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Project Milestone"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "milestone_date", 
+  "fieldtype": "Date", 
+  "label": "Milestone Date", 
+  "oldfieldname": "milestone_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "milestone", 
+  "fieldtype": "Text", 
+  "label": "Milestone", 
+  "oldfieldname": "milestone", 
+  "oldfieldtype": "Text", 
+  "print_width": "300px", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "label": "Status", 
+  "no_copy": 1, 
+  "oldfieldname": "status", 
+  "oldfieldtype": "Select", 
+  "options": "Pending\nCompleted"
+ }
+]

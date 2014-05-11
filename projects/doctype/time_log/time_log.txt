@@ -1,0 +1,210 @@
+[
+ {
+  "creation": "2013-04-03 16:38:41", 
+  "docstatus": 0, 
+  "modified": "2013-11-02 14:05:45", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "allow_attach": 1, 
+  "autoname": "naming_series:", 
+  "description": "Log of Activities performed by users against Tasks that can be used for tracking time, billing.", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-time", 
+  "is_submittable": 1, 
+  "module": "Projects", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Time Log", 
+  "parentfield": "fields", 
+  "parenttype": "DocType"
+ }, 
+ {
+  "amend": 1, 
+  "cancel": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Time Log", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "submit": 1, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Time Log"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "naming_series", 
+  "fieldtype": "Select", 
+  "label": "Series", 
+  "options": "TL-", 
+  "permlevel": 0, 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "from_time", 
+  "fieldtype": "Datetime", 
+  "in_list_view": 1, 
+  "label": "From Time", 
+  "permlevel": 0, 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "to_time", 
+  "fieldtype": "Datetime", 
+  "in_list_view": 0, 
+  "label": "To Time", 
+  "permlevel": 0, 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "hours", 
+  "fieldtype": "Float", 
+  "label": "Hours", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_3", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "status", 
+  "fieldtype": "Select", 
+  "in_list_view": 1, 
+  "label": "Status", 
+  "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
+  "permlevel": 0, 
+  "read_only": 1, 
+  "reqd": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "activity_type", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Activity Type", 
+  "options": "Activity Type", 
+  "permlevel": 0, 
+  "read_only": 0, 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "task", 
+  "fieldtype": "Link", 
+  "label": "Task", 
+  "options": "Task", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "billable", 
+  "fieldtype": "Check", 
+  "in_list_view": 1, 
+  "label": "Billable", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_7", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "note", 
+  "fieldtype": "Text Editor", 
+  "label": "Note", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "section_break_9", 
+  "fieldtype": "Section Break", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "project", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Project", 
+  "options": "Project", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "description": "Will be updated when batched.", 
+  "doctype": "DocField", 
+  "fieldname": "time_log_batch", 
+  "fieldtype": "Link", 
+  "label": "Time Log Batch", 
+  "options": "Time Log Batch", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "description": "Will be updated when billed.", 
+  "doctype": "DocField", 
+  "fieldname": "sales_invoice", 
+  "fieldtype": "Link", 
+  "label": "Sales Invoice", 
+  "options": "Sales Invoice", 
+  "permlevel": 0, 
+  "read_only": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "column_break_16", 
+  "fieldtype": "Column Break", 
+  "permlevel": 0, 
+  "read_only": 0
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "amended_from", 
+  "fieldtype": "Link", 
+  "label": "Amended From", 
+  "no_copy": 1, 
+  "options": "Time Log", 
+  "permlevel": 1, 
+  "print_hide": 1, 
+  "read_only": 0
+ }, 
+ {
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "match": "owner", 
+  "role": "Projects User"
+ }, 
+ {
+  "doctype": "DocPerm", 
+  "role": "Projects Manager"
+ }
+]

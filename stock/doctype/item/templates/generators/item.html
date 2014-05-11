@@ -1,0 +1,87 @@
+{% extends base_template %}
+
+{% block javascript %}
+<script>
+	{% include "app/stock/doctype/item/templates/includes/product_page.js" %}
+	
+	$(function() {
+		if(window.logged_in && getCookie("system_user")==="yes") {
+			wn.has_permission("Item", "{{ name }}", "write", function(r) {
+				wn.require("lib/js/wn/website/editable.js");
+				wn.make_editable($('[itemprop="description"]'), "Item", "{{ name }}", "web_long_description");
+			});
+		}
+	});
+</script>
+{% endblock %}
+
+{% block css %}
+<style>
+	{% include "app/stock/doctype/item/templates/includes/product_page.css" %}
+</style>
+{% endblock %}
+
+{% block content %}
+	{% include 'app/stock/doctype/item/templates/includes/product_search_box.html' %}
+	{% include 'app/stock/doctype/item/templates/includes/product_breadcrumbs.html' %}
+	<div class="container content product-page-content" itemscope itemtype="http://schema.org/Product">
+		<div class="row">
+			<div class="col-md-6">
+				{% if slideshow %}
+					{% include "lib/website/doctype/website_slideshow/templates/includes/slideshow.html" %}
+				{% else %}
+					{% if website_image %}
+					<image itemprop="image" class="item-main-image"
+						src="{{ website_image }}" />
+					{% else %}
+					<div class="img-area">
+		{% include 'app/stock/doctype/item/templates/includes/product_missing_image.html' %}
+					</div>
+					{% endif %}
+				{% endif %}
+			</div>
+			<div class="col-md-6">
+				<h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3>
+				<p class="help">Item Code: <span itemprop="productID">{{ name }}</span></p>
+				<h4>Product Description</h4>
+				<div itemprop="description">
+				{{ web_long_description or description or "[No description given]" }}
+				</div>
+				<div style="min-height: 100px; margin: 10px 0;">
+					<div class="item-price-info" style="display: none;">
+						<h4 class="item-price" itemprop="price"></h4>
+						<div class="item-stock" itemprop="availablity"></div>
+						<div id="item-add-to-cart">
+							<button class="btn btn-primary">
+								<i class="icon-shopping-cart"></i> Add to Cart</button>
+						</div>
+						<div id="item-update-cart" class="input-group col-md-4" style="display: none;
+							padding-left: 0px; padding-right: 0px;">
+							<input class="form-control" type="text">
+							<div class="input-group-btn">
+								<button class="btn btn-primary">
+									<i class="icon-ok"></i></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% if obj.doclist.get({"doctype":"Item Website Specification"}) -%}
+		<div class="row" style="margin-top: 20px">
+			<div class="col-md-12">
+				<h4>Specifications</h4>
+				<table class="table table-bordered" style="width: 100%">
+				{% for d in obj.doclist.get(
+					{"doctype":"Item Website Specification"}) -%}
+					<tr>
+						<td style="width: 30%;">{{ d.label }}</td>
+						<td>{{ d.description }}</td>
+					</tr>
+				{%- endfor %}
+				</table>
+			</div>
+		</div>
+		{%- endif %}
+	</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends base_template %}
+
+{% set title="My Addresses" %}
+
+{% block content %}
+<div class="container content">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a></li>
+    	<li class="active"><i class="icon-map-marker icon-fixed-width"></i> My Addresses</li>
+    </ul>
+	<p><a class="btn btn-default" href="address"><i class="icon-plus"> New Address</i></a></p>
+	<hr>
+	<div id="address-list">
+		<div class="progress progress-striped active">
+			<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+;(function() {
+	$(document).ready(function() {
+		fetch_addresses();
+	});
+	
+	var fetch_addresses = function() {
+		wn.call({
+			method: "selling.utils.cart.get_addresses",
+			callback: function(r) {
+				$("#address-list .progress").remove();
+				var $list = $("#address-list");
+			
+				if(!(r.message && r.message.length)) {
+					$list.html("<div class='alert'>No Addresses Found</div>");
+					return;
+				}
+			
+				$.each(r.message, function(i, address) {
+					address.url_name = encodeURIComponent(address.name);
+					$(repl('<div> \
+						<p><a href="address?name=%(url_name)s">%(name)s</a></p> \
+						<p>%(display)s</p> \
+						<hr> \
+					</div>', address)).appendTo($list);
+				});
+			}
+		});
+	};
+})();
+</script>
+{% endblock %}

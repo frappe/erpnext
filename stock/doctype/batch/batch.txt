@@ -1,0 +1,105 @@
+[
+ {
+  "creation": "2013-03-05 14:50:38", 
+  "docstatus": 0, 
+  "modified": "2013-07-05 14:26:48", 
+  "modified_by": "Administrator", 
+  "owner": "harshada@webnotestech.com"
+ }, 
+ {
+  "allow_attach": 1, 
+  "autoname": "field:batch_id", 
+  "doctype": "DocType", 
+  "document_type": "Master", 
+  "icon": "icon-archive", 
+  "max_attachments": 5, 
+  "module": "Stock", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "parent": "Batch", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "cancel": 1, 
+  "create": 1, 
+  "doctype": "DocPerm", 
+  "name": "__common__", 
+  "parent": "Batch", 
+  "parentfield": "permissions", 
+  "parenttype": "DocType", 
+  "permlevel": 0, 
+  "read": 1, 
+  "report": 1, 
+  "role": "Material Master Manager", 
+  "submit": 0, 
+  "write": 1
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Batch"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "batch_id", 
+  "fieldtype": "Data", 
+  "label": "Batch ID", 
+  "no_copy": 1, 
+  "oldfieldname": "batch_id", 
+  "oldfieldtype": "Data", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "item", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Item", 
+  "oldfieldname": "item", 
+  "oldfieldtype": "Link", 
+  "options": "Item", 
+  "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "description", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Description", 
+  "oldfieldname": "description", 
+  "oldfieldtype": "Small Text", 
+  "width": "300px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "expiry_date", 
+  "fieldtype": "Date", 
+  "in_list_view": 1, 
+  "label": "Expiry Date", 
+  "oldfieldname": "expiry_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "start_date", 
+  "fieldtype": "Date", 
+  "label": "Batch Started Date", 
+  "oldfieldname": "start_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "finished_date", 
+  "fieldtype": "Date", 
+  "label": "Batch Finished Date", 
+  "oldfieldname": "finished_date", 
+  "oldfieldtype": "Date"
+ }, 
+ {
+  "doctype": "DocPerm"
+ }
+]

@@ -1,0 +1,92 @@
+[
+ {
+  "creation": "2013-03-08 15:36:46", 
+  "docstatus": 0, 
+  "modified": "2013-07-10 14:54:12", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "DocType", 
+  "istable": 1, 
+  "module": "Accounts", 
+  "name": "__common__"
+ }, 
+ {
+  "doctype": "DocField", 
+  "name": "__common__", 
+  "no_copy": 1, 
+  "parent": "Purchase Invoice Advance", 
+  "parentfield": "fields", 
+  "parenttype": "DocType", 
+  "permlevel": 0
+ }, 
+ {
+  "doctype": "DocType", 
+  "name": "Purchase Invoice Advance"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "journal_voucher", 
+  "fieldtype": "Link", 
+  "in_list_view": 1, 
+  "label": "Journal Voucher", 
+  "oldfieldname": "journal_voucher", 
+  "oldfieldtype": "Link", 
+  "options": "Journal Voucher", 
+  "print_width": "180px", 
+  "read_only": 1, 
+  "width": "180px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "jv_detail_no", 
+  "fieldtype": "Data", 
+  "hidden": 1, 
+  "in_list_view": 0, 
+  "label": "Journal Voucher Detail No", 
+  "oldfieldname": "jv_detail_no", 
+  "oldfieldtype": "Date", 
+  "print_hide": 1, 
+  "print_width": "80px", 
+  "read_only": 1, 
+  "width": "80px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "advance_amount", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Advance Amount", 
+  "oldfieldname": "advance_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "100px", 
+  "read_only": 1, 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "allocated_amount", 
+  "fieldtype": "Currency", 
+  "in_list_view": 1, 
+  "label": "Allocated Amount", 
+  "oldfieldname": "allocated_amount", 
+  "oldfieldtype": "Currency", 
+  "options": "Company:company:default_currency", 
+  "print_width": "100px", 
+  "width": "100px"
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "remarks", 
+  "fieldtype": "Small Text", 
+  "in_list_view": 1, 
+  "label": "Remarks", 
+  "oldfieldname": "remarks", 
+  "oldfieldtype": "Small Text", 
+  "print_width": "150px", 
+  "read_only": 1, 
+  "width": "150px"
+ }
+]

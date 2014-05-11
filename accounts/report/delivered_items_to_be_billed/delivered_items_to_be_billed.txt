@@ -1,0 +1,22 @@
+[
+ {
+  "creation": "2013-07-30 17:28:49", 
+  "docstatus": 0, 
+  "modified": "2013-09-05 12:40:04", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Report", 
+  "is_standard": "Yes", 
+  "name": "__common__", 
+  "query": "select\n    `tabDelivery Note`.`name` as \"Delivery Note:Link/Delivery Note:120\",\n\t`tabDelivery Note`.`customer` as \"Customer:Link/Customer:120\",\n\t`tabDelivery Note`.`posting_date` as \"Date:Date\",\n\t`tabDelivery Note`.`project_name` as \"Project\",\n\t`tabDelivery Note Item`.`item_code` as \"Item:Link/Item:120\",\n\t(`tabDelivery Note Item`.`qty` - ifnull((select sum(qty) from `tabSales Invoice Item` \n\t    where `tabSales Invoice Item`.docstatus=1 and \n            `tabSales Invoice Item`.delivery_note = `tabDelivery Note`.name and\n\t        `tabSales Invoice Item`.dn_detail = `tabDelivery Note Item`.name), 0))\n\t\tas \"Qty:Float:110\",\n\t(`tabDelivery Note Item`.`amount` - ifnull((select sum(amount) from `tabSales Invoice Item` \n        where `tabSales Invoice Item`.docstatus=1 and \n            `tabSales Invoice Item`.delivery_note = `tabDelivery Note`.name and\n            `tabSales Invoice Item`.dn_detail = `tabDelivery Note Item`.name), 0))\n\t\tas \"Amount:Currency:110\",\n\t`tabDelivery Note Item`.`item_name` as \"Item Name::150\",\n\t`tabDelivery Note Item`.`description` as \"Description::200\"\nfrom `tabDelivery Note`, `tabDelivery Note Item`\nwhere\n    `tabDelivery Note`.docstatus = 1 and\n\t`tabDelivery Note`.`status` != \"Stopped\" and\n    `tabDelivery Note`.name = `tabDelivery Note Item`.parent and\n    (`tabDelivery Note Item`.qty > ifnull((select sum(qty) from `tabSales Invoice Item` \n        where `tabSales Invoice Item`.docstatus=1 and \n            `tabSales Invoice Item`.delivery_note = `tabDelivery Note`.name and\n            `tabSales Invoice Item`.dn_detail = `tabDelivery Note Item`.name), 0))\norder by `tabDelivery Note`.`name` desc", 
+  "ref_doctype": "Sales Invoice", 
+  "report_name": "Delivered Items To Be Billed", 
+  "report_type": "Query Report"
+ }, 
+ {
+  "doctype": "Report", 
+  "name": "Delivered Items To Be Billed"
+ }
+]
