@@ -677,12 +677,12 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_duplicate(self):
 		self._clear_stock_account_balance()
-		self.test_serial_by_series()
+		se, serial_nos = self.test_serial_by_series()
 
 		se = frappe.copy_doc(test_records[0])
 		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
 		se.get("mtn_details")[0].qty = 1
-		se.get("mtn_details")[0].serial_no = "ABCD00001"
+		se.get("mtn_details")[0].serial_no = serial_nos[0]
 		se.get("mtn_details")[0].transfer_qty = 1
 		se.insert()
 		self.assertRaises(SerialNoDuplicateError, se.submit)
@@ -696,18 +696,18 @@ class TestStockEntry(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("Serial No", serial_nos[0]))
 		self.assertTrue(frappe.db.exists("Serial No", serial_nos[1]))
 
-		return se
+		return se, serial_nos
 
 	def test_serial_item_error(self):
 		self._clear_stock_account_balance()
-		self.test_serial_by_series()
+		se, serial_nos = self.test_serial_by_series()
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
 		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
 		se.get("mtn_details")[0].qty = 1
 		se.get("mtn_details")[0].transfer_qty = 1
-		se.get("mtn_details")[0].serial_no = "ABCD00001"
+		se.get("mtn_details")[0].serial_no = serial_nos[0]
 		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
 		se.get("mtn_details")[0].t_warehouse = "_Test Warehouse 1 - _TC"
 		se.insert()
@@ -735,14 +735,15 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_warehouse_error(self):
 		self._clear_stock_account_balance()
-		make_serialized_item()
+		t = make_serialized_item()
+		serial_nos = get_serial_nos(t.get("mtn_details")[0].serial_no)
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
 		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
 		se.get("mtn_details")[0].qty = 1
 		se.get("mtn_details")[0].transfer_qty = 1
-		se.get("mtn_details")[0].serial_no = "ABCD00001"
+		se.get("mtn_details")[0].serial_no = serial_nos[0]
 		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse 1 - _TC"
 		se.get("mtn_details")[0].t_warehouse = "_Test Warehouse - _TC"
 		se.insert()
@@ -750,7 +751,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_cancel(self):
 		self._clear_stock_account_balance()
-		se = self.test_serial_by_series()
+		se, serial_nos = self.test_serial_by_series()
 		se.cancel()
 
 		serial_no = get_serial_nos(se.get("mtn_details")[0].serial_no)[0]
