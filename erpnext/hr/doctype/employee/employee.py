@@ -129,12 +129,6 @@ class Employee(Document):
 		if self.date_of_birth and self.date_of_joining and getdate(self.date_of_birth) >= getdate(self.date_of_joining):
 			throw(_("Date of Joining must be greater than Date of Birth"))
 
-		elif self.scheduled_confirmation_date and self.date_of_joining and (getdate(self.scheduled_confirmation_date) < getdate(self.date_of_joining)):
-			throw(_("Scheduled Confirmation Date must be greater than Date of Joining"))
-
-		elif self.final_confirmation_date and self.date_of_joining and (getdate(self.final_confirmation_date) < getdate(self.date_of_joining)):
-			throw(_("Final Confirmation Date must be greater than Date of Joining"))
-
 		elif self.date_of_retirement and self.date_of_joining and (getdate(self.date_of_retirement) <= getdate(self.date_of_joining)):
 			throw(_("Date Of Retirement must be greater than Date of Joining"))
 
@@ -155,6 +149,8 @@ class Employee(Document):
 			throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self):
+		if not self.status == 'Active':
+			return
 		enabled = frappe.db.sql("""select name from `tabUser` where
 			name=%s and enabled=1""", self.user_id)
 		if not enabled:

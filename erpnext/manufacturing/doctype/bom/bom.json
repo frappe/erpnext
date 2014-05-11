@@ -3,7 +3,7 @@
  "allow_copy": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
- "creation": "2013-01-22 15:11:38.000000", 
+ "creation": "2013-01-22 15:11:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -162,9 +162,9 @@
   }, 
   {
    "fieldname": "uom", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Item UOM", 
-   "options": "link:UOM", 
+   "options": "UOM", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -233,7 +233,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-01-20 17:48:26.000000", 
+ "modified": "2014-05-09 02:16:39.975486", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
@@ -267,5 +267,7 @@
   }
  ], 
  "read_only": 0, 
- "search_fields": "item"
+ "search_fields": "item", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

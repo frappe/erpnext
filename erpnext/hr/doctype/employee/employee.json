@@ -136,10 +136,10 @@
   }, 
   {
    "fieldname": "company", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Company", 
-   "options": "link:Company", 
+   "options": "Company", 
    "permlevel": 0, 
    "print_hide": 1, 
    "reqd": 1
@@ -672,7 +672,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:40.142903", 
+ "modified": "2014-05-09 02:16:47.217445", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
@@ -730,5 +730,7 @@
    "role": "Leave Approver"
   }
  ], 
- "search_fields": "employee_name"
+ "search_fields": "employee_name", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

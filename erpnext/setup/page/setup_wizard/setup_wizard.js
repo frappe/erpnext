@@ -29,6 +29,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					}, 2000);
 				},
 				error: function(r) {
+					
 					var d = msgprint(__("There were errors."));
 					d.custom_onhide = function() {
 						frappe.set_route(erpnext.wiz.page_name, "0");

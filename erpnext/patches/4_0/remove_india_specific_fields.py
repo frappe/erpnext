@@ -6,6 +6,7 @@ import frappe
 from frappe.core.doctype.custom_field.custom_field import create_custom_field_if_values_exist
 
 def execute():
+	frappe.db.sql("delete from tabDocField where parent='Salary Slip' and options='Grade'")
 	docfields = {
 		("Purchase Receipt", "challan_no"): frappe.get_meta("Purchase Receipt").get_field("challan_no"),
 		("Purchase Receipt", "challan_date"): frappe.get_meta("Purchase Receipt").get_field("challan_date"),
@@ -18,6 +19,8 @@ def execute():
 	}
 
 	for (doctype, fieldname), df in docfields.items():
+		if not df:
+			continue
 		opts = df.as_dict()
 		if df.idx >= 2:
 			opts["insert_after"] = frappe.get_meta(doctype).get("fields")[df.idx - 2].fieldname

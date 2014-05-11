@@ -1,6 +1,6 @@
 {
  "autoname": "EXP.######", 
- "creation": "2013-01-10 16:34:14.000000", 
+ "creation": "2013-01-10 16:34:14", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -114,23 +114,23 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1
   }, 
   {
    "fieldname": "company", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Company", 
    "oldfieldname": "company", 
    "oldfieldtype": "Link", 
-   "options": "link:Company", 
+   "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -187,7 +187,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-22 16:05:34.000000", 
+ "modified": "2014-05-09 02:16:38.198490", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
@@ -234,5 +234,7 @@
    "write": 1
   }
  ], 
- "search_fields": "approval_status,employee,employee_name"
+ "search_fields": "approval_status,employee,employee_name", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

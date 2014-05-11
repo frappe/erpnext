@@ -8,7 +8,7 @@ def execute():
 	frappe.reload_doc("core", "doctype", "outgoing_email_settings")
 	frappe.reload_doc("support", "doctype", "support_email_settings")
 	
-	email_settings = frappe.get_doc("Email Settings")
+	email_settings = get_email_settings()
 	map_outgoing_email_settings(email_settings)
 	map_support_email_settings(email_settings)
 	frappe.delete_doc("Doctype", "Email Settings")
@@ -48,3 +48,9 @@ def map_support_email_settings(email_settings):
 	
 	support_email_settings.save()
 	
+def get_email_settings():
+	ret = {}
+	for field, value in frappe.db.sql("select field, value from tabSingles where doctype='Email Settings'"):
+		ret[field] = value
+	return ret
+

@@ -18,13 +18,13 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "search_index": 1
   }, 
@@ -40,7 +40,7 @@
  ], 
  "icon": "icon-bar-chart", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:40.574148", 
+ "modified": "2014-05-09 02:16:47.567367", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget Distribution", 
@@ -70,5 +70,7 @@
    "role": "Accounts Manager", 
    "submit": 0
   }
- ]
+ ], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "allow_rename": 1, 
- "creation": "2013-01-10 16:34:32.000000", 
+ "creation": "2013-01-10 16:34:32", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -74,11 +74,11 @@
   }, 
   {
    "fieldname": "country", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Country", 
-   "options": "link:Country", 
+   "options": "Country", 
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
@@ -199,7 +199,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-01-27 11:19:06.000000", 
+ "modified": "2014-05-09 02:16:43.798644", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
@@ -258,5 +258,7 @@
    "write": 1
   }
  ], 
- "search_fields": "customer, supplier, sales_partner, country, state"
+ "search_fields": "customer, supplier, sales_partner, country, state", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }
