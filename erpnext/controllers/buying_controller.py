@@ -256,7 +256,7 @@ class BuyingController(StockController):
 
 			rm_supplied_idx += 1
 
-			raw_materials_cost += required_qty * flt(item.rate)
+			raw_materials_cost += required_qty * flt(bom_item.rate)
 
 		if self.doctype == "Purchase Receipt":
 			item.rm_supp_cost = raw_materials_cost
