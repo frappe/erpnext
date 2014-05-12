@@ -1,4 +1,5 @@
 {
+ "allow_import": 1, 
  "autoname": "PRULE.#####", 
  "creation": "2014-02-21 15:02:51", 
  "docstatus": 0, 
@@ -202,7 +203,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-05-05 11:09:38.244111", 
+ "modified": "2014-05-12 16:24:52.005162", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 
@@ -211,16 +212,23 @@
   {
    "create": 1, 
    "delete": 1, 
+   "export": 0, 
+   "import": 0, 
    "permlevel": 0, 
    "read": 1, 
+   "report": 1, 
    "role": "Accounts Manager", 
    "write": 1
   }, 
   {
    "create": 1, 
    "delete": 1, 
+   "export": 0, 
+   "import": 0, 
    "permlevel": 0, 
+   "print": 0, 
    "read": 1, 
+   "report": 1, 
    "role": "Sales Manager", 
    "write": 1
   }, 
@@ -229,6 +237,7 @@
    "delete": 1, 
    "permlevel": 0, 
    "read": 1, 
+   "report": 1, 
    "role": "Purchase Manager", 
    "write": 1
   }, 
@@ -237,16 +246,23 @@
    "delete": 1, 
    "permlevel": 0, 
    "read": 1, 
+   "report": 1, 
    "role": "Website Manager", 
    "write": 1
   }, 
   {
    "create": 1, 
    "delete": 1, 
+   "export": 1, 
+   "import": 1, 
    "permlevel": 0, 
    "read": 1, 
+   "report": 1, 
+   "restrict": 1, 
    "role": "System Manager", 
    "write": 1
   }
- ]
+ ], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }
