@@ -15,66 +15,73 @@ import install_fixtures
 
 @frappe.whitelist()
 def setup_account(args=None):
-	frappe.clear_cache()
+	try:
+		frappe.clear_cache()
 
-	if frappe.db.sql("select name from tabCompany"):
-		frappe.throw(_("Setup Already Complete!!"))
+		if frappe.db.sql("select name from tabCompany"):
+			frappe.throw(_("Setup Already Complete!!"))
 
-	if not args:
-		args = frappe.local.form_dict
-	if isinstance(args, basestring):
-		args = json.loads(args)
-	args = frappe._dict(args)
+		if not args:
+			args = frappe.local.form_dict
+		if isinstance(args, basestring):
+			args = json.loads(args)
 
-	if args.language != "english":
-		set_default_language(args.language)
+		args = frappe._dict(args)
 
-	install_fixtures.install(args.get("country"))
+		if args.language != "english":
+			set_default_language(args.language)
 
-	update_user_name(args)
-	frappe.local.message_log = []
+		install_fixtures.install(args.get("country"))
 
-	create_fiscal_year_and_company(args)
-	frappe.local.message_log = []
+		update_user_name(args)
+		frappe.local.message_log = []
 
-	set_defaults(args)
-	frappe.local.message_log = []
+		create_fiscal_year_and_company(args)
+		frappe.local.message_log = []
 
-	create_territories()
-	frappe.local.message_log = []
+		set_defaults(args)
+		frappe.local.message_log = []
 
-	create_price_lists(args)
-	frappe.local.message_log = []
+		create_territories()
+		frappe.local.message_log = []
 
-	create_feed_and_todo()
-	frappe.local.message_log = []
+		create_price_lists(args)
+		frappe.local.message_log = []
 
-	create_email_digest()
-	frappe.local.message_log = []
+		create_feed_and_todo()
+		frappe.local.message_log = []
 
-	create_letter_head(args)
-	frappe.local.message_log = []
+		create_email_digest()
+		frappe.local.message_log = []
 
-	create_taxes(args)
-	frappe.local.message_log = []
+		create_letter_head(args)
+		frappe.local.message_log = []
 
-	create_items(args)
-	frappe.local.message_log = []
+		create_taxes(args)
+		frappe.local.message_log = []
 
-	create_customers(args)
-	frappe.local.message_log = []
+		create_items(args)
+		frappe.local.message_log = []
 
-	create_suppliers(args)
-	frappe.local.message_log = []
+		create_customers(args)
+		frappe.local.message_log = []
 
-	frappe.db.set_default('desktop:home_page', 'desktop')
+		create_suppliers(args)
+		frappe.local.message_log = []
 
-	website_maker(args.company_name, args.company_tagline, args.name)
-	create_logo(args)
+		frappe.db.set_default('desktop:home_page', 'desktop')
 
-	frappe.clear_cache()
-	frappe.db.commit()
+		website_maker(args.company_name, args.company_tagline, args.name)
+		create_logo(args)
 
+		frappe.clear_cache()
+		frappe.db.commit()
+	except:
+		traceback = frappe.get_traceback()
+		for hook in frappe.get_hooks("setup_wizard_exception"):
+			frappe.get_attr(hook)(traceback, args)
+
+		raise
 
 def update_user_name(args):
 	if args.get("email"):
