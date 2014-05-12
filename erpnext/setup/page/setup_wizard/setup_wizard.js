@@ -29,7 +29,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					}, 2000);
 				},
 				error: function(r) {
-					
+
 					var d = msgprint(__("There were errors."));
 					d.custom_onhide = function() {
 						frappe.set_route(erpnext.wiz.page_name, "0");
@@ -223,8 +223,13 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				title: __("Logo and Letter Heads"),
 				help: __('Upload your letter head and logo - you can edit them later.'),
 				fields: [
-					{fieldtype:"Attach Image", fieldname:"attach_letterhead", label: __("Attach Letterhead")},
-					{fieldtype:"Attach Image", fieldname:"attach_logo", label:__("Attach Logo")},
+					{fieldtype:"Attach Image", fieldname:"attach_letterhead",
+						label: __("Attach Letterhead"),
+						description: __("Keep it web friendly 900px (w) by 100px (h)")
+					},
+					{fieldtype:"Attach Image", fieldname:"attach_logo",
+						label:__("Attach Logo"),
+						description: __("100px by 100px")},
 				],
 			},
 
