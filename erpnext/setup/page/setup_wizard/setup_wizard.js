@@ -19,7 +19,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					wiz.show_complete();
 					setTimeout(function() {
 						if(user==="Administrator") {
-							msgprint(__("Login with your new User ID") + ":" + values.email);
+							msgprint(__("Login with your new User ID") + ": " + values.email);
 							setTimeout(function() {
 								frappe.app.logout();
 							}, 2000);
@@ -62,7 +62,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					{"fieldname": "language", "label": __("Language"), "fieldtype": "Select",
 						options: ["english", "العربية", "deutsch", "ελληνικά", "español", "français", "हिंदी", "hrvatski",
 						"italiano", "nederlands", "português brasileiro", "português", "српски", "தமிழ்",
-						"ไทย", "中国（简体", "中國（繁體"], reqd:1},
+						"ไทย", "中国（简体）", "中國（繁體）"], reqd:1},
 				],
 				help: __("Welcome to ERPNext. Please select your language to begin the Setup Wizard."),
 				onload: function(slide) {
@@ -237,12 +237,13 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			{
 				icon: "icon-money",
 				"title": __("Add Taxes"),
-				"help": __("List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later."),
+				"help": __("List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 				"fields": [],
 				before_load: function(slide) {
 					for(var i=1; i<4; i++) {
 						slide.fields = slide.fields.concat([
-							{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i, placeholder:__("e.g. VAT")},
+							{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i,
+								placeholder:__("e.g. VAT") + " " + i},
 							{fieldtype:"Column Break"},
 							{fieldtype:"Float", fieldname:"tax_rate_" + i, label:__("Rate (%)"), placeholder:__("e.g. 5")},
 							{fieldtype:"Section Break"},
@@ -264,33 +265,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 								placeholder:__("Customer Name")},
 							{fieldtype:"Column Break"},
 							{fieldtype:"Data", fieldname:"customer_contact_" + i,
-								label:__("Contact"), placeholder:__("Contact Name")},
-							{fieldtype:"Section Break"}
-						])
-					}
-				}
-			},
-
-			// Items to Sell
-			{
-				icon: "icon-barcode",
-				"title": __("Your Products or Services"),
-				"help": __("List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
-				"fields": [],
-				before_load: function(slide) {
-					for(var i=1; i<6; i++) {
-						slide.fields = slide.fields.concat([
-							{fieldtype:"Data", fieldname:"item_" + i, label:__("Item") + " " + i,
-								placeholder:__("A Product or Service")},
-							{fieldtype:"Column Break"},
-							{fieldtype:"Attach", fieldname:"item_img_" + i, label:__("Attach Image")},
-							{fieldtype:"Section Break"},
-							{fieldtype:"Column Break"},
-							{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i,
-								options:[__("Products"), __("Services")]},
-							{fieldtype:"Column Break"},
-							{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
-								options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"), __("Hour"), __("Minute")]},
+								label:__("Contact Name") + " " + i, placeholder:__("Contact Name")},
 							{fieldtype:"Section Break"}
 						])
 					}
@@ -307,41 +282,42 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					for(var i=1; i<6; i++) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Data", fieldname:"supplier_" + i, label:__("Supplier")+" " + i,
-								placeholder:"Supplier Name"},
+								placeholder:__("Supplier Name")},
 							{fieldtype:"Column Break"},
 							{fieldtype:"Data", fieldname:"supplier_contact_" + i,
-								label:"Contact", placeholder:__("Contact Name")},
+								label:__("Contact Name") + " " + i, placeholder:__("Contact Name")},
 							{fieldtype:"Section Break"}
 						])
 					}
 				}
 			},
 
-			// Items to Buy
+			// Items to Sell
 			{
 				icon: "icon-barcode",
-				"title": __("Products or Services You Buy"),
-				"help": __("List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them."),
+				"title": __("Your Products or Services"),
+				"help": __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 				"fields": [],
 				before_load: function(slide) {
 					for(var i=1; i<6; i++) {
 						slide.fields = slide.fields.concat([
-							{fieldtype:"Data", fieldname:"item_buy_" + i, label: __("Item") + " " + i,
+							{fieldtype:"Section Break", show_section_border: true},
+							{fieldtype:"Data", fieldname:"item_" + i, label:__("Item") + " " + i,
 								placeholder:__("A Product or Service")},
+							{fieldtype: "Check", fieldname: "is_sales_item_" + i, label:__("We sell this Item")},
+							{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
 							{fieldtype:"Column Break"},
-							{fieldtype:"Section Break"},
-							{fieldtype:"Column Break"},
-							{fieldtype:"Select", fieldname:"item_buy_group_" + i, label: __("Group"),
-								options:[__("Raw Material"), __("Consumable"), __("Sub Assemblies"), __("Services"), __("Products")]},
-							{fieldtype:"Column Break"},
-							{fieldtype:"Select", fieldname:"item_buy_uom_" + i, label: __("UOM"),
-								options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"), __("Hour"), __("Minute")]},
-							{fieldtype:"Section Break"},
+							{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i,
+								options:[__("Products"), __("Services"),
+									__("Raw Material"), __("Consumable"), __("Sub Assemblies")]},
+							{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
+								options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
+									__("Hour"), __("Minute")]},
+							{fieldtype:"Attach", fieldname:"item_img_" + i, label:__("Attach Image")},
 						])
 					}
 				}
 			},
-
 		]
 	}
 
@@ -461,7 +437,7 @@ frappe.wiz.WizardSlide = Class.extend({
 				</div>\
 				<div class="row">\
 					<div class="col-sm-12">\
-						<p class="text-muted">%(help)s</p><br>\
+						<p>%(help)s</p><br>\
 						<div class="form"></div>\
 					</div>\
 				</div>\
@@ -503,6 +479,8 @@ frappe.wiz.WizardSlide = Class.extend({
 					me.values = me.form.get_values();
 					if(me.values===null)
 						return;
+					if(me.validate && !me.validate())
+						return;
 					frappe.set_route(me.wiz.page_name, me.id+1 + "");
 				})
 		} else {
@@ -510,6 +488,8 @@ frappe.wiz.WizardSlide = Class.extend({
 				.click(function() {
 					me.values = me.form.get_values();
 					if(me.values===null)
+						return;
+					if(me.validate && !me.validate())
 						return;
 					me.wiz.on_complete(me.wiz);
 				})

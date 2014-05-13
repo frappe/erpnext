@@ -291,45 +291,34 @@ def create_items(args):
 		item = args.get("item_" + str(i))
 		if item:
 			item_group = args.get("item_group_" + str(i))
+			is_sales_item = args.get("is_sales_item_" + str(i))
+			is_purchase_item = args.get("is_purchase_item_" + str(i))
+			is_stock_item = item_group!=_("Services")
+			default_warehouse = ""
+			if is_stock_item:
+				if is_sales_item:
+					default_warehouse = _("Finished Goods") + " - " + args.get("company_abbr")
+				else:
+					default_warehouse = _("Stores") + " - " + args.get("company_abbr")
+
 			frappe.get_doc({
 				"doctype":"Item",
 				"item_code": item,
 				"item_name": item,
 				"description": item,
-				"is_sales_item": "Yes",
+				"is_sales_item": "Yes" if is_sales_item else "No",
+				"is_purchase_item": "Yes" if is_purchase_item else "No",
 				"show_in_website": 1,
-				"is_stock_item": item_group!=_("Services") and "Yes" or "No",
+				"is_stock_item": is_stock_item and "Yes" or "No",
 				"item_group": item_group,
 				"stock_uom": args.get("item_uom_" + str(i)),
-				"default_warehouse": item_group!=_("Service") and (_("Finished Goods") + " - " + args.get("company_abbr")) or ""
+				"default_warehouse": default_warehouse
 			}).insert()
 
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
 				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
 				frappe.db.set_value("Item", item, "image", fileurl)
-
-	for i in xrange(1,6):
-		item = args.get("item_buy_" + str(i))
-		if item:
-			item_group = args.get("item_buy_group_" + str(i))
-			frappe.get_doc({
-				"doctype":"Item",
-				"item_code": item,
-				"item_name": item,
-				"description": item,
-				"is_sales_item": "No",
-				"is_stock_item": item_group!=_("Services") and "Yes" or "No",
-				"item_group": item_group,
-				"stock_uom": args.get("item_buy_uom_" + str(i)),
-				"default_warehouse": item_group!=_("Services") and (_("Stores") + " - " + args.get("company_abbr")) or ""
-			}).insert()
-
-			if args.get("item_img_" + str(i)):
-				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
-				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
-				frappe.db.set_value("Item", item, "image", fileurl)
-
 
 def create_customers(args):
 	for i in xrange(1,6):
