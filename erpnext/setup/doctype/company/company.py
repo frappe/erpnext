@@ -138,7 +138,7 @@ class Company(Document):
 				cc_doc.ignore_mandatory = True
 			cc_doc.insert()
 
-		frappe.db.set(self, "cost_center", "Main - " + self.abbr)
+		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
 
 	def on_trash(self):
 		"""

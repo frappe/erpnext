@@ -94,7 +94,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					{"fieldname": "last_name", "label": __("Last Name"), "fieldtype": "Data",
 						reqd:1},
 					{"fieldname": "email", "label": __("Email Id"), "fieldtype": "Data",
-						reqd:1, "description":"Your Login Id", "options":"Email"},
+						reqd:1, "description": __("Your Login Id"), "options":"Email"},
 					{"fieldname": "password", "label": __("Password"), "fieldtype": "Password",
 						reqd:1},
 					{fieldtype:"Attach Image", fieldname:"attach_user",

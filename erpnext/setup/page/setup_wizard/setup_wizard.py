@@ -136,10 +136,10 @@ def create_fiscal_year_and_company(args):
 	args["curr_fiscal_year"] = curr_fiscal_year
 
 def create_price_lists(args):
-	for pl_type in ["Selling", "Buying"]:
+	for pl_type, pl_name in (("Selling", _("Standard Selling")), ("Buying", _("Standard Buying"))):
 		frappe.get_doc({
 			"doctype": "Price List",
-			"price_list_name": "Standard " + pl_type,
+			"price_list_name": pl_name,
 			"enabled": 1,
 			"buying": 1 if pl_type == "Buying" else 0,
 			"selling": 1 if pl_type == "Selling" else 0,
@@ -273,7 +273,7 @@ def create_taxes(args):
 				frappe.get_doc({
 					"doctype":"Account",
 					"company": args.get("company_name"),
-					"parent_account": "Duties and Taxes - " + args.get("company_abbr"),
+					"parent_account": _("Duties and Taxes") + " - " + args.get("company_abbr"),
 					"account_name": args.get("tax_" + str(i)),
 					"group_or_ledger": "Ledger",
 					"report_type": "Balance Sheet",
