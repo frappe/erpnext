@@ -1,11 +1,11 @@
 {
  "add_total_row": 1, 
- "creation": "2013-05-13 16:23:05.000000", 
+ "creation": "2013-05-13 16:23:05", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-03-07 15:30:27.000000", 
+ "modified": "2014-05-13 16:08:56.184249", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Requested Items To Be Transferred", 

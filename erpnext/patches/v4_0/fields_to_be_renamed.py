@@ -101,31 +101,9 @@ rename_map = {
 }
 
 def execute():
-	reload_docs()
+	for dn in rename_map:
+		frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
 
 	for dt, field_list in rename_map.items():
 		for field in field_list:
 			rename_field(dt, field[0], field[1])
-
-def reload_docs():
-	for dn in rename_map:
-		frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
-
-	# reload all standard print formats
-	for pf in frappe.db.sql("""select name, module from `tabPrint Format`
-			where ifnull(standard, 'No') = 'Yes'""", as_dict=1):
-		try:
-			frappe.reload_doc(pf.module, "Print Format", pf.name)
-		except Exception, e:
-			print e
-			pass
-
-	# reload all standard reports
-	for r in frappe.db.sql("""select name, ref_doctype from `tabReport`
-		where ifnull(is_standard, 'No') = 'Yes'
-		and report_type in ('Report Builder', 'Query Report')""", as_dict=1):
-			try:
-				frappe.reload_doc(get_doctype_module(r.ref_doctype), "report", r.name)
-			except Exception, e:
-				print e
-				pass

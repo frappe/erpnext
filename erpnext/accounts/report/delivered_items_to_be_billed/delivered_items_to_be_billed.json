@@ -1,10 +1,10 @@
 {
- "creation": "2013-07-30 17:28:49.000000", 
+ "creation": "2013-07-30 17:28:49", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-03-07 15:30:27.000000", 
+ "modified": "2014-05-13 16:08:56.009640", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Delivered Items To Be Billed", 

@@ -704,7 +704,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			return this.frm.call({
 				method: "erpnext.controllers.accounts_controller.get_taxes_and_charges",
 				args: {
-					"master_doctype": "Sales Taxes and Charges Master",
+					"master_doctype": frappe.meta.get_docfield(this.frm.doc.doctype, "taxes_and_charges",
+						this.frm.doc.name).options,
 					"master_name": this.frm.doc.taxes_and_charges,
 					"tax_parentfield": this.other_fname
 				},
