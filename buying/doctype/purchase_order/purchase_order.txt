@@ -2,7 +2,7 @@
  {
   "creation": "2013-05-21 16:16:39", 
   "docstatus": 0, 
-  "modified": "2013-11-22 17:20:58", 
+  "modified": "2014-05-12 23:03:51", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -59,6 +59,12 @@
   "options": "\nPO", 
   "print_hide": 1, 
   "reqd": 1
+ }, 
+ {
+  "doctype": "DocField", 
+  "fieldname": "is_service", 
+  "fieldtype": "Check", 
+  "label": "Is Service"
  }, 
  {
   "description": "Supplier (vendor) name as entered in supplier master", 
