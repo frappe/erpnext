@@ -7,8 +7,14 @@
 }
 .setup-wizard-wrapper {
 	margin: 0px auto;
-	width: 600px;
 }
+
+@media (min-width: 768px) {
+	.setup-wizard-wrapper {
+		width: 720px;
+	}
+}
+
 #page-setup-wizard .panel {
 	background-color: #fff;
 }
