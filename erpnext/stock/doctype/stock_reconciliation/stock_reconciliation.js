@@ -20,7 +20,10 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 					"company": this.frm.doc.company
 				},
 				callback: function(r) {
-					if (!r.exc) me.frm.set_value("expense_account", r.message);
+					if (!r.exc) {
+						me.frm.set_value("expense_account", r.message);
+						me.frm.script_manager.trigger("refresh");
+					}
 				}
 			});
 		}
