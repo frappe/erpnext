@@ -73,7 +73,7 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 	create_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	}
 });
@@ -110,7 +110,8 @@ cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
 	frappe.model.map_current_doc({
 		method: "erpnext.selling.doctype.lead.lead.make_opportunity",
-		source_name: cur_frm.doc.lead
+		source_name: cur_frm.doc.lead,
+		frm: cur_frm
 	});
 }
 

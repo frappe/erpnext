@@ -33,7 +33,8 @@ erpnext.support.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 			this.frm.add_custom_button(__("Make Maintenance Visit"), function() {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
-					source_name: me.frm.doc.name
+					source_name: me.frm.doc.name,
+					frm: me.frm
 				})
 			});
 		}

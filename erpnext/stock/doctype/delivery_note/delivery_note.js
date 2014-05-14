@@ -70,14 +70,14 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	make_sales_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 
 	make_installation_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		});
 	},
 

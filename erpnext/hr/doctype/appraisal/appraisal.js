@@ -5,7 +5,7 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
-	if(!doc.status) 
+	if(!doc.status)
 		set_multiple(cdt,cdn,{status:'Draft'});
 	if(doc.amended_from && doc.__islocal) {
 		doc.status = "Draft";
@@ -27,6 +27,7 @@ cur_frm.cscript.kra_template = function(doc, dt, dn) {
 	frappe.model.map_current_doc({
 		method: "erpnext.hr.doctype.appraisal.appraisal.fetch_appraisal_template",
 		source_name: cur_frm.doc.kra_template,
+		frm: cur_frm
 	});
 }
 
@@ -71,5 +72,5 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
-	return{	query: "erpnext.controllers.queries.employee_query" }	
+	return{	query: "erpnext.controllers.queries.employee_query" }
 }

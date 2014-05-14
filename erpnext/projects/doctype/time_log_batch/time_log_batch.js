@@ -32,7 +32,7 @@ $.extend(cur_frm.cscript, {
 	make_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.projects.doctype.time_log_batch.time_log_batch.make_sales_invoice",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		});
 	}
 });

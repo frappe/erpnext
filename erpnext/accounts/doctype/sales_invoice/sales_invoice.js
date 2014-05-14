@@ -270,7 +270,7 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 cur_frm.cscript['Make Delivery Note'] = function() {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
-		source_name: cur_frm.doc.name
+		frm: cur_frm
 	})
 }
 
