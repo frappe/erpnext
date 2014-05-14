@@ -294,9 +294,8 @@ class StockReconciliation(StockController):
 		if not self.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
 		elif not frappe.db.sql("""select * from `tabStock Ledger Entry`"""):
-			if frappe.db.get_value("Account", self.expense_account,
-					"report_type") == "Profit and Loss":
-				frappe.throw(_("'Profit and Loss' type Account {0} used be set for Opening Entry").format(self.expense_account))
+			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
+				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"))
 
 @frappe.whitelist()
 def upload():
