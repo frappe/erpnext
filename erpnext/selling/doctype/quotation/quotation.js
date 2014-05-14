@@ -134,7 +134,7 @@ cur_frm.fields_dict.lead.get_query = function(doc,cdt,cdn) {
 cur_frm.cscript['Make Sales Order'] = function() {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
-		source_name: cur_frm.doc.name
+		frm: cur_frm
 	})
 }
 

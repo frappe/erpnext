@@ -39,7 +39,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 	make_purchase_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	}
 });

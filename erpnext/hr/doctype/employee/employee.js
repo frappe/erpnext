@@ -58,7 +58,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	make_salary_structure: function(btn) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.hr.doctype.employee.employee.make_salary_structure",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		});
 	}
 });

@@ -102,35 +102,35 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_material_request: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 
 	make_delivery_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 
 	make_sales_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 
 	make_maintenance_schedule: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 
 	make_maintenance_visit: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 });

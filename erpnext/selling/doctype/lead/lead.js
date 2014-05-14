@@ -78,14 +78,14 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	create_customer: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.lead.lead.make_customer",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	}, 
 	
 	create_opportunity: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.lead.lead.make_opportunity",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	}
 });
