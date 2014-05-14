@@ -83,6 +83,9 @@ def make_feed(feedtype, doctype, name, owner, subject, color):
 
 def update_feed(doc, method=None):
 	"adds a new feed"
+	if frappe.flags.in_patch:
+		return
+
 	if method in ['on_update', 'on_submit']:
 		subject, color = feed_dict.get(doc.doctype, [None, None])
 		if subject:
