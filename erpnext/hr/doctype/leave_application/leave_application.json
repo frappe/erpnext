@@ -20,9 +20,9 @@
   {
    "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
    "fieldname": "leave_approver", 
-   "fieldtype": "Link", 
+   "fieldtype": "Select", 
    "label": "Leave Approver", 
-   "options": "User", 
+   "options": "[Select]", 
    "permlevel": 0
   }, 
   {
@@ -182,7 +182,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-05-09 02:17:13.936705", 
+ "modified": "2014-05-15 19:30:47.331357", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
