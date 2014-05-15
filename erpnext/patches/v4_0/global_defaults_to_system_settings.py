@@ -11,11 +11,11 @@ def execute():
 	system_settings = frappe.get_doc("System Settings")
 
 	# set values from global_defauls
-	global_defauls = frappe.db.get_value("Global Defaults", None,
-		["time_zone", "date_format", "number_format", "float_precision", "session_expiry"])
+	global_defaults = frappe.db.get_value("Global Defaults", None,
+		["time_zone", "date_format", "number_format", "float_precision", "session_expiry"], as_dict=True)
 
 	if global_defauls:
-		for key, val in global_defauls.items():
+		for key, val in global_defaults.items():
 			if not system_settings.get(key):
 				system_settings[key] = val
 
