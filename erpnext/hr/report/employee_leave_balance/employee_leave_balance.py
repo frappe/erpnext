@@ -3,38 +3,43 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.widgets.reportview import execute as runreport
 
 def execute(filters=None):
 	if not filters: filters = {}
-	
+
 	employee_filters = filters.get("company") and \
 		[["Employee", "company", "=", filters.get("company")]] or None
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
 		filters=employee_filters)
+
+	if not employees:
+		frappe.throw(_("No employee found!"))
+
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type`")
-	
+
 	if filters.get("fiscal_year"):
 		fiscal_years = [filters["fiscal_year"]]
 	else:
 		fiscal_years = frappe.db.sql_list("select name from `tabFiscal Year` order by name desc")
-			
+
 	allocations = frappe.db.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
-	 	from `tabLeave Allocation` 
-		where docstatus=1 and employee in (%s)""" % 
+	 	from `tabLeave Allocation`
+		where docstatus=1 and employee in (%s)""" %
 		','.join(['%s']*len(employees)), employees, as_dict=True)
-		
-	applications = frappe.db.sql("""select employee, fiscal_year, leave_type, 
+
+	applications = frappe.db.sql("""select employee, fiscal_year, leave_type,
 			SUM(total_leave_days) as leaves
-		from `tabLeave Application` 
+		from `tabLeave Application`
 		where status="Approved" and docstatus = 1 and employee in (%s)
-		group by employee, fiscal_year, leave_type""" % 
+		group by employee, fiscal_year, leave_type""" %
 			','.join(['%s']*len(employees)), employees, as_dict=True)
-	
+
 	columns = [
 		"Fiscal Year", "Employee:Link/Employee:150", "Employee Name::200", "Department::150"
 	]
-	
+
 	for leave_type in leave_types:
 		columns.append(leave_type + " Allocated:Float")
 		columns.append(leave_type + " Taken:Float")
@@ -42,13 +47,13 @@ def execute(filters=None):
 
 	data = {}
 	for d in allocations:
-		data.setdefault((d.fiscal_year, d.employee, 
+		data.setdefault((d.fiscal_year, d.employee,
 			d.leave_type), frappe._dict()).allocation = d.total_leaves_allocated
 
 	for d in applications:
-		data.setdefault((d.fiscal_year, d.employee, 
+		data.setdefault((d.fiscal_year, d.employee,
 			d.leave_type), frappe._dict()).leaves = d.leaves
-	
+
 	result = []
 	for fiscal_year in fiscal_years:
 		for employee in employees:
