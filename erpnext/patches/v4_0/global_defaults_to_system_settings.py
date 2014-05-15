@@ -17,7 +17,7 @@ def execute():
 	if global_defaults:
 		for key, val in global_defaults.items():
 			if not system_settings.get(key):
-				system_settings[key] = val
+				system_settings.set(key, val)
 
 	# language
 	if not system_settings.get("language"):
