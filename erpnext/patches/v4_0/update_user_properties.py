@@ -76,8 +76,8 @@ def update_user_match():
 def add_employee_restrictions_to_leave_approver():
 	from frappe.core.page.user_properties import user_properties
 	
-	# add restrict rights to HR User and HR Manager
-	frappe.db.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')
+	# add can_restrict rights to HR User and HR Manager
+	frappe.db.sql("""update `tabDocPerm` set `can_restrict`=1 where parent in ('Employee', 'Leave Application')
 		and role in ('HR User', 'HR Manager') and permlevel=0 and `read`=1""")
 	frappe.clear_cache()
 	
