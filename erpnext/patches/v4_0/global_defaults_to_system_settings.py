@@ -30,4 +30,5 @@ def execute():
 
 		system_settings.language = lang
 
+	system_settings.ignore_mandatory = True
 	system_settings.save()
