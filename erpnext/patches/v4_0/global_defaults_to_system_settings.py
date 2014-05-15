@@ -14,7 +14,7 @@ def execute():
 	global_defaults = frappe.db.get_value("Global Defaults", None,
 		["time_zone", "date_format", "number_format", "float_precision", "session_expiry"], as_dict=True)
 
-	if global_defauls:
+	if global_defaults:
 		for key, val in global_defaults.items():
 			if not system_settings.get(key):
 				system_settings[key] = val
