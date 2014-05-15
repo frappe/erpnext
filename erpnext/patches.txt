@@ -4,6 +4,7 @@ erpnext.patches.v4_0.validate_v3_patch
 erpnext.patches.v4_0.update_user_properties
 erpnext.patches.v4_0.move_warehouse_user_to_restrictions
 erpnext.patches.v4_0.new_permissions
+erpnext.patches.v4_0.global_defaults_to_system_settings
 erpnext.patches.v4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
 execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'sales_order') # 2014-01-29
@@ -42,4 +43,4 @@ execute:frappe.delete_doc_if_exists("DocType", "Warehouse User")
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
 execute:import frappe.defaults;frappe.defaults.clear_default("price_list_currency")
-erpnext.patches.v4_0.global_defaults_to_system_settings
+
