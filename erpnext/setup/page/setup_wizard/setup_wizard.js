@@ -68,6 +68,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				onload: function(slide) {
 					slide.get_input("language").on("change", function() {
 						var lang = $(this).val();
+						frappe._messages = {};
 						frappe.call({
 							method: "erpnext.setup.page.setup_wizard.setup_wizard.load_messages",
 							args: {
@@ -240,6 +241,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"help": __("List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 				"fields": [],
 				before_load: function(slide) {
+					slide.fields = [];
 					for(var i=1; i<4; i++) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Data", fieldname:"tax_"+ i, label:__("Tax") + " " + i,
@@ -259,6 +261,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"help": __("List a few of your customers. They could be organizations or individuals."),
 				"fields": [],
 				before_load: function(slide) {
+					slide.fields = [];
 					for(var i=1; i<6; i++) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Data", fieldname:"customer_" + i, label:__("Customer") + " " + i,
@@ -279,6 +282,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"help": __("List a few of your suppliers. They could be organizations or individuals."),
 				"fields": [],
 				before_load: function(slide) {
+					slide.fields = [];
 					for(var i=1; i<6; i++) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Data", fieldname:"supplier_" + i, label:__("Supplier")+" " + i,
@@ -299,6 +303,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				"help": __("List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start."),
 				"fields": [],
 				before_load: function(slide) {
+					slide.fields = [];
 					for(var i=1; i<6; i++) {
 						slide.fields = slide.fields.concat([
 							{fieldtype:"Section Break", show_section_border: true},
@@ -307,10 +312,10 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 							{fieldtype: "Check", fieldname: "is_sales_item_" + i, label:__("We sell this Item")},
 							{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
 							{fieldtype:"Column Break"},
-							{fieldtype:"Select", label:"Group", fieldname:"item_group_" + i,
+							{fieldtype:"Select", label:__("Group"), fieldname:"item_group_" + i,
 								options:[__("Products"), __("Services"),
 									__("Raw Material"), __("Consumable"), __("Sub Assemblies")]},
-							{fieldtype:"Select", fieldname:"item_uom_" + i, label:"UOM",
+							{fieldtype:"Select", fieldname:"item_uom_" + i, label:__("UOM"),
 								options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
 									__("Hour"), __("Minute")]},
 							{fieldtype:"Attach", fieldname:"item_img_" + i, label:__("Attach Image")},
