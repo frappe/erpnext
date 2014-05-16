@@ -32,7 +32,7 @@
   {
    "fieldname": "cb0", 
    "fieldtype": "Column Break", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "permlevel": 0
   }, 
   {
@@ -162,7 +162,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-05-04 00:06:26.075492", 
+ "modified": "2014-05-16 15:26:47.322787", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 

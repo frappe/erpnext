@@ -120,18 +120,21 @@ class JournalVoucher(AccountsController):
 			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_and_credit(self):
-		self.total_debit, self.total_credit = 0, 0
+		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 
 		for d in self.get("entries"):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit)
-			self.total_credit = flt(self.total_credit) + flt(d.credit)
+			self.total_debit = flt(self.total_debit) + flt(d.debit, self.precision("debit", "entries"))
+			self.total_credit = flt(self.total_credit) + flt(d.credit, self.precision("credit", "entries"))
 
-		if abs(self.total_debit-self.total_credit) > 0.001:
+		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
+			flt(self.total_credit, self.precision("total_credit"))
+
+		if self.difference:
 			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
-				.format(self.total_debit - self.total_credit))
+				.format(self.difference))
 
 	def create_remarks(self):
 		r = []
@@ -254,8 +257,8 @@ class JournalVoucher(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"against": d.against_account,
-						"debit": d.debit,
-						"credit": d.credit,
+						"debit": flt(d.debit, self.precision("debit", "entries")),
+						"credit": flt(d.credit, self.precision("credit", "entries")),
 						"against_voucher_type": ((d.against_voucher and "Purchase Invoice")
 							or (d.against_invoice and "Sales Invoice")
 							or (d.against_jv and "Journal Voucher")),
@@ -279,7 +282,7 @@ class JournalVoucher(AccountsController):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 		else:
 			flag, self.total_debit, self.total_credit = 0, 0, 0
-			diff = flt(self.difference, 2)
+			diff = flt(self.difference, self.precision("difference"))
 
 			# If any row without amount, set the diff on that row
 			for d in self.get('entries'):
@@ -298,45 +301,44 @@ class JournalVoucher(AccountsController):
 				elif diff<0:
 					jd.debit = abs(diff)
 
-			# Set the total debit, total credit and difference
-			for d in self.get('entries'):
-				self.total_debit += flt(d.debit, 2)
-				self.total_credit += flt(d.credit, 2)
-
-			self.difference = flt(self.total_debit, 2) - flt(self.total_credit, 2)
+			self.validate_debit_and_credit()
 
 	def get_outstanding_invoices(self):
 		self.set('entries', [])
 		total = 0
 		for d in self.get_values():
-			total += flt(d[2])
-			jd = self.append('entries', {})
-			jd.account = cstr(d[1])
+			total += flt(d.outstanding_amount, self.precision("credit", "entries"))
+			jd1 = self.append('entries', {})
+			jd1.account = d.account
+
 			if self.write_off_based_on == 'Accounts Receivable':
-				jd.credit = flt(d[2])
-				jd.against_invoice = cstr(d[0])
+				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "entries"))
+				jd1.against_invoice = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
-				jd.debit = flt(d[2])
-				jd.against_voucher = cstr(d[0])
-			jd.save(1)
-		jd = self.append('entries', {})
+				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "entries"))
+				jd1.against_voucher = cstr(d.name)
+
+		jd2 = self.append('entries', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd.debit = total
+			jd2.debit = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd.credit = total
-		jd.save(1)
+			jd2.credit = total
+
+		self.validate_debit_and_credit()
+
 
 	def get_values(self):
-		cond = (flt(self.write_off_amount) > 0) and \
-			' and outstanding_amount <= '+ self.write_off_amount or ''
+		cond = " and outstanding_amount <= {0}".format(self.write_off_amount) \
+			if flt(self.write_off_amount) > 0 else ""
+
 		if self.write_off_based_on == 'Accounts Receivable':
-			return frappe.db.sql("""select name, debit_to, outstanding_amount
+			return frappe.db.sql("""select name, debit_to as account, outstanding_amount
 				from `tabSales Invoice` where docstatus = 1 and company = %s
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.company)
+				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
 		elif self.write_off_based_on == 'Accounts Payable':
-			return frappe.db.sql("""select name, credit_to, outstanding_amount
+			return frappe.db.sql("""select name, credit_to as account, outstanding_amount
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.company)
+				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
