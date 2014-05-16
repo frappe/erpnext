@@ -325,7 +325,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:17:14.634335", 
+ "modified": "2014-05-16 08:39:29.467100", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -346,6 +346,7 @@
   }, 
   {
    "amend": 1, 
+   "can_restrict": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

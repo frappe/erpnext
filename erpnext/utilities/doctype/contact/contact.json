@@ -199,7 +199,7 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2014-05-07 06:39:39.702149", 
+ "modified": "2014-05-16 08:37:31.462441", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 
@@ -285,6 +285,7 @@
    "write": 1
   }, 
   {
+   "can_restrict": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 

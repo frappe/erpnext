@@ -20,7 +20,7 @@
  ], 
  "icon": "icon-code-fork", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:31.752490", 
+ "modified": "2014-05-16 08:38:50.590068", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Branch", 
@@ -40,6 +40,7 @@
    "write": 1
   }, 
   {
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

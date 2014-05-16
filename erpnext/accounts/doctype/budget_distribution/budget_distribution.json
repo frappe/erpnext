@@ -40,7 +40,7 @@
  ], 
  "icon": "icon-bar-chart", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:47.567367", 
+ "modified": "2014-05-16 08:37:11.509034", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget Distribution", 
@@ -49,6 +49,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

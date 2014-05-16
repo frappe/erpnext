@@ -744,7 +744,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:52.618986", 
+ "modified": "2014-05-16 08:38:19.327358", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -794,6 +794,7 @@
   }, 
   {
    "amend": 1, 
+   "can_restrict": 0, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

@@ -832,13 +832,14 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-05-12 07:54:58.118118", 
+ "modified": "2014-05-16 08:42:20.542203", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -854,6 +855,7 @@
   }, 
   {
    "amend": 0, 
+   "can_restrict": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

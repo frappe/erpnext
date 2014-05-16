@@ -33,13 +33,14 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-05-06 12:13:17.646235", 
+ "modified": "2014-05-16 08:42:33.001370", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

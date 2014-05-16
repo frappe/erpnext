@@ -136,7 +136,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-07 06:32:11.724588", 
+ "modified": "2014-05-16 08:44:40.530089", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Territory", 
@@ -145,6 +145,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
@@ -159,6 +160,7 @@
   }, 
   {
    "amend": 0, 
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
