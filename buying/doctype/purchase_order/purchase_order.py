@@ -49,6 +49,9 @@ class DocType(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.create_raw_materials_supplied("po_raw_material_details")
+# Added on 17-05-2014
+# Validation added for Service PO to check the material group is Service or Hired material
+		self.validate_service_po_type()
 
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -63,6 +66,28 @@ class DocType(BuyingController):
 				"is_child_table": True
 			}
 		})
+
+# Added on 17-05-2014
+# Validation added for Service PO to check the material group is Service or Hired material
+
+	def validate_service_po_type(self):
+		if self.doc.is_service == 1 :
+			
+			for d in getlist(self.doclist, 'po_details'):
+				#1. Check if is_service_item == 'Yes'
+				if webnotes.conn.get_value("Item", d.item_code, "item_group") != "Services" :
+					msgprint((" '%s' is not a 'Services' item group." % cstr(d.item_code)), raise_exception=1)
+					continue
+
+				
+
+		else:
+			for d in getlist(self.doclist, 'po_details'):
+				#1. Check if is_service_item == 'No'
+				if webnotes.conn.get_value("Item", d.item_code, "item_group") == "Services":
+					msgprint((" '%s' is a 'Services' item group." % cstr(d.item_code)), raise_exception=1)
+					continue
+#------------------------------------------------------------------------------------------
 
 	def get_schedule_dates(self):
 		for d in getlist(self.doclist, 'po_details'):
@@ -131,7 +156,7 @@ class DocType(BuyingController):
 		date_diff = webnotes.conn.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.doc.modified)))
 
 		if date_diff and date_diff[0][0]:
-			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refresh. ")
+			msgprint(cstr(self.doc.doctype) +" => "+ cstr(self.doc.name) +" has been modified. Please Refreesh. ")
 			raise Exception
 
 	def update_status(self, status):
