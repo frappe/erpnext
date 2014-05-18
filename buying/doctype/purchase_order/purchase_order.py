@@ -52,6 +52,7 @@ class DocType(BuyingController):
 # Added on 17-05-2014
 # Validation added for Service PO to check the material group is Service or Hired material
 		self.validate_service_po_type()
+		self.validate_hired_mat_type()
 
 	def validate_with_previous_doc(self):
 		super(DocType, self).validate_with_previous_doc(self.tname, {
@@ -75,7 +76,7 @@ class DocType(BuyingController):
 			
 			for d in getlist(self.doclist, 'po_details'):
 				#1. Check if is_service_item == 'Yes'
-				if webnotes.conn.get_value("Item", d.item_code, "item_group") != "Services" :
+				if webnotes.conn.get_value("Item", d.item_code, "item_group") != "Services"  :
 					msgprint((" '%s' is not a 'Services' item group." % cstr(d.item_code)), raise_exception=1)
 					continue
 
@@ -87,6 +88,17 @@ class DocType(BuyingController):
 				if webnotes.conn.get_value("Item", d.item_code, "item_group") == "Services":
 					msgprint((" '%s' is a 'Services' item group." % cstr(d.item_code)), raise_exception=1)
 					continue
+
+	def validate_hired_mat_type(self):
+
+		for d in getlist(self.doclist, 'po_details'):
+			#1. Check if item_group is Hired material
+			if webnotes.conn.get_value("Item", d.item_code, "item_group") == "Hireing material":
+				if d.purchase_rate > 0 :
+
+					msgprint((" '%s' is hired material,  price should be 0." % cstr(d.item_code)), raise_exception=1)
+					continue
+
 #------------------------------------------------------------------------------------------
 
 	def get_schedule_dates(self):

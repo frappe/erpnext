@@ -42,6 +42,9 @@ class DocType(DocListController, WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_item_type_for_reorder()
+#Validation added for Hireing material group -18-05-2014
+		self.validate_item_group_hireing()
+		self.validate_item_group_service()
 
 		if self.doc.name:
 			self.old_page_name = webnotes.conn.get_value('Item', self.doc.name, 'page_name')
@@ -122,7 +125,23 @@ class DocType(DocListController, WebsiteGenerator):
 
 		if self.doc.has_serial_no == 'Yes' and self.doc.is_stock_item == 'No':
 			msgprint("'Has Serial No' can not be 'Yes' for non-stock item", raise_exception=1)
-			
+
+	#Validation added 18-05-2014
+	def validate_item_group_hireing(self):
+		if cstr(self.doc.item_group) == "Hireing material":
+			if self.doc.standard_rate > 0  :
+				msgprint((" '%s' is a 'Hireing Material', price cannot be maintained." % cstr(self.doc.item_code)), 						raise_exception=1)
+			if self.doc.is_manufactured_item == "Yes":			
+				msgprint((" '%s' is a 'Hireing Material', BOM cannot be maintained." % cstr(self.doc.item_code)), 						raise_exception=1)
+	def validate_item_group_service(self):
+		if cstr(self.doc.item_group) == "Services":
+			if self.doc.is_manufactured_item == "Yes":			
+				msgprint((" '%s' is a 'Service', BOM cannot be maintained." % cstr(self.doc.item_code)), 						raise_exception=1)
+
+	
+
+
+
 	def check_for_active_boms(self):
 		if self.doc.is_purchase_item != "Yes":
 			bom_mat = webnotes.conn.sql("""select distinct t1.parent 
