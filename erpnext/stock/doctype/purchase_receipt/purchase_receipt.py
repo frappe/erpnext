@@ -34,7 +34,7 @@ class PurchaseReceipt(BuyingController):
 			where purchase_receipt=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("purchase_receipt_details")))
-			self.set("__billing_complete", billed_qty[0][0] == total_qty)
+			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()

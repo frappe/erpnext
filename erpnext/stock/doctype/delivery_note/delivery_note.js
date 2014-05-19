@@ -17,7 +17,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 
-		if(!doc.__billing_complete && doc.docstatus==1) {
+		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1) {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
 			from_sales_invoice = cur_frm.doc.delivery_note_details.some(function(item) {

@@ -13,7 +13,7 @@ class WarehouseNotSet(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	def onload(self):
-		self.set("__sle_exists", self.check_if_sle_exists())
+		self.get("__onload").sle_exists = self.check_if_sle_exists()
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":

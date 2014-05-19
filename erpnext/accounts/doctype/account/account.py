@@ -12,16 +12,9 @@ class Account(Document):
 
 	def onload(self):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings", "frozen_accounts_modifier")
-		print frozen_accounts_modifier
 		if frozen_accounts_modifier in frappe.user.get_roles():
-			self.can_freeze_account = True
+			self.get("__onload").can_freeze_account = True
 
-	def as_dict(self, no_nulls=False):
-		doc = super(Account, self).as_dict(no_nulls)
-		if self.get("can_freeze_account"):
-			doc["can_freeze_account"] = self.can_freeze_account
-
-		return doc
 
 	def autoname(self):
 		self.name = self.account_name.strip() + ' - ' + \

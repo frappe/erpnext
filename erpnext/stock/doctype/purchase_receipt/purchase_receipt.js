@@ -16,9 +16,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this._super();
 
 		if(this.frm.doc.docstatus == 1) {
-			if(!this.frm.doc.__billing_complete) {
-				cur_frm.add_custom_button(__('Make Purchase Invoice'),
-					this.make_purchase_invoice);
+			if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
+				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
 
