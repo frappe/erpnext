@@ -22,7 +22,7 @@ def get_permission_query_conditions():
 	ignore_restrictions = frappe.user.ignore_restrictions
 
 	can_read_doctypes = ['"{}"'.format(doctype) for doctype in
-		list(set(can_read) + set(ignore_restrictions) - set(restrictions.keys()))]
+		list(set(can_read + ignore_restrictions) - set(restrictions.keys()))]
 
 	if not can_read_doctypes:
 		return ""
