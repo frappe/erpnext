@@ -19,10 +19,10 @@ def on_doctype_update():
 def get_permission_query_conditions():
 	restrictions = frappe.defaults.get_restrictions()
 	can_read = frappe.user.get_can_read()
-	dont_restrict = frappe.user.dont_restrict
+	ignore_restrictions = frappe.user.ignore_restrictions
 
 	can_read_doctypes = ['"{}"'.format(doctype) for doctype in
-		list(set(can_read) + set(dont_restrict) - set(restrictions.keys()))]
+		list(set(can_read) + set(ignore_restrictions) - set(restrictions.keys()))]
 
 	if not can_read_doctypes:
 		return ""
@@ -37,7 +37,7 @@ def get_permission_query_conditions():
 	if restrictions:
 		can_read_docs = []
 		for doctype, names in restrictions.items():
-			if doctype in dont_restrict:
+			if doctype in ignore_restrictions:
 				continue
 
 			for n in names:

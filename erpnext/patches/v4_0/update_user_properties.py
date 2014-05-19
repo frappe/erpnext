@@ -11,7 +11,7 @@ def execute():
 	frappe.reload_doc("hr", "doctype", "employee")
 
 	# set don't restrict, to preserve old permission logic
-	frappe.db.sql("""update `tabDocPerm` set `dont_restrict`=1 where ifnull(match, '')=''
+	frappe.db.sql("""update `tabDocPerm` set `ignore_restrictions`=1 where ifnull(match, '')=''
 		and permlevel=0 and read=1""")
 	frappe.clear_cache()
 

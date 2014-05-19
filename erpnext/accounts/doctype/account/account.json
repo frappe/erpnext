@@ -282,7 +282,7 @@
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 
-   "dont_restrict": 0, 
+   "ignore_restrictions": 0, 
    "email": 1, 
    "export": 1, 
    "import": 1, 
