@@ -88,6 +88,7 @@ class StatusUpdater(Document):
 
 	def on_communication(self):
 		self.communication_set = True
+		self.get("communications").sort(key=lambda d: d.creation)
 		self.set_status(update=True)
 		del self.communication_set
 
