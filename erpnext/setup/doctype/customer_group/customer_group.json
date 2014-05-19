@@ -101,7 +101,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-07 06:39:41.073285", 
+ "modified": "2014-05-16 08:44:31.641527", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Customer Group", 
@@ -109,6 +109,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -137,6 +138,7 @@
   }, 
   {
    "amend": 0, 
+   "can_restrict": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:industry", 
- "creation": "2012-03-27 14:36:09.000000", 
+ "creation": "2012-03-27 14:36:09", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +9,7 @@
   {
    "fieldname": "industry", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Industry", 
    "oldfieldname": "industry", 
    "oldfieldtype": "Data", 
@@ -18,7 +19,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2013-12-20 19:24:08.000000", 
+ "modified": "2014-05-16 08:44:33.627703", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Industry Type", 
@@ -43,6 +44,7 @@
    "role": "Sales User"
   }, 
   {
+   "can_restrict": 1, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 

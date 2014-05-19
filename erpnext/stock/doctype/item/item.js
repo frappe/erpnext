@@ -143,7 +143,7 @@ cur_frm.cscript.add_image = function(doc, dt, dn) {
 	doc.description_html = repl('<table style="width: 100%; table-layout: fixed;">' +
 		'<tr><td style="width:110px"><img src="%(imgurl)s" width="100px"></td>' +
 		'<td>%(desc)s</td></tr>' +
-		'</table>', {imgurl: frappe.utils.get_file_link(doc.image), desc:doc.description});
+		'</table>', {imgurl: doc.image, desc:doc.description});
 
 	refresh_field('description_html');
 }

@@ -1,6 +1,6 @@
 {
  "autoname": "field:chart_name", 
- "creation": "2014-03-05 14:11:31.000000", 
+ "creation": "2014-03-05 14:11:31", 
  "description": "Financial Chart of Accounts. Imported from file.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -41,13 +41,14 @@
  ], 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-03-05 14:51:05.000000", 
+ "modified": "2014-05-16 08:37:40.251035", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Chart of Accounts", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "can_restrict": 0, 
    "export": 0, 
    "permlevel": 0, 
    "print": 1, 

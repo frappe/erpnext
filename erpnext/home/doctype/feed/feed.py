@@ -19,18 +19,27 @@ def on_doctype_update():
 def get_permission_query_conditions():
 	restrictions = frappe.defaults.get_restrictions()
 	can_read = frappe.user.get_can_read()
+	ignore_restrictions = frappe.user.ignore_restrictions
 
 	can_read_doctypes = ['"{}"'.format(doctype) for doctype in
-		list(set(can_read) - set(restrictions.keys()))]
+		list(set(can_read + ignore_restrictions) - set(restrictions.keys()))]
 
 	if not can_read_doctypes:
 		return ""
 
-	conditions = ["tabFeed.doc_type in ({})".format(", ".join(can_read_doctypes))]
+	conditions = [
+		"tabFeed.doc_type in ({})".format(", ".join(can_read_doctypes)),
+
+		'(tabFeed.owner = "{}" and tabFeed.doc_type in ({}))'.format(frappe.session.user,
+			", ".join(['"{}"'.format(doctype) for doctype in can_read]))
+	]
 
 	if restrictions:
 		can_read_docs = []
 		for doctype, names in restrictions.items():
+			if doctype in ignore_restrictions:
+				continue
+
 			for n in names:
 				can_read_docs.append('"{}|{}"'.format(doctype, n))
 
