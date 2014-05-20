@@ -13,8 +13,7 @@ from frappe.utils.email_lib import sendmail
 from frappe.core.doctype.user.user import STANDARD_USERS
 
 content_sequence = [
-	# ["Income / Expenses", ["income_year_to_date", "bank_balance",
-	# 	"income", "expenses_booked"]],
+	["Income / Expenses", ["income_year_to_date", "income", "expenses_booked"]],
 	["Receivables / Payables", ["collections", "payments",
 		"invoiced_amount", "payables"]],
 	["Bank Balance", ["bank_balance"]],
@@ -154,9 +153,9 @@ class EmailDigest(Document):
 
 		return msg
 
-	# def get_income_year_to_date(self):
-	# 	return self.get_income(frappe.db.get_defaults("year_start_date"),
-	# 		self.meta.get_label("income_year_to_date"))
+	def get_income_year_to_date(self):
+		return self.get_income(frappe.db.get_defaults("year_start_date"),
+			self.meta.get_label("income_year_to_date"))
 
 	def get_bank_balance(self):
 		# account is of type "Bank" or "Cash"
@@ -169,36 +168,34 @@ class EmailDigest(Document):
 				accounts[gle["account"]][1] += gle["debit"] - gle["credit"]
 
 		# build html
-		out = self.get_html("Bank/Cash Balance", "", "")
+		out = self.get_html("Bank/Cash Balance as on " + formatdate(self.to_date), "", "")
 		for ac in ackeys:
 			if accounts[ac][1]:
 				out += "\n" + self.get_html(accounts[ac][0], self.currency,
 					fmt_money(accounts[ac][1]), style="margin-left: 17px")
 		return sum((accounts[ac][1] for ac in ackeys)), out
 
-	# def get_income(self, from_date=None, label=None):
-	# 	# account is PL Account and Credit type account
-	# 	accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Income"]
-	#
-	# 	income = 0
-	# 	for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
-	# 		if gle["account"] in accounts:
-	# 			income += gle["credit"] - gle["debit"]
-	#
-	# 	return income, self.get_html(label or self.meta.get_label("income"), self.currency,
-	# 		fmt_money(income))
-	#
-	# def get_expenses_booked(self):
-	# 	# account is PL Account and Debit type account
-	# 	accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Expense"]
-	#
-	# 	expense = 0
-	# 	for gle in self.get_gl_entries(self.from_date, self.to_date):
-	# 		if gle["account"] in accounts:
-	# 			expense += gle["debit"] - gle["credit"]
-	#
-	# 	return expense, self.get_html(self.meta.get_label("expenses_booked"), self.currency,
-	# 		fmt_money(expense))
+	def get_income(self, from_date=None, label=None):
+		accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Income"]
+
+		income = 0
+		for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				income += gle["credit"] - gle["debit"]
+
+		return income, self.get_html(label or self.meta.get_label("income"), self.currency,
+			fmt_money(income))
+
+	def get_expenses_booked(self):
+		accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Expense"]
+
+		expense = 0
+		for gle in self.get_gl_entries(self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				expense += gle["debit"] - gle["credit"]
+
+		return expense, self.get_html(self.meta.get_label("expenses_booked"), self.currency,
+			fmt_money(expense))
 
 	def get_collections(self):
 		return self.get_party_total("Customer", "credit", self.meta.get_label("collections"))
@@ -390,7 +387,7 @@ class EmailDigest(Document):
 
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
-			self.accounts = frappe.db.sql("""select name, account_type, account_name, master_type
+			self.accounts = frappe.db.sql("""select name, account_type, account_name, master_type, root_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
 				(self.company,), as_dict=1)

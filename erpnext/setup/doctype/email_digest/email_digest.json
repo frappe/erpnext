@@ -96,7 +96,7 @@
   {
    "fieldname": "income_year_to_date", 
    "fieldtype": "Check", 
-   "hidden": 1, 
+   "hidden": 0, 
    "label": "Income Year to Date", 
    "permlevel": 0
   }, 
@@ -104,7 +104,7 @@
    "description": "Income booked for the digest period", 
    "fieldname": "income", 
    "fieldtype": "Check", 
-   "hidden": 1, 
+   "hidden": 0, 
    "label": "Income Booked", 
    "permlevel": 0
   }, 
@@ -112,22 +112,8 @@
    "description": "Expenses booked for the digest period", 
    "fieldname": "expenses_booked", 
    "fieldtype": "Check", 
-   "hidden": 1, 
+   "hidden": 0, 
    "label": "Expenses Booked", 
-   "permlevel": 0
-  }, 
-  {
-   "description": "Payments received during the digest period", 
-   "fieldname": "collections", 
-   "fieldtype": "Check", 
-   "label": "Payments Received", 
-   "permlevel": 0
-  }, 
-  {
-   "description": "Payments made during the digest period", 
-   "fieldname": "payments", 
-   "fieldtype": "Check", 
-   "label": "Payments Made", 
    "permlevel": 0
   }, 
   {
@@ -149,6 +135,20 @@
    "fieldname": "payables", 
    "fieldtype": "Check", 
    "label": "Payables", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Payments received during the digest period", 
+   "fieldname": "collections", 
+   "fieldtype": "Check", 
+   "label": "Payments Received", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "Payments made during the digest period", 
+   "fieldname": "payments", 
+   "fieldtype": "Check", 
+   "label": "Payments Made", 
    "permlevel": 0
   }, 
   {
@@ -328,7 +328,7 @@
  ], 
  "icon": "icon-envelope", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:43.979204", 
+ "modified": "2014-05-20 14:02:36.762220", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Email Digest", 
