@@ -57,6 +57,7 @@ var calculate_totals = function(doc, cdt, cdn) {
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	calculate_totals(doc, cdt, cdn);
+	if(doc.employee && doc.is_active == "Yes") frappe.model.clear_doc("Employee", doc.employee);
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {

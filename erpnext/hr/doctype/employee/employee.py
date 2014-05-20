@@ -14,16 +14,8 @@ from frappe.model.mapper import get_mapped_doc
 
 class Employee(Document):
 	def onload(self):
-		self.salary_structure_exists = frappe.db.get_value("Salary Structure",
+		self.get("__onload").salary_structure_exists = frappe.db.get_value("Salary Structure",
 			{"employee": self.name, "is_active": "Yes", "docstatus": ["!=", 2]})
-
-	def as_dict(self, no_nulls=False):
-		doc = super(Employee, self).as_dict(no_nulls)
-
-		if hasattr(self, "salary_structure_exists"):
-			doc["salary_structure_exists"] = self.salary_structure_exists
-
-		return doc
 
 	def autoname(self):
 		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")

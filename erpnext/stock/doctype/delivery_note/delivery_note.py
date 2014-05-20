@@ -37,7 +37,7 @@ class DeliveryNote(SellingController):
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
-			self.set("__billing_complete", billed_qty[0][0] == total_qty)
+			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
 
 	def get_portal_page(self):
 		return "shipment" if self.docstatus==1 else None

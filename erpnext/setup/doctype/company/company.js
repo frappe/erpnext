@@ -9,7 +9,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 
 	if(!doc.__islocal) {
-		cur_frm.toggle_enable("default_currency", !cur_frm.doc.__transactions_exist);
+		cur_frm.toggle_enable("default_currency", (cur_frm.doc.__onload &&
+			!cur_frm.doc.__onload.transactions_exist));
 	}
 }
 

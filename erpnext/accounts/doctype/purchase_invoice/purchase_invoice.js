@@ -110,6 +110,12 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	entries_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_account", "cost_center"]);
+	},
+
+	on_submit: function() {
+		$.each(this.frm.doc["entries"], function(i, row) {
+			if(row.purchase_receipt) frappe.model.clear_doc("Purchase Receipt", row.purchase_receipt)
+		})
 	}
 });
 
