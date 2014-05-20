@@ -83,6 +83,13 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "root_type", 
+   "fieldtype": "Select", 
+   "label": "Root Type", 
+   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "report_type", 
    "fieldtype": "Select", 
    "label": "Report Type", 
@@ -200,7 +207,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-12 17:03:19.733139", 
+ "modified": "2014-05-20 11:44:53.012945", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 

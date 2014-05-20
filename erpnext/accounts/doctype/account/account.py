@@ -42,7 +42,7 @@ class Account(Document):
 		"""Fetch Parent Details and validation for account not to be created under ledger"""
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["name", "group_or_ledger", "report_type"], as_dict=1)
+				["name", "group_or_ledger", "report_type", "root_type"], as_dict=1)
 			if not par:
 				throw(_("Parent account does not exist"))
 			elif par["name"] == self.name:
@@ -52,6 +52,8 @@ class Account(Document):
 
 			if par["report_type"]:
 				self.report_type = par["report_type"]
+			if par["root_type"]:
+				self.root_type - par["root_type"]
 
 	def validate_root_details(self):
 		#does not exists parent
@@ -98,6 +100,9 @@ class Account(Document):
 	def validate_mandatory(self):
 		if not self.report_type:
 			throw(_("Report Type is mandatory"))
+
+		if not self.root_type:
+			throw(_("Root Type is mandatory"))
 
 	def validate_warehouse_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -194,10 +199,10 @@ class Account(Document):
 				throw(_("Account {0} does not exist").format(new))
 
 			val = list(frappe.db.get_value("Account", new_account,
-				["group_or_ledger", "report_type", "company"]))
+				["group_or_ledger", "root_type", "company"]))
 
-			if val != [self.group_or_ledger, self.report_type, self.company]:
-				throw(_("""Merging is only possible if following properties are same in both records. Group or Ledger, Report Type, Company"""))
+			if val != [self.group_or_ledger, self.root_type, self.company]:
+				throw(_("""Merging is only possible if following properties are same in both records. Group or Ledger, Root Type, Company"""))
 
 		return new_account
 

@@ -49,6 +49,7 @@ cur_frm.cscript.master_type = function(doc, cdt, cdn) {
 }
 
 cur_frm.add_fetch('parent_account', 'report_type', 'report_type');
+cur_frm.add_fetch('parent_account', 'root_type', 'root_type');
 
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
