@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reoad_doc("accounts", "doctype", "account")
+
 	account_table_columns = frappe.db.get_table_columns("Account")
 	if "debit_or_credit" in account_table_columns and "is_pl_account" in account_table_columns:
 		frappe.db.sql("""UPDATE tabAccount SET root_type = CASE
