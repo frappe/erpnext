@@ -19,7 +19,9 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 				function(user) {
 					return {value: user, label: frappe.user_info(user).fullname};
 				}));
+
 			if(leave_approver) cur_frm.set_value("leave_approver", leave_approver);
+
 			cur_frm.cscript.get_leave_balance(cur_frm.doc);
 		}
 	});

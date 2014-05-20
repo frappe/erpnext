@@ -17,7 +17,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 
-		if(!doc.__billing_complete && doc.docstatus==1) {
+		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1) {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
 			from_sales_invoice = cur_frm.doc.delivery_note_details.some(function(item) {
@@ -70,14 +70,14 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	make_sales_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 
 	make_installation_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		});
 	},
 

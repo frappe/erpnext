@@ -10,9 +10,10 @@ frappe.listview_settings['Time Log'] = {
 			var selected = me.get_checked_items() || [];
 
 			if(!selected.length) {
-				msgprint(__("Please select Time Logs."))
+				msgprint(__("Please select Time Logs."));
+				return;
 			}
-			
+
 			// select only billable time logs
 			for(var i in selected) {
 				var d = selected[i];
@@ -22,27 +23,27 @@ frappe.listview_settings['Time Log'] = {
 				}
 				if(d.status!="Submitted") {
 					msgprint(__("Time Log Status must be Submitted."));
+					return
 				}
 			}
-			
+
 			// make batch
 			frappe.model.with_doctype("Time Log Batch", function() {
 				var tlb = frappe.model.get_new_doc("Time Log Batch");
 				$.each(selected, function(i, d) {
-					var detail = frappe.model.get_new_doc("Time Log Batch Detail");
+					var detail = frappe.model.get_new_doc("Time Log Batch Detail", tlb,
+						"time_log_batch_details");
+
 					$.extend(detail, {
-						"parenttype": "Time Log Batch",
-						"parentfield": "time_log_batch_details",
-						"parent": tlb.name,
 						"time_log": d.name,
 						"activity_type": d.activity_type,
 						"created_by": d.owner,
-						"idx": i+1
+						"hours": d.hours
 					});
 				})
 				frappe.set_route("Form", "Time Log Batch", tlb.name);
 			})
-			
+
 		}, "icon-file-alt");
 	}
 };

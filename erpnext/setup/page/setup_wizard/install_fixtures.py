@@ -112,14 +112,14 @@ def install(country=None):
 		{'doctype': 'Sales Person', 'sales_person_name': _('Sales Team'), 'is_group': "Yes", "parent_sales_person": ""},
 
 		# UOM
-		{'uom_name': _('Unit'), 'doctype': 'UOM', 'name': 'Unit', "must_be_whole_number": 1},
-		{'uom_name': _('Box'), 'doctype': 'UOM', 'name': 'Box', "must_be_whole_number": 1},
-		{'uom_name': _('Kg'), 'doctype': 'UOM', 'name': 'Kg'},
-		{'uom_name': _('Nos'), 'doctype': 'UOM', 'name': 'Nos', "must_be_whole_number": 1},
-		{'uom_name': _('Pair'), 'doctype': 'UOM', 'name': 'Pair', "must_be_whole_number": 1},
-		{'uom_name': _('Set'), 'doctype': 'UOM', 'name': 'Set', "must_be_whole_number": 1},
-		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': 'Hour'},
-		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': 'Minute'},
+		{'uom_name': _('Unit'), 'doctype': 'UOM', 'name': _('Unit'), "must_be_whole_number": 1},
+		{'uom_name': _('Box'), 'doctype': 'UOM', 'name': _('Box'), "must_be_whole_number": 1},
+		{'uom_name': _('Kg'), 'doctype': 'UOM', 'name': _('Kg')},
+		{'uom_name': _('Nos'), 'doctype': 'UOM', 'name': _('Nos'), "must_be_whole_number": 1},
+		{'uom_name': _('Pair'), 'doctype': 'UOM', 'name': _('Pair'), "must_be_whole_number": 1},
+		{'uom_name': _('Set'), 'doctype': 'UOM', 'name': _('Set'), "must_be_whole_number": 1},
+		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': _('Hour')},
+		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
 
 		# Mode of Payment
 		{'doctype': 'Mode of Payment', 'mode_of_payment': 'Check' if country=="United States" else _('Cheque')},

@@ -1,7 +1,7 @@
 {
  "allow_attach": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-05-21 16:16:39.000000", 
+ "creation": "2013-05-21 16:16:39", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Transaction", 
@@ -28,7 +28,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "\nGRN", 
+   "options": "PREC-", 
    "permlevel": 0, 
    "print_hide": 1, 
    "reqd": 1
@@ -129,34 +129,6 @@
    "print_width": "100px", 
    "reqd": 1, 
    "search_index": 0, 
-   "width": "100px"
-  }, 
-  {
-   "fieldname": "challan_no", 
-   "fieldtype": "Data", 
-   "hidden": 1, 
-   "label": "Supplier Shipment No", 
-   "no_copy": 1, 
-   "oldfieldname": "challan_no", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "print_width": "100px", 
-   "reqd": 0, 
-   "width": "100px"
-  }, 
-  {
-   "fieldname": "challan_date", 
-   "fieldtype": "Date", 
-   "hidden": 1, 
-   "label": "Supplier Shipment Date", 
-   "no_copy": 1, 
-   "oldfieldname": "challan_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "print_width": "100px", 
-   "reqd": 0, 
    "width": "100px"
   }, 
   {
@@ -591,9 +563,9 @@
   {
    "allow_on_submit": 1, 
    "fieldname": "letter_head", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Letter Head", 
-   "options": "link:Letter Head", 
+   "options": "Letter Head", 
    "permlevel": 0, 
    "print_hide": 1
   }, 
@@ -630,12 +602,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "print_hide": 1, 
    "print_width": "150px", 
@@ -782,7 +754,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-02-17 12:01:00.000000", 
+ "modified": "2014-05-09 02:17:29.990590", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
@@ -831,6 +803,12 @@
    "write": 1
   }, 
   {
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Accounts User"
+  }, 
+  {
    "cancel": 0, 
    "delete": 0, 
    "email": 1, 
@@ -842,5 +820,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "status, posting_date, supplier"
+ "search_fields": "status, posting_date, supplier", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

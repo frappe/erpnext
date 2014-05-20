@@ -21,7 +21,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "OPPT", 
+   "options": "OPTY-", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -286,12 +286,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
@@ -409,7 +409,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-04-23 06:38:48.858871", 
+ "modified": "2014-05-09 02:16:41.042535", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 
@@ -444,5 +444,7 @@
    "write": 1
   }
  ], 
- "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company"
+ "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

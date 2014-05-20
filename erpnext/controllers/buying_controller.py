@@ -200,48 +200,82 @@ class BuyingController(StockController):
 			and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted Purchase Receipt"))
 
-	def update_raw_materials_supplied(self, raw_material_table):
-		self.set(raw_material_table, [])
+	def create_raw_materials_supplied(self, raw_material_table):
 		if self.is_subcontracted=="Yes":
+			parent_items = []
+			rm_supplied_idx = 0
 			for item in self.get(self.fname):
 				if self.doctype == "Purchase Receipt":
 					item.rm_supp_cost = 0.0
 				if item.item_code in self.sub_contracted_items:
-					self.add_bom_items(item, raw_material_table)
+					self.update_raw_materials_supplied(item, raw_material_table, rm_supplied_idx)
+
+					if [item.item_code, item.name] not in parent_items:
+						parent_items.append([item.item_code, item.name])
+
+			self.cleanup_raw_materials_supplied(parent_items, raw_material_table)
 
 		elif self.doctype == "Purchase Receipt":
 			for item in self.get(self.fname):
 				item.rm_supp_cost = 0.0
 
-	def add_bom_items(self, d, raw_material_table):
-		bom_items = self.get_items_from_default_bom(d.item_code)
+	def update_raw_materials_supplied(self, item, raw_material_table, rm_supplied_idx):
+		bom_items = self.get_items_from_default_bom(item.item_code)
 		raw_materials_cost = 0
-		for item in bom_items:
-			required_qty = flt(item.qty_consumed_per_unit) * flt(d.qty) * flt(d.conversion_factor)
-			rm_doclist = {
-				"doctype": self.doctype + " Item Supplied",
-				"reference_name": d.name,
-				"bom_detail_no": item.name,
-				"main_item_code": d.item_code,
-				"rm_item_code": item.item_code,
-				"stock_uom": item.stock_uom,
-				"required_qty": required_qty,
-				"conversion_factor": d.conversion_factor,
-				"rate": item.rate,
-				"amount": required_qty * flt(item.rate)
-			}
+
+		for bom_item in bom_items:
+			# check if exists
+			exists = 0
+			for d in self.get(raw_material_table):
+				if d.main_item_code == item.item_code and d.rm_item_code == bom_item.item_code \
+					and d.reference_name == item.name:
+						rm, exists = d, 1
+						break
+
+			if not exists:
+				rm = self.append(raw_material_table, {})
+
+			required_qty = flt(bom_item.qty_consumed_per_unit) * flt(item.qty) * flt(item.conversion_factor)
+			rm.reference_name = item.name
+			rm.bom_detail_no = bom_item.name
+			rm.main_item_code = item.item_code
+			rm.rm_item_code = bom_item.item_code
+			rm.stock_uom = bom_item.stock_uom
+			rm.required_qty = required_qty
+
+			rm.conversion_factor = item.conversion_factor
+			rm.rate = bom_item.rate
+			rm.amount = required_qty * flt(bom_item.rate)
+			rm.idx = rm_supplied_idx
+
 			if self.doctype == "Purchase Receipt":
-				rm_doclist.update({
-					"consumed_qty": required_qty,
-					"description": item.description,
-				})
+				rm.consumed_qty = required_qty
+				rm.description = bom_item.description
+				if item.batch_no and not rm.batch_no:
+					rm.batch_no = item.batch_no
 
-			self.append(raw_material_table, rm_doclist)
+			rm_supplied_idx += 1
 
-			raw_materials_cost += required_qty * flt(item.rate)
+			raw_materials_cost += required_qty * flt(bom_item.rate)
 
 		if self.doctype == "Purchase Receipt":
-			d.rm_supp_cost = raw_materials_cost
+			item.rm_supp_cost = raw_materials_cost
+
+	def cleanup_raw_materials_supplied(self, parent_items, raw_material_table):
+		"""Remove all those child items which are no longer present in main item table"""
+		delete_list = []
+		for d in self.get(raw_material_table):
+			if [d.main_item_code, d.reference_name] not in parent_items:
+				# mark for deletion from doclist
+				delete_list.append([d.main_item_code, d.reference_name])
+
+		# delete from doclist
+		if delete_list:
+			rm_supplied_details = self.get(raw_material_table)
+			self.set(raw_material_table, [])
+			for d in rm_supplied_details:
+				if d not in delete_list:
+					self.append(raw_material_table, d)
 
 	def get_items_from_default_bom(self, item_code):
 		bom_items = frappe.db.sql("""select t2.item_code, t2.qty_consumed_per_unit,

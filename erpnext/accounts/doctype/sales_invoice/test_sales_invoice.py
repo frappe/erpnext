@@ -6,6 +6,8 @@ import unittest, json, copy
 from frappe.utils import flt
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
+
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -365,27 +367,30 @@ class TestSalesInvoice(unittest.TestCase):
 			561.8)
 
 	def test_time_log_batch(self):
-		tlb = frappe.get_doc("Time Log Batch", "_T-Time Log Batch-00001")
+		delete_time_log_and_batch()
+		time_log = create_time_log()
+		tlb = create_time_log_batch(time_log)
+
+		tlb = frappe.get_doc("Time Log Batch", tlb.name)
 		tlb.submit()
 
 		si = frappe.get_doc(frappe.copy_doc(test_records[0]))
-		si.get("entries")[0].time_log_batch = "_T-Time Log Batch-00001"
+		si.get("entries")[0].time_log_batch = tlb.name
 		si.insert()
 		si.submit()
 
-		self.assertEquals(frappe.db.get_value("Time Log Batch", "_T-Time Log Batch-00001",
-		 	"status"), "Billed")
+		self.assertEquals(frappe.db.get_value("Time Log Batch", tlb.name, "status"), "Billed")
 
-		self.assertEquals(frappe.db.get_value("Time Log", "_T-Time Log-00001", "status"),
-			"Billed")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log, "status"), "Billed")
 
 		si.cancel()
 
-		self.assertEquals(frappe.db.get_value("Time Log Batch", "_T-Time Log Batch-00001",
-			"status"), "Submitted")
+		self.assertEquals(frappe.db.get_value("Time Log Batch", tlb.name, "status"), "Submitted")
 
-		self.assertEquals(frappe.db.get_value("Time Log", "_T-Time Log-00001", "status"),
-			"Batched for Billing")
+		self.assertEquals(frappe.db.get_value("Time Log", time_log, "status"), "Batched for Billing")
+
+		frappe.delete_doc("Sales Invoice", si.name)
+		delete_time_log_and_batch()
 
 	def test_sales_invoice_gl_entry_without_aii(self):
 		self.clear_stock_account_balance()
@@ -423,9 +428,9 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_gl_entry_with_aii(self):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
+		self.make_pos_setting()
 
 		self._insert_purchase_receipt()
-		self._insert_pos_settings()
 
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
@@ -478,6 +483,26 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(get_stock_and_account_difference([stock_in_hand]))
 
 		set_perpetual_inventory(0)
+
+		frappe.db.sql("delete from `tabPOS Setting`")
+
+	def make_pos_setting(self):
+		pos_setting = frappe.get_doc({
+			"cash_bank_account": "_Test Account Bank Account - _TC",
+			"company": "_Test Company",
+			"cost_center": "_Test Cost Center - _TC",
+			"currency": "INR",
+			"doctype": "POS Setting",
+			"expense_account": "_Test Account Cost for Goods Sold - _TC",
+			"income_account": "Sales - _TC",
+			"name": "_Test POS Setting",
+			"naming_series": "_T-POS Setting-",
+			"selling_price_list": "_Test Price List",
+			"territory": "_Test Territory",
+			"warehouse": "_Test Warehouse - _TC"
+		})
+
+		pos_setting.insert()
 
 	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
 		self.clear_stock_account_balance()
@@ -603,14 +628,6 @@ class TestSalesInvoice(unittest.TestCase):
 		dn.insert()
 		dn.submit()
 		return dn
-
-	def _insert_pos_settings(self):
-		from erpnext.accounts.doctype.pos_setting.test_pos_setting \
-			import test_records as pos_setting_test_records
-		frappe.db.sql("""delete from `tabPOS Setting`""")
-
-		ps = frappe.copy_doc(pos_setting_test_records[0])
-		ps.insert()
 
 	def test_sales_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
@@ -843,5 +860,5 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertRaises(SerialNoStatusError, si.submit)
 
-test_dependencies = ["Journal Voucher", "POS Setting", "Contact", "Address"]
+test_dependencies = ["Journal Voucher", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')

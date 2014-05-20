@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "LAL/.#####", 
- "creation": "2013-02-20 19:10:38.000000", 
+ "creation": "2013-02-20 19:10:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -15,6 +15,7 @@
    "fieldname": "employee", 
    "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Employee", 
    "oldfieldname": "employee", 
    "oldfieldtype": "Link", 
@@ -27,6 +28,7 @@
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Employee Name", 
    "permlevel": 0, 
    "read_only": 1, 
@@ -34,12 +36,13 @@
   }, 
   {
    "fieldname": "leave_type", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Leave Type", 
    "oldfieldname": "leave_type", 
    "oldfieldtype": "Link", 
-   "options": "link:Leave Type", 
+   "options": "Leave Type", 
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
@@ -49,6 +52,7 @@
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
+   "in_list_view": 1, 
    "label": "Posting Date", 
    "no_copy": 1, 
    "oldfieldname": "date", 
@@ -60,12 +64,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Data", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
@@ -132,7 +136,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-22 16:05:35.000000", 
+ "modified": "2014-05-09 02:16:39.508488", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Allocation", 
@@ -168,5 +172,7 @@
    "write": 1
   }
  ], 
- "search_fields": "employee,employee_name,leave_type,total_leaves_allocated,fiscal_year"
+ "search_fields": "employee,employee_name,leave_type,total_leaves_allocated,fiscal_year", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

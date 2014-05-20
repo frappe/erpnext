@@ -47,7 +47,7 @@ class StockReconciliation(StockController):
 			self.reconciliation_json = json.dumps(data)
 
 		def _get_msg(row_num, msg):
-			return _("Row # ") + ("%d: " % (row_num+head_row_no+2)) + _(msg)
+			return _("Row # {0}: ").format(row_num+head_row_no+2) + msg
 
 		self.validation_messages = []
 		item_warehouse_combinations = []
@@ -60,27 +60,30 @@ class StockReconciliation(StockController):
 		for row_num, row in enumerate(rows):
 			# find duplicates
 			if [row[0], row[1]] in item_warehouse_combinations:
-				self.validation_messages.append(_get_msg(row_num, "Duplicate entry"))
+				self.validation_messages.append(_get_msg(row_num, _("Duplicate entry")))
 			else:
 				item_warehouse_combinations.append([row[0], row[1]])
 
 			self.validate_item(row[0], row_num+head_row_no+2)
-			# note: warehouse will be validated through link validation
+
+			# validate warehouse
+			if not frappe.db.get_value("Warehouse", row[1]):
+				self.validation_messages.append(_get_msg(row_num, _("Warehouse not found in the system")))
 
 			# if both not specified
 			if row[2] == "" and row[3] == "":
 				self.validation_messages.append(_get_msg(row_num,
-					"Please specify either Quantity or Valuation Rate or both"))
+					_("Please specify either Quantity or Valuation Rate or both")))
 
 			# do not allow negative quantity
 			if flt(row[2]) < 0:
 				self.validation_messages.append(_get_msg(row_num,
-					"Negative Quantity is not allowed"))
+					_("Negative Quantity is not allowed")))
 
 			# do not allow negative valuation
 			if flt(row[3]) < 0:
 				self.validation_messages.append(_get_msg(row_num,
-					"Negative Valuation Rate is not allowed"))
+					_("Negative Valuation Rate is not allowed")))
 
 		# throw all validation messages
 		if self.validation_messages:
@@ -97,6 +100,8 @@ class StockReconciliation(StockController):
 
 		try:
 			item = frappe.get_doc("Item", item_code)
+			if not item:
+				raise frappe.ValidationError, (_("Item: {0} not found in the system").format(item_code))
 
 			# end of life and stock item
 			validate_end_of_life(item_code, item.end_of_life, verbose=0)
@@ -104,7 +109,13 @@ class StockReconciliation(StockController):
 
 			# item should not be serialized
 			if item.has_serial_no == "Yes":
-				raise frappe.ValidationError, _("Serialized Item {0} cannot be updated using Stock Reconciliation").format(item_code)
+				raise frappe.ValidationError, _("Serialized Item {0} cannot be updated \
+					using Stock Reconciliation").format(item_code)
+
+			# item managed batch-wise not allowed
+			if item.has_batch_no == "Yes":
+				raise frappe.ValidationError, _("Item: {0} managed batch-wise, can not be reconciled using \
+					Stock Reconciliation, instead use Stock Entry").format(item_code)
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
@@ -283,9 +294,8 @@ class StockReconciliation(StockController):
 		if not self.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
 		elif not frappe.db.sql("""select * from `tabStock Ledger Entry`"""):
-			if frappe.db.get_value("Account", self.expense_account,
-					"report_type") == "Profit and Loss":
-				frappe.throw(_("'Profit and Loss' type Account {0} used be set for Opening Entry").format(self.expense_account))
+			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
+				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"))
 
 @frappe.whitelist()
 def upload():

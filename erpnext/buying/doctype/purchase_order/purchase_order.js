@@ -43,14 +43,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	make_purchase_receipt: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 	
 	make_purchase_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	},
 	

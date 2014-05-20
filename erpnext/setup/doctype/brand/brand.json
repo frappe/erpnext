@@ -1,7 +1,8 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:brand", 
- "creation": "2013-02-22 01:27:54.000000", 
+ "creation": "2013-02-22 01:27:54", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +10,7 @@
   {
    "fieldname": "brand", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Brand Name", 
    "oldfieldname": "brand", 
    "oldfieldtype": "Data", 
@@ -19,6 +21,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Text", 
+   "in_list_view": 1, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Text", 
@@ -30,14 +33,14 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-01-20 17:48:27.000000", 
+ "modified": "2014-05-06 12:13:17.646235", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 1, 
+   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

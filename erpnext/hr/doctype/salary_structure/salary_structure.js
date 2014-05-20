@@ -21,7 +21,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn){
 cur_frm.cscript['Make Salary Slip'] = function() {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
-		source_name: cur_frm.doc.name
+		frm: cur_frm
 	});
 }
 
@@ -57,6 +57,7 @@ var calculate_totals = function(doc, cdt, cdn) {
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	calculate_totals(doc, cdt, cdn);
+	if(doc.employee && doc.is_active == "Yes") frappe.model.clear_doc("Employee", doc.employee);
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {

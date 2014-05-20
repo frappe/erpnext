@@ -14,18 +14,17 @@ frappe.provide("erpnext.stock");
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
-		
+
 		if(this.frm.doc.docstatus == 1) {
-			if(!this.frm.doc.__billing_complete) {
-				cur_frm.add_custom_button(__('Make Purchase Invoice'), 
-					this.make_purchase_invoice);
+			if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
+				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice);
 			}
 			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-			
+
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		} else {
-			cur_frm.add_custom_button(__(__('From Purchase Order')), 
+			cur_frm.add_custom_button(__(__('From Purchase Order')),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
@@ -40,12 +39,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					})
 				});
 		}
-
-		if(frappe.boot.sysdefaults.country == 'India') {
-			unhide_field(['challan_no', 'challan_date']);
-		}
 	},
-	
+
 	received_qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
@@ -53,30 +48,30 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		item.qty = (item.qty < item.received_qty) ? item.qty : item.received_qty;
 		this.qty(doc, cdt, cdn);
 	},
-	
+
 	qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-		
+
 		if(!(item.received_qty || item.rejected_qty) && item.qty) {
 			item.received_qty = item.qty;
 		}
-		
+
 		if(item.qty > item.received_qty) {
-			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)), 
+			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "qty", item.name)),
 						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]))
 			item.qty = item.rejected_qty = 0.0;
 		} else {
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 		}
-		
+
 		this._super();
 	},
-	
+
 	rejected_qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
-		
+
 		if(item.rejected_qty > item.received_qty) {
 			msgprint(__("Error: {0} > {1}", [__(frappe.meta.get_label(item.doctype, "rejected_qty", item.name)),
 						__(frappe.meta.get_label(item.doctype, "received_qty", item.name))]));
@@ -84,21 +79,21 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		} else {
 			item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		}
-		
+
 		this.qty(doc, cdt, cdn);
 	},
-	
+
 	make_purchase_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
-	}, 
+	},
 
 	tc_name: function() {
 		this.get_terms();
 	},
-		
+
 });
 
 // for backward compatibility: combine new and previous states

@@ -42,6 +42,10 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	}
 }
 
+cur_frm.cscript.validate = function(doc, dt, dn) {
+	if(doc.lead_name) frappe.model.clear_doc("Lead", doc.lead_name);
+}
+
 cur_frm.cscript.setup_dashboard = function(doc) {
 	cur_frm.dashboard.reset(doc);
 	if(doc.__islocal)

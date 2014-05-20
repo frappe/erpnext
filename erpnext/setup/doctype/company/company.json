@@ -63,6 +63,7 @@
   {
    "fieldname": "country", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 0, 
    "in_list_view": 1, 
    "label": "Country", 
    "options": "Country", 
@@ -72,6 +73,7 @@
   {
    "fieldname": "chart_of_accounts", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Chart of Accounts", 
    "options": "Chart of Accounts", 
    "permlevel": 0
@@ -88,6 +90,7 @@
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "default_bank_account", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Default Bank Account", 
    "no_copy": 1, 
    "oldfieldname": "default_bank_account", 
@@ -99,6 +102,7 @@
   {
    "fieldname": "default_cash_account", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Default Cash Account", 
    "no_copy": 1, 
    "options": "Account", 
@@ -109,6 +113,7 @@
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "receivables_group", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Receivables Group", 
    "no_copy": 1, 
    "oldfieldname": "receivables_group", 
@@ -121,6 +126,7 @@
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "payables_group", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Payables Group", 
    "no_copy": 1, 
    "oldfieldname": "payables_group", 
@@ -132,6 +138,7 @@
   {
    "fieldname": "default_expense_account", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Default Expense Account", 
    "no_copy": 1, 
    "options": "Account", 
@@ -140,6 +147,7 @@
   {
    "fieldname": "default_income_account", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Default Income Account", 
    "no_copy": 1, 
    "options": "Account", 
@@ -156,6 +164,7 @@
   {
    "fieldname": "default_currency", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Default Currency", 
    "options": "Currency", 
    "permlevel": 0, 
@@ -166,6 +175,7 @@
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Cost Center", 
    "no_copy": 1, 
    "options": "Cost Center", 
@@ -225,6 +235,7 @@
   {
    "fieldname": "stock_received_but_not_billed", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Stock Received But Not Billed", 
    "no_copy": 1, 
    "options": "Account", 
@@ -234,6 +245,7 @@
   {
    "fieldname": "stock_adjustment_account", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Stock Adjustment Account", 
    "no_copy": 1, 
    "options": "Account", 
@@ -243,6 +255,7 @@
   {
    "fieldname": "expenses_included_in_valuation", 
    "fieldtype": "Link", 
+   "ignore_restrictions": 1, 
    "label": "Expenses Included In Valuation", 
    "no_copy": 1, 
    "options": "Account", 
@@ -332,21 +345,11 @@
    "oldfieldtype": "Code", 
    "permlevel": 0, 
    "read_only": 0
-  }, 
-  {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "no_copy": 1, 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
   }
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-04-28 16:49:05.832905", 
+ "modified": "2014-05-07 06:39:40.682148", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

@@ -34,7 +34,7 @@ class PurchaseReceipt(BuyingController):
 			where purchase_receipt=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("purchase_receipt_details")))
-			self.set("__billing_complete", billed_qty[0][0] == total_qty)
+			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
@@ -53,7 +53,6 @@ class PurchaseReceipt(BuyingController):
 		self.validate_inspection()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
-		self.validate_challan_no()
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
@@ -61,7 +60,7 @@ class PurchaseReceipt(BuyingController):
 
 		# sub-contracting
 		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied("pr_raw_material_details")
+		self.create_raw_materials_supplied("pr_raw_material_details")
 
 		self.update_valuation_rate("purchase_receipt_details")
 
@@ -88,15 +87,6 @@ class PurchaseReceipt(BuyingController):
 			if ((flt(d.qty) + flt(d.rejected_qty)) != flt(d.received_qty)):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
 
-
-	def validate_challan_no(self):
-		"Validate if same challan no exists for same supplier in a submitted purchase receipt"
-		if self.challan_no:
-			exists = frappe.db.sql_list("""select name from `tabPurchase Receipt`
-				where docstatus=1 and name!=%s and supplier=%s and challan_no=%s
-				and fiscal_year=%s""", (self.name, self.supplier, self.challan_no, self.doc.fiscal_year))
-			if exists:
-				frappe.throw(_("Supplier delivery number duplicate in {0}").format(exists))
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc(self.tname, {

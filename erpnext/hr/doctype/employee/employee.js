@@ -12,17 +12,16 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 	onload: function() {
 		this.setup_leave_approver_select();
-		this.frm.toggle_display(["esic_card_no", "gratuity_lic_id", "pan_number", "pf_number"],
-			frappe.boot.sysdefaults.country==="India");
 		if(this.frm.doc.__islocal) this.frm.set_value("employee_name", "");
 	},
 
 	refresh: function() {
 		var me = this;
 		erpnext.toggle_naming_series();
-		if(!this.frm.doc.__islocal && !this.frm.doc.salary_structure_exists) {
-			cur_frm.add_custom_button(__('Make Salary Structure'), function() {
-				me.make_salary_structure(this); });
+		if(!this.frm.doc.__islocal && this.frm.doc.__onload &&
+			!this.frm.doc.__onload.salary_structure_exists) {
+				cur_frm.add_custom_button(__('Make Salary Structure'), function() {
+					me.make_salary_structure(this); });
 		}
 	},
 
@@ -60,7 +59,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	make_salary_structure: function(btn) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.hr.doctype.employee.employee.make_salary_structure",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		});
 	}
 });

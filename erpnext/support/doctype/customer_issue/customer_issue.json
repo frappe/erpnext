@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-01-10 16:34:30.000000", 
+ "creation": "2013-01-10 16:34:30", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -20,7 +20,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "\nCI/2010-2011/", 
+   "options": "CI-", 
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 0
@@ -344,12 +344,12 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "print_hide": 1, 
    "reqd": 1, 
@@ -394,7 +394,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-01-20 17:48:35.000000", 
+ "modified": "2014-05-09 02:16:43.267003", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Customer Issue", 
@@ -415,5 +415,7 @@
    "write": 1
   }
  ], 
- "search_fields": "status,customer,customer_name,territory"
+ "search_fields": "status,customer,customer_name,territory", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

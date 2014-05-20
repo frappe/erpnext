@@ -6,7 +6,7 @@
  "allow_print": 1, 
  "allow_rename": 1, 
  "autoname": "field:price_list_name", 
- "creation": "2013-01-25 11:35:09.000000", 
+ "creation": "2013-01-25 11:35:09", 
  "description": "Price List Master", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -75,7 +75,7 @@
  "icon": "icon-tags", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-01-27 11:11:08.000000", 
+ "modified": "2014-05-07 06:01:57.302928", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Price List", 
@@ -113,7 +113,7 @@
    "role": "Purchase User"
   }, 
   {
-   "cancel": 1, 
+   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "permlevel": 0, 
@@ -121,6 +121,12 @@
    "report": 1, 
    "role": "Purchase Master Manager", 
    "write": 1
+  }, 
+  {
+   "permlevel": 0, 
+   "read": 1, 
+   "report": 0, 
+   "role": "Manufacturing User"
   }
  ]
 }

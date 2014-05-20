@@ -94,8 +94,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 
-		self.assertEquals(pr.get("purchase_receipt_details")[0].rm_supp_cost, 70000.0)
 		self.assertEquals(len(pr.get("pr_raw_material_details")), 2)
+		self.assertEquals(pr.get("purchase_receipt_details")[0].rm_supp_cost, 70000.0)
+
 
 	def test_serial_no_supplier(self):
 		pr = frappe.copy_doc(test_records[0])

@@ -1,22 +1,14 @@
 {
  "allow_import": 1, 
- "creation": "2013-01-10 16:34:14.000000", 
+ "creation": "2013-01-10 16:34:14", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "holiday_list_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Holiday List Name", 
    "oldfieldname": "holiday_list_name", 
    "oldfieldtype": "Data", 
@@ -26,23 +18,26 @@
   {
    "fieldname": "is_default", 
    "fieldtype": "Check", 
+   "in_list_view": 1, 
    "label": "Default", 
    "permlevel": 0
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Link", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "reqd": 1
   }, 
   {
    "fieldname": "weekly_off", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Weekly Off", 
    "no_copy": 1, 
    "options": "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday", 
@@ -77,7 +72,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:46.000000", 
+ "modified": "2014-05-09 02:16:38.887266", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Holiday List", 
@@ -96,5 +91,7 @@
    "submit": 0, 
    "write": 1
   }
- ]
+ ], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

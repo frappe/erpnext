@@ -211,7 +211,7 @@ class BOM(Document):
 			item = self.get_item_det(m.item_code)
 			if item[0]['is_manufactured_item'] == 'Yes':
 				if not m.bom_no:
-					frappe.throw(_("BOM number is required for manufactured Item {0} in row {1}").format(m.item, m.idx))
+					frappe.throw(_("BOM number is required for manufactured Item {0} in row {1}").format(m.item_code, m.idx))
 				else:
 					self.validate_bom_no(m.item_code, m.bom_no, m.idx)
 

@@ -19,7 +19,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
 
 	if(doc.group_or_ledger=='Ledger') {
-		cur_frm.toggle_display('freeze_account', doc.can_freeze_account);
+		cur_frm.toggle_display('freeze_account', doc.__onload && doc.__onload.can_freeze_account);
 	}
 
 	// read-only for root accounts

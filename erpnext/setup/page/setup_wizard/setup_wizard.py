@@ -15,65 +15,73 @@ import install_fixtures
 
 @frappe.whitelist()
 def setup_account(args=None):
+	try:
+		frappe.clear_cache()
 
-	if frappe.db.sql("select name from tabCompany"):
-		frappe.throw(_("Setup Already Complete!!"))
+		if frappe.db.sql("select name from tabCompany"):
+			frappe.throw(_("Setup Already Complete!!"))
 
-	if not args:
-		args = frappe.local.form_dict
-	if isinstance(args, basestring):
-		args = json.loads(args)
-	args = frappe._dict(args)
+		if not args:
+			args = frappe.local.form_dict
+		if isinstance(args, basestring):
+			args = json.loads(args)
 
-	if args.language != "english":
-		set_default_language(args.language)
+		args = frappe._dict(args)
 
-	install_fixtures.install(args.get("country"))
+		if args.language != "english":
+			set_default_language(args.language)
 
-	update_user_name(args)
-	frappe.local.message_log = []
+		install_fixtures.install(args.get("country"))
 
-	create_fiscal_year_and_company(args)
-	frappe.local.message_log = []
+		update_user_name(args)
+		frappe.local.message_log = []
 
-	set_defaults(args)
-	frappe.local.message_log = []
+		create_fiscal_year_and_company(args)
+		frappe.local.message_log = []
 
-	create_territories()
-	frappe.local.message_log = []
+		set_defaults(args)
+		frappe.local.message_log = []
 
-	create_price_lists(args)
-	frappe.local.message_log = []
+		create_territories()
+		frappe.local.message_log = []
 
-	create_feed_and_todo()
-	frappe.local.message_log = []
+		create_price_lists(args)
+		frappe.local.message_log = []
 
-	create_email_digest()
-	frappe.local.message_log = []
+		create_feed_and_todo()
+		frappe.local.message_log = []
 
-	create_letter_head(args)
-	frappe.local.message_log = []
+		create_email_digest()
+		frappe.local.message_log = []
 
-	create_taxes(args)
-	frappe.local.message_log = []
+		create_letter_head(args)
+		frappe.local.message_log = []
 
-	create_items(args)
-	frappe.local.message_log = []
+		create_taxes(args)
+		frappe.local.message_log = []
 
-	create_customers(args)
-	frappe.local.message_log = []
+		create_items(args)
+		frappe.local.message_log = []
 
-	create_suppliers(args)
-	frappe.local.message_log = []
+		create_customers(args)
+		frappe.local.message_log = []
 
-	frappe.db.set_default('desktop:home_page', 'desktop')
+		create_suppliers(args)
+		frappe.local.message_log = []
 
-	website_maker(args.company_name, args.company_tagline, args.name)
-	create_logo(args)
+		frappe.db.set_default('desktop:home_page', 'desktop')
 
-	frappe.clear_cache()
-	frappe.db.commit()
+		website_maker(args.company_name, args.company_tagline, args.name)
+		create_logo(args)
 
+		frappe.clear_cache()
+		frappe.db.commit()
+	except:
+		traceback = frappe.get_traceback()
+		for hook in frappe.get_hooks("setup_wizard_exception"):
+			frappe.get_attr(hook)(traceback, args)
+
+		raise
 
 def update_user_name(args):
 	if args.get("email"):
@@ -128,10 +136,10 @@ def create_fiscal_year_and_company(args):
 	args["curr_fiscal_year"] = curr_fiscal_year
 
 def create_price_lists(args):
-	for pl_type in ["Selling", "Buying"]:
+	for pl_type, pl_name in (("Selling", _("Standard Selling")), ("Buying", _("Standard Buying"))):
 		frappe.get_doc({
 			"doctype": "Price List",
-			"price_list_name": "Standard " + pl_type,
+			"price_list_name": pl_name,
 			"enabled": 1,
 			"buying": 1 if pl_type == "Buying" else 0,
 			"selling": 1 if pl_type == "Selling" else 0,
@@ -174,7 +182,7 @@ def set_defaults(args):
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
-	stock_settings.stock_uom = "Nos"
+	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
 	stock_settings.save()
 
@@ -265,7 +273,7 @@ def create_taxes(args):
 				frappe.get_doc({
 					"doctype":"Account",
 					"company": args.get("company_name"),
-					"parent_account": "Duties and Taxes - " + args.get("company_abbr"),
+					"parent_account": _("Duties and Taxes") + " - " + args.get("company_abbr"),
 					"account_name": args.get("tax_" + str(i)),
 					"group_or_ledger": "Ledger",
 					"report_type": "Balance Sheet",
@@ -283,45 +291,34 @@ def create_items(args):
 		item = args.get("item_" + str(i))
 		if item:
 			item_group = args.get("item_group_" + str(i))
+			is_sales_item = args.get("is_sales_item_" + str(i))
+			is_purchase_item = args.get("is_purchase_item_" + str(i))
+			is_stock_item = item_group!=_("Services")
+			default_warehouse = ""
+			if is_stock_item:
+				if is_sales_item:
+					default_warehouse = _("Finished Goods") + " - " + args.get("company_abbr")
+				else:
+					default_warehouse = _("Stores") + " - " + args.get("company_abbr")
+
 			frappe.get_doc({
 				"doctype":"Item",
 				"item_code": item,
 				"item_name": item,
 				"description": item,
-				"is_sales_item": "Yes",
+				"is_sales_item": "Yes" if is_sales_item else "No",
+				"is_purchase_item": "Yes" if is_purchase_item else "No",
 				"show_in_website": 1,
-				"is_stock_item": item_group!=_("Services") and "Yes" or "No",
+				"is_stock_item": is_stock_item and "Yes" or "No",
 				"item_group": item_group,
 				"stock_uom": args.get("item_uom_" + str(i)),
-				"default_warehouse": item_group!=_("Service") and (_("Finished Goods") + " - " + args.get("company_abbr")) or ""
+				"default_warehouse": default_warehouse
 			}).insert()
 
 			if args.get("item_img_" + str(i)):
 				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
 				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
 				frappe.db.set_value("Item", item, "image", fileurl)
-
-	for i in xrange(1,6):
-		item = args.get("item_buy_" + str(i))
-		if item:
-			item_group = args.get("item_buy_group_" + str(i))
-			frappe.get_doc({
-				"doctype":"Item",
-				"item_code": item,
-				"item_name": item,
-				"description": item,
-				"is_sales_item": "No",
-				"is_stock_item": item_group!=_("Services") and "Yes" or "No",
-				"item_group": item_group,
-				"stock_uom": args.get("item_buy_uom_" + str(i)),
-				"default_warehouse": item_group!=_("Services") and (_("Stores") + " - " + args.get("company_abbr")) or ""
-			}).insert()
-
-			if args.get("item_img_" + str(i)):
-				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
-				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
-				frappe.db.set_value("Item", item, "image", fileurl)
-
 
 def create_customers(args):
 	for i in xrange(1,6):

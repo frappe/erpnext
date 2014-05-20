@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-04-10 11:45:37.000000", 
+ "creation": "2013-04-10 11:45:37", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -20,7 +20,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "LEAD\nLEAD/10-11/\nLEAD/MUMBAI/", 
+   "options": "LEAD-", 
    "permlevel": 0, 
    "reqd": 0
   }, 
@@ -312,13 +312,13 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "hidden": 1, 
    "in_filter": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0
   }, 
   {
@@ -362,7 +362,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:54.000000", 
+ "modified": "2014-05-09 02:16:40.769432", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Lead", 
@@ -397,5 +397,7 @@
    "write": 1
   }
  ], 
- "search_fields": "lead_name,lead_owner,status"
+ "search_fields": "lead_name,lead_owner,status", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

@@ -1,6 +1,6 @@
 {
  "autoname": "field:distribution_id", 
- "creation": "2013-01-10 16:34:05.000000", 
+ "creation": "2013-01-10 16:34:05", 
  "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -9,6 +9,7 @@
    "description": "Name of the Budget Distribution", 
    "fieldname": "distribution_id", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Distribution Name", 
    "oldfieldname": "distribution_id", 
    "oldfieldtype": "Data", 
@@ -17,12 +18,13 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Fiscal Year", 
    "oldfieldname": "fiscal_year", 
    "oldfieldtype": "Select", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "search_index": 1
   }, 
@@ -34,20 +36,11 @@
    "oldfieldtype": "Table", 
    "options": "Budget Distribution Detail", 
    "permlevel": 0
-  }, 
-  {
-   "fieldname": "trash_reason", 
-   "fieldtype": "Small Text", 
-   "label": "Trash Reason", 
-   "oldfieldname": "trash_reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 1
   }
  ], 
  "icon": "icon-bar-chart", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:27.000000", 
+ "modified": "2014-05-09 02:16:47.567367", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget Distribution", 
@@ -77,5 +70,7 @@
    "role": "Accounts Manager", 
    "submit": 0
   }
- ]
+ ], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

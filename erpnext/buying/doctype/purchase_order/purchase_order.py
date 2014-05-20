@@ -45,7 +45,7 @@ class PurchaseOrder(BuyingController):
 
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
-		self.update_raw_materials_supplied("po_raw_material_details")
+		self.create_raw_materials_supplied("po_raw_material_details")
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc(self.tname, {

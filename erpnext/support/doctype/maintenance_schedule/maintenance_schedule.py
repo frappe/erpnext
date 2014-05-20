@@ -133,40 +133,22 @@ class MaintenanceSchedule(TransactionBase):
 
 		return schedule_date
 
-	def validate_period(self, arg):
-		args = eval(arg)
-		if getdate(args['start_date']) >= getdate(args['end_date']):
-			throw(_("Start date should be less than end date."))
+	def validate_dates_with_periodicity(self):
+		for d in self.get("item_maintenance_detail"):
+			if d.start_date and d.end_date and d.periodicity:
+				date_diff = (getdate(d.end_date) - getdate(d.start_date)).days + 1
+				days_in_period = {
+					"Weekly": 7,
+					"Monthly": 30,
+					"Quarterly": 90,
+					"Half Yearly": 180,
+					"Yearly": 365
+				}
 
-		period = (getdate(args['end_date']) - getdate(args['start_date'])).days + 1
-
-		if (args['periodicity'] == 'Yearly' or args['periodicity'] == 'Half Yearly' or
-			args['periodicity'] == 'Quarterly') and period < 90:
-			throw(_("Period is too short"))
-		elif args['periodicity'] == 'Monthly' and period < 30:
-			throw(_("Period is too short"))
-		elif args['periodicity'] == 'Weekly' and period < 7:
-			throw(_("Period is too short"))
-
-	def get_no_of_visits(self, arg):
-		args = eval(arg)
-		self.validate_period(arg)
-		period = (getdate(args['end_date']) - getdate(args['start_date'])).days + 1
-		count = 0
-
-		if args['periodicity'] == 'Weekly':
-			count = period/7
-		elif args['periodicity'] == 'Monthly':
-			count = period/30
-		elif args['periodicity'] == 'Quarterly':
-			count = period/91
-		elif args['periodicity'] == 'Half Yearly':
-			count = period/182
-		elif args['periodicity'] == 'Yearly':
-			count = period/365
-
-		ret = {'no_of_visits' : count}
-		return ret
+				if date_diff < days_in_period[d.periodicity]:
+					throw(_("Row {0}: To set {1} periodicity, difference between from and to date \
+						must be greater than or equal to {2}")
+						.format(d.idx, d.periodicity, days_in_period[d.periodicity]))
 
 	def validate_maintenance_detail(self):
 		if not self.get('item_maintenance_detail'):
@@ -196,6 +178,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate(self):
 		self.validate_maintenance_detail()
+		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
 
 	def on_update(self):

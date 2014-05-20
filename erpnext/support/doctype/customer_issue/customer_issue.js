@@ -20,7 +20,7 @@ erpnext.support.CustomerIssue = frappe.ui.form.Controller.extend({
 	make_maintenance_visit: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.support.doctype.customer_issue.customer_issue.make_maintenance_visit",
-			source_name: cur_frm.doc.name
+			frm: cur_frm
 		})
 	}
 });

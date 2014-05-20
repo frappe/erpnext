@@ -13,7 +13,7 @@ from frappe.model.document import Document
 
 class Company(Document):
 	def onload(self):
-		self.set("__transactions_exist", self.check_if_transactions_exist())
+		self.get("__onload").transactions_exist = self.check_if_transactions_exist()
 
 	def check_if_transactions_exist(self):
 		exists = False
@@ -138,7 +138,7 @@ class Company(Document):
 				cc_doc.ignore_mandatory = True
 			cc_doc.insert()
 
-		frappe.db.set(self, "cost_center", "Main - " + self.abbr)
+		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
 
 	def on_trash(self):
 		"""

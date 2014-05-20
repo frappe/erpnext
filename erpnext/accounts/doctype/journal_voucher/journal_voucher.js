@@ -140,13 +140,13 @@ cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var el = doc.entries || [];
 	for(var i in el) {
-		td += flt(el[i].debit, 2);
-		tc += flt(el[i].credit, 2);
+		td += flt(el[i].debit, precision("debit", el[i]));
+		tc += flt(el[i].credit, precision("credit", el[i]));
 	}
 	var doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
 	doc.total_credit = tc;
-	doc.difference = flt((td - tc), 2);
+	doc.difference = flt((td - tc), precision("difference"));
 	refresh_many(['total_debit','total_credit','difference']);
 }
 

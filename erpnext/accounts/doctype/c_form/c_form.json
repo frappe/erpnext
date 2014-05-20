@@ -1,7 +1,7 @@
 {
  "allow_attach": 1, 
  "autoname": "naming_series:", 
- "creation": "2013-03-07 11:55:06.000000", 
+ "creation": "2013-03-07 11:55:06", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -17,7 +17,7 @@
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "label": "Series", 
-   "options": "\nC-FORM/", 
+   "options": "C-FORM-", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -25,6 +25,7 @@
   {
    "fieldname": "c_form_no", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "C-Form No", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -33,6 +34,7 @@
   {
    "fieldname": "received_date", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Received Date", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -41,6 +43,7 @@
   {
    "fieldname": "customer", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Customer", 
    "options": "Customer", 
    "permlevel": 0, 
@@ -57,17 +60,17 @@
   }, 
   {
    "fieldname": "company", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Company", 
-   "options": "link:Company", 
+   "options": "Company", 
    "permlevel": 0, 
    "read_only": 0
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Fiscal Year", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -136,7 +139,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2013-12-20 19:23:58.000000", 
+ "modified": "2014-05-09 02:18:00.162685", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 

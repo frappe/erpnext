@@ -13,7 +13,7 @@ class WarehouseNotSet(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	def onload(self):
-		self.set("__sle_exists", self.check_if_sle_exists())
+		self.get("__onload").sle_exists = self.check_if_sle_exists()
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by")=="Naming Series":
@@ -348,4 +348,5 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 def invalidate_cache_for_item(doc):
 	invalidate_cache_for(doc, doc.item_group)
 	for d in doc.get({"doctype":"Website Item Group"}):
-		invalidate_cache_for(doc, d.item_group)
+		if d.item_group:
+			invalidate_cache_for(doc, d.item_group)

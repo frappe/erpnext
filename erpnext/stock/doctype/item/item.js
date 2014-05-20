@@ -25,7 +25,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
 		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
-			doc.__sle_exists=="exists" ? false : true);
+			(doc.__onload && doc.__onload.sle_exists=="exists") ? false : true);
 	}
 
 	erpnext.item.toggle_reqd(cur_frm);

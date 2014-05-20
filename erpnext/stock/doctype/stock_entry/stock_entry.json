@@ -4,7 +4,7 @@
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
- "creation": "2013-04-09 11:43:55.000000", 
+ "creation": "2013-04-09 11:43:55", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -27,7 +27,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "\nSTE", 
+   "options": "STE-", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
@@ -499,10 +499,10 @@
   }, 
   {
    "fieldname": "fiscal_year", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "in_filter": 0, 
    "label": "Fiscal Year", 
-   "options": "link:Fiscal Year", 
+   "options": "Fiscal Year", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
@@ -580,7 +580,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-02-26 10:59:19.000000", 
+ "modified": "2014-05-09 02:17:33.093429", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -645,5 +645,7 @@
  ], 
  "read_only": 0, 
  "read_only_onload": 0, 
- "search_fields": "transfer_date, from_warehouse, to_warehouse, purpose, remarks"
+ "search_fields": "transfer_date, from_warehouse, to_warehouse, purpose, remarks", 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }
