@@ -53,7 +53,7 @@ class Account(Document):
 			if par["report_type"]:
 				self.report_type = par["report_type"]
 			if par["root_type"]:
-				self.root_type - par["root_type"]
+				self.root_type = par["root_type"]
 
 	def validate_root_details(self):
 		#does not exists parent
