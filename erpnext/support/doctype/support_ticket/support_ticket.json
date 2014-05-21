@@ -237,7 +237,7 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2014-05-06 08:20:28.842404", 
+ "modified": "2014-05-21 06:15:26.988620", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Support Ticket", 
@@ -286,5 +286,6 @@
    "write": 1
   }
  ], 
- "search_fields": "status,customer,allocated_to,subject,raised_by"
+ "search_fields": "status,customer,allocated_to,subject,raised_by", 
+ "title_field": "subject"
 }
