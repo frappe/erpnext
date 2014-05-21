@@ -119,6 +119,10 @@ class Item(WebsiteGenerator):
 		if self.has_serial_no == 'Yes' and self.is_stock_item == 'No':
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
+		if self.has_serial_no == "No" and self.serial_no_series:
+			self.serial_no_series = None
+
+
 	def check_for_active_boms(self):
 		if self.is_purchase_item != "Yes":
 			bom_mat = frappe.db.sql("""select distinct t1.parent

@@ -277,6 +277,7 @@
    "fieldname": "serial_no_series", 
    "fieldtype": "Data", 
    "label": "Serial Number Series", 
+   "no_copy": 1, 
    "permlevel": 0
   }, 
   {
@@ -728,6 +729,7 @@
    "fieldname": "page_name", 
    "fieldtype": "Data", 
    "label": "Page Name", 
+   "no_copy": 1, 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -825,6 +827,7 @@
    "fieldtype": "Link", 
    "ignore_restrictions": 1, 
    "label": "Parent Website Route", 
+   "no_copy": 1, 
    "options": "Website Route", 
    "permlevel": 0
   }
@@ -832,7 +835,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-05-12 07:54:58.118118", 
+ "modified": "2014-05-21 15:37:30.124881", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
