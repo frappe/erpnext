@@ -53,7 +53,7 @@ class TransactionBase(StatusUpdater):
 					"person": self.contact_by
 				})
 
-			event_doclist.insert()
+			event_doclist.insert(ignore_permissions=True)
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
