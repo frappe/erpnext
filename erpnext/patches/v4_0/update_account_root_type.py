@@ -36,4 +36,4 @@ def execute():
 				frappe.db.sql("""UPDATE tabAccount SET root_type=%s WHERE lft>%s and rgt<%s""",
 					(root.root_type, root.lft, root.rgt))
 			else:
-				print "Root type not found for {0}".format(root.name)
+				print b"Root type not found for {0}".format(root.name.encode("utf-8"))
