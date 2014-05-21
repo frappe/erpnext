@@ -192,7 +192,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
 						placeholder: __('e.g. "My Company LLC"')},
 					{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
-						placeholder: __('e.g. "MC"'),reqd:1},
+						description: __('Max 5 characters'), placeholder: __('e.g. "MC"'), reqd:1},
 					{fieldname:'fy_start_date', label:__('Financial Year Start Date'), fieldtype:'Date',
 						description: __('Your financial year begins on'), reqd:1},
 					{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
