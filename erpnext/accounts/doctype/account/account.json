@@ -83,13 +83,6 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "report_type", 
-   "fieldtype": "Select", 
-   "label": "Report Type", 
-   "options": "\nBalance Sheet\nProfit and Loss", 
-   "permlevel": 0
-  }, 
-  {
    "description": "Setting Account Type helps in selecting this Account in transactions.", 
    "fieldname": "account_type", 
    "fieldtype": "Select", 
@@ -170,6 +163,22 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "root_type", 
+   "fieldtype": "Select", 
+   "label": "Root Type", 
+   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "report_type", 
+   "fieldtype": "Select", 
+   "label": "Report Type", 
+   "options": "\nBalance Sheet\nProfit and Loss", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "lft", 
    "fieldtype": "Int", 
    "hidden": 1, 
@@ -200,7 +209,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-12 17:03:19.733139", 
+ "modified": "2014-05-21 11:42:47.255511", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
