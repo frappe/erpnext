@@ -672,7 +672,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:47.217445", 
+ "modified": "2014-05-21 07:49:56.180832", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
@@ -732,5 +732,6 @@
  ], 
  "search_fields": "employee_name", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }
