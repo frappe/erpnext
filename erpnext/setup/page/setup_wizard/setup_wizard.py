@@ -413,6 +413,7 @@ def create_territories():
 
 @frappe.whitelist()
 def load_messages(language):
+	frappe.clear_cache()
 	lang = get_lang_dict()[language]
 	frappe.local.lang = lang
 	m = get_dict("page", "setup-wizard")
