@@ -1,7 +1,5 @@
  (Half Day),(Halve dag)
  and year: ,en jaar:
- by Role ,per rol
- is not set,is niet ingesteld
 """ does not exists",""" Bestaat niet"
 %  Delivered,Geleverd%
 % Amount Billed,Gefactureerd% Bedrag
@@ -34,7 +32,6 @@
 "1 Currency = [?] Fraction
 For e.g. 1 USD = 100 Cent",1 Valuta = [ ? ] Fraction \ Nfor bijv.
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Om de klant wijzen artikelcode te behouden en om ze doorzoekbaar te maken op basis van hun code te gebruiken van deze optie
-2 days ago,2 dagen geleden
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
@@ -89,7 +86,6 @@ Accounts Frozen Upto,Accounts Frozen Tot
 Accounts Payable,Accounts Payable
 Accounts Receivable,Debiteuren
 Accounts Settings,Accounts Settings
-Actions,acties
 Active,Actief
 Active: Will extract emails from ,Actief: Zal ​​e-mails uittreksel uit
 Activity,Activiteit
@@ -111,23 +107,13 @@ Actual Quantity,Werkelijke hoeveelheid
 Actual Start Date,Werkelijke Startdatum
 Add,Toevoegen
 Add / Edit Taxes and Charges,Toevoegen / bewerken en-heffingen
-Add Attachments,Bijlagen toevoegen
-Add Bookmark,Voeg bladwijzer toe
 Add Child,Child
-Add Column,Kolom toevoegen
-Add Message,Bericht toevoegen
-Add Reply,Voeg antwoord
 Add Serial No,Voeg Serienummer
 Add Taxes,Belastingen toevoegen
 Add Taxes and Charges,Belastingen en heffingen toe te voegen
-Add This To User's Restrictions,Voeg dit toe aan Beperkingen gebruikershandleiding
-Add attachment,Bijlage toevoegen
-Add new row,Voeg een nieuwe rij
 Add or Deduct,Toevoegen of aftrekken
 Add rows to set annual budgets on Accounts.,Rijen toevoegen aan jaarlijkse begrotingen op Accounts in te stellen.
 Add to Cart,In winkelwagen
-Add to To Do,Toevoegen aan To Do
-Add to To Do List of,Toevoegen aan To Do List van Do
 Add to calendar on this date,Toevoegen aan agenda op deze datum
 Add/Remove Recipients,Toevoegen / verwijderen Ontvangers
 Address,Adres
@@ -220,9 +206,6 @@ Allow user to edit Price List Rate in transactions,Zodat de gebruiker te bewerke
 Allowance Percent,Toelage Procent
 Allowance for over-delivery / over-billing crossed for Item {0},Korting voor over- levering / over- billing gekruist voor post {0}
 Allowed Role to Edit Entries Before Frozen Date,Toegestaan ​​Rol te bewerken items voor Frozen Datum
-"Allowing DocType, DocType. Be careful!","Het toestaan ​​DocType , DocType . Wees voorzichtig !"
-Alternative download link,Alternatieve download link
-Amend,Amenderen
 Amended From,Gewijzigd Van
 Amount,Bedrag
 Amount (Company Currency),Bedrag (Company Munt)
@@ -270,26 +253,18 @@ Approving User,Goedkeuren Gebruiker
 Approving User cannot be same as user the rule is Applicable To,Goedkeuring van Gebruiker kan niet hetzelfde zijn als gebruiker de regel is van toepassing op
 Are you sure you want to STOP ,
 Are you sure you want to UNSTOP ,
-Are you sure you want to delete the attachment?,Weet u zeker dat u de bijlage wilt verwijderen?
 Arrear Amount,Achterstallig bedrag
 "As Production Order can be made for this item, it must be a stock item.","Zoals productieorder kan worden gemaakt voor dit punt, moet het een voorraad item."
 As per Stock UOM,Per Stock Verpakking
 "As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","Want er zijn bestaande voorraad transacties voor dit artikel , kunt u de waarden van ' Has Serial No ' niet veranderen , ' Is Stock Item ' en ' Valuation Method '"
-Ascending,Oplopend
 Asset,aanwinst
-Assign To,Toewijzen aan
-Assigned To,toegewezen aan
-Assignments,opdrachten
 Assistant,assistent
 Associate,associëren
 Atleast one warehouse is mandatory,Tenminste een magazijn is verplicht
-Attach Document Print,Bevestig Document Print
 Attach Image,Bevestig Afbeelding
 Attach Letterhead,Bevestig briefhoofd
 Attach Logo,Bevestig Logo
 Attach Your Picture,Bevestig Uw Beeld
-Attach as web link,Bevestig als weblink
-Attachments,Toebehoren
 Attendance,Opkomst
 Attendance Date,Aanwezigheid Datum
 Attendance Details,Aanwezigheid Details
@@ -402,7 +377,6 @@ Block leave applications by department.,Blok verlaten toepassingen per afdeling.
 Blog Post,Blog Post
 Blog Subscriber,Blog Abonnee
 Blood Group,Bloedgroep
-Bookmarks,Bladwijzers
 Both Warehouse must belong to same Company,Beide Warehouse moeten behoren tot dezelfde Company
 Box,doos
 Branch,Tak
@@ -437,7 +411,6 @@ C-Form No,C-vorm niet
 C-Form records,C -Form platen
 Calculate Based On,Bereken Based On
 Calculate Total Score,Bereken Totaal Score
-Calendar,Kalender
 Calendar Events,Kalender Evenementen
 Call,Noemen
 Calls,oproepen
@@ -450,7 +423,6 @@ Can be approved by {0},Kan door {0} worden goedgekeurd
 "Can not filter based on Account, if grouped by Account",Kan niet filteren op basis van account als gegroepeerd per account
 "Can not filter based on Voucher No, if grouped by Voucher","Kan niet filteren op basis van Voucher Nee, als gegroepeerd per Voucher"
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Kan verwijzen rij alleen als het type lading is 'On Vorige Row Bedrag ' of ' Vorige Row Total'
-Cancel,Annuleren
 Cancel Material Visit {0} before cancelling this Customer Issue,Annuleren Materiaal Bezoek {0} voor het annuleren van deze klant Issue
 Cancel Material Visits {0} before cancelling this Maintenance Visit,Annuleren Materiaal Bezoeken {0} voor het annuleren van deze Maintenance Visit
 Cancelled,Geannuleerd
@@ -469,11 +441,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,Kan niet deactive 
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',Kan niet aftrekken als categorie is voor ' Valuation ' of ' Valuation en Total '
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.","Kan Serienummer {0} niet verwijderen in voorraad . Verwijder eerst uit voorraad , dan verwijderen."
 "Cannot directly set amount. For 'Actual' charge type, use the rate field","Kan niet direct is opgenomen. Voor ' Actual ""type lading , gebruikt u het veld tarief"
-Cannot edit standard fields,Kan standaard velden niet bewerken
-Cannot open instance when its {0} is open,Kan niet openen bijvoorbeeld wanneer de {0} is geopend
-Cannot open {0} when its instance is open,Kan niet openen {0} wanneer de instantie is geopend
 "Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'","Kan niet overbill voor post {0} in rij {0} meer dan {1} . Om overbilling staan ​​, stel dan in ' Instellingen ' > ' Global Defaults'"
-Cannot print cancelled documents,Kan geannuleerd documenten niet afdrukken
 Cannot produce more Item {0} than Sales Order quantity {1},Kan niet meer produceren Item {0} dan Sales Bestelhoeveelheid {1}
 Cannot refer row number greater than or equal to current row number for this Charge type,Kan niet verwijzen rij getal groter dan of gelijk aan de huidige rijnummer voor dit type Charge
 Cannot return more than {0} for Item {1},Kan niet meer dan terug {0} voor post {1}
@@ -527,19 +495,14 @@ Claim Amount,Claim Bedrag
 Claims for company expense.,Claims voor rekening bedrijf.
 Class / Percentage,Klasse / Percentage
 Classic,Klassiek
-Clear Cache,Cache wissen
 Clear Table,Clear Tabel
 Clearance Date,Clearance Datum
 Clearance Date not mentioned,Ontruiming Datum niet vermeld
 Clearance date cannot be before check date in row {0},Klaring mag niet voor check datum in rij {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Klik op &#39;Sales Invoice&#39; knop om een ​​nieuwe verkoopfactuur maken.
 Click on a link to get options to expand get options ,
-Click on row to view / edit.,Klik op de rij / bewerken weer te geven.
-Click to Expand / Collapse,Klik om Uitklappen / Inklappen
 Client,Klant
-Close,Sluiten
 Close Balance Sheet and book Profit or Loss.,Sluiten Balans en boek Winst of verlies .
-Close: {0},Sluiten : {0}
 Closed,Gesloten
 Closing Account Head,Sluiten Account Hoofd
 Closing Account {0} must be of type 'Liability',Closing account {0} moet van het type ' Aansprakelijkheid ' zijn
@@ -550,10 +513,8 @@ Closing Value,eindwaarde
 CoA Help,CoA Help
 Code,Code
 Cold Calling,Cold Calling
-Collapse,ineenstorting
 Color,Kleur
 Comma separated list of email addresses,Komma&#39;s gescheiden lijst van e-mailadressen
-Comment,Commentaar
 Comments,Reacties
 Commercial,commercieel
 Commission,commissie
@@ -564,7 +525,6 @@ Commission rate cannot be greater than 100,Tarief Commissie kan niet groter zijn
 Communication,Verbinding
 Communication HTML,Communicatie HTML
 Communication History,Communicatie Geschiedenis
-Communication Medium,Communicatie Medium
 Communication log.,Communicatie log.
 Communications,communicatie
 Company,Vennootschap
@@ -583,7 +543,6 @@ Company registration numbers for your reference. Tax numbers etc.,"Registratienu
 "Company, Month and Fiscal Year is mandatory","Bedrijf , maand en het fiscale jaar is verplicht"
 Compensatory Off,compenserende Off
 Complete,Compleet
-Complete By,Compleet Door
 Complete Setup,compleet Setup
 Completed,Voltooid
 Completed Production Orders,Voltooide productieorders
@@ -635,7 +594,6 @@ Convert into Recurring Invoice,Om te zetten in terugkerende factuur
 Convert to Group,Converteren naar Groep
 Convert to Ledger,Converteren naar Ledger
 Converted,Omgezet
-Copy,Kopiëren
 Copy From Item Group,Kopiëren van Item Group
 Cosmetics,schoonheidsmiddelen
 Cost Center,Kostenplaats
@@ -666,7 +624,6 @@ Create Stock Ledger Entries when you submit a Sales Invoice,Maak Stock Grootboek
 Create rules to restrict transactions based on values.,Regels maken om transacties op basis van waarden te beperken.
 Created By,Gemaakt door
 Creates salary slip for above mentioned criteria.,Maakt salarisstrook voor de bovengenoemde criteria.
-Creation / Modified By,Creatie / Gewijzigd door
 Creation Date,aanmaakdatum
 Creation Document No,Creatie Document No
 Creation Document Type,Type het maken van documenten
@@ -697,11 +654,9 @@ Current Liabilities,Kortlopende verplichtingen
 Current Stock,Huidige voorraad
 Current Stock UOM,Huidige voorraad Verpakking
 Current Value,Huidige waarde
-Current status,Actuele status
 Custom,Gewoonte
 Custom Autoreply Message,Aangepaste Autoreply Bericht
 Custom Message,Aangepast bericht
-Custom Reports,Aangepaste rapporten
 Customer,Klant
 Customer (Receivable) Account,Klant (Debiteuren) Account
 Customer / Item Name,Klant / Naam van het punt
@@ -750,7 +705,6 @@ Date Format,Datumnotatie
 Date Of Retirement,Datum van pensionering
 Date Of Retirement must be greater than Date of Joining,Datum van pensionering moet groter zijn dan Datum van Deelnemen zijn
 Date is repeated,Datum wordt herhaald
-Date must be in format: {0},Datum moet volgend formaat : {0}
 Date of Birth,Geboortedatum
 Date of Issue,Datum van afgifte
 Date of Joining,Datum van toetreding tot
@@ -761,7 +715,6 @@ Dates,Data
 Days Since Last Order,Dagen sinds vorige Bestel
 Days for which Holidays are blocked for this department.,Dagen waarvoor feestdagen zijn geblokkeerd voor deze afdeling.
 Dealer,Handelaar
-Dear,Lieve
 Debit,Debet
 Debit Amt,Debet Amt
 Debit Note,Debetnota
@@ -809,7 +762,6 @@ Default settings for stock transactions.,Standaardinstellingen voor effectentran
 Defense,defensie
 "Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Definieer budget voor deze kostenplaats. Om de begroting actie in te stellen, zie <a href=""#!List/Company"">Company Master</a>"
 Delete,Verwijder
-Delete Row,Rij verwijderen
 Delete {0} {1}?,Verwijder {0} {1} ?
 Delivered,Geleverd
 Delivered Items To Be Billed,Geleverd Items te factureren
@@ -836,7 +788,6 @@ Department,Afdeling
 Department Stores,Warenhuizen
 Depends on LWP,Afhankelijk van LWP
 Depreciation,waardevermindering
-Descending,Aflopend
 Description,Beschrijving
 Description HTML,Beschrijving HTML
 Designation,Benaming
@@ -881,25 +832,18 @@ Do you really want to stop production order: ,
 Doc Name,Doc Naam
 Doc Type,Doc Type
 Document Description,Document Beschrijving
-Document Status transition from ,Document Status overgang van
-Document Status transition from {0} to {1} is not allowed,Document Status overgang van {0} tot {1} is niet toegestaan
 Document Type,Soort document
-Document is only editable by users of role,Document is alleen bewerkbaar door gebruikers van de rol van
-Documentation,Documentatie
 Documents,Documenten
 Domain,Domein
 Don't send Employee Birthday Reminders,Stuur geen Werknemer verjaardagsherinneringen
-Download,Download
 Download Materials Required,Download Benodigde materialen
 Download Reconcilation Data,Download Verzoening gegevens
 Download Template,Download Template
 Download a report containing all raw materials with their latest inventory status,Download een verslag met alle grondstoffen met hun nieuwste inventaris status
 "Download the Template, fill appropriate data and attach the modified file.","Download de Template , vul de juiste gegevens en bevestig het gewijzigde bestand ."
 "Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Download de Template , vul de juiste gegevens en bevestig het gewijzigde bestand . \ NAlle dateert en werknemer combinatie in de gekozen periode zal komen in de template , met bestaande presentielijsten"
+All dates and employee combination in the selected period will come in the template, with existing attendance records","Download de Template , vul de juiste gegevens en bevestig het gewijzigde bestand . \ NAlle dateert en werknemer combinatie in de gekozen periode zal komen in de sjabloon , met bestaande presentielijsten"
 Draft,Ontwerp
-Drafts,Concepten
-Drag to sort columns,Sleep om te sorteren kolommen
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox Toegang toegestaan
 Dropbox Access Key,Dropbox Access Key
@@ -920,7 +864,6 @@ Earning & Deduction,Verdienen &amp; Aftrek
 Earning Type,Verdienen Type
 Earning1,Earning1
 Edit,Redigeren
-Editable,Bewerkbare
 Education,onderwijs
 Educational Qualification,Educatieve Kwalificatie
 Educational Qualification Details,Educatieve Kwalificatie Details
@@ -940,12 +883,9 @@ Email Id,E-mail Identiteitskaart
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",E-mail Identiteitskaart waar een sollicitant zal bijvoorbeeld &quot;jobs@example.com&quot; e-mail
 Email Notifications,e-mailberichten
 Email Sent?,E-mail verzonden?
-"Email addresses, separted by commas","E-mailadressen, separted door komma&#39;s"
 "Email id must be unique, already exists for {0}","E-id moet uniek zijn , al bestaat voor {0}"
 Email ids separated by commas.,E-mail ids gescheiden door komma&#39;s.
-Email sent to {0},E-mail verzonden naar {0}
 "Email settings to extract Leads from sales email id e.g. ""sales@example.com""",E-mail instellingen voor Leads uit de verkoop e-id bijvoorbeeld &quot;sales@example.com&quot; extract
-Email...,Email ...
 Emergency Contact,Emergency Contact
 Emergency Contact Details,Emergency Contactgegevens
 Emergency Phone,Emergency Phone
@@ -984,7 +924,6 @@ End date of current invoice's period,Einddatum van de periode huidige factuur&#3
 End of Life,End of Life
 Energy,energie
 Engineer,ingenieur
-Enter Value,Waarde invoeren
 Enter Verification Code,Voer Verification Code
 Enter campaign name if the source of lead is campaign.,Voer naam voor de campagne als de bron van lood is campagne.
 Enter department to which this Contact belongs,Voer dienst waaraan deze persoon behoort
@@ -1002,7 +941,6 @@ Entries,Inzendingen
 Entries against,inzendingen tegen
 Entries are not allowed against this Fiscal Year if the year is closed.,Inzendingen zijn niet toegestaan ​​tegen deze fiscale jaar als het jaar gesloten is.
 Entries before {0} are frozen,Inzendingen voor {0} zijn bevroren
-Equals,equals
 Equity,billijkheid
 Error: {0} > {1},Fout : {0} > {1}
 Estimated Material Cost,Geschatte Materiaal Kosten
@@ -1019,7 +957,6 @@ Exhibition,Tentoonstelling
 Existing Customer,Bestaande klant
 Exit,Uitgang
 Exit Interview Details,Exit Interview Details
-Expand,uitbreiden
 Expected,Verwachte
 Expected Completion Date can not be less than Project Start Date,Verwachte oplevering datum kan niet lager zijn dan startdatum van het project zijn
 Expected Date cannot be before Material Request Date,Verwachte datum kan niet voor de Material Aanvraagdatum
@@ -1052,8 +989,6 @@ Expenses Booked,Kosten geboekt
 Expenses Included In Valuation,Kosten inbegrepen In Valuation
 Expenses booked for the digest period,Kosten geboekt voor de digest periode
 Expiry Date,Vervaldatum
-Export,Exporteren
-Export not allowed. You need {0} role to export.,Export niet toegestaan ​​. Je nodig hebt {0} rol om te exporteren .
 Exports,Export
 External,Extern
 Extract Emails,Extract Emails
@@ -1068,11 +1003,8 @@ Feedback,Terugkoppeling
 Female,Vrouwelijk
 Fetch exploded BOM (including sub-assemblies),Fetch ontplofte BOM ( inclusief onderdelen )
 "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","Veld verkrijgbaar in Delivery Note, Offerte, Sales Invoice, Sales Order"
-Field {0} is not selectable.,Veld {0} kan niet worden geselecteerd .
-File,Bestand
 Files Folder ID,Bestanden Folder ID
 Fill the form and save it,Vul het formulier in en sla het
-Filter,Filteren
 Filter based on customer,Filteren op basis van klant
 Filter based on item,Filteren op basis van artikel
 Financial / accounting year.,Financiële / boekjaar .
@@ -1101,14 +1033,10 @@ For Server Side Print Formats,Voor Server Side Print Formats
 For Supplier,voor Leverancier
 For Warehouse,Voor Warehouse
 For Warehouse is required before Submit,Voor Warehouse is vereist voordat Indienen
-"For comparative filters, start with","Voor vergelijkingsdoeleinden filters, te beginnen met"
 "For e.g. 2012, 2012-13","Voor bijvoorbeeld 2012, 2012-13"
-For ranges,Voor bereiken
 For reference,Ter referentie
 For reference only.,Alleen ter referentie.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Voor het gemak van de klanten, kunnen deze codes worden gebruikt in gedrukte formaten zoals facturen en de leveringsbonnen"
-Form,Vorm
-Forums,Forums
 Fraction,Fractie
 Fraction Units,Fractie Units
 Freeze Stock Entries,Freeze Stock Entries
@@ -1161,12 +1089,10 @@ Generate Material Requests (MRP) and Production Orders.,Genereer Materiaal Reque
 Generate Salary Slips,Genereer Salaris Slips
 Generate Schedule,Genereer Plan
 Generates HTML to include selected image in the description,Genereert HTML aan geselecteerde beeld te nemen in de beschrijving
-Get,Krijgen
 Get Advances Paid,Get betaalde voorschotten
 Get Advances Received,Get ontvangen voorschotten
 Get Against Entries,Krijgen Tegen Entries
 Get Current Stock,Get Huidige voorraad
-Get From ,Get Van
 Get Items,Get Items
 Get Items From Sales Orders,Krijg Items Van klantorders
 Get Items from BOM,Items ophalen van BOM
@@ -1194,8 +1120,6 @@ Government,overheid
 Graduate,Afstuderen
 Grand Total,Algemeen totaal
 Grand Total (Company Currency),Grand Total (Company Munt)
-Greater or equals,Groter of gelijk
-Greater than,groter dan
 "Grid ""","Grid """
 Grocery,kruidenierswinkel
 Gross Margin %,Winstmarge%
@@ -1207,7 +1131,6 @@ Gross Profit (%),Brutowinst (%)
 Gross Weight,Brutogewicht
 Gross Weight UOM,Brutogewicht Verpakking
 Group,Groep
-"Group Added, refreshing...","Group Toegevoegd , verfrissend ..."
 Group by Account,Groep door Account
 Group by Voucher,Groep door Voucher
 Group or Ledger,Groep of Ledger
@@ -1229,14 +1152,12 @@ Health Care,Gezondheidszorg
 Health Concerns,Gezondheid Zorgen
 Health Details,Gezondheid Details
 Held On,Held Op
-Help,Help
 Help HTML,Help HTML
 "Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Help: Om te linken naar een andere record in het systeem, gebruikt &quot;# Vorm / NB / [Note Name] &#39;, zoals de Link URL. (Gebruik geen &quot;http://&quot;)"
 "Here you can maintain family details like name and occupation of parent, spouse and children","Hier kunt u onderhouden familie gegevens zoals naam en beroep van de ouder, echtgenoot en kinderen"
 "Here you can maintain height, weight, allergies, medical concerns etc","Hier kunt u onderhouden lengte, gewicht, allergieën, medische zorgen, enz."
 Hide Currency Symbol,Verberg Valutasymbool
 High,Hoog
-History,Geschiedenis
 History In Company,Geschiedenis In Bedrijf
 Hold,Houden
 Holiday,Feestdag
@@ -1281,17 +1202,14 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',Als u te betrekken in de productie -activiteit . Stelt Item ' is vervaardigd '
 Ignore,Negeren
 Ignored: ,Genegeerd:
-"Ignoring Item {0}, because a group exists with the same name!","Post negeren {0} , omdat een groep bestaat met dezelfde naam !"
 Image,Beeld
 Image View,Afbeelding View
 Implementation Partner,Implementatie Partner
-Import,Importeren
 Import Attendance,Import Toeschouwers
 Import Failed!,Import mislukt!
 Import Log,Importeren Inloggen
 Import Successful!,Importeer Succesvol!
 Imports,Invoer
-In,in
 In Hours,In Hours
 In Process,In Process
 In Qty,in Aantal
@@ -1306,7 +1224,6 @@ In Words will be visible once you save the Purchase Receipt.,In Woorden zijn zic
 In Words will be visible once you save the Quotation.,In Woorden zijn zichtbaar zodra het opslaan van de offerte.
 In Words will be visible once you save the Sales Invoice.,In Woorden zijn zichtbaar zodra u bespaart de verkoopfactuur.
 In Words will be visible once you save the Sales Order.,In Woorden zijn zichtbaar zodra u bespaart de Verkooporder.
-In response to,In reactie op
 Incentives,Incentives
 Include Reconciled Entries,Omvatten Reconciled Entries
 Include holidays in Total no. of Working Days,Onder meer vakanties in Total nee. van Werkdagen
@@ -1327,8 +1244,6 @@ Indirect Income,indirecte Inkomen
 Individual,Individueel
 Industry,Industrie
 Industry Type,Industry Type
-Insert Below,Hieronder invoegen
-Insert Row,Rij invoegen
 Inspected By,Geïnspecteerd door
 Inspection Criteria,Inspectie Criteria
 Inspection Required,Inspectie Verplicht
@@ -1350,8 +1265,6 @@ Internal,Intern
 Internet Publishing,internet Publishing
 Introduction,Introductie
 Invalid Barcode or Serial No,Ongeldige streepjescode of Serienummer
-Invalid Email: {0},Ongeldig E-mail : {0}
-Invalid Filter: {0},Ongeldige Filter : {0}
 Invalid Mail Server. Please rectify and try again.,Ongeldige Mail Server . Aub verwijderen en probeer het opnieuw .
 Invalid Master Name,Ongeldige Master Naam
 Invalid User Name or Support Password. Please rectify and try again.,Ongeldige gebruikersnaam of wachtwoord Ondersteuning . Aub verwijderen en probeer het opnieuw .
@@ -1516,7 +1429,6 @@ Landed Cost updated successfully,Landed Cost succesvol bijgewerkt
 Language,Taal
 Last Name,Achternaam
 Last Purchase Rate,Laatste Purchase Rate
-Last updated by,Laatst gewijzigd door
 Latest,laatst
 Lead,Leiden
 Lead Details,Lood Details
@@ -1566,24 +1478,17 @@ Ledgers,grootboeken
 Left,Links
 Legal,wettelijk
 Legal Expenses,Juridische uitgaven
-Less or equals,Minder of gelijk
-Less than,minder dan
 Letter Head,Brief Hoofd
 Letter Heads for print templates.,Letter Heads voor print templates .
 Level,Niveau
 Lft,Lft
 Liability,aansprakelijkheid
-Like,zoals
-Linked With,Linked Met
-List,Lijst
 List a few of your customers. They could be organizations or individuals.,Lijst een paar van uw klanten. Ze kunnen organisaties of personen .
 List a few of your suppliers. They could be organizations or individuals.,Lijst een paar van uw leveranciers . Ze kunnen organisaties of personen .
 List items that form the package.,Lijst items die het pakket vormen.
 List this Item in multiple groups on the website.,Lijst deze post in meerdere groepen op de website.
 "List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.",Een lijst van uw producten of diensten die u koopt of verkoopt .
 "List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Een lijst van uw fiscale koppen ( zoals btw , accijnzen , ze moeten unieke namen hebben ) en hun standaard tarieven."
-Loading,Het laden
-Loading Report,Laden Rapport
 Loading...,Loading ...
 Loans (Liabilities),Leningen (passiva )
 Loans and Advances (Assets),Leningen en voorschotten ( Assets )
@@ -1591,7 +1496,6 @@ Local,lokaal
 Login with your new User ID,Log in met je nieuwe gebruikersnaam
 Logo,Logo
 Logo and Letter Heads,Logo en Letter Heads
-Logout,Afmelden
 Lost,verloren
 Lost Reason,Verloren Reden
 Low,Laag
@@ -1642,7 +1546,6 @@ Make Salary Structure,Maak salarisstructuur
 Make Sales Invoice,Maak verkoopfactuur
 Make Sales Order,Maak klantorder
 Make Supplier Quotation,Maak Leverancier Offerte
-Make a new,Maak een nieuw
 Male,Mannelijk
 Manage Customer Group Tree.,Beheer Customer Group Boom .
 Manage Sales Person Tree.,Beheer Sales Person Boom .
@@ -1650,8 +1553,6 @@ Manage Territory Tree.,Beheer Grondgebied Boom.
 Manage cost of operations,Beheer kosten van de operaties
 Management,beheer
 Manager,Manager
-Mandatory fields required in {0},Verplichte velden zijn verplicht in {0}
-Mandatory filters required:\n,Verplichte filters nodig : \ n
 "Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",Verplicht als Stock Item is &quot;ja&quot;. Ook de standaard opslagplaats waar de gereserveerde hoeveelheid is ingesteld van Sales Order.
 Manufacture against Sales Order,Vervaardiging tegen Verkooporder
 Manufacture/Repack,Fabricage / Verpak
@@ -1722,13 +1623,11 @@ Minute,minuut
 Misc Details,Misc Details
 Miscellaneous Expenses,diverse kosten
 Miscelleneous,Miscelleneous
-Missing Values Required,Ontbrekende Vereiste waarden
 Mobile No,Mobiel Nog geen
 Mobile No.,Mobile No
 Mode of Payment,Wijze van betaling
 Modern,Modern
 Modified Amount,Gewijzigd Bedrag
-Modified by,Aangepast door
 Monday,Maandag
 Month,Maand
 Monthly,Maandelijks
@@ -1736,12 +1635,9 @@ Monthly Attendance Sheet,Maandelijkse Toeschouwers Sheet
 Monthly Earning & Deduction,Maandelijkse Verdienen &amp; Aftrek
 Monthly Salary Register,Maandsalaris Register
 Monthly salary statement.,Maandsalaris verklaring.
-More,Meer
 More Details,Meer details
 More Info,Meer info
 Motion Picture & Video,Motion Picture & Video
-Move Down: {0},Omlaag : {0}
-Move Up: {0},Move Up : {0}
 Moving Average,Moving Average
 Moving Average Rate,Moving Average Rate
 Mr,De heer
@@ -1751,12 +1647,9 @@ Multiple Item prices.,Meerdere Artikelprijzen .
 			conflict by assigning priority. Price Rules: {0}","Prijs Regel Meerdere bestaat met dezelfde criteria , dan kunt u oplossen \ \ n conflict door het toekennen van prioriteit."
 Music,muziek
 Must be Whole Number,Moet heel getal zijn
-My Settings,Mijn instellingen
 Name,Naam
 Name and Description,Naam en beschrijving
 Name and Employee ID,Naam en Employee ID
-Name is required,Naam is vereist
-Name not permitted,Naam niet toegestaan
 "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","Naam van de nieuwe account . Let op : Gelieve niet goed voor klanten en leveranciers te maken, worden ze automatisch gemaakt op basis van cliënt en leverancier, meester"
 Name of person or organization that this address belongs to.,Naam van de persoon of organisatie die dit adres behoort.
 Name of the Budget Distribution,Naam van de begroting Distribution
@@ -1774,7 +1667,6 @@ Net Weight UOM,Netto Gewicht Verpakking
 Net Weight of each Item,Netto gewicht van elk item
 Net pay cannot be negative,Nettoloon kan niet negatief zijn
 Never,Nooit
-New,nieuw
 New ,
 New Account,nieuw account
 New Account Name,Nieuw account Naam
@@ -1794,7 +1686,6 @@ New Projects,Nieuwe projecten
 New Purchase Orders,Nieuwe bestellingen
 New Purchase Receipts,Nieuwe aankoopbonnen
 New Quotations,Nieuwe Citaten
-New Record,Nieuwe record
 New Sales Orders,Nieuwe Verkooporders
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Nieuwe Serienummer kunt niet Warehouse. Warehouse moet door Stock Entry of Kwitantie worden ingesteld
 New Stock Entries,Nieuwe toevoegingen aan de voorraden
@@ -1816,11 +1707,8 @@ Next,volgende
 Next Contact By,Volgende Contact Door
 Next Contact Date,Volgende Contact Datum
 Next Date,Volgende datum
-Next Record,Volgende record
-Next actions,Volgende acties
 Next email will be sent on:,Volgende e-mail wordt verzonden op:
 No,Geen
-No Communication tagged with this ,Geen Communicatie getagd met deze
 No Customer Accounts found.,Geen Customer Accounts gevonden .
 No Customer or Supplier Accounts found,Geen klant of leverancier Accounts gevonden
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,Geen kosten Goedkeurders . Gelieve toewijzen ' Expense Approver ' Rol om tenminste een gebruiker
@@ -1830,48 +1718,31 @@ No Items to pack,Geen items om te pakken
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,Geen Leave Goedkeurders . Gelieve ' Leave Approver ' Rol toewijzen aan tenminste een gebruiker
 No Permission,Geen toestemming
 No Production Orders created,Geen productieorders aangemaakt
-No Report Loaded. Please use query-report/[Report Name] to run a report.,Geen rapport Loaded. Gelieve gebruik AND-rapport / [Report naam] om een ​​rapport uit te voeren.
-No Results,geen resultaten
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,Geen Leverancier Accounts gevonden . Leverancier Accounts worden geïdentificeerd op basis van 'Master Type' waarde in rekening te nemen.
 No accounting entries for the following warehouses,Geen boekingen voor de volgende magazijnen
 No addresses created,Geen adressen aangemaakt
 No contacts created,Geen contacten gemaakt
 No default BOM exists for Item {0},Geen standaard BOM bestaat voor post {0}
 No description given,Geen beschrijving gegeven
-No document selected,Geen document geselecteerd
 No employee found,Geen enkele werknemer gevonden
 No employee found!,Geen enkele werknemer gevonden !
 No of Requested SMS,Geen van de gevraagde SMS
 No of Sent SMS,Geen van Sent SMS
 No of Visits,Geen van bezoeken
-No one,Niemand
 No permission,geen toestemming
-No permission to '{0}' {1},Geen toestemming om ' {0} ' {1}
-No permission to edit,Geen toestemming te bewerken
 No record found,Geen record gevonden
-No records tagged.,Geen records gelabeld.
 No salary slip found for month: ,Geen loonstrook gevonden voor de maand:
 Non Profit,non Profit
-None,Niemand
-None: End of Workflow,Geen: Einde van de Workflow
 Nos,nos
 Not Active,Niet actief
 Not Applicable,Niet van toepassing
 Not Available,niet beschikbaar
 Not Billed,Niet in rekening gebracht
 Not Delivered,Niet geleverd
-Not Found,Niet gevonden
-Not Linked to any record.,Niet gekoppeld aan een record.
-Not Permitted,Niet Toegestane
 Not Set,niet instellen
-Not Submitted,niet ingediend
-Not allowed,niet toegestaan
 Not allowed to update entries older than {0},Niet toegestaan ​​om data ouder dan updaten {0}
 Not authorized to edit frozen Account {0},Niet bevoegd om bevroren account bewerken {0}
 Not authroized since {0} exceeds limits,Niet authroized sinds {0} overschrijdt grenzen
-Not enough permission to see links.,Niet genoeg rechten om links te zien.
-Not equals,niet gelijken
-Not found,niet gevonden
 Not permitted,niet toegestaan
 Note,Nota
 Note User,Opmerking Gebruiker
@@ -1880,7 +1751,6 @@ Note User,Opmerking Gebruiker
 Note: Due Date exceeds the allowed credit days by {0} day(s),Opmerking : Due Date overschrijdt de toegestane krediet dagen door {0} dag (en )
 Note: Email will not be sent to disabled users,Opmerking: E-mail wordt niet verzonden naar gebruikers met een handicap
 Note: Item {0} entered multiple times,Opmerking : Item {0} ingevoerd meerdere keren
-Note: Other permission rules may also apply,Opmerking: Andere toestemming regels kunnen ook van toepassing zijn
 Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,Let op : De betaling krijgt u geen toegang gemaakt sinds ' Cash of bankrekening ' is niet opgegeven
 Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,Opmerking : Het systeem controleert niet over- levering en overboeking voor post {0} als hoeveelheid of bedrag 0
 Note: There is not enough leave balance for Leave Type {0},Opmerking : Er is niet genoeg verlofsaldo voor Verlof type {0}
@@ -1889,12 +1759,9 @@ Note: {0},Opmerking : {0}
 Notes,Opmerkingen
 Notes:,Opmerkingen:
 Nothing to request,Niets aan te vragen
-Nothing to show,Niets aan te geven
-Nothing to show for this selection,Niets te tonen voor deze selectie
 Notice (days),Notice ( dagen )
 Notification Control,Kennisgeving Controle
 Notification Email Address,Melding e-mail adres
-Notify By Email,Informeer via e-mail
 Notify by Email on creation of automatic Material Request,Informeer per e-mail op de creatie van automatische Materiaal Request
 Number Format,Getalnotatie
 Offer Date,aanbieding Datum
@@ -1938,7 +1805,6 @@ Opportunity Items,Opportunity Items
 Opportunity Lost,Opportunity Verloren
 Opportunity Type,Type functie
 Optional. This setting will be used to filter in various transactions.,Optioneel. Deze instelling wordt gebruikt om te filteren op diverse transacties .
-Or Created By,Of Gemaakt door
 Order Type,Bestel Type
 Order Type must be one of {1},Bestel Type moet een van zijn {1}
 Ordered,bestelde
@@ -1953,7 +1819,6 @@ Organization Profile,organisatie Profiel
 Organization branch master.,Organisatie tak meester .
 Organization unit (department) master.,Organisatie -eenheid (departement) meester.
 Original Amount,originele Bedrag
-Original Message,Oorspronkelijk bericht
 Other,Ander
 Other Details,Andere Details
 Others,anderen
@@ -1996,7 +1861,6 @@ Packing Slip Items,Pakbon Items
 Packing Slip(s) cancelled,Pakbon ( s ) geannuleerd
 Page Break,Pagina-einde
 Page Name,Page Name
-Page not found,Pagina niet gevonden
 Paid Amount,Betaalde Bedrag
 Paid amount + Write Off Amount can not be greater than Grand Total,Betaalde bedrag + Schrijf Uit Het bedrag kan niet groter zijn dan eindtotaal worden
 Pair,paar
@@ -2062,9 +1926,6 @@ Period Closing Voucher,Periode Closing Voucher
 Periodicity,Periodiciteit
 Permanent Address,Permanente Adres
 Permanent Address Is,Vast adres
-Permanently Cancel {0}?,Permanent Annuleren {0} ?
-Permanently Submit {0}?,Permanent Submit {0} ?
-Permanently delete {0}?,Permanent verwijderen {0} ?
 Permission,Toestemming
 Personal,Persoonlijk
 Personal Details,Persoonlijke Gegevens
@@ -2073,7 +1934,6 @@ Pharmaceutical,farmaceutisch
 Pharmaceuticals,Pharmaceuticals
 Phone,Telefoon
 Phone No,Telefoon nr.
-Pick Columns,Kies Kolommen
 Piecework,stukwerk
 Pincode,Pincode
 Place of Issue,Plaats van uitgave
@@ -2086,8 +1946,6 @@ Plant,Plant
 Plant and Machinery,Plant and Machinery
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Gelieve goed op Enter Afkorting of korte naam als het zal worden toegevoegd als suffix aan alle Account Heads.
 Please add expense voucher details,Gelieve te voegen koste voucher informatie
-Please attach a file first.,Gelieve een bestand eerst.
-Please attach a file or set a URL,Gelieve een bestand of stel een URL
 Please check 'Is Advance' against Account {0} if this is an advance entry.,Kijk ' Is Advance ' tegen account {0} als dit is een voorschot binnenkomst .
 Please click on 'Generate Schedule',Klik op ' Generate Schedule'
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},Klik op ' Generate Schedule' te halen Serial No toegevoegd voor post {0}
@@ -2096,7 +1954,6 @@ Please create Customer from Lead {0},Maak Klant van Lead {0}
 Please create Salary Structure for employee {0},Maak salarisstructuur voor werknemer {0}
 Please create new account from Chart of Accounts.,Maak nieuwe account van Chart of Accounts .
 Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,Gelieve niet Account ( Grootboeken ) te creëren voor klanten en leveranciers . Ze worden rechtstreeks vanuit de klant / leverancier- meesters.
-Please enable pop-ups,Schakel pop - ups
 Please enter 'Expected Delivery Date',Vul ' Verwachte leverdatum '
 Please enter 'Is Subcontracted' as Yes or No,Vul ' Is Uitbesteed ' als Ja of Nee
 Please enter 'Repeat on Day of Month' field value,Vul de 'Repeat op de Dag van de Maand ' veldwaarde
@@ -2107,7 +1964,6 @@ Please enter Company,Vul Company
 Please enter Cost Center,Vul kostenplaats
 Please enter Delivery Note No or Sales Invoice No to proceed,Vul Delivery Note Geen of verkoopfactuur Nee om door te gaan
 Please enter Employee Id of this sales parson,Vul Werknemer Id van deze verkoop dominee
-Please enter Event's Date and Time!,Vul Event Datum en tijd !
 Please enter Expense Account,Vul Expense Account
 Please enter Item Code to get batch no,Vul de artikelcode voor batch niet krijgen
 Please enter Item Code.,Vul Item Code .
@@ -2133,14 +1989,11 @@ Please enter parent cost center,Vul ouder kostenplaats
 Please enter quantity for Item {0},Graag het aantal voor post {0}
 Please enter relieving date.,Vul het verlichten datum .
 Please enter sales order in the above table,Vul de verkooporder in de bovenstaande tabel
-Please enter some text!,U dient een tekst !
-Please enter title!,Vul de titel!
 Please enter valid Company Email,Voer geldige Company Email
 Please enter valid Email Id,Voer een geldig e Id
 Please enter valid Personal Email,Voer geldige Personal Email
 Please enter valid mobile nos,Voer geldige mobiele nos
 Please install dropbox python module,Installeer dropbox python module
-Please login to Upvote!,Log in om Upvote !
 Please mention no of visits required,Vermeld geen bezoeken nodig
 Please pull items from Delivery Note,Gelieve te trekken items uit Delivery Note
 Please save the Newsletter before sending,Wij verzoeken u de nieuwsbrief voor het verzenden
@@ -2191,8 +2044,6 @@ Plot By,plot Door
 Point of Sale,Point of Sale
 Point-of-Sale Setting,Point-of-Sale-instelling
 Post Graduate,Post Graduate
-Post already exists. Cannot add again!,Bericht bestaat reeds. Kan niet opnieuw toe te voegen !
-Post does not exist. Please add post!,Bericht bestaat niet . Voeg bericht !
 Postal,Post-
 Postal Expenses,portokosten
 Posting Date,Plaatsingsdatum
@@ -2207,7 +2058,6 @@ Prevdoc DocType,Prevdoc DocType
 Prevdoc Doctype,Prevdoc Doctype
 Preview,Voorbeeld
 Previous,vorig
-Previous Record,Vorige Record
 Previous Work Experience,Vorige Werkervaring
 Price,prijs
 Price / Discount,Prijs / Korting
@@ -2226,12 +2076,10 @@ Price or Discount,Prijs of korting
 Pricing Rule,Pricing Rule
 Pricing Rule For Discount,Pricing Rule voor korting
 Pricing Rule For Price,Pricing regel voor Prijs
-Print,afdrukken
 Print Format Style,Print Format Style
 Print Heading,Print rubriek
 Print Without Amount,Printen zonder Bedrag
 Print and Stationary,Print en stationaire
-Print...,Print ...
 Printing and Branding,Printen en Branding
 Priority,Prioriteit
 Private Equity,private Equity
@@ -2357,7 +2205,6 @@ Quantity of item obtained after manufacturing / repacking from given quantities 
 Quantity required for Item {0} in row {1},Benodigde hoeveelheid voor post {0} in rij {1}
 Quarter,Kwartaal
 Quarterly,Driemaandelijks
-Query Report,Query Report
 Quick Help,Quick Help
 Quotation,Citaat
 Quotation Date,Offerte Datum
@@ -2459,14 +2306,11 @@ Rejected Warehouse is mandatory against regected item,Verworpen Warehouse is ver
 Relation,Relatie
 Relieving Date,Het verlichten van Datum
 Relieving Date must be greater than Date of Joining,Het verlichten Datum moet groter zijn dan Datum van Deelnemen zijn
-Reload Page,Reload Pagina
 Remark,Opmerking
 Remarks,Opmerkingen
-Remove Bookmark,Bladwijzer verwijderen
 Rename,andere naam geven
 Rename Log,Hernoemen Inloggen
 Rename Tool,Wijzig de naam van Tool
-Rename...,Hernoemen ...
 Rent Cost,Kosten huur
 Rent per hour,Huur per uur
 Rented,Verhuurd
@@ -2474,12 +2318,9 @@ Repeat on Day of Month,Herhaal dit aan Dag van de maand
 Replace,Vervang
 Replace Item / BOM in all BOMs,Vervang Item / BOM in alle stuklijsten
 Replied,Beantwoord
-Report,Verslag
 Report Date,Verslag Datum
 Report Type,Meld Type
 Report Type is mandatory,Soort rapport is verplicht
-Report an Issue,Een probleem rapporteren?
-Report was not saved (there were errors),Rapport werd niet opgeslagen (er waren fouten)
 Reports to,Rapporteert aan
 Reqd By Date,Reqd op datum
 Request Type,Soort aanvraag
@@ -2630,7 +2471,6 @@ Salutation,Aanhef
 Sample Size,Steekproefomvang
 Sanctioned Amount,Gesanctioneerde Bedrag
 Saturday,Zaterdag
-Save,besparen
 Schedule,Plan
 Schedule Date,tijdschema
 Schedule Details,Schema Details
@@ -2644,7 +2484,6 @@ Score (0-5),Score (0-5)
 Score Earned,Score Verdiende
 Score must be less than or equal to 5,Score moet lager dan of gelijk aan 5 zijn
 Scrap %,Scrap%
-Search,Zoek
 Seasonality for setting budgets.,Seizoensinvloeden voor het instellen van budgetten.
 Secretary,secretaresse
 Secured Loans,Beveiligde Leningen
@@ -2656,26 +2495,18 @@ Securities and Deposits,Effecten en deposito's
 "Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Selecteer &quot;Ja&quot; als dit voorwerp vertegenwoordigt wat werk zoals training, ontwerpen, overleg, enz."
 "Select ""Yes"" if you are maintaining stock of this item in your Inventory.",Selecteer &quot;Ja&quot; als u het handhaven voorraad van dit artikel in je inventaris.
 "Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",Selecteer &quot;Ja&quot; als u de levering van grondstoffen aan uw leverancier om dit item te produceren.
-Select All,Alles selecteren
-Select Attachments,Selecteer Bijlagen
 Select Budget Distribution to unevenly distribute targets across months.,Selecteer Budget Uitkering aan ongelijk verdelen doelen uit maanden.
 "Select Budget Distribution, if you want to track based on seasonality.","Selecteer Budget Distributie, als je wilt volgen op basis van seizoensinvloeden."
 Select DocType,Selecteer DocType
 Select Items,Selecteer Items
-Select Print Format,Selecteer Print Format
 Select Purchase Receipts,Selecteer Aankoopfacturen
-Select Report Name,Selecteer Rapportnaam
 Select Sales Orders,Selecteer Verkooporders
 Select Sales Orders from which you want to create Production Orders.,Selecteer Verkooporders van waaruit u wilt productieorders creëren.
 Select Time Logs and Submit to create a new Sales Invoice.,Selecteer Time Logs en indienen om een ​​nieuwe verkoopfactuur maken.
-Select To Download:,Selecteer Naar Download:
 Select Transaction,Selecteer Transactie
-Select Type,Selecteer Type
 Select Your Language,Selecteer uw taal
 Select account head of the bank where cheque was deposited.,Selecteer met het hoofd van de bank waar cheque werd afgezet.
 Select company name first.,Kies eerst een bedrijfsnaam.
-Select dates to create a new ,Kies een datum om een ​​nieuwe te maken
-Select or drag across time slots to create a new event.,Selecteer of sleep over tijdsloten om een ​​nieuwe gebeurtenis te maken.
 Select template from which you want to get the Goals,Selecteer template van waaruit u de Doelen te krijgen
 Select the Employee for whom you are creating the Appraisal.,Selecteer de werknemer voor wie u het maken van de Beoordeling.
 Select the period when the invoice will be generated automatically,Selecteer de periode waarin de factuur wordt automatisch gegenereerd
@@ -2691,11 +2522,9 @@ Select your home country and check the timezone and currency.,Selecteer uw land 
 Selling,Selling
 Selling Settings,Selling Instellingen
 Send,Sturen
-Send As Email,Verstuur als e-mail
 Send Autoreply,Stuur Autoreply
 Send Email,E-mail verzenden
 Send From,Stuur Van
-Send Me A Copy,Stuur mij een kopie
 Send Notifications To,Meldingen verzenden naar
 Send Now,Nu verzenden
 Send SMS,SMS versturen
@@ -2705,7 +2534,6 @@ Send mass SMS to your contacts,Stuur massa SMS naar uw contacten
 Send to this list,Stuur deze lijst
 Sender Name,Naam afzender
 Sent On,Verzonden op
-Sent or Received,Verzonden of ontvangen
 Separate production order will be created for each finished good item.,Gescheiden productie order wordt aangemaakt voor elk eindproduct goed punt.
 Serial No,Serienummer
 Serial No / Batch,Serienummer / Batch
@@ -2739,11 +2567,9 @@ Series {0} already used in {1},Serie {0} al gebruikt in {1}
 Service,service
 Service Address,Service Adres
 Services,Diensten
-Session Expired. Logging you out,Sessie verlopen. U wordt afgemeld
 Set,reeks
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.","Standaardwaarden zoals onderneming , Valuta , huidige boekjaar , etc."
 Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,Set Item Group-wise budgetten op dit gebied. U kunt ook seizoensinvloeden door de Distribution.
-Set Link,Stel Link
 Set as Default,Instellen als standaard
 Set as Lost,Instellen als Lost
 Set prefix for numbering series on your transactions,Stel prefix voor het nummeren van serie over uw transacties
@@ -2776,17 +2602,12 @@ Shipping Rule Label,Verzending Regel Label
 Shop,Winkelen
 Shopping Cart,Winkelwagen
 Short biography for website and other publications.,Korte biografie voor website en andere publicaties.
-Shortcut,Kortere weg
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",Toon &quot;Op voorraad&quot; of &quot;Niet op voorraad&quot; op basis van de beschikbare voorraad in dit magazijn.
 "Show / Hide features like Serial Nos, POS etc.","Toon / verberg functies, zoals serienummers , POS etc."
-Show Details,Show Details
 Show In Website,Toon in Website
-Show Tags,Toon Tags
 Show a slideshow at the top of the page,Laat een diavoorstelling aan de bovenkant van de pagina
 Show in Website,Toon in Website
-Show rows with zero values,Toon rijen met nulwaarden
 Show this slideshow at the top of the page,Laat deze slideshow aan de bovenkant van de pagina
-Showing only for (if not empty),Slechts het tonen van (indien niet leeg )
 Sick Leave,Sick Leave
 Signature,Handtekening
 Signature to be appended at the end of every email,Handtekening moet worden toegevoegd aan het einde van elke e-mail
@@ -2797,11 +2618,8 @@ Slideshow,Diashow
 Soap & Detergent,Soap & Wasmiddel
 Software,software
 Software Developer,software Developer
-Sorry we were unable to find what you were looking for.,Sorry we waren niet in staat om te vinden wat u zocht.
-Sorry you are not permitted to view this page.,Sorry dat je niet toegestaan ​​om deze pagina te bekijken.
 "Sorry, Serial Nos cannot be merged","Sorry , kan de serienummers niet worden samengevoegd"
 "Sorry, companies cannot be merged","Sorry , bedrijven kunnen niet worden samengevoegd"
-Sort By,Sorteer op
 Source,Bron
 Source File,Bronbestand
 Source Warehouse,Bron Warehouse
@@ -2826,7 +2644,6 @@ Standard Selling,Standaard Selling
 Standard contract terms for Sales or Purchase.,Standaard contractvoorwaarden voor Sales en Inkoop .
 Start,begin
 Start Date,Startdatum
-Start Report For,Start Rapport Voor
 Start date of current invoice's period,Begindatum van de periode huidige factuur&#39;s
 Start date should be less than end date for Item {0},Startdatum moet kleiner zijn dan einddatum voor post zijn {0}
 State,Staat
@@ -2884,7 +2701,6 @@ Sub Assemblies,sub Assemblies
 "Sub-currency. For e.g. ""Cent""",Sub-valuta. Voor bijvoorbeeld &quot;Cent&quot;
 Subcontract,Subcontract
 Subject,Onderwerp
-Submit,Voorleggen
 Submit Salary Slip,Indienen loonstrook
 Submit all salary slips for the above selected criteria,Gelieve alle loonstroken voor de bovenstaande geselecteerde criteria
 Submit this Production Order for further processing.,Submit deze productieorder voor verdere verwerking .
@@ -2928,7 +2744,6 @@ Support Email Settings,Ondersteuning E-mailinstellingen
 Support Password,Ondersteuning Wachtwoord
 Support Ticket,Hulpaanvraag
 Support queries from customers.,Ondersteuning vragen van klanten.
-Switch to Website,Schakel over naar Website
 Symbol,Symbool
 Sync Support Mails,Sync Ondersteuning Mails
 Sync with Dropbox,Synchroniseren met Dropbox
@@ -2936,7 +2751,6 @@ Sync with Google Drive,Synchroniseren met Google Drive
 System,Systeem
 System Settings,Systeeminstellingen
 "System User (login) ID. If set, it will become default for all HR forms.","Systeem (login) ID. Indien ingesteld, zal het standaard voor alle HR-formulieren."
-Tags,Tags
 Target  Amount,Streefbedrag
 Target Detail,Doel Detail
 Target Details,Target Details
@@ -2995,7 +2809,6 @@ Territory Target Variance Item Group-Wise,Grondgebied Doel Variance Post Group -
 Territory Targets,Grondgebied Doelen
 Test,Test
 Test Email Id,Test E-mail Identiteitskaart
-Test Runner,Test Runner
 Test the Newsletter,Test de nieuwsbrief
 The BOM which will be replaced,De BOM die zal worden vervangen
 The First User: You,De eerste gebruiker : U
@@ -3015,28 +2828,23 @@ The net weight of this package. (calculated automatically as sum of net weight o
 The new BOM after replacement,De nieuwe BOM na vervanging
 The rate at which Bill Currency is converted into company's base currency,De snelheid waarmee Bill valuta worden omgezet in basis bedrijf munt
 The unique id for tracking all recurring invoices. It is generated on submit.,De unieke id voor het bijhouden van alle terugkerende facturen. Het wordt geproduceerd op te dienen.
-Then By (optional),Vervolgens op (optioneel)
 There are more holidays than working days this month.,Er zijn meer vakanties dan werkdagen deze maand .
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","Er kan maar een Verzenden Regel Voorwaarde met 0 of blanco waarde voor ""To Value """
 There is not enough leave balance for Leave Type {0},Er is niet genoeg verlofsaldo voor Verlof type {0}
 There is nothing to edit.,Er is niets om te bewerken .
 There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Er is een fout opgetreden . Een mogelijke reden zou kunnen zijn dat je niet hebt opgeslagen het formulier . Neem dan contact support@erpnext.com als het probleem aanhoudt .
-There were errors,Er zijn fouten
-There were errors while sending email. Please try again.,Er zijn fouten opgetreden tijdens het versturen van e-mail. Probeer het opnieuw .
 There were errors.,Er waren fouten .
 This Currency is disabled. Enable to use in transactions,Deze valuta is uitgeschakeld . In staat om te gebruiken in transacties
 This Leave Application is pending approval. Only the Leave Apporver can update status.,Deze verlofaanvraag is in afwachting van goedkeuring . Alleen de Leave Apporver kan status bijwerken .
 This Time Log Batch has been billed.,This Time Log Batch is gefactureerd.
 This Time Log Batch has been cancelled.,This Time Log Batch is geannuleerd.
 This Time Log conflicts with {0},This Time Log in strijd is met {0}
-This is PERMANENT action and you cannot undo. Continue?,Dit is PERMANENTE actie en u ongedaan kunt maken niet. Doorgaan?
 This is a root account and cannot be edited.,Dit is een root account en kan niet worden bewerkt .
 This is a root customer group and cannot be edited.,Dit is een wortel klantgroep en kan niet worden bewerkt .
 This is a root item group and cannot be edited.,Dit is een hoofditem groep en kan niet worden bewerkt .
 This is a root sales person and cannot be edited.,Dit is een wortel verkoper en kan niet worden bewerkt .
 This is a root territory and cannot be edited.,Dit is een wortel grondgebied en kan niet worden bewerkt .
 This is an example website auto-generated from ERPNext,Dit is een voorbeeld website automatisch gegenereerd ERPNext
-This is permanent action and you cannot undo. Continue?,Dit is een permanente actie en u ongedaan kunt maken niet. Doorgaan?
 This is the number of the last created transaction with this prefix,Dit is het nummer van de laatst gemaakte transactie met dit voorvoegsel
 This will be used for setting rule in HR module,Deze wordt gebruikt voor instelling regel HR module
 Thread HTML,Thread HTML
@@ -3078,7 +2886,6 @@ To get Item Group in details table,Om Item Group te krijgen in details tabel
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Om voorheffing omvatten in rij {0} in Item tarief , de belastingen in rijen {1} moet ook opgenomen worden"
 "To merge, following properties must be same for both items","Te fuseren , moeten volgende eigenschappen hetzelfde zijn voor beide posten"
 "To report an issue, go to ",
-"To run a test add the module name in the route after '{0}'. For example, {1}","Om een test voeg de module naam in de route na ' {0} ' . Bijvoorbeeld , {1}"
 "To set this Fiscal Year as Default, click on 'Set as Default'","Om dit fiscale jaar ingesteld als standaard , klik op ' Als standaard instellen '"
 To track any installation or commissioning related work after sales,Om een ​​installatie of inbedrijfstelling gerelateerde werk na verkoop bij te houden
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Om merknaam volgen op de volgende documenten Delivery Note, Opportunity , Materiaal Request , punt , Bestelling , Aankoopbon , Koper Ontvangst , Offerte , verkoopfactuur , Sales BOM , Sales Order , Serienummer"
@@ -3130,7 +2937,6 @@ Totals,Totalen
 Track Leads by Industry Type.,Track Leads door de industrie type .
 Track this Delivery Note against any Project,Volg dit pakbon tegen elke Project
 Track this Sales Order against any Project,Volg dit Verkooporder tegen elke Project
-Trainee,stagiair
 Transaction,Transactie
 Transaction Date,Transactie Datum
 Transaction not allowed against stopped Production Order {0},Transactie niet toegestaan ​​tegen gestopt productieorder {0}
@@ -3162,7 +2968,6 @@ UOM Conversion Factor,Verpakking Conversie Factor
 UOM Conversion factor is required in row {0},Verpakking omrekeningsfactor worden vastgesteld in rij {0}
 UOM Name,Verpakking Naam
 UOM coversion factor required for UOM {0} in Item {1},Verpakking conversie factor die nodig is voor Verpakking {0} in Item {1}
-Unable to load: {0},Niet in staat om belasting: {0}
 Under AMC,Onder AMC
 Under Graduate,Onder Graduate
 Under Warranty,Onder de garantie
@@ -3172,11 +2977,8 @@ Unit of Measure {0} has been entered more than once in Conversion Factor Table,M
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Meeteenheid van dit artikel (bijvoorbeeld kg, eenheid, Nee, Pair)."
 Units/Hour,Eenheden / uur
 Units/Shifts,Eenheden / Verschuivingen
-Unknown Column: {0},Onbekend Column : {0}
-Unknown Print Format: {0},Onbekend Print Formaat : {0}
 Unmatched Amount,Ongeëvenaarde Bedrag
 Unpaid,Onbetaald
-Unread Messages,Ongelezen berichten
 Unscheduled,Ongeplande
 Unsecured Loans,ongedekte leningen
 Unstop,opendraaien
@@ -3196,18 +2998,14 @@ Update bank payment dates with journals.,Update bank betaaldata met tijdschrifte
 Update clearance date of Journal Entries marked as 'Bank Vouchers',Goedkeuring datum actualisering van Journaalposten gemarkeerd als ' Bank Vouchers '
 Updated,Bijgewerkt
 Updated Birthday Reminders,Bijgewerkt verjaardagsherinneringen
-Upload,uploaden
-Upload Attachment,Upload Attachment
 Upload Attendance,Upload Toeschouwers
 Upload Backups to Dropbox,Upload Backups naar Dropbox
 Upload Backups to Google Drive,Upload Backups naar Google Drive
 Upload HTML,Upload HTML
 Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,Upload een csv-bestand met twee kolommen:. De oude naam en de nieuwe naam. Max. 500 rijen.
-Upload a file,Een bestand uploaden
 Upload attendance from a .csv file,Upload aanwezigheid van een. Csv-bestand
 Upload stock balance via csv.,Upload voorraadsaldo via csv.
 Upload your letter head and logo - you can edit them later.,Upload uw brief hoofd en logo - u kunt ze later bewerken .
-Uploading...,Uploaden ...
 Upper Income,Bovenste Inkomen
 Urgent,Dringend
 Use Multi-Level BOM,Gebruik Multi-Level BOM
@@ -3217,11 +3015,9 @@ User ID,Gebruikers-ID
 User ID not set for Employee {0},Gebruikers-ID niet ingesteld voor Employee {0}
 User Name,Gebruikersnaam
 User Name or Support Password missing. Please enter and try again.,Gebruikersnaam of wachtwoord ondersteuning ontbreekt. Vul en probeer het opnieuw .
-User Permission Restrictions,Gebruiker Toestemming Beperkingen
 User Remark,Gebruiker Opmerking
 User Remark will be added to Auto Remark,Gebruiker Opmerking zal worden toegevoegd aan Auto Opmerking
 User Remarks is mandatory,Gebruiker Opmerkingen is verplicht
-User Restrictions,gebruikersbeperkingen
 User Specific,gebruiker Specifieke
 User must always select,Gebruiker moet altijd kiezen
 User {0} is already assigned to Employee {1},Gebruiker {0} is al Employee toegewezen {1}
@@ -3319,8 +3115,6 @@ Will be updated after Sales Invoice is Submitted.,Zal worden bijgewerkt na verko
 Will be updated when batched.,Zal worden bijgewerkt wanneer gedoseerd.
 Will be updated when billed.,Zal worden bijgewerkt wanneer gefactureerd.
 Wire Transfer,overboeking
-With Groups,met Groepen
-With Ledgers,met Ledgers
 With Operations,Met Operations
 With period closing entry,Met periode sluitpost
 Work Details,Work Details
@@ -3328,7 +3122,6 @@ Work Done,Werk
 Work In Progress,Work In Progress
 Work-in-Progress Warehouse,Work-in-Progress Warehouse
 Work-in-Progress Warehouse is required before Submit,Work -in- Progress Warehouse wordt vóór vereist Verzenden
-Workflow will start after saving.,Workflow begint na het opslaan.
 Working,Werkzaam
 Workstation,Workstation
 Workstation Name,Naam van werkstation
@@ -3351,11 +3144,6 @@ Year Start Date should not be greater than Year End Date,Jaar Startdatum mag nie
 Year of Passing,Jaar van de Passing
 Yearly,Jaar-
 Yes,Ja
-Yesterday,Gisteren
-You are not allowed to create / edit reports,U bent niet toegestaan ​​om / bewerken van rapporten
-You are not allowed to export this report,U bent niet bevoegd om dit rapport te exporteren
-You are not allowed to print this document,U bent niet gemachtigd om dit document af te drukken
-You are not allowed to send emails related to this document,Het is niet toegestaan ​​om e-mails met betrekking tot dit document te versturen
 You are not authorized to add or update entries before {0},U bent niet bevoegd om items toe te voegen of bij te werken voordat {0}
 You are not authorized to set Frozen value,U bent niet bevoegd om Frozen waarde in te stellen
 You are the Expense Approver for this record. Please Update the 'Status' and Save,U bent de Expense Approver voor dit record . Werk van de 'Status' en opslaan
@@ -3372,7 +3160,6 @@ You can submit this Stock Reconciliation.,U kunt indienen dit Stock Verzoening .
 You can update either Quantity or Valuation Rate or both.,U kunt Hoeveelheid of Valuation Rate of beide te werken.
 You cannot credit and debit same account at the same time,Je kunt niet crediteren en debiteren dezelfde account op hetzelfde moment
 You have entered duplicate items. Please rectify and try again.,U heeft dubbele items ingevoerd. Aub verwijderen en probeer het opnieuw .
-You have unsaved changes in this form. Please save before you continue.,Je hebt opgeslagen wijzigingen in deze vorm .
 You may need to update: {0},U kan nodig zijn om te werken: {0}
 You must Save the form before proceeding,U moet het formulier opslaan voordat u verder gaat
 You must allocate amount before reconcile,U moet dit bedrag gebruiken voor elkaar te verzoenen
@@ -3381,7 +3168,6 @@ Your Customers,uw klanten
 Your Login Id,Uw login-ID
 Your Products or Services,Uw producten of diensten
 Your Suppliers,uw Leveranciers
-"Your download is being built, this may take a few moments...","Uw download wordt gebouwd, kan dit enige tijd duren ..."
 Your email address,Uw e-mailadres
 Your financial year begins on,Uw financiële jaar begint op
 Your financial year ends on,Uw financiële jaar eindigt op
@@ -3394,8 +3180,6 @@ Your support email id - must be a valid email - this is where your emails will c
 and,en
 are not allowed.,zijn niet toegestaan ​​.
 assigned by,toegewezen door
-comment,commentaar
-comments,reacties
 "e.g. ""Build tools for builders""","bijv. ""Bouw gereedschap voor bouwers """
 "e.g. ""MC""","bijv. "" MC """
 "e.g. ""My Company LLC""","bijv. "" My Company LLC """
@@ -3405,14 +3189,9 @@ e.g. 5,bijv. 5
 e.g. VAT,bijv. BTW
 eg. Cheque Number,bijvoorbeeld. Cheque nummer
 example: Next Day Shipping,Bijvoorbeeld: Next Day Shipping
-found,gevonden
-is not allowed.,is niet toegestaan.
 lft,lft
 old_parent,old_parent
-or,of
 rgt,RGT
-to,naar
-values and dates,waarden en data
 website page link,website Paginalink
 {0} '{1}' not in Fiscal Year {2},{0} ' {1} ' niet in het fiscale jaar {2}
 {0} Credit limit {0} crossed,{0} kredietlimiet {0} gekruist

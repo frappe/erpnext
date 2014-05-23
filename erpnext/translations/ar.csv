@@ -1,7 +1,5 @@
  (Half Day),(نصف يوم)
  and year: ,والسنة:
- by Role ,بالتخصص
- is not set,لم يتم تعيين
 """ does not exists",""" لا يوجد"
 %  Delivered,ألقيت٪
 % Amount Billed,المبلغ٪ صفت
@@ -34,7 +32,6 @@
 "1 Currency = [?] Fraction
 For e.g. 1 USD = 100 Cent",1 العملة = [ ؟ ] جزء \ n للحصول على سبيل المثال
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. للحفاظ على العملاء رمز البند الحكيمة والبحث فيها لجعلها تقوم على التعليمات البرمجية الخاصة بهم استخدام هذا الخيار
-2 days ago,2 منذ أيام
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> إضافة / تحرير < / A>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> إضافة / تحرير < / A>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> إضافة / تحرير < / A>"
@@ -89,7 +86,6 @@ Accounts Frozen Upto,حسابات مجمدة لغاية
 Accounts Payable,ذمم دائنة
 Accounts Receivable,حسابات القبض
 Accounts Settings,إعدادات الحسابات
-Actions,الإجراءات
 Active,نشط
 Active: Will extract emails from ,نشط: سيتم استخراج رسائل البريد الإلكتروني من
 Activity,نشاط
@@ -111,23 +107,13 @@ Actual Quantity,الكمية الفعلية
 Actual Start Date,تاريخ البدء الفعلي
 Add,إضافة
 Add / Edit Taxes and Charges,إضافة / تعديل الضرائب والرسوم
-Add Attachments,إضافة مرفقات
-Add Bookmark,إضافة علامة
 Add Child,إضافة الطفل
-Add Column,إضافة عمود
-Add Message,إضافة رسالة
-Add Reply,إضافة رد
 Add Serial No,إضافة رقم المسلسل
 Add Taxes,إضافة الضرائب
 Add Taxes and Charges,إضافة الضرائب والرسوم
-Add This To User's Restrictions,هذا إضافة إلى تقييد المستخدم
-Add attachment,إضافة المرفقات
-Add new row,إضافة صف جديد
 Add or Deduct,إضافة أو خصم
 Add rows to set annual budgets on Accounts.,إضافة صفوف لوضع الميزانيات السنوية على الحسابات.
 Add to Cart,إضافة إلى العربة
-Add to To Do,إضافة إلى المهام
-Add to To Do List of,إضافة إلى قائمة المهام من
 Add to calendar on this date,إضافة إلى التقويم في هذا التاريخ
 Add/Remove Recipients,إضافة / إزالة المستلمين
 Address,عنوان
@@ -220,9 +206,6 @@ Allow user to edit Price List Rate in transactions,تسمح للمستخدم ل�
 Allowance Percent,بدل النسبة
 Allowance for over-delivery / over-billing crossed for Item {0},بدل عن الإفراط في تسليم / الإفراط في الفواتير عبرت القطعة ل {0}
 Allowed Role to Edit Entries Before Frozen Date,دور سمح ل تحرير مقالات المجمدة قبل التسجيل
-"Allowing DocType, DocType. Be careful!",السماح DOCTYPE ، DOCTYPE . كن حذرا!
-Alternative download link,رابط تحميل بديل
-Amend,تعديل
 Amended From,عدل من
 Amount,كمية
 Amount (Company Currency),المبلغ (عملة الشركة)
@@ -270,26 +253,18 @@ Approving User,الموافقة العضو
 Approving User cannot be same as user the rule is Applicable To,الموافقة العضو لا يمكن أن يكون نفس المستخدم القاعدة تنطبق على
 Are you sure you want to STOP ,
 Are you sure you want to UNSTOP ,
-Are you sure you want to delete the attachment?,هل أنت متأكد أنك تريد حذف المرفق؟
 Arrear Amount,متأخرات المبلغ
 "As Production Order can be made for this item, it must be a stock item.",كما يمكن أن يتم ترتيب الإنتاج لهذا البند، يجب أن يكون بند الأوراق المالية .
 As per Stock UOM,وفقا للأوراق UOM
 "As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","كما أن هناك معاملات الأوراق المالية الموجودة لهذا البند ، لا يمكنك تغيير قيم "" ليس لديه المسلسل '،' هل البند الأسهم "" و "" أسلوب التقييم """
-Ascending,تصاعدي
 Asset,الأصول
-Assign To,تعيين إلى
-Assigned To,تعيين ل
-Assignments,تعيينات
 Assistant,المساعد
 Associate,مساعد
 Atleast one warehouse is mandatory,واحدة على الاقل مستودع إلزامي
-Attach Document Print,إرفاق طباعة المستند
 Attach Image,إرفاق صورة
 Attach Letterhead,نعلق رأسية
 Attach Logo,نعلق شعار
 Attach Your Picture,نعلق صورتك
-Attach as web link,كما نعلق رابط موقع
-Attachments,المرفقات
 Attendance,الحضور
 Attendance Date,تاريخ الحضور
 Attendance Details,تفاصيل الحضور
@@ -402,7 +377,6 @@ Block leave applications by department.,منع مغادرة الطلبات ال�
 Blog Post,بلوق وظيفة
 Blog Subscriber,بلوق المشترك
 Blood Group,فصيلة الدم
-Bookmarks,الإشارات المرجعية
 Both Warehouse must belong to same Company,كلا مستودع يجب أن تنتمي إلى نفس الشركة
 Box,صندوق
 Branch,فرع
@@ -437,7 +411,6 @@ C-Form No,C-الاستمارة رقم
 C-Form records,سجلات نموذج C-
 Calculate Based On,حساب الربح بناء على
 Calculate Total Score,حساب النتيجة الإجمالية
-Calendar,تقويم
 Calendar Events,الأحداث
 Call,دعوة
 Calls,المكالمات
@@ -450,7 +423,6 @@ Can be approved by {0},يمكن أن يكون وافق عليها {0}
 "Can not filter based on Account, if grouped by Account",لا يمكن تصفية استنادا إلى الحساب ، إذا جمعت بواسطة حساب
 "Can not filter based on Voucher No, if grouped by Voucher",لا يمكن تصفية استنادا قسيمة لا، إذا تم تجميعها حسب قسيمة
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',"يمكن الرجوع صف فقط إذا كان نوع التهمة هي "" في السابق المبلغ صف 'أو' السابق صف إجمالي '"
-Cancel,إلغاء
 Cancel Material Visit {0} before cancelling this Customer Issue,إلغاء المواد زيارة {0} قبل إلغاء هذا العدد العملاء
 Cancel Material Visits {0} before cancelling this Maintenance Visit,إلغاء المواد الزيارات {0} قبل إلغاء هذه الصيانة زيارة
 Cancelled,إلغاء
@@ -469,11 +441,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,لا يمكن deac
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',لا يمكن أن تقتطع عند الفئة هو ل ' التقييم ' أو ' تقييم وتوتال '
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.",لا يمكن حذف أي مسلسل {0} في الأوراق المالية. أولا إزالة من الأسهم ، ثم حذف .
 "Cannot directly set amount. For 'Actual' charge type, use the rate field",لا يمكن تعيين مباشرة المبلغ. ل ' الفعلية ' نوع التهمة ، استخدم الحقل معدل
-Cannot edit standard fields,لا تستطيع تعديل الحقول القياسية
-Cannot open instance when its {0} is open,لا يمكن فتح المثال عندما ه {0} مفتوح
-Cannot open {0} when its instance is open,لا يمكن فتح {0} عندما مثيل لها مفتوح
 "Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'","لا يمكن overbill القطعة ل {0} في الصف {0} أكثر من {1} . للسماح بالمغالاة في الفواتير ، الرجاء تعيين في ' إعداد '> ' الافتراضية العالمية """
-Cannot print cancelled documents,لا يمكن طباعة المستندات إلغاء
 Cannot produce more Item {0} than Sales Order quantity {1},لا يمكن أن تنتج أكثر تفاصيل {0} من المبيعات كمية الطلب {1}
 Cannot refer row number greater than or equal to current row number for this Charge type,لا يمكن أن يشير رقم الصف أكبر من أو يساوي رقم الصف الحالي لهذا النوع المسؤول
 Cannot return more than {0} for Item {1},لا يمكن أن يعود أكثر من {0} القطعة ل {1}
@@ -527,19 +495,14 @@ Claim Amount,المطالبة المبلغ
 Claims for company expense.,مطالبات لحساب الشركة.
 Class / Percentage,فئة / النسبة المئوية
 Classic,كلاسيكي
-Clear Cache,مسح ذاكرة التخزين المؤقت
 Clear Table,الجدول واضح
 Clearance Date,إزالة التاريخ
 Clearance Date not mentioned,إزالة التاريخ لم يرد ذكرها
 Clearance date cannot be before check date in row {0},تاريخ التخليص لا يمكن أن يكون قبل تاريخ الاختيار في الصف {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,انقر على &#39;جعل مبيعات الفاتورة &quot;الزر لإنشاء فاتورة مبيعات جديدة.
 Click on a link to get options to expand get options ,
-Click on row to view / edit.,انقر على صف لعرض / تحرير .
-Click to Expand / Collapse,انقر لتوسيع / ​​طي
 Client,زبون
-Close,أغلق
 Close Balance Sheet and book Profit or Loss.,وثيقة الميزانية العمومية و كتاب الربح أو الخسارة .
-Close: {0},وثيقة : {0}
 Closed,مغلق
 Closing Account Head,إغلاق حساب رئيس
 Closing Account {0} must be of type 'Liability',إغلاق الحساب {0} يجب أن تكون من النوع ' المسؤولية '
@@ -550,10 +513,8 @@ Closing Value,القيمة إغلاق
 CoA Help,تعليمات لجنة الزراعة
 Code,رمز
 Cold Calling,ووصف الباردة
-Collapse,انهيار
 Color,اللون
 Comma separated list of email addresses,فاصلة فصل قائمة من عناوين البريد الإلكتروني
-Comment,تعليق
 Comments,تعليقات
 Commercial,تجاري
 Commission,عمولة
@@ -564,7 +525,6 @@ Commission rate cannot be greater than 100,معدل العمولة لا يمكن
 Communication,اتصالات
 Communication HTML,الاتصالات HTML
 Communication History,الاتصال التاريخ
-Communication Medium,الاتصالات متوسطة
 Communication log.,سجل الاتصالات.
 Communications,الاتصالات
 Company,شركة
@@ -583,7 +543,6 @@ Company registration numbers for your reference. Tax numbers etc.,أرقام ت�
 "Company, Month and Fiscal Year is mandatory",شركة والشهر و السنة المالية إلزامي
 Compensatory Off,التعويضية
 Complete,كامل
-Complete By,الكامل من جانب
 Complete Setup,الإعداد الكامل
 Completed,الانتهاء
 Completed Production Orders,أوامر الإنتاج الانتهاء
@@ -635,7 +594,6 @@ Convert into Recurring Invoice,تحويل الفاتورة إلى التكرار
 Convert to Group,تحويل إلى المجموعة
 Convert to Ledger,تحويل ل يدجر
 Converted,تحويل
-Copy,نسخ
 Copy From Item Group,نسخة من المجموعة السلعة
 Cosmetics,مستحضرات التجميل
 Cost Center,مركز التكلفة
@@ -666,7 +624,6 @@ Create Stock Ledger Entries when you submit a Sales Invoice,إنشاء ألبو�
 Create rules to restrict transactions based on values.,إنشاء قواعد لتقييد المعاملات على أساس القيم.
 Created By,التي أنشأتها
 Creates salary slip for above mentioned criteria.,يخلق زلة مرتبات المعايير المذكورة أعلاه.
-Creation / Modified By,إنشاء / تم التعديل بواسطة
 Creation Date,تاريخ الإنشاء
 Creation Document No,إنشاء وثيقة لا
 Creation Document Type,نوع الوثيقة إنشاء
@@ -697,11 +654,9 @@ Current Liabilities,الخصوم الحالية
 Current Stock,الأسهم الحالية
 Current Stock UOM,الأسهم الحالية UOM
 Current Value,القيمة الحالية
-Current status,الوضع الحالي
 Custom,عرف
 Custom Autoreply Message,رد تلقائي المخصصة رسالة
 Custom Message,رسالة مخصصة
-Custom Reports,تقارير مخصصة
 Customer,زبون
 Customer (Receivable) Account,حساب العميل (ذمم مدينة)
 Customer / Item Name,العميل / البند الاسم
@@ -750,7 +705,6 @@ Date Format,تنسيق التاريخ
 Date Of Retirement,تاريخ التقاعد
 Date Of Retirement must be greater than Date of Joining,تاريخ التقاعد يجب أن يكون أكبر من تاريخ الالتحاق بالعمل
 Date is repeated,ويتكرر التاريخ
-Date must be in format: {0},يجب أن تكون الآن في شكل : {0}
 Date of Birth,تاريخ الميلاد
 Date of Issue,تاريخ الإصدار
 Date of Joining,تاريخ الانضمام
@@ -761,7 +715,6 @@ Dates,التواريخ
 Days Since Last Order,منذ أيام طلب آخر
 Days for which Holidays are blocked for this department.,يتم حظر أيام الأعياد التي لهذا القسم.
 Dealer,تاجر
-Dear,العزيز
 Debit,مدين
 Debit Amt,الخصم AMT
 Debit Note,ملاحظة الخصم
@@ -809,7 +762,6 @@ Default settings for stock transactions.,الإعدادات الافتراضية
 Defense,دفاع
 "Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","تحديد الميزانية لهذا المركز التكلفة. أن تتخذ إجراءات لميزانية، انظر <a href=""#!List/Company"">ماجستير شركة</a>"
 Delete,حذف
-Delete Row,حذف صف
 Delete {0} {1}?,حذف {0} {1} ؟
 Delivered,تسليم
 Delivered Items To Be Billed,وحدات تسليمها الى أن توصف
@@ -836,7 +788,6 @@ Department,قسم
 Department Stores,المتاجر
 Depends on LWP,يعتمد على LWP
 Depreciation,خفض
-Descending,تنازلي
 Description,وصف
 Description HTML,وصف HTML
 Designation,تعيين
@@ -881,15 +832,10 @@ Do you really want to stop production order: ,
 Doc Name,اسم الوثيقة
 Doc Type,نوع الوثيقة
 Document Description,وصف الوثيقة
-Document Status transition from ,وثيقة الانتقال من الحالة
-Document Status transition from {0} to {1} is not allowed,لا يسمح وضع وثيقة الانتقال من {0} إلى {1}
 Document Type,نوع الوثيقة
-Document is only editable by users of role,الوثيقة للتحرير فقط من قبل المستخدمين من دور
-Documentation,توثيق
 Documents,وثائق
 Domain,مجال
 Don't send Employee Birthday Reminders,لا ترسل الموظف عيد ميلاد تذكير
-Download,تحميل
 Download Materials Required,تحميل المواد المطلوبة
 Download Reconcilation Data,تحميل مصالحة البيانات
 Download Template,تحميل قالب
@@ -898,8 +844,6 @@ Download a report containing all raw materials with their latest inventory statu
 "Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records",تحميل قالب ، وملء البيانات المناسبة وإرفاق الملف المعدل . \ n كل التواريخ و سوف مزيج موظف في الفترة المختارة تأتي في القالب، مع سجلات الحضور القائمة
 Draft,مسودة
-Drafts,الداما
-Drag to sort columns,اسحب لفرز الأعمدة
 Dropbox,المربع المنسدل
 Dropbox Access Allowed,دروببوإكس الدخول الأليفة
 Dropbox Access Key,دروببوإكس مفتاح الوصول
@@ -920,7 +864,6 @@ Earning & Deduction,وكسب الخصم
 Earning Type,كسب نوع
 Earning1,Earning1
 Edit,تحرير
-Editable,للتحرير
 Education,تعليم
 Educational Qualification,المؤهلات العلمية
 Educational Qualification Details,تفاصيل المؤهلات العلمية
@@ -940,12 +883,9 @@ Email Id,البريد الإلكتروني معرف
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",معرف البريد الإلكتروني حيث طالب العمل سوف البريد الإلكتروني على سبيل المثال &quot;jobs@example.com&quot;
 Email Notifications,إشعارات البريد الإلكتروني
 Email Sent?,البريد الإلكتروني المرسلة؟
-"Email addresses, separted by commas",عناوين البريد الإلكتروني، separted بفواصل
 "Email id must be unique, already exists for {0}",يجب أن يكون البريد الإلكتروني معرف فريد ، موجود بالفعل ل {0}
 Email ids separated by commas.,معرفات البريد الإلكتروني مفصولة بفواصل.
-Email sent to {0},أرسل بريد إلكتروني إلى {0}
 "Email settings to extract Leads from sales email id e.g. ""sales@example.com""",إعدادات البريد الإلكتروني لاستخراج البريد الإلكتروني من عروض المبيعات &quot;sales@example.com&quot; معرف على سبيل المثال
-Email...,البريد الإلكتروني ...
 Emergency Contact,الاتصال في حالات الطوارئ
 Emergency Contact Details,تفاصيل الاتصال في حالات الطوارئ
 Emergency Phone,الهاتف في حالات الطوارئ
@@ -984,7 +924,6 @@ End date of current invoice's period,تاريخ نهاية فترة الفاتو
 End of Life,نهاية الحياة
 Energy,طاقة
 Engineer,مهندس
-Enter Value,أدخل القيمة
 Enter Verification Code,أدخل رمز التحقق
 Enter campaign name if the source of lead is campaign.,أدخل اسم الحملة إذا كان مصدر الرصاص هو الحملة.
 Enter department to which this Contact belongs,أدخل الدائرة التي ينتمي هذا الاتصال
@@ -1002,7 +941,6 @@ Entries,مقالات
 Entries against,مقالات ضد
 Entries are not allowed against this Fiscal Year if the year is closed.,لا يسمح مقالات ضد السنة المالية الحالية إذا تم إغلاق السنة.
 Entries before {0} are frozen,يتم تجميد الإدخالات قبل {0}
-Equals,التساوي
 Equity,إنصاف
 Error: {0} > {1},الخطأ: {0} > {1}
 Estimated Material Cost,تقدر تكلفة المواد
@@ -1019,7 +957,6 @@ Exhibition,معرض
 Existing Customer,القائمة العملاء
 Exit,خروج
 Exit Interview Details,تفاصيل مقابلة الخروج
-Expand,وسع
 Expected,متوقع
 Expected Completion Date can not be less than Project Start Date,تاريخ الانتهاء المتوقع لا يمكن أن يكون أقل من تاريخ بدء المشروع
 Expected Date cannot be before Material Request Date,التاريخ المتوقع لا يمكن أن يكون قبل تاريخ طلب المواد
@@ -1052,8 +989,6 @@ Expenses Booked,حجز النفقات
 Expenses Included In Valuation,وشملت النفقات في التقييم
 Expenses booked for the digest period,نفقات حجزها لفترة هضم
 Expiry Date,تاريخ انتهاء الصلاحية
-Export,تصدير
-Export not allowed. You need {0} role to export.,الصادرات غير مسموح به. تحتاج {0} دور للتصدير.
 Exports,صادرات
 External,خارجي
 Extract Emails,استخراج رسائل البريد الإلكتروني
@@ -1068,11 +1003,8 @@ Feedback,تعليقات
 Female,أنثى
 Fetch exploded BOM (including sub-assemblies),جلب BOM انفجرت (بما في ذلك المجالس الفرعية)
 "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order",متوفرة في مذكرة التسليم، اقتباس، فاتورة المبيعات، والمبيعات من أجل الميدان
-Field {0} is not selectable.,الحقل {0} ليس اختيار.
-File,ملف
 Files Folder ID,ملفات ID المجلد
 Fill the form and save it,تعبئة النموذج وحفظه
-Filter,تحديد
 Filter based on customer,تصفية على أساس العملاء
 Filter based on item,تصفية استنادا إلى البند
 Financial / accounting year.,المالية / المحاسبة العام.
@@ -1101,14 +1033,10 @@ For Server Side Print Formats,لتنسيقات طباعة جانب الملقم
 For Supplier,ل مزود
 For Warehouse,لمستودع
 For Warehouse is required before Submit,ل مطلوب في معرض النماذج ثلاثية قبل إرسال
-"For comparative filters, start with",للمرشحات النسبية، وتبدأ مع
 "For e.g. 2012, 2012-13",ل، 2012 على سبيل المثال 2012-13
-For ranges,للنطاقات
 For reference,للرجوع إليها
 For reference only.,للإشارة فقط.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",لراحة العملاء، ويمكن استخدام هذه الرموز في أشكال الطباعة مثل الفواتير والسندات التسليم
-Form,شكل
-Forums,المنتديات
 Fraction,جزء
 Fraction Units,جزء الوحدات
 Freeze Stock Entries,تجميد مقالات المالية
@@ -1161,12 +1089,10 @@ Generate Material Requests (MRP) and Production Orders.,إنشاء طلبات ا
 Generate Salary Slips,توليد قسائم راتب
 Generate Schedule,توليد جدول
 Generates HTML to include selected image in the description,يولد HTML لتشمل الصورة المحددة في الوصف
-Get,الحصول على
 Get Advances Paid,الحصول على السلف المدفوعة
 Get Advances Received,الحصول على السلف المتلقاة
 Get Against Entries,الحصول ضد مقالات
 Get Current Stock,الحصول على المخزون الحالي
-Get From ,عليه من
 Get Items,الحصول على العناصر
 Get Items From Sales Orders,الحصول على سلع من أوامر المبيعات
 Get Items from BOM,الحصول على عناصر من BOM
@@ -1194,8 +1120,6 @@ Government,حكومة
 Graduate,تخريج
 Grand Total,المجموع الإجمالي
 Grand Total (Company Currency),المجموع الكلي (العملات شركة)
-Greater or equals,أكبر أو يساوي
-Greater than,أكبر من
 "Grid ""","الشبكة """
 Grocery,بقالة
 Gross Margin %,هامش إجمالي٪
@@ -1207,7 +1131,6 @@ Gross Profit (%),إجمالي الربح (٪)
 Gross Weight,الوزن الإجمالي
 Gross Weight UOM,الوزن الإجمالي UOM
 Group,مجموعة
-"Group Added, refreshing...",مجموعة المضافة، منعش ...
 Group by Account,مجموعة بواسطة حساب
 Group by Voucher,المجموعة بواسطة قسيمة
 Group or Ledger,مجموعة أو ليدجر
@@ -1229,14 +1152,12 @@ Health Care,الرعاية الصحية
 Health Concerns,الاهتمامات الصحية
 Health Details,الصحة التفاصيل
 Held On,عقدت في
-Help,مساعدة
 Help HTML,مساعدة HTML
 "Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")",مساعدة: لربط إلى سجل آخر في النظام، استخدم &quot;# نموذج / ملاحظة / [اسم ملاحظة]&quot;، كما URL رابط. (لا تستخدم &quot;الإلكتروني http://&quot;)
 "Here you can maintain family details like name and occupation of parent, spouse and children",هنا يمكنك الحفاظ على تفاصيل مثل اسم العائلة واحتلال الزوج، الوالدين والأطفال
 "Here you can maintain height, weight, allergies, medical concerns etc",هنا يمكنك الحفاظ على الطول والوزن، والحساسية، الخ المخاوف الطبية
 Hide Currency Symbol,إخفاء رمز العملة
 High,ارتفاع
-History,تاريخ
 History In Company,وفي تاريخ الشركة
 Hold,عقد
 Holiday,عطلة
@@ -1281,17 +1202,14 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',إذا كنت تنطوي في نشاط الصناعات التحويلية . تمكن السلعة ' يتم تصنيعها '
 Ignore,تجاهل
 Ignored: ,تجاهلها:
-"Ignoring Item {0}, because a group exists with the same name!",تجاهل البند {0} ، لأن مجموعة موجودة بنفس الاسم !
 Image,صورة
 Image View,عرض الصورة
 Implementation Partner,تنفيذ الشريك
-Import,استيراد
 Import Attendance,الحضور الاستيراد
 Import Failed!,استيراد فشل !
 Import Log,استيراد دخول
 Import Successful!,استيراد الناجحة !
 Imports,واردات
-In,في
 In Hours,في ساعات
 In Process,في عملية
 In Qty,في الكمية
@@ -1306,7 +1224,6 @@ In Words will be visible once you save the Purchase Receipt.,وبعبارة تك
 In Words will be visible once you save the Quotation.,وبعبارة تكون مرئية بمجرد حفظ اقتباس.
 In Words will be visible once you save the Sales Invoice.,وبعبارة تكون مرئية بمجرد حفظ فاتورة المبيعات.
 In Words will be visible once you save the Sales Order.,وبعبارة تكون مرئية بمجرد حفظ ترتيب المبيعات.
-In response to,ردا على
 Incentives,الحوافز
 Include Reconciled Entries,وتشمل مقالات التوفيق
 Include holidays in Total no. of Working Days,تشمل أيام العطل في المجموع لا. أيام العمل
@@ -1327,8 +1244,6 @@ Indirect Income,الدخل غير المباشرة
 Individual,فرد
 Industry,صناعة
 Industry Type,صناعة نوع
-Insert Below,إدراج بالأسفل
-Insert Row,إدراج صف
 Inspected By,تفتيش من قبل
 Inspection Criteria,التفتيش معايير
 Inspection Required,التفتيش المطلوبة
@@ -1350,8 +1265,6 @@ Internal,داخلي
 Internet Publishing,نشر الإنترنت
 Introduction,مقدمة
 Invalid Barcode or Serial No,الباركود صالح أو رقم المسلسل
-Invalid Email: {0},صالح البريد الإلكتروني: {0}
-Invalid Filter: {0},تصفية الباطلة: {0}
 Invalid Mail Server. Please rectify and try again.,خادم البريد غير صالحة . يرجى تصحيح و حاول مرة أخرى.
 Invalid Master Name,اسم ماستر غير صالحة
 Invalid User Name or Support Password. Please rectify and try again.,اسم المستخدم غير صحيح أو كلمة المرور الدعم . يرجى تصحيح و حاول مرة أخرى.
@@ -1516,7 +1429,6 @@ Landed Cost updated successfully,تحديث تكلفة هبطت بنجاح
 Language,لغة
 Last Name,اسم العائلة
 Last Purchase Rate,مشاركة الشراء قيم
-Last updated by,اخر تحديث قام به
 Latest,آخر
 Lead,قيادة
 Lead Details,تفاصيل اعلان
@@ -1566,24 +1478,17 @@ Ledgers,دفاتر
 Left,ترك
 Legal,قانوني
 Legal Expenses,المصاريف القانونية
-Less or equals,أقل أو يساوي
-Less than,أقل من
 Letter Head,رسالة رئيس
 Letter Heads for print templates.,رؤساء إلكتروني لقوالب الطباعة.
 Level,مستوى
 Lft,LFT
 Liability,مسئولية
-Like,مثل
-Linked With,ترتبط
-List,قائمة
 List a few of your customers. They could be organizations or individuals.,قائمة قليلة من الزبائن. يمكن أن تكون المنظمات أو الأفراد.
 List a few of your suppliers. They could be organizations or individuals.,قائمة قليلة من الموردين الخاصة بك . يمكن أن تكون المنظمات أو الأفراد.
 List items that form the package.,عناصر القائمة التي تشكل الحزمة.
 List this Item in multiple groups on the website.,قائمة هذا البند في مجموعات متعددة على شبكة الانترنت.
 "List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.",قائمة المنتجات أو الخدمات التي تشتري أو تبيع الخاص بك.
 "List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.",قائمة رؤساء الضريبية الخاصة بك (على سبيل المثال ضريبة القيمة المضافة، الضرائب ، بل ينبغي لها أسماء فريدة من نوعها ) و معدلاتها القياسية.
-Loading,تحميل
-Loading Report,تحميل تقرير
 Loading...,تحميل ...
 Loans (Liabilities),القروض ( المطلوبات )
 Loans and Advances (Assets),القروض والسلفيات (الأصول )
@@ -1591,7 +1496,6 @@ Local,محلي
 Login with your new User ID,تسجيل الدخول مع اسم المستخدم الخاص بك جديدة
 Logo,شعار
 Logo and Letter Heads,شعار و رسالة رؤساء
-Logout,خروج
 Lost,مفقود
 Lost Reason,فقد السبب
 Low,منخفض
@@ -1642,7 +1546,6 @@ Make Salary Structure,جعل هيكل الرواتب
 Make Sales Invoice,جعل فاتورة المبيعات
 Make Sales Order,جعل ترتيب المبيعات
 Make Supplier Quotation,جعل مورد اقتباس
-Make a new,جعل جديدة
 Male,ذكر
 Manage Customer Group Tree.,إدارة مجموعة العملاء شجرة .
 Manage Sales Person Tree.,إدارة المبيعات الشخص شجرة .
@@ -1650,8 +1553,6 @@ Manage Territory Tree.,إدارة شجرة الإقليم.
 Manage cost of operations,إدارة تكلفة العمليات
 Management,إدارة
 Manager,مدير
-Mandatory fields required in {0},الحقول الإلزامية المطلوبة في {0}
-Mandatory filters required:\n,مرشحات الإلزامية المطلوبة: \ ن
 "Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",إلزامية إذا البند الأسهم هو &quot;نعم&quot;. أيضا المستودع الافتراضي حيث يتم تعيين الكمية المحجوزة من ترتيب المبيعات.
 Manufacture against Sales Order,تصنيع ضد ترتيب المبيعات
 Manufacture/Repack,تصنيع / أعد حزم
@@ -1722,13 +1623,11 @@ Minute,دقيقة
 Misc Details,تفاصيل منوعات
 Miscellaneous Expenses,المصروفات المتنوعة
 Miscelleneous,متفرقات
-Missing Values Required,في عداد المفقودين القيم المطلوبة
 Mobile No,رقم الجوال
 Mobile No.,رقم الجوال
 Mode of Payment,طريقة الدفع
 Modern,حديث
 Modified Amount,تعديل المبلغ
-Modified by,تعديلها من قبل
 Monday,يوم الاثنين
 Month,شهر
 Monthly,شهريا
@@ -1736,12 +1635,9 @@ Monthly Attendance Sheet,ورقة الحضور الشهرية
 Monthly Earning & Deduction,الدخل الشهري وخصم
 Monthly Salary Register,سجل الراتب الشهري
 Monthly salary statement.,بيان الراتب الشهري.
-More,أكثر
 More Details,مزيد من التفاصيل
 More Info,المزيد من المعلومات
 Motion Picture & Video,الحركة صور والفيديو
-Move Down: {0},تحريك لأسفل : {0}
-Move Up: {0},تحريك لأعلى : {0}
 Moving Average,المتوسط ​​المتحرك
 Moving Average Rate,الانتقال متوسط ​​معدل
 Mr,السيد
@@ -1751,12 +1647,9 @@ Multiple Item prices.,أسعار الإغلاق متعددة .
 			conflict by assigning priority. Price Rules: {0}",موجود متعددة سعر القاعدة مع المعايير نفسها ، يرجى لحل الصراع \ \ ن عن طريق تعيين الأولوية.
 Music,موسيقى
 Must be Whole Number,يجب أن يكون عدد صحيح
-My Settings,الإعدادات
 Name,اسم
 Name and Description,الاسم والوصف
 Name and Employee ID,الاسم والرقم الوظيفي
-Name is required,مطلوب اسم
-Name not permitted,تسمية غير مسموح
 "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master",اسم الحساب الجديد. ملاحظة : الرجاء عدم إنشاء حسابات للعملاء والموردين ، يتم إنشاؤها تلقائيا من العملاء والموردين الماجستير
 Name of person or organization that this address belongs to.,اسم الشخص أو المنظمة التي ينتمي إلى هذا العنوان.
 Name of the Budget Distribution,اسم توزيع الميزانية
@@ -1774,7 +1667,6 @@ Net Weight UOM,الوزن الصافي UOM
 Net Weight of each Item,الوزن الصافي لكل بند
 Net pay cannot be negative,صافي الأجور لا يمكن أن تكون سلبية
 Never,أبدا
-New,جديد
 New ,
 New Account,حساب جديد
 New Account Name,اسم الحساب الجديد
@@ -1794,7 +1686,6 @@ New Projects,مشاريع جديدة
 New Purchase Orders,أوامر الشراء الجديدة
 New Purchase Receipts,إيصالات شراء جديدة
 New Quotations,الاقتباسات الجديدة
-New Record,رقم قياسي جديد
 New Sales Orders,أوامر المبيعات الجديدة
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,المسلسل الجديد لا يمكن أن يكون المستودع. يجب تعيين مستودع من قبل دخول الأسهم أو شراء الإيصال
 New Stock Entries,مقالات جديدة للأسهم
@@ -1816,11 +1707,8 @@ Next,التالي
 Next Contact By,لاحق اتصل بواسطة
 Next Contact Date,تاريخ لاحق اتصل
 Next Date,تاريخ القادمة
-Next Record,سجل المقبل
-Next actions,الإجراءات التالية
 Next email will be sent on:,سيتم إرسال البريد الإلكتروني التالي على:
 No,لا
-No Communication tagged with this ,لا الاتصالات المفتاحية هذه
 No Customer Accounts found.,لم يتم العثور على حسابات العملاء .
 No Customer or Supplier Accounts found,لا العملاء أو مزود الحسابات وجدت
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,"لا الموافقون المصروفات . يرجى تعيين ' المصروفات الموافق ""دور ل مستخدم واحد أتلست"
@@ -1830,48 +1718,31 @@ No Items to pack,لا توجد عناصر لحزمة
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,"لم اترك الموافقون . يرجى تعيين ' اترك الموافق ""دور ل مستخدم واحد أتلست"
 No Permission,لا يوجد تصريح
 No Production Orders created,لا أوامر الإنتاج التي تم إنشاؤها
-No Report Loaded. Please use query-report/[Report Name] to run a report.,أي تقرير المحملة. الرجاء استخدام استعلام تقرير / [اسم التقرير] لتشغيل التقرير.
-No Results,لا نتائج
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,لا توجد حسابات الموردين. ويتم تحديد حسابات المورد على أساس القيمة 'نوع الماجستير في سجل حساب .
 No accounting entries for the following warehouses,لا القيود المحاسبية للمستودعات التالية
 No addresses created,أية عناوين خلق
 No contacts created,هناك أسماء تم إنشاؤها
 No default BOM exists for Item {0},لا توجد BOM الافتراضي القطعة ل {0}
 No description given,لا يوجد وصف معين
-No document selected,أي وثيقة مختارة
 No employee found,لا توجد موظف
 No employee found!,أي موظف موجود!
 No of Requested SMS,لا للSMS مطلوب
 No of Sent SMS,لا للSMS المرسلة
 No of Visits,لا الزيارات
-No one,لا احد
 No permission,لا يوجد إذن
-No permission to '{0}' {1},لا توجد صلاحية ل '{0} ' {1}
-No permission to edit,لا توجد صلاحية ل تعديل
 No record found,العثور على أي سجل
-No records tagged.,لا توجد سجلات المعلمة.
 No salary slip found for month: ,لا زلة راتب شهر تم العثور عليها ل:
 Non Profit,غير الربح
-None,لا شيء
-None: End of Workflow,لا شيء: نهاية سير العمل
 Nos,غ
 Not Active,لا بالموقع
 Not Applicable,لا ينطبق
 Not Available,غير متوفرة
 Not Billed,لا صفت
 Not Delivered,ولا يتم توريدها
-Not Found,لم يتم العثور على
-Not Linked to any record.,لا يرتبط أي سجل.
-Not Permitted,لا يسمح
 Not Set,غير محدد
-Not Submitted,لم تقدم
-Not allowed,لا يسمح
 Not allowed to update entries older than {0},لا يسمح لتحديث إدخالات أقدم من {0}
 Not authorized to edit frozen Account {0},غير مخول لتحرير الحساب المجمد {0}
 Not authroized since {0} exceeds limits,لا أوثرويزيد منذ {0} يتجاوز حدود
-Not enough permission to see links.,لا إذن بما يكفي لرؤية الروابط.
-Not equals,لا يساوي
-Not found,لم يتم العثور على
 Not permitted,لا يسمح
 Note,لاحظ
 Note User,ملاحظة العضو
@@ -1880,7 +1751,6 @@ Note User,ملاحظة العضو
 Note: Due Date exceeds the allowed credit days by {0} day(s),ملاحظة : تاريخ الاستحقاق يتجاوز الأيام الائتمان المسموح به من قبل {0} يوم (s )
 Note: Email will not be sent to disabled users,ملاحظة: لن يتم إرسالها إلى البريد الإلكتروني للمستخدمين ذوي الاحتياجات الخاصة
 Note: Item {0} entered multiple times,ملاحظة : البند {0} دخلت عدة مرات
-Note: Other permission rules may also apply,ملاحظة: قد قواعد أخرى إذن تنطبق أيضا
 Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"ملاحظة : لن يتم إنشاء الدفع منذ دخول ' النقد أو البنك الحساب "" لم يتم تحديد"
 Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,ملاحظة : سوف النظام لا تحقق الإفراط التسليم و الإفراط في حجز القطعة ل {0} حيث الكمية أو المبلغ 0
 Note: There is not enough leave balance for Leave Type {0},ملاحظة : ليس هناك ما يكفي من التوازن إجازة ل إجازة نوع {0}
@@ -1889,12 +1759,9 @@ Note: {0},ملاحظة : {0}
 Notes,تلاحظ
 Notes:,الملاحظات :
 Nothing to request,شيء أن تطلب
-Nothing to show,لا شيء لإظهار
-Nothing to show for this selection,شيء لاظهار هذا الاختيار
 Notice (days),إشعار (أيام )
 Notification Control,إعلام التحكم
 Notification Email Address,عنوان البريد الإلكتروني الإخطار
-Notify By Email,إبلاغ عن طريق البريد الإلكتروني
 Notify by Email on creation of automatic Material Request,إبلاغ عن طريق البريد الإلكتروني على خلق مادة التلقائي طلب
 Number Format,عدد تنسيق
 Offer Date,عرض التسجيل
@@ -1938,7 +1805,6 @@ Opportunity Items,فرصة الأصناف
 Opportunity Lost,فقدت فرصة
 Opportunity Type,الفرصة نوع
 Optional. This setting will be used to filter in various transactions.,اختياري . سيتم استخدام هذا الإعداد لتصفية في المعاملات المختلفة.
-Or Created By,أو إنشاء بواسطة
 Order Type,نوع النظام
 Order Type must be one of {1},يجب أن يكون النظام نوع واحد من {1}
 Ordered,أمر
@@ -1953,7 +1819,6 @@ Organization Profile,الملف الشخصي المنظمة
 Organization branch master.,فرع المؤسسة الرئيسية .
 Organization unit (department) master.,وحدة المؤسسة ( قسم) الرئيسي.
 Original Amount,المبلغ الأصلي
-Original Message,رسالة الأصلي
 Other,آخر
 Other Details,تفاصيل أخرى
 Others,آخرون
@@ -1996,7 +1861,6 @@ Packing Slip Items,التعبئة عناصر زلة
 Packing Slip(s) cancelled,زلة التعبئة (ق ) إلغاء
 Page Break,الصفحة استراحة
 Page Name,الصفحة اسم
-Page not found,لم يتم العثور على الصفحة
 Paid Amount,دفع المبلغ
 Paid amount + Write Off Amount can not be greater than Grand Total,المبلغ المدفوع + شطب المبلغ لا يمكن أن يكون أكبر من المجموع الكلي
 Pair,زوج
@@ -2062,9 +1926,6 @@ Period Closing Voucher,فترة الإغلاق قسيمة
 Periodicity,دورية
 Permanent Address,العنوان الدائم
 Permanent Address Is,العنوان الدائم هو
-Permanently Cancel {0}?,الغاء دائم {0} ؟
-Permanently Submit {0}?,إرسال دائم {0} ؟
-Permanently delete {0}?,حذف بشكل دائم {0} ؟
 Permission,إذن
 Personal,الشخصية
 Personal Details,تفاصيل شخصية
@@ -2073,7 +1934,6 @@ Pharmaceutical,الأدوية
 Pharmaceuticals,المستحضرات الصيدلانية
 Phone,هاتف
 Phone No,رقم الهاتف
-Pick Columns,اختيار الأعمدة
 Piecework,العمل مقاولة
 Pincode,Pincode
 Place of Issue,مكان الإصدار
@@ -2086,8 +1946,6 @@ Plant,مصنع
 Plant and Machinery,النباتية و الآلات
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,الرجاء إدخال الإسم المختصر اختصار أو بشكل صحيح كما سيتم إضافة لاحقة على أنها لجميع رؤساء الحساب.
 Please add expense voucher details,الرجاء إضافة حساب التفاصيل قسيمة
-Please attach a file first.,يرجى إرفاق ملف الأول.
-Please attach a file or set a URL,يرجى إرفاق ملف أو تعيين URL
 Please check 'Is Advance' against Account {0} if this is an advance entry.,"يرجى مراجعة ""هل المسبق ضد الحساب {0} إذا كان هذا هو إدخال مسبقا."
 Please click on 'Generate Schedule',الرجاء انقر على ' إنشاء الجدول '
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},الرجاء انقر على ' إنشاء الجدول ' لجلب رقم المسلسل أضاف القطعة ل {0}
@@ -2096,7 +1954,6 @@ Please create Customer from Lead {0},يرجى إنشاء العملاء من ا�
 Please create Salary Structure for employee {0},يرجى إنشاء هيكل الرواتب ل موظف {0}
 Please create new account from Chart of Accounts.,يرجى إنشاء حساب جديد من الرسم البياني للحسابات .
 Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,يرجى عدم إنشاء حساب ( الدفاتر ) للزبائن و الموردين. أنها يتم إنشاؤها مباشرة من سادة العملاء / الموردين.
-Please enable pop-ups,يرجى تمكين النوافذ المنبثقة
 Please enter 'Expected Delivery Date',"يرجى إدخال "" التاريخ المتوقع تسليم '"
 Please enter 'Is Subcontracted' as Yes or No,"يرجى إدخال "" التعاقد من الباطن "" كما نعم أو لا"
 Please enter 'Repeat on Day of Month' field value,"الرجاء إدخال ' كرر في يوم من الشهر "" قيمة الحقل"
@@ -2107,7 +1964,6 @@ Please enter Company,يرجى إدخال الشركة
 Please enter Cost Center,الرجاء إدخال مركز التكلفة
 Please enter Delivery Note No or Sales Invoice No to proceed,الرجاء إدخال التسليم ملاحظة لا أو فاتورة المبيعات لا للمضي قدما
 Please enter Employee Id of this sales parson,يرجى إدخال رقم الموظف من هذا بارسون المبيعات
-Please enter Event's Date and Time!,الرجاء إدخال حدث في التاريخ والوقت !
 Please enter Expense Account,الرجاء إدخال حساب المصاريف
 Please enter Item Code to get batch no,الرجاء إدخال رمز المدينة للحصول على دفعة لا
 Please enter Item Code.,الرجاء إدخال رمز المدينة .
@@ -2133,14 +1989,11 @@ Please enter parent cost center,الرجاء إدخال مركز تكلفة ال
 Please enter quantity for Item {0},الرجاء إدخال كمية القطعة ل {0}
 Please enter relieving date.,من فضلك ادخل تاريخ التخفيف .
 Please enter sales order in the above table,يرجى إدخال أمر المبيعات في الجدول أعلاه
-Please enter some text!,الرجاء إدخال النص !
-Please enter title!,يرجى إدخال عنوان !
 Please enter valid Company Email,الرجاء إدخال صالحة شركة البريد الإلكتروني
 Please enter valid Email Id,يرجى إدخال البريد الإلكتروني هوية صالحة
 Please enter valid Personal Email,يرجى إدخال البريد الإلكتروني الشخصية سارية المفعول
 Please enter valid mobile nos,الرجاء إدخال غ المحمول صالحة
 Please install dropbox python module,الرجاء تثبيت قطاف بيثون وحدة
-Please login to Upvote!,يرجى الدخول إلى Upvote !
 Please mention no of visits required,يرجى ذكر أي من الزيارات المطلوبة
 Please pull items from Delivery Note,يرجى سحب العناصر من التسليم ملاحظة
 Please save the Newsletter before sending,الرجاء حفظ النشرة قبل الإرسال
@@ -2191,8 +2044,6 @@ Plot By,مؤامرة بواسطة
 Point of Sale,نقطة بيع
 Point-of-Sale Setting,نقطة من بيع إعداد
 Post Graduate,دكتوراة
-Post already exists. Cannot add again!,آخر موجود بالفعل. لا يمكن إضافة مرة أخرى!
-Post does not exist. Please add post!,آخر غير موجود. الرجاء إضافة آخر !
 Postal,بريدي
 Postal Expenses,المصروفات البريدية
 Posting Date,تاريخ النشر
@@ -2207,7 +2058,6 @@ Prevdoc DocType,Prevdoc DOCTYPE
 Prevdoc Doctype,Prevdoc DOCTYPE
 Preview,معاينة
 Previous,سابق
-Previous Record,سجل السابق
 Previous Work Experience,خبرة العمل السابقة
 Price,السعر
 Price / Discount,السعر / الخصم
@@ -2226,12 +2076,10 @@ Price or Discount,سعر الخصم أو
 Pricing Rule,التسعير القاعدة
 Pricing Rule For Discount,التسعير القاعدة للحصول على الخصم
 Pricing Rule For Price,التسعير القاعدة للحصول على السعر
-Print,طباعة
 Print Format Style,طباعة شكل ستايل
 Print Heading,طباعة عنوان
 Print Without Amount,طباعة دون المبلغ
 Print and Stationary,طباعة و قرطاسية
-Print...,طباعة ...
 Printing and Branding,الطباعة و العلامات التجارية
 Priority,أفضلية
 Private Equity,الأسهم الخاصة
@@ -2357,7 +2205,6 @@ Quantity of item obtained after manufacturing / repacking from given quantities 
 Quantity required for Item {0} in row {1},الكمية المطلوبة القطعة ل {0} في {1} الصف
 Quarter,ربع
 Quarterly,فصلي
-Query Report,الاستعلام عن
 Quick Help,مساعدة سريعة
 Quotation,اقتباس
 Quotation Date,اقتباس تاريخ
@@ -2459,14 +2306,11 @@ Rejected Warehouse is mandatory against regected item,مستودع رفض إلز
 Relation,علاقة
 Relieving Date,تخفيف تاريخ
 Relieving Date must be greater than Date of Joining,تخفيف التسجيل يجب أن يكون أكبر من تاريخ الالتحاق بالعمل
-Reload Page,تحديث الصفحة
 Remark,كلام
 Remarks,تصريحات
-Remove Bookmark,أضف إزالة
 Rename,إعادة تسمية
 Rename Log,إعادة تسمية الدخول
 Rename Tool,إعادة تسمية أداة
-Rename...,إعادة تسمية ...
 Rent Cost,الإيجار التكلفة
 Rent per hour,الايجار لكل ساعة
 Rented,مؤجر
@@ -2474,12 +2318,9 @@ Repeat on Day of Month,تكرار في يوم من شهر
 Replace,استبدل
 Replace Item / BOM in all BOMs,استبدال السلعة / BOM في جميع BOMs
 Replied,رد
-Report,تقرير
 Report Date,تقرير تاريخ
 Report Type,نوع التقرير
 Report Type is mandatory,تقرير نوع إلزامي
-Report an Issue,أبلغ عن مشكلة
-Report was not saved (there were errors),لم يتم حفظ التقرير (كانت هناك أخطاء)
 Reports to,تقارير إلى
 Reqd By Date,Reqd حسب التاريخ
 Request Type,طلب نوع
@@ -2630,7 +2471,6 @@ Salutation,تحية
 Sample Size,حجم العينة
 Sanctioned Amount,يعاقب المبلغ
 Saturday,السبت
-Save,حفظ
 Schedule,جدول
 Schedule Date,جدول التسجيل
 Schedule Details,جدول تفاصيل
@@ -2644,7 +2484,6 @@ Score (0-5),نقاط (0-5)
 Score Earned,نقاط المكتسبة
 Score must be less than or equal to 5,يجب أن تكون النتيجة أقل من أو يساوي 5
 Scrap %,الغاء٪
-Search,البحث
 Seasonality for setting budgets.,موسمية لوضع الميزانيات.
 Secretary,أمين
 Secured Loans,القروض المضمونة
@@ -2656,26 +2495,18 @@ Securities and Deposits,الأوراق المالية و الودائع
 "Select ""Yes"" if this item represents some work like training, designing, consulting etc.",حدد &quot;نعم&quot; إذا هذا البند يمثل بعض الأعمال مثل التدريب، وتصميم، والتشاور الخ.
 "Select ""Yes"" if you are maintaining stock of this item in your Inventory.",حدد &quot;نعم&quot; إذا كنت الحفاظ على المخزون في هذا البند في المخزون الخاص بك.
 "Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",حدد &quot;نعم&quot; إذا كنت توريد المواد الخام لتصنيع المورد الخاص بك إلى هذا البند.
-Select All,حدد كافة
-Select Attachments,حدد المرفقات
 Select Budget Distribution to unevenly distribute targets across months.,حدد توزيع الميزانية لتوزيع غير متساو عبر الأهداف أشهر.
 "Select Budget Distribution, if you want to track based on seasonality.",حدد توزيع الميزانية، إذا كنت تريد أن تتبع على أساس موسمي.
 Select DocType,حدد DOCTYPE
 Select Items,حدد العناصر
-Select Print Format,حدد تنسيق طباعة
 Select Purchase Receipts,حدد إيصالات شراء
-Select Report Name,حدد اسم التقرير
 Select Sales Orders,حدد أوامر المبيعات
 Select Sales Orders from which you want to create Production Orders.,حدد أوامر المبيعات التي تريد إنشاء أوامر الإنتاج.
 Select Time Logs and Submit to create a new Sales Invoice.,حدد وقت السجلات وتقديمها إلى إنشاء فاتورة مبيعات جديدة.
-Select To Download:,اختار ل تحميل :
 Select Transaction,حدد المعاملات
-Select Type,حدد نوع
 Select Your Language,اختر اللغة الخاصة بك
 Select account head of the bank where cheque was deposited.,حدد رئيس حساب في البنك حيث أودع الاختيار.
 Select company name first.,حدد اسم الشركة الأول.
-Select dates to create a new ,قم بتحديد مواعيد لخلق جديد
-Select or drag across time slots to create a new event.,حدد أو اسحب عبر فتحات الوقت لإنشاء حدث جديد.
 Select template from which you want to get the Goals,حدد قالب الذي تريد للحصول على الأهداف
 Select the Employee for whom you are creating the Appraisal.,حدد موظف الذين تقوم بإنشاء تقييم.
 Select the period when the invoice will be generated automatically,حدد الفترة التي سيتم إنشاء فاتورة تلقائيا
@@ -2691,11 +2522,9 @@ Select your home country and check the timezone and currency.,حدد بلدك و
 Selling,بيع
 Selling Settings,بيع إعدادات
 Send,إرسال
-Send As Email,أرسل للبريد الالكتروني
 Send Autoreply,إرسال رد تلقائي
 Send Email,إرسال البريد الإلكتروني
 Send From,أرسل من قبل
-Send Me A Copy,أرسل لي نسخة
 Send Notifications To,إرسال إشعارات إلى
 Send Now,أرسل الآن
 Send SMS,إرسال SMS
@@ -2705,7 +2534,6 @@ Send mass SMS to your contacts,إرسال SMS الشامل لجهات الاتص
 Send to this list,إرسال إلى هذه القائمة
 Sender Name,المرسل اسم
 Sent On,ارسلت في
-Sent or Received,المرسلة أو المتلقاة
 Separate production order will be created for each finished good item.,سيتم إنشاء منفصلة أمر الإنتاج لمادة جيدة لكل النهائي.
 Serial No,المسلسل لا
 Serial No / Batch,المسلسل لا / دفعة
@@ -2739,11 +2567,9 @@ Series {0} already used in {1},سلسلة {0} تستخدم بالفعل في {1}
 Service,خدمة
 Service Address,خدمة العنوان
 Services,الخدمات
-Session Expired. Logging you out,انتهى الدورة. تسجيل خروجك
 Set,مجموعة
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.",تعيين القيم الافتراضية مثل شركة ، العملات، السنة المالية الحالية ، الخ
 Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,تعيين مجموعة من الحكمة الإغلاق الميزانيات على هذا الإقليم. يمكنك أيضا تضمين الموسمية عن طريق تعيين التوزيع.
-Set Link,تعيين لينك
 Set as Default,تعيين كافتراضي
 Set as Lost,على النحو المفقودة
 Set prefix for numbering series on your transactions,تعيين بادئة لترقيم السلسلة على المعاملات الخاصة بك
@@ -2776,17 +2602,12 @@ Shipping Rule Label,الشحن تسمية القاعدة
 Shop,تسوق
 Shopping Cart,سلة التسوق
 Short biography for website and other publications.,نبذة عن سيرة حياة لموقع الويب وغيرها من المطبوعات.
-Shortcut,الاختصار
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",تظهر &quot;في سوق الأسهم&quot; أو &quot;ليس في الأوراق المالية&quot; على أساس الأسهم المتاحة في هذا المخزن.
 "Show / Hide features like Serial Nos, POS etc.",إظهار / إخفاء ميزات مثل المسلسل نص ، POS الخ
-Show Details,عرض التفاصيل
 Show In Website,تظهر في الموقع
-Show Tags,تظهر الكلمات
 Show a slideshow at the top of the page,تظهر الشرائح في أعلى الصفحة
 Show in Website,تظهر في الموقع
-Show rows with zero values,عرض الصفوف مع قيم الصفر
 Show this slideshow at the top of the page,تظهر هذه الشرائح في أعلى الصفحة
-Showing only for (if not empty),تظهر فقط ل (إن لم يكن فارغ)
 Sick Leave,الإجازات المرضية
 Signature,توقيع
 Signature to be appended at the end of every email,توقيع لإلحاقها في نهاية كل البريد الإلكتروني
@@ -2797,11 +2618,8 @@ Slideshow,عرض الشرائح
 Soap & Detergent,الصابون والمنظفات
 Software,البرمجيات
 Software Developer,البرنامج المطور
-Sorry we were unable to find what you were looking for.,وآسف نتمكن من العثور على ما كنت تبحث عنه.
-Sorry you are not permitted to view this page.,عذرا غير مسموح لك بعرض هذه الصفحة.
 "Sorry, Serial Nos cannot be merged",آسف ، المسلسل نص لا يمكن دمج
 "Sorry, companies cannot be merged",آسف، و الشركات لا يمكن دمج
-Sort By,فرز حسب
 Source,مصدر
 Source File,مصدر الملف
 Source Warehouse,مصدر مستودع
@@ -2826,7 +2644,6 @@ Standard Selling,البيع القياسية
 Standard contract terms for Sales or Purchase.,شروط العقد القياسية ل مبيعات أو شراء .
 Start,بداية
 Start Date,تاريخ البدء
-Start Report For,تقرير عن بدء
 Start date of current invoice's period,تاريخ بدء فترة الفاتورة الحالية
 Start date should be less than end date for Item {0},يجب أن يكون تاريخ البدء أقل من تاريخ انتهاء القطعة ل {0}
 State,دولة
@@ -2884,7 +2701,6 @@ Sub Assemblies,الجمعيات الفرعية
 "Sub-currency. For e.g. ""Cent""",شبه العملات. ل &quot;سنت&quot; على سبيل المثال
 Subcontract,قام بمقاولة فرعية
 Subject,موضوع
-Submit,عرض
 Submit Salary Slip,يقدم زلة الراتب
 Submit all salary slips for the above selected criteria,تقديم جميع قسائم راتب لتحديد المعايير المذكورة أعلاه
 Submit this Production Order for further processing.,يقدم هذا ترتيب الإنتاج لمزيد من المعالجة .
@@ -2928,7 +2744,6 @@ Support Email Settings,دعم إعدادات البريد الإلكتروني
 Support Password,الدعم كلمة المرور
 Support Ticket,تذكرة دعم
 Support queries from customers.,دعم الاستفسارات من العملاء.
-Switch to Website,التبديل إلى موقع الويب
 Symbol,رمز
 Sync Support Mails,مزامنة الرسائل الالكترونية الدعم
 Sync with Dropbox,مزامنة مع Dropbox
@@ -2936,7 +2751,6 @@ Sync with Google Drive,متزامنا مع محرك جوجل
 System,نظام
 System Settings,إعدادات النظام
 "System User (login) ID. If set, it will become default for all HR forms.",نظام المستخدم (دخول) ID. إذا تعيين، وسوف تصبح الافتراضية لكافة أشكال HR.
-Tags,به
 Target  Amount,الهدف المبلغ
 Target Detail,الهدف التفاصيل
 Target Details,الهدف تفاصيل
@@ -2995,7 +2809,6 @@ Territory Target Variance Item Group-Wise,الأراضي المستهدفة ال
 Territory Targets,الأراضي الأهداف
 Test,اختبار
 Test Email Id,اختبار البريد الإلكتروني معرف
-Test Runner,اختبار عداء
 Test the Newsletter,اختبار النشرة الإخبارية
 The BOM which will be replaced,وBOM التي سيتم استبدالها
 The First User: You,المستخدم أولا : أنت
@@ -3015,28 +2828,23 @@ The net weight of this package. (calculated automatically as sum of net weight o
 The new BOM after replacement,وBOM الجديدة بعد استبدال
 The rate at which Bill Currency is converted into company's base currency,المعدل الذي يتم تحويل العملة إلى عملة بيل قاعدة الشركة
 The unique id for tracking all recurring invoices. It is generated on submit.,المعرف الفريد لتتبع جميع الفواتير المتكررة. يتم إنشاؤها على تقديم.
-Then By (optional),ثم (اختياري)
 There are more holidays than working days this month.,هناك أكثر من العطلات أيام عمل من هذا الشهر.
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","يمكن أن يكون هناك واحد فقط الشحن القاعدة الحالة مع 0 أو قيمة فارغة ل "" إلى القيمة """
 There is not enough leave balance for Leave Type {0},ليس هناك ما يكفي من التوازن إجازة ل إجازة نوع {0}
 There is nothing to edit.,هناك شيء ل تحريره.
 There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,كان هناك خطأ . يمكن أن يكون أحد الأسباب المحتملة التي قد لا يتم حفظ النموذج. يرجى الاتصال support@erpnext.com إذا استمرت المشكلة.
-There were errors,كانت هناك أخطاء
-There were errors while sending email. Please try again.,كانت هناك أخطاء أثناء إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.
 There were errors.,كانت هناك أخطاء .
 This Currency is disabled. Enable to use in transactions,تم تعطيل هذه العملات . تمكين لاستخدامها في المعاملات
 This Leave Application is pending approval. Only the Leave Apporver can update status.,هذا التطبيق اترك بانتظار الموافقة. فقط اترك Apporver يمكن تحديث الحالة.
 This Time Log Batch has been billed.,وتوصف هذه الدفعة دخول الوقت.
 This Time Log Batch has been cancelled.,تم إلغاء هذه الدفعة دخول الوقت.
 This Time Log conflicts with {0},هذا وقت دخول يتعارض مع {0}
-This is PERMANENT action and you cannot undo. Continue?,هذا هو العمل الدائم ويمكنك التراجع لا. المتابعة؟
 This is a root account and cannot be edited.,هذا هو حساب الجذر والتي لا يمكن تحريرها.
 This is a root customer group and cannot be edited.,هذه هي مجموعة العملاء الجذرية والتي لا يمكن تحريرها.
 This is a root item group and cannot be edited.,هذه هي مجموعة البند الجذرية والتي لا يمكن تحريرها.
 This is a root sales person and cannot be edited.,هذا هو الشخص المبيعات الجذرية والتي لا يمكن تحريرها.
 This is a root territory and cannot be edited.,هذا هو الجذر الأرض والتي لا يمكن تحريرها.
 This is an example website auto-generated from ERPNext,هذا مثال موقع ولدت لصناعة السيارات من ERPNext
-This is permanent action and you cannot undo. Continue?,هذا هو العمل الدائم ويمكنك التراجع لا. المتابعة؟
 This is the number of the last created transaction with this prefix,هذا هو عدد المعاملات التي تم إنشاؤها باستخدام مشاركة هذه البادئة
 This will be used for setting rule in HR module,وسوف تستخدم هذه القاعدة لإعداد وحدة في HR
 Thread HTML,الموضوع HTML
@@ -3078,7 +2886,6 @@ To get Item Group in details table,للحصول على تفاصيل المجمو
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included",ل تشمل الضريبة في الصف {0} في معدل الإغلاق ، {1} ويجب أيضا تضمين الضرائب في الصفوف
 "To merge, following properties must be same for both items",لدمج ، يجب أن يكون نفس الخصائص التالية ل كلا البندين
 "To report an issue, go to ",
-"To run a test add the module name in the route after '{0}'. For example, {1}",لتشغيل اختبار إضافة اسم وحدة في الطريق بعد '{0}'. على سبيل المثال، {1}
 "To set this Fiscal Year as Default, click on 'Set as Default'","لتعيين هذه السنة المالية كما الافتراضي، انقر على ' تعيين كافتراضي """
 To track any installation or commissioning related work after sales,لتتبع أي تركيب أو الأعمال ذات الصلة التكليف بعد البيع
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",لتتبع اسم العلامة التجارية في الوثائق التالية توصيل ملاحظة ، فرصة ، طلب المواد ، البند ، طلب شراء ، شراء قسيمة ، المشتري الإيصال، اقتباس، فاتورة المبيعات ، مبيعات BOM ، ترتيب المبيعات ، رقم المسلسل
@@ -3130,7 +2937,6 @@ Totals,المجاميع
 Track Leads by Industry Type.,المسار يؤدي حسب نوع الصناعة .
 Track this Delivery Note against any Project,تتبع هذه ملاحظة التوصيل ضد أي مشروع
 Track this Sales Order against any Project,تتبع هذا الأمر ضد أي مشروع المبيعات
-Trainee,متدرب
 Transaction,صفقة
 Transaction Date,تاريخ المعاملة
 Transaction not allowed against stopped Production Order {0},الصفقة لا يسمح ضد توقفت أمر الإنتاج {0}
@@ -3162,7 +2968,6 @@ UOM Conversion Factor,UOM تحويل عامل
 UOM Conversion factor is required in row {0},مطلوب عامل UOM التحويل في الصف {0}
 UOM Name,UOM اسم
 UOM coversion factor required for UOM {0} in Item {1},عامل coversion UOM اللازمة ل UOM {0} في البند {1}
-Unable to load: {0},غير قادر على تحميل: {0}
 Under AMC,تحت AMC
 Under Graduate,تحت الدراسات العليا
 Under Warranty,تحت الكفالة
@@ -3172,11 +2977,8 @@ Unit of Measure {0} has been entered more than once in Conversion Factor Table,�
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).",وحدة القياس في هذا البند (مثل كجم، وحدة، لا، الزوج).
 Units/Hour,وحدة / ساعة
 Units/Shifts,وحدة / التحولات
-Unknown Column: {0},غير معروف العمود: {0}
-Unknown Print Format: {0},تنسيق طباعة غير معروف: {0}
 Unmatched Amount,لا مثيل لها المبلغ
 Unpaid,غير مدفوع
-Unread Messages,رسائل غير مقروءة
 Unscheduled,غير المجدولة
 Unsecured Loans,القروض غير المضمونة
 Unstop,نزع السدادة
@@ -3196,18 +2998,14 @@ Update bank payment dates with journals.,تحديث البنك دفع التوا
 Update clearance date of Journal Entries marked as 'Bank Vouchers',تاريخ التخليص تحديث إدخالات دفتر اليومية وضعت ' قسائم البنك
 Updated,تحديث
 Updated Birthday Reminders,تحديث ميلاد تذكير
-Upload,تحميل
-Upload Attachment,تحميل المرفقات
 Upload Attendance,تحميل الحضور
 Upload Backups to Dropbox,تحميل النسخ الاحتياطي إلى دروببوإكس
 Upload Backups to Google Drive,تحميل النسخ الاحتياطية إلى Google Drive
 Upload HTML,تحميل HTML
 Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,تحميل ملف CSV مع عمودين:. الاسم القديم والاسم الجديد. ماكس 500 الصفوف.
-Upload a file,تحميل ملف
 Upload attendance from a .csv file,تحميل الحضور من ملف CSV.
 Upload stock balance via csv.,تحميل المال عن طريق التوازن CSV.
 Upload your letter head and logo - you can edit them later.,تحميل رئيس رسالتكم والشعار - يمكنك تحريرها في وقت لاحق .
-Uploading...,تحميل ...
 Upper Income,العلوي الدخل
 Urgent,ملح
 Use Multi-Level BOM,استخدام متعدد المستويات BOM
@@ -3217,11 +3015,9 @@ User ID,المستخدم ID
 User ID not set for Employee {0},هوية المستخدم لم يتم تعيين موظف ل {0}
 User Name,اسم المستخدم
 User Name or Support Password missing. Please enter and try again.,اسم المستخدم أو كلمة المرور الدعم في عداد المفقودين. من فضلك ادخل وحاول مرة أخرى .
-User Permission Restrictions,تقييد إذن المستخدم
 User Remark,ملاحظة المستخدم
 User Remark will be added to Auto Remark,ملاحظة سيتم إضافة مستخدم لملاحظة السيارات
 User Remarks is mandatory,ملاحظات المستخدم إلزامي
-User Restrictions,تقييد المستخدم
 User Specific,مستخدم محددة
 User must always select,يجب دائما مستخدم تحديد
 User {0} is already assigned to Employee {1},المستخدم {0} تم تعيينه بالفعل إلى موظف {1}
@@ -3319,8 +3115,6 @@ Will be updated after Sales Invoice is Submitted.,سيتم تحديث بعد ت�
 Will be updated when batched.,سيتم تحديث عندما دفعات.
 Will be updated when billed.,سيتم تحديث عندما توصف.
 Wire Transfer,حوالة مصرفية
-With Groups,مع المجموعات
-With Ledgers,مع سجلات الحسابات
 With Operations,مع عمليات
 With period closing entry,مع دخول فترة إغلاق
 Work Details,تفاصيل العمل
@@ -3328,7 +3122,6 @@ Work Done,العمل المنجز
 Work In Progress,التقدم في العمل
 Work-in-Progress Warehouse,مستودع العمل قيد التنفيذ
 Work-in-Progress Warehouse is required before Submit,مطلوب العمل في و التقدم في معرض النماذج ثلاثية قبل إرسال
-Workflow will start after saving.,سوف تبدأ العمل بعد الحفظ.
 Working,عامل
 Workstation,محطة العمل
 Workstation Name,محطة العمل اسم
@@ -3351,11 +3144,6 @@ Year Start Date should not be greater than Year End Date,لا ينبغي أن ي
 Year of Passing,اجتياز سنة
 Yearly,سنويا
 Yes,نعم
-Yesterday,أمس
-You are not allowed to create / edit reports,لا يسمح لك لإنشاء تقارير / تحرير
-You are not allowed to export this report,لا يسمح لك لتصدير هذا التقرير
-You are not allowed to print this document,لا يسمح لك طباعة هذه الوثيقة
-You are not allowed to send emails related to this document,لا يسمح لك بإرسال رسائل البريد الإلكتروني ذات الصلة لهذه الوثيقة
 You are not authorized to add or update entries before {0},غير مصرح لك لإضافة أو تحديث الإدخالات قبل {0}
 You are not authorized to set Frozen value,لا يحق لك تعيين القيمة المجمدة
 You are the Expense Approver for this record. Please Update the 'Status' and Save,"كنت الموافق المصروفات لهذا السجل . يرجى تحديث ""الحالة"" و فروا"
@@ -3372,7 +3160,6 @@ You can submit this Stock Reconciliation.,يمكنك تقديم هذه الأس�
 You can update either Quantity or Valuation Rate or both.,يمكنك تحديث إما الكمية أو تثمين قيم أو كليهما.
 You cannot credit and debit same account at the same time,لا يمكنك الائتمان والخصم نفس الحساب في نفس الوقت
 You have entered duplicate items. Please rectify and try again.,لقد دخلت عناصر مكررة . يرجى تصحيح و حاول مرة أخرى.
-You have unsaved changes in this form. Please save before you continue.,لديك تغييرات لم يتم حفظها في هذا النموذج.
 You may need to update: {0},قد تحتاج إلى تحديث : {0}
 You must Save the form before proceeding,يجب حفظ النموذج قبل الشروع
 You must allocate amount before reconcile,يجب تخصيص المبلغ قبل التوفيق بين
@@ -3381,7 +3168,6 @@ Your Customers,الزبائن
 Your Login Id,تسجيل الدخول اسم المستخدم الخاص بك
 Your Products or Services,المنتجات أو الخدمات الخاصة بك
 Your Suppliers,لديك موردون
-"Your download is being built, this may take a few moments...",ويجري بناء التنزيل، وهذا قد يستغرق بضع لحظات ...
 Your email address,عنوان البريد الإلكتروني الخاص بك
 Your financial year begins on,تبدأ السنة المالية الخاصة بك على
 Your financial year ends on,السنة المالية تنتهي في الخاص
@@ -3394,8 +3180,6 @@ Your support email id - must be a valid email - this is where your emails will c
 and,و
 are not allowed.,لا يسمح .
 assigned by,يكلفه بها
-comment,تعليق
-comments,تعليقات
 "e.g. ""Build tools for builders""","على سبيل المثال "" بناء أدوات لبناة """
 "e.g. ""MC""","على سبيل المثال "" MC """
 "e.g. ""My Company LLC""","على سبيل المثال ""شركتي LLC """
@@ -3405,14 +3189,9 @@ e.g. 5,على سبيل المثال 5
 e.g. VAT,على سبيل المثال ضريبة
 eg. Cheque Number,على سبيل المثال. عدد الشيكات
 example: Next Day Shipping,مثال: اليوم التالي شحن
-found,أسس
-is not allowed.,غير مسموح به.
 lft,LFT
 old_parent,old_parent
-or,أو
 rgt,RGT
-to,إلى
-values and dates,القيم والتواريخ
 website page link,الموقع رابط الصفحة
 {0} '{1}' not in Fiscal Year {2},{0} '{1}' ليس في السنة المالية {2}
 {0} Credit limit {0} crossed,{0} حد الائتمان {0} عبروا

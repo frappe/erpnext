@@ -1,7 +1,5 @@
  (Half Day),（半天）
  and year: ,和年份：
- by Role ,按角色
- is not set,沒有設置
 """ does not exists",“不存在
 %  Delivered,％交付
 % Amount Billed,（％）金額帳單
@@ -34,7 +32,6 @@
 "1 Currency = [?] Fraction
 For e.g. 1 USD = 100 Cent",1貨幣= [？]分數\ n對於如
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1。為了保持客戶明智的項目代碼，並使其搜索根據自己的代碼中使用這個選項
-2 days ago,3天前
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">添加/編輯</a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">添加/編輯</a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">添加/編輯</a>"
@@ -89,7 +86,6 @@ Accounts Frozen Upto,賬戶被凍結到...為止
 Accounts Payable,應付帳款
 Accounts Receivable,應收帳款
 Accounts Settings,賬戶設置
-Actions,操作
 Active,活躍
 Active: Will extract emails from ,主動：請問從郵件中提取
 Activity,活動
@@ -111,23 +107,13 @@ Actual Quantity,實際數量
 Actual Start Date,實際開始日期
 Add,加
 Add / Edit Taxes and Charges,添加/編輯稅金及費用
-Add Attachments,添加附件
-Add Bookmark,添加書籤
 Add Child,添加子
-Add Column,添加列
-Add Message,發表留言
-Add Reply,添加回复
 Add Serial No,添加序列號
 Add Taxes,加稅
 Add Taxes and Charges,增加稅收和收費
-Add This To User's Restrictions,將它添加到用戶的限制
-Add attachment,添加附件
-Add new row,添加新行
 Add or Deduct,添加或扣除
 Add rows to set annual budgets on Accounts.,添加行上的帳戶設置年度預算。
 Add to Cart,添加到購物車
-Add to To Do,添加到待辦事項
-Add to To Do List of,添加到待辦事項列表
 Add to calendar on this date,添加到日曆在此日期
 Add/Remove Recipients,添加/刪除收件人
 Address,地址
@@ -220,9 +206,6 @@ Allow user to edit Price List Rate in transactions,允許用戶編輯價目表�
 Allowance Percent,津貼百分比
 Allowance for over-delivery / over-billing crossed for Item {0},備抵過交付/過賬單越過為項目{0}
 Allowed Role to Edit Entries Before Frozen Date,寵物角色來編輯文章前冷凍日期
-"Allowing DocType, DocType. Be careful!",允許的DOCTYPE，的DocType 。要小心！
-Alternative download link,另類下載鏈接
-Amend,修改
 Amended From,從修訂
 Amount,量
 Amount (Company Currency),金額（公司貨幣）
@@ -270,26 +253,18 @@ Approving User,批准用戶
 Approving User cannot be same as user the rule is Applicable To,批准用戶作為用戶的規則適用於不能相同
 Are you sure you want to STOP ,您確定要停止
 Are you sure you want to UNSTOP ,您確定要UNSTOP
-Are you sure you want to delete the attachment?,您確定要刪除的附件？
 Arrear Amount,欠款金額
 "As Production Order can be made for this item, it must be a stock item.",由於生產訂單可以為這個項目提出，它必須是一個股票項目。
 As per Stock UOM,按庫存計量單位
 "As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'",首先從倉庫中取出，然後將其刪除。
-Ascending,升序
 Asset,財富
-Assign To,分配給
-Assigned To,分配給
-Assignments,作業
 Assistant,助理
 Associate,關聯
 Atleast one warehouse is mandatory,ATLEAST一間倉庫是強制性的
-Attach Document Print,附加文檔打印
 Attach Image,附上圖片
 Attach Letterhead,附加信
 Attach Logo,附加標誌
 Attach Your Picture,附上你的照片
-Attach as web link,附加為網站鏈接
-Attachments,附件
 Attendance,護理
 Attendance Date,考勤日期
 Attendance Details,考勤詳情
@@ -402,7 +377,6 @@ Block leave applications by department.,按部門封鎖許可申請。
 Blog Post,博客公告
 Blog Subscriber,博客用戶
 Blood Group,血型
-Bookmarks,書籤
 Both Warehouse must belong to same Company,這兩個倉庫必須屬於同一個公司
 Box,箱
 Branch,支
@@ -437,7 +411,6 @@ C-Form No,C-表格編號
 C-Form records,C-往績紀錄
 Calculate Based On,計算的基礎上
 Calculate Total Score,計算總分
-Calendar,日曆
 Calendar Events,日曆事件
 Call,通話
 Calls,電話
@@ -450,7 +423,6 @@ Can be approved by {0},可以通過{0}的批准
 "Can not filter based on Account, if grouped by Account",7 。總計：累積總數達到了這一點。
 "Can not filter based on Voucher No, if grouped by Voucher",是冷凍的帳戶。要禁止該帳戶創建/編輯事務，你需要角色
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',可以參考的行只有在充電類型是“在上一行量'或'前行總計”
-Cancel,取消
 Cancel Material Visit {0} before cancelling this Customer Issue,取消物料造訪{0}之前取消這個客戶問題
 Cancel Material Visits {0} before cancelling this Maintenance Visit,取消取消此保養訪問之前，材質訪問{0}
 Cancelled,註銷
@@ -469,11 +441,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,不能取消激活
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',不能抵扣當類別為“估值”或“估值及總'
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.",不能{0}刪除序號股票。首先從庫存中刪除，然後刪除。
 "Cannot directly set amount. For 'Actual' charge type, use the rate field",不能直接設置金額。對於“實際”充電式，用速度場
-Cannot edit standard fields,不能編輯標準字段
-Cannot open instance when its {0} is open,無法打開實例時，它的{0}是開放的
-Cannot open {0} when its instance is open,無法打開{0} ，當它的實例是開放的
 "Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'",不能在一行overbill的項目{0} {0}不是{1}更多。要允許超收，請在“設置”設置> “全球默認值”
-Cannot print cancelled documents,無法打印的文檔取消
 Cannot produce more Item {0} than Sales Order quantity {1},不能產生更多的項目{0}不是銷售訂單數量{1}
 Cannot refer row number greater than or equal to current row number for this Charge type,不能引用的行號大於或等於當前行號碼提供給充電式
 Cannot return more than {0} for Item {1},不能返回超過{0}的項目{1}
@@ -527,19 +495,14 @@ Claim Amount,索賠金額
 Claims for company expense.,索賠費用由公司負責。
 Class / Percentage,類/百分比
 Classic,經典
-Clear Cache,清除緩存
 Clear Table,明確表
 Clearance Date,清拆日期
 Clearance Date not mentioned,清拆日期未提及
 Clearance date cannot be before check date in row {0},清拆日期不能行檢查日期前{0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,單擊“製作銷售發票”按鈕來創建一個新的銷售發票。
 Click on a link to get options to expand get options ,點擊一個鏈接以獲取股權以擴大獲取選項
-Click on row to view / edit.,點擊一行，查看/編輯。
-Click to Expand / Collapse,點擊展開/折疊
 Client,客戶
-Close,關閉
 Close Balance Sheet and book Profit or Loss.,關閉資產負債表和賬面利潤或虧損。
-Close: {0},關閉： {0}
 Closed,關閉
 Closing Account Head,關閉帳戶頭
 Closing Account {0} must be of type 'Liability',關閉帳戶{0}必須是類型'責任'
@@ -550,10 +513,8 @@ Closing Value,收盤值
 CoA Help,輔酶幫助
 Code,碼
 Cold Calling,自薦
-Collapse,崩潰
 Color,顏色
 Comma separated list of email addresses,逗號分隔的電子郵件地址列表
-Comment,評論
 Comments,評論
 Commercial,廣告
 Commission,佣金
@@ -564,7 +525,6 @@ Commission rate cannot be greater than 100,佣金率不能大於100
 Communication,通訊
 Communication HTML,溝通的HTML
 Communication History,通信歷史記錄
-Communication Medium,通信介質
 Communication log.,通信日誌。
 Communications,通訊
 Company,公司
@@ -583,7 +543,6 @@ Company registration numbers for your reference. Tax numbers etc.,公司註冊�
 "Company, Month and Fiscal Year is mandatory",在以下文件 - 軌道名牌
 Compensatory Off,補假
 Complete,完整
-Complete By,完成
 Complete Setup,完成安裝
 Completed,已完成
 Completed Production Orders,完成生產訂單
@@ -635,7 +594,6 @@ Convert into Recurring Invoice,轉換成週期性發票
 Convert to Group,轉換為集團
 Convert to Ledger,轉換到總帳
 Converted,轉換
-Copy,複製
 Copy From Item Group,複製從項目組
 Cosmetics,化妝品
 Cost Center,成本中心
@@ -666,7 +624,6 @@ Create Stock Ledger Entries when you submit a Sales Invoice,創建庫存總帳�
 Create rules to restrict transactions based on values.,創建規則來限制基於價值的交易。
 Created By,創建人
 Creates salary slip for above mentioned criteria.,建立工資單上面提到的標準。
-Creation / Modified By,創建/修改者
 Creation Date,創建日期
 Creation Document No,文檔創建無
 Creation Document Type,創建文件類型
@@ -697,11 +654,9 @@ Current Liabilities,流動負債
 Current Stock,當前庫存
 Current Stock UOM,目前的庫存計量單位
 Current Value,當前值
-Current status,現狀
 Custom,習俗
 Custom Autoreply Message,自定義自動回复消息
 Custom Message,自定義消息
-Custom Reports,自定義報告
 Customer,顧客
 Customer (Receivable) Account,客戶（應收）帳
 Customer / Item Name,客戶/項目名稱
@@ -750,7 +705,6 @@ Date Format,日期格式
 Date Of Retirement,日退休
 Date Of Retirement must be greater than Date of Joining,日期退休必須大於加入的日期
 Date is repeated,日期重複
-Date must be in format: {0},日期格式必須是： {0}
 Date of Birth,出生日期
 Date of Issue,發行日期
 Date of Joining,加入日期
@@ -761,7 +715,6 @@ Dates,日期
 Days Since Last Order,天自上次訂購
 Days for which Holidays are blocked for this department.,天的假期被封鎖這個部門。
 Dealer,零售商
-Dear,親愛
 Debit,借方
 Debit Amt,借記額
 Debit Note,繳費單
@@ -809,7 +762,6 @@ Default settings for stock transactions.,默認設置為股票交易。
 Defense,防禦
 "Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","定義預算這個成本中心。要設置預算行動，見<a href=""#!List/Company"">公司主</a>"
 Delete,刪除
-Delete Row,刪除行
 Delete {0} {1}?,刪除{0} {1} ？
 Delivered,交付
 Delivered Items To Be Billed,交付項目要被收取
@@ -836,7 +788,6 @@ Department,部門
 Department Stores,百貨
 Depends on LWP,依賴於LWP
 Depreciation,折舊
-Descending,降
 Description,描述
 Description HTML,說明HTML
 Designation,指定
@@ -881,15 +832,10 @@ Do you really want to stop production order: ,
 Doc Name,文件名稱
 Doc Type,文件類型
 Document Description,文檔說明
-Document Status transition from ,從文檔狀態過渡
-Document Status transition from {0} to {1} is not allowed,從{0}到{1}文件狀態轉換是不允許的
 Document Type,文件類型
-Document is only editable by users of role,文件只有通過編輯角色的用戶
-Documentation,文檔
 Documents,文件
 Domain,域
 Don't send Employee Birthday Reminders,不要送員工生日提醒
-Download,下載
 Download Materials Required,下載所需材料
 Download Reconcilation Data,下載Reconcilation數據
 Download Template,下載模板
@@ -898,8 +844,6 @@ Download a report containing all raw materials with their latest inventory statu
 "Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records",下載模板，填寫相應的數據，並附加了修改後的文件。 \ n所有的日期，並在所選期間員工的組合會在模板中，與現有的考勤記錄
 Draft,草案
-Drafts,草稿箱
-Drag to sort columns,拖動進行排序的列
 Dropbox,Dropbox的
 Dropbox Access Allowed,Dropbox的允許訪問
 Dropbox Access Key,Dropbox的訪問鍵
@@ -920,7 +864,6 @@ Earning & Deduction,收入及扣除
 Earning Type,收入類型
 Earning1,Earning1
 Edit,編輯
-Editable,編輯
 Education,教育
 Educational Qualification,學歷
 Educational Qualification Details,學歷詳情
@@ -940,12 +883,9 @@ Email Id,電子郵件Id
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",電子郵件Id其中一個應聘者的電子郵件，例如“jobs@example.com”
 Email Notifications,電子郵件通知
 Email Sent?,郵件發送？
-"Email addresses, separted by commas",電子郵件地址，以逗號separted
 "Email id must be unique, already exists for {0}",電子郵件ID必須是唯一的，已經存在{0}
 Email ids separated by commas.,電子郵件ID，用逗號分隔。
-Email sent to {0},電子郵件發送到{0}
 "Email settings to extract Leads from sales email id e.g. ""sales@example.com""",電子郵件設置，以銷售電子郵件ID，例如“sales@example.com”提取信息
-Email...,電子郵件...
 Emergency Contact,緊急聯絡人
 Emergency Contact Details,緊急聯繫方式
 Emergency Phone,緊急電話
@@ -984,7 +924,6 @@ End date of current invoice's period,當前發票的期限的最後一天
 End of Life,壽命結束
 Energy,能源
 Engineer,工程師
-Enter Value,輸入值
 Enter Verification Code,輸入驗證碼
 Enter campaign name if the source of lead is campaign.,輸入活動名稱，如果鉛的來源是運動。
 Enter department to which this Contact belongs,輸入部門的這種聯繫是屬於
@@ -1002,7 +941,6 @@ Entries,項
 Entries against,將成為
 Entries are not allowed against this Fiscal Year if the year is closed.,參賽作品不得對本財年，如果當年被關閉。
 Entries before {0} are frozen,前{0}項被凍結
-Equals,等號
 Equity,公平
 Error: {0} > {1},錯誤： {0} > {1}
 Estimated Material Cost,預計材料成本
@@ -1019,7 +957,6 @@ Exhibition,展覽
 Existing Customer,現有客戶
 Exit,出口
 Exit Interview Details,退出面試細節
-Expand,擴大
 Expected,預期
 Expected Completion Date can not be less than Project Start Date,預計完成日期不能少於項目開始日期
 Expected Date cannot be before Material Request Date,消息大於160個字符將會被分成多個消息
@@ -1052,8 +989,6 @@ Expenses Booked,支出預訂
 Expenses Included In Valuation,支出計入估值
 Expenses booked for the digest period,預訂了消化期間費用
 Expiry Date,到期時間
-Export,出口
-Export not allowed. You need {0} role to export.,導出不允許的。您需要{0}的角色出口。
 Exports,出口
 External,外部
 Extract Emails,提取電子郵件
@@ -1068,11 +1003,8 @@ Feedback,反饋
 Female,女
 Fetch exploded BOM (including sub-assemblies),取爆炸BOM（包括子組件）
 "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order",在送貨單，報價單，銷售發票，銷售訂單可用字段
-Field {0} is not selectable.,域{0}是不可選擇的。
-File,文件
 Files Folder ID,文件夾的ID
 Fill the form and save it,填寫表格，並將其保存
-Filter,過濾器
 Filter based on customer,過濾器可根據客戶
 Filter based on item,根據項目篩選
 Financial / accounting year.,財務/會計年度。
@@ -1101,14 +1033,10 @@ For Server Side Print Formats,對於服務器端打印的格式
 For Supplier,已過期
 For Warehouse,對於倉​​庫
 For Warehouse is required before Submit,對於倉庫之前，需要提交
-"For comparative filters, start with",對於比較器，開始
 "For e.g. 2012, 2012-13",對於例如2012，2012-13
-For ranges,對於範圍
 For reference,供參考
 For reference only.,僅供參考。
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",為方便客戶，這些代碼可以在打印格式，如發票和送貨單使用
-Form,表格
-Forums,論壇
 Fraction,分數
 Fraction Units,部分單位
 Freeze Stock Entries,凍結庫存條目
@@ -1161,12 +1089,10 @@ Generate Material Requests (MRP) and Production Orders.,生成材料要求（MRP
 Generate Salary Slips,生成工資條
 Generate Schedule,生成時間表
 Generates HTML to include selected image in the description,生成HTML，包括所選圖像的描述
-Get,得到
 Get Advances Paid,獲取有償進展
 Get Advances Received,取得進展收稿
 Get Against Entries,獲取對條目
 Get Current Stock,獲取當前庫存
-Get From ,得到
 Get Items,找項目
 Get Items From Sales Orders,獲取項目從銷售訂單
 Get Items from BOM,獲取項目從物料清單
@@ -1194,8 +1120,6 @@ Government,政府
 Graduate,畢業生
 Grand Total,累計
 Grand Total (Company Currency),總計（公司貨幣）
-Greater or equals,大於或等於
-Greater than,大於
 "Grid """,電網“
 Grocery,雜貨
 Gross Margin %,毛利率％
@@ -1207,7 +1131,6 @@ Gross Profit (%),毛利率（％）
 Gross Weight,毛重
 Gross Weight UOM,毛重計量單位
 Group,組
-"Group Added, refreshing...",集團已添加，清爽...
 Group by Account,集團賬戶
 Group by Voucher,集團透過券
 Group or Ledger,集團或Ledger
@@ -1229,14 +1152,12 @@ Health Care,保健
 Health Concerns,健康問題
 Health Details,健康細節
 Held On,舉行
-Help,幫助
 Help HTML,HTML幫助
 "Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")",說明：要鏈接到另一個記錄在系統中，使用“＃表單/注意/ [注名]”的鏈接網址。 （不使用的“http://”）
 "Here you can maintain family details like name and occupation of parent, spouse and children",在這裡，您可以維繫家庭的詳細信息，如姓名的父母，配偶和子女及職業
 "Here you can maintain height, weight, allergies, medical concerns etc",在這裡，你可以保持身高，體重，過敏，醫療問題等
 Hide Currency Symbol,隱藏貨幣符號
 High,高
-History,歷史
 History In Company,歷史在公司
 Hold,持有
 Holiday,節日
@@ -1281,17 +1202,14 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',如果您在製造業活動涉及。使項目'製造'
 Ignore,忽略
 Ignored: ,忽略：
-"Ignoring Item {0}, because a group exists with the same name!",忽略項目{0} ，因為一組存在具有相同名字！
 Image,圖像
 Image View,圖像查看
 Implementation Partner,實施合作夥伴
-Import,進口
 Import Attendance,進口出席
 Import Failed!,導入失敗！
 Import Log,導入日誌
 Import Successful!,導入成功！
 Imports,進口
-In,在
 In Hours,以小時為單位
 In Process,在過程
 In Qty,在數量
@@ -1306,7 +1224,6 @@ In Words will be visible once you save the Purchase Receipt.,在詞將是可見�
 In Words will be visible once you save the Quotation.,在詞將是可見的，一旦你保存報價。
 In Words will be visible once you save the Sales Invoice.,在詞將是可見的，一旦你保存銷售發票。
 In Words will be visible once you save the Sales Order.,在詞將是可見的，一旦你保存銷售訂單。
-In response to,響應於
 Incentives,獎勵
 Include Reconciled Entries,包括對賬項目
 Include holidays in Total no. of Working Days,包括節假日的總數。工作日
@@ -1327,8 +1244,6 @@ Indirect Income,間接收入
 Individual,個人
 Industry,行業
 Industry Type,行業類型
-Insert Below,下面插入
-Insert Row,插入行
 Inspected By,視察
 Inspection Criteria,檢驗標準
 Inspection Required,需要檢驗
@@ -1350,8 +1265,6 @@ Internal,內部
 Internet Publishing,互聯網出版
 Introduction,介紹
 Invalid Barcode or Serial No,無效的條碼或序列號
-Invalid Email: {0},無效的電子郵件： {0}
-Invalid Filter: {0},無效的過濾器： {0}
 Invalid Mail Server. Please rectify and try again.,無效的郵件服務器。請糾正，然後再試一次。
 Invalid Master Name,公司，月及全年是強制性的
 Invalid User Name or Support Password. Please rectify and try again.,無效的用戶名或支持密碼。請糾正，然後再試一次。
@@ -1516,7 +1429,6 @@ Landed Cost updated successfully,到岸成本成功更新
 Language,語
 Last Name,姓
 Last Purchase Rate,最後預訂價
-Last updated by,最後更新由
 Latest,最新
 Lead,鉛
 Lead Details,鉛詳情
@@ -1566,24 +1478,17 @@ Ledgers,總帳
 Left,左
 Legal,法律
 Legal Expenses,法律費用
-Less or equals,小於或等於
-Less than,小於
 Letter Head,信頭
 Letter Heads for print templates.,信頭的打印模板。
 Level,級別
 Lft,LFT
 Liability,責任
-Like,喜歡
-Linked With,掛具
-List,表
 List a few of your customers. They could be organizations or individuals.,列出一些你的客戶。他們可以是組織或個人。
 List a few of your suppliers. They could be organizations or individuals.,列出一些你的供應商。他們可以是組織或個人。
 List items that form the package.,形成包列表項。
 List this Item in multiple groups on the website.,列出這個項目在網站上多個組。
 "List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.",列出您的產品或您購買或出售服務。
 "List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.",列出你的頭稅（如增值稅，消費稅，他們應該有唯一的名稱）及其標準費率。
-Loading,載入中
-Loading Report,加載報表
 Loading...,載入中...
 Loans (Liabilities),借款（負債）
 Loans and Advances (Assets),貸款及墊款（資產）
@@ -1591,7 +1496,6 @@ Local,當地
 Login with your new User ID,與你的新的用戶ID登錄
 Logo,標誌
 Logo and Letter Heads,標誌和信頭
-Logout,註銷
 Lost,丟失
 Lost Reason,失落的原因
 Low,低
@@ -1642,7 +1546,6 @@ Make Salary Structure,使薪酬結構
 Make Sales Invoice,做銷售發票
 Make Sales Order,使銷售訂單
 Make Supplier Quotation,讓供應商報價
-Make a new,創建一個新的
 Male,男性
 Manage Customer Group Tree.,管理客戶組樹。
 Manage Sales Person Tree.,管理銷售人員樹。
@@ -1650,8 +1553,6 @@ Manage Territory Tree.,管理領地樹。
 Manage cost of operations,管理運營成本
 Management,管理
 Manager,經理
-Mandatory fields required in {0},在需要的必填字段{0}
-Mandatory filters required:\n,需要強制性的過濾器： \ ñ
 "Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",如果股票的強制性項目為“是”。也是默認倉庫，保留數量從銷售訂單設置。
 Manufacture against Sales Order,對製造銷售訂單
 Manufacture/Repack,製造/重新包裝
@@ -1722,13 +1623,11 @@ Minute,分鐘
 Misc Details,其它詳細信息
 Miscellaneous Expenses,雜項開支
 Miscelleneous,Miscelleneous
-Missing Values Required,所需遺漏值
 Mobile No,手機號碼
 Mobile No.,手機號碼
 Mode of Payment,付款方式
 Modern,現代
 Modified Amount,修改金額
-Modified by,改性
 Monday,星期一
 Month,月
 Monthly,每月一次
@@ -1736,12 +1635,9 @@ Monthly Attendance Sheet,每月考勤表
 Monthly Earning & Deduction,每月入息和扣除
 Monthly Salary Register,月薪註冊
 Monthly salary statement.,月薪聲明。
-More,更多
 More Details,更多詳情
 More Info,更多信息
 Motion Picture & Video,電影和視頻
-Move Down: {0},下移： {0}
-Move Up: {0},上移： {0}
 Moving Average,移動平均線
 Moving Average Rate,移動平均房價
 Mr,先生
@@ -1751,12 +1647,9 @@ Multiple Item prices.,多個項目的價格。
 			conflict by assigning priority. Price Rules: {0}",多價規則存在具有相同的標準，請通過分配優先解決\ \ ñ衝突。
 Music,音樂
 Must be Whole Number,必須是整數
-My Settings,我的設置
 Name,名稱
 Name and Description,名稱和說明
 Name and Employee ID,姓名和僱員ID
-Name is required,名稱是必需的
-Name not permitted,名稱不允許
 "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master",新帳戶的名稱。注：請不要創建帳戶客戶和供應商，它們會自動從客戶和供應商創造大師
 Name of person or organization that this address belongs to.,的人或組織該地址所屬的命名。
 Name of the Budget Distribution,在預算分配的名稱
@@ -1774,7 +1667,6 @@ Net Weight UOM,淨重計量單位
 Net Weight of each Item,每個項目的淨重
 Net pay cannot be negative,淨工資不能為負
 Never,從來沒有
-New,新
 New ,新
 New Account,新帳號
 New Account Name,新帳號名稱
@@ -1794,7 +1686,6 @@ New Projects,新項目
 New Purchase Orders,新的採購訂單
 New Purchase Receipts,新的購買收據
 New Quotations,新語錄
-New Record,新記錄
 New Sales Orders,新的銷售訂單
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,新的序列號不能有倉庫。倉庫必須由股票輸入或外購入庫單進行設置
 New Stock Entries,新貨條目
@@ -1816,11 +1707,8 @@ Next,下一個
 Next Contact By,接著聯繫到
 Next Contact Date,下一步聯絡日期
 Next Date,下一個日期
-Next Record,下一紀錄
-Next actions,下一步行動
 Next email will be sent on:,接下來的電子郵件將被發送：
 No,無
-No Communication tagged with this ,無標籤的通信與此
 No Customer Accounts found.,沒有客戶帳戶發現。
 No Customer or Supplier Accounts found,沒有找到客戶或供應商賬戶
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,無費用審批。請指定“支出審批人的角色，以ATLEAST一個用戶
@@ -1830,48 +1718,31 @@ No Items to pack,無項目包
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,沒有請假審批。請指定'休假審批的角色，以ATLEAST一個用戶
 No Permission,無權限
 No Production Orders created,沒有創建生產訂單
-No Report Loaded. Please use query-report/[Report Name] to run a report.,無報告加載。請使用查詢報告/ [報告名稱]運行報告。
-No Results,沒有結果
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,＃，＃＃ ＃ ＃＃＃
 No accounting entries for the following warehouses,沒有以下的倉庫會計分錄
 No addresses created,沒有發起任何地址
 No contacts created,沒有發起任何接觸
 No default BOM exists for Item {0},默認情況下不存在的BOM項目為{0}
 No description given,未提供描述
-No document selected,沒有選擇文件
 No employee found,任何員工發現
 No employee found!,任何員工發現！
 No of Requested SMS,無的請求短信
 No of Sent SMS,沒有發送短信
 No of Visits,沒有訪問量的
-No one,沒有人
 No permission,沒有權限
-No permission to '{0}' {1},沒有權限“{0}” {1}
-No permission to edit,無權限進行編輯
 No record found,沒有資料
-No records tagged.,沒有記錄標記。
 No salary slip found for month: ,沒有工資單上發現的一個月：
 Non Profit,非營利
-None,無
-None: End of Workflow,無：結束的工作流程
 Nos,NOS
 Not Active,不活躍
 Not Applicable,不適用
 Not Available,不可用
 Not Billed,不發單
 Not Delivered,未交付
-Not Found,未找到
-Not Linked to any record.,不鏈接到任何記錄。
-Not Permitted,不允許
 Not Set,沒有設置
-Not Submitted,未提交
-Not allowed,不允許
 Not allowed to update entries older than {0},不允許更新比舊條目{0}
 Not authorized to edit frozen Account {0},無權修改凍結帳戶{0}
 Not authroized since {0} exceeds limits,不authroized因為{0}超出範圍
-Not enough permission to see links.,沒有足夠的權限查看鏈接。
-Not equals,不等於
-Not found,未找到
 Not permitted,不允許
 Note,注
 Note User,注意用戶
@@ -1880,7 +1751,6 @@ Note User,注意用戶
 Note: Due Date exceeds the allowed credit days by {0} day(s),注：截止日期為{0}天超過允許的信用天
 Note: Email will not be sent to disabled users,注：電子郵件將不會被發送到用戶禁用
 Note: Item {0} entered multiple times,注：項目{0}多次輸入
-Note: Other permission rules may also apply,注：其它權限規則也可申請
 Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,注：付款項將不會被因為“現金或銀行帳戶”未指定創建
 Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,注：系統將不檢查過交付和超額預訂的項目{0}的數量或金額為0
 Note: There is not enough leave balance for Leave Type {0},注：沒有足夠的休假餘額請假類型{0}
@@ -1889,12 +1759,9 @@ Note: {0},注： {0}
 Notes,筆記
 Notes:,注意事項：
 Nothing to request,9 。這是含稅的基本價格：？如果您檢查這一點，就意味著這個稅不會顯示在項目表中，但在你的主項表將被納入基本速率。你想要給一個單位價格（包括所有稅費）的價格為顧客這是有用的。
-Nothing to show,沒有顯示
-Nothing to show for this selection,沒什麼可顯示該選擇
 Notice (days),通告（天）
 Notification Control,通知控制
 Notification Email Address,通知電子郵件地址
-Notify By Email,通知通過電子郵件
 Notify by Email on creation of automatic Material Request,在創建自動材料通知要求通過電子郵件
 Number Format,數字格式
 Offer Date,要約日期
@@ -1938,7 +1805,6 @@ Opportunity Items,項目的機會
 Opportunity Lost,失去的機會
 Opportunity Type,機會型
 Optional. This setting will be used to filter in various transactions.,可選。此設置將被應用於各種交易進行過濾。
-Or Created By,或者創建人
 Order Type,訂單類型
 Order Type must be one of {1},訂單類型必須是一個{1}
 Ordered,訂購
@@ -1953,7 +1819,6 @@ Organization Profile,組織簡介
 Organization branch master.,組織分支主。
 Organization unit (department) master.,組織單位（部門）的主人。
 Original Amount,原來的金額
-Original Message,原始消息
 Other,其他
 Other Details,其他詳細信息
 Others,他人
@@ -1996,7 +1861,6 @@ Packing Slip Items,裝箱單項目
 Packing Slip(s) cancelled,裝箱單（ S）取消
 Page Break,分頁符
 Page Name,網頁名稱
-Page not found,找不到網頁
 Paid Amount,支付的金額
 Paid amount + Write Off Amount can not be greater than Grand Total,支付的金額+寫的抵銷金額不能大於總計
 Pair,對
@@ -2062,9 +1926,6 @@ Period Closing Voucher,期末券
 Periodicity,週期性
 Permanent Address,永久地址
 Permanent Address Is,永久地址
-Permanently Cancel {0}?,永久取消{0} ？
-Permanently Submit {0}?,永久提交{0} ？
-Permanently delete {0}?,永久刪除{0} ？
 Permission,允許
 Personal,個人
 Personal Details,個人資料
@@ -2073,7 +1934,6 @@ Pharmaceutical,醫藥
 Pharmaceuticals,製藥
 Phone,電話
 Phone No,電話號碼
-Pick Columns,摘列
 Piecework,計件工作
 Pincode,PIN代碼
 Place of Issue,簽發地點
@@ -2086,8 +1946,6 @@ Plant,廠
 Plant and Machinery,廠房及機器
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,請輸入縮寫或簡稱恰當，因為它會被添加為後綴的所有帳戶頭。
 Please add expense voucher details,請新增支出憑單細節
-Please attach a file first.,請附上文件第一。
-Please attach a file or set a URL,請附上一個文件或設置一個URL
 Please check 'Is Advance' against Account {0} if this is an advance entry.,請檢查'是推進'對帳戶{0} ，如果這是一個進步的條目。
 Please click on 'Generate Schedule',請點擊“生成表”
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},請點擊“生成表”來獲取序列號增加了對項目{0}
@@ -2096,7 +1954,6 @@ Please create Customer from Lead {0},請牽頭建立客戶{0}
 Please create Salary Structure for employee {0},員工請建立薪酬結構{0}
 Please create new account from Chart of Accounts.,請從科目表創建新帳戶。
 Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,請不要用於客戶及供應商建立的帳戶（總帳）。他們直接從客戶/供應商創造的主人。
-Please enable pop-ups,請啟用彈出窗口
 Please enter 'Expected Delivery Date',請輸入“預產期”
 Please enter 'Is Subcontracted' as Yes or No,請輸入'轉包' YES或NO
 Please enter 'Repeat on Day of Month' field value,請輸入“重複上月的一天'字段值
@@ -2107,7 +1964,6 @@ Please enter Company,你不能輸入行沒有。大於或等於當前行沒有�
 Please enter Cost Center,請輸入成本中心
 Please enter Delivery Note No or Sales Invoice No to proceed,請輸入送貨單號或銷售發票號碼進行
 Please enter Employee Id of this sales parson,請輸入本銷售牧師的員工標識
-Please enter Event's Date and Time!,請輸入事件的日期和時間！
 Please enter Expense Account,請輸入您的費用帳戶
 Please enter Item Code to get batch no,請輸入產品編號，以獲得批號
 Please enter Item Code.,請輸入產品編號。
@@ -2133,14 +1989,11 @@ Please enter parent cost center,請輸入父成本中心
 Please enter quantity for Item {0},請輸入量的項目{0}
 Please enter relieving date.,請輸入解除日期。
 Please enter sales order in the above table,小於等於零系統，估值率是強制性的資料
-Please enter some text!,請輸入一些文字！
-Please enter title!,請輸入標題！
 Please enter valid Company Email,請輸入有效的電郵地址
 Please enter valid Email Id,請輸入有效的電子郵件Id
 Please enter valid Personal Email,請輸入有效的個人電子郵件
 Please enter valid mobile nos,請輸入有效的手機號
 Please install dropbox python module,請安裝Dropbox的Python模塊
-Please login to Upvote!,請登錄到的upvote ！
 Please mention no of visits required,請註明無需訪問
 Please pull items from Delivery Note,請送貨單拉項目
 Please save the Newsletter before sending,請在發送之前保存通訊
@@ -2191,8 +2044,6 @@ Plot By,陰謀
 Point of Sale,銷售點
 Point-of-Sale Setting,銷售點的設置
 Post Graduate,研究生
-Post already exists. Cannot add again!,帖子已經存在。不能再添加！
-Post does not exist. Please add post!,帖子不存在。請新增職位！
 Postal,郵政
 Postal Expenses,郵政費用
 Posting Date,發布日期
@@ -2207,7 +2058,6 @@ Prevdoc DocType,Prevdoc的DocType
 Prevdoc Doctype,Prevdoc文檔類型
 Preview,預覽
 Previous,以前
-Previous Record,上一記錄
 Previous Work Experience,以前的工作經驗
 Price,價格
 Price / Discount,價格/折扣
@@ -2226,12 +2076,10 @@ Price or Discount,價格或折扣
 Pricing Rule,定價規則
 Pricing Rule For Discount,定價規則對於折扣
 Pricing Rule For Price,定價規則對於價格
-Print,打印
 Print Format Style,打印格式樣式
 Print Heading,打印標題
 Print Without Amount,打印量不
 Print and Stationary,印刷和文具
-Print...,打印...
 Printing and Branding,印刷及品牌
 Priority,優先
 Private Equity,私募股權投資
@@ -2357,7 +2205,6 @@ Quantity of item obtained after manufacturing / repacking from given quantities 
 Quantity required for Item {0} in row {1},要求項目數量{0}行{1}
 Quarter,季
 Quarterly,季刊
-Query Report,查詢報表
 Quick Help,快速幫助
 Quotation,行情
 Quotation Date,報價日期
@@ -2459,14 +2306,11 @@ Rejected Warehouse is mandatory against regected item,拒絕倉庫是必須反�
 Relation,關係
 Relieving Date,解除日期
 Relieving Date must be greater than Date of Joining,解除日期必須大於加入的日期
-Reload Page,刷新頁面
 Remark,備註
 Remarks,備註
-Remove Bookmark,刪除書籤
 Rename,重命名
 Rename Log,重命名日誌
 Rename Tool,重命名工具
-Rename...,重命名...
 Rent Cost,租金成本
 Rent per hour,每小時租
 Rented,租
@@ -2474,12 +2318,9 @@ Repeat on Day of Month,重複上月的日
 Replace,更換
 Replace Item / BOM in all BOMs,更換項目/物料清單中的所有材料明細表
 Replied,回答
-Report,報告
 Report Date,報告日期
 Report Type,報告類型
 Report Type is mandatory,報告類型是強制性的
-Report an Issue,報告問題
-Report was not saved (there were errors),報告沒有被保存（有錯誤）
 Reports to,報告以
 Reqd By Date,REQD按日期
 Request Type,請求類型
@@ -2630,7 +2471,6 @@ Salutation,招呼
 Sample Size,樣本大小
 Sanctioned Amount,制裁金額
 Saturday,星期六
-Save,節省
 Schedule,時間表
 Schedule Date,時間表日期
 Schedule Details,計劃詳細信息
@@ -2644,7 +2484,6 @@ Score (0-5),得分（0-5）
 Score Earned,獲得得分
 Score must be less than or equal to 5,得分必須小於或等於5
 Scrap %,廢鋼％
-Search,搜索
 Seasonality for setting budgets.,季節性設定預算。
 Secretary,秘書
 Secured Loans,抵押貸款
@@ -2656,26 +2495,18 @@ Securities and Deposits,證券及存款
 "Select ""Yes"" if this item represents some work like training, designing, consulting etc.",選擇“是”，如果此項目表示類似的培訓，設計，諮詢等一些工作
 "Select ""Yes"" if you are maintaining stock of this item in your Inventory.",選擇“是”，如果你保持這個項目的股票在你的庫存。
 "Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",選擇“是”，如果您對供應原料給供應商，製造資料。
-Select All,全選
-Select Attachments,選擇附件
 Select Budget Distribution to unevenly distribute targets across months.,選擇預算分配跨個月呈不均衡分佈的目標。
 "Select Budget Distribution, if you want to track based on seasonality.",選擇預算分配，如果你要根據季節來跟踪。
 Select DocType,選擇的DocType
 Select Items,選擇項目
-Select Print Format,選擇打印格式
 Select Purchase Receipts,選擇外購入庫單
-Select Report Name,選擇報告名稱
 Select Sales Orders,選擇銷售訂單
 Select Sales Orders from which you want to create Production Orders.,要從創建生產訂單選擇銷售訂單。
 Select Time Logs and Submit to create a new Sales Invoice.,選擇時間日誌和提交創建一個新的銷售發票。
-Select To Download:,選擇要下載：
 Select Transaction,選擇交易
-Select Type,選擇類型
 Select Your Language,選擇您的語言
 Select account head of the bank where cheque was deposited.,選取支票存入該銀行賬戶的頭。
 Select company name first.,先選擇公司名稱。
-Select dates to create a new ,選擇日期以創建一個新的
-Select or drag across time slots to create a new event.,選擇或拖動整個時隙，以創建一個新的事件。
 Select template from which you want to get the Goals,選擇您想要得到的目標模板
 Select the Employee for whom you are creating the Appraisal.,選擇要為其創建的考核員工。
 Select the period when the invoice will be generated automatically,當選擇發票會自動生成期間
@@ -2691,11 +2522,9 @@ Select your home country and check the timezone and currency.,選擇您的國家
 Selling,銷售
 Selling Settings,銷售設置
 Send,發送
-Send As Email,發送電子郵件
 Send Autoreply,發送自動回复
 Send Email,發送電子郵件
 Send From,從發送
-Send Me A Copy,給我發一份
 Send Notifications To,發送通知給
 Send Now,立即發送
 Send SMS,發送短信
@@ -2705,7 +2534,6 @@ Send mass SMS to your contacts,發送群發短信到您的聯繫人
 Send to this list,發送到這個列表
 Sender Name,發件人名稱
 Sent On,在發送
-Sent or Received,發送或接收
 Separate production order will be created for each finished good item.,獨立的生產訂單將每個成品項目被創建。
 Serial No,序列號
 Serial No / Batch,序列號/批次
@@ -2739,11 +2567,9 @@ Series {0} already used in {1},系列{0}已經被應用在{1}
 Service,服務
 Service Address,服務地址
 Services,服務
-Session Expired. Logging you out,會話過期。您的退出
 Set,集
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.",像公司，貨幣，當前財政年度，等設置默認值
 Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,設置這個領地項目組間的預算。您還可以包括季節性通過設置分發。
-Set Link,設置鏈接
 Set as Default,設置為默認
 Set as Lost,設為失落
 Set prefix for numbering series on your transactions,為你的交易編號序列設置的前綴
@@ -2776,17 +2602,12 @@ Shipping Rule Label,送貨規則標籤
 Shop,店
 Shopping Cart,購物車
 Short biography for website and other publications.,短的傳記的網站和其他出版物。
-Shortcut,捷徑
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",顯示“有貨”或“無貨”的基礎上股票在這個倉庫有。
 "Show / Hide features like Serial Nos, POS etc.",像序列號， POS機等顯示/隱藏功能
-Show Details,顯示詳細信息
 Show In Website,顯示在網站
-Show Tags,顯示標籤
 Show a slideshow at the top of the page,顯示幻燈片在頁面頂部
 Show in Website,顯示在網站
-Show rows with zero values,秀行與零值
 Show this slideshow at the top of the page,這顯示在幻燈片頁面頂部
-Showing only for (if not empty),僅顯示為（如果不為空）
 Sick Leave,病假
 Signature,簽名
 Signature to be appended at the end of every email,簽名在每封電子郵件的末尾追加
@@ -2797,11 +2618,8 @@ Slideshow,連續播放
 Soap & Detergent,肥皂和洗滌劑
 Software,軟件
 Software Developer,軟件開發人員
-Sorry we were unable to find what you were looking for.,對不起，我們無法找到您所期待的。
-Sorry you are not permitted to view this page.,對不起，您沒有權限瀏覽這個頁面。
 "Sorry, Serial Nos cannot be merged",對不起，序列號無法合併
 "Sorry, companies cannot be merged",對不起，企業不能合併
-Sort By,排序
 Source,源
 Source File,源文件
 Source Warehouse,源代碼倉庫
@@ -2826,7 +2644,6 @@ Standard Selling,標準銷售
 Standard contract terms for Sales or Purchase.,標準合同條款的銷售或採購。
 Start,開始
 Start Date,開始日期
-Start Report For,啟動年報
 Start date of current invoice's period,啟動電流發票的日期內
 Start date should be less than end date for Item {0},開始日期必須小於結束日期項目{0}
 State,態
@@ -2884,7 +2701,6 @@ Sub Assemblies,子組件
 "Sub-currency. For e.g. ""Cent""",子貨幣。對於如“美分”
 Subcontract,轉包
 Subject,主題
-Submit,提交
 Submit Salary Slip,提交工資單
 Submit all salary slips for the above selected criteria,提交所有工資單的上面選擇標準
 Submit this Production Order for further processing.,提交此生產訂單進行進一步的處理。
@@ -2928,7 +2744,6 @@ Support Email Settings,支持電子郵件設置
 Support Password,支持密碼
 Support Ticket,支持票
 Support queries from customers.,客戶支持查詢。
-Switch to Website,切換到網站
 Symbol,符號
 Sync Support Mails,同步支持郵件
 Sync with Dropbox,同步與Dropbox
@@ -2936,7 +2751,6 @@ Sync with Google Drive,同步與谷歌驅動器
 System,系統
 System Settings,系統設置
 "System User (login) ID. If set, it will become default for all HR forms.",系統用戶（登錄）的標識。如果設置，這將成為默認的所有人力資源的形式。
-Tags,標籤
 Target  Amount,目標金額
 Target Detail,目標詳細信息
 Target Details,目標詳細信息
@@ -2957,7 +2771,7 @@ Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are no
 Tax Rate,稅率
 Tax and other salary deductions.,稅務及其他薪金中扣除。
 "Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges",稅務詳細表由項目主作為一個字符串，並存儲在此字段中取出。 \ n已使用的稅費和費用
+Used for Taxes and Charges",稅表的細節從項目主作為一個字符串，並存儲在此字段中取出。 \ n已使用的稅費和費用
 Tax template for buying transactions.,稅務模板購買交易。
 Tax template for selling transactions.,稅務模板賣出的交易。
 Taxable,應課稅
@@ -2995,7 +2809,6 @@ Territory Target Variance Item Group-Wise,境內目標差異項目組，智者
 Territory Targets,境內目標
 Test,測試
 Test Email Id,測試電子郵件Id
-Test Runner,測試運行
 Test the Newsletter,測試通訊
 The BOM which will be replaced,這將被替換的物料清單
 The First User: You,第一個用戶：您
@@ -3003,7 +2816,7 @@ The First User: You,第一個用戶：您
 The Organization,本組織
 "The account head under Liability, in which Profit/Loss will be booked",根據責任賬號頭，其中利潤/虧損將被黃牌警告
 "The date on which next invoice will be generated. It is generated on submit.
-",在這接下來的發票將生成的日期。
+",在其旁邊的發票將生成的日期。
 The date on which recurring invoice will be stop,在其經常性發票將被停止日期
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",這個月的日子，汽車發票將會產生如05，28等
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,在天在你申請許可的假期。你不需要申請許可。
@@ -3015,28 +2828,23 @@ The net weight of this package. (calculated automatically as sum of net weight o
 The new BOM after replacement,更換後的新物料清單
 The rate at which Bill Currency is converted into company's base currency,在該條例草案的貨幣轉換成公司的基礎貨幣的比率
 The unique id for tracking all recurring invoices. It is generated on submit.,唯一ID來跟踪所有的經常性發票。它是在提交生成的。
-Then By (optional),再由（可選）
 There are more holidays than working days this month.,還有比這個月工作日更多的假期。
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""",只能有一個運輸規則條件為0或空值“ To值”
 There is not enough leave balance for Leave Type {0},沒有足夠的餘額休假請假類型{0}
 There is nothing to edit.,對於如1美元= 100美分
 There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,有一個錯誤。一個可能的原因可能是因為您沒有保存的形式。請聯繫support@erpnext.com如果問題仍然存在。
-There were errors,有錯誤
-There were errors while sending email. Please try again.,還有在發送電子郵件是錯誤的。請再試一次。
 There were errors.,有錯誤。
 This Currency is disabled. Enable to use in transactions,公司在以下倉庫失踪
 This Leave Application is pending approval. Only the Leave Apporver can update status.,這個假期申請正在等待批准。只有離開Apporver可以更新狀態。
 This Time Log Batch has been billed.,此時日誌批量一直標榜。
 This Time Log Batch has been cancelled.,此時日誌批次已被取消。
 This Time Log conflicts with {0},這個時間日誌與衝突{0}
-This is PERMANENT action and you cannot undo. Continue?,這是永久性的行動，你不能撤消。要繼續嗎？
 This is a root account and cannot be edited.,這是一個root帳戶，不能被編輯。
 This is a root customer group and cannot be edited.,ERPNext是一個開源的基於Web的ERP系統通過網絡注技術私人有限公司向提供集成的工具，在一個小的組織管理大多數進程。有關Web註釋，或購買託管楝更多信息，請訪問
 This is a root item group and cannot be edited.,請先輸入項目
 This is a root sales person and cannot be edited.,您可以通過選擇備份頻率啟動和\
 This is a root territory and cannot be edited.,集團或Ledger ，借方或貸方，是特等帳戶
 This is an example website auto-generated from ERPNext,這是一個示例網站從ERPNext自動生成
-This is permanent action and you cannot undo. Continue?,這是永久的行動，你不能撤消。要繼續嗎？
 This is the number of the last created transaction with this prefix,這就是以這個前綴的最後一個創建的事務數
 This will be used for setting rule in HR module,這將用於在人力資源模塊的設置規則
 Thread HTML,主題HTML
@@ -3078,7 +2886,6 @@ To get Item Group in details table,為了讓項目組在詳細信息表
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included",要包括稅款，行{0}項率，稅收行{1}也必須包括在內
 "To merge, following properties must be same for both items",若要合併，以下屬性必須為這兩個項目是相同的
 "To report an issue, go to ",要報告問題，請至
-"To run a test add the module name in the route after '{0}'. For example, {1}",運行測試後， “{0}”添加模塊名稱的路線。例如， {1}
 "To set this Fiscal Year as Default, click on 'Set as Default'",要設置這個財政年度為默認值，點擊“設為默認”
 To track any installation or commissioning related work after sales,跟踪銷售後的任何安裝或調試相關工作
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",在以下文件送貨單，機遇，材質要求，項目，採購訂單，購買憑證，買方收據，報價單，銷售發票，銷售物料，銷售訂單，序列號跟踪品牌
@@ -3130,7 +2937,6 @@ Totals,總計
 Track Leads by Industry Type.,軌道信息通過行業類型。
 Track this Delivery Note against any Project,跟踪此送貨單反對任何項目
 Track this Sales Order against any Project,跟踪對任何項目這個銷售訂單
-Trainee,實習生
 Transaction,交易
 Transaction Date,交易日期
 Transaction not allowed against stopped Production Order {0},交易不反對停止生產訂單允許{0}
@@ -3162,7 +2968,6 @@ UOM Conversion Factor,計量單位換算係數
 UOM Conversion factor is required in row {0},計量單位換算係數是必需的行{0}
 UOM Name,計量單位名稱
 UOM coversion factor required for UOM {0} in Item {1},所需的計量單位計量單位：丁文因素{0}項{1}
-Unable to load: {0},無法加載： {0}
 Under AMC,在AMC
 Under Graduate,根據研究生
 Under Warranty,在保修期
@@ -3172,11 +2977,8 @@ Unit of Measure {0} has been entered more than once in Conversion Factor Table,�
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).",這資料（如公斤，單位，不，一對）的測量單位。
 Units/Hour,單位/小時
 Units/Shifts,單位/位移
-Unknown Column: {0},未知專欄： {0}
-Unknown Print Format: {0},未知的打印格式： {0}
 Unmatched Amount,無與倫比的金額
 Unpaid,未付
-Unread Messages,未讀消息
 Unscheduled,計劃外
 Unsecured Loans,無抵押貸款
 Unstop,Unstop
@@ -3196,18 +2998,14 @@ Update bank payment dates with journals.,更新與期刊銀行付款日期。
 Update clearance date of Journal Entries marked as 'Bank Vouchers',你不能同時輸入送貨單號及銷售發票編號請輸入任何一個。
 Updated,更新
 Updated Birthday Reminders,更新生日提醒
-Upload,上載
-Upload Attachment,上傳附件
 Upload Attendance,上傳出席
 Upload Backups to Dropbox,上傳備份到Dropbox
 Upload Backups to Google Drive,上傳備份到谷歌驅動器
 Upload HTML,上傳HTML
 Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,上傳一個csv文件有兩列：舊名稱和新名稱。最大500行。
-Upload a file,上傳文件
 Upload attendance from a .csv file,從。csv文件上傳考勤
 Upload stock balance via csv.,通過CSV上傳庫存餘額。
 Upload your letter head and logo - you can edit them later.,上傳你的信頭和標誌 - 你可以在以後對其進行編輯。
-Uploading...,上載...
 Upper Income,高收入
 Urgent,急
 Use Multi-Level BOM,採用多級物料清單
@@ -3217,11 +3015,9 @@ User ID,用戶ID
 User ID not set for Employee {0},用戶ID不為員工設置{0}
 User Name,用戶名
 User Name or Support Password missing. Please enter and try again.,用戶名或支持密碼丟失。請輸入並重試。
-User Permission Restrictions,用戶權限限制
 User Remark,用戶備註
 User Remark will be added to Auto Remark,用戶備註將被添加到自動注
 User Remarks is mandatory,用戶備註是強制性的
-User Restrictions,用戶限制
 User Specific,特定用戶
 User must always select,用戶必須始終選擇
 User {0} is already assigned to Employee {1},用戶{0}已經被分配給員工{1}
@@ -3319,8 +3115,6 @@ Will be updated after Sales Invoice is Submitted.,之後銷售發票已提交將
 Will be updated when batched.,批處理時將被更新。
 Will be updated when billed.,計費時將被更新。
 Wire Transfer,電匯
-With Groups,與團體
-With Ledgers,與總帳
 With Operations,隨著運營
 With period closing entry,隨著期末入門
 Work Details,作品詳細信息
@@ -3328,7 +3122,6 @@ Work Done,工作完成
 Work In Progress,工作進展
 Work-in-Progress Warehouse,工作在建倉庫
 Work-in-Progress Warehouse is required before Submit,工作在進展倉庫提交之前，需要
-Workflow will start after saving.,保存後的工作流程將啟動。
 Working,工作的
 Workstation,工作站
 Workstation Name,工作站名稱
@@ -3351,11 +3144,6 @@ Year Start Date should not be greater than Year End Date,今年開始日期不�
 Year of Passing,路過的一年
 Yearly,每年
 Yes,是的
-Yesterday,昨天
-You are not allowed to create / edit reports,你不允許創建/編輯報導
-You are not allowed to export this report,你不准出口本報告
-You are not allowed to print this document,你不允許打印此文檔
-You are not allowed to send emails related to this document,你是不是允許發送與此相關的文檔的電子郵件
 You are not authorized to add or update entries before {0},你無權之前添加或更新條目{0}
 You are not authorized to set Frozen value,您無權設定值凍結
 You are the Expense Approver for this record. Please Update the 'Status' and Save,讓項目B是製造< / B>
@@ -3372,7 +3160,6 @@ You can submit this Stock Reconciliation.,您可以提交該股票對賬。
 You can update either Quantity or Valuation Rate or both.,你可以更新數量或估值速率或兩者兼而有之。
 You cannot credit and debit same account at the same time,你無法信用卡和借記同一賬戶在同一時間
 You have entered duplicate items. Please rectify and try again.,您輸入重複的項目。請糾正，然後再試一次。
-You have unsaved changes in this form. Please save before you continue.,你在本表格未保存的更改。
 You may need to update: {0},你可能需要更新： {0}
 You must Save the form before proceeding,在繼續之前，您必須保存表單
 You must allocate amount before reconcile,調和之前，你必須分配金額
@@ -3381,7 +3168,6 @@ Your Customers,您的客戶
 Your Login Id,您的登錄ID
 Your Products or Services,您的產品或服務
 Your Suppliers,您的供應商
-"Your download is being built, this may take a few moments...",您的下載正在修建，這可能需要一些時間......
 Your email address,您的電子郵件地址
 Your financial year begins on,您的會計年度自
 Your financial year ends on,您的財政年度結束於
@@ -3394,8 +3180,6 @@ Your support email id - must be a valid email - this is where your emails will c
 and,和
 are not allowed.,項目組樹
 assigned by,由分配
-comment,評論
-comments,評論
 "e.g. ""Build tools for builders""",例如「建設建設者工具“
 "e.g. ""MC""",例如“MC”
 "e.g. ""My Company LLC""",例如“我的公司有限責任公司”
@@ -3405,14 +3189,9 @@ e.g. 5,例如5
 e.g. VAT,例如增值稅
 eg. Cheque Number,例如：。支票號碼
 example: Next Day Shipping,例如：次日發貨
-found,發現
-is not allowed.,是不允許的。
 lft,LFT
 old_parent,old_parent
-or,或
 rgt,RGT
-to,至
-values and dates,值和日期
 website page link,網站頁面的鏈接
 {0} '{1}' not in Fiscal Year {2},{0}“ {1}”不財政年度{2}
 {0} Credit limit {0} crossed,{0}信貸限額{0}劃線
