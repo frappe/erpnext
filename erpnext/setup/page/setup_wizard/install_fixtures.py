@@ -51,7 +51,6 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Contract')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Commission')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Piecework')},
-		{'doctype': 'Employment Type', 'employee_type_name': _('Trainee')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
 
