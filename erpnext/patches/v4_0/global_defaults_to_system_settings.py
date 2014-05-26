@@ -8,6 +8,7 @@ from collections import Counter
 from frappe.core.doctype.user.user import STANDARD_USERS
 
 def execute():
+	frappe.reload_doc("core", "doctype", "system_settings")
 	system_settings = frappe.get_doc("System Settings")
 
 	# set values from global_defauls

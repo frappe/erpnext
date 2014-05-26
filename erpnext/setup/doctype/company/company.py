@@ -207,7 +207,7 @@ class Company(Document):
 					[_('Plant and Machinery'),_('Fixed Assets'),'Ledger','Fixed Asset','Balance Sheet','', 'Asset'],
 				[_('Investments'),_('Application of Funds (Assets)'),'Group','','Balance Sheet','', 'Asset'],
 				[_('Temporary Accounts (Assets)'),_('Application of Funds (Assets)'),'Group','','Balance Sheet','', 'Asset'],
-					[_('Temporary Account (Assets)'),_('Temporary Accounts (Assets)'),'Ledger','','Balance Sheet','', 'Asset'],
+					[_('Temporary Assets'),_('Temporary Accounts (Assets)'),'Ledger','','Balance Sheet','', 'Asset'],
 			[_('Expenses'),'','Group','Expense Account','Profit and Loss','', 'Expense'],
 				[_('Direct Expenses'),_('Expenses'),'Group','Expense Account','Profit and Loss','', 'Expense'],
 					[_('Stock Expenses'),_('Direct Expenses'),'Group','Expense Account','Profit and Loss','', 'Expense'],
@@ -253,7 +253,7 @@ class Company(Document):
 						[_('Unsecured Loans'),_('Loans (Liabilities)'),'Group','','Balance Sheet','', 'Liability'],
 						[_('Bank Overdraft Account'),_('Loans (Liabilities)'),'Group','','Balance Sheet','', 'Liability'],
 				[_('Temporary Accounts (Liabilities)'),_('Source of Funds (Liabilities)'),'Group','','Balance Sheet','', 'Liability'],
-					[_('Temporary Account (Liabilities)'),_('Temporary Accounts (Liabilities)'),'Ledger','','Balance Sheet','', 'Liability']
+					[_('Temporary Liabilities'),_('Temporary Accounts (Liabilities)'),'Ledger','','Balance Sheet','', 'Liability']
 		]
 
 		# load common account heads
