@@ -59,7 +59,7 @@ class PackingSlip(Document):
 			OR (%(from_case_no)s BETWEEN from_case_no AND to_case_no))
 			""", {"delivery_note":self.delivery_note,
 				"from_case_no":self.from_case_no,
-				"to_case_no":self.to_case_no}, debug=1)
+				"to_case_no":self.to_case_no})
 
 		if res:
 			frappe.throw(_("""Case No(s) already in use. Try from Case No {0}""").format(self.get_recommended_case_no()))
