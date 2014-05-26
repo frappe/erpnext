@@ -22,12 +22,3 @@ from frappe.utils import cint, comma_or
 def validate_status(status, options):
 	if status not in options:
 		frappe.throw(_("Status must be one of {0}").format(comma_or(options)))
-
-def build_filter_conditions(filters):
-	conditions, filter_values = [], []
-	for key in filters:
-		conditions.append('`' + key + '` = %s')
-		filter_values.append(filters[key])
-
-	conditions = conditions and " and " + " and ".join(conditions) or ""
-	return conditions, filter_values
