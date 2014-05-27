@@ -1,1 +1,0 @@
-If specified, only user defined in this table are allowed to transact on the parent Warehouse.
