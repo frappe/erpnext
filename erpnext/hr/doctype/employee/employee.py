@@ -8,7 +8,7 @@ from frappe.utils import getdate, validate_email_add, cint
 from frappe.model.naming import make_autoname
 from frappe import throw, _
 import frappe.permissions
-from frappe.defaults import get_restrictions
+from frappe.defaults import get_user_permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
@@ -72,9 +72,9 @@ class Employee(Document):
 
 	def add_restriction_if_required(self, doctype, user):
 		if frappe.permissions.has_only_non_restrict_role(doctype, user) \
-			and self.name not in get_restrictions(user).get("Employee", []):
+			and self.name not in get_user_permissions(user).get("Employee", []):
 
-			frappe.defaults.add_default("Employee", self.name, user, "Restriction")
+			frappe.defaults.add_default("Employee", self.name, user, "User Permission")
 
 	def update_user(self):
 		# add employee role if missing
