@@ -776,8 +776,10 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
-		frappe.get_doc("User", "test@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		test_user = frappe.get_doc("User", "test@example.com")
+		test_user.add_roles("Sales User", "Sales Manager", "Material User")
+		test_user.remove_roles("Material Manager")
+
 		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
@@ -799,7 +801,7 @@ class TestStockEntry(unittest.TestCase):
 		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1",
 			"test2@example.com", parenttype="User Permission")
 
-	def test_freeze_stocks (self):
+	def test_freeze_stocks(self):
 		self._clear_stock_account_balance()
 		frappe.db.set_value('Stock Settings', None,'stock_auth_role', '')
 
