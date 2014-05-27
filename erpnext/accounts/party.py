@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.defaults import get_restrictions
+from frappe.defaults import get_user_permissions
 from frappe.utils import add_days
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
@@ -86,7 +86,7 @@ def set_other_values(out, party, party_type):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = get_restrictions().get("Price List")
+	price_list = get_user_permissions().get("Price List")
 	if isinstance(price_list, list):
 		price_list = None
 

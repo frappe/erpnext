@@ -17,20 +17,20 @@ def on_doctype_update():
 			add index feed_doctype_docname_index(doc_type, doc_name)""")
 
 def get_permission_query_conditions():
-	restrictions = frappe.defaults.get_restrictions()
+	user_permissions = frappe.defaults.get_user_permissions()
 	can_read = frappe.user.get_can_read()
 
 	can_read_doctypes = ['"{}"'.format(doctype) for doctype in
-		list(set(can_read) - set(restrictions.keys()))]
+		list(set(can_read) - set(user_permissions.keys()))]
 
 	if not can_read_doctypes:
 		return ""
 
 	conditions = ["tabFeed.doc_type in ({})".format(", ".join(can_read_doctypes))]
 
-	if restrictions:
+	if user_permissions:
 		can_read_docs = []
-		for doctype, names in restrictions.items():
+		for doctype, names in user_permissions.items():
 			for n in names:
 				can_read_docs.append('"{}|{}"'.format(doctype, n))
 

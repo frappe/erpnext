@@ -283,7 +283,7 @@ class TestSalesOrder(unittest.TestCase):
 			so.get("sales_order_details")[0].warehouse, 20.0)
 
 	def test_warehouse_user(self):
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "User Permission")
 		frappe.get_doc("User", "test@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
@@ -302,7 +302,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 		so.insert()
 
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
+		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="User Permission")
 
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 

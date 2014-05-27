@@ -191,7 +191,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -278,7 +278,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:43.663232", 
+ "modified": "2014-05-26 03:05:50.014543", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 
