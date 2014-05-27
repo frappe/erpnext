@@ -48,7 +48,7 @@ doc_events = {
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_qty"
 	},
 	"User": {
-		"on_update": "erpnext.hr.doctype.employee.employee.update_user_default"
+		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions"
 	}
 }
 

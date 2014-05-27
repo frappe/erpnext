@@ -48,7 +48,7 @@
  ], 
  "icon": "icon-rss", 
  "idx": 1, 
- "modified": "2014-05-02 08:27:23.936733", 
+ "modified": "2014-05-27 03:49:10.882587", 
  "modified_by": "Administrator", 
  "module": "Home", 
  "name": "Feed", 
@@ -63,6 +63,7 @@
    "role": "System Manager"
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "All"

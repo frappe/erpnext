@@ -744,7 +744,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-26 03:05:50.996094", 
+ "modified": "2014-05-27 03:49:15.589404", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -752,6 +752,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -766,6 +767,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -780,6 +782,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -808,6 +811,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

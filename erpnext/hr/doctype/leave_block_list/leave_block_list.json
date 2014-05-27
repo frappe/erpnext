@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:leave_block_list_name", 
- "creation": "2013-02-18 17:43:12.000000", 
+ "creation": "2013-02-18 17:43:12", 
  "description": "Block Holidays on important days.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -10,6 +10,7 @@
   {
    "fieldname": "leave_block_list_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Leave Block List Name", 
    "permlevel": 0, 
    "reqd": 1
@@ -17,6 +18,7 @@
   {
    "fieldname": "year", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Year", 
    "options": "Fiscal Year", 
    "permlevel": 0, 
@@ -25,6 +27,7 @@
   {
    "fieldname": "company", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Company", 
    "options": "Company", 
    "permlevel": 0, 
@@ -34,6 +37,7 @@
    "description": "If not checked, the list will have to be added to each Department where it has to be applied.", 
    "fieldname": "applies_to_all_departments", 
    "fieldtype": "Check", 
+   "in_list_view": 1, 
    "label": "Applies to Company", 
    "permlevel": 0
   }, 
@@ -68,13 +72,14 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2013-12-20 19:24:13.000000", 
+ "modified": "2014-05-27 03:49:13.198735", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Block List", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "apply_user_permissions": 1, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 
