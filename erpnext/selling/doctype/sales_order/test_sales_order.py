@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import flt
+import frappe.permissions
 import unittest
 import copy
 
@@ -283,12 +284,17 @@ class TestSalesOrder(unittest.TestCase):
 			so.get("sales_order_details")[0].warehouse, 20.0)
 
 	def test_warehouse_user(self):
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "User Permission")
-		frappe.get_doc("User", "test@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
 
-		frappe.get_doc("User", "test2@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		test_user = frappe.get_doc("User", "test@example.com")
+		test_user.add_roles("Sales User", "Material User")
+		test_user.remove_roles("Sales Manager")
+
+		test_user_2 = frappe.get_doc("User", "test2@example.com")
+		test_user_2.add_roles("Sales User", "Material User")
+		test_user_2.remove_roles("Sales Manager")
 
 		frappe.set_user("test@example.com")
 
@@ -302,7 +308,9 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 		so.insert()
 
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="User Permission")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
 
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 
