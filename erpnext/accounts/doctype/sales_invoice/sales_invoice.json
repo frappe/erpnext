@@ -1180,7 +1180,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-26 03:05:52.871209", 
+ "modified": "2014-05-27 03:49:17.806077", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
@@ -1202,6 +1202,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -1215,6 +1216,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "delete": 0, 
    "email": 1, 

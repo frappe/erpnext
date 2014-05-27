@@ -1,6 +1,6 @@
 {
  "allow_import": 1, 
- "creation": "2013-06-20 15:40:29.000000", 
+ "creation": "2013-06-20 15:40:29", 
  "description": "Specify Exchange Rate to convert one currency into another", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -9,6 +9,7 @@
   {
    "fieldname": "from_currency", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "From Currency", 
    "options": "Currency", 
    "permlevel": 0, 
@@ -17,6 +18,7 @@
   {
    "fieldname": "to_currency", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "To Currency", 
    "options": "Currency", 
    "permlevel": 0, 
@@ -25,6 +27,7 @@
   {
    "fieldname": "exchange_rate", 
    "fieldtype": "Float", 
+   "in_list_view": 1, 
    "label": "Exchange Rate", 
    "permlevel": 0, 
    "reqd": 1
@@ -32,14 +35,13 @@
  ], 
  "icon": "icon-exchange", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:31.000000", 
+ "modified": "2014-05-27 03:49:09.092389", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency Exchange", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -51,6 +53,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -60,6 +63,7 @@
    "role": "Accounts User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -69,6 +73,7 @@
    "role": "Sales User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 

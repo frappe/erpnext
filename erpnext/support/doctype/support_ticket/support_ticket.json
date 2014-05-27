@@ -237,7 +237,7 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2014-05-21 06:15:26.988620", 
+ "modified": "2014-05-27 03:49:20.573065", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Support Ticket", 
@@ -245,7 +245,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -259,7 +258,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -273,7 +272,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
