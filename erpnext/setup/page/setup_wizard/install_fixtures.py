@@ -71,7 +71,6 @@ def install(country=None):
 
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
-		{'doctype': 'Designation', 'designation_name': _('Director')},
 		{'doctype': 'Designation', 'designation_name': _('Manager')},
 		{'doctype': 'Designation', 'designation_name': _('Analyst')},
 		{'doctype': 'Designation', 'designation_name': _('Engineer')},
