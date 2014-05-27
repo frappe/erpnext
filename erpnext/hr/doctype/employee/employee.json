@@ -87,6 +87,7 @@
    "description": "System User (login) ID. If set, it will become default for all HR forms.", 
    "fieldname": "user_id", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "User ID", 
    "options": "User", 
    "permlevel": 0
@@ -672,7 +673,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:10.297398", 
+ "modified": "2014-05-27 07:34:49.337586", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
