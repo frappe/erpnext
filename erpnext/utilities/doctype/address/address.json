@@ -199,14 +199,14 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-05-09 02:16:43.798644", 
+ "modified": "2014-05-27 03:49:07.273657", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -219,7 +219,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -232,7 +232,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -245,7 +245,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 

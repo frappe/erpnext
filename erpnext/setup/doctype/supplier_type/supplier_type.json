@@ -20,7 +20,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:39.516612", 
+ "modified": "2014-05-27 03:49:20.505739", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Supplier Type", 
@@ -28,7 +28,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -42,7 +41,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -56,7 +55,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

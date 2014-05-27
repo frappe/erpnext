@@ -180,7 +180,7 @@
  "icon": "icon-suitcase",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2014-05-26 03:07:50.514014",
+ "modified": "2014-05-27 03:49:14.251039",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
@@ -188,6 +188,7 @@
  "permissions": [
   {
    "amend": 1,
+   "apply_user_permissions": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -202,6 +203,7 @@
   },
   {
    "amend": 1,
+   "apply_user_permissions": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,

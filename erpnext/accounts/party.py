@@ -86,9 +86,9 @@ def set_other_values(out, party, party_type):
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
-	price_list = get_user_permissions().get("Price List")
+	price_list = filter(None, get_user_permissions().get("Price List", []))
 	if isinstance(price_list, list):
-		price_list = None
+		price_list = price_list[0] if len(price_list)==1 else None
 
 	if not price_list:
 		price_list = party.default_price_list

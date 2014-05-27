@@ -348,7 +348,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-05-26 03:05:47.284171", 
+ "modified": "2014-05-27 03:49:08.597191", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -356,7 +356,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -369,6 +368,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
