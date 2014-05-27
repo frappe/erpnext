@@ -35,7 +35,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		{fieldtype:"Select", label: __("Range"), 
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters")}
+		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],
 
 	setup_columns: function() {

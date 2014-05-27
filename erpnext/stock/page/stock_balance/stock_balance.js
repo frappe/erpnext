@@ -71,7 +71,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date")},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters")}
+		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],
 	
 	setup_plot_check: function() {

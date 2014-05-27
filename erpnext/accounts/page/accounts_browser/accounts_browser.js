@@ -238,6 +238,9 @@ erpnext.AccountsChart = Class.extend({
 				method: 'erpnext.accounts.utils.add_ac',
 				callback: function(r) {
 					d.hide();
+					if(node.expanded) {
+						node.toggle_node();
+					}
 					node.reload();
 				}
 			});
@@ -281,6 +284,9 @@ erpnext.AccountsChart = Class.extend({
 				method: 'erpnext.accounts.utils.add_cc',
 				callback: function(r) {
 					d.hide();
+					if(node.expanded) {
+						node.toggle_node();
+					}
 					node.reload();
 				}
 			});
