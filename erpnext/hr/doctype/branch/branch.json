@@ -20,14 +20,14 @@
  ], 
  "icon": "icon-code-fork", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:31.752490", 
+ "modified": "2014-05-27 03:49:08.179137", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Branch", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -40,7 +40,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

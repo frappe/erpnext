@@ -199,14 +199,13 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2014-05-07 06:39:39.702149", 
+ "modified": "2014-05-27 03:49:08.789451", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -220,7 +219,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -233,7 +231,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -246,7 +243,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -259,7 +255,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -272,7 +267,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -285,7 +279,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -298,7 +291,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -311,7 +304,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -324,7 +317,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -337,7 +330,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 

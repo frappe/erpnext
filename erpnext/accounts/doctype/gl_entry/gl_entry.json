@@ -186,7 +186,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-09 02:16:29.981405", 
+ "modified": "2014-05-27 03:49:10.998572", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 
@@ -194,7 +194,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -207,7 +207,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "email": 1, 
    "permlevel": 0, 

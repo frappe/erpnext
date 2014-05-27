@@ -85,7 +85,7 @@
  "icon": "icon-check", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-05-06 16:26:08.984595", 
+ "modified": "2014-05-27 03:37:21.783216", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation", 
@@ -93,6 +93,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "permlevel": 0, 
