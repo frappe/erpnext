@@ -9,15 +9,15 @@ import frappe.defaults
 def execute():
 	frappe.reload_doc("core", "doctype", "docperm")
 	frappe.reload_doc("hr", "doctype", "employee")
-	update_user_properties()
+	update_user_permissions()
 	update_user_match()
-	add_employee_restrictions_to_leave_approver()
+	add_employee_user_permissions_to_leave_approver()
 	update_permissions()
-	remove_duplicate_restrictions()
+	remove_duplicate_user_permissions()
 	frappe.defaults.clear_cache()
 	frappe.clear_cache()
 
-def update_user_properties():
+def update_user_permissions():
 	frappe.reload_doc("core", "doctype", "docfield")
 	
 	for d in frappe.db.sql("""select parent, defkey, defvalue from tabDefaultValue
@@ -27,7 +27,7 @@ def update_user_properties():
 		
 		if df:
 			frappe.db.sql("""update tabDefaultValue
-				set defkey=%s, parenttype='Restriction'
+				set defkey=%s, parenttype='User Permission'
 				where defkey=%s and
 				parent not in ('__global', '__default')""", (df[0].options, d.defkey))
 
@@ -71,17 +71,17 @@ def update_user_match():
 				for name in frappe.db.sql_list("""select name from `tab{doctype}`
 					where `{field}`=%s""".format(doctype=doctype, field=match.split(":")[0]), user):
 					
-					frappe.defaults.add_default(doctype, name, user, "Restriction")
+					frappe.defaults.add_default(doctype, name, user, "User Permission")
 					
-def add_employee_restrictions_to_leave_approver():
-	from frappe.core.page.user_properties import user_properties
+def add_employee_user_permissions_to_leave_approver():
+	from frappe.core.page.user_permissions import user_permissions
 	
 	# add restrict rights to HR User and HR Manager
 	frappe.db.sql("""update `tabDocPerm` set `restrict`=1 where parent in ('Employee', 'Leave Application')
 		and role in ('HR User', 'HR Manager') and permlevel=0 and `read`=1""")
 	frappe.clear_cache()
 	
-	# add Employee restrictions (in on_update method)
+	# add Employee user_permissions (in on_update method)
 	for employee in frappe.db.sql_list("""select name from `tabEmployee`
 		where (exists(select leave_approver from `tabEmployee Leave Approver`
 			where `tabEmployee Leave Approver`.parent=`tabEmployee`.name)
@@ -94,8 +94,8 @@ def update_permissions():
 	frappe.db.sql("""update tabDocPerm set `match`=''
 		where ifnull(`match`,'') not in ('', 'owner')""")
 
-def remove_duplicate_restrictions():
-	# remove duplicate restrictions (if they exist)
+def remove_duplicate_user_permissions():
+	# remove duplicate user_permissions (if they exist)
 	for d in frappe.db.sql("""select parent, defkey, defvalue,
 		count(*) as cnt from tabDefaultValue
 		where parent not in ('__global', '__default')

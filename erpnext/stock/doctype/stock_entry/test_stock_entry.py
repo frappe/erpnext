@@ -774,8 +774,8 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_user(self):
 		set_perpetual_inventory(0)
 
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "Restriction")
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "Restriction")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
 		frappe.get_doc("User", "test@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 		frappe.get_doc("User", "test2@example.com")\
@@ -795,9 +795,9 @@ class TestStockEntry(unittest.TestCase):
 		st1.submit()
 
 		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC",
-			"test@example.com", parenttype="Restriction")
+			"test@example.com", parenttype="User Permission")
 		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1",
-			"test2@example.com", parenttype="Restriction")
+			"test2@example.com", parenttype="User Permission")
 
 	def test_freeze_stocks (self):
 		self._clear_stock_account_balance()

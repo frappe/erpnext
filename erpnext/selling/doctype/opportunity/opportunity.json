@@ -386,7 +386,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -409,7 +409,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:41.042535", 
+ "modified": "2014-05-26 03:05:50.362530", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 

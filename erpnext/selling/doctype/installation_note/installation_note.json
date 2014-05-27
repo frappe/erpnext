@@ -196,7 +196,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -235,7 +235,7 @@
  "icon": "icon-wrench", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:17:16.592562", 
+ "modified": "2014-05-26 03:05:48.899177", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 
