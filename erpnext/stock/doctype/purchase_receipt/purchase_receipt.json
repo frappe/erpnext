@@ -754,7 +754,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-26 03:05:51.846204", 
+ "modified": "2014-05-27 03:49:16.302198", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
@@ -776,6 +776,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -790,6 +791,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -803,12 +805,14 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
    "role": "Accounts User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "delete": 0, 
    "email": 1, 

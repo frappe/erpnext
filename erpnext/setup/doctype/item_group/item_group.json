@@ -162,7 +162,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-05-26 03:05:49.376278", 
+ "modified": "2014-05-27 03:49:12.086044", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 
@@ -170,7 +170,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -184,7 +183,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -197,7 +196,6 @@
    "write": 0
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -210,7 +208,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -220,7 +218,7 @@
    "role": "Sales User"
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -230,7 +228,7 @@
    "role": "Purchase User"
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 

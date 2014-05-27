@@ -1,6 +1,6 @@
 {
  "autoname": "Prompt", 
- "creation": "2013-06-25 11:48:03.000000", 
+ "creation": "2013-06-25 11:48:03", 
  "description": "Specify conditions to calculate shipping amount", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -102,13 +102,14 @@
  ], 
  "icon": "icon-truck", 
  "idx": 1, 
- "modified": "2014-01-20 17:49:27.000000", 
+ "modified": "2014-05-27 03:49:19.387875", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -118,6 +119,7 @@
    "role": "Accounts User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -127,7 +129,6 @@
    "role": "Sales User"
   }, 
   {
-   "cancel": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -139,7 +140,6 @@
    "write": 1
   }, 
   {
-   "cancel": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

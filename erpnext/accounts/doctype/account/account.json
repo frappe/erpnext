@@ -218,7 +218,7 @@
  "permissions": [
   {
    "amend": 0,
-   "cancel": 0,
+   "apply_user_permissions": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -234,7 +234,7 @@
   },
   {
    "amend": 0,
-   "cancel": 0,
+   "apply_user_permissions": 1,
    "create": 0,
    "delete": 0,
    "email": 1,
@@ -248,7 +248,7 @@
   },
   {
    "amend": 0,
-   "cancel": 0,
+   "apply_user_permissions": 1,
    "create": 0,
    "delete": 0,
    "email": 1,
@@ -262,7 +262,7 @@
   },
   {
    "amend": 0,
-   "cancel": 0,
+   "apply_user_permissions": 1,
    "create": 0,
    "delete": 0,
    "email": 1,
@@ -288,7 +288,6 @@
   },
   {
    "amend": 0,
-   "cancel": 0,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -298,8 +297,8 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "set_user_permissions": 1,
    "role": "Accounts Manager",
+   "set_user_permissions": 1,
    "submit": 0,
    "write": 1
   },
