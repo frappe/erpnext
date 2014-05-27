@@ -5,7 +5,7 @@ import frappe
 import unittest
 
 from erpnext.hr.doctype.leave_application.leave_application import LeaveDayBlockedError, OverlapError
-from frappe.core.page.user_properties.user_properties import clear_restrictions
+from frappe.core.page.user_permissions.user_permissions import clear_user_permissions
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -91,7 +91,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		from frappe.utils.user import add_role
 		add_role("test1@example.com", "HR User")
-		clear_restrictions("Employee")
+		clear_user_permissions("Employee")
 
 		frappe.db.set_value("Department", "_Test Department",
 			"leave_block_list", "_Test Leave Block List")

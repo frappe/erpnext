@@ -181,7 +181,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -196,13 +196,14 @@
  "icon": "icon-thumbs-up", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:37.334857", 
+ "modified": "2014-05-26 03:05:46.761819", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal", 
  "owner": "ashwini@webnotestech.com", 
  "permissions": [
   {
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -211,7 +212,6 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restricted": 1, 
    "role": "Employee", 
    "submit": 0, 
    "write": 1
