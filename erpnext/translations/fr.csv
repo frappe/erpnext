@@ -800,7 +800,6 @@ Difference Account,Compte de la différence
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Différents Emballage des articles mènera à incorrects (Total ) Valeur de poids . Assurez-vous que poids net de chaque article se trouve dans la même unité de mesure .
 Direct Expenses,{0} {1} a été modifié . S'il vous plaît rafraîchir .
 Direct Income,Choisissez votre langue
-Director,directeur
 Disable,"Groupe ajoutée, rafraîchissant ..."
 Disable Rounded Total,Désactiver totale arrondie
 Disabled,Handicapé
@@ -3058,7 +3057,6 @@ Warehouse,entrepôt
 Warehouse Contact Info,Entrepôt Info Contact
 Warehouse Detail,Détail d&#39;entrepôt
 Warehouse Name,Nom d&#39;entrepôt
-Warehouse User,L&#39;utilisateur d&#39;entrepôt
 Warehouse and Reference,Entrepôt et référence
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Descendre : {0}
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Entrepôt ne peut être modifié via Stock Entrée / bon de livraison / reçu d'achat

@@ -800,7 +800,6 @@ Difference Account,Razlika račun
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Različite UOM za stavke će dovesti do pogrešne (ukupno) Neto vrijednost težine. Uvjerite se da je neto težina svake stavke u istom UOM .
 Direct Expenses,izravni troškovi
 Direct Income,Izravna dohodak
-Director,direktor
 Disable,onesposobiti
 Disable Rounded Total,Bez Zaobljeni Ukupno
 Disabled,Onesposobljen
@@ -3058,7 +3057,6 @@ Warehouse,skladište
 Warehouse Contact Info,Skladište Kontakt Info
 Warehouse Detail,Skladište Detalj
 Warehouse Name,Skladište Ime
-Warehouse User,Skladište Upute
 Warehouse and Reference,Skladište i upute
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Skladište se ne može izbrisati , kao entry stock knjiga postoji za to skladište ."
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Skladište se može mijenjati samo preko Stock Stupanje / Dostavnica / kupiti primitka

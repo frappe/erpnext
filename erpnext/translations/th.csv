@@ -800,7 +800,6 @@ Difference Account,บัญชี ที่แตกต่างกัน
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,UOM ที่แตกต่างกัน สำหรับรายการที่ จะ นำไปสู่การ ที่ไม่ถูกต้อง ( รวม ) ค่า น้ำหนักสุทธิ ให้แน่ใจว่า น้ำหนักสุทธิ ของแต่ละรายการ ที่อยู่ในUOM เดียวกัน
 Direct Expenses,ค่าใช้จ่าย โดยตรง
 Direct Income,รายได้ โดยตรง
-Director,ผู้อำนวยการ
 Disable,ปิดการใช้งาน
 Disable Rounded Total,ปิดการใช้งานรวมโค้ง
 Disabled,พิการ
@@ -3058,7 +3057,6 @@ Warehouse,คลังสินค้า
 Warehouse Contact Info,ข้อมูลการติดต่อคลังสินค้า
 Warehouse Detail,รายละเอียดคลังสินค้า
 Warehouse Name,ชื่อคลังสินค้า
-Warehouse User,ผู้ใช้คลังสินค้า
 Warehouse and Reference,คลังสินค้าและการอ้างอิง
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,คลังสินค้า ไม่สามารถลบได้ เป็นรายการ บัญชีแยกประเภท หุ้น ที่มีอยู่สำหรับ คลังสินค้า นี้
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,คลังสินค้า สามารถ เปลี่ยน ผ่านทาง หุ้น เข้า / ส่ง หมายเหตุ / รับซื้อ

@@ -800,7 +800,6 @@ Difference Account,cuenta Diferencia
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,UOM diferente para elementos dará lugar a incorrecto ( Total) Valor neto Peso . Asegúrese de que peso neto de cada artículo esté en la misma UOM .
 Direct Expenses,gastos directos
 Direct Income,Ingreso directo
-Director,director
 Disable,inhabilitar
 Disable Rounded Total,Desactivar Total redondeado
 Disabled,discapacitado
@@ -3058,7 +3057,6 @@ Warehouse,almacén
 Warehouse Contact Info,Almacén Contacto
 Warehouse Detail,Detalle de almacenes
 Warehouse Name,Nombre de almacenes
-Warehouse User,Almacén del usuario
 Warehouse and Reference,Almacén y Referencia
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Almacén no se puede suprimir porque hay una entrada en registro de acciones para este almacén.
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Depósito sólo se puede cambiar a través de la entrada Stock / nota de entrega / recibo de compra

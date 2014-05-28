@@ -800,7 +800,6 @@ Difference Account,வித்தியாசம் கணக்கு
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,பொருட்களை பல்வேறு மொறட்டுவ பல்கலைகழகம் தவறான ( மொத்த ) நிகர எடை மதிப்பு வழிவகுக்கும். ஒவ்வொரு பொருளின் நிகர எடை அதே மொறட்டுவ பல்கலைகழகம் உள்ளது என்று உறுதி.
 Direct Expenses,நேரடி செலவுகள்
 Direct Income,நேரடி வருமானம்
-Director,இயக்குநர்
 Disable,முடக்கு
 Disable Rounded Total,வட்டமான மொத்த முடக்கு
 Disabled,முடக்கப்பட்டது
@@ -3058,7 +3057,6 @@ Warehouse,கிடங்கு
 Warehouse Contact Info,சேமிப்பு கிடங்கு தொடர்பு தகவல்
 Warehouse Detail,சேமிப்பு கிடங்கு விரிவாக
 Warehouse Name,சேமிப்பு கிடங்கு பெயர்
-Warehouse User,கிடங்கு பயனர்
 Warehouse and Reference,கிடங்கு மற்றும் குறிப்பு
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,பங்கு லெட்ஜர் நுழைவு கிடங்கு உள்ளது என கிடங்கு நீக்க முடியாது .
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,கிடங்கு மட்டுமே பங்கு நுழைவு / டெலிவரி குறிப்பு / கொள்முதல் ரசீது மூலம் மாற்ற முடியும்
