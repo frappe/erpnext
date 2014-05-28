@@ -15,7 +15,6 @@ class PricingRule(Document):
 		self.validate_min_max_qty()
 		self.cleanup_fields_value()
 
-
 	def validate_mandatory(self):
 		for field in ["apply_on", "applicable_for", "price_or_discount"]:
 			tocheck = frappe.scrub(self.get(field) or "")
@@ -25,7 +24,6 @@ class PricingRule(Document):
 	def validate_min_max_qty(self):
 		if self.min_qty and self.max_qty and flt(self.min_qty) > flt(self.max_qty):
 			throw(_("Min Qty can not be greater than Max Qty"))
-
 
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "price_or_discount"]:

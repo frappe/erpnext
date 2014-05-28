@@ -68,7 +68,12 @@ def get_item_details(args):
 	if args.transaction_type == "selling" and cint(args.is_pos):
 		out.update(get_pos_settings_item_details(args.company, args))
 
-	apply_pricing_rule(out, args)
+	# update args with out, if key or value not exists
+	for key, value in out.iteritems():
+		if args.get(key) is None:
+			args[key] = value
+
+	out.update(apply_pricing_rule(args))
 
 	if args.get("doctype") in ("Sales Invoice", "Delivery Note"):
 		if item_doc.has_serial_no == "Yes" and not args.serial_no:
@@ -243,36 +248,50 @@ def get_pos_settings(company):
 
 	return pos_settings and pos_settings[0] or None
 
-def apply_pricing_rule(out, args):
-	args_dict = frappe._dict().update(args)
-	args_dict.update(out)
-	all_pricing_rules = get_pricing_rules(args_dict)
+@frappe.whitelist()
+def apply_pricing_rule(args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
 
-	rule_for_price = False
-	for rule_for in ["price", "discount_percentage"]:
-		pricing_rules = filter(lambda x: x[rule_for] > 0.0, all_pricing_rules)
-		if rule_for_price:
-			pricing_rules = filter(lambda x: not x["for_price_list"], pricing_rules)
+	args = frappe._dict(args)
+	out = frappe._dict()
 
-		pricing_rule = filter_pricing_rules(args_dict, pricing_rules)
+	if not args.get("item_group") or not args.get("brand"):
+		args.item_group, args.brand = frappe.db.get_value("Item",
+			args.item_code, ["item_group", "brand"])
 
-		if pricing_rule:
-			if rule_for == "discount_percentage":
-				out["discount_percentage"] = pricing_rule["discount_percentage"]
-				out["pricing_rule_for_discount"] = pricing_rule["name"]
-			else:
-				out["base_price_list_rate"] = pricing_rule["price"]
-				out["price_list_rate"] = pricing_rule["price"] * \
-					flt(args_dict.plc_conversion_rate) / flt(args_dict.conversion_rate)
-				out["pricing_rule_for_price"] = pricing_rule["name"]
-				rule_for_price = True
+	if not args.get("customer_group") or not args.get("territory"):
+		args.customer_group, args.territory = frappe.db.get_value("Customer",
+			args.customer, ["customer_group", "territory"])
 
-def get_pricing_rules(args_dict):
+	if not args.get("supplier_type"):
+		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
+
+	pricing_rules = get_pricing_rules(args)
+	pricing_rule = filter_pricing_rules(args, pricing_rules)
+
+	if pricing_rule:
+		out.pricing_rule = pricing_rule.name
+		if pricing_rule.price_or_discount == "Price":
+			out.base_price_list_rate = pricing_rule.price
+			out.price_list_rate = pricing_rule.price*flt(args.plc_conversion_rate)/flt(args.conversion_rate)
+			out.base_rate = out.base_price_list_rate
+			out.rate = out.price_list_rate
+			out.discount_percentage = 0.0
+		else:
+			out.discount_percentage = pricing_rule.discount_percentage
+	else:
+		out.pricing_rule = None
+
+	return out
+
+
+def get_pricing_rules(args):
 	def _get_tree_conditions(doctype, allow_blank=True):
 		field = frappe.scrub(doctype)
 		condition = ""
-		if args_dict.get(field):
-			lft, rgt = frappe.db.get_value(doctype, args_dict[field], ["lft", "rgt"])
+		if args.get(field):
+			lft, rgt = frappe.db.get_value(doctype, args[field], ["lft", "rgt"])
 			parent_groups = frappe.db.sql_list("""select name from `tab%s`
 				where lft<=%s and rgt>=%s""" % (doctype, '%s', '%s'), (lft, rgt))
 
@@ -284,8 +303,8 @@ def get_pricing_rules(args_dict):
 
 
 	conditions = ""
-	for field in ["customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
-			if args_dict.get(field):
+	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
+			if args.get(field):
 				conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
 			else:
 				conditions += " and ifnull("+field+", '') = ''"
@@ -297,8 +316,7 @@ def get_pricing_rules(args_dict):
 
 	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
 
-
-	if args_dict.get("transaction_date"):
+	if args.get("transaction_date"):
 		conditions += """ and %(transaction_date)s between ifnull(valid_from, '2000-01-01')
 			and ifnull(valid_upto, '2500-12-31')"""
 
@@ -307,13 +325,13 @@ def get_pricing_rules(args_dict):
 			and docstatus < 2 and ifnull(disable, 0) = 0 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=_get_tree_conditions("Item Group", False), conditions=conditions),
-			args_dict, as_dict=1)
+			args, as_dict=1)
 
-def filter_pricing_rules(args_dict, pricing_rules):
+def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
-	if pricing_rules and args_dict.get("qty"):
-		pricing_rules = filter(lambda x: (args_dict.qty>=flt(x.min_qty)
-			and (args_dict.qty<=x.max_qty if x.max_qty else True)), pricing_rules)
+	if pricing_rules and args.get("qty"):
+		pricing_rules = filter(lambda x: (args.qty>=flt(x.min_qty)
+			and (args.qty<=x.max_qty if x.max_qty else True)), pricing_rules)
 
 	# find pricing rule with highest priority
 	if pricing_rules:
@@ -323,15 +341,19 @@ def filter_pricing_rules(args_dict, pricing_rules):
 
 	# apply internal priority
 	all_fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory",
-		"supplier", "supplier_type", "campaign", "for_price_list", "sales_partner"]
+		"supplier", "supplier_type", "campaign", "sales_partner"]
 
 	if len(pricing_rules) > 1:
 		for field_set in [["item_code", "item_group", "brand"],
 			["customer", "customer_group", "territory"], ["supplier", "supplier_type"]]:
 				remaining_fields = list(set(all_fields) - set(field_set))
 				if if_all_rules_same(pricing_rules, remaining_fields):
-					pricing_rules = apply_internal_priority(pricing_rules, field_set, args_dict)
+					pricing_rules = apply_internal_priority(pricing_rules, field_set, args)
 					break
+	if len(pricing_rules) > 1:
+		price_or_discount = list(set([d.price_or_discount for d in pricing_rules]))
+		if len(price_or_discount) == 1 and price_or_discount[0] == "Discount Percentage":
+			pricing_rules = filter(lambda x: x.for_price_list==args.price_list, pricing_rules)
 
 	if len(pricing_rules) > 1:
 		frappe.throw(_("Multiple Price Rule exists with same criteria, please resolve \
@@ -350,11 +372,11 @@ def if_all_rules_same(pricing_rules, fields):
 
 	return all_rules_same
 
-def apply_internal_priority(pricing_rules, field_set, args_dict):
+def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
-		if args_dict.get(field):
-			filtered_rules = filter(lambda x: x[field]==args_dict[field], pricing_rules)
+		if args.get(field):
+			filtered_rules = filter(lambda x: x[field]==args[field], pricing_rules)
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules

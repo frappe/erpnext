@@ -7,9 +7,11 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	if not filters.get("account"): return
 
 	columns = get_columns()
+
+	if not filters.get("account"): return columns, []
+
 	data = get_entries(filters)
 
 	from erpnext.accounts.utils import get_balance_on

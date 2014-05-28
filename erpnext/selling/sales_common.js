@@ -104,7 +104,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	customer: function() {
-		erpnext.utils.get_party_details(this.frm);
+		var me = this;
+		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
 	},
 
 	customer_address: function() {
@@ -117,6 +118,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	contact_person: function() {
 		erpnext.utils.get_contact_details(this.frm);
+	},
+
+	sales_partner: function() {
+		this.apply_pricing_rule();
+	},
+
+	campaign: function() {
+		this.apply_pricing_rule();
 	},
 
 	barcode: function(doc, cdt, cdn) {

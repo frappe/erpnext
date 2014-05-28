@@ -132,6 +132,13 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0
+  }, 
+  {
    "default": "Today", 
    "fieldname": "valid_from", 
    "fieldtype": "Date", 
@@ -198,12 +205,25 @@
    "label": "For Price List", 
    "options": "Price List", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "help_section", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "options": "Simple", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "pricing_rule_help", 
+   "fieldtype": "HTML", 
+   "label": "Pricing Rule Help", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-05-12 16:24:52.005162", 
+ "modified": "2014-05-27 15:14:34.849671", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 

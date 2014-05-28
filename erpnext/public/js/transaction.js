@@ -194,6 +194,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 
 			this.frm.script_manager.trigger("currency");
+			this.apply_pricing_rule()
 		}
 	},
 
@@ -225,7 +226,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-		if(flt(this.frm.doc.conversion_rate)>0.0) this.calculate_taxes_and_totals();
+		if(flt(this.frm.doc.conversion_rate)>0.0) {
+			this.apply_pricing_rule();
+		}
 	},
 
 	get_price_list_currency: function(buying_or_selling) {
@@ -278,12 +281,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 		if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
-			this.calculate_taxes_and_totals();
+			this.apply_pricing_rule();
 		}
 	},
 
 	qty: function(doc, cdt, cdn) {
-		this.calculate_taxes_and_totals();
+		this.apply_pricing_rule(frappe.get_doc(cdt, cdn));
 	},
 
 	// tax rate
@@ -324,6 +327,52 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	calculate_charges: function() {
 		this.calculate_taxes_and_totals();
+	},
+
+	apply_pricing_rule: function(item) {
+		var me = this;
+
+		var _apply_pricing_rule = function(item) {
+			return me.frm.call({
+				method: "erpnext.stock.get_item_details.apply_pricing_rule",
+				child: item,
+				args: {
+					args: {
+						item_code: item.item_code,
+						item_group: item.item_group,
+						brand: item.brand,
+						qty: item.qty,
+						customer: me.frm.doc.customer,
+						customer_group: me.frm.doc.customer_group,
+						territory: me.frm.doc.territory,
+						supplier: me.frm.doc.supplier,
+						supplier_type: me.frm.doc.supplier_type,
+						currency: me.frm.doc.currency,
+						conversion_rate: me.frm.doc.conversion_rate,
+						price_list: me.frm.doc.selling_price_list ||
+							 me.frm.doc.buying_price_list,
+						plc_conversion_rate: me.frm.doc.plc_conversion_rate,
+						company: me.frm.doc.company,
+						transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
+						campaign: me.frm.doc.campaign,
+						sales_partner: me.frm.doc.sales_partner
+					}
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						me.frm.script_manager.trigger("price_list_rate", item.doctype, item.name);
+					}
+				}
+			});
+		}
+
+
+		if(item) _apply_pricing_rule(item);
+		else {
+			$.each(this.get_item_doclist(), function(n, item) {
+				_apply_pricing_rule(item);
+			});
+		}
 	},
 
 	included_in_print_rate: function(doc, cdt, cdn) {

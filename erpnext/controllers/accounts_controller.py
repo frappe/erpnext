@@ -97,10 +97,16 @@ class AccountsController(TransactionBase):
 					args = item.as_dict()
 					args.update(parent_dict)
 					ret = get_item_details(args)
+
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and \
 							item.get(fieldname) is None and value is not None:
 								item.set(fieldname, value)
+
+					if ret.get("pricing_rule"):
+						for field in ["base_price_list_rate", "price_list_rate",
+							"discount_percentage", "base_rate", "rate"]:
+								item.set(field, ret.get(field))
 
 	def set_taxes(self, tax_parentfield, tax_master_field):
 		if not self.meta.get_field(tax_parentfield):
