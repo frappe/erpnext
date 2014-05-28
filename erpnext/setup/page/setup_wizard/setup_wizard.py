@@ -392,7 +392,7 @@ def create_logo(args):
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
 	for role in frappe.db.sql("""select name from tabRole"""):
-		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
+		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner", "Employee"]:
 			d = user.append("user_roles")
 			d.role = role[0]
 	user.save()
