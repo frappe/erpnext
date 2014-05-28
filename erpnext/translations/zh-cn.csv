@@ -800,7 +800,6 @@ Difference Account,差异帐户
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,不同计量单位的项目会导致不正确的（总）净重值。确保每个项目的净重是在同一个计量单位。
 Direct Expenses,直接费用
 Direct Income,直接收入
-Director,导演
 Disable,关闭
 Disable Rounded Total,禁用圆角总
 Disabled,残
@@ -2771,7 +2770,7 @@ Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are no
 Tax Rate,税率
 Tax and other salary deductions.,税务及其他薪金中扣除。
 "Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges",税表的细节从项目主作为一个字符串，并存储在此字段中取出。 \ n已使用的税费和费用
+Used for Taxes and Charges",税务详细表由项目主作为一个字符串，并存储在此字段中取出。 \ n已使用的税费和费用
 Tax template for buying transactions.,税务模板购买交易。
 Tax template for selling transactions.,税务模板卖出的交易。
 Taxable,应课税
@@ -2816,7 +2815,7 @@ The First User: You,第一个用户：您
 The Organization,本组织
 "The account head under Liability, in which Profit/Loss will be booked",根据责任账号头，其中利润/亏损将被黄牌警告
 "The date on which next invoice will be generated. It is generated on submit.
-",在其旁边的发票将生成的日期。
+",在这接下来的发票将生成的日期。
 The date on which recurring invoice will be stop,在其经常性发票将被停止日期
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",这个月的日子，汽车发票将会产生如05，28等
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,在天在你申请许可的假期。你不需要申请许可。
@@ -3058,7 +3057,6 @@ Warehouse,从维护计划
 Warehouse Contact Info,仓库联系方式
 Warehouse Detail,仓库的详细信息
 Warehouse Name,仓库名称
-Warehouse User,仓库用户
 Warehouse and Reference,仓库及参考
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,股票分类帐项存在这个仓库仓库不能被删除。
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,仓库只能通过股票输入/送货单/外购入库单变
