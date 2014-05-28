@@ -800,7 +800,6 @@ Difference Account,Разлика налог
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,"Различные Единица измерения для элементов приведет к некорректному (Всего) значение массы нетто . Убедитесь, что вес нетто каждого элемента находится в том же UOM ."
 Direct Expenses,прямые расходы
 Direct Income,Прямая прибыль
-Director,директор
 Disable,запрещать
 Disable Rounded Total,Онемогући Роундед Укупно
 Disabled,Онеспособљен
@@ -3058,7 +3057,6 @@ Warehouse,магацин
 Warehouse Contact Info,Магацин Контакт Инфо
 Warehouse Detail,Магацин Детаљ
 Warehouse Name,Магацин Име
-Warehouse User,Магацин корисника
 Warehouse and Reference,Магацин и Референтни
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Склад не может быть удален как существует запись складе книга для этого склада .
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Складиште може да се промени само преко Сток Улаз / Испорука Напомена / рачуном
