@@ -137,7 +137,6 @@ class Item(WebsiteGenerator):
 			bom = frappe.db.sql("""select name from `tabBOM` where item = %s
 				and is_active = 1""", (self.name,))
 			if bom and bom[0][0]:
-				print self.name
 				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item"""))
 
 	def fill_customer_code(self):
