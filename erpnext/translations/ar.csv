@@ -800,7 +800,6 @@ Difference Account,حساب الفرق
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,سوف UOM مختلفة لعناصر تؤدي إلى غير صحيحة ( مجموع ) صافي قيمة الوزن . تأكد من أن الوزن الصافي من كل عنصر في نفس UOM .
 Direct Expenses,المصاريف المباشرة
 Direct Income,الدخل المباشر
-Director,مدير
 Disable,تعطيل
 Disable Rounded Total,تعطيل إجمالي مدور
 Disabled,معاق
@@ -3058,7 +3057,6 @@ Warehouse,مستودع
 Warehouse Contact Info,مستودع معلومات الاتصال
 Warehouse Detail,مستودع التفاصيل
 Warehouse Name,مستودع اسم
-Warehouse User,مستودع العضو
 Warehouse and Reference,مستودع والمراجع
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,مستودع لا يمكن حذف كما يوجد مدخل الأسهم دفتر الأستاذ لهذا المستودع.
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,لا يمكن إلا أن تتغير مستودع عبر دخول سوق الأسهم / التوصيل ملاحظة / شراء الإيصال

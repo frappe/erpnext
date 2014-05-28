@@ -800,7 +800,6 @@ Difference Account,verschil Account
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Verschillende Verpakking voor items zal leiden tot een onjuiste (Totaal ) Netto gewicht waarde . Zorg ervoor dat Netto gewicht van elk item is in dezelfde Verpakking .
 Direct Expenses,directe kosten
 Direct Income,direct Inkomen
-Director,directeur
 Disable,onbruikbaar maken
 Disable Rounded Total,Uitschakelen Afgeronde Totaal
 Disabled,Invalide
@@ -3058,7 +3057,6 @@ Warehouse,magazijn
 Warehouse Contact Info,Warehouse Contact Info
 Warehouse Detail,Magazijn Detail
 Warehouse Name,Warehouse Naam
-Warehouse User,Magazijn Gebruiker
 Warehouse and Reference,Magazijn en Reference
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Magazijn kan niet worden verwijderd als voorraad grootboek toegang bestaat voor dit magazijn .
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Magazijn kan alleen via Stock Entry / Delivery Note / Kwitantie worden veranderd

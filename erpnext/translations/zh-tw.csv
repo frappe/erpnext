@@ -800,7 +800,6 @@ Difference Account,差異帳戶
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,不同計量單位的項目會導致不正確的（總）淨重值。確保每個項目的淨重是在同一個計量單位。
 Direct Expenses,直接費用
 Direct Income,直接收入
-Director,導演
 Disable,關閉
 Disable Rounded Total,禁用圓角總
 Disabled,殘
@@ -3058,7 +3057,6 @@ Warehouse,從維護計劃
 Warehouse Contact Info,倉庫聯繫方式
 Warehouse Detail,倉庫的詳細信息
 Warehouse Name,倉庫名稱
-Warehouse User,倉庫用戶
 Warehouse and Reference,倉庫及參考
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,股票分類帳項存在這個倉庫倉庫不能被刪除。
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,倉庫只能通過股票輸入/送貨單/外購入庫單變
