@@ -195,30 +195,6 @@ def update_against_doc(d, jv_obj):
 	jv_obj.ignore_validate_update_after_submit = True
 	jv_obj.save()
 
-def get_account_list(doctype, txt, searchfield, start, page_len, filters):
-	filters = add_group_or_ledger_filter("Account", filters)
-
-	return frappe.widgets.reportview.execute("Account", filters = filters,
-		fields = ["name", "parent_account"],
-		limit_start=start, limit_page_length=page_len, as_list=True)
-
-def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
-	filters = add_group_or_ledger_filter("Cost Center", filters)
-
-	return frappe.widgets.reportview.execute("Cost Center", filters = filters,
-		fields = ["name", "parent_cost_center"],
-		limit_start=start, limit_page_length=page_len, as_list=True)
-
-def add_group_or_ledger_filter(doctype, filters):
-	if isinstance(filters, dict):
-		if not filters.get("group_or_ledger"):
-			filters["group_or_ledger"] = "Ledger"
-	elif isinstance(filters, list):
-		if "group_or_ledger" not in [d[0] for d in filters]:
-			filters.append([doctype, "group_or_ledger", "=", "Ledger"])
-
-	return filters
-
 def remove_against_link_from_jv(ref_type, ref_no, against_field):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Voucher Detail`
 		where `%s`=%s and docstatus < 2""" % (against_field, "%s"), (ref_no))
