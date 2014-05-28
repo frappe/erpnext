@@ -20,15 +20,10 @@ def execute():
 		""")
 
 	else:
-		frappe.db.sql("""UPDATE tabAccount
-			SET root_type = CASE
-				WHEN name like '%%asset%%' THEN 'Asset'
-				WHEN name like '%%liabilities%%' THEN 'Liability'
-				WHEN name like '%%expense%%' THEN 'Expense'
-				WHEN name like '%%income%%' THEN 'Income'
-				END
-			WHERE ifnull(parent_account, '') = ''
-		""")
+		for key, root_type in (("asset", "Asset"), ("liabilities", "Liability"), ("expense", "Expense"),
+			("income", "Income")):
+			frappe.db.sql("""update tabAccount set root_type=%s where name like %s
+				and ifnull(parent_account, '')=''""", (root_type, "%" + key + "%"))
 
 	for root in frappe.db.sql("""SELECT name, lft, rgt, root_type FROM `tabAccount`
 		WHERE ifnull(parent_account, '')=''""",	as_dict=True):
