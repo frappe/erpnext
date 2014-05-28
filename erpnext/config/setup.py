@@ -83,6 +83,11 @@ def get_data():
 					"name": "Jobs Email Settings",
 					"description": _("Setup incoming server for jobs email id. (e.g. jobs@example.com)")
 				},
+				{
+					"type": "doctype",
+					"name": "SMS Settings",
+					"description": _("Setup SMS gateway settings")
+				},
 			]
 		},
 		{
