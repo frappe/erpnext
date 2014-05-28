@@ -800,7 +800,6 @@ Difference Account,ವ್ಯತ್ಯಾಸ ಖಾತೆ
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,ಐಟಂಗಳನ್ನು ವಿವಿಧ UOM ತಪ್ಪು ( ಒಟ್ಟು ) ನೆಟ್ ತೂಕ ಮೌಲ್ಯವನ್ನು ಕಾರಣವಾಗುತ್ತದೆ . ಪ್ರತಿ ಐಟಂ ಮಾಡಿ surethat ನೆಟ್ ತೂಕ ಅದೇ UOM ಹೊಂದಿದೆ .
 Direct Expenses,ನೇರ ವೆಚ್ಚಗಳು
 Direct Income,ನೇರ ಆದಾಯ
-Director,ನಿರ್ದೇಶಕ
 Disable,ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ
 Disable Rounded Total,ದುಂಡಾದ ಒಟ್ಟು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ
 Disabled,ಅಂಗವಿಕಲ
@@ -3058,7 +3057,6 @@ Warehouse,ಮಳಿಗೆ
 Warehouse Contact Info,ವೇರ್ಹೌಸ್ ಸಂಪರ್ಕ ಮಾಹಿತಿ
 Warehouse Detail,ವೇರ್ಹೌಸ್ ವಿವರ
 Warehouse Name,ವೇರ್ಹೌಸ್ ಹೆಸರು
-Warehouse User,ವೇರ್ಹೌಸ್ ಬಳಕೆದಾರ
 Warehouse and Reference,ವೇರ್ಹೌಸ್ ಮತ್ತು ರೆಫರೆನ್ಸ್
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,ಸ್ಟಾಕ್ ಲೆಡ್ಜರ್ ಪ್ರವೇಶ ಈ ಗೋದಾಮಿನ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ ಎಂದು ವೇರ್ಹೌಸ್ ಅಳಿಸಲಾಗುವುದಿಲ್ಲ .
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,ವೇರ್ಹೌಸ್ ಮಾತ್ರ ಸ್ಟಾಕ್ ಎಂಟ್ರಿ / ಡೆಲಿವರಿ ಸೂಚನೆ / ರಸೀತಿ ಖರೀದಿ ಮೂಲಕ ಬದಲಾಯಿಸಬಹುದು
