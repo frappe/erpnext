@@ -55,7 +55,7 @@ class Employee(Document):
 		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
 
 	def update_leave_approver_user_permissions(self):
-		"""restrict to this employee for leave approver"""
+		"""add employee user permission for leave approver"""
 		employee_leave_approvers = [d.leave_approver for d in self.get("employee_leave_approvers")]
 		if self.reports_to and self.reports_to not in employee_leave_approvers:
 			employee_leave_approvers.append(frappe.db.get_value("Employee", self.reports_to, "user_id"))
@@ -204,13 +204,15 @@ def make_salary_structure(source_name, target=None):
 	target.make_earn_ded_table()
 	return target
 
-def update_user_permissions(doc, method):
+def validate_employee_role(doc, method):
 	# called via User hook
-
 	if "Employee" in [d.role for d in doc.get("user_roles")]:
-		try:
-			employee = frappe.get_doc("Employee", {"user_id": doc.name})
-			employee.update_user_permissions()
-		except frappe.DoesNotExistError:
+		if not frappe.db.get_value("Employee", {"user_id": doc.name}):
 			frappe.msgprint("Please set User ID field in an Employee record to set Employee Role")
 			doc.get("user_roles").remove(doc.get("user_roles", {"role": "Employee"})[0])
+
+def update_user_permissions(doc, method):
+	# called via User hook
+	if "Employee" in [d.role for d in doc.get("user_roles")]:
+		employee = frappe.get_doc("Employee", {"user_id": doc.name})
+		employee.update_user_permissions()
