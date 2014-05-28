@@ -20,6 +20,7 @@ class TestPricingRule(unittest.TestCase):
 			"price_or_discount": "Discount Percentage",
 			"price": 0,
 			"discount_percentage": 10,
+			"company": "_Test Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
@@ -36,7 +37,6 @@ class TestPricingRule(unittest.TestCase):
 			"transaction_type": "selling",
 			"customer": "_Test Customer",
 		})
-
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 

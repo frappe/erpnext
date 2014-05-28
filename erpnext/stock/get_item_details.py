@@ -268,6 +268,7 @@ def apply_pricing_rule(args):
 		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
 
 	pricing_rules = get_pricing_rules(args)
+
 	pricing_rule = filter_pricing_rules(args, pricing_rules)
 
 	if pricing_rule:
