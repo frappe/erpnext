@@ -1,1 +1,1 @@
-__version__ = '4.0.2'
+from erpnext.__version__ import __version__
