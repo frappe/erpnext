@@ -72,7 +72,7 @@ class TestPricingRule(unittest.TestCase):
 
 		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
 		from erpnext.stock.get_item_details import MultiplePricingRuleConflict
-		self.assertRaises (MultiplePricingRuleConflict, get_item_details, args)
+		self.assertRaises(MultiplePricingRuleConflict, get_item_details, args)
 
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)

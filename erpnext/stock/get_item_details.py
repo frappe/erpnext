@@ -260,11 +260,11 @@ def apply_pricing_rule(args):
 		args.item_group, args.brand = frappe.db.get_value("Item",
 			args.item_code, ["item_group", "brand"])
 
-	if not args.get("customer_group") or not args.get("territory"):
+	if args.get("customer") and (not args.get("customer_group") or not args.get("territory")):
 		args.customer_group, args.territory = frappe.db.get_value("Customer",
 			args.customer, ["customer_group", "territory"])
 
-	if not args.get("supplier_type"):
+	if args.get("supplier") and not args.get("supplier_type"):
 		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
 
 	pricing_rules = get_pricing_rules(args)
@@ -350,10 +350,12 @@ def filter_pricing_rules(args, pricing_rules):
 				if if_all_rules_same(pricing_rules, remaining_fields):
 					pricing_rules = apply_internal_priority(pricing_rules, field_set, args)
 					break
+
 	if len(pricing_rules) > 1:
 		price_or_discount = list(set([d.price_or_discount for d in pricing_rules]))
 		if len(price_or_discount) == 1 and price_or_discount[0] == "Discount Percentage":
-			pricing_rules = filter(lambda x: x.for_price_list==args.price_list, pricing_rules)
+			pricing_rules = filter(lambda x: x.for_price_list==args.price_list, pricing_rules) \
+				or pricing_rules
 
 	if len(pricing_rules) > 1:
 		frappe.throw(_("Multiple Price Rule exists with same criteria, please resolve \
