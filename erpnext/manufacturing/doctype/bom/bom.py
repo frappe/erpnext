@@ -54,7 +54,7 @@ class BOM(Document):
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, is_asset_item, is_purchase_item,
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
-			last_purchase_rate, standard_rate, is_manufactured_item
+			last_purchase_rate, is_manufactured_item
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
@@ -111,8 +111,6 @@ class BOM(Document):
 					frappe.throw(_("Please select Price List"))
 				rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
-			elif self.rm_cost_as_per == 'Standard Rate':
-				rate = arg['standard_rate']
 
 		return rate
 
