@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext.hr.doctype.employee.employee import EmployeeUserDisabledError
 
 def execute():
 	update_hr_permissions()
@@ -25,7 +26,10 @@ def update_hr_permissions():
 
 	# save employees to run on_update events
 	for employee in frappe.db.sql_list("""select name from `tabEmployee`"""):
-		frappe.get_doc("Employee", employee).save()
+		try:
+			frappe.get_doc("Employee", employee).save()
+		except EmployeeUserDisabledError:
+			pass
 
 def update_permissions():
 	# clear match conditions other than owner
