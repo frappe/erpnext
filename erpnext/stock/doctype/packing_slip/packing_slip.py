@@ -141,7 +141,7 @@ class PackingSlip(Document):
 			note
 		"""
 		recommended_case_no = frappe.db.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
-			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.as_dict())
+			WHERE delivery_note = %s AND docstatus=1""", self.delivery_note)
 
 		return cint(recommended_case_no[0][0]) + 1
 
