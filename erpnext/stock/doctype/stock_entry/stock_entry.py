@@ -365,17 +365,18 @@ class StockEntry(StockController):
 		ret.update(stock_and_rate)
 		return ret
 
-	def get_uom_details(self, arg = ''):
-		arg, ret = eval(arg), {}
-		uom = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail`
-			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
-		if not uom or not flt(uom[0].conversion_factor):
-			frappe.msgprint(_("UOM coversion factor required for UOM {0} in Item {1}").format(arg["uom"], arg["item_code"]))
+	def get_uom_details(self, args):
+		conversion_factor = frappe.db.get_value("UOM Conversion Detail", {"parent": args.get("item_code"),
+			"uom": args.get("uom")}, "conversion_factor")
+
+		if not conversion_factor:
+			frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")
+				.format(args.get("uom"), args.get("item_code")))
 			ret = {'uom' : ''}
 		else:
 			ret = {
-				'conversion_factor'		: flt(uom[0]['conversion_factor']),
-				'transfer_qty'			: flt(arg['qty']) * flt(uom[0]['conversion_factor']),
+				'conversion_factor'		: flt(conversion_factor),
+				'transfer_qty'			: flt(args.get("qty")) * flt(conversion_factor)
 			}
 		return ret
 
