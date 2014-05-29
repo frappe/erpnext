@@ -134,13 +134,13 @@ class BOM(Document):
 	def get_valuation_rate(self, args):
 		""" Get weighted average of valuation rate from all warehouses """
 
-		total_qty, total_value = 0, 0
+		total_qty, total_value = 0.0, 0.0
 		for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
 			where item_code=%s and actual_qty > 0""", args['item_code'], as_dict=1):
 				total_qty += flt(d.actual_qty)
 				total_value += flt(d.stock_value)
 
-		return total_value / total_qty
+		return total_value / total_qty if total_qty else 0.0
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default,
