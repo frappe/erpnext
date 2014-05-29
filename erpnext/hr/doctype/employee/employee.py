@@ -11,6 +11,8 @@ import frappe.permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
+class EmployeeUserDisabledError(frappe.ValidationError): pass
+
 class Employee(Document):
 	def onload(self):
 		self.get("__onload").salary_structure_exists = frappe.db.get_value("Salary Structure",
@@ -133,7 +135,7 @@ class Employee(Document):
 		enabled = frappe.db.sql("""select name from `tabUser` where
 			name=%s and enabled=1""", self.user_id)
 		if not enabled:
-			throw(_("User {0} is disabled").format(self.user_id))
+			throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
 
 	def validate_duplicate_user_id(self):
 		employee = frappe.db.sql_list("""select name from `tabEmployee` where
