@@ -11,8 +11,11 @@ from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 
 class StockReconciliation(StockController):
-	def validate(self):
+	def __init__(self, arg1, arg2=None):
+		super(StockReconciliation, self).__init__(arg1, arg2)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
+
+	def validate(self):
 		self.entries = []
 
 		self.validate_data()
@@ -300,4 +303,5 @@ class StockReconciliation(StockController):
 @frappe.whitelist()
 def upload():
 	from frappe.utils.datautils import read_csv_content_from_uploaded_file
-	return read_csv_content_from_uploaded_file()
+	csv_content = read_csv_content_from_uploaded_file()
+	return filter(lambda x: x and any(x), csv_content)
