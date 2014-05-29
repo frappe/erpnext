@@ -4,11 +4,11 @@
 // On REFRESH
 cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
-	
+
 	if (!doc.__islocal && doc.docstatus<2) {
 		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost);
 	}
-	
+
 	cur_frm.cscript.with_operations(doc);
 	set_operation_no(doc);
 }
@@ -41,14 +41,14 @@ var set_operation_no = function(doc) {
 		var op = op_table[i].operation_no;
 		if (op && !inList(operations, op)) operations.push(op);
 	}
-		
-	frappe.meta.get_docfield("BOM Item", "operation_no", 
+
+	frappe.meta.get_docfield("BOM Item", "operation_no",
 		cur_frm.docname).options = operations.join("\n");
-	
+
 	$.each(doc.bom_materials || [], function(i, v) {
 		if(!inList(operations, cstr(v.operation_no))) v.operation_no = null;
 	});
-	
+
 	refresh_field("bom_materials");
 }
 
@@ -97,7 +97,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 			doc: cur_frm.doc,
 			method: "get_bom_material_detail",
 			args: {
-				'item_code': d.item_code, 
+				'item_code': d.item_code,
 				'bom_no': d.bom_no != null ? d.bom_no: '',
 				'qty': d.qty
 			},
@@ -131,7 +131,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	}
 }
 
-var calculate_op_cost = function(doc) {	
+var calculate_op_cost = function(doc) {
 	var op = doc.bom_operations || [];
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
@@ -143,13 +143,13 @@ var calculate_op_cost = function(doc) {
 	refresh_field('operating_cost');
 }
 
-var calculate_rm_cost = function(doc) {	
+var calculate_rm_cost = function(doc) {
 	var rm = doc.bom_materials || [];
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
 		amt =	flt(rm[i].rate) * flt(rm[i].qty);
 		set_multiple('BOM Item',rm[i].name, {'amount': amt}, 'bom_materials');
-		set_multiple('BOM Item',rm[i].name, 
+		set_multiple('BOM Item',rm[i].name,
 			{'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'bom_materials');
 		total_rm_cost += amt;
 	}
@@ -196,7 +196,7 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = functi
 			'is_active': 1,
 			'docstatus': 1
 		}
-	}	
+	}
 }
 
 cur_frm.cscript.validate = function(doc, dt, dn) {

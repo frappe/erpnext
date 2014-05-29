@@ -175,6 +175,9 @@ class StockEntry(StockController):
 
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
+
+		raw_material_cost = 0.0
+
 		for d in self.get('mtn_details'):
 			args = frappe._dict({
 				"item_code": d.item_code,
@@ -182,17 +185,27 @@ class StockEntry(StockController):
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
-				"serial_no": d.serial_no,
-				"bom_no": d.bom_no,
+				"serial_no": d.serial_no
 			})
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 
 			# get incoming rate
-			if not flt(d.incoming_rate):
-				d.incoming_rate = self.get_incoming_rate(args)
+			if not d.bom_no:
+				if not flt(d.incoming_rate):
+					d.incoming_rate = self.get_incoming_rate(args)
 
-			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+				raw_material_cost += flt(d.amount)
+
+		# set incoming rate for fg item
+		if self.production_order and self.purpose == "Manufacture/Repack":
+			for d in self.get("mtn_details"):
+				if d.bom_no:
+					bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
+					operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+					d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
+					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0

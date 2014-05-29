@@ -68,10 +68,6 @@ def get_incoming_rate(args):
 	in_rate = 0
 	if args.get("serial_no"):
 		in_rate = get_avg_purchase_rate(args.get("serial_no"))
-	elif args.get("bom_no"):
-		result = frappe.db.sql("""select ifnull(total_cost, 0) / ifnull(quantity, 1)
-			from `tabBOM` where name = %s and docstatus=1 and is_active=1""", args.get("bom_no"))
-		in_rate = result and flt(result[0][0]) or 0
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
