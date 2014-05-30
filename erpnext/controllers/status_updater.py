@@ -156,8 +156,8 @@ class StatusUpdater(Document):
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			msgprint(_("Allowance for over-delivery / over-billing crossed for Item {0}").format(item["item_code"]))
-			throw(_("{0} must be less than or equal to {1}").format(_(item["target_ref_field"]), item[args["max_allowed"]]))
+			msgprint(_("Allowance for over-delivery / over-billing crossed for Item {0}.").format(item["item_code"]))
+			throw(_("{0} must be less than or equal to {1}").format(item["target_ref_field"].title(), item["max_allowed"]))
 
 	def update_qty(self, change_modified=True):
 		"""

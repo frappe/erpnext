@@ -415,7 +415,7 @@ class AccountsController(TransactionBase):
 
 					if total_billed_amt - max_allowed_amt > 0.01:
 						reduce_by = total_billed_amt - max_allowed_amt
-						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'").format(item.item_code, item.idx, max_allowed_amt))
+						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
