@@ -33,8 +33,8 @@ class SalarySlip(TransactionBase):
 		return struct and struct[0][0] or ''
 
 	def pull_sal_struct(self, struct):
-		from erpnext.hr.doctype.salary_structure.salary_structure import get_mapped_doc
-		self.update(get_mapped_doc(struct, self))
+		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
+		self.update(make_salary_slip(struct, self).as_dict())
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee,
