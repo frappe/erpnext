@@ -9,7 +9,7 @@ from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
-
+from erpnext.hr.utils import set_employee_name
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -145,6 +145,8 @@ class SalarySlip(TransactionBase):
 
 		company_currency = get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
+
+		set_employee_name(self)
 
 	def calculate_earning_total(self):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)

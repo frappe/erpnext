@@ -9,6 +9,7 @@ from frappe.model.naming import make_autoname
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
+from erpnext.hr.utils import set_employee_name
 
 class SalaryStructure(Document):
 	def autoname(self):
@@ -63,6 +64,7 @@ class SalaryStructure(Document):
 	def validate(self):
 		self.check_existing()
 		self.validate_amount()
+		set_employee_name(self)
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
