@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import getdate, validate_email_add, cint
 from frappe.model.naming import make_autoname
-from frappe import throw, _
+from frappe import throw, _, msgprint
 import frappe.permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -144,12 +144,12 @@ class Employee(Document):
 			throw(_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]))
 
 	def validate_employee_leave_approver(self):
-		from frappe.utils.user import User
 		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 
-		for l in self.get("employee_leave_approvers"):
-			if "Leave Approver" not in User(l.leave_approver).get_roles():
-				throw(_("{0} is not a valid Leave Approver").format(l.leave_approver), InvalidLeaveApproverError)
+		for l in self.get("employee_leave_approvers")[:]:
+			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
+				self.get("employee_leave_approvers").remove(l)
+				msgprint(_("{0} is not a valid Leave Approver. Removing row #{1}.").format(l.leave_approver, l.idx))
 
 	def update_dob_event(self):
 		if self.status == "Active" and self.date_of_birth \

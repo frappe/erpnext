@@ -9,7 +9,10 @@ def execute():
 	for user in frappe.db.sql_list("select distinct parent from `tabUserRole` where role='Employee'"):
 		# if employee record does not exists, remove employee role!
 		if not frappe.db.get_value("Employee", {"user_id": user}):
-			user = frappe.get_doc("User", user)
-			for role in user.get("user_roles", {"role": "Employee"}):
-				user.get("user_roles").remove(role)
-			user.save()
+			try:
+				user = frappe.get_doc("User", user)
+				for role in user.get("user_roles", {"role": "Employee"}):
+					user.get("user_roles").remove(role)
+				user.save()
+			except frappe.DoesNotExistError:
+				pass
