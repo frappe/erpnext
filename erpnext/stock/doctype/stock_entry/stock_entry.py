@@ -181,8 +181,7 @@ class StockEntry(StockController):
 					valuation_at_target += flt(d.amount)
 
 			if valuation_at_target < valuation_at_source:
-				frappe.throw(_("Total valuation for manufactured or repacked item(s) can not be less than \
-					total valuation of raw materials"))
+				frappe.throw(_("Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials"))
 
 	def set_total_amount(self):
 		self.total_amount = sum([flt(item.amount) for item in self.get("mtn_details")])

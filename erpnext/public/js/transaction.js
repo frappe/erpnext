@@ -367,8 +367,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 
 
-		if(item) _apply_pricing_rule(item);
-		else {
+		if(item) {
+			_apply_pricing_rule(item);
+		} else {
 			$.each(this.get_item_doclist(), function(n, item) {
 				_apply_pricing_rule(item);
 			});
