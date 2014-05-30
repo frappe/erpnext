@@ -1,6 +1,6 @@
 {
  "autoname": "GRND/.#######", 
- "creation": "2013-05-24 19:29:10.000000", 
+ "creation": "2013-05-24 19:29:10", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -256,17 +256,9 @@
    "width": "100px"
   }, 
   {
-   "fieldname": "pricing_rule_for_price", 
+   "fieldname": "pricing_rule", 
    "fieldtype": "Link", 
-   "label": "Pricing Rule For Price", 
-   "options": "Pricing Rule", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "pricing_rule_for_discount", 
-   "fieldtype": "Link", 
-   "label": "Pricing Rule For Discount", 
+   "label": "Pricing Rule", 
    "options": "Pricing Rule", 
    "permlevel": 0, 
    "read_only": 1
@@ -553,9 +545,12 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:27:09.000000", 
+ "modified": "2014-05-28 12:43:16.669040", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

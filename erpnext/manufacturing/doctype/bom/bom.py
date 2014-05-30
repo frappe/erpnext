@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, cstr, flt, now, nowdate
+from frappe.utils import cint, cstr, flt
 
 from frappe import _
 from frappe.model.document import Document
@@ -54,7 +54,7 @@ class BOM(Document):
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, is_asset_item, is_purchase_item,
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
-			last_purchase_rate, standard_rate, is_manufactured_item
+			last_purchase_rate, is_manufactured_item
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
@@ -111,8 +111,6 @@ class BOM(Document):
 					frappe.throw(_("Please select Price List"))
 				rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
-			elif self.rm_cost_as_per == 'Standard Rate':
-				rate = arg['standard_rate']
 
 		return rate
 
@@ -134,26 +132,15 @@ class BOM(Document):
 		return bom and bom[0]['unit_cost'] or 0
 
 	def get_valuation_rate(self, args):
-		""" Get average valuation rate of relevant warehouses
-			as per valuation method (MAR/FIFO)
-			as on costing date
-		"""
-		from erpnext.stock.utils import get_incoming_rate
-		posting_date, posting_time = nowdate(), now().split()[1]
-		warehouse = frappe.db.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
-		rate = []
-		for wh in warehouse:
-			r = get_incoming_rate({
-				"item_code": args.get("item_code"),
-				"warehouse": wh[0],
-				"posting_date": posting_date,
-				"posting_time": posting_time,
-				"qty": args.get("qty") or 0
-			})
-			if r:
-				rate.append(r)
+		""" Get weighted average of valuation rate from all warehouses """
 
-		return rate and flt(sum(rate))/len(rate) or 0
+		total_qty, total_value = 0.0, 0.0
+		for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
+			where item_code=%s and actual_qty > 0""", args['item_code'], as_dict=1):
+				total_qty += flt(d.actual_qty)
+				total_value += flt(d.stock_value)
+
+		return total_value / total_qty if total_qty else 0.0
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default,

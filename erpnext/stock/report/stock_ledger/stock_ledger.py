@@ -17,23 +17,25 @@ def execute(filters=None):
 			% ("/".join(["#Form", sle.voucher_type, sle.voucher_no]),)
 
 		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
-			item_detail.brand, item_detail.description, sle.warehouse, item_detail.stock_uom,
-			sle.actual_qty, sle.qty_after_transaction, sle.valuation_rate, sle.stock_value,
-			sle.voucher_type, sle.voucher_no, voucher_link_icon, sle.batch_no, sle.serial_no, sle.company])
+			item_detail.brand, item_detail.description, sle.warehouse,
+			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
+			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
+			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
+			voucher_link_icon, sle.batch_no, sle.serial_no, sle.company])
 
 	return columns, data
 
 def get_columns():
-	return ["Date:Datetime:95", "Item:Link/Item:130", "Item Name::100",
-		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100",
-		"Description::200", "Warehouse:Link/Warehouse:100",
-		"Stock UOM:Link/UOM:100", "Qty:Float:50", "Balance Qty:Float:100", "Valuation Rate:Currency:110",
-		"Balance Value:Currency:110", "Voucher Type::110", "Voucher #::100", "Link::30",
-		"Batch:Link/Batch:100", "Serial #:Link/Serial No:100", "Company:Link/Company:100"]
+	return ["Date:Datetime:95", "Item:Link/Item:130", "Item Name::100", "Item Group:Link/Item Group:100",
+		"Brand:Link/Brand:100", "Description::200", "Warehouse:Link/Warehouse:100",
+		"Stock UOM:Link/UOM:100", "Qty:Float:50", "Balance Qty:Float:100",
+		"Incoming Rate:Currency:110", "Valuation Rate:Currency:110", "Balance Value:Currency:110",
+		"Voucher Type::110", "Voucher #::100", "Link::30", "Batch:Link/Batch:100",
+		"Serial #:Link/Serial No:100", "Company:Link/Company:100"]
 
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
-			item_code, warehouse, actual_qty, qty_after_transaction, valuation_rate,
+			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company
 		from `tabStock Ledger Entry`
 		where company = %(company)s and

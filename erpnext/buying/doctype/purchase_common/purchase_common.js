@@ -62,7 +62,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	supplier: function() {
-		erpnext.utils.get_party_details(this.frm);
+		var me = this;
+		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
 	},
 
 	supplier_address: function() {

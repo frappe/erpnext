@@ -23,7 +23,7 @@ frappe.query_reports["Bank Clearance Summary"] = {
 			"options": "Account",
 			"get_query": function() {
 				return {
-					"query": "erpnext.accounts.utils.get_account_list", 
+					"query": "erpnext.controllers.queries.get_account_list", 
 					"filters": [
 						['Account', 'account_type', 'in', 'Bank, Cash'],
 						['Account', 'group_or_ledger', '=', 'Ledger'],

@@ -18,14 +18,14 @@ data_map = {
 
 	# Accounts
 	"Account": {
-		"columns": ["name", "parent_account", "lft", "rgt", "report_type", 
+		"columns": ["name", "parent_account", "lft", "rgt", "report_type",
 			"company", "group_or_ledger"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "lft",
 		"links": {
 			"company": ["Company", "name"],
 		}
-		
+
 	},
 	"Cost Center": {
 		"columns": ["name", "lft", "rgt"],
@@ -33,7 +33,7 @@ data_map = {
 		"order_by": "lft"
 	},
 	"GL Entry": {
-		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit", 
+		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit",
 			"is_opening", "company", "voucher_type", "voucher_no", "remarks"],
 		"order_by": "posting_date, account",
 		"links": {
@@ -45,8 +45,8 @@ data_map = {
 
 	# Stock
 	"Item": {
-		"columns": ["name", "if(item_name=name, '', item_name) as item_name", "description", 
-			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method", 
+		"columns": ["name", "if(item_name=name, '', item_name) as item_name", "description",
+			"item_group as parent_item_group", "stock_uom", "brand", "valuation_method",
 			"re_order_level", "re_order_qty"],
 		# "conditions": ["docstatus < 2"],
 		"order_by": "name",
@@ -76,7 +76,7 @@ data_map = {
 		"order_by": "name"
 	},
 	"Stock Ledger Entry": {
-		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse", 
+		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse",
 			"actual_qty as qty", "voucher_type", "voucher_no", "project",
 			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no"],
 		"order_by": "posting_date, posting_time, name",
@@ -98,8 +98,8 @@ data_map = {
 		"order_by": "posting_date, posting_time, name",
 	},
 	"Production Order": {
-		"columns": ["name", "production_item as item_code", 
-			"(ifnull(qty, 0) - ifnull(produced_qty, 0)) as qty", 
+		"columns": ["name", "production_item as item_code",
+			"(ifnull(qty, 0) - ifnull(produced_qty, 0)) as qty",
 			"fg_warehouse as warehouse"],
 		"conditions": ["docstatus=1", "status != 'Stopped'", "ifnull(fg_warehouse, '')!=''",
 			"ifnull(qty, 0) > ifnull(produced_qty, 0)"],
@@ -109,7 +109,7 @@ data_map = {
 		},
 	},
 	"Material Request Item": {
-		"columns": ["item.name as name", "item_code", "warehouse", 
+		"columns": ["item.name as name", "item_code", "warehouse",
 			"(ifnull(qty, 0) - ifnull(ordered_qty, 0)) as qty"],
 		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
@@ -120,21 +120,21 @@ data_map = {
 		},
 	},
 	"Purchase Order Item": {
-		"columns": ["item.name as name", "item_code", "warehouse", 
+		"columns": ["item.name as name", "item_code", "warehouse",
 			"(ifnull(qty, 0) - ifnull(received_qty, 0)) as qty"],
 		"from": "`tabPurchase Order Item` item, `tabPurchase Order` main",
-		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
+		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
 			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(received_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
 		},
 	},
-	
+
 	"Sales Order Item": {
 		"columns": ["item.name as name", "item_code", "(ifnull(qty, 0) - ifnull(delivered_qty, 0)) as qty", "warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
-		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'", 
+		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
 			"ifnull(warehouse, '')!=''", "ifnull(qty, 0) > ifnull(delivered_qty, 0)"],
 		"links": {
 			"item_code": ["Item", "name"],
@@ -144,7 +144,7 @@ data_map = {
 
 	# Sales
 	"Customer": {
-		"columns": ["name", "if(customer_name=name, '', customer_name) as customer_name", 
+		"columns": ["name", "if(customer_name=name, '', customer_name) as customer_name",
 			"customer_group as parent_customer_group", "territory as parent_territory"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name",
@@ -218,7 +218,7 @@ data_map = {
 		}
 	},
 	"Supplier": {
-		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name", 
+		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name",
 			"supplier_type as parent_supplier_type"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name",
@@ -291,5 +291,5 @@ data_map = {
 		"conditions": ["docstatus < 2"],
 		"order_by": "creation"
 	}
-	
+
 }

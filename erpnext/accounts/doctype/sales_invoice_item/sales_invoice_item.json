@@ -1,6 +1,6 @@
 {
  "autoname": "INVD.######", 
- "creation": "2013-06-04 11:02:19.000000", 
+ "creation": "2013-06-04 11:02:19", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -201,17 +201,9 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "pricing_rule_for_price", 
+   "fieldname": "pricing_rule", 
    "fieldtype": "Link", 
-   "label": "Pricing Rule For Price", 
-   "options": "Pricing Rule", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "pricing_rule_for_discount", 
-   "fieldtype": "Link", 
-   "label": "Pricing Rule For Discount", 
+   "label": "Pricing Rule", 
    "options": "Pricing Rule", 
    "permlevel": 0, 
    "read_only": 1
@@ -456,9 +448,12 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:04:19.000000", 
+ "modified": "2014-05-28 12:42:28.209942", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

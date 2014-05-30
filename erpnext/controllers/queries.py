@@ -234,3 +234,15 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				'posting_date': filters['posting_date'], 'txt': "%%%s%%" % txt,
 				'mcond':get_match_cond(doctype),'start': start,
 				'page_len': page_len})
+
+def get_account_list(doctype, txt, searchfield, start, page_len, filters):
+	if isinstance(filters, dict):
+		if not filters.get("group_or_ledger"):
+			filters["group_or_ledger"] = "Ledger"
+	elif isinstance(filters, list):
+		if "group_or_ledger" not in [d[0] for d in filters]:
+			filters.append(["Account", "group_or_ledger", "=", "Ledger"])
+
+	return frappe.widgets.reportview.execute("Account", filters = filters,
+		fields = ["name", "parent_account"],
+		limit_start=start, limit_page_length=page_len, as_list=True)

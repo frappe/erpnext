@@ -20,6 +20,7 @@ class TestPricingRule(unittest.TestCase):
 			"price_or_discount": "Discount Percentage",
 			"price": 0,
 			"discount_percentage": 10,
+			"company": "_Test Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
@@ -36,7 +37,6 @@ class TestPricingRule(unittest.TestCase):
 			"transaction_type": "selling",
 			"customer": "_Test Customer",
 		})
-
 		details = get_item_details(args)
 		self.assertEquals(details.get("discount_percentage"), 10)
 
@@ -72,7 +72,7 @@ class TestPricingRule(unittest.TestCase):
 
 		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
 		from erpnext.stock.get_item_details import MultiplePricingRuleConflict
-		self.assertRaises (MultiplePricingRuleConflict, get_item_details, args)
+		self.assertRaises(MultiplePricingRuleConflict, get_item_details, args)
 
 		args.item_code = "_Test Item 2"
 		details = get_item_details(args)

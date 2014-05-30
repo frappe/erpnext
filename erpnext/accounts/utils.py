@@ -7,8 +7,7 @@ import frappe
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
 from frappe import throw, _
 from frappe.utils import formatdate
-from erpnext.utilities import build_filter_conditions
-
+import frappe.widgets.reportview
 
 class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass
@@ -195,28 +194,6 @@ def update_against_doc(d, jv_obj):
 	# will work as update after submit
 	jv_obj.ignore_validate_update_after_submit = True
 	jv_obj.save()
-
-def get_account_list(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("group_or_ledger"):
-		filters["group_or_ledger"] = "Ledger"
-
-	conditions, filter_values = build_filter_conditions(filters)
-
-	return frappe.db.sql("""select name, parent_account from `tabAccount`
-		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" %
-		(conditions, searchfield, "%s", "%s", "%s"),
-		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
-
-def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("group_or_ledger"):
-		filters["group_or_ledger"] = "Ledger"
-
-	conditions, filter_values = build_filter_conditions(filters)
-
-	return frappe.db.sql("""select name, parent_cost_center from `tabCost Center`
-		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" %
-		(conditions, searchfield, "%s", "%s", "%s"),
-		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
 
 def remove_against_link_from_jv(ref_type, ref_no, against_field):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Voucher Detail`

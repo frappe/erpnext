@@ -41,6 +41,7 @@ class StockEntry(StockController):
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		self.validate_fiscal_year()
+		self.validate_valuation_rate()
 		self.set_total_amount()
 
 	def on_submit(self):
@@ -170,11 +171,26 @@ class StockEntry(StockController):
 				frappe.throw(_("Stock Entries already created for Production Order ")
 					+ self.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
 
+	def validate_valuation_rate(self):
+		if self.purpose == "Manufacture/Repack":
+			valuation_at_source, valuation_at_target = 0, 0
+			for d in self.get("mtn_details"):
+				if d.s_warehouse and not d.t_warehouse:
+					valuation_at_source += flt(d.amount)
+				if d.t_warehouse and not d.s_warehouse:
+					valuation_at_target += flt(d.amount)
+
+			if valuation_at_target < valuation_at_source:
+				frappe.throw(_("Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials"))
+
 	def set_total_amount(self):
 		self.total_amount = sum([flt(item.amount) for item in self.get("mtn_details")])
 
 	def get_stock_and_rate(self):
 		"""get stock and incoming rate on posting date"""
+
+		raw_material_cost = 0.0
+
 		for d in self.get('mtn_details'):
 			args = frappe._dict({
 				"item_code": d.item_code,
@@ -182,17 +198,28 @@ class StockEntry(StockController):
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
-				"serial_no": d.serial_no,
-				"bom_no": d.bom_no,
+				"serial_no": d.serial_no
 			})
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 
 			# get incoming rate
-			if not flt(d.incoming_rate):
-				d.incoming_rate = self.get_incoming_rate(args)
+			if not d.bom_no:
+				if not flt(d.incoming_rate):
+					d.incoming_rate = self.get_incoming_rate(args)
 
-			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+				raw_material_cost += flt(d.amount)
+
+		# set incoming rate for fg item
+		if self.production_order and self.purpose == "Manufacture/Repack":
+			for d in self.get("mtn_details"):
+				if d.bom_no:
+					if not flt(d.incoming_rate):
+						bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
+						operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+						d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
+					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
@@ -365,17 +392,18 @@ class StockEntry(StockController):
 		ret.update(stock_and_rate)
 		return ret
 
-	def get_uom_details(self, arg = ''):
-		arg, ret = eval(arg), {}
-		uom = frappe.db.sql("""select conversion_factor from `tabUOM Conversion Detail`
-			where parent = %s and uom = %s""", (arg['item_code'], arg['uom']), as_dict = 1)
-		if not uom or not flt(uom[0].conversion_factor):
-			frappe.msgprint(_("UOM coversion factor required for UOM {0} in Item {1}").format(arg["uom"], arg["item_code"]))
+	def get_uom_details(self, args):
+		conversion_factor = frappe.db.get_value("UOM Conversion Detail", {"parent": args.get("item_code"),
+			"uom": args.get("uom")}, "conversion_factor")
+
+		if not conversion_factor:
+			frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")
+				.format(args.get("uom"), args.get("item_code")))
 			ret = {'uom' : ''}
 		else:
 			ret = {
-				'conversion_factor'		: flt(uom[0]['conversion_factor']),
-				'transfer_qty'			: flt(arg['qty']) * flt(uom[0]['conversion_factor']),
+				'conversion_factor'		: flt(conversion_factor),
+				'transfer_qty'			: flt(args.get("qty")) * flt(conversion_factor)
 			}
 		return ret
 

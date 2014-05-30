@@ -155,8 +155,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	customer: function() {
-		if(this.frm.updating_party_details)
-			return;
+		var me = this;
+		if(this.frm.updating_party_details) return;
+
 		erpnext.utils.get_party_details(this.frm,
 			"erpnext.accounts.party.get_party_details", {
 				posting_date: this.frm.doc.posting_date,
@@ -164,7 +165,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				party_type: "Customer",
 				account: this.frm.doc.debit_to,
 				price_list: this.frm.doc.selling_price_list,
-			})
+			}, function() {
+			me.apply_pricing_rule();
+		})
 	},
 
 	debit_to: function() {
