@@ -9,12 +9,14 @@ from frappe.utils import flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
+from erpnext.hr.utils import set_employee_name
 
 class Appraisal(Document):
 	def validate(self):
 		if not self.status:
 			self.status = "Draft"
 
+		set_employee_name(self)
 		self.validate_dates()
 		self.validate_existing_appraisal()
 		self.calculate_total()

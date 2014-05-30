@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, \
 	comma_or, get_fullname
 from frappe import msgprint
+from erpnext.hr.utils import set_employee_name
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -21,6 +22,8 @@ class LeaveApplication(Document):
 			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
 		else:
 			self.previous_doc = None
+
+		set_employee_name(self)
 
 		self.validate_to_date()
 		self.validate_balance_leaves()
