@@ -289,8 +289,8 @@ class DocType(StockController):
 						raise_exception=webnotes.DoesNotExistError)
 
 				# validate quantity <= ref item's qty - qty already returned
-				ref_item = ref.doclist.getone({"item_code": item.item_code})
-				returnable_qty = ref_item.qty - flt(already_returned_item_qty.get(item.item_code))
+				ref_item_qty = sum([flt(d.qty) for d in ref.doclist.get({"item_code": item.item_code})])
+				returnable_qty = ref_item_qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
 					webnotes.throw("{item}: {item_code} {returned}".format(
 						item=_("Item"), item_code=item.item_code,
