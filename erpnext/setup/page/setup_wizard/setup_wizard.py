@@ -176,6 +176,7 @@ def set_defaults(args):
 		"float_precision": 3,
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
 		'number_format': get_country_info(args.get("country")).get("number_format", "#,###.##"),
+		'enable_scheduler': 1
 	})
 
 	system_settings.save()
