@@ -45,6 +45,7 @@ class PurchaseOrder(BuyingController):
 
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
+		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("po_raw_material_details")
 
 	def validate_with_previous_doc(self):
@@ -60,6 +61,13 @@ class PurchaseOrder(BuyingController):
 				"is_child_table": True
 			}
 		})
+
+	def validate_minimum_order_qty(self):
+		itemwise_min_order_qty = frappe._dict(frappe.db.sql("select name, min_order_qty from tabItem"))
+
+		for d in self.get("po_details"):
+			if flt(d.qty) < flt(itemwise_min_order_qty.get(d.item_code)):
+				frappe.throw(_("Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(d.idx))
 
 	def get_schedule_dates(self):
 		for d in self.get('po_details'):
