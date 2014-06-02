@@ -111,7 +111,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.uom) {
 			return this.frm.call({
-				method: "erpnext.buying.utils.get_conversion_factor",
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
 				child: item,
 				args: {
 					item_code: item.item_code,
@@ -144,7 +144,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.buying.utils.get_projected_qty",
+				method: "erpnext.stock.get_item_details.get_projected_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,

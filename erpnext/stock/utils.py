@@ -175,6 +175,11 @@ def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
+
+	# if initial setup not completed, return
+	if not frappe.db.sql("select name from `tabFiscal Year` limit 1"):
+		return
+
 	if getattr(frappe.local, "auto_indent", None) is None:
 		frappe.local.auto_indent = cint(frappe.db.get_value('Stock Settings', None, 'auto_indent'))
 
