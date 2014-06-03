@@ -1,10 +1,11 @@
 {
+ "apply_user_permissions": 1, 
  "creation": "2013-02-22 18:01:55", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:56.124684", 
+ "modified": "2014-06-03 07:18:17.202885", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Ordered Items To Be Delivered", 

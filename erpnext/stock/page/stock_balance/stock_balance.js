@@ -57,21 +57,21 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 	},
 
 	filters: [
-		{fieldtype:"Select", label: __("Brand"), link:"Brand",
-			default_value: "Select Brand...", filter: function(val, item, opts) {
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", fieldname: "brand",
+			default_value: __("Select Brand..."), filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse",
-			default_value: "Select Warehouse...", filter: function(val, item, opts, me) {
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
+			default_value: __("Select Warehouse..."), filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: __("Project"), link:"Project",
-			default_value: "Select Project...", filter: function(val, item, opts, me) {
+		{fieldtype:"Select", label: __("Project"), link:"Project", fieldname: "project",
+			default_value: __("Select Project..."), filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}, link_formatter: {filter_input: "project"}},
-		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Label", label: __("To")},
-		{fieldtype:"Date", label: __("To Date")},
+		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],
