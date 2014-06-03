@@ -1,11 +1,12 @@
 {
+ "apply_user_permissions": 1, 
  "creation": "2013-05-06 18:43:53", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
  "json": "{\"filters\":[],\"columns\":[[\"name\",\"Employee\"],[\"employee_number\",\"Employee\"],[\"date_of_joining\",\"Employee\"],[\"branch\",\"Employee\"],[\"department\",\"Employee\"],[\"designation\",\"Employee\"],[\"gender\",\"Employee\"],[\"status\",\"Employee\"],[\"company\",\"Employee\"],[\"employment_type\",\"Employee\"],\"Employee\"],[\"reports_to\",\"Employee\"],[\"company_email\",\"Employee\"]],\"sort_by\":\"Employee.bank_ac_no\",\"sort_order\":\"desc\",\"sort_by_next\":\"\",\"sort_order_next\":\"desc\"}", 
- "modified": "2014-05-13 16:08:56.013856", 
+ "modified": "2014-06-03 07:18:17.059554", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Information", 

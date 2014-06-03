@@ -1,10 +1,11 @@
 {
+ "apply_user_permissions": 1, 
  "creation": "2013-07-30 18:35:10", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:56.176404", 
+ "modified": "2014-06-03 07:18:17.275594", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Received Items To Be Billed", 

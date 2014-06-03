@@ -1,10 +1,11 @@
 {
- "creation": "2013-06-18 12:56:36.000000", 
+ "apply_user_permissions": 1, 
+ "creation": "2013-06-18 12:56:36", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-03-07 15:30:27.000000", 
+ "modified": "2014-06-03 07:18:16.971175", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget Variance Report", 
