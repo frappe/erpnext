@@ -1,10 +1,11 @@
 {
+ "apply_user_permissions": 1, 
  "creation": "2012-10-04 18:45:27", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:56.003913", 
+ "modified": "2014-06-03 07:18:17.006732", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer Addresses And Contacts", 
