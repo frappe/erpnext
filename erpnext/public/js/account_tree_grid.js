@@ -55,18 +55,19 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 
 	},
 	filters: [
-		{fieldtype: "Select", label: __("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", label: __("Company"), link:"Company", fieldname: "company",
+			default_value: __("Select Company..."),
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype: "Select", label: __("Fiscal Year"), link:"Fiscal Year",
-			default_value: "Select Fiscal Year..."},
-		{fieldtype: "Date", label: __("From Date")},
+		{fieldtype: "Select", label: "Fiscal Year", link:"Fiscal Year", fieldname: "fiscal_year",
+			default_value: __("Select Fiscal Year...")},
+		{fieldtype: "Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype: "Label", label: __("To")},
-		{fieldtype: "Date", label: __("To Date")},
+		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype: "Button", label: __("Refresh"), icon:"icon-refresh icon-white",
 		 	cssClass:"btn-info"},
 		{fieldtype: "Button", label: __("Reset Filters"), icon: "icon-filter"},
@@ -83,7 +84,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 					me.filter_inputs.to_date.val(dateutil.str_to_user(v.year_end_date));
 				}
 			});
-			me.set_route();
+			me.refresh();
 		});
 		me.show_zero_check()
 		if(me.ignore_closing_entry) me.ignore_closing_entry();
