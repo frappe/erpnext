@@ -80,6 +80,7 @@
    "oldfieldtype": "Link", 
    "options": "Account", 
    "permlevel": 0, 
+   "reqd": 1, 
    "search_index": 1
   }, 
   {
@@ -209,7 +210,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-21 11:42:47.255511", 
+ "modified": "2014-06-03 18:27:58.109303", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
