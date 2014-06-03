@@ -17,8 +17,9 @@ frappe.pages['financial-analytics'].onload = function(wrapper) {
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [
 		{
-			fieldtype:"Select", label: __("PL or BS"),
-			options:["Profit and Loss", "Balance Sheet"],
+			fieldtype:"Select", label: __("PL or BS"), fieldname: "pl_or_bs",
+			options:[{"label": __("Profit and Loss"), "value": "Profit and Loss"},
+				{"label": __("Balance Sheet"), "value": "Balance Sheet"}],
 			filter: function(val, item, opts, me) {
 				if(item._show) return true;
 
@@ -31,19 +32,21 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 			}
 		},
 		{
-			fieldtype:"Select", label: __("Company"),
-			link:"Company", default_value: "Select Company...",
+			fieldtype:"Select", label: __("Company"), fieldname: "company",
+			link:"Company", default_value: __("Select Company..."),
 			filter: function(val, item, opts) {
 				return item.company == val || val == opts.default_value || item._show;
 			}
 		},
-		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year",
-			default_value: "Select Fiscal Year..."},
-		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", fieldname: "fiscal_year",
+			default_value: __("Select Fiscal Year...")},
+		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Label", label: __("To")},
-		{fieldtype:"Date", label: __("To Date")},
-		{fieldtype:"Select", label: __("Range"),
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
+		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
+		{fieldtype:"Select", label: __("Range"), fieldname: "range",
+			options:[{label: __("Daily"), value: "Daily"}, {label: __("Weekly"), value: "Weekly"},
+				{label: __("Monthly"), value: "Monthly"}, {label: __("Quarterly"), value: "Quarterly"},
+				{label: __("Yearly"), value: "Yearly"}]},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],

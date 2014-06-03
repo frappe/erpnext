@@ -3,7 +3,7 @@
 
 frappe.require("assets/erpnext/js/account_tree_grid.js");
 
-frappe.pages['trial-balance'].onload = function(wrapper) { 
+frappe.pages['trial-balance'].onload = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Trial Balance'),
@@ -13,26 +13,26 @@ frappe.pages['trial-balance'].onload = function(wrapper) {
 		init: function(wrapper, title) {
 			var me = this;
 			this._super(wrapper, title);
-			
+
 			// period closing entry checkbox
 			this.wrapper.bind("make", function() {
 				$('<div style="margin: 10px 0px; "\
-				 	class="with_period_closing_entry"><input type="checkbox" checked="checked">' + 
+				 	class="with_period_closing_entry"><input type="checkbox" checked="checked">' +
 						__("With period closing entry") + '</div>')
 					.appendTo(me.wrapper)
 					.find("input").click(function() { me.refresh(); });
 			});
 		},
-		
+
 		prepare_balances: function() {
 			// store value of with closing entry
 			this.with_period_closing_entry = this.wrapper
 				.find(".with_period_closing_entry input:checked").length;
 			this._super();
 		},
-		
+
 		update_balances: function(account, posting_date, v) {
-			// for period closing voucher, 
+			// for period closing voucher,
 			// only consider them when adding "With Closing Entry is checked"
 			if(v.voucher_type === "Period Closing Voucher") {
 				if(this.with_period_closing_entry) {
@@ -44,8 +44,8 @@ frappe.pages['trial-balance'].onload = function(wrapper) {
 		},
 	})
 	erpnext.trial_balance = new TrialBalance(wrapper, 'Trial Balance');
-	
+
 
 	wrapper.appframe.add_module_icon("Accounts")
-	
+
 }

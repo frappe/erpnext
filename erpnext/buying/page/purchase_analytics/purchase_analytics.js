@@ -86,21 +86,24 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: __("Tree Type"), options:["Supplier Type", "Supplier",
-			"Item Group", "Item"],
+		{fieldtype:"Select", label: __("Tree Type"), fieldname: "tree_type",
+			options:["Supplier Type", "Supplier", "Item Group", "Item"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: __("Based On"), options:["Purchase Invoice",
-			"Purchase Order", "Purchase Receipt"]},
-		{fieldtype:"Select", label: __("Value or Qty"), options:["Value", "Quantity"]},
-		{fieldtype:"Select", label: __("Company"), link:"Company",
-			default_value: "Select Company..."},
-		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Select", label: __("Based On"), fieldname: "based_on",
+			options:["Purchase Invoice", "Purchase Order", "Purchase Receipt"]},
+		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
+			options:["Value", "Quantity"]},
+		{fieldtype:"Select", label: __("Company"), link:"Company", fieldname: "company",
+			default_value: __("Select Company...")},
+		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Label", label: __("To")},
-		{fieldtype:"Date", label: __("To Date")},
-		{fieldtype:"Select", label: __("Range"),
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
+		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
+		{fieldtype:"Select", label: __("Range"), fieldname: "range",
+			options:[{label: __("Daily"), value: "Daily"}, {label: __("Weekly"), value: "Weekly"},
+				{label: __("Monthly"), value: "Monthly"}, {label: __("Quarterly"), value: "Quarterly"},
+				{label: __("Yearly"), value: "Yearly"}]},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
 		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],
@@ -126,7 +129,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			// Set parent supplier type for tree view
 
 			$.each(frappe.report_dump.data["Supplier Type"], function(i, v) {
-				v['parent_supplier_type'] = "All Supplier Types"
+				v['parent_supplier_type'] = __("All Supplier Types")
 			})
 
 			frappe.report_dump.data["Supplier Type"] = [{
@@ -136,7 +139,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 
 			frappe.report_dump.data["Supplier"].push({
 				name: __("Not Set"),
-				parent_supplier_type: "All Supplier Types",
+				parent_supplier_type: __("All Supplier Types"),
 				id: "Not Set",
 			});
 
@@ -219,7 +222,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		$.each(this.data, function(i, item) {
 			var parent = me.parent_map[item.name];
 			while(parent) {
-				parent_group = me.item_by_name[parent];
+				var parent_group = me.item_by_name[parent];
 
 				$.each(me.columns, function(c, col) {
 					if (col.formatter == me.currency_formatter) {
