@@ -1,11 +1,12 @@
 {
  "add_total_row": 1, 
+ "apply_user_permissions": 1, 
  "creation": "2013-05-28 15:54:16", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:56.166593", 
+ "modified": "2014-06-03 07:18:17.244501", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Order Items To Be Billed", 

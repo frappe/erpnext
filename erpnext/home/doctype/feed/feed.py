@@ -40,5 +40,5 @@ def get_permission_query_conditions():
 
 	return "(" + " or ".join(conditions) + ")"
 
-def has_permission(doc):
-	return frappe.has_permission(doc.doc_type, "read", doc.doc_name)
+def has_permission(doc, user):
+	return frappe.has_permission(doc.doc_type, "read", doc.doc_name, user=user)
