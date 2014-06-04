@@ -106,7 +106,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -562,7 +562,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:17:10.664189", 
+ "modified": "2014-05-27 03:49:20.226683", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
@@ -598,6 +598,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -612,6 +613,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -626,6 +628,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

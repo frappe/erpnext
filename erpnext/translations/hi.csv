@@ -800,7 +800,6 @@ Difference Account,अंतर खाता
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,मदों के लिए अलग UOM गलत ( कुल ) नेट वजन मूल्य को बढ़ावा मिलेगा. प्रत्येक आइटम का शुद्ध वजन ही UOM में है कि सुनिश्चित करें.
 Direct Expenses,प्रत्यक्ष खर्च
 Direct Income,प्रत्यक्ष आय
-Director,निर्देशक
 Disable,असमर्थ
 Disable Rounded Total,गोल कुल अक्षम
 Disabled,विकलांग
@@ -3058,7 +3057,6 @@ Warehouse,गोदाम
 Warehouse Contact Info,वेयरहाउस संपर्क जानकारी
 Warehouse Detail,वेअरहाउस विस्तार
 Warehouse Name,वेअरहाउस नाम
-Warehouse User,वेअरहाउस उपयोगकर्ता के
 Warehouse and Reference,गोदाम और संदर्भ
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,शेयर खाता प्रविष्टि इस गोदाम के लिए मौजूद वेयरहाउस हटाया नहीं जा सकता .
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,वेयरहाउस केवल स्टॉक एंट्री / डिलिवरी नोट / खरीद रसीद के माध्यम से बदला जा सकता है

@@ -176,6 +176,7 @@ def set_defaults(args):
 		"float_precision": 3,
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
 		'number_format': get_country_info(args.get("country")).get("number_format", "#,###.##"),
+		'enable_scheduler': 1
 	})
 
 	system_settings.save()
@@ -392,7 +393,7 @@ def create_logo(args):
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
 	for role in frappe.db.sql("""select name from tabRole"""):
-		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
+		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner", "Employee"]:
 			d = user.append("user_roles")
 			d.role = role[0]
 	user.save()

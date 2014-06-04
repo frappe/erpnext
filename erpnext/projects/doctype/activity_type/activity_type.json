@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:activity_type", 
- "creation": "2013-03-05 10:14:59.000000", 
+ "creation": "2013-03-05 10:14:59", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +9,7 @@
   {
    "fieldname": "activity_type", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Activity Type", 
    "permlevel": 0, 
    "reqd": 1
@@ -17,7 +18,7 @@
  "icon": "icon-flag", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2013-12-20 19:23:54.000000", 
+ "modified": "2014-05-27 03:49:07.219341", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Type", 
@@ -34,6 +35,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 

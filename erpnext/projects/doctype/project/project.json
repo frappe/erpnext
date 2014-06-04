@@ -258,7 +258,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-05-07 06:03:31.085767", 
+ "modified": "2014-05-27 03:49:15.252736", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
@@ -266,7 +266,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

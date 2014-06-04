@@ -1,10 +1,11 @@
 {
- "creation": "2013-06-05 11:00:31.000000", 
+ "apply_user_permissions": 1, 
+ "creation": "2013-06-05 11:00:31", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-03-07 15:30:28.000000", 
+ "modified": "2014-06-03 07:18:17.384923", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Warehouse-Wise Stock Balance", 

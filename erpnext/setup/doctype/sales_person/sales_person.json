@@ -2,7 +2,7 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:sales_person_name", 
- "creation": "2013-01-10 16:34:24.000000", 
+ "creation": "2013-01-10 16:34:24", 
  "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -19,6 +19,7 @@
    "fieldname": "sales_person_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Sales Person Name", 
    "oldfieldname": "sales_person_name", 
    "oldfieldtype": "Data", 
@@ -30,7 +31,8 @@
    "description": "Select company name first.", 
    "fieldname": "parent_sales_person", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
+   "in_list_view": 1, 
    "label": "Parent Sales Person", 
    "oldfieldname": "parent_sales_person", 
    "oldfieldtype": "Link", 
@@ -41,6 +43,7 @@
   {
    "fieldname": "is_group", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Has Child Node", 
    "oldfieldname": "is_group", 
    "oldfieldtype": "Select", 
@@ -140,7 +143,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-01-20 17:49:25.000000", 
+ "modified": "2014-05-27 03:49:18.900175", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Person", 
@@ -148,7 +151,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -162,7 +164,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -176,7 +178,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

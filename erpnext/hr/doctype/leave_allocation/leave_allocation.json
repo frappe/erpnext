@@ -123,7 +123,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
    "hidden": 0, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -136,7 +136,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:39.508488", 
+ "modified": "2014-05-27 03:49:12.744348", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Allocation", 
@@ -144,6 +144,7 @@
  "permissions": [
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -152,7 +153,6 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restricted": 1, 
    "role": "HR User", 
    "submit": 1, 
    "write": 1

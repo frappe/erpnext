@@ -1,10 +1,11 @@
 {
+ "apply_user_permissions": 1, 
  "creation": "2013-08-12 12:44:27", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:55.966140", 
+ "modified": "2014-06-03 07:18:16.977800", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Completed Production Orders", 

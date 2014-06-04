@@ -126,7 +126,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "options": "C-Form", 
@@ -139,13 +139,14 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-05-09 02:18:00.162685", 
+ "modified": "2014-05-27 03:49:08.272135", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 
  "owner": "Administrator", 
  "permissions": [
   {
+   "apply_user_permissions": 1, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 

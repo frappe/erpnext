@@ -1,9 +1,11 @@
 execute:import unidecode # new requirement
 
 erpnext.patches.v4_0.validate_v3_patch
+erpnext.patches.v4_0.fix_employee_user_id
+erpnext.patches.v4_0.remove_employee_role_if_no_employee
 erpnext.patches.v4_0.update_user_properties
+erpnext.patches.v4_0.apply_user_permissions
 erpnext.patches.v4_0.move_warehouse_user_to_restrictions
-erpnext.patches.v4_0.new_permissions
 erpnext.patches.v4_0.global_defaults_to_system_settings
 erpnext.patches.v4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
 execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2014-01-29
@@ -30,7 +32,6 @@ erpnext.patches.v4_0.customer_discount_to_pricing_rule
 execute:frappe.db.sql("""delete from `tabWebsite Item Group` where ifnull(item_group, '')=''""")
 erpnext.patches.v4_0.remove_module_home_pages
 erpnext.patches.v4_0.split_email_settings
-erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.import_country_codes
 erpnext.patches.v4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
@@ -39,7 +40,6 @@ execute:frappe.delete_doc("DocType", "Stock Ledger")
 execute:frappe.db.sql("update `tabJournal Voucher` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 execute:frappe.delete_doc("DocType", "Grade")
 erpnext.patches.v4_0.remove_india_specific_fields
-execute:frappe.delete_doc_if_exists("DocType", "Warehouse User")
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
 execute:import frappe.defaults;frappe.defaults.clear_default("price_list_currency")

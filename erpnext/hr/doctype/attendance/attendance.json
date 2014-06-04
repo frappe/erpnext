@@ -117,7 +117,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "options": "Attendance", 
@@ -129,7 +129,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:37.761770", 
+ "modified": "2014-05-27 03:49:07.580876", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Attendance", 
@@ -149,6 +149,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
+import frappe.permissions
 
 def execute():
-	from frappe.core.page.user_properties import user_properties
 	for warehouse, user in frappe.db.sql("""select parent, user from `tabWarehouse User`"""):
-		user_properties.add(user, "Warehouse", warehouse)
-	
-	frappe.delete_doc("DocType", "Warehouse User")
+		frappe.permissions.add_user_permission("Warehouse", warehouse, user)
+
+	frappe.delete_doc_if_exists("DocType", "Warehouse User")
 	frappe.reload_doc("stock", "doctype", "warehouse")

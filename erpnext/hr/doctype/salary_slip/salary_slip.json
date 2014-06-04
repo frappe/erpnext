@@ -182,7 +182,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
    "hidden": 0, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -325,7 +325,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:17:14.634335", 
+ "modified": "2014-05-27 03:49:17.213045", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -333,6 +333,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -359,9 +360,9 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
-   "restricted": 0, 
    "role": "Employee"
   }
  ], 

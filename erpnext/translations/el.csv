@@ -800,7 +800,6 @@ Difference Account,Ο λογαριασμός διαφορά
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Διαφορετικές UOM για τα στοιχεία θα οδηγήσουν σε λανθασμένη ( Σύνολο ) Καθαρή αξία βάρος . Βεβαιωθείτε ότι το Καθαρό βάρος κάθε στοιχείου είναι το ίδιο UOM .
 Direct Expenses,Άμεσες δαπάνες
 Direct Income,Άμεσα Έσοδα
-Director,διευθυντής
 Disable,Απενεργοποίηση
 Disable Rounded Total,Απενεργοποίηση Στρογγυλεμένες Σύνολο
 Disabled,Ανάπηρος
@@ -3058,7 +3057,6 @@ Warehouse,αποθήκη
 Warehouse Contact Info,Αποθήκη Επικοινωνία
 Warehouse Detail,Λεπτομέρεια αποθήκη
 Warehouse Name,Όνομα αποθήκη
-Warehouse User,Χρήστης αποθήκη
 Warehouse and Reference,Αποθήκη και αναφορά
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Αποθήκης δεν μπορεί να διαγραφεί , όπως υφίσταται είσοδο στα αποθέματα καθολικό για την αποθήκη αυτή ."
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Αποθήκη μπορεί να αλλάξει μόνο μέσω Stock εισόδου / Σημείωμα παράδοσης / απόδειξη αγοράς

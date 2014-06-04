@@ -5,11 +5,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.hr.utils import set_employee_name
 
 class ExpenseClaim(Document):
 	def validate(self):
 		self.validate_fiscal_year()
 		self.validate_exp_details()
+		set_employee_name(self)
 
 	def on_submit(self):
 		if self.approval_status=="Draft":

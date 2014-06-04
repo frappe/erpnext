@@ -426,7 +426,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -440,7 +440,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:47.686703", 
+ "modified": "2014-05-27 03:49:12.326026", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Voucher", 
@@ -448,6 +448,7 @@
  "permissions": [
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -476,6 +477,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

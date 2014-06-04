@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt
 from frappe import _
-
 from frappe.model.document import Document
+from erpnext.hr.utils import set_employee_name
 
 class LeaveAllocation(Document):
 	def validate(self):
@@ -14,6 +14,8 @@ class LeaveAllocation(Document):
 		self.check_existing_leave_allocation()
 		if not self.total_leaves_allocated:
 			self.total_leaves_allocated = self.new_leaves_allocated
+
+		set_employee_name(self)
 
 	def on_update_after_submit(self):
 		self.validate_new_leaves_allocated_value()

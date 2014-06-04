@@ -23,7 +23,7 @@
    "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
    "fieldname": "parent_territory", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "in_list_view": 1, 
    "label": "Parent Territory", 
    "oldfieldname": "parent_territory", 
@@ -95,7 +95,7 @@
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "old_parent", 
    "no_copy": 1, 
    "oldfieldname": "old_parent", 
@@ -136,7 +136,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-07 06:32:11.724588", 
+ "modified": "2014-05-27 03:49:20.981624", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Territory", 
@@ -145,7 +145,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -159,7 +158,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -173,7 +171,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -186,11 +184,13 @@
    "write": 0
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Material User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Maintenance User"

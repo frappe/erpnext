@@ -28,10 +28,12 @@ standard_queries = "Customer:erpnext.selling.doctype.customer.customer.get_custo
 
 permission_query_conditions = {
 		"Feed": "erpnext.home.doctype.feed.feed.get_permission_query_conditions",
+		"Note": "erpnext.utilities.doctype.note.note.get_permission_query_conditions"
 	}
 
 has_permission = {
 		"Feed": "erpnext.home.doctype.feed.feed.has_permission",
+		"Note": "erpnext.utilities.doctype.note.note.has_permission"
 	}
 
 
@@ -48,7 +50,8 @@ doc_events = {
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_qty"
 	},
 	"User": {
-		"on_update": "erpnext.hr.doctype.employee.employee.update_user_default"
+		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
+		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions"
 	}
 }
 

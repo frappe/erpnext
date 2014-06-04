@@ -172,7 +172,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Data", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -187,13 +187,14 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:38.198490", 
+ "modified": "2014-05-27 03:49:10.736177", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
  "owner": "harshada@webnotestech.com", 
  "permissions": [
   {
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -201,12 +202,12 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restricted": 1, 
    "role": "Employee", 
    "write": 1
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -221,6 +222,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

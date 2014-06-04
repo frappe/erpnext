@@ -539,7 +539,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
    "hidden": 0, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "in_filter": 0, 
    "label": "Amended From", 
    "no_copy": 1, 
@@ -580,7 +580,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-05-09 02:17:33.093429", 
+ "modified": "2014-05-27 03:49:19.520247", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -588,6 +588,7 @@
  "permissions": [
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -602,6 +603,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 

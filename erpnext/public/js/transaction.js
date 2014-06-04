@@ -38,7 +38,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	onload_post_render: function() {
 		var me = this;
-		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
+		if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc[this.fname] && !this.frm.doc.is_pos) {
 			this.calculate_taxes_and_totals();
 		}
 		if(frappe.meta.get_docfield(this.tname, "item_code")) {
