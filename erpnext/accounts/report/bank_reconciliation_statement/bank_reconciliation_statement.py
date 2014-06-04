@@ -22,7 +22,7 @@ def execute(filters=None):
 		total_debit += flt(d[4])
 		total_credit += flt(d[5])
 
-	bank_bal = flt(balance_as_per_company) + flt(total_debit) - flt(total_credit)
+	bank_bal = flt(balance_as_per_company) - flt(total_debit) + flt(total_credit)
 
 	data += [
 		get_balance_row("Balance as per company books", balance_as_per_company),
