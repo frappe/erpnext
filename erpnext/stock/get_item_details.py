@@ -255,6 +255,7 @@ def apply_pricing_rule(args):
 
 	args = frappe._dict(args)
 	out = frappe._dict()
+	if not args.get("item_code"): return
 
 	if not args.get("item_group") or not args.get("brand"):
 		args.item_group, args.brand = frappe.db.get_value("Item",

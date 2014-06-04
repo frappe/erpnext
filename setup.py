@@ -1,14 +1,13 @@
 from setuptools import setup, find_packages
+from erpnext.__version__ import __version__
 import os
-
-version = '4.0.2'
 
 with open("requirements.txt", "r") as f:
 	install_requires = f.readlines()
 
 setup(
     name='erpnext',
-    version=version,
+    version=__version__,
     description='Open Source ERP',
     author='Web Notes Technologies',
     author_email='info@erpnext.com',
