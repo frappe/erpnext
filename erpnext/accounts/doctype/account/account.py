@@ -30,6 +30,7 @@ class Account(Document):
 		self.validate_mandatory()
 		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
+		self.validate_balance_must_be_settings()
 
 	def validate_master_name(self):
 		if self.master_type in ('Customer', 'Supplier') or self.account_type == "Warehouse":
@@ -68,6 +69,15 @@ class Account(Document):
 			if not frozen_accounts_modifier or \
 				frozen_accounts_modifier not in frappe.user.get_roles():
 					throw(_("You are not authorized to set Frozen value"))
+
+	def validate_balance_must_be_settings(self):
+		from erpnext.accounts.utils import get_balance_on
+		account_balance = get_balance_on(self.name)
+
+		if account_balance > 0 and self.balance_must_be == "Credit":
+			frappe.throw(_("Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"))
+		elif account_balance < 0 and self.balance_must_be == "Debit":
+			frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
