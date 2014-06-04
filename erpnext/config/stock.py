@@ -214,12 +214,6 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase In Transit",
-					"doctype": "Purchase Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Requested Items To Be Transferred",
 					"doctype": "Material Request"
 				},
