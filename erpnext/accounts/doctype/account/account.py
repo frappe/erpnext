@@ -72,12 +72,13 @@ class Account(Document):
 
 	def validate_balance_must_be_settings(self):
 		from erpnext.accounts.utils import get_balance_on
-		account_balance = get_balance_on(self.name)
+		if not self.get("__islocal") and self.balance_must_be:
+			account_balance = get_balance_on(self.name)
 
-		if account_balance > 0 and self.balance_must_be == "Credit":
-			frappe.throw(_("Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"))
-		elif account_balance < 0 and self.balance_must_be == "Debit":
-			frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
+			if account_balance > 0 and self.balance_must_be == "Credit":
+				frappe.throw(_("Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"))
+			elif account_balance < 0 and self.balance_must_be == "Debit":
+				frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
