@@ -9,6 +9,10 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 		this.setup_queries();
 	},
 
+	onload_post_render: function() {
+		cur_frm.get_field("entries").grid.set_multiple_add("account");
+	},
+
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			frappe.model.set_default_values(this.frm.doc);

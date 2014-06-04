@@ -13,6 +13,10 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 {% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
+frappe.ui.form.on("Quotation", "onload_post_render", function(frm) {
+	frm.get_field("quotation_details").grid.set_multiple_add("item_code");
+});
+
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;
@@ -21,6 +25,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			doc.quotation_to = "Customer";
 		else if(doc.lead && !doc.quotation_to)
 			doc.quotation_to = "Lead";
+
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
