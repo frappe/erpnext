@@ -1,10 +1,11 @@
+from erpnext.__version__ import __version__
 app_name = "erpnext"
 app_title = "ERPNext"
 app_publisher = "Web Notes Technologies Pvt. Ltd. and Contributors"
 app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "4.0.0-wip"
+app_version = __version__
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
