@@ -38,8 +38,7 @@ class Warehouse(Document):
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 			if not frappe.db.get_value("Account", {"account_type": "Warehouse",
-					"master_name": self.name}) and not frappe.db.get_value("Account",
-					{"account_name": self.warehouse_name}):
+					"master_name": self.name}):
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
 					self.validate_parent_account()

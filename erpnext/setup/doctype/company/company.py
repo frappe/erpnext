@@ -91,6 +91,8 @@ class Company(Document):
 
 		for d in self.fld_dict.keys():
 			account.set(d, (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.abbr or lst[self.fld_dict[d]])
+		if not account.parent_account:
+			account.ignore_mandatory = True
 		account.insert()
 
 	def set_default_accounts(self):
