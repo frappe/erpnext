@@ -16,9 +16,11 @@ def on_doctype_update():
 		frappe.db.sql("""alter table `tabFeed`
 			add index feed_doctype_docname_index(doc_type, doc_name)""")
 
-def get_permission_query_conditions():
-	user_permissions = frappe.defaults.get_user_permissions()
-	can_read = frappe.user.get_can_read()
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+
+	user_permissions = frappe.defaults.get_user_permissions(user)
+	can_read = frappe.get_user(user).get_can_read()
 
 	can_read_doctypes = ['"{}"'.format(doctype) for doctype in
 		list(set(can_read) - set(user_permissions.keys()))]

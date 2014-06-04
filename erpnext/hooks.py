@@ -28,10 +28,12 @@ standard_queries = "Customer:erpnext.selling.doctype.customer.customer.get_custo
 
 permission_query_conditions = {
 		"Feed": "erpnext.home.doctype.feed.feed.get_permission_query_conditions",
+		"Note": "erpnext.utilities.doctype.note.note.get_permission_query_conditions"
 	}
 
 has_permission = {
 		"Feed": "erpnext.home.doctype.feed.feed.has_permission",
+		"Note": "erpnext.utilities.doctype.note.note.has_permission"
 	}
 
 

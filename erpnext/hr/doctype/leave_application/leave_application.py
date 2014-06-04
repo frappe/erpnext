@@ -209,7 +209,7 @@ class LeaveApplication(Document):
 	def notify(self, args):
 		args = frappe._dict(args)
 		from frappe.core.page.messages.messages import post
-		post({"txt": args.message, "contact": args.message_to, "subject": args.subject,
+		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
 
 @frappe.whitelist()

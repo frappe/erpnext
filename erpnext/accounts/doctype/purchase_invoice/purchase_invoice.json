@@ -744,17 +744,17 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-27 03:49:15.589404", 
+ "modified": "2014-06-04 08:45:25.582170", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "amend": 0, 
+   "amend": 1, 
    "apply_user_permissions": 1, 
-   "cancel": 0, 
-   "create": 0, 
+   "cancel": 1, 
+   "create": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -762,8 +762,8 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts User", 
-   "submit": 0, 
-   "write": 0
+   "submit": 1, 
+   "write": 1
   }, 
   {
    "amend": 0, 
