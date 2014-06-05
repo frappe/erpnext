@@ -14,6 +14,9 @@ def execute():
 
 	for d in frappe.db.sql("""select * from `tabCustomer Discount`
 		where ifnull(parent, '') != ''""", as_dict=1):
+			if not d.discount:
+				continue
+
 			frappe.get_doc({
 				"doctype": "Pricing Rule",
 				"apply_on": "Item Group",
