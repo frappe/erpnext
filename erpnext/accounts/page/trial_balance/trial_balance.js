@@ -29,6 +29,7 @@ frappe.pages['trial-balance'].onload = function(wrapper) {
 			this.with_period_closing_entry = this.wrapper
 				.find(".with_period_closing_entry input:checked").length;
 			this._super();
+			this.add_total_debit_credit();
 		},
 
 		update_balances: function(account, posting_date, v) {
@@ -42,6 +43,32 @@ frappe.pages['trial-balance'].onload = function(wrapper) {
 				this._super(account, posting_date, v);
 			}
 		},
+
+		add_total_debit_credit: function() {
+			var me = this;
+
+			var total_row = {
+				company: me.company,
+				id: "Total Debit / Credit",
+				name: "Total Debit / Credit",
+				indent: 0,
+				opening_dr: "NA",
+				opening_cr: "NA",
+				debit: 0,
+				credit: 0,
+				checked: false,
+			};
+			me.item_by_name[total_row.name] = total_row;
+
+			$.each(this.data, function(i, account) {
+				if((account.group_or_ledger == "Ledger") || (account.rgt - account.lft == 1)) {
+					total_row["debit"] += account.debit;
+					total_row["credit"] += account.credit;
+				}
+			});
+
+			this.data.push(total_row);
+		}
 	})
 	erpnext.trial_balance = new TrialBalance(wrapper, 'Trial Balance');
 

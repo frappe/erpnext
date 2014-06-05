@@ -267,7 +267,7 @@ class BuyingController(StockController):
 		for d in self.get(raw_material_table):
 			if [d.main_item_code, d.reference_name] not in parent_items:
 				# mark for deletion from doclist
-				delete_list.append([d.main_item_code, d.reference_name])
+				delete_list.append(d)
 
 		# delete from doclist
 		if delete_list:

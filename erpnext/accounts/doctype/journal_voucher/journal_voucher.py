@@ -410,7 +410,7 @@ def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
 	from erpnext.accounts.utils import get_balance_on
 	accounts = frappe.db.sql_list("""select name from tabAccount
-		where group_or_ledger='Ledger' and report_type='Profit and Loss' and company=%s""", company)
+		where group_or_ledger='Ledger' and report_type='Balance Sheet' and company=%s""", company)
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 

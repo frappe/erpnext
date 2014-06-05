@@ -44,3 +44,4 @@ execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_gro
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
 execute:import frappe.defaults;frappe.defaults.clear_default("price_list_currency")
 erpnext.patches.v4_0.update_account_root_type
+execute:frappe.delete_doc("Report", "Purchase In Transit")

@@ -256,9 +256,6 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				}
 			});
 			this.data.push(net_profit);
-			// $.each(me.data, function(i, v) {
-			// 	if(v.report_type=="Profit and Loss") console.log(v)
-			// })
 		}
 	},
 	add_balance: function(field, account, gl) {
