@@ -7,6 +7,11 @@ import frappe, json
 from frappe import _, throw, msgprint
 from frappe.utils import cstr, nowdate
 
+from frappe.model.document import Document
+
+class SMSSettings(Document):
+	pass
+
 def validate_receiver_nos(receiver_list):
 	validated_receiver_list = []
 	for d in receiver_list:
