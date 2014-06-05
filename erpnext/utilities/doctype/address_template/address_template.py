@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import _
 
 class AddressTemplate(Document):
 	def validate(self):
@@ -12,8 +13,12 @@ class AddressTemplate(Document):
 		if not self.is_default:
 			if not defaults:
 				self.is_default = 1
-				frappe.msgprint(frappe._("Setting this Address Template as default as there is no other default"))
+				frappe.msgprint(_("Setting this Address Template as default as there is no other default"))
 		else:
 			if defaults:
 				for d in defaults:
 					frappe.db.set_value("Address Template", d, "is_default", 0)
+
+	def on_trash(self):
+		if self.is_default:
+			frappe.throw(_("Default Address Tempalate cannot be deleted"))
