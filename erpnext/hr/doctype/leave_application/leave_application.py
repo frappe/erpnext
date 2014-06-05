@@ -137,7 +137,12 @@ class LeaveApplication(Document):
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or %(from_date)s between from_date and to_date)
-			and name != %(name)s""", self.as_dict(), as_dict = 1):
+			and name != %(name)s""", {
+				"employee": self.employee,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"name": self.name
+			}, as_dict = 1):
 
 			frappe.msgprint(_("Employee {0} has already applied for {1} between {2} and {3}").format(self.employee,
 				cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date'])))

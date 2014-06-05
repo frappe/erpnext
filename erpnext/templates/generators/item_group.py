@@ -44,7 +44,7 @@ def get_child_groups(item_group_name):
 	item_group = frappe.get_doc("Item Group", item_group_name)
 	return frappe.db.sql("""select name
 		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s
-			and show_in_website = 1""", item_group.as_dict())
+			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt})
 
 def get_item_for_list_in_html(context):
 	return frappe.get_template("templates/includes/product_in_grid.html").render(context)
