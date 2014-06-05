@@ -21,4 +21,4 @@ class AddressTemplate(Document):
 
 	def on_trash(self):
 		if self.is_default:
-			frappe.throw(_("Default Address Tempalate cannot be deleted"))
+			frappe.throw(_("Default Address Template cannot be deleted"))
