@@ -245,7 +245,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Quotation Trend",
+					"name": "Quotation Trends",
 					"doctype": "Quotation"
 				},
 				{

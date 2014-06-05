@@ -21,7 +21,7 @@ var get_filters = function(){
 			"fieldname":"group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",
-			"options": ["Item", "Customer"].join("\n"),
+			"options": ["", "Item", "Customer"].join("\n"),
 			"default": ""
 		},
 		{
@@ -37,6 +37,6 @@ var get_filters = function(){
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company")
-		},	
+		},
 	];
 }

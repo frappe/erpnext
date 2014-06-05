@@ -21,7 +21,7 @@ var get_filters = function(){
 			"fieldname":"group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",
-			"options": ["Item", "Supplier"].join("\n"),
+			"options": ["", "Item", "Supplier"].join("\n"),
 			"default": ""
 		},
 		{
