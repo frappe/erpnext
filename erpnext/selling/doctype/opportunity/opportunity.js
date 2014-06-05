@@ -1,8 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'utilities/doctype/sms_control/sms_control.js' %};
-
 frappe.ui.form.on_change("Opportunity", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
 frappe.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_address_display);
@@ -145,3 +143,9 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 	});
 	dialog.show();
 }
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

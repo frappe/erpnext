@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 {% include 'setup/doctype/contact_control/contact_control.js' %};
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 
 frappe.provide("erpnext");
 erpnext.LeadController = frappe.ui.form.Controller.extend({
@@ -90,3 +89,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

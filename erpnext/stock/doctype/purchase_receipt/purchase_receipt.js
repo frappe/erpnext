@@ -7,7 +7,6 @@ cur_frm.cscript.other_fname = "other_charges";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.stock");
@@ -165,3 +164,9 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.purchase_receipt))
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

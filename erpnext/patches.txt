@@ -46,3 +46,4 @@ execute:import frappe.defaults;frappe.defaults.clear_default("price_list_currenc
 erpnext.patches.v4_0.update_account_root_type
 execute:frappe.delete_doc("Report", "Purchase In Transit")
 erpnext.patches.v4_0.new_address_template
+execute:frappe.delete_doc("DocType", "SMS Control")
