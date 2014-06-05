@@ -10,6 +10,9 @@ from frappe import _
 def install(country=None):
 	records = [
 
+		# address template
+		{'doctype':"Address Template", "country": country},
+
 		# item group
 		{'doctype': 'Item Group', 'item_group_name': _('All Item Groups'),
 			'is_group': 'Yes', 'parent_item_group': ''},
@@ -189,7 +192,8 @@ def install(country=None):
 
 	from frappe.modules import scrub
 	for r in records:
-		doc = frappe.get_doc(r)
+		doc = frappe.new_doc(r.get("doctype"))
+		doc.update(r)
 
 		# ignore mandatory for root
 		parent_link_field = ("parent_" + scrub(doc.doctype))
