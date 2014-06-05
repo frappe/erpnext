@@ -17,7 +17,7 @@ class AddressTemplate(Document):
 		else:
 			if defaults:
 				for d in defaults:
-					frappe.db.set_value("Address Template", d, "is_default", 0)
+					frappe.db.set_value("Address Template", d[0], "is_default", 0)
 
 	def on_trash(self):
 		if self.is_default:
