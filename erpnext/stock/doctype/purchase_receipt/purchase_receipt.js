@@ -64,7 +64,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 		}
 
-		this._super();
+		this._super(doc, cdt, cdn);
 	},
 
 	rejected_qty: function(doc, cdt, cdn) {
