@@ -62,7 +62,7 @@ def get_address_display(address_dict):
 			{"is_default": 1}, "template")
 
 	if not template:
-		frappe.throw(_("No default Address Template found. Please create a new one"))
+		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
 
 	return frappe.render_template(template, address_dict)
 
