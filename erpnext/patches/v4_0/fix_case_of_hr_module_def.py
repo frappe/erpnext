@@ -8,3 +8,5 @@ def execute():
 	if hr == "Hr":
 		frappe.rename_doc("Module Def", "Hr", "HR")
 		frappe.db.set_value("Module Def", "HR", "module_name", "HR")
+
+	frappe.clear_cache()
