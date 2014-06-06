@@ -47,3 +47,6 @@ erpnext.patches.v4_0.update_account_root_type
 execute:frappe.delete_doc("Report", "Purchase In Transit")
 erpnext.patches.v4_0.new_address_template
 execute:frappe.delete_doc("DocType", "SMS Control")
+
+# WATCHOUT: This patch reload's documents
+erpnext.patches.v4_0.reset_permissions_for_masters

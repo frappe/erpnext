@@ -182,9 +182,9 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-05-27 03:49:12.957706", 
+ "modified": "2014-06-06 05:06:44.594229", 
  "modified_by": "Administrator", 
- "module": "HR", 
+ "module": "Hr", 
  "name": "Leave Application", 
  "owner": "Administrator", 
  "permissions": [
@@ -198,6 +198,20 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
+   "write": 1
+  }, 
+  {
+   "amend": 1, 
+   "cancel": 1, 
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "HR Manager", 
+   "set_user_permissions": 1, 
+   "submit": 1, 
    "write": 1
   }, 
   {
