@@ -12,8 +12,7 @@ def execute():
 		"Designation", "Earning Type", "Event", "Feed", "File Data", "Fiscal Year",
 		"HR Settings", "Industry Type", "Jobs Email Settings", "Leave Type", "Letter Head",
 		"Mode of Payment", "Module Def", "Naming Series", "POS Setting", "Print Heading",
-		"Report", "Role", "Sales Email Settings", "Selling Settings", "Shopping Cart Settings",
-		"Stock Settings", "Supplier Type", "UOM"):
+		"Report", "Role", "Sales Email Settings", "Selling Settings", "Stock Settings", "Supplier Type", "UOM"):
 		try:
 			frappe.reset_perms(doctype)
 		except:
