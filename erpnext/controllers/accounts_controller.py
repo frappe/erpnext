@@ -12,7 +12,8 @@ import json
 
 class AccountsController(TransactionBase):
 	def validate(self):
-		self.set_missing_values(for_validate=True)
+		if self._action != "update_after_submit":
+			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()

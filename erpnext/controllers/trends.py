@@ -10,9 +10,9 @@ def get_columns(filters, trans):
 	validate_filters(filters)
 
 	# get conditions for based_on filter cond
-	based_on_details = based_wise_colums_query(filters.get("based_on"), trans)
+	based_on_details = based_wise_columns_query(filters.get("based_on"), trans)
 	# get conditions for periodic filter cond
-	period_cols, period_select = period_wise_colums_query(filters, trans)
+	period_cols, period_select = period_wise_columns_query(filters, trans)
 	# get conditions for grouping filter cond
 	group_by_cols = group_wise_column(filters.get("group_by"))
 
@@ -115,7 +115,7 @@ def get_data(filters, conditions):
 def get_mon(dt):
 	return getdate(dt).strftime("%b")
 
-def period_wise_colums_query(filters, trans):
+def period_wise_columns_query(filters, trans):
 	query_details = ''
 	pwc = []
 	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
@@ -132,9 +132,9 @@ def period_wise_colums_query(filters, trans):
 	else:
 		pwc = [filters.get("fiscal_year") + " (Qty):Float:120",
 			filters.get("fiscal_year") + " (Amt):Currency:120"]
-		query_details = " SUM(t2.qty), SUM(t1.grand_total),"
+		query_details = " SUM(t2.qty), SUM(t2.base_amount),"
 
-	query_details += 'SUM(t2.qty), SUM(t1.grand_total)'
+	query_details += 'SUM(t2.qty), SUM(t2.base_amount)'
 	return pwc, query_details
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -147,7 +147,7 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
 	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)),
-					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t1.grand_total, NULL)),
+					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_amount, NULL)),
 				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 
@@ -191,7 +191,7 @@ def get_period_month_ranges(period, fiscal_year):
 
 	return period_month_ranges
 
-def based_wise_colums_query(based_on, trans):
+def based_wise_columns_query(based_on, trans):
 	based_on_details = {}
 
 	# based_on_cols, based_on_select, based_on_group_by, addl_tables
