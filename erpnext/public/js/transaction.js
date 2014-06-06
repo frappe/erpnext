@@ -42,7 +42,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.calculate_taxes_and_totals();
 		}
 		if(frappe.meta.get_docfield(this.tname, "item_code")) {
-			cur_frm.get_field(this.fname).grid.set_multiple_add("item_code");
+			cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
 		}
 	},
 
