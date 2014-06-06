@@ -9,7 +9,6 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %};
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.stock");
@@ -245,3 +244,9 @@ if (sys_defaults.auto_accounting_for_stock) {
 		}
 	}
 }
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

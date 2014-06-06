@@ -22,7 +22,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	onload_post_render: function() {
-		cur_frm.get_field(this.fname).grid.set_multiple_add("item_code");
+		cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
 	},
 
 	setup_queries: function() {
