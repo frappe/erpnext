@@ -56,3 +56,4 @@ erpnext.patches.v4_0.update_tax_amount_after_discount
 execute:frappe.reset_perms("GL Entry") #2014-06-09
 execute:frappe.reset_perms("Stock Ledger Entry") #2014-06-09
 erpnext.patches.v4_0.create_custom_fields_for_india_specific_fields
+erpnext.patches.v4_0.save_default_letterhead
