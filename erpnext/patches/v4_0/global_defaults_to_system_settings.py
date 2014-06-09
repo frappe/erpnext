@@ -33,3 +33,7 @@ def execute():
 
 	system_settings.ignore_mandatory = True
 	system_settings.save()
+
+	global_defaults = frappe.get_doc("Global Defaults")
+	global_defaults.ignore_mandatory = True
+	global_defaults.save()
