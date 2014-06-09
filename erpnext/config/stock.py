@@ -161,7 +161,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"is_query_report": True,
+					"is_query_report": False,
 					"name": "Item-wise Price List Rate",
 					"doctype": "Item Price",
 				},
