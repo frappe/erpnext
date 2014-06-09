@@ -18,7 +18,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 	if(!doc.__islocal && doc.show_in_website) {
 		cur_frm.appframe.add_button("View In Website", function() {
-			window.open(doc.page_name);
+			window.open(doc.__onload.website_route);
 		}, "icon-globe");
 	}
 	cur_frm.cscript.edit_prices_button();

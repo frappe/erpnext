@@ -10,3 +10,4 @@ def execute():
 		frappe.db.set_value("Module Def", "HR", "module_name", "HR")
 
 	frappe.clear_cache()
+	frappe.setup_module_map()
