@@ -39,7 +39,6 @@ execute:frappe.delete_doc("Page", "Financial Statements")
 execute:frappe.delete_doc("DocType", "Stock Ledger")
 execute:frappe.db.sql("update `tabJournal Voucher` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 execute:frappe.delete_doc("DocType", "Grade")
-erpnext.patches.v4_0.remove_india_specific_fields
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
 execute:import frappe.defaults;frappe.defaults.clear_default("price_list_currency")
@@ -56,3 +55,4 @@ erpnext.patches.v4_0.reset_permissions_for_masters
 erpnext.patches.v4_0.update_tax_amount_after_discount
 execute:frappe.reset_perms("GL Entry") #2014-06-09
 execute:frappe.reset_perms("Stock Ledger Entry") #2014-06-09
+erpnext.patches.v4_0.create_custom_fields_for_india_specific_fields
