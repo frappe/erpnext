@@ -88,7 +88,7 @@ class Newsletter(Document):
 
 		send(recipients = self.recipients, sender = sender,
 			subject = self.subject, message = self.message,
-			doctype = self.send_to_doctype, email_field = self.email_field or "email_id",
+			doctype = self.send_to_doctype, email_field = self.get("email_field") or "email_id",
 			ref_doctype = self.doctype, ref_docname = self.name)
 
 		if not frappe.flags.in_test:
