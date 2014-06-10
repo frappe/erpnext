@@ -30,13 +30,13 @@ class GlobalDefaults(Document):
 		# update year start date and year end date from fiscal_year
 		year_start_end_date = frappe.db.sql("""select year_start_date, year_end_date
 			from `tabFiscal Year` where name=%s""", self.current_fiscal_year)
+		if year_start_end_date:
+			ysd = year_start_end_date[0][0] or ''
+			yed = year_start_end_date[0][1] or ''
 
-		ysd = year_start_end_date[0][0] or ''
-		yed = year_start_end_date[0][1] or ''
-
-		if ysd and yed:
-			frappe.db.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
-			frappe.db.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
+			if ysd and yed:
+				frappe.db.set_default('year_start_date', ysd.strftime('%Y-%m-%d'))
+				frappe.db.set_default('year_end_date', yed.strftime('%Y-%m-%d'))
 
 		# enable default currency
 		if self.default_currency:
