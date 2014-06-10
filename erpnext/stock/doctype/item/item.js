@@ -16,16 +16,16 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 
 
-	if(!doc.__islocal && doc.show_in_website) {
-		cur_frm.appframe.add_button("View In Website", function() {
-			window.open(doc.__onload.website_route);
-		}, "icon-globe");
-	}
 	cur_frm.cscript.edit_prices_button();
 
 	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
 		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
 			(doc.__onload && doc.__onload.sle_exists=="exists") ? false : true);
+	}
+
+	if (!doc.__islocal && doc.show_in_website) {
+		cur_frm.set_intro(__("Published on website at: {0}",
+			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
 	}
 
 	erpnext.item.toggle_reqd(cur_frm);

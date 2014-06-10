@@ -6,6 +6,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 from frappe.model.document import Document
 from frappe.utils.email_lib.receive import POP3Mailbox
 import _socket, poplib
@@ -16,7 +17,7 @@ class SupportEmailSettings(Document):
 		"""
 			Checks support ticket email settings
 		"""
-		if self.sync_support_mails and self.mail_server:
+		if cint(self.sync_support_mails) and self.mail_server and not frappe.local.flags.in_patch:
 			inc_email = frappe._dict(self.as_dict())
 			# inc_email.encode()
 			inc_email.host = self.mail_server
