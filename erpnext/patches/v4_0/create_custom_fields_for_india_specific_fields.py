@@ -20,7 +20,7 @@ def execute():
 			"label": "Supplier Shipment Date",
 			"fieldname": "challan_date",
 			"fieldtype": "Date",
-			"insert_after": "challan_no"
+			"insert_after": "is_subcontracted"
 		}],
 		"Employee": [{
 			"label": "PAN Number",
@@ -31,7 +31,7 @@ def execute():
 			"label": "Gratuity LIC Id",
 			"fieldname": "gratuity_lic_id",
 			"fieldtype": "Data",
-			"insert_after": "pan_number"
+			"insert_after": "company_email"
 		}, {
 			"label": "Esic Card No",
 			"fieldname": "esic_card_no",
@@ -41,7 +41,7 @@ def execute():
 			"label": "PF Number",
 			"fieldname": "pf_number",
 			"fieldtype": "Data",
-			"insert_after": "esic_card_no"
+			"insert_after": "bank_ac_no"
 		}],
 		"Salary Slip": [{
 			"label": "Esic No",
@@ -53,7 +53,7 @@ def execute():
 			"label": "PF Number",
 			"fieldname": "pf_no",
 			"fieldtype": "Data",
-			"insert_after": "esic_no",
+			"insert_after": "letter_head",
 			"permlevel": 1
 		}]
 	}
