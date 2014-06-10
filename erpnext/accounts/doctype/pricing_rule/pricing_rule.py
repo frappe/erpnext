@@ -14,12 +14,14 @@ class PricingRule(Document):
 		self.validate_mandatory()
 		self.validate_min_max_qty()
 		self.cleanup_fields_value()
+		self.validate_price_or_discount()
 
 	def validate_mandatory(self):
-		for field in ["apply_on", "applicable_for", "price_or_discount"]:
+		for field in ["apply_on", "applicable_for"]:
 			tocheck = frappe.scrub(self.get(field) or "")
 			if tocheck and not self.get(tocheck):
 				throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
+
 
 	def validate_min_max_qty(self):
 		if self.min_qty and self.max_qty and flt(self.min_qty) > flt(self.max_qty):
@@ -37,3 +39,8 @@ class PricingRule(Document):
 				f = frappe.scrub(f)
 				if f!=fieldname:
 					self.set(f, None)
+
+	def validate_price_or_discount(self):
+		for field in ["Price", "Discount Percentage"]:
+			if flt(self.get(frappe.scrub(field))) < 0:
+				throw(_("{0} can not be negative").format(field))
