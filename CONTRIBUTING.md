@@ -1,16 +1,19 @@
-# Contributing to ERPNext
+# Contributing to Frappe / ERPNext
 
 ## Reporting issues
 
 We only accept issues that are bug reports or feature requests. Bugs must be isolated and reproducible problems. Please read the following guidelines before opening any issue.
 
-1. **Search for existing issues.** We want to avoid duplication, and you'd help us out a lot by first checking if someone else has reported the same issue. The issue may have already been resolved with a fix available.
+1. **Search for existing issues:** We want to avoid duplication, and you'd help us out a lot by first checking if someone else has reported the same issue. The issue may have already been resolved with a fix available.
+1. **Report each issue separately:** Don't club multiple, unreleated issues in one note.
+1. **Mention the version number:** Please mention the application, browser and platform version numbers.
 
 ### Issues
 
-1. **Share as much information as possible.** Include operating system and version, browser and version, when did you last update ERPNext, how is it customized, etc. where appropriate. Also include steps to reproduce the bug.
-1. Consider adding screenshots annotated with what goes wrong.
-1. If you are reporting an issue from the browser, Open the Javascript Console and paste us any error messages you see.
+1. **Share as much information as possible:** Include operating system and version, browser and version, when did you last update ERPNext, how is it customized, etc. where appropriate. Also include steps to reproduce the bug.
+1. **Include Screenshots if possible:** Consider adding screenshots annotated with what goes wrong.
+1. **Find and post the trace for bugs:** If you are reporting an issue from the browser, Open the Javascript Console and paste us any error messages you see.
+
 
 ### Feature Requests
 
@@ -36,10 +39,6 @@ that function to accommodate your use case.
 #### Don't create new DocTypes Unless Absolutely Necessary
 
 DocTypes are easy to create but hard to maintain. If you find that there is a another DocType with a similar functionality, then please try and extend that functionality. For example, by adding a "type" field to classify the new type of record.
-
-#### Don't Send Trivial Requests
-
-Don't send pull requests for fixing a simple typo in a code comment.
 
 #### Tabs or spaces?
 
