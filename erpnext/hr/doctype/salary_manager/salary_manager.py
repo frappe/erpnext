@@ -128,7 +128,7 @@ class SalaryManager(Document):
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			try:
-				frappe.db.set(ss_obj, 'email_check', cint(self.send_mail))
+				frappe.db.set(ss_obj, 'email_check', cint(self.send_email))
 				if cint(self.send_email) == 1:
 					ss_obj.send_mail_funct()
 
