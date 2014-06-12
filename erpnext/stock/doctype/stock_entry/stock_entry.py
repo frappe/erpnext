@@ -70,6 +70,9 @@ class StockEntry(StockController):
 
 	def set_transfer_qty(self):
 		for item in self.get("mtn_details"):
+			if not flt(item.qty):
+				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx))
+
 			item.transfer_qty = flt(item.qty * item.conversion_factor, self.precision("transfer_qty", item))
 
 	def validate_item(self):
@@ -191,6 +194,9 @@ class StockEntry(StockController):
 
 		raw_material_cost = 0.0
 
+		if not self.posting_date or not self.posting_time:
+			frappe.throw(_("Posting date and posting time is mandatory"))
+
 		for d in self.get('mtn_details'):
 			args = frappe._dict({
 				"item_code": d.item_code,
@@ -200,6 +206,7 @@ class StockEntry(StockController):
 				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
 				"serial_no": d.serial_no
 			})
+
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 			if d.s_warehouse and d.actual_qty <= d.transfer_qty:
