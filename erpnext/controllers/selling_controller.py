@@ -19,7 +19,7 @@ class SellingController(StockController):
 		if frappe.db.get_value('Sales Email Settings', None, 'extract_emails'):
 			return frappe.db.get_value('Sales Email Settings', None, 'email_id')
 		else:
-			return frappe.session.user
+			return comm.sender or frappe.session.user
 
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
