@@ -30,7 +30,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
-		this.frm.clear_custom_buttons();
 
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Create Customer"), this.create_customer);
