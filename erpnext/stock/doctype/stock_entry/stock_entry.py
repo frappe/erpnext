@@ -70,6 +70,9 @@ class StockEntry(StockController):
 
 	def set_transfer_qty(self):
 		for item in self.get("mtn_details"):
+			if not flt(item.qty):
+				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx))
+
 			item.transfer_qty = flt(item.qty * item.conversion_factor, self.precision("transfer_qty", item))
 
 	def validate_item(self):
@@ -191,6 +194,11 @@ class StockEntry(StockController):
 
 		raw_material_cost = 0.0
 
+		if not self.posting_date or not self.posting_time:
+			frappe.throw(_("Posting date and posting time is mandatory"))
+
+		allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+
 		for d in self.get('mtn_details'):
 			args = frappe._dict({
 				"item_code": d.item_code,
@@ -200,13 +208,21 @@ class StockEntry(StockController):
 				"qty": d.s_warehouse and -1*d.transfer_qty or d.transfer_qty,
 				"serial_no": d.serial_no
 			})
+
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 
+			if d.s_warehouse and not allow_negative_stock and d.actual_qty <= d.transfer_qty:
+				frappe.throw(_("""Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
+					Available Qty: {4}, Transfer Qty: {5}""").format(d.idx, d.s_warehouse,
+					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty))
+
 			# get incoming rate
 			if not d.bom_no:
-				if not flt(d.incoming_rate):
-					d.incoming_rate = self.get_incoming_rate(args)
+				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return":
+					incoming_rate = self.get_incoming_rate(args)
+					if incoming_rate:
+						d.incoming_rate = incoming_rate
 
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 				raw_material_cost += flt(d.amount)
