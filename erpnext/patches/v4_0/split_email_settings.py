@@ -28,6 +28,7 @@ def map_outgoing_email_settings(email_settings):
 
 		outgoing_email_settings.set(to_fieldname, email_settings.get(from_fieldname))
 
+	outgoing_email_settings._fix_numeric_types()
 	outgoing_email_settings.save()
 
 def map_support_email_settings(email_settings):
@@ -47,6 +48,7 @@ def map_support_email_settings(email_settings):
 
 		support_email_settings.set(to_fieldname, email_settings.get(from_fieldname))
 
+	support_email_settings._fix_numeric_types()
 	support_email_settings.save()
 
 def get_email_settings():
