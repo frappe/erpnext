@@ -202,6 +202,10 @@ class StockEntry(StockController):
 			})
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
+			if d.s_warehouse and d.actual_qty <= d.transfer_qty:
+				frappe.throw(_("""Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
+					Available Qty: {4}, Transfer Qty: {5}""").format(d.idx, d.s_warehouse,
+					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty))
 
 			# get incoming rate
 			if not d.bom_no:
