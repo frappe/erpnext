@@ -80,7 +80,6 @@ $.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
-	cur_frm.clear_custom_buttons();
 
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
 		cur_frm.add_custom_button(__('Create Quotation'), cur_frm.cscript.create_quotation);
