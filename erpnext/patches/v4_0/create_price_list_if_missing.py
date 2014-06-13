@@ -7,6 +7,10 @@ from frappe import _
 from frappe.utils.nestedset import get_root_of
 
 def execute():
+	# setup not complete
+	if not frappe.db.sql("""select name from tabCompany limit 1"""):
+		return
+
 	if not frappe.db.sql("select name from `tabPrice List` where buying=1"):
 		create_price_list(_("Standard Buying"), buying=1)
 
