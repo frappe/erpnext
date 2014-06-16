@@ -18,7 +18,7 @@ cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query =
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.delivery_note && doc.__islocal) {
-			cur_frm.cscript.get_items(doc, cdt, cdn);
+		cur_frm.cscript.get_items(doc, cdt, cdn);
 	}
 }
 
