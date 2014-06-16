@@ -118,10 +118,10 @@ cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 }
 
 cur_frm.cscript['Make Packing Slip'] = function() {
-	n = frappe.model.make_new_doc_and_get_name('Packing Slip');
-	ps = locals["Packing Slip"][n];
-	ps.delivery_note = cur_frm.doc.name;
-	loaddoc('Packing Slip', n);
+	frappe.model.open_mapped_doc({
+		method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+		frm: cur_frm
+	})
 }
 
 var set_print_hide= function(doc, cdt, cdn){
