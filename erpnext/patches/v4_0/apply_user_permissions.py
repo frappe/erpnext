@@ -27,7 +27,9 @@ def update_hr_permissions():
 	# save employees to run on_update events
 	for employee in frappe.db.sql_list("""select name from `tabEmployee` where docstatus < 2"""):
 		try:
-			frappe.get_doc("Employee", employee).save()
+			emp = frappe.get_doc("Employee", employee)
+			emp.ignore_mandatory = True
+			emp.save()
 		except EmployeeUserDisabledError:
 			pass
 

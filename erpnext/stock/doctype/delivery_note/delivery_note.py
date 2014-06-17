@@ -68,13 +68,14 @@ class DeliveryNote(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.update_current_stock()
 		self.validate_with_previous_doc()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self, 'delivery_note_details')
 
-		self.status = 'Draft'
+		self.update_current_stock()
+
+		if not self.status: self.status = 'Draft'
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
@@ -133,14 +134,17 @@ class DeliveryNote(SellingController):
 
 
 	def update_current_stock(self):
-		for d in self.get('delivery_note_details'):
-			bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
-			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
+		if self._action != "update_after_submit":
+			for d in self.get('delivery_note_details'):
+				d.actual_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
+					"warehouse": d.warehouse}, "actual_qty")
 
-		for d in self.get('packing_details'):
-			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
-			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
-			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
+			for d in self.get('packing_details'):
+				bin_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
+					"warehouse": d.warehouse}, ["actual_qty", "projected_qty"], as_dict=True)
+				if bin_qty:
+					d.actual_qty = flt(bin_qty.actual_qty)
+					d.projected_qty = flt(bin_qty.projected_qty)
 
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -342,6 +346,22 @@ def make_installation_note(source_name, target_doc=None):
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.installed_qty < doc.qty
+		}
+	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
+def make_packing_slip(source_name, target_doc=None):
+	doclist = get_mapped_doc("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Packing Slip",
+			"field_map": {
+				"name": "delivery_note"
+			},
+			"validation": {
+				"docstatus": ["=", 0]
+			}
 		}
 	}, target_doc)
 

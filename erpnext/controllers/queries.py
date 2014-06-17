@@ -141,7 +141,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			concat(substr(tabItem.description, 1, 40), "..."), description) as decription
 		from tabItem
 		where tabItem.docstatus < 2
-			and (ifnull(tabItem.end_of_life, '') = '' or tabItem.end_of_life > %(today)s)
+			and (tabItem.end_of_life is null or tabItem.end_of_life > %(today)s)
 			and (tabItem.`{key}` LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s)
 			{fcond} {mcond}
@@ -236,13 +236,21 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				'page_len': page_len})
 
 def get_account_list(doctype, txt, searchfield, start, page_len, filters):
-	if isinstance(filters, dict):
-		if not filters.get("group_or_ledger"):
-			filters["group_or_ledger"] = "Ledger"
-	elif isinstance(filters, list):
-		if "group_or_ledger" not in [d[0] for d in filters]:
-			filters.append(["Account", "group_or_ledger", "=", "Ledger"])
+	filter_list = []
 
-	return frappe.widgets.reportview.execute("Account", filters = filters,
+	if isinstance(filters, dict):
+		for key, val in filters.items():
+			if isinstance(val, (list, tuple)):
+				filter_list.append([doctype, key, val[0], val[1]])
+			else:
+				filter_list.append([doctype, key, "=", val])
+
+	if "group_or_ledger" not in [d[1] for d in filter_list]:
+		filter_list.append(["Account", "group_or_ledger", "=", "Ledger"])
+
+	if searchfield and txt:
+		filter_list.append([doctype, searchfield, "like", "%%%s%%" % txt])
+
+	return frappe.widgets.reportview.execute("Account", filters = filter_list,
 		fields = ["name", "parent_account"],
 		limit_start=start, limit_page_length=page_len, as_list=True)

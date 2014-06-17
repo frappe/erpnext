@@ -52,9 +52,8 @@ class BuyingController(StockController):
 			validate_warehouse_company(w, self.company)
 
 	def validate_stock_or_nonstock_items(self):
-		if not self.get_stock_items():
-			tax_for_valuation = [d.account_head for d in
-				self.get("other_charges")
+		if self.meta.get_field("other_charges") and not self.get_stock_items():
+			tax_for_valuation = [d.account_head for d in self.get("other_charges")
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
 				frappe.throw(_("Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"))

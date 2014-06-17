@@ -48,7 +48,7 @@ class MaterialRequest(BuyingController):
 
 	def validate_schedule_date(self):
 		for d in self.get('indent_details'):
-			if d.schedule_date < self.transaction_date:
+			if d.schedule_date and d.schedule_date < self.transaction_date:
 				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 
 	# Validate
