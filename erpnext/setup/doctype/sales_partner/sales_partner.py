@@ -6,6 +6,9 @@ import frappe
 from frappe.utils import cstr, filter_strip_join
 from frappe.website.website_generator import WebsiteGenerator
 
+condition_field = "show_in_website"
+template = "templates/generators/sales_partner.html"
+
 class SalesPartner(WebsiteGenerator):
 	def autoname(self):
 		self.name = self.partner_name

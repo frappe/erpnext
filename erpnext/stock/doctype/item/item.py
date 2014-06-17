@@ -13,6 +13,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 class WarehouseNotSet(frappe.ValidationError): pass
 
 condition_field = "show_in_website"
+template = "templates/generators/item.html"
 
 class Item(WebsiteGenerator):
 	def onload(self):
