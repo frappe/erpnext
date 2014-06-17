@@ -206,11 +206,11 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		if(me.pl_or_bs=='Balance Sheet') {
 			$.each(me.data, function(i, ac) {
 				if((ac.rgt - ac.lft)==1 && ac.report_type=='Balance Sheet') {
-					var opening = 0;
+					var opening = flt(ac["opening_dr"]) - flt(ac["opening_cr"]);
 					//if(opening) throw opening;
 					$.each(me.columns, function(i, col) {
 						if(col.formatter==me.currency_formatter) {
-							if(col.balance_type=="Dr") {
+							if(col.balance_type=="Dr" && !in_list(["opening_dr", "opening_cr"], col.field)) {
 								opening = opening + flt(ac[col.date + "_dr"]) -
 									flt(ac[col.date + "_cr"]);
 								me.set_debit_or_credit(ac, col.date, opening);
