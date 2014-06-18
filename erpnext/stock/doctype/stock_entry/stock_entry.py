@@ -228,7 +228,7 @@ class StockEntry(StockController):
 				raw_material_cost += flt(d.amount)
 
 		# set incoming rate for fg item
-		if self.production_order and self.purpose == "Manufacture/Repack":
+		if self.purpose == "Manufacture/Repack":
 			for d in self.get("mtn_details"):
 				if d.bom_no:
 					if not flt(d.incoming_rate):
