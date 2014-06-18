@@ -84,7 +84,7 @@
   {
    "fieldname": "total_words", 
    "fieldtype": "Int", 
-   "label": "Total Words", 
+   "label": "Total Characters", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -109,7 +109,7 @@
  "idx": 1, 
  "in_create": 0, 
  "issingle": 1, 
- "modified": "2014-05-09 02:16:41.375945", 
+ "modified": "2014-05-09 02:17:41.375945", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "SMS Center", 
