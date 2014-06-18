@@ -248,12 +248,13 @@ class StockEntry(StockController):
 
 	def get_incoming_rate_for_sales_return(self, args):
 		incoming_rate = 0.0
-		if self.delivery_note_no or self.sales_invoice_no:
+		if (self.delivery_note_no or self.sales_invoice_no) and args.get("item_code"):
 			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s and item_code = %s limit 1""",
 				((self.delivery_note_no and "Delivery Note" or "Sales Invoice"),
-				self.delivery_note_no or self.sales_invoice_no, args.item_code))[0][0]
+				self.delivery_note_no or self.sales_invoice_no, args.item_code))
+			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
 
