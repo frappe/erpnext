@@ -279,13 +279,9 @@ def make_delivery_note(source_name, target_doc=None):
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
-	doclist = get_mapped_doc("Sales Order", source_name, {
+	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Delivery Note",
-			"field_map": {
-				"shipping_address": "address_display",
-				"shipping_address_name": "customer_address",
-			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -310,7 +306,7 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	return doclist
+	return target_doc
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
