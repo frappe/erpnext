@@ -239,26 +239,21 @@ class StockEntry(StockController):
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
-		if self.purpose == "Sales Return" and \
-				(self.delivery_note_no or self.sales_invoice_no):
-			sle = frappe.db.sql("""select name, posting_date, posting_time,
-				actual_qty, stock_value, warehouse from `tabStock Ledger Entry`
-				where voucher_type = %s and voucher_no = %s and
-				item_code = %s limit 1""",
-				((self.delivery_note_no and "Delivery Note" or "Sales Invoice"),
-				self.delivery_note_no or self.sales_invoice_no, args.item_code), as_dict=1)
-			if sle:
-				args.update({
-					"posting_date": sle[0].posting_date,
-					"posting_time": sle[0].posting_time,
-					"sle": sle[0].name,
-					"warehouse": sle[0].warehouse,
-				})
-				previous_sle = get_previous_sle(args)
-				incoming_rate = (flt(sle[0].stock_value) - flt(previous_sle.get("stock_value"))) / \
-					flt(sle[0].actual_qty)
+		if self.purpose == "Sales Return":
+			incoming_rate = self.get_incoming_rate_for_sales_return(args)
 		else:
 			incoming_rate = get_incoming_rate(args)
+
+		return incoming_rate
+
+	def get_incoming_rate_for_sales_return(self, args):
+		incoming_rate = 0.0
+		if self.delivery_note_no or self.sales_invoice_no:
+			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
+				from `tabStock Ledger Entry`
+				where voucher_type = %s and voucher_no = %s and item_code = %s limit 1""",
+				((self.delivery_note_no and "Delivery Note" or "Sales Invoice"),
+				self.delivery_note_no or self.sales_invoice_no, args.item_code))[0][0]
 
 		return incoming_rate
 
