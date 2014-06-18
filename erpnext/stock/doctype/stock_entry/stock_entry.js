@@ -241,14 +241,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	customer: function() {
 		return this.frm.call({
 			method: "erpnext.accounts.party.get_party_details",
-			args: { party: this.frm.doc.customer, party_type:"Customer" }
+			args: { party: this.frm.doc.customer, party_type:"Customer", doctype: this.frm.doc.doctype }
 		});
 	},
 
 	supplier: function() {
 		return this.frm.call({
 			method: "erpnext.accounts.party.get_party_details",
-			args: { party: this.frm.doc.supplier, party_type:"Supplier" }
+			args: { party: this.frm.doc.supplier, party_type:"Supplier", doctype: this.frm.doc.doctype }
 		});
 	},
 
