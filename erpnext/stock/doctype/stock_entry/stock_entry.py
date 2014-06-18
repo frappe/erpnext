@@ -217,8 +217,8 @@ class StockEntry(StockController):
 					Available Qty: {4}, Transfer Qty: {5}""").format(d.idx, d.s_warehouse,
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty))
 
-			# get incoming rate
 			if not d.bom_no:
+				# set incoming rate
 				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return":
 					incoming_rate = self.get_incoming_rate(args)
 					if flt(incoming_rate) > 0:
@@ -227,15 +227,16 @@ class StockEntry(StockController):
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 				raw_material_cost += flt(d.amount)
 
-		# set incoming rate for fg item
-		if self.production_order and self.purpose == "Manufacture/Repack":
-			for d in self.get("mtn_details"):
-				if d.bom_no:
-					if not flt(d.incoming_rate):
-						bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
-						operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
-						d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
-					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+			# bom no exists and purpose is Manufacture/Repack
+			elif self.purpose == "Manufacture/Repack":
+
+				# set incoming rate for fg item
+				if not flt(d.incoming_rate):
+					bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
+					operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+					d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
+
+				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
