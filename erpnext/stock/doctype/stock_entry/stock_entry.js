@@ -359,16 +359,17 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	args = {
-		'item_code'		: d.item_code,
-		'warehouse'		: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-		'transfer_qty'	: d.transfer_qty,
-		'serial_no'		: d.serial_no,
-		'bom_no'		: d.bom_no,
-		'qty'			: d.s_warehouse ? -1* d.qty : d.qty
+	if(!d.bom_no) {
+		args = {
+			'item_code'		: d.item_code,
+			'warehouse'		: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+			'transfer_qty'	: d.transfer_qty,
+			'serial_no'		: d.serial_no,
+			'qty'			: d.s_warehouse ? -1* d.qty : d.qty
+		}
+		return get_server_fields('get_warehouse_details', JSON.stringify(args),
+			'mtn_details', doc, cdt, cdn, 1);
 	}
-	return get_server_fields('get_warehouse_details', JSON.stringify(args),
-		'mtn_details', doc, cdt, cdn, 1);
 }
 
 cur_frm.cscript.t_warehouse = cur_frm.cscript.s_warehouse;
