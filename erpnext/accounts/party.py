@@ -12,13 +12,14 @@ from erpnext.utilities.doctype.contact.contact import get_contact_details
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, price_list=None, currency=None):
+	posting_date=None, price_list=None, currency=None, doctype=None):
 
-	return _get_party_details(party, account, party_type, company, posting_date, price_list, currency)
+	return _get_party_details(party, account, party_type,
+		company, posting_date, price_list, currency, doctype)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None,
-	posting_date=None, price_list=None, currency=None, ignore_permissions=False):
-	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date))
+	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
+	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, doctype))
 
 	party = out[party_type.lower()]
 
@@ -106,8 +107,8 @@ def set_price_list(out, party, party_type, given_price_list):
 	out["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
 
 
-def set_account_and_due_date(party, account, party_type, company, posting_date):
-	if not posting_date:
+def set_account_and_due_date(party, account, party_type, company, posting_date, doctype):
+	if doctype not in ["Sales Invoice", "Purchase Invoice"]:
 		# not an invoice
 		return {
 			party_type.lower(): party
