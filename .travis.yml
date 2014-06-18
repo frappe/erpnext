@@ -14,8 +14,12 @@ install:
   - sudo apt-get update
   - sudo apt-get purge -y mysql-common
   - sudo apt-get install mariadb-server mariadb-common libmariadbclient-dev
-  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop &&
+  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@$TRAVIS_BRANCH &&
   - pip install --editable .
+
+before_script:
+  - mysql -e 'create database test_frappe'
+  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root
 
 script:
   - cd ./test_sites/
@@ -25,7 +29,3 @@ script:
   - frappe -b
   - frappe --serve_test &
   - frappe --verbose --run_tests --app erpnext
-
-before_script:
-  - mysql -e 'create database test_frappe'
-  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root
