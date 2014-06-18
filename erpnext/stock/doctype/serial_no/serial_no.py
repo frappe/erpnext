@@ -278,13 +278,16 @@ def get_serial_nos(serial_no):
 
 def make_serial_no(serial_no, sle):
 	sr = frappe.new_doc("Serial No")
+	sr.warehouse = None
+	sr.dont_update_if_missing.append("warehouse")
 	sr.ignore_permissions = True
+
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
-	sr.warehouse = None
 	sr.company = sle.company
 	sr.via_stock_ledger = True
 	sr.insert()
+
 	sr.warehouse = sle.warehouse
 	sr.status = "Available"
 	sr.save()
