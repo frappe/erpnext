@@ -221,7 +221,7 @@ class StockEntry(StockController):
 			if not d.bom_no:
 				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return":
 					incoming_rate = self.get_incoming_rate(args)
-					if incoming_rate:
+					if flt(incoming_rate) > 0:
 						d.incoming_rate = incoming_rate
 
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
