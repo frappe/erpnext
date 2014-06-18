@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, os, json
 
 def import_charts():
+	print "Importing Chart of Accounts"
 	frappe.db.sql("""delete from `tabChart of Accounts`""")
 	charts_dir = os.path.join(os.path.dirname(__file__), "charts")
 	for fname in os.listdir(charts_dir):
@@ -19,8 +20,8 @@ def import_charts():
 						"source_file": fname,
 						"country": country
 					}).insert()
-					print doc.name.encode("utf-8")
-				else:
-					print "No chart for: " + chart.get("name").encode("utf-8")
-				
+					#print doc.name.encode("utf-8")
+				#else:
+					#print "No chart for: " + chart.get("name").encode("utf-8")
+
 	frappe.db.commit()
