@@ -125,7 +125,7 @@ def create_lead(email_id):
 		"doctype": "Lead",
 		"email_id": email_id,
 		"lead_name": real_name or email_id,
-		"status": "Contacted",
+		"status": "Lead",
 		"naming_series": get_default_naming_series("Lead"),
 		"company": frappe.db.get_default("company"),
 		"source": "Email"
