@@ -186,8 +186,13 @@ class JournalVoucher(AccountsController):
 
 	def set_print_format_fields(self):
 		for d in self.get('entries'):
-			account_type, master_type = frappe.db.get_value("Account", d.account,
+			result = frappe.db.get_value("Account", d.account,
 				["account_type", "master_type"])
+
+			if not result:
+				continue
+
+			account_type, master_type = result
 
 			if master_type in ['Supplier', 'Customer']:
 				if not self.pay_to_recd_from:
