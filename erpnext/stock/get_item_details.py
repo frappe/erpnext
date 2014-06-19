@@ -229,7 +229,7 @@ def get_pos_settings_item_details(company, args, pos_settings=None):
 
 	if pos_settings:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
-			if not args.get(fieldname):
+			if not args.get(fieldname) and pos_settings.get(fieldname):
 				res[fieldname] = pos_settings.get(fieldname)
 
 		if res.get("warehouse"):
