@@ -237,8 +237,11 @@ class StockController(AccountsController):
 		if not item.get("expense_account"):
 			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
 
-		if item.get("expense_account") and not item.get("cost_center"):
-			frappe.throw(_("""Cost Center is mandatory for Item {0}""").format(item.get("item_code")))
+		else:
+			is_expense_account = frappe.db.get_value("Account", item.get("expense_account"), "report_type")=="Profit and Loss"
+			if is_expense_account and not item.get("cost_center"):
+				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
+					_(self.doctype), self.name, item.get("item_code")))
 
 	def get_sl_entries(self, d, args):
 		sl_dict = {
