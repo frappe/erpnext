@@ -232,6 +232,14 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "ignore_pricing_rule", 
+   "fieldtype": "Check", 
+   "label": "Ignore Pricing Rule", 
+   "no_copy": 1, 
+   "permlevel": 1, 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "items", 
    "fieldtype": "Section Break", 
    "label": "Items", 
@@ -744,7 +752,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-04 08:45:25.582170", 
+ "modified": "2014-06-19 15:50:50.898237", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -823,6 +831,12 @@
    "role": "Auditor", 
    "submit": 0, 
    "write": 0
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Accounts Manager", 
+   "write": 1
   }
  ], 
  "read_only_onload": 1, 

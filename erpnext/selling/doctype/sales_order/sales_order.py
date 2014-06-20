@@ -245,9 +245,6 @@ class SalesOrder(SellingController):
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
 
-def set_missing_values(source, target):
-	target.run_method("set_missing_values")
-	target.run_method("calculate_taxes_and_totals")
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
@@ -274,6 +271,11 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
@@ -312,6 +314,7 @@ def make_delivery_note(source_name, target_doc=None):
 def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.is_pos = 0
+		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 

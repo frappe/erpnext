@@ -280,6 +280,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def update_accounts(source, target):
 		target.is_pos = 0
+		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 
 		if len(target.get("entries")) == 0:

@@ -275,6 +275,14 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "ignore_pricing_rule", 
+   "fieldtype": "Check", 
+   "label": "Ignore Pricing Rule", 
+   "no_copy": 1, 
+   "permlevel": 1, 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "items", 
    "fieldtype": "Section Break", 
    "label": "Items", 
@@ -818,7 +826,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2014-05-27 03:49:16.670976", 
+ "modified": "2014-06-19 15:59:30.019826", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
@@ -895,6 +903,12 @@
    "report": 1, 
    "role": "Maintenance User", 
    "submit": 1, 
+   "write": 1
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Sales Manager", 
    "write": 1
   }
  ], 

@@ -276,6 +276,14 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "ignore_pricing_rule", 
+   "fieldtype": "Check", 
+   "label": "Ignore Pricing Rule", 
+   "no_copy": 1, 
+   "permlevel": 1, 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "items", 
    "fieldtype": "Section Break", 
    "label": "Items", 
@@ -999,7 +1007,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-05-27 03:49:09.721622", 
+ "modified": "2014-06-19 16:00:47.326127", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
@@ -1073,6 +1081,12 @@
    "read": 1, 
    "report": 1, 
    "role": "Customer"
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Material Manager", 
+   "write": 1
   }
  ], 
  "read_only_onload": 1, 
