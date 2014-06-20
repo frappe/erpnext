@@ -19,6 +19,7 @@ class PricingRule(Document):
 		self.validate_min_max_qty()
 		self.cleanup_fields_value()
 		self.validate_price_or_discount()
+		self.validate_max_discount()
 
 	def validate_mandatory(self):
 		for field in ["apply_on", "applicable_for"]:
@@ -60,6 +61,13 @@ class PricingRule(Document):
 		for field in ["Price", "Discount Percentage"]:
 			if flt(self.get(frappe.scrub(field))) < 0:
 				throw(_("{0} can not be negative").format(field))
+
+	def validate_max_discount(self):
+		if self.price_or_discount == "Discount Percentage" and self.item_code:
+			max_discount = frappe.db.get_value("Item", self.item_code, "max_discount")
+			if flt(self.discount_percentage) > max_discount:
+				throw(_("Max discount allowed for item: {0} is {1}%".format(self.item_code, max_discount)))
+
 
 #--------------------------------------------------------------------------------
 
