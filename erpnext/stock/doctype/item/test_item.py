@@ -17,7 +17,7 @@ class TestItem(unittest.TestCase):
 		item.is_stock_item = "Yes"
 		item.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)
-		
+
 	def test_get_item_details(self):
 		from erpnext.stock.get_item_details import get_item_details
 		to_check = {
@@ -41,22 +41,22 @@ class TestItem(unittest.TestCase):
 			"uom": "_Test UOM",
 			"conversion_factor": 1.0,
 		}
-		
+
 		make_test_records("Item Price")
-				
+
 		details = get_item_details({
 			"item_code": "_Test Item",
 			"company": "_Test Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
-			"doctype": "Sales Order",
+			"parenttype": "Sales Order",
 			"conversion_rate": 1,
 			"price_list_currency": "_Test Currency",
 			"plc_conversion_rate": 1,
 			"order_type": "Sales",
 			"transaction_type": "selling"
 		})
-		
+
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
 

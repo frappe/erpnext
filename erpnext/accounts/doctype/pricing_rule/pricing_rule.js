@@ -61,4 +61,31 @@ frappe.ui.form.on("Pricing Rule", "refresh", function(frm) {
 	'</table>'].join("\n");
 
 	set_field_options("pricing_rule_help", help_content);
+
+	cur_frm.cscript.set_options_for_applicable_for();
 });
+
+cur_frm.cscript.set_options_for_applicable_for = function() {
+	var options = [""];
+	var applicable_for = cur_frm.doc.applicable_for;
+
+	if(cur_frm.doc.selling) {
+		options = $.merge(options, ["Customer", "Customer Group", "Territory", "Sales Partner", "Campaign"]);
+	}
+	if(cur_frm.doc.buying) {
+		$.merge(options, ["Supplier", "Supplier Type"]);
+	}
+
+	set_field_options("applicable_for", options.join("\n"));
+
+	if(!in_list(options, applicable_for)) applicable_for = null;
+	cur_frm.set_value("applicable_for", applicable_for)
+}
+
+cur_frm.cscript.selling = function() {
+	cur_frm.cscript.set_options_for_applicable_for();
+}
+
+cur_frm.cscript.buying = function() {
+	cur_frm.cscript.set_options_for_applicable_for();
+}
