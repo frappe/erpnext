@@ -127,15 +127,15 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "max_qty", 
-   "fieldtype": "Float", 
-   "label": "Max Qty", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "min_qty", 
    "fieldtype": "Float", 
    "label": "Min Qty", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "max_qty", 
+   "fieldtype": "Float", 
+   "label": "Max Qty", 
    "permlevel": 0
   }, 
   {
@@ -235,7 +235,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-06-19 15:00:09.962572", 
+ "modified": "2014-06-20 19:36:22.502381", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 
@@ -244,8 +244,8 @@
   {
    "create": 1, 
    "delete": 1, 
-   "export": 0, 
-   "import": 0, 
+   "export": 1, 
+   "import": 1, 
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
@@ -290,7 +290,6 @@
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
-   "restrict": 1, 
    "role": "System Manager", 
    "write": 1
   }

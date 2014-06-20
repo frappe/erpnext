@@ -66,7 +66,7 @@ class PricingRule(Document):
 		if self.price_or_discount == "Discount Percentage" and self.item_code:
 			max_discount = frappe.db.get_value("Item", self.item_code, "max_discount")
 			if max_discount and flt(self.discount_percentage) > flt(max_discount):
-				throw(_("Max discount allowed for item: {0} is {1}%".format(self.item_code, max_discount)))
+				throw(_("Max discount allowed for item: {0} is {1}%").format(self.item_code, max_discount))
 
 
 #--------------------------------------------------------------------------------
@@ -141,7 +141,8 @@ def get_pricing_rule_for_item(args):
 		item_details.pricing_rule = pricing_rule.name
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
-				"price_list_rate": pricing_rule.price*flt(args.plc_conversion_rate)/flt(args.conversion_rate),
+				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \
+					if args.conversion_rate else 0.0,
 				"discount_percentage": 0.0
 			})
 		else:
@@ -167,10 +168,10 @@ def get_pricing_rules(args):
 
 	conditions = ""
 	for field in ["company", "customer", "supplier", "supplier_type", "campaign", "sales_partner"]:
-			if args.get(field):
-				conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
-			else:
-				conditions += " and ifnull("+field+", '') = ''"
+		if args.get(field):
+			conditions += " and ifnull("+field+", '') in (%("+field+")s, '')"
+		else:
+			conditions += " and ifnull("+field+", '') = ''"
 
 	for parenttype in ["Customer Group", "Territory"]:
 		group_condition = _get_tree_conditions(parenttype)
