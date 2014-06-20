@@ -62,3 +62,4 @@ erpnext.patches.v4_0.update_other_charges_in_custom_purchase_print_formats
 erpnext.patches.v4_0.create_price_list_if_missing
 execute:frappe.db.sql("update `tabItem` set end_of_life=null where end_of_life='0000-00-00'") #2014-06-16
 erpnext.patches.v4_0.update_users_report_view_settings
+erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling

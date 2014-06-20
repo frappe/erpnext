@@ -187,12 +187,13 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
+def set_missing_values(source, target):
+	target.ignore_pricing_rule = 1
+	target.run_method("set_missing_values")
+	target.run_method("calculate_taxes_and_totals")
+
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
-
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
@@ -226,10 +227,6 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
-
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)

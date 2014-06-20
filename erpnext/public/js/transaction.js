@@ -116,8 +116,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							barcode: item.barcode,
 							serial_no: item.serial_no,
 							warehouse: item.warehouse,
-							doctype: me.frm.doc.doctype,
-							docname: me.frm.doc.name,
+							parenttype: me.frm.doc.doctype,
+							parent: me.frm.doc.name,
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
@@ -130,7 +130,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_subcontracted: me.frm.doc.is_subcontracted,
-							transaction_date: me.frm.doc.transaction_date
+							transaction_date: me.frm.doc.transaction_date,
+							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
+							doctype: item.doctype,
+							name: item.name
 						}
 					},
 					callback: function(r) {
@@ -196,7 +199,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 
 			this.frm.script_manager.trigger("currency");
-			this.apply_pricing_rule()
+			this.apply_pricing_rule();
 		}
 	},
 
@@ -229,7 +232,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
-			this.apply_pricing_rule();
+			if(this.frm.doc.ignore_pricing_rule) {
+				this.calculate_taxes_and_totals();
+			} else {
+				this.apply_pricing_rule();
+			}
+
 		}
 	},
 
@@ -283,12 +291,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 		if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
-			this.apply_pricing_rule();
 		}
 	},
 
 	qty: function(doc, cdt, cdn) {
-		this.apply_pricing_rule(frappe.get_doc(cdt, cdn));
+		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
 	// tax rate
@@ -331,51 +338,71 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
-	apply_pricing_rule: function(item) {
+	ignore_pricing_rule: function() {
+		this.apply_pricing_rule();
+	},
+
+	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
 		var me = this;
-
-		var _apply_pricing_rule = function(item) {
-			return me.frm.call({
-				method: "erpnext.stock.get_item_details.apply_pricing_rule",
-				child: item,
-				args: {
-					args: {
-						item_code: item.item_code,
-						item_group: item.item_group,
-						brand: item.brand,
-						qty: item.qty,
-						customer: me.frm.doc.customer,
-						customer_group: me.frm.doc.customer_group,
-						territory: me.frm.doc.territory,
-						supplier: me.frm.doc.supplier,
-						supplier_type: me.frm.doc.supplier_type,
-						currency: me.frm.doc.currency,
-						conversion_rate: me.frm.doc.conversion_rate,
-						price_list: me.frm.doc.selling_price_list ||
-							 me.frm.doc.buying_price_list,
-						plc_conversion_rate: me.frm.doc.plc_conversion_rate,
-						company: me.frm.doc.company,
-						transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
-						campaign: me.frm.doc.campaign,
-						sales_partner: me.frm.doc.sales_partner
-					}
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.frm.script_manager.trigger("price_list_rate", item.doctype, item.name);
-					}
+		var item_list = this._get_item_list(item);
+		var args = {
+			"item_list": item_list,
+			"customer": me.frm.doc.customer,
+			"customer_group": me.frm.doc.customer_group,
+			"territory": me.frm.doc.territory,
+			"supplier": me.frm.doc.supplier,
+			"supplier_type": me.frm.doc.supplier_type,
+			"currency": me.frm.doc.currency,
+			"conversion_rate": me.frm.doc.conversion_rate,
+			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
+			"plc_conversion_rate": me.frm.doc.plc_conversion_rate,
+			"company": me.frm.doc.company,
+			"transaction_date": me.frm.doc.transaction_date || me.frm.doc.posting_date,
+			"campaign": me.frm.doc.campaign,
+			"sales_partner": me.frm.doc.sales_partner,
+			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
+			"parenttype": me.frm.doc.doctype,
+			"parent": me.frm.doc.name
+		};
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
+			args: {	args: args },
+			callback: function(r) {
+				if (!r.exc) {
+					$.each(r.message, function(i, d) {
+						$.each(d, function(k, v) {
+							if (["doctype", "name"].indexOf(k)===-1) {
+								frappe.model.set_value(d.doctype, d.name, k, v);
+							}
+						});
+					});
+					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 				}
+			}
+		});
+	},
+
+	_get_item_list: function(item) {
+		var item_list = [];
+		var append_item = function(d) {
+			item_list.push({
+				"doctype": d.doctype,
+				"name": d.name,
+				"item_code": d.item_code,
+				"item_group": d.item_group,
+				"brand": d.brand,
+				"qty": d.qty
 			});
-		}
+		};
 
-
-		if(item) {
-			_apply_pricing_rule(item);
+		if (item) {
+			append_item(item);
 		} else {
-			$.each(this.get_item_doclist(), function(n, item) {
-				_apply_pricing_rule(item);
+			$.each(this.get_item_doclist(), function(i, d) {
+				append_item(d);
 			});
 		}
+		return item_list;
 	},
 
 	included_in_print_rate: function(doc, cdt, cdn) {
