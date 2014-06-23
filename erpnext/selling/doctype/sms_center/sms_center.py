@@ -12,7 +12,6 @@ from frappe.model.document import Document
 from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 
 class SMSCenter(Document):
-
 	def create_receiver_list(self):
 		rec, where_clause = '', ''
 		if self.send_to == 'All Customer Contact':
@@ -71,6 +70,7 @@ class SMSCenter(Document):
 		return receiver_nos
 
 	def send_sms(self):
+		receiver_list = []
 		if not self.message:
 			msgprint(_("Please enter message before sending"))
 		else:
