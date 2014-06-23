@@ -17,4 +17,12 @@ cur_frm.cscript.onload = function() {
 
 frappe.ui.form.on("Serial No", "refresh", function(frm) {
 	frm.toggle_enable("item_code", frm.doc.__islocal);
+
+	if(frm.doc.status == "Sales Returned" && frm.doc.warehouse)
+		cur_frm.add_custom_button(__('Set Status as Available'), cur_frm.cscript.set_status_as_available);
 });
+
+cur_frm.cscript.set_status_as_available = function() {
+	cur_frm.set_value("status", "Available");
+	cur_frm.save()
+}
