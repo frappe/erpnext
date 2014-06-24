@@ -481,7 +481,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	set_dynamic_labels: function() {
 		this._super();
-		set_sales_bom_help(this.frm.doc);
+		this.set_sales_bom_help(this.frm.doc);
+	},
+
+	set_sales_bom_help: function(doc) {
+		if(!cur_frm.fields_dict.packing_list) return;
+		if ((doc.packing_details || []).length) {
+			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
+
+			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+				help_msg = "<div class='alert alert-warning'>" +
+					__("For 'Sales BOM' items, warehouse, serial no and batch no will be considered from the 'Packing List' table. If warehouse and batch no are same for all packing items for any 'Sales BOM' item, those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
+				"</div>";
+				frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+			}
+		} else {
+			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
+			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+				frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
+			}
+		}
+		refresh_field('sales_bom_help');
 	},
 
 	change_form_labels: function(company_currency) {
@@ -574,26 +594,5 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			var df = frappe.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
 			if(df) df.label = label;
 		});
-	},
-});
-
-// Help for Sales BOM items
-var set_sales_bom_help = function(doc) {
-	if(!cur_frm.fields_dict.packing_list) return;
-	if ((doc.packing_details || []).length) {
-		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
-
-		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			help_msg = "<div class='alert alert-warning'>" +
-				__("For 'Sales BOM' items, warehouse, serial no and batch no will be considered from the 'Packing List' table. If warehouse and batch no are same for all packing items for any 'Sales BOM' item, those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
-			"</div>";
-			frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
-		}
-	} else {
-		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
-		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
-		}
 	}
-	refresh_field('sales_bom_help');
-}
+});
