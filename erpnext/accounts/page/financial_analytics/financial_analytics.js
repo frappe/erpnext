@@ -232,7 +232,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 				indent: 0,
 				opening: 0,
 				checked: false,
-				report_type: me.pl_or_bs,
+				report_type: me.pl_or_bs=="Balance Sheet"? "Balance Sheet" : "Profit and Loss",
 			};
 			me.item_by_name[net_profit.name] = net_profit;
 
@@ -244,7 +244,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 
 			$.each(me.data, function(i, ac) {
 				if(!ac.parent_account && me.apply_filter(ac, "company") &&
-						ac.report_type==me.pl_or_bs) {
+						ac.report_type==net_profit.report_type) {
 					$.each(me.columns, function(i, col) {
 						if(col.formatter==me.currency_formatter && col.balance_type=="Dr") {
 							var bal = net_profit[col.date+"_dr"] -

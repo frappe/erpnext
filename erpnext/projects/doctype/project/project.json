@@ -1,6 +1,7 @@
 {
  "allow_attach": 1, 
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:project_name", 
  "creation": "2013-03-07 11:55:07", 
  "docstatus": 0, 
@@ -258,7 +259,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-05-27 03:49:15.252736", 
+ "modified": "2014-06-24 12:44:19.530707", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
