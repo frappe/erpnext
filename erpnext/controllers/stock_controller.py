@@ -239,7 +239,11 @@ class StockController(AccountsController):
 
 		else:
 			is_expense_account = frappe.db.get_value("Account", item.get("expense_account"), "report_type")=="Profit and Loss"
-			if is_expense_account and not item.get("cost_center"):
+			if not is_expense_account:
+				prefix = _("Row #{0}:").format(item.idx) if self.doctype != "Stock Reconciliation" else ""
+				frappe.throw(_("{0} {1} is not a valid Expense / Difference Account").format(prefix, item.expense_account))
+
+			elif not item.get("cost_center"):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
