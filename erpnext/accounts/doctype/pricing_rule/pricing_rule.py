@@ -107,9 +107,9 @@ def apply_pricing_rule(args):
 		args.transaction_type = "buying" if frappe.get_meta(args.parenttype).get_field("supplier") \
 			else "selling"
 
-	args_copy = copy.deepcopy(args)
-	args_copy.pop("item_list")
 	for item in args.get("item_list"):
+		args_copy = copy.deepcopy(args)
+		args_copy.pop("item_list")
 		args_copy.update(item)
 		out.append(get_pricing_rule_for_item(args_copy))
 
