@@ -6,6 +6,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
+import copy
 from frappe import throw, _
 from frappe.utils import flt, cint
 from frappe.model.document import Document
@@ -106,8 +107,11 @@ def apply_pricing_rule(args):
 		args.transaction_type = "buying" if frappe.get_meta(args.parenttype).get_field("supplier") \
 			else "selling"
 
-	for item in args.get("item_list"):
-		args_copy = args.copy()
+	item_list = args.get("item_list")
+	args.pop("item_list")
+
+	for item in item_list:
+		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		out.append(get_pricing_rule_for_item(args_copy))
 
