@@ -52,7 +52,7 @@ def get_events(start, end, filters=None):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	conditions = build_match_conditions("Task")
-	conditions and (" and " + conditions) or ""
+	conditions = conditions and (" and " + conditions) or ""
 
 	if filters:
 		filters = json.loads(filters)
