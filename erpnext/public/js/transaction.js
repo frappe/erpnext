@@ -7,6 +7,8 @@ frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {
 		var me = this;
+		this._super();
+
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
