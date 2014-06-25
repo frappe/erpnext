@@ -238,7 +238,11 @@ class StockController(AccountsController):
 			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
 
 		else:
-			is_expense_account = frappe.db.get_value("Account", item.get("expense_account"), "report_type")=="Profit and Loss"
+			is_expense_account = frappe.db.get_value("Account",
+				item.get("expense_account"), "report_type")=="Profit and Loss"
+			if self.doctype != "Purchase Receipt" and not is_expense_account:
+				frappe.throw(_("Expense / Difference account ({0}) must be a 'Profit or Loss' account")
+					.format(item.get("expense_account")))
 			if is_expense_account and not item.get("cost_center"):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
