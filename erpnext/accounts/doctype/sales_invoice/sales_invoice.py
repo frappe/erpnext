@@ -747,7 +747,7 @@ def assign_task_to_owner(inv, msg, users):
 			'doctype'		:	'Sales Invoice',
 			'name'			:	inv,
 			'description'	:	msg,
-			'priority'		:	'Urgent'
+			'priority'		:	'High'
 		}
 		assign_to.add(args)
 

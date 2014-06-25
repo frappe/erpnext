@@ -54,7 +54,6 @@ cur_frm.add_fetch('parent_account', 'root_type', 'root_type');
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
-		cur_frm.toggle_display('master_type', cstr(doc.account_type)=='');
 		cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' ||
 			in_list(['Customer', 'Supplier'], doc.master_type));
 	}
