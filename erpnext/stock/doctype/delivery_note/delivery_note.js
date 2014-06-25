@@ -12,6 +12,7 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.stock");
+frappe.provide("erpnext.stock.delivery_note");
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
@@ -40,7 +41,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(__('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
 		}
 
-		set_print_hide(doc, dt, dn);
+		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
 		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
 		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
@@ -124,7 +125,7 @@ cur_frm.cscript['Make Packing Slip'] = function() {
 	})
 }
 
-var set_print_hide= function(doc, cdt, cdn){
+erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 	var dn_fields = frappe.meta.docfield_map['Delivery Note'];
 	var dn_item_fields = frappe.meta.docfield_map['Delivery Note Item'];
 	var dn_fields_copy = dn_fields;
@@ -147,7 +148,7 @@ var set_print_hide= function(doc, cdt, cdn){
 }
 
 cur_frm.cscript.print_without_amount = function(doc, cdt, cdn) {
-	set_print_hide(doc, cdt, cdn);
+	erpnext.stock.delivery_note.set_print_hide(doc, cdt, cdn);
 }
 
 

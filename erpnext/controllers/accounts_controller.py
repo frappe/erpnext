@@ -424,8 +424,7 @@ class AccountsController(TransactionBase):
 
 	def get_stock_items(self):
 		stock_items = []
-		item_codes = list(set(item.item_code for item in
-			self.get(self.fname)))
+		item_codes = list(set(item.item_code for item in self.get(self.fname)))
 		if item_codes:
 			stock_items = [r[0] for r in frappe.db.sql("""select name
 				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
