@@ -168,12 +168,13 @@
   }, 
   {
    "fieldname": "amended_from", 
-   "fieldtype": "Data", 
+   "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
    "oldfieldtype": "Data", 
+   "options": "Quality Inspection", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
@@ -206,7 +207,7 @@
  "icon": "icon-search", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-26 03:05:52.140251", 
+ "modified": "2014-06-23 07:55:51.183113", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Quality Inspection", 

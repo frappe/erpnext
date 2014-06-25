@@ -263,10 +263,10 @@ class SalesInvoice(SellingController):
 		for d in self.get('entries'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem`
 				where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""", d.item_code)
-			acc =	frappe.db.sql("""select account_type from `tabAccount`
+			acc = frappe.db.sql("""select account_type from `tabAccount`
 				where name = %s and docstatus != 2""", d.income_account)
-			if item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset':
-				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(d.item_code), raise_exception=True)
+			if item and item[0][1] == 'Yes' and acc and acc[0][0] != 'Fixed Asset':
+				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(acc[0][0], d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
@@ -732,7 +732,7 @@ def notify_errors(inv, customer, owner):
 
 	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
 		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
-		message = frappe.get_template("template/emails/recurring_invoice_failed.html").render({
+		message = frappe.get_template("templates/emails/recurring_invoice_failed.html").render({
 			"name": inv,
 			"customer": customer
 		}))

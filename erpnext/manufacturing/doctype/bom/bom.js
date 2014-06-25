@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 // On REFRESH
+frappe.provide("erpnext.bom");
 cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
 
@@ -10,7 +11,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	}
 
 	cur_frm.cscript.with_operations(doc);
-	set_operation_no(doc);
+	erpnext.bom.set_operation_no(doc);
 }
 
 cur_frm.cscript.update_cost = function() {
@@ -30,10 +31,10 @@ cur_frm.cscript.with_operations = function(doc) {
 
 cur_frm.cscript.operation_no = function(doc, cdt, cdn) {
 	var child = locals[cdt][cdn];
-	if(child.parentfield=="bom_operations") set_operation_no(doc);
+	if(child.parentfield=="bom_operations") erpnext.bom.set_operation_no(doc);
 }
 
-var set_operation_no = function(doc) {
+erpnext.bom.set_operation_no = function(doc) {
 	var op_table = doc.bom_operations || [];
 	var operations = [];
 
@@ -53,7 +54,7 @@ var set_operation_no = function(doc) {
 }
 
 cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
-	set_operation_no(doc);
+	erpnext.bom.set_operation_no(doc);
 }
 
 cur_frm.add_fetch("item", "description", "description");
@@ -64,15 +65,15 @@ cur_frm.cscript.workstation = function(doc,dt,dn) {
 	frappe.model.with_doc("Workstation", d.workstation, function(i, r) {
 		d.hour_rate = r.docs[0].hour_rate;
 		refresh_field("hour_rate", dn, "bom_operations");
-		calculate_op_cost(doc);
-		calculate_total(doc);
+		erpnext.bom.calculate_op_cost(doc);
+		erpnext.bom.calculate_total(doc);
 	});
 }
 
 
 cur_frm.cscript.hour_rate = function(doc, dt, dn) {
-	calculate_op_cost(doc);
-	calculate_total(doc);
+	erpnext.bom.calculate_op_cost(doc);
+	erpnext.bom.calculate_total(doc);
 }
 
 
@@ -106,8 +107,8 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 				$.extend(d, r.message);
 				refresh_field("bom_materials");
 				doc = locals[doc.doctype][doc.name];
-				calculate_rm_cost(doc);
-				calculate_total(doc);
+				erpnext.bom.calculate_rm_cost(doc);
+				erpnext.bom.calculate_total(doc);
 			},
 			freeze: true
 		});
@@ -116,8 +117,8 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 
 
 cur_frm.cscript.qty = function(doc, cdt, cdn) {
-	calculate_rm_cost(doc);
-	calculate_total(doc);
+	erpnext.bom.calculate_rm_cost(doc);
+	erpnext.bom.calculate_total(doc);
 }
 
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
@@ -126,12 +127,12 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 		msgprint(__("You can not change rate if BOM mentioned agianst any item"));
 		get_bom_material_detail(doc, cdt, cdn);
 	} else {
-		calculate_rm_cost(doc);
-		calculate_total(doc);
+		erpnext.bom.calculate_rm_cost(doc);
+		erpnext.bom.calculate_total(doc);
 	}
 }
 
-var calculate_op_cost = function(doc) {
+erpnext.bom.calculate_op_cost = function(doc) {
 	var op = doc.bom_operations || [];
 	total_op_cost = 0;
 	for(var i=0;i<op.length;i++) {
@@ -143,7 +144,7 @@ var calculate_op_cost = function(doc) {
 	refresh_field('operating_cost');
 }
 
-var calculate_rm_cost = function(doc) {
+erpnext.bom.calculate_rm_cost = function(doc) {
 	var rm = doc.bom_materials || [];
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
@@ -159,7 +160,7 @@ var calculate_rm_cost = function(doc) {
 
 
 // Calculate Total Cost
-var calculate_total = function(doc) {
+erpnext.bom.calculate_total = function(doc) {
 	doc.total_cost = flt(doc.raw_material_cost) + flt(doc.operating_cost);
 	refresh_field('total_cost');
 }
@@ -200,7 +201,7 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = functi
 }
 
 cur_frm.cscript.validate = function(doc, dt, dn) {
-	calculate_op_cost(doc);
-	calculate_rm_cost(doc);
-	calculate_total(doc);
+	erpnext.bom.calculate_op_cost(doc);
+	erpnext.bom.calculate_rm_cost(doc);
+	erpnext.bom.calculate_total(doc);
 }

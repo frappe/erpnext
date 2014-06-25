@@ -24,7 +24,8 @@ def execute():
 				"applicable_for": "Customer",
 				"customer": d.parent,
 				"price_or_discount": "Discount Percentage",
-				"discount_percentage": d.discount
+				"discount_percentage": d.discount,
+				"selling": 1
 			}).insert()
 
 	frappe.db.auto_commit_on_many_writes = False

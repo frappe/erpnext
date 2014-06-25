@@ -16,8 +16,7 @@ def validate_receiver_nos(receiver_list):
 	validated_receiver_list = []
 	for d in receiver_list:
 		# remove invalid character
-		invalid_char_list = [' ', '+', '-', '(', ')']
-		for x in invalid_char_list:
+		for x in [' ', '+', '-', '(', ')']:
 			d = d.replace(x, '')
 
 		validated_receiver_list.append(d)
@@ -48,6 +47,13 @@ def get_contact_number(contact_name, value, key):
 
 @frappe.whitelist()
 def send_sms(receiver_list, msg, sender_name = ''):
+
+	import json
+	if isinstance(receiver_list, basestring):
+		receiver_list = json.loads(receiver_list)
+		if not isinstance(receiver_list, list):
+			receiver_list = [receiver_list]
+
 	receiver_list = validate_receiver_nos(receiver_list)
 
 	arg = {

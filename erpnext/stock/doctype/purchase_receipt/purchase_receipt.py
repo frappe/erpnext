@@ -287,6 +287,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			frappe.throw(_("All items have already been invoiced"))
 
 		doc = frappe.get_doc(target)
+		doc.ignore_pricing_rule = 1
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
 
