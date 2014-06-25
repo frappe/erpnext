@@ -275,6 +275,16 @@ class StockController(AccountsController):
 			and voucher_no=%s""", (self.doctype, self.name)):
 				self.make_gl_entries()
 
+	def get_serialized_items(self):
+		serialized_items = []
+		item_codes = list(set([d.item_code for d in self.get(self.fname)]))
+		if item_codes:
+			serialized_items = frappe.db.sql_list("""select name from `tabItem`
+				where has_serial_no='Yes' and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
+				tuple(item_codes))
+
+		return serialized_items
+
 def update_gl_entries_after(posting_date, posting_time, warehouse_account=None, for_items=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
