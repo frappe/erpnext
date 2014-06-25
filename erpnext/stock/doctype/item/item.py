@@ -6,10 +6,14 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
-from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
+from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
+from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 
 class WarehouseNotSet(frappe.ValidationError): pass
+
+condition_field = "show_in_website"
+template = "templates/generators/item.html"
 
 class Item(WebsiteGenerator):
 	def onload(self):
@@ -54,6 +58,14 @@ class Item(WebsiteGenerator):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
+
+	def get_context(self, context):
+		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
+			[{"name": self.name}]
+		if self.slideshow:
+			context.update(get_slideshow(self))
+
+		return context
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.is_stock_item=="Yes" and not self.default_warehouse:

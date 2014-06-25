@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr
-from erpnext.templates.generators.item_group import get_item_for_list_in_html
+from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
 
 no_cache = 1
 no_sitemap = 1
