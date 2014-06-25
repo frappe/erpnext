@@ -77,6 +77,7 @@ class StockEntry(StockController):
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
+		serialized_items = self.get_serialized_items()
 		for item in self.get("mtn_details"):
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
@@ -88,6 +89,12 @@ class StockEntry(StockController):
 				item.conversion_factor = 1
 			if not item.transfer_qty:
 				item.transfer_qty = item.qty * item.conversion_factor
+			if (self.purpose in ("Material Transfer", "Sales Return", "Purchase Return")
+				and not item.serial_no
+				and item.item_code in serialized_items):
+				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
+					frappe.MandatoryError)
+
 
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
