@@ -155,7 +155,7 @@
    "fieldtype": "Select", 
    "label": "Creation Document Type", 
    "no_copy": 1, 
-   "options": "\nPurchase Receipt\nStock Entry", 
+   "options": "\nPurchase Receipt\nStock Entry\nSerial No", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -418,7 +418,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-05-27 03:49:19.131746", 
+ "modified": "2014-06-26 12:33:49.911829", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 
