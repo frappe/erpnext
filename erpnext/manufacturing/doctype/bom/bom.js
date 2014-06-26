@@ -62,7 +62,7 @@ cur_frm.add_fetch("item", "stock_uom", "uom");
 
 cur_frm.cscript.workstation = function(doc,dt,dn) {
 	var d = locals[dt][dn];
-	frappe.model.with_doc("Workstation", d.workstation, function(i, r) {
+	frappe.model.with_doc("Workstation", d.workstation, function(name, r) {
 		d.hour_rate = r.docs[0].hour_rate;
 		refresh_field("hour_rate", dn, "bom_operations");
 		erpnext.bom.calculate_op_cost(doc);
