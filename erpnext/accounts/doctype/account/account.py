@@ -11,8 +11,9 @@ class Account(Document):
 	nsm_parent_field = 'parent_account'
 
 	def onload(self):
-		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings", "frozen_accounts_modifier")
-		if frozen_accounts_modifier in frappe.user.get_roles():
+		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
+			"frozen_accounts_modifier")
+		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.user.get_roles():
 			self.get("__onload").can_freeze_account = True
 
 

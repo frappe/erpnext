@@ -383,20 +383,20 @@ class SalesInvoice(SellingController):
 
 
 	def get_warehouse(self):
-		w = frappe.db.sql("""select warehouse from `tabPOS Setting`
-			where ifnull(user,'') = %s and company = %s""",
-			(frappe.session['user'], self.company))
-		w = w and w[0][0] or ''
-		if not w:
-			ps = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
+		user_pos_setting = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
+			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
+		warehouse = user_pos_setting[0][1] if user_pos_setting else None
+
+		if not warehouse:
+			global_pos_setting = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
 				where ifnull(user,'') = '' and company = %s""", self.company)
-			if not ps:
+
+			if global_pos_setting:
+				warehouse = global_pos_setting[0][1]
+			elif not user_pos_setting:
 				msgprint(_("POS Setting required to make POS Entry"), raise_exception=True)
-			elif not ps[0][1]:
-				msgprint(_("Warehouse required in POS Setting"))
-			else:
-				w = ps[0][1]
-		return w
+
+		return warehouse
 
 	def on_update(self):
 		if cint(self.update_stock) == 1:
@@ -747,7 +747,7 @@ def assign_task_to_owner(inv, msg, users):
 			'doctype'		:	'Sales Invoice',
 			'name'			:	inv,
 			'description'	:	msg,
-			'priority'		:	'Urgent'
+			'priority'		:	'High'
 		}
 		assign_to.add(args)
 
