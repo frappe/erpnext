@@ -19,8 +19,6 @@ notification_config = "erpnext.startup.notifications.get_notification_config"
 dump_report_map = "erpnext.startup.report_data_map.data_map"
 update_website_context = "erpnext.startup.webutils.update_website_context"
 
-mail_footer = "erpnext.startup.mail_footer"
-
 on_session_creation = "erpnext.startup.event_handlers.on_session_creation"
 before_tests = "erpnext.setup.utils.before_tests"
 
@@ -76,3 +74,4 @@ scheduler_events = {
 		"erpnext.setup.doctype.backup_manager.backup_manager.take_backups_weekly"
 	]
 }
+
