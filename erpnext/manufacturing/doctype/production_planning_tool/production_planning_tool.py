@@ -370,10 +370,8 @@ class ProductionPlanningTool(Document):
 		if items_to_be_requested:
 			for item in items_to_be_requested:
 				item_wrapper = frappe.get_doc("Item", item)
-				pr_doc = frappe.get_doc({
-					"doctype": "Material Request",
-					"__islocal": 1,
-					"naming_series": "IDT",
+				pr_doc = frappe.new_doc("Material Request")
+				pr_doc.update({
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,
