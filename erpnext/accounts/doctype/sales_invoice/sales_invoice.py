@@ -392,7 +392,7 @@ class SalesInvoice(SellingController):
 				where ifnull(user,'') = '' and company = %s""", self.company)
 
 			if global_pos_setting:
-				warehouse = global_pos_setting[0][1] if global_pos_setting else None
+				warehouse = global_pos_setting[0][1]
 			elif not user_pos_setting:
 				msgprint(_("POS Setting required to make POS Entry"), raise_exception=True)
 
