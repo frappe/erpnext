@@ -7,7 +7,7 @@ import frappe
 
 from frappe import _
 
-default_system_signature = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
+default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
 
 def after_install():
@@ -83,5 +83,5 @@ def set_single_defaults():
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
-	frappe.db.set_value("Outgoing Email Settings", "Outgoing Email Settings", "system_signature",
-		default_system_signature)
+	frappe.db.set_value("Outgoing Email Settings", "Outgoing Email Settings", "footer",
+		default_mail_footer)
