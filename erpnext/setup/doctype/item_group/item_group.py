@@ -102,5 +102,6 @@ def invalidate_cache_for(doc, item_group=None):
 		item_group = doc.name
 
 	for i in get_parent_item_groups(item_group):
-		if i.page_name:
-			clear_cache(i.page_name)
+		route = frappe.db.get_value("Website Route", {"ref_doctype":"Item Group", "docname": i.name})
+		if route:
+			clear_cache(route)

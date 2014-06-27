@@ -64,6 +64,7 @@ class Customer(TransactionBase):
 			c.customer = self.name
 			c.customer_name = self.customer_name
 			c.is_primary_contact = 1
+			c.ignore_permissions = getattr(self, "ignore_permissions", None)
 			try:
 				c.save()
 			except frappe.NameError:
