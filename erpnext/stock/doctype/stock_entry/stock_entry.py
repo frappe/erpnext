@@ -387,7 +387,7 @@ class StockEntry(StockController):
 	def get_item_details(self, args):
 		item = frappe.db.sql("""select stock_uom, description, item_name,
 			expense_account, buying_cost_center from `tabItem`
-			where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""",
+			where name = %s and (ifnull(end_of_life,'0000-00-00')='0000-00-00' or end_of_life > now())""",
 			(args.get('item_code')), as_dict = 1)
 		if not item:
 			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
