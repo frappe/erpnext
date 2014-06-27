@@ -40,9 +40,8 @@ class MaintenanceSchedule(TransactionBase):
 				child.idx = count
 				count = count + 1
 				child.sales_person = d.sales_person
-				child.save(1)
 
-		self.on_update()
+		self.save()
 
 	def on_submit(self):
 		if not self.get('maintenance_schedule_detail'):
