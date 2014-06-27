@@ -262,7 +262,7 @@ class SalesInvoice(SellingController):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
 		for d in self.get('entries'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem`
-				where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""", d.item_code)
+				where name = %s""", d.item_code)
 			acc = frappe.db.sql("""select account_type from `tabAccount`
 				where name = %s and docstatus != 2""", d.income_account)
 			if item and item[0][1] == 'Yes' and acc and acc[0][0] != 'Fixed Asset':
