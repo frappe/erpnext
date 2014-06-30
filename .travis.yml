@@ -27,5 +27,6 @@ script:
   - frappe --reinstall
   - frappe --install_app erpnext --verbose
   - frappe -b
+  - frappe --build_website
   - frappe --serve_test &
   - frappe --verbose --run_tests --app erpnext
