@@ -92,6 +92,11 @@ def get_data():
 					"doctype": "Territory",
 				},
 				{
+					"type": "doctype",
+					"name": "Sales Partner",
+					"description": _("Manage Sales Partners."),
+				},
+				{
 					"type": "page",
 					"label": _("Sales Person"),
 					"name": "Sales Browser",

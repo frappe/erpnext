@@ -46,3 +46,6 @@ class SalesPartner(WebsiteGenerator):
 
 		return context
 
+	def get_parent_website_route(self):
+		parent_website_sitemap = super(SalesPartner, self).get_parent_website_route()
+		return parent_website_sitemap or "partners"

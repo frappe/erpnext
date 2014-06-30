@@ -50,8 +50,10 @@ class Item(WebsiteGenerator):
 		if not self.parent_website_route:
 			self.parent_website_route = frappe.get_website_route("Item Group", self.item_group)
 
-		if self.name:
-			self.old_page_name = frappe.db.get_value('Item', self.name, 'page_name')
+		if not self.get("__islocal"):
+			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
+			self.old_website_item_groups = frappe.db.sql_list("""select item_group from `tabWebsite Item Group`
+				where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
 		super(Item, self).on_update()
@@ -216,7 +218,7 @@ class Item(WebsiteGenerator):
 		if self.name==self.item_name:
 			page_name_from = self.name
 		else:
-			page_name_from = self.name + " " + self.item_name
+			page_name_from = self.name + " - " + self.item_name
 
 		return page_name_from
 
@@ -363,6 +365,12 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 def invalidate_cache_for_item(doc):
 	invalidate_cache_for(doc, doc.item_group)
-	for d in doc.get({"doctype":"Website Item Group"}):
-		if d.item_group:
-			invalidate_cache_for(doc, d.item_group)
+
+	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
+		+ [d.item_group for d in doc.get({"doctype":"Website Item Group"}) if d.item_group]))
+
+	for item_group in website_item_groups:
+		invalidate_cache_for(doc, item_group)
+
+	if doc.get("old_item_group"):
+		invalidate_cache_for(doc, doc.old_item_group)
