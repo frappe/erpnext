@@ -10,8 +10,6 @@ from frappe import _, msgprint
 from frappe.model.document import Document
 
 class AuthorizationRule(Document):
-
-
 	def check_duplicate_entry(self):
 		exists = frappe.db.sql("""select name, docstatus from `tabAuthorization Rule`
 			where transaction = %s and based_on = %s and system_user = %s
@@ -49,5 +47,4 @@ class AuthorizationRule(Document):
 	def validate(self):
 		self.check_duplicate_entry()
 		self.validate_rule()
-		self.validate_master_name()
 		if not self.value: self.value = 0.0
