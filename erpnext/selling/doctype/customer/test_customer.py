@@ -41,10 +41,22 @@ class TestCustomer(unittest.TestCase):
 			self.assertEquals(value, details.get(key))
 
 	def test_rename(self):
+		comment = frappe.new_doc("Comment")
+		comment.update({
+			"comment": "Test Comment for Rename",
+			"comment_doctype": "Customer",
+			"comment_docname": "_Test Customer 1"
+		})
+		comment.insert()
+
 		frappe.rename_doc("Customer", "_Test Customer 1", "_Test Customer 1 Renamed")
 
 		self.assertTrue(frappe.db.exists("Customer", "_Test Customer 1 Renamed"))
 		self.assertFalse(frappe.db.exists("Customer", "_Test Customer 1"))
+
+		# test that comment gets renamed
+		self.assertEquals(frappe.db.get_value("Comment",
+			{"comment_doctype": "Customer", "comment_docname": "Test Customer 1 Renamed"}), comment.name)
 
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 
