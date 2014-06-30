@@ -288,6 +288,7 @@
   },
   {
    "amend": 0,
+   "apply_user_permissions": 0,
    "create": 1,
    "delete": 1,
    "email": 1,

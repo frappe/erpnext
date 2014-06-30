@@ -6,10 +6,14 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
-from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
+from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
+from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 
 class WarehouseNotSet(frappe.ValidationError): pass
+
+condition_field = "show_in_website"
+template = "templates/generators/item.html"
 
 class Item(WebsiteGenerator):
 	def onload(self):
@@ -46,14 +50,24 @@ class Item(WebsiteGenerator):
 		if not self.parent_website_route:
 			self.parent_website_route = frappe.get_website_route("Item Group", self.item_group)
 
-		if self.name:
-			self.old_page_name = frappe.db.get_value('Item', self.name, 'page_name')
+		if not self.get("__islocal"):
+			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
+			self.old_website_item_groups = frappe.db.sql_list("""select item_group from `tabWebsite Item Group`
+				where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
 		super(Item, self).on_update()
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
+
+	def get_context(self, context):
+		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
+			[{"name": self.name}]
+		if self.slideshow:
+			context.update(get_slideshow(self))
+
+		return context
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.is_stock_item=="Yes" and not self.default_warehouse:
@@ -204,7 +218,7 @@ class Item(WebsiteGenerator):
 		if self.name==self.item_name:
 			page_name_from = self.name
 		else:
-			page_name_from = self.name + " " + self.item_name
+			page_name_from = self.name + " - " + self.item_name
 
 		return page_name_from
 
@@ -351,6 +365,12 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 def invalidate_cache_for_item(doc):
 	invalidate_cache_for(doc, doc.item_group)
-	for d in doc.get({"doctype":"Website Item Group"}):
-		if d.item_group:
-			invalidate_cache_for(doc, d.item_group)
+
+	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
+		+ [d.item_group for d in doc.get({"doctype":"Website Item Group"}) if d.item_group]))
+
+	for item_group in website_item_groups:
+		invalidate_cache_for(doc, item_group)
+
+	if doc.get("old_item_group"):
+		invalidate_cache_for(doc, doc.old_item_group)

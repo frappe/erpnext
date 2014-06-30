@@ -64,3 +64,4 @@ execute:frappe.db.sql("update `tabItem` set end_of_life=null where end_of_life='
 erpnext.patches.v4_0.update_users_report_view_settings
 erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling
 erpnext.patches.v4_0.set_naming_series_property_setter
+erpnext.patches.v4_1.set_outgoing_email_footer

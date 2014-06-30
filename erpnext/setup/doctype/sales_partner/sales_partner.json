@@ -188,6 +188,7 @@
    "permlevel": 0
   }, 
   {
+   "default": "partners", 
    "fieldname": "parent_website_route", 
    "fieldtype": "Link", 
    "label": "Parent Website Route", 
@@ -198,7 +199,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-05-27 03:49:18.661354", 
+ "modified": "2014-06-27 09:21:33.687012", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 
