@@ -131,6 +131,8 @@ def get_pricing_rule_for_item(args):
 
 	if not (args.item_group and args.brand):
 		args.item_group, args.brand = frappe.db.get_value("Item", args.item_code, ["item_group", "brand"])
+		if not args.item_group:
+			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
 	if args.customer and not (args.customer_group and args.territory):
 		args.customer_group, args.territory = frappe.db.get_value("Customer", args.customer,
@@ -188,12 +190,15 @@ def get_pricing_rules(args):
 		conditions += """ and %(transaction_date)s between ifnull(valid_from, '2000-01-01')
 			and ifnull(valid_upto, '2500-12-31')"""
 
+	item_group_condition = _get_tree_conditions("Item Group", False)
+	if item_group_condition: item_group_condition = " or " + item_group_condition
+
 	return frappe.db.sql("""select * from `tabPricing Rule`
-		where (item_code=%(item_code)s or {item_group_condition} or brand=%(brand)s)
+		where (item_code=%(item_code)s {item_group_condition} or brand=%(brand)s)
 			and docstatus < 2 and ifnull(disable, 0) = 0
 			and ifnull({transaction_type}, 0) = 1 {conditions}
 		order by priority desc, name desc""".format(
-			item_group_condition=_get_tree_conditions("Item Group", False),
+			item_group_condition=item_group_condition,
 			transaction_type=args.transaction_type, conditions=conditions), args, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):

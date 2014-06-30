@@ -169,13 +169,9 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 }
 
 cur_frm.cscript.copy_from_item_group = function(doc) {
-	frappe.model.with_doc("Item Group", doc.item_group, function(name, r) {
-		$.each((r.docs[0].item_website_specifications || []), function(i, d) {
-			var n = frappe.model.add_child(doc, "Item Website Specification", "item_website_specifications");
-			n.label = d.label;
-			n.description = d.description;
-		});
-		cur_frm.refresh();
+	return cur_frm.call({
+		doc: doc,
+		method: "copy_specification_from_item_group"
 	});
 }
 

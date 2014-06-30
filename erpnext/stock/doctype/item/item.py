@@ -270,6 +270,15 @@ class Item(WebsiteGenerator):
 			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 		frappe.db.auto_commit_on_many_writes = 0
 
+	def copy_specification_from_item_group(self):
+		self.set("item_website_specifications", [])
+		if self.item_group:
+			for label, desc in frappe.db.get_values("Item Website Specification",
+				{"parent": self.item_group}, ["label", "description"]):
+					row = self.append("item_website_specifications")
+					row.label = label
+					row.description = desc
+
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
