@@ -16,10 +16,11 @@ class SellingController(StockController):
 		check_active_sales_items(self)
 
 	def get_sender(self, comm):
-		if frappe.db.get_value('Sales Email Settings', None, 'extract_emails'):
-			return frappe.db.get_value('Sales Email Settings', None, 'email_id')
-		else:
-			return comm.sender or frappe.session.user
+		sender = None
+		if cint(frappe.db.get_value('Sales Email Settings', None, 'extract_emails')):
+			sender = frappe.db.get_value('Sales Email Settings', None, 'email_id')
+
+		return sender or comm.sender or frappe.session.user
 
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
