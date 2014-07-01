@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
+import re
 from frappe.model.naming import make_autoname
 from frappe.utils import cint
 from frappe.utils.email_lib import sendmail_to_system_managers
@@ -201,4 +202,46 @@ def rename_docs():
 		frappe.db.commit()
 
 		sendmail_to_system_managers("[Important] [ERPNext] Renamed Documents via Patch", content)
+
+def fix_comments():
+	renamed_docs_comments = frappe.db.sql("""select name, comment, comment_doctype, comment_docname
+		from `tabComment` where comment like 'Renamed from **%** to %'
+		order by comment_doctype, comment_docname""", as_dict=True)
+
+	# { "comment_doctype": [("old_comment_docname", "new_comment_docname", ['comment1', 'comment2', ...])] }
+	comments_to_rename = {}
+
+	for comment in renamed_docs_comments:
+		old_comment_docname, new_comment_docname = re.findall("""Renamed from \*\*([^\*]*)\*\* to (.*)""", comment.comment)[0]
+		if not frappe.db.exists(comment.comment_doctype, old_comment_docname):
+			orphaned_comments = frappe.db.sql_list("""select comment from `tabComment`
+				where comment_doctype=%s and comment_docname=%s""", (comment.comment_doctype, old_comment_docname))
+			if orphaned_comments:
+				to_rename = (old_comment_docname, new_comment_docname, orphaned_comments)
+				comments_to_rename.setdefault(comment.comment_doctype, []).append(to_rename)
+
+	for doctype in comments_to_rename:
+		if not comments_to_rename[doctype]:
+			continue
+
+		print
+		print "Fix comments for", doctype, ":"
+		for (old_comment_docname, new_comment_docname, comments) in comments_to_rename[doctype]:
+			print
+			print old_comment_docname, "-->", new_comment_docname
+			print "\n".join(comments)
+
+		print
+		confirm = raw_input("do it? (yes / anything else): ")
+		if confirm=="yes":
+			for (old_comment_docname, new_comment_docname, comments) in comments_to_rename[doctype]:
+				fix_comment(doctype, old_comment_docname, new_comment_docname)
+			print "Fixed"
+
+	frappe.db.commit()
+
+def fix_comment(comment_doctype, old_comment_docname, new_comment_docname):
+	frappe.db.sql("""update `tabComment` set comment_docname=%s
+		where comment_doctype=%s and comment_docname=%s""",
+		(new_comment_docname, comment_doctype, old_comment_docname))
 
