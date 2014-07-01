@@ -147,7 +147,7 @@ class JournalVoucher(AccountsController):
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
-				r.append(_("{0} {1} against Invoice {1}").format(currency, fmt_money(flt(d.credit)), d.against_invoice))
+				r.append(_("{0} {1} against Invoice {2}").format(currency, fmt_money(flt(d.credit)), d.against_invoice))
 
 			if d.against_voucher and d.debit:
 				bill_no = frappe.db.sql("""select bill_no, bill_date, currency
