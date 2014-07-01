@@ -82,7 +82,7 @@ def get_balance_on(account=None, date=None):
 			and ac.lft >= %s and ac.rgt <= %s
 		)""" % (acc.lft, acc.rgt))
 	else:
-		cond.append("""gle.account = "%s" """ % (account.replace('"', '\"'), ))
+		cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
 
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
