@@ -183,10 +183,10 @@ class StatusUpdater(Document):
 					args['second_source_condition'] = ""
 					if args.get('second_source_dt') and args.get('second_source_field') \
 							and args.get('second_join_field'):
-						args['second_source_condition'] = """ + (select sum(%(second_source_field)s)
+						args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
 							from `tab%(second_source_dt)s`
 							where `%(second_join_field)s`="%(detail_id)s"
-							and (docstatus=1))""" % args
+							and (docstatus=1)), 0)""" % args
 
 					if args['detail_id']:
 						frappe.db.sql("""update `tab%(target_dt)s`
