@@ -7,6 +7,7 @@ from frappe import _, throw
 from frappe.utils import flt, cint, add_days
 import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from erpnext.setup.utils import get_exchange_rate
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -30,27 +31,7 @@ def get_item_details(args):
 			"ignore_pricing_rule": 0/1
 		}
 	"""
-
-	if isinstance(args, basestring):
-		args = json.loads(args)
-
-	args = frappe._dict(args)
-
-	if not args.get("transaction_type"):
-		if args.get("parenttype")=="Material Request" or \
-				frappe.get_meta(args.get("parenttype")).get_field("supplier"):
-			args.transaction_type = "buying"
-		else:
-			args.transaction_type = "selling"
-
-	if not args.get("price_list"):
-		args.price_list = args.get("selling_price_list") or args.get("buying_price_list")
-
-	if args.barcode:
-		args.item_code = get_item_code(barcode=args.barcode)
-	elif not args.item_code and args.serial_no:
-		args.item_code = get_item_code(serial_no=args.serial_no)
-
+	args = process_args(args)
 	item_doc = frappe.get_doc("Item", args.item_code)
 	item = item_doc
 
@@ -85,6 +66,29 @@ def get_item_details(args):
 			item.lead_time_days)
 
 	return out
+
+def process_args(args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+
+	if not args.get("transaction_type"):
+		if args.get("parenttype")=="Material Request" or \
+				frappe.get_meta(args.get("parenttype")).get_field("supplier"):
+			args.transaction_type = "buying"
+		else:
+			args.transaction_type = "selling"
+
+	if not args.get("price_list"):
+		args.price_list = args.get("selling_price_list") or args.get("buying_price_list")
+
+	if args.barcode:
+		args.item_code = get_item_code(barcode=args.barcode)
+	elif not args.item_code and args.serial_no:
+		args.item_code = get_item_code(serial_no=args.serial_no)
+
+	return args
 
 def get_item_code(barcode=None, serial_no=None):
 	if barcode:
@@ -273,3 +277,73 @@ def get_projected_qty(item_code, warehouse):
 def get_available_qty(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty"], as_dict=True) or {}
+
+@frappe.whitelist()
+def apply_price_list(args):
+	"""
+		args = {
+			"item_list": [{"doctype": "", "name": "", "item_code": "", "brand": "", "item_group": ""}, ...],
+			"conversion_rate": 1.0,
+			"selling_price_list": None,
+			"price_list_currency": None,
+			"plc_conversion_rate": 1.0,
+			"parenttype": "",
+			"parent": "",
+			"supplier": None,
+			"transaction_date": None,
+			"conversion_rate": 1.0,
+			"buying_price_list": None,
+			"transaction_type": "selling",
+			"ignore_pricing_rule": 0/1
+		}
+	"""
+	args = process_args(args)
+
+	parent = get_price_list_currency_and_exchange_rate(args)
+	children = []
+
+	if "item_list" in args:
+		item_list = args.get("item_list")
+		del args["item_list"]
+
+		args.update(parent)
+
+		for item in item_list:
+			args_copy = frappe._dict(args.copy())
+			args_copy.update(item)
+			item_details = apply_price_list_on_item(args_copy)
+			children.append(item_details)
+
+	return {
+		"parent": parent,
+		"children": children
+	}
+
+def apply_price_list_on_item(args):
+	item_details = frappe._dict()
+	item_doc = frappe.get_doc("Item", args.item_code)
+	get_price_list_rate(args, item_doc, item_details)
+	item_details.update(get_pricing_rule_for_item(args))
+	return item_details
+
+def get_price_list_currency(price_list):
+	result = frappe.db.get_value("Price List", {"name": price_list,
+		"enabled": 1}, ["name", "currency"], as_dict=True)
+
+	if not result:
+		throw(_("Price List {0} is disabled").format(price_list))
+
+	return result.currency
+
+def get_price_list_currency_and_exchange_rate(args):
+	price_list_currency = get_price_list_currency(args.price_list)
+	plc_conversion_rate = args.plc_conversion_rate
+
+	if (not plc_conversion_rate) or (price_list_currency != args.price_list_currency):
+		plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency) \
+			or plc_conversion_rate
+
+	return {
+		"price_list_currency": price_list_currency,
+		"plc_conversion_rate": plc_conversion_rate
+	}

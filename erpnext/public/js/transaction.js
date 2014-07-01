@@ -243,24 +243,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		}
 	},
 
-	get_price_list_currency: function(buying_or_selling) {
-		var me = this;
-		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
-		if(this.frm.doc[fieldname]) {
-			return this.frm.call({
-				method: "erpnext.setup.utils.get_price_list_currency",
-				args: {
-					price_list: this.frm.doc[fieldname],
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.price_list_currency();
-					}
-				}
-			});
-		}
-	},
-
 	get_exchange_rate: function(from_currency, to_currency, callback) {
 		var exchange_name = from_currency + "-" + to_currency;
 		frappe.model.with_doc("Currency Exchange", exchange_name, function(name) {
@@ -346,9 +328,22 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
 		var me = this;
-		var item_list = this._get_item_list(item);
-		var args = {
-			"item_list": item_list,
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
+			args: {	args: this._get_args(item) },
+			callback: function(r) {
+				if (!r.exc) {
+					me._set_values_for_item_list(r.message);
+					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+				}
+			}
+		});
+	},
+
+	_get_args: function(item) {
+		var me = this;
+		return {
+			"item_list": this._get_item_list(item),
 			"customer": me.frm.doc.customer,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
@@ -366,22 +361,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			"parenttype": me.frm.doc.doctype,
 			"parent": me.frm.doc.name
 		};
-		return this.frm.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
-			args: {	args: args },
-			callback: function(r) {
-				if (!r.exc) {
-					$.each(r.message, function(i, d) {
-						$.each(d, function(k, v) {
-							if (["doctype", "name"].indexOf(k)===-1) {
-								frappe.model.set_value(d.doctype, d.name, k, v);
-							}
-						});
-					});
-					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
-				}
-			}
-		});
 	},
 
 	_get_item_list: function(item) {
@@ -405,6 +384,31 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			});
 		}
 		return item_list;
+	},
+
+	_set_values_for_item_list: function(children) {
+		$.each(children, function(i, d) {
+			$.each(d, function(k, v) {
+				if (["doctype", "name"].indexOf(k)===-1) {
+					frappe.model.set_value(d.doctype, d.name, k, v);
+				}
+			});
+		});
+	},
+
+	apply_price_list: function() {
+		var me = this;
+		return this.frm.call({
+			method: "erpnext.stock.get_item_details.apply_price_list",
+			args: {	args: this._get_args() },
+			callback: function(r) {
+				if (!r.exc) {
+					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
+					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
+					me._set_values_for_item_list(r.message.children);
+				}
+			}
+		});
 	},
 
 	included_in_print_rate: function(doc, cdt, cdn) {
