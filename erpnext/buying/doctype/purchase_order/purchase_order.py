@@ -137,7 +137,7 @@ class PurchaseOrder(BuyingController):
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
-			msgprint(_("{0} {1} has been modified. Please refresh").format(self.doctype, self.name),
+			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
 
 	def update_status(self, status):
