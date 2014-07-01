@@ -3212,7 +3212,7 @@ website page link,الموقع رابط الصفحة
 {0} must have role 'Leave Approver',{0} يجب أن يكون دور ' اترك الموافق '
 {0} valid serial nos for Item {1},{0} غ المسلسل صالحة لل تفاصيل {1}
 {0} {1} against Bill {2} dated {3},{0} {1} ضد بيل {2} بتاريخ {3}
-{0} {1} against Invoice {1},{0} {1} ضد الفاتورة {1}
+{0} {1} against Invoice {2},{0} {1} ضد الفاتورة {2}
 {0} {1} has already been submitted,{0} {1} وقد تم بالفعل قدمت
 {0} {1} has been modified. Please Refresh,{0} {1} تم تعديل . يرجى تحديث
 {0} {1} has been modified. Please refresh,{0} {1} تم تعديل . يرجى تحديث

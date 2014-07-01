@@ -3212,7 +3212,7 @@ website page link,sito web link alla pagina
 {0} must have role 'Leave Approver',{0} deve avere ruolo di ' Lascia Approvatore '
 {0} valid serial nos for Item {1},{0} nos seriali validi per Voce {1}
 {0} {1} against Bill {2} dated {3},{0} {1} contro Bill {2} del {3}
-{0} {1} against Invoice {1},{0} {1} contro fattura {1}
+{0} {1} against Invoice {2},{0} {1} contro fattura {2}
 {0} {1} has already been submitted,{0} {1} è già stata presentata
 {0} {1} has been modified. Please Refresh,{0} {1} è stato modificato . Si prega Aggiorna
 {0} {1} has been modified. Please refresh,{0} {1} è stato modificato . Si prega di aggiornare

@@ -3212,7 +3212,7 @@ website page link,Website-Link
 {0} must have role 'Leave Approver',"{0} muss Rolle "" Genehmiger Leave ' haben"
 {0} valid serial nos for Item {1},{0} gültige Seriennummernfür Artikel {1}
 {0} {1} against Bill {2} dated {3},{0} {1} gegen Bill {2} {3} vom
-{0} {1} against Invoice {1},{0} {1} gegen Rechnung {1}
+{0} {1} against Invoice {2},{0} {1} gegen Rechnung {2}
 {0} {1} has already been submitted,{0} {1} wurde bereits eingereicht
 {0} {1} has been modified. Please Refresh,{0} {1} wurde geändert . Bitte aktualisieren
 {0} {1} has been modified. Please refresh,{0} {1} wurde geändert . Bitte aktualisieren

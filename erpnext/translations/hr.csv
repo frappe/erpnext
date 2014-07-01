@@ -3212,7 +3212,7 @@ website page link,web stranica vode
 {0} must have role 'Leave Approver',{0} mora imati ulogu ' Leave odobravatelju '
 {0} valid serial nos for Item {1},{0} valjani serijski nos za Stavka {1}
 {0} {1} against Bill {2} dated {3},{0} {1} od {2} Billa od {3}
-{0} {1} against Invoice {1},{0} {1} protiv fakture {1}
+{0} {1} against Invoice {2},{0} {1} protiv fakture {2}
 {0} {1} has already been submitted,{0} {1} je već poslan
 {0} {1} has been modified. Please Refresh,{0} {1} je izmijenjen . Osvježite
 {0} {1} has been modified. Please refresh,{0} {1} je izmijenjen . osvježite

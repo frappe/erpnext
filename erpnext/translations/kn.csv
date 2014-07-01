@@ -3212,7 +3212,7 @@ website page link,ವೆಬ್ಸೈಟ್ ಪುಟ ಲಿಂಕ್
 {0} must have role 'Leave Approver',{0} ಪಾತ್ರದಲ್ಲಿ 'ಲೀವ್ ಅನುಮೋದಕ ' ಹೊಂದಿರಬೇಕು
 {0} valid serial nos for Item {1},ಐಟಂ {0} ಮಾನ್ಯ ಸರಣಿ ಸೂಲ {1}
 {0} {1} against Bill {2} dated {3},{0} {1} ಮಸೂದೆ ವಿರುದ್ಧ {2} {3} ದಿನಾಂಕ
-{0} {1} against Invoice {1},{0} {1} {1} ಸರಕುಪಟ್ಟಿ ವಿರುದ್ಧ
+{0} {1} against Invoice {2},{0} {1} {2} ಸರಕುಪಟ್ಟಿ ವಿರುದ್ಧ
 {0} {1} has already been submitted,{0} {1} ಈಗಾಗಲೇ ಸಲ್ಲಿಸಲಾಗಿದೆ
 {0} {1} has been modified. Please Refresh,{0} {1} ಮಾರ್ಪಡಿಸಲಾಗಿದೆ. ರಿಫ್ರೆಶ್ ಮಾಡಿ
 {0} {1} has been modified. Please refresh,{0} {1} ಮಾರ್ಪಡಿಸಲಾಗಿದೆ. ರಿಫ್ರೆಶ್ ಮಾಡಿ

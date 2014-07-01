@@ -3212,7 +3212,7 @@ website page link,網站頁面的鏈接
 {0} must have role 'Leave Approver',{0}必須有角色“請假審批”
 {0} valid serial nos for Item {1},{0}有效的序列號的項目{1}
 {0} {1} against Bill {2} dated {3},{0} {1}反對比爾{2}於{3}
-{0} {1} against Invoice {1},{0} {1}對發票{1}
+{0} {1} against Invoice {2},{0} {1}對發票{2}
 {0} {1} has already been submitted,{0} {1}已經提交
 {0} {1} has been modified. Please Refresh,{0} {1}已被修改。請刷新
 {0} {1} has been modified. Please refresh,{0} {1}已被修改。請刷新

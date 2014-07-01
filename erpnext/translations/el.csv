@@ -3212,7 +3212,7 @@ website page link,Ιστοσελίδα link της σελίδας
 {0} must have role 'Leave Approver',{0} πρέπει να έχει ρόλο « Αφήστε Έγκρισης »
 {0} valid serial nos for Item {1},{0} έγκυρο σειριακό nos για τη θέση {1}
 {0} {1} against Bill {2} dated {3},{0} {1} εναντίον Bill {2} { 3 με ημερομηνία }
-{0} {1} against Invoice {1},{0} {1} κατά Τιμολόγιο {1}
+{0} {1} against Invoice {2},{0} {1} κατά Τιμολόγιο {2}
 {0} {1} has already been submitted,{0} {1} έχει ήδη υποβληθεί
 {0} {1} has been modified. Please Refresh,{0} {1} έχει τροποποιηθεί . Παρακαλούμε Ανανέωση
 {0} {1} has been modified. Please refresh,{0} {1} έχει τροποποιηθεί . Παρακαλούμε ανανεώστε

@@ -3212,7 +3212,7 @@ website page link,இணைய பக்கம் இணைப்பு
 {0} must have role 'Leave Approver',{0} பங்கு 'விடுப்பு அப்ரூவரான ' வேண்டும்
 {0} valid serial nos for Item {1},உருப்படி {0} செல்லுபடியாகும் தொடர் இலக்கங்கள் {1}
 {0} {1} against Bill {2} dated {3},{0} {1} பில் எதிராக {2} தேதியிட்ட {3}
-{0} {1} against Invoice {1},{0} {1} விலைப்பட்டியல் எதிரான {1}
+{0} {1} against Invoice {2},{0} {1} விலைப்பட்டியல் எதிரான {2}
 {0} {1} has already been submitted,{0} {1} ஏற்கனவே சமர்ப்பித்த
 {0} {1} has been modified. Please Refresh,{0} {1} மாற்றப்பட்டுள்ளது . புதுப்பிக்கவும்
 {0} {1} has been modified. Please refresh,{0} {1} மாற்றப்பட்டுள்ளது . புதுப்பிக்கவும்

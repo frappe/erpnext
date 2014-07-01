@@ -3212,7 +3212,7 @@ website page link,网站页面的链接
 {0} must have role 'Leave Approver',{0}必须有角色“请假审批”
 {0} valid serial nos for Item {1},{0}有效的序列号的项目{1}
 {0} {1} against Bill {2} dated {3},{0} {1}反对比尔{2}于{3}
-{0} {1} against Invoice {1},{0} {1}对发票{1}
+{0} {1} against Invoice {2},{0} {1}对发票{2}
 {0} {1} has already been submitted,{0} {1}已经提交
 {0} {1} has been modified. Please Refresh,{0} {1}已被修改。请刷新
 {0} {1} has been modified. Please refresh,{0} {1}已被修改。请刷新

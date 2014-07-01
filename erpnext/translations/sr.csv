@@ -3212,7 +3212,7 @@ website page link,веб страница веза
 {0} must have role 'Leave Approver',"{0} должен иметь роль "" Оставить утверждающего '"
 {0} valid serial nos for Item {1},{0} действительные серийные NOS для Пункт {1}
 {0} {1} against Bill {2} dated {3},{0} {1} против Билла {2} от {3}
-{0} {1} against Invoice {1},{0} {1} против Invoice {1}
+{0} {1} against Invoice {2},{0} {1} против Invoice {2}
 {0} {1} has already been submitted,{0} {1} уже представлен
 {0} {1} has been modified. Please Refresh,{0} {1} был изменен. Пожалуйста Обновить
 {0} {1} has been modified. Please refresh,"{0} {1} был изменен. Пожалуйста, обновите"

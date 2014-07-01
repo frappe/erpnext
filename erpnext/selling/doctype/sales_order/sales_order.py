@@ -209,7 +209,7 @@ class SalesOrder(SellingController):
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" %
 			( mod_db, cstr(self.modified)))
 		if date_diff and date_diff[0][0]:
-			frappe.throw(_("{0} {1} has been modified. Please Refresh").format(self.doctype, self.name))
+			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
 	def stop_sales_order(self):
 		self.check_modified_date()
