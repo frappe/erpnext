@@ -1,1 +1,2 @@
 en english
+hu hungarian
