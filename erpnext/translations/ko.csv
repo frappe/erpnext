@@ -3212,7 +3212,7 @@ website page link,pagina site-ului link-ul
 {0} must have role 'Leave Approver',"{0} trebuie să aibă rol de ""Leave aprobator"""
 {0} valid serial nos for Item {1},{0} nos serie valabile pentru postul {1}
 {0} {1} against Bill {2} dated {3},{0} {1} împotriva Bill {2} din {3}
-{0} {1} against Invoice {1},{0} {1} împotriva Factura {1}
+{0} {1} against Invoice {2},{0} {1} împotriva Factura {2}
 {0} {1} has already been submitted,{0} {1} a fost deja prezentat
 {0} {1} has been modified. Please Refresh,{0} {1} a fost modificat. Va rugam sa Refresh
 {0} {1} has been modified. Please refresh,{0} {1} a fost modificat. Vă rugăm să reîmprospătați

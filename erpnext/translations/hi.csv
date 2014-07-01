@@ -3212,7 +3212,7 @@ website page link,वेबसाइट के पेज लिंक
 {0} must have role 'Leave Approver',{0} भूमिका ' लीव अनुमोदक ' होना चाहिए
 {0} valid serial nos for Item {1},आइटम के लिए {0} वैध धारावाहिक नग {1}
 {0} {1} against Bill {2} dated {3},{0} {1} विधेयक के खिलाफ {2} दिनांक {3}
-{0} {1} against Invoice {1},{0} {1} चालान के खिलाफ {1}
+{0} {1} against Invoice {2},{0} {1} चालान के खिलाफ {2}
 {0} {1} has already been submitted,{0} {1} पहले से ही प्रस्तुत किया गया है
 {0} {1} has been modified. Please Refresh,{0} {1} संशोधित किया गया है . ताज़ा करें
 {0} {1} has been modified. Please refresh,{0} {1} संशोधित किया गया है . ताज़ा करें

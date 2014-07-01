@@ -142,7 +142,7 @@ class JournalVoucher(AccountsController):
 			if self.cheque_date:
 				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
 			else:
-				msgprint(_("Please enter Reference date"), raise_exception=1)
+				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
 
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
@@ -164,7 +164,7 @@ class JournalVoucher(AccountsController):
 		if r:
 			self.remark = ("\n").join(r)
 		else:
-			frappe.msgprint(_("User Remarks is mandatory"), raise_exception=1)
+			frappe.msgprint(_("User Remarks is mandatory"), raise_exception=frappe.MandatoryError)
 
 	def set_aging_date(self):
 		if self.is_opening != 'Yes':
