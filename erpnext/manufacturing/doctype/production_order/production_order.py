@@ -149,7 +149,7 @@ class ProductionOrder(Document):
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
-		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
+		from `tabItem` where (ifnull(end_of_life, "0000-00-00")="0000-00-00" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
 
 	if not res:

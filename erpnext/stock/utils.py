@@ -190,7 +190,9 @@ def reorder_item():
 			and exists (select name from `tabItem`
 				where `tabItem`.name = `tabBin`.item_code and
 				is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
-				(ifnull(end_of_life, '')='' or end_of_life > curdate()))""", as_dict=True)
+				(ifnull(end_of_life, '0000-00-00')='0000-00-00' or end_of_life > curdate()))""",
+				as_dict=True)
+
 		for bin in bin_list:
 			#check if re-order is required
 			item_reorder = frappe.db.get("Item Reorder",
