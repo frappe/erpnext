@@ -283,7 +283,7 @@ def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
 
-	if end_of_life and getdate(end_of_life) <= now_datetime().date():
+	if end_of_life and end_of_life!="0000-00-00" and getdate(end_of_life) <= now_datetime().date():
 		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
 		_msgprint(msg, verbose)
 
