@@ -31,21 +31,21 @@ def install(company):
 	}
 
 	acc_list_india = [
-		['CENVAT Capital Goods','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Service Tax','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Service Tax Cess 1','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Service Tax Cess 2','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Edu Cess','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT SHE Cess','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
+		['CENVAT Capital Goods','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['CENVAT','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['CENVAT Service Tax','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['CENVAT Service Tax Cess 1','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['CENVAT Service Tax Cess 2','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['CENVAT Edu Cess','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['CENVAT SHE Cess','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
 		['Excise Duty 4','Tax Assets','Ledger','Tax','Balance Sheet','4.00'],
 		['Excise Duty 8','Tax Assets','Ledger','Tax','Balance Sheet','8.00'],
 		['Excise Duty 10','Tax Assets','Ledger','Tax','Balance Sheet','10.00'],
 		['Excise Duty 14','Tax Assets','Ledger','Tax','Balance Sheet','14.00'],
 		['Excise Duty Edu Cess 2','Tax Assets','Ledger','Tax','Balance Sheet','2.00'],
 		['Excise Duty SHE Cess 1','Tax Assets','Ledger','Tax','Balance Sheet','1.00'],
-		['P L A','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['P L A - Cess Portion','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
+		['P L A','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
+		['P L A - Cess Portion','Tax Assets','Ledger','Chargeable','Balance Sheet', None],
 		['Edu. Cess on Excise','Duties and Taxes','Ledger','Tax','Balance Sheet','2.00'],
 		['Edu. Cess on Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet','2.00'],
 		['Edu. Cess on TDS','Duties and Taxes','Ledger','Tax','Balance Sheet','2.00'],
@@ -57,14 +57,14 @@ def install(company):
 		['SHE Cess on Excise','Duties and Taxes','Ledger','Tax','Balance Sheet','1.00'],
 		['SHE Cess on Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet','1.00'],
 		['SHE Cess on TDS','Duties and Taxes','Ledger','Tax','Balance Sheet','1.00'],
-		['Professional Tax','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['VAT','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Advertisement)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Commission)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Contractor)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Interest)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Rent)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Salary)','Duties and Taxes','Ledger','Chargeable','Balance Sheet','']
+		['Professional Tax','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['VAT','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['TDS (Advertisement)','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['TDS (Commission)','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['TDS (Contractor)','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['TDS (Interest)','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['TDS (Rent)','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None],
+		['TDS (Salary)','Duties and Taxes','Ledger','Chargeable','Balance Sheet', None]
 	 ]
 
 	for lst in acc_list_india:
