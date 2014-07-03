@@ -134,7 +134,7 @@ class DeliveryNote(SellingController):
 
 
 	def update_current_stock(self):
-		if self._action != "update_after_submit":
+		if self.get("_action") and self._action != "update_after_submit":
 			for d in self.get('delivery_note_details'):
 				d.actual_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
 					"warehouse": d.warehouse}, "actual_qty")
