@@ -236,8 +236,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
-			} else {
-				this.apply_pricing_rule();
+			} else if (!this.in_apply_price_list){
+				this.apply_price_list();
 			}
 
 		}
@@ -254,22 +254,17 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	price_list_currency: function() {
 		var me=this;
 		this.set_dynamic_labels();
-
-		var company_currency = this.get_company_currency();
-		if(this.frm.doc.price_list_currency !== company_currency) {
-			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
-				function(exchange_rate) {
-					if(exchange_rate) {
-						me.frm.set_value("plc_conversion_rate", exchange_rate);
-						me.plc_conversion_rate();
-					}
-				});
-		} else {
-			this.plc_conversion_rate();
-		}
+		this.set_plc_conversion_rate();
 	},
 
 	plc_conversion_rate: function() {
+		this.set_plc_conversion_rate();
+		if(!this.in_apply_price_list) {
+			this.apply_price_list();
+		}
+	},
+
+	set_plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
 		}
@@ -403,8 +398,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			args: {	args: this._get_args() },
 			callback: function(r) {
 				if (!r.exc) {
+					me.in_apply_price_list = true;
 					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
 					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
+					me.in_apply_price_list = false;
 					me._set_values_for_item_list(r.message.children);
 				}
 			}
