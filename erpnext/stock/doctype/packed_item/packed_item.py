@@ -62,7 +62,7 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 def make_packing_list(obj, item_table_fieldname):
 	"""make packing list for sales bom item"""
 
-	if obj._action == "update_after_submit": return
+	if obj.get("_action") and obj._action == "update_after_submit": return
 
 	packing_list_idx = 0
 	parent_items = []
