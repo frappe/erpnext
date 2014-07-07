@@ -7,6 +7,7 @@ import json
 from frappe.utils import flt, cstr, nowdate, add_days, cint
 from frappe.defaults import get_global_default
 from frappe.utils.email_lib import sendmail
+from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
 
@@ -222,15 +223,30 @@ def reorder_item():
 					})
 				)
 
-		create_material_request(material_requests)
+		if material_requests:
+			create_material_request(material_requests)
 
 def create_material_request(material_requests):
 	"""	Create indent on reaching reorder level	"""
 	mr_list = []
 	defaults = frappe.defaults.get_defaults()
 	exceptions_list = []
-	from erpnext.accounts.utils import get_fiscal_year
-	current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
+
+	def _log_exception():
+		if frappe.local.message_log:
+			exceptions_list.extend(frappe.local.message_log)
+			frappe.local.message_log = []
+		else:
+			exceptions_list.append(frappe.get_traceback())
+
+	try:
+		current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
+
+	except FiscalYearError:
+		_log_exception()
+		notify_errors(exceptions_list)
+		return
+
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
 			try:
@@ -266,11 +282,7 @@ def create_material_request(material_requests):
 				mr_list.append(mr)
 
 			except:
-				if frappe.local.message_log:
-					exceptions_list.append([] + frappe.local.message_log)
-					frappe.local.message_log = []
-				else:
-					exceptions_list.append(frappe.get_traceback())
+				_log_exception()
 
 	if mr_list:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
@@ -307,16 +319,16 @@ def notify_errors(exceptions_list):
 	subject = "[Important] [ERPNext] Error(s) while creating Material Requests based on Re-order Levels"
 	msg = """Dear System Manager,
 
-		An error occured for certain Items while creating Material Requests based on Re-order level.
+An error occured for certain Items while creating Material Requests based on Re-order level.
 
-		Please rectify these issues:
-		---
-
-		%s
-
-		---
-		Regards,
-		Administrator""" % ("\n\n".join(["\n".join(msg) for msg in exceptions_list]),)
+Please rectify these issues:
+---
+<pre>
+%s
+</pre>
+---
+Regards,
+Administrator""" % ("\n\n".join(exceptions_list),)
 
 	from frappe.utils.user import get_system_managers
 	sendmail(get_system_managers(), subject=subject, msg=msg)

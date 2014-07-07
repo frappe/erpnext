@@ -30,6 +30,8 @@ class Item(WebsiteGenerator):
 		self.name = self.item_code
 
 	def validate(self):
+		super(Item, self).validate()
+
 		if not self.stock_uom:
 			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
 		if self.image and not self.website_image:

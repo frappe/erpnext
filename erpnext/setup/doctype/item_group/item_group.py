@@ -19,6 +19,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		self.name = self.item_group_name
 
 	def validate(self):
+		WebsiteGenerator.validate(self)
 		if not self.parent_website_route:
 			if frappe.db.get_value("Item Group", self.parent_item_group, "show_in_website"):
 				self.parent_website_route = frappe.get_website_route("Item Group",
