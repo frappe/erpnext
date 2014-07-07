@@ -67,3 +67,4 @@ erpnext.patches.v4_0.set_naming_series_property_setter
 erpnext.patches.v4_1.set_outgoing_email_footer
 erpnext.patches.v4_1.fix_jv_remarks
 erpnext.patches.v4_1.fix_sales_order_delivered_status
+erpnext.patches.v4_1.fix_delivery_and_billing_status_for_draft_so
