@@ -284,7 +284,7 @@ class TestSalesOrder(unittest.TestCase):
 			so.get("sales_order_details")[0].warehouse, 20.0)
 
 	def test_warehouse_user(self):
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
 		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
 
@@ -308,7 +308,7 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 		so.insert()
 
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
 		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
 
