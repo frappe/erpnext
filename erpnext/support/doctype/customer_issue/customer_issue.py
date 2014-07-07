@@ -38,7 +38,11 @@ class CustomerIssue(TransactionBase):
 
 @frappe.whitelist()
 def make_maintenance_visit(source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
+	from frappe.model.mapper import get_mapped_doc, map_child_doc
+
+	def _update_links(source_doc, target_doc, source_parent):
+		target_doc.prevdoc_doctype = source_parent.doctype
+		target_doc.prevdoc_docname = source_parent.name
 
 	visit = frappe.db.sql("""select t1.name
 		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
@@ -46,7 +50,7 @@ def make_maintenance_visit(source_name, target_doc=None):
 		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
 
 	if not visit:
-		doclist = get_mapped_doc("Customer Issue", source_name, {
+		target_doc = get_mapped_doc("Customer Issue", source_name, {
 			"Customer Issue": {
 				"doctype": "Maintenance Visit",
 				"field_map": {
@@ -57,4 +61,12 @@ def make_maintenance_visit(source_name, target_doc=None):
 			}
 		}, target_doc)
 
-		return doclist
+		source_doc = frappe.get_doc("Customer Issue", source_name)
+		if source_doc.get("item_code"):
+			table_map = {
+				"doctype": "Maintenance Visit Purpose",
+				"postprocess": _update_links
+			}
+			map_child_doc(source_doc, target_doc, table_map, source_doc)
+
+		return target_doc
