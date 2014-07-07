@@ -18,8 +18,7 @@ def map_outgoing_email_settings(email_settings):
 	outgoing_email_settings = frappe.get_doc("Outgoing Email Settings")
 	for fieldname in (("outgoing_mail_server", "mail_server"),
 		"use_ssl", "mail_port", "mail_login", "mail_password",
-		"always_use_login_id_as_sender",
-		"auto_email_id", "send_print_in_body_and_attachment"):
+		"always_use_login_id_as_sender", "auto_email_id"):
 
 		if isinstance(fieldname, tuple):
 			from_fieldname, to_fieldname = fieldname
