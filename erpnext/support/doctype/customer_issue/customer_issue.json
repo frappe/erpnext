@@ -202,6 +202,7 @@
   {
    "fieldname": "resolved_by", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "in_filter": 1, 
    "label": "Resolved By", 
    "no_copy": 1, 
@@ -395,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-06-23 07:55:47.488335", 
+ "modified": "2014-07-07 02:47:56.491906", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Customer Issue", 
