@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, _round, cstr
+from frappe.utils import cint, flt, _round, cstr, comma_or
 from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
 
@@ -287,7 +287,7 @@ class SellingController(StockController):
 		if not self.order_type:
 			self.order_type = "Sales"
 		elif self.order_type not in valid_types:
-			throw(_("Order Type must be one of {1}").comma_or(valid_types))
+			throw(_("Order Type must be one of {0}").format(comma_or(valid_types)))
 
 	def check_credit(self, grand_total):
 		customer_account = frappe.db.get_value("Account", {"company": self.company,
