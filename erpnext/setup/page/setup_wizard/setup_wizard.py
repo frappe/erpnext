@@ -216,10 +216,6 @@ def set_defaults(args):
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
 
-	email_settings = frappe.get_doc("Outgoing Email Settings")
-	email_settings.send_print_in_body_and_attachment = 1
-	email_settings.save()
-
 def create_feed_and_todo():
 	"""update activty feed and create todo for creation of item, customer, vendor"""
 	from erpnext.home import make_feed
