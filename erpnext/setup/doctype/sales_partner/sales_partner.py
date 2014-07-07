@@ -14,6 +14,7 @@ class SalesPartner(WebsiteGenerator):
 		self.name = self.partner_name
 
 	def validate(self):
+		super(SalesPartner, self).validate()
 		if self.partner_website and not self.partner_website.startswith("http"):
 			self.partner_website = "http://" + self.partner_website
 
