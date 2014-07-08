@@ -241,28 +241,10 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
-			} else {
-				this.apply_pricing_rule();
+			} else if (!this.in_apply_price_list){
+				this.apply_price_list();
 			}
 
-		}
-	},
-
-	get_price_list_currency: function(buying_or_selling) {
-		var me = this;
-		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
-		if(this.frm.doc[fieldname]) {
-			return this.frm.call({
-				method: "erpnext.setup.utils.get_price_list_currency",
-				args: {
-					price_list: this.frm.doc[fieldname],
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.price_list_currency();
-					}
-				}
-			});
 		}
 	},
 
@@ -277,22 +259,17 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	price_list_currency: function() {
 		var me=this;
 		this.set_dynamic_labels();
-
-		var company_currency = this.get_company_currency();
-		if(this.frm.doc.price_list_currency !== company_currency) {
-			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
-				function(exchange_rate) {
-					if(exchange_rate) {
-						me.frm.set_value("plc_conversion_rate", exchange_rate);
-						me.plc_conversion_rate();
-					}
-				});
-		} else {
-			this.plc_conversion_rate();
-		}
+		this.set_plc_conversion_rate();
 	},
 
 	plc_conversion_rate: function() {
+		this.set_plc_conversion_rate();
+		if(!this.in_apply_price_list) {
+			this.apply_price_list();
+		}
+	},
+
+	set_plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
 		}
@@ -351,9 +328,22 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
 		var me = this;
-		var item_list = this._get_item_list(item);
-		var args = {
-			"item_list": item_list,
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
+			args: {	args: this._get_args(item) },
+			callback: function(r) {
+				if (!r.exc) {
+					me._set_values_for_item_list(r.message);
+					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+				}
+			}
+		});
+	},
+
+	_get_args: function(item) {
+		var me = this;
+		return {
+			"item_list": this._get_item_list(item),
 			"customer": me.frm.doc.customer,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
@@ -371,22 +361,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			"parenttype": me.frm.doc.doctype,
 			"parent": me.frm.doc.name
 		};
-		return this.frm.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
-			args: {	args: args },
-			callback: function(r) {
-				if (!r.exc) {
-					$.each(r.message, function(i, d) {
-						$.each(d, function(k, v) {
-							if (["doctype", "name"].indexOf(k)===-1) {
-								frappe.model.set_value(d.doctype, d.name, k, v);
-							}
-						});
-					});
-					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
-				}
-			}
-		});
 	},
 
 	_get_item_list: function(item) {
@@ -410,6 +384,33 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			});
 		}
 		return item_list;
+	},
+
+	_set_values_for_item_list: function(children) {
+		$.each(children, function(i, d) {
+			$.each(d, function(k, v) {
+				if (["doctype", "name"].indexOf(k)===-1) {
+					frappe.model.set_value(d.doctype, d.name, k, v);
+				}
+			});
+		});
+	},
+
+	apply_price_list: function() {
+		var me = this;
+		return this.frm.call({
+			method: "erpnext.stock.get_item_details.apply_price_list",
+			args: {	args: this._get_args() },
+			callback: function(r) {
+				if (!r.exc) {
+					me.in_apply_price_list = true;
+					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
+					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
+					me.in_apply_price_list = false;
+					me._set_values_for_item_list(r.message.children);
+				}
+			}
+		});
 	},
 
 	included_in_print_rate: function(doc, cdt, cdn) {

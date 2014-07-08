@@ -75,7 +75,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	buying_price_list: function() {
-		this.get_price_list_currency("Buying");
+		this.apply_price_list();
 	},
 
 	price_list_rate: function(doc, cdt, cdn) {
