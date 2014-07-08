@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "RFD/.#####", 
- "creation": "2013-05-02 16:29:48.000000", 
+ "creation": "2013-05-02 16:29:48", 
  "description": "Multiple Item prices.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -73,6 +73,15 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "currency", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Currency", 
+   "options": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "col_br_1", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -90,22 +99,13 @@
    "label": "Item Description", 
    "permlevel": 0, 
    "read_only": 1
-  }, 
-  {
-   "fieldname": "currency", 
-   "fieldtype": "Link", 
-   "hidden": 1, 
-   "label": "Currency", 
-   "options": "Currency", 
-   "permlevel": 0, 
-   "read_only": 1
   }
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
  "in_create": 0, 
  "istable": 0, 
- "modified": "2014-02-10 17:27:32.000000", 
+ "modified": "2014-07-08 15:38:23.653034", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 
