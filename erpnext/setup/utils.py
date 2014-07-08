@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
+from frappe.utils import flt
 
 def get_company_currency(company):
 	currency = frappe.db.get_value("Company", company, "default_currency")
@@ -27,16 +28,6 @@ def get_ancestors_of(doctype, name):
 	result = frappe.db.sql_list("""select name from `tab%s`
 		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
 	return result or []
-
-@frappe.whitelist()
-def get_price_list_currency(price_list):
-	price_list_currency = frappe.db.get_value("Price List", {"name": price_list,
-		"enabled": 1}, "currency")
-
-	if not price_list_currency:
-		throw(_("Price List {0} is disabled").format(price_list))
-	else:
-		return {"price_list_currency": price_list_currency}
 
 def before_tests():
 	# complete setup if missing
@@ -64,3 +55,7 @@ def before_tests():
 	frappe.db.sql("delete from `tabSalary Slip`")
 	frappe.db.sql("delete from `tabItem Price`")
 	frappe.db.commit()
+
+def get_exchange_rate(from_currency, to_currency):
+	exchange = "%s-%s" % (from_currency, to_currency)
+	return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))

@@ -137,7 +137,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	selling_price_list: function() {
-		this.get_price_list_currency("Selling");
+		this.apply_price_list();
 	},
 
 	price_list_rate: function(doc, cdt, cdn) {
