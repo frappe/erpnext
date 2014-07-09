@@ -32,34 +32,46 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name, employee_name from `tabEmployee`
 		where status = 'Active'
 			and docstatus < 2
-			and (%(key)s like "%(txt)s"
-				or employee_name like "%(txt)s")
-			%(mcond)s
+			and ({key} like %(txt)s
+				or employee_name like %(txt)s)
+			{mcond}
 		order by
-			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", employee_name), locate("%(_txt)s", employee_name), 99999),
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
 			name, employee_name
-		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,
-		'_txt': txt.replace("%", ""),
-		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+			'mcond': get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
 
  # searches for leads which are not converted
 def lead_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name, lead_name, company_name from `tabLead`
 		where docstatus < 2
 			and ifnull(status, '') != 'Converted'
-			and (%(key)s like "%(txt)s"
-				or lead_name like "%(txt)s"
-				or company_name like "%(txt)s")
-			%(mcond)s
+			and ({key} like %(txt)s
+				or lead_name like %(txt)s
+				or company_name like %(txt)s)
+			{mcond}
 		order by
-			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", lead_name), locate("%(_txt)s", lead_name), 99999),
-			if(locate("%(_txt)s", company_name), locate("%(_txt)s", company_name), 99999),
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, lead_name), locate(%(_txt)s, lead_name), 99999),
+			if(locate(%(_txt)s, company_name), locate(%(_txt)s, company_name), 99999),
 			name, lead_name
-		limit %(start)s, %(page_len)s""" % {'key': searchfield, 'txt': "%%%s%%" % txt,
-		'_txt': txt.replace("%", ""),
-		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+			'mcond':get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
 
  # searches for customer
 def customer_query(doctype, txt, searchfield, start, page_len, filters):
@@ -72,19 +84,25 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 
 	fields = ", ".join(fields)
 
-	return frappe.db.sql("""select %(field)s from `tabCustomer`
+	return frappe.db.sql("""select {fields} from `tabCustomer`
 		where docstatus < 2
-			and (%(key)s like "%(txt)s"
-				or customer_name like "%(txt)s")
-			%(mcond)s
+			and ({key} like %(txt)s
+				or customer_name like %(txt)s)
+			{mcond}
 		order by
-			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", customer_name), locate("%(_txt)s", customer_name), 99999),
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, customer_name), locate(%(_txt)s, customer_name), 99999),
 			name, customer_name
-		limit %(start)s, %(page_len)s""" % {'field': fields,'key': searchfield,
-		'txt': "%%%s%%" % txt, '_txt': txt.replace("%", ""),
-		'mcond':get_match_cond(doctype),
-		'start': start, 'page_len': page_len})
+		limit %(start)s, %(page_len)s""".format(**{
+			"fields": fields,
+			"key": searchfield,
+			"mcond": get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
 
 # searches for supplier
 def supplier_query(doctype, txt, searchfield, start, page_len, filters):
@@ -95,19 +113,25 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		fields = ["name", "supplier_name", "supplier_type"]
 	fields = ", ".join(fields)
 
-	return frappe.db.sql("""select %(field)s from `tabSupplier`
+	return frappe.db.sql("""select {field} from `tabSupplier`
 		where docstatus < 2
-			and (%(key)s like "%(txt)s"
-				or supplier_name like "%(txt)s")
-			%(mcond)s
+			and ({key} like %(txt)s
+				or supplier_name like %(txt)s)
+			{mcond}
 		order by
-			if(locate("%(_txt)s", name), locate("%(_txt)s", name), 99999),
-			if(locate("%(_txt)s", supplier_name), locate("%(_txt)s", supplier_name), 99999),
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
 			name, supplier_name
-		limit %(start)s, %(page_len)s """ % {'field': fields,'key': searchfield,
-		'txt': "%%%s%%" % txt, '_txt': txt.replace("%", ""),
-		'mcond':get_match_cond(doctype), 'start': start,
-		'page_len': page_len})
+		limit %(start)s, %(page_len)s """.format(**{
+			'field': fields,
+			'key': searchfield,
+			'mcond':get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len
+		})
 
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
