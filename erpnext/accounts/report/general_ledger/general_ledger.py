@@ -63,6 +63,8 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
+		if not frappe.db.exists("Account", filters["account"]):
+			frappe.throw(_("Account {0} is not valid").format(filters["account"]))
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))

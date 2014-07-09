@@ -183,7 +183,7 @@ def get_pricing_rules(args):
 		group_condition = _get_tree_conditions(parenttype)
 		if group_condition:
 			conditions += " and " + group_condition
-
+	if not args.price_list: args.price_list = None
 	conditions += " and ifnull(for_price_list, '') in (%(price_list)s, '')"
 
 	if args.get("transaction_date"):
