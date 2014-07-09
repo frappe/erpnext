@@ -24,6 +24,7 @@ class PurchaseOrder(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
+			'overflow_type': 'order'
 		}]
 
 	def validate(self):
