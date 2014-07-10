@@ -36,7 +36,8 @@ class SalesInvoice(SellingController):
 			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
-			'keyword': 'Billed'
+			'keyword': 'Billed',
+			'overflow_type': 'billing'
 		}]
 
 	def validate(self):
@@ -134,7 +135,8 @@ class SalesInvoice(SellingController):
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'prevdoc_detail_docname'
+				'second_join_field': 'prevdoc_detail_docname',
+				'overflow_type': 'delivery'
 			})
 
 	def on_update_after_submit(self):

@@ -30,6 +30,7 @@ class PurchaseInvoice(BuyingController):
 			'target_ref_field': 'amount',
 			'source_field': 'amount',
 			'percent_join_field': 'purchase_order',
+			'overflow_type': 'billing'
 		}]
 
 	def validate(self):
