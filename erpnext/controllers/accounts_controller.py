@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
 from frappe.utils import flt, cint, today
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 import json
@@ -68,7 +68,7 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = self.get_exchange_rate(
+					self.plc_conversion_rate = get_exchange_rate(
 						self.price_list_currency, company_currency)
 
 			# currency
@@ -78,12 +78,8 @@ class AccountsController(TransactionBase):
 			elif self.currency == company_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
-				self.conversion_rate = self.get_exchange_rate(self.currency,
+				self.conversion_rate = get_exchange_rate(self.currency,
 					company_currency)
-
-	def get_exchange_rate(self, from_currency, to_currency):
-		exchange = "%s-%s" % (from_currency, to_currency)
-		return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
 
 	def set_missing_item_details(self):
 		"""set missing item values"""
