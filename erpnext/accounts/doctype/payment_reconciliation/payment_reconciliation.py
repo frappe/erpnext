@@ -11,4 +11,8 @@ from frappe import msgprint, _
 from frappe.model.document import Document
 
 class PaymentReconciliation(Document):
-	pass
+	def get_unreconciled_entries(self):
+		self.set('payment_reconciliation_payment', [])
+		jve = self.get_jv_entries()
+		self.create_payment_reconciliation_payment(jve)
+
