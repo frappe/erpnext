@@ -1,27 +1,18 @@
 {
- "creation": "2013-02-22 01:28:02.000000", 
+ "creation": "2013-02-22 01:28:02", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "account_head", 
+   "fieldname": "item_code", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
-   "label": "Account Head", 
-   "oldfieldname": "account_head", 
-   "oldfieldtype": "Link", 
-   "options": "Account", 
+   "label": "Item Code", 
+   "options": "Item", 
    "permlevel": 0, 
+   "read_only": 1, 
    "reqd": 1, 
-   "search_index": 1
-  }, 
-  {
-   "fieldname": "cost_center", 
-   "fieldtype": "Link", 
-   "label": "Cost Center", 
-   "options": "Cost Center", 
-   "permlevel": 0, 
-   "reqd": 1
+   "width": "100px"
   }, 
   {
    "fieldname": "description", 
@@ -32,8 +23,46 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "print_width": "300px", 
+   "read_only": 1, 
    "reqd": 1, 
-   "width": "300px"
+   "width": "120px"
+  }, 
+  {
+   "fieldname": "purchase_receipt", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Purchase Receipt", 
+   "options": "Purchase Receipt", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "warehouse", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "label": "Warehouse", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "col_break2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "qty", 
+   "fieldtype": "Float", 
+   "label": "Qty", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "rate", 
+   "fieldtype": "Currency", 
+   "label": "Rate", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "amount", 
@@ -44,14 +73,34 @@
    "oldfieldtype": "Currency", 
    "options": "currency", 
    "permlevel": 0, 
+   "read_only": 1, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "old_valuation_rate", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Old Valuation Rate", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "width": ""
+  }, 
+  {
+   "fieldname": "new_valuation_rate", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "New Valuation Rate", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "width": ""
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:18.000000", 
+ "modified": "2014-07-11 15:20:53.714633", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Item", 
- "owner": "wasim@webnotestech.com"
+ "owner": "wasim@webnotestech.com", 
+ "permissions": []
 }

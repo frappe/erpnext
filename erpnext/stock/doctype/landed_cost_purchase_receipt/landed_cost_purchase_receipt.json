@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:28:02.000000", 
+ "creation": "2013-02-22 01:28:02", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -13,14 +13,48 @@
    "options": "Purchase Receipt", 
    "permlevel": 0, 
    "print_width": "220px", 
+   "read_only": 0, 
+   "reqd": 1, 
    "width": "220px"
+  }, 
+  {
+   "fieldname": "supplier", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Supplier", 
+   "options": "Supplier", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "posting_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Posting Date", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "grand_total", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Grand Total", 
+   "permlevel": 0, 
+   "read_only": 1
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:18.000000", 
+ "modified": "2014-07-11 12:12:08.572263", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Purchase Receipt", 
- "owner": "wasim@webnotestech.com"
+ "owner": "wasim@webnotestech.com", 
+ "permissions": []
 }
