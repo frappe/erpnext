@@ -191,7 +191,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			"posting_time": posting_time
 		})
 
-def reset_serial_no_status_and_warehouse(serial_nos=[]):
+def reset_serial_no_status_and_warehouse(serial_nos=None):
 	if not serial_nos:
 		serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where status != 'Not in Use'
 			and docstatus = 0""")
