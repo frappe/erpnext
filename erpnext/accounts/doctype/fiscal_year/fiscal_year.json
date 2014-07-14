@@ -55,7 +55,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:10.942338", 
+ "modified": "2014-07-14 05:30:56.843180", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fiscal Year", 
@@ -82,5 +82,7 @@
    "read": 1, 
    "role": "All"
   }
- ]
+ ], 
+ "sort_field": "name", 
+ "sort_order": "DESC"
 }
