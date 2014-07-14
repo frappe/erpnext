@@ -19,10 +19,19 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 	},
 
 	get_unreconciled_entries: function() {
-		return this.frm.call({
-			doc: me.frm.doc,
-			method: 'get_unreconciled_entries'
-		});
+		var me = this;
+		if (!this.frm.doc.company) {
+			msgprint(__("Please enter the Company"));
+		} 
+		else if (!this.frm.doc.party_account) {
+			msgprint(__("Please enter the Party Account"));			
+		}
+		else {
+			return this.frm.call({
+				doc: me.frm.doc,
+				method: 'get_unreconciled_entries'
+			});
+		}
 	}
 
 });
