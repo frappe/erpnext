@@ -56,10 +56,19 @@
    "label": "Remark", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "voucher_detail_number", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "in_list_view": 0, 
+   "label": "Voucher Detail Number", 
+   "permlevel": 0, 
+   "read_only": 1
   }
  ], 
  "istable": 1, 
- "modified": "2014-07-09 17:00:18.705385", 
+ "modified": "2014-07-14 16:48:45.875052", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation Payment", 

@@ -53,6 +53,7 @@ class PaymentReconciliation(Document):
 			ent.posting_date = e.get('posting_date')
 			ent.amount = flt(e.get('credit' or 'debit'))
 			ent.remark = e.get('remark')
+			ent.voucher_detail_number = e.get('voucher_detail_no')
 
 	def validation(self):
 		self.check_mandatory()
