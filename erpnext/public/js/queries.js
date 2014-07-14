@@ -71,7 +71,7 @@ $.extend(erpnext.queries, {
 
 	warehouse: function(doc) {
 		return {
-			filters: [["Warehouse", "company", "in", ["", doc.company]]]
+			filters: [["Warehouse", "company", "in", ["", cstr(doc.company)]]]
 		}
 	}
 });
