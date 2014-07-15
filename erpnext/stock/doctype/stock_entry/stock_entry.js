@@ -92,7 +92,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function() {
 		var me = this;
 
-		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+		if(cint(frappe.defaults.get_default("auto_accounting_for_stock")) && this.frm.doc.company) {
 			var account_for = "stock_adjustment_account";
 
 			if (this.frm.doc.purpose == "Purchase Return")
