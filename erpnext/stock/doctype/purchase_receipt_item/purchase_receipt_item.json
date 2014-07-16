@@ -502,6 +502,13 @@
    "width": "150px"
   }, 
   {
+   "fieldname": "landed_cost_voucher_amount", 
+   "fieldtype": "Currency", 
+   "label": "Landed Cost Voucher Amount", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "valuation_rate", 
    "fieldtype": "Currency", 
    "hidden": 1, 

@@ -67,9 +67,16 @@ class PurchaseReceipt(BuyingController):
 		# sub-contracting
 		self.validate_for_subcontracting()
 		self.create_raw_materials_supplied("pr_raw_material_details")
-
+		self.set_landed_cost_voucher_amount()
 		self.update_valuation_rate("purchase_receipt_details")
-
+		
+	def set_landed_cost_voucher_amount(self, voucher_detail):
+		for d in self.get("purchase_receipt_details"):
+			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges)) 
+				from `tabLanded Cost Item` 
+				where docstatus = 1 and pr_item_row_id = %s""", voucher_detail)
+			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
+			
 	def validate_rejected_warehouse(self):
 		for d in self.get("purchase_receipt_details"):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
@@ -265,7 +272,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		pc_obj.update_last_purchase_rate(self, 0)
 
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def get_current_stock(self):
 		for d in self.get('pr_raw_material_details'):
@@ -277,10 +284,88 @@ class PurchaseReceipt(BuyingController):
 		return frappe.get_doc('Purchase Common').get_rate(arg,self)
 
 	def get_gl_entries(self, warehouse_account=None):
-		against_stock_account = self.get_company_default("stock_received_but_not_billed")
+		from erpnext.accounts.general_ledger import process_gl_map
+		
+		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		default_cost_center = self.get_company_default("cost_center")
+		against_expense_account = None
+		
+		gl_entries = []
+		warehouse_with_no_account = []
+		stock_items = self.get_stock_items()
+		for d in self.get("purchase_receipt_details"):
+			if d.item_code in stock_items and flt(d.valuation_rate):
+				if warehouse_account.get(d.warehouse) or warehouse_account.get(d.rejected_warehouse):
+					self.check_expense_account(d)
+					
+					# warehouse account
+					if flt(d.qty):
+						gl_list.append(self.get_gl_dict({
+							"account": warehouse_account[d.warehouse],
+							"against": against_expense_account,
+							"cost_center": default_cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"debit": flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor)
+						}))
+					
+					# rejected warehouse
+					if flt(d.rejected_qty):
+						gl_list.append(self.get_gl_dict({
+							"account": warehouse_account[d.rejected_warehouse],
+							"against": against_expense_account,
+							"cost_center": default_cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"debit": flt(d.valuation_rate) * flt(d.rejected_qty) * flt(d.conversion_factor)
+						}))
 
-		gl_entries = super(PurchaseReceipt, self).get_gl_entries(warehouse_account, against_stock_account)
-		return gl_entries
+					# stock received but not billed
+					gl_list.append(self.get_gl_dict({
+						"account": stock_rbnb,
+						"against": warehouse_account[d.warehouse],
+						"cost_center": default_cost_center,
+						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"credit": flt(d.base_amount, 2)
+					}))
+					
+					if flt(d.landed_cost_voucher_amount):
+						gl_list.append(self.get_gl_dict({
+							"account": expenses_included_in_valuation,
+							"against": warehouse_account[d.warehouse],
+							"cost_center": default_cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"credit": flt(d.landed_cost_voucher_amount)
+						}))
+				
+				elif d.warehouse not in warehouse_with_no_account or \
+					d.rejected_warehouse not in warehouse_with_no_account:
+						warehouse_with_no_account.append(d.warehouse)
+				
+		if warehouse_with_no_account:
+			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
+				"\n".join(warehouse_with_no_account))
+				
+		valuation_tax = {}
+		for tax in self.get("other_charges"):
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+				if not tax.cost_center:
+					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
+				valuation_tax.setdefault(tax.cost_center, 0)
+				valuation_tax[tax.cost_center] += \
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+				
+		for cost_center, amount in valuation_tax.items():
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": expenses_included_in_valuation,
+					"cost_center": cost_center,
+					# "against": ,
+					"credit": amount,
+					"remarks": self.remarks or "Accounting Entry for Stock"
+				})
+			)
+		
+		return process_gl_map(gl_entries)
 
 
 @frappe.whitelist()

@@ -16,7 +16,10 @@ class LandedCostVoucher(Document):
 		for pr in self.get("landed_cost_purchase_receipts"):
 			pr_items = frappe.db.sql("""select pr_tem.item_code, pr_tem.description, 
 				pr_tem.qty, pr_tem.rate, pr_tem.amount, pr_tem.name
-				from `tabPurchase Receipt Item` where parent = %s""", pr.purchase_receipt, as_dict=True)
+				from `tabPurchase Receipt Item` pr_item where parent = %s 
+				and (select name form tabItem where name = pr_item.item_code and is_stock_item = 'Yes')""", 
+				pr.purchase_receipt, as_dict=True)
+				
 			for d in pr_items:
 				item = self.append("landed_cost_items")
 				item.item_code = d.item_code
@@ -73,7 +76,14 @@ class LandedCostVoucher(Document):
 		
 	def on_submit(self):
 		purchase_receipts = list(set([d.purchase_receipt for d in self.get("landed_cost_items")]))
-		
+		self.delete_sle_and_gle(purchase_receipts)
 		for purchase_receipt in purchase_receipts:
 			pr = frappe.get_doc("Purchase Receipt", purchase_receipt)
-			
+			pr.update_valuation_rate()
+			pr.update_stock()
+			pr.make_gl_entries()
+		
+	def delete_sle_and_gle(self, purchase_receipts):
+		for doctype in ["Stock Ledger Entry", "GL Entry"]:
+			frappe.db.sql("""delete from `tab%s` where voucher_type='Purchase Receipt' 
+				and voucher_no in (%s)""" % (doctype, ', '.join(['%s']*len(purchase_receipts))), purchase_receipts)

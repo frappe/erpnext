@@ -27,7 +27,7 @@ class StockReconciliation(StockController):
 
 	def on_cancel(self):
 		self.delete_and_repost_sle()
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def validate_data(self):
 		if not self.reconciliation_json:

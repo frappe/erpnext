@@ -196,7 +196,7 @@ class DeliveryNote(SellingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def validate_packed_qty(self):
 		"""
