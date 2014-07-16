@@ -204,7 +204,7 @@ class StockEntry(StockController):
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
-		allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
 
 		for d in self.get('mtn_details'):
 			args = frappe._dict({
@@ -219,7 +219,8 @@ class StockEntry(StockController):
 			# get actual stock at source warehouse
 			d.actual_qty = get_previous_sle(args).get("qty_after_transaction") or 0
 
-			if d.s_warehouse and not allow_negative_stock and d.actual_qty <= d.transfer_qty:
+			# validate qty during submit
+			if d.docstatus==1 and d.s_warehouse and not allow_negative_stock and d.actual_qty < d.transfer_qty:
 				frappe.throw(_("""Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
 					Available Qty: {4}, Transfer Qty: {5}""").format(d.idx, d.s_warehouse,
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty))

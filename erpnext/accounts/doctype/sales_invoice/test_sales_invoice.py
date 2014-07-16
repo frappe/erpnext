@@ -674,6 +674,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
 			"repeat_on_day_of_month": getdate(today).day,
 			"posting_date": today,
+			"due_date": None,
 			"fiscal_year": get_fiscal_year(today)[0],
 			"invoice_period_from_date": get_first_day(today),
 			"invoice_period_to_date": get_last_day(today)
