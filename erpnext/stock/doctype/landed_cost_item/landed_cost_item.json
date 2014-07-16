@@ -37,15 +37,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "warehouse", 
-   "fieldtype": "Link", 
-   "hidden": 0, 
-   "label": "Warehouse", 
-   "options": "Warehouse", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -53,6 +44,7 @@
   {
    "fieldname": "qty", 
    "fieldtype": "Float", 
+   "in_list_view": 1, 
    "label": "Qty", 
    "permlevel": 0, 
    "read_only": 1
@@ -60,6 +52,7 @@
   {
    "fieldname": "rate", 
    "fieldtype": "Currency", 
+   "in_list_view": 0, 
    "label": "Rate", 
    "permlevel": 0, 
    "read_only": 1
@@ -77,27 +70,23 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "old_valuation_rate", 
+   "fieldname": "applicable_charges", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
-   "label": "Old Valuation Rate", 
+   "label": "Applicable Charges", 
    "permlevel": 0, 
-   "read_only": 1, 
-   "width": ""
+   "read_only": 1
   }, 
   {
-   "fieldname": "new_valuation_rate", 
-   "fieldtype": "Currency", 
-   "in_list_view": 1, 
-   "label": "New Valuation Rate", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "width": ""
+   "fieldname": "pr_item_row_id", 
+   "fieldtype": "Data", 
+   "label": "PR Item Row Id", 
+   "permlevel": 0
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-07-11 15:20:53.714633", 
+ "modified": "2014-07-15 18:01:26.152422", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Item", 
