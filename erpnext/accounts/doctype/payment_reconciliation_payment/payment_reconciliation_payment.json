@@ -43,17 +43,18 @@
   }, 
   {
    "fieldname": "invoice_number", 
-   "fieldtype": "Data", 
+   "fieldtype": "Select", 
    "in_list_view": 1, 
    "label": "Invoice Number", 
+   "options": "", 
    "permlevel": 0, 
    "reqd": 1
   }, 
   {
-   "fieldname": "remark", 
-   "fieldtype": "Text", 
-   "in_list_view": 1, 
-   "label": "Remark", 
+   "fieldname": "is_advance", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Is Advance", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -65,10 +66,18 @@
    "label": "Voucher Detail Number", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "remark", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 1, 
+   "label": "Remark", 
+   "permlevel": 0, 
+   "read_only": 1
   }
  ], 
  "istable": 1, 
- "modified": "2014-07-14 16:48:45.875052", 
+ "modified": "2014-07-17 18:32:25.230146", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation Payment", 
