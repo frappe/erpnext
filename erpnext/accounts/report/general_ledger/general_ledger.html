@@ -1,5 +1,13 @@
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
-<h4 class="text-center">{%= filters.account || "General Ledger" %}</h3>
+<h4 class="text-center">{%= filters.account || "General Ledger" %}</h4>
+<h5 class="text-center">
+	{%= dateutil.str_to_user(filters.from_date) %}
+	{%= __("to") %}
+	{%= dateutil.str_to_user(filters.to_date) %}
+</h5>
 <hr>
 <table class="table table-bordered">
 	<thead>

@@ -113,9 +113,11 @@ def update_user_name(args):
 			last_name=%(last_name)s WHERE name=%(name)s""", args)
 
 	if args.get("attach_user"):
-		filename, filetype, content = args.get("attach_user").split(",")
-		fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_url
-		frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
+		attach_user = args.get("attach_user").split(",")
+		if len(attach_user)==3:
+			filename, filetype, content = attach_user
+			fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_url
+			frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
 
 	add_all_roles_to(args.get("name"))
 
@@ -319,9 +321,11 @@ def create_items(args):
 			}).insert()
 
 			if args.get("item_img_" + str(i)):
-				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
-				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
-				frappe.db.set_value("Item", item, "image", fileurl)
+				item_image = args.get("item_img_" + str(i)).split(",")
+				if len(item_image)==3:
+					filename, filetype, content = item_image
+					fileurl = save_file(filename, content, "Item", item, decode=True).file_url
+					frappe.db.set_value("Item", item, "image", fileurl)
 
 def create_customers(args):
 	for i in xrange(1,6):
@@ -374,17 +378,21 @@ def create_letter_head(args):
 			"is_default": 1
 		}).insert()
 
-		filename, filetype, content = args.get("attach_letterhead").split(",")
-		fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
-		frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		attach_letterhead = args.get("attach_letterhead").split(",")
+		if len(attach_letterhead)==3:
+			filename, filetype, content = attach_letterhead
+			fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
+			frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def create_logo(args):
 	if args.get("attach_logo"):
-		filename, filetype, content = args.get("attach_logo").split(",")
-		fileurl = save_file(filename, content, "Website Settings", "Website Settings",
-			decode=True).file_url
-		frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
-			"<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		attach_logo = args.get("attach_logo").split(",")
+		if len(attach_logo)==3:
+			filename, filetype, content = attach_logo
+			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
+				decode=True).file_url
+			frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
+				"<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
