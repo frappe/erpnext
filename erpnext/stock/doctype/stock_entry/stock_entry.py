@@ -676,9 +676,9 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 
 	batch_nos = None
 	args = {
-		'item_code': filters['item_code'],
-		's_warehouse': filters['s_warehouse'],
-		'posting_date': filters['posting_date'],
+		'item_code': filters.get("item_code"),
+		's_warehouse': filters.get('s_warehouse'),
+		'posting_date': filters.get('posting_date'),
 		'txt': "%%%s%%" % txt,
 		'mcond':get_match_cond(doctype),
 		"start": start,
