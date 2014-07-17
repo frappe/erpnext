@@ -664,7 +664,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_serial_no_not_exists(self):
 		self._clear_stock_account_balance()
 		frappe.db.sql("delete from `tabSerial No` where name in ('ABCD', 'EFGH')")
-		make_serialized_item()
+		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TC")
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Issue"
 		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
