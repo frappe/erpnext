@@ -1,0 +1,46 @@
+<style>
+	.balance-sheet-important td {
+		font-weight: bold;
+	}
+
+	.balance-sheet-blank-row td {
+		height: 37px;
+	}
+</style>
+
+<h2 class="text-center">{%= __("Balance Sheet") %}</h2>
+<h4 class="text-center">{%= filters.fiscal_year %}</h3>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 40%"></th>
+			{% for(var i=2, l=report.columns.length; i<l; i++) { %}
+				<th class="text-right">{%= report.columns[i].label %}</th>
+			{% } %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var j=0, k=data.length; j<k; j++) { %}
+			{%
+				var row = data[j];
+				var row_class = data[j].parent_account ? "" : "balance-sheet-important";
+				row_class += data[j].account_name ? "" : " balance-sheet-blank-row";
+			%}
+			<tr class="{%= row_class %}">
+				<td>
+					<span style="padding-left: {%= cint(data[j].indent) * 7 %}%">{%= row.account_name %}</span>
+				</td>
+				{% for(var i=2, l=report.columns.length; i<l; i++) { %}
+					<td class="text-right">
+						{% var fieldname = report.columns[i].field; %}
+						{% if (!is_null(row[fieldname])) { %}
+							{%= format_currency(row[fieldname]) %}
+						{% } %}
+					</td>
+				{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

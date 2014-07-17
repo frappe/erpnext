@@ -196,6 +196,12 @@ def get_data():
 					"is_query_report": True
 				},
 				{
+					"type": "report",
+					"name": "Balance Sheet",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
 					"type": "page",
 					"name": "financial-analytics",
 					"label": _("Financial Analytics"),
