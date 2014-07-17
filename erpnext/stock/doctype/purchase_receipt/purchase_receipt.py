@@ -70,11 +70,11 @@ class PurchaseReceipt(BuyingController):
 		self.set_landed_cost_voucher_amount()
 		self.update_valuation_rate("purchase_receipt_details")
 		
-	def set_landed_cost_voucher_amount(self, voucher_detail):
+	def set_landed_cost_voucher_amount(self):
 		for d in self.get("purchase_receipt_details"):
-			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges)) 
+			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0)) 
 				from `tabLanded Cost Item` 
-				where docstatus = 1 and pr_item_row_id = %s""", voucher_detail)
+				where docstatus = 1 and pr_item_row_id = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
 			
 	def validate_rejected_warehouse(self):
@@ -297,42 +297,41 @@ class PurchaseReceipt(BuyingController):
 		for d in self.get("purchase_receipt_details"):
 			if d.item_code in stock_items and flt(d.valuation_rate):
 				if warehouse_account.get(d.warehouse) or warehouse_account.get(d.rejected_warehouse):
-					self.check_expense_account(d)
-					
+
 					# warehouse account
 					if flt(d.qty):
-						gl_list.append(self.get_gl_dict({
+						gl_entries.append(self.get_gl_dict({
 							"account": warehouse_account[d.warehouse],
 							"against": against_expense_account,
-							"cost_center": default_cost_center,
+							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor)
 						}))
 					
 					# rejected warehouse
 					if flt(d.rejected_qty):
-						gl_list.append(self.get_gl_dict({
+						gl_entries.append(self.get_gl_dict({
 							"account": warehouse_account[d.rejected_warehouse],
 							"against": against_expense_account,
-							"cost_center": default_cost_center,
+							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(d.valuation_rate) * flt(d.rejected_qty) * flt(d.conversion_factor)
 						}))
 
 					# stock received but not billed
-					gl_list.append(self.get_gl_dict({
+					gl_entries.append(self.get_gl_dict({
 						"account": stock_rbnb,
 						"against": warehouse_account[d.warehouse],
-						"cost_center": default_cost_center,
+						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
 						"credit": flt(d.base_amount, 2)
 					}))
 					
 					if flt(d.landed_cost_voucher_amount):
-						gl_list.append(self.get_gl_dict({
+						gl_entries.append(self.get_gl_dict({
 							"account": expenses_included_in_valuation,
 							"against": warehouse_account[d.warehouse],
-							"cost_center": default_cost_center,
+							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(d.landed_cost_voucher_amount)
 						}))
@@ -353,7 +352,10 @@ class PurchaseReceipt(BuyingController):
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
-				
+					
+		if frappe.db.get_value("Purchase Invoice Item", {"purchase_receipt": self.name, "docstatus": 1}):
+			expenses_included_in_valuation = stock_rbnb
+			
 		for cost_center, amount in valuation_tax.items():
 			gl_entries.append(
 				self.get_gl_dict({
@@ -364,7 +366,7 @@ class PurchaseReceipt(BuyingController):
 					"remarks": self.remarks or "Accounting Entry for Stock"
 				})
 			)
-		
+
 		return process_gl_map(gl_entries)
 
 

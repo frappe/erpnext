@@ -194,7 +194,7 @@ class BuyingController(StockController):
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
-				
+
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype == "Purchase Receipt" else 0.0
 				
