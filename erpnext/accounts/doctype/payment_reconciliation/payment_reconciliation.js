@@ -16,7 +16,12 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				]
 			};
 		});
+
+		var help_content = ['<i class="icon-hand-right"></i> Note:',
+		'<ul>If you are unable to match the exact amount, then amend your Journal Voucher and split rows such that your amounts match the invoice you are trying to reconcile. </ul>'].join("\n");
+		this.frm.set_value("reconcile_help", help_content);
 	},
+
 
 	get_unreconciled_entries: function() {
 		var me = this;

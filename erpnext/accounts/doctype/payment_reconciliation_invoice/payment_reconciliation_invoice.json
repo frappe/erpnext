@@ -31,6 +31,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "label": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "amount", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
@@ -48,7 +54,7 @@
   }
  ], 
  "istable": 1, 
- "modified": "2014-07-17 15:52:28.820965", 
+ "modified": "2014-07-18 12:20:51.269974", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation Invoice", 

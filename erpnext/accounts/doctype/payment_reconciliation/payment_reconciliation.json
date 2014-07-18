@@ -108,7 +108,7 @@
   {
    "fieldname": "sec_break2", 
    "fieldtype": "Section Break", 
-   "label": "Invoice/JV Details", 
+   "label": "Invoice/Journal Voucher Details", 
    "permlevel": 0
   }, 
   {
@@ -118,11 +118,18 @@
    "options": "Payment Reconciliation Invoice", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "reconcile_help", 
+   "fieldtype": "Small Text", 
+   "label": "", 
+   "permlevel": 0, 
+   "read_only": 1
   }
  ], 
  "hide_toolbar": 1, 
  "issingle": 1, 
- "modified": "2014-07-17 19:07:34.385854", 
+ "modified": "2014-07-18 15:53:20.638456", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation", 
