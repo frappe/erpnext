@@ -3,4 +3,4 @@
 
 frappe.require("assets/erpnext/js/financial_statements.js");
 
-frappe.query_reports["Balance Sheet"] = erpnext.financial_statements;
+frappe.query_reports["Profit and Loss Statement"] = erpnext.financial_statements;
