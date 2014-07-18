@@ -14,6 +14,10 @@ class Note(Document):
 		import re
 		self.name = re.sub("[%'\"#*?`]", "", self.title.strip())
 
+	def before_print(self):
+		self.print_heading = self.name
+		self.sub_heading = ""
+
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
 

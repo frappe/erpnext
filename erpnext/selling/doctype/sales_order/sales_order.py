@@ -18,10 +18,6 @@ class SalesOrder(SellingController):
 	person_tname = 'Target Detail'
 	partner_tname = 'Partner Target Detail'
 	territory_tname = 'Territory Target Detail'
-	table_print_templates = {
-		"sales_order_details": "templates/print_formats/includes/item_grid.html",
-		"other_charges": "templates/print_formats/includes/taxes.html",
-	}
 
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
