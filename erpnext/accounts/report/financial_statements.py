@@ -134,9 +134,12 @@ def prepare_data(accounts, balance_must_be, period_list):
 			if d.get(period.key):
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
 				d[period.key] *= (1 if balance_must_be=="Debit" else -1)
-				has_value = True
 
 			row[period.key] = flt(d.get(period.key, 0.0), 3)
+
+			if abs(row[period.key]) >= 0.005:
+				# ignore zero values
+				has_value = True
 
 		if has_value:
 			out.append(row)
