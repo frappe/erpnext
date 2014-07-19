@@ -152,7 +152,7 @@ class StatusUpdater(Document):
 
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
 		 	item[args['target_ref_field']]) * 100
-		print overflow_percent - tolerance
+
 		if overflow_percent - tolerance > 0.01:
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
