@@ -152,7 +152,7 @@ class StatusUpdater(Document):
 
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
 		 	item[args['target_ref_field']]) * 100
-
+		print overflow_percent - tolerance
 		if overflow_percent - tolerance > 0.01:
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
@@ -266,8 +266,7 @@ def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 
 	if not tolerance:
 		if global_tolerance == None:
-			global_tolerance = flt(frappe.db.get_value('Global Defaults', None,
-				'tolerance'))
+			global_tolerance = flt(frappe.db.get_value('Stock Settings', None, 'tolerance'))
 		tolerance = global_tolerance
 
 	item_tolerance[item_code] = tolerance
