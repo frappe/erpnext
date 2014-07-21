@@ -230,6 +230,36 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
+	source_mandatory: ["Material Issue", "Material Transfer", "Purchase Return"],
+	target_mandatory: ["Material Receipt", "Material Transfer", "Sales Return"],
+
+	from_warehouse: function(doc) {
+		var me = this;
+		this.set_warehouse_if_missing("s_warehouse", doc.from_warehouse, function(row) {
+			return me.source_mandatory.indexOf(me.frm.doc.purpose)!==-1;
+		});
+	},
+
+	to_warehouse: function(doc) {
+		var me = this;
+		this.set_warehouse_if_missing("t_warehouse", doc.to_warehouse, function(row) {
+			return me.target_mandatory.indexOf(me.frm.doc.purpose)!==-1;
+		});
+	},
+
+	set_warehouse_if_missing: function(fieldname, value, condition) {
+		for (var i=0, l=(this.frm.doc.mtn_details || []).length; i<l; i++) {
+			var row = this.frm.doc.mtn_details[i];
+			if (!row[fieldname]) {
+				if (condition && !condition(row)) {
+					continue;
+				}
+
+				frappe.model.set_value(row.doctype, row.name, fieldname, value, "Link");
+			}
+		}
+	},
+
 	mtn_details_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	},
