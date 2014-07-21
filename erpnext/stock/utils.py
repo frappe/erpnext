@@ -192,7 +192,7 @@ def _reorder_item():
 
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty()
 	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`"""))
-	default_company = (frappe.defaults.get_defaults()["company"] or
+	default_company = (frappe.defaults.get_defaults().get("company") or
 		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 
 	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type):

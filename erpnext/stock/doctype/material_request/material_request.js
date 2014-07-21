@@ -11,8 +11,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		this._super();
 		this.frm.set_query("item_code", this.frm.cscript.fname, function() {
 			return {
-				query: "erpnext.controllers.queries.item_query",
-				filters: {'is_stock_item': 'Yes'}
+				query: "erpnext.controllers.queries.item_query"
 			}
 		});
 	},

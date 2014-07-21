@@ -266,8 +266,7 @@ def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 
 	if not tolerance:
 		if global_tolerance == None:
-			global_tolerance = flt(frappe.db.get_value('Global Defaults', None,
-				'tolerance'))
+			global_tolerance = flt(frappe.db.get_value('Stock Settings', None, 'tolerance'))
 		tolerance = global_tolerance
 
 	item_tolerance[item_code] = tolerance
