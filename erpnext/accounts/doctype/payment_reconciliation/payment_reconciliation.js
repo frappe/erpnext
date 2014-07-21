@@ -7,22 +7,40 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 	onload: function() {
 		var me = this
-		this.frm.set_query ('party_account', function() {
-			return{
-				filters:[
-					['Account', 'company', '=', me.frm.doc.company],
-					['Account', 'group_or_ledger', '=', 'Ledger'],
-					['Account', 'master_type', 'in', ['Customer', 'Supplier']]
-				]
-			};
+		this.frm.set_query('party_account', function() {
+			if(!me.frm.doc.company) {
+				msgprint(__("Please select company first"));
+			} else {
+				return{
+					filters:[
+						['Account', 'company', '=', me.frm.doc.company],
+						['Account', 'group_or_ledger', '=', 'Ledger'],
+						['Account', 'master_type', 'in', ['Customer', 'Supplier']]
+					]
+				};
+			}
+			
+		});
+		
+		this.frm.set_query('bank_cash_account', function() {
+			if(!me.frm.doc.company) {
+				msgprint(__("Please select company first"));
+			} else {
+				return{
+					filters:[
+						['Account', 'company', '=', me.frm.doc.company],
+						['Account', 'group_or_ledger', '=', 'Ledger'],
+						['Account', 'account_type', 'in', ['Bank', 'Cash']]
+					]
+				};
+			}
 		});
 
-		var help_content = ['<i class="icon-hand-right"></i> Note:',
-		'<ul>If you are unable to match the exact amount, then amend your Journal Voucher and split rows such that your amounts match the invoice you are trying to reconcile. </ul>'].join("\n");
+		var help_content = '<i class="icon-hand-right"></i> Note:<br>'+
+			'<ul>If you are unable to match the exact amount, then amend your Journal Voucher and split rows such that payment amount match the invoice amount.</ul>';
 		this.frm.set_value("reconcile_help", help_content);
 	},
-
-
+	
 	get_unreconciled_entries: function() {
 		var me = this;
 		return this.frm.call({

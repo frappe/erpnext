@@ -31,7 +31,7 @@
    "hidden": 1, 
    "in_list_view": 1, 
    "label": "Party Type", 
-   "options": "Customer\nSupplier", 
+   "options": "\nCustomer\nSupplier", 
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 0
@@ -129,7 +129,7 @@
  ], 
  "hide_toolbar": 1, 
  "issingle": 1, 
- "modified": "2014-07-18 15:53:20.638456", 
+ "modified": "2014-07-21 16:54:31.454679", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation", 
