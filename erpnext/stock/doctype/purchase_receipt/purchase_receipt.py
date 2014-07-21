@@ -150,7 +150,7 @@ class PurchaseReceipt(BuyingController):
 						"warehouse": d.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
 						"serial_no": cstr(d.rejected_serial_no).strip(),
-						"incoming_rate": d.valuation_rate
+						"incoming_rate": 0.0
 					}))
 
 		self.bk_flush_supp_wh(sl_entries)
@@ -296,27 +296,16 @@ class PurchaseReceipt(BuyingController):
 		stock_items = self.get_stock_items()
 		for d in self.get("purchase_receipt_details"):
 			if d.item_code in stock_items and flt(d.valuation_rate):
-				if warehouse_account.get(d.warehouse) or warehouse_account.get(d.rejected_warehouse):
+				if warehouse_account.get(d.warehouse) and flt(d.qty) and flt(d.valuation_rate):
 
 					# warehouse account
-					if flt(d.qty):
-						gl_entries.append(self.get_gl_dict({
-							"account": warehouse_account[d.warehouse],
-							"against": against_expense_account,
-							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor)
-						}))
-					
-					# rejected warehouse
-					if flt(d.rejected_qty):
-						gl_entries.append(self.get_gl_dict({
-							"account": warehouse_account[d.rejected_warehouse],
-							"against": against_expense_account,
-							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(d.valuation_rate) * flt(d.rejected_qty) * flt(d.conversion_factor)
-						}))
+					gl_entries.append(self.get_gl_dict({
+						"account": warehouse_account[d.warehouse],
+						"against": against_expense_account,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"debit": flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor)
+					}))
 
 					# stock received but not billed
 					gl_entries.append(self.get_gl_dict({
@@ -327,6 +316,7 @@ class PurchaseReceipt(BuyingController):
 						"credit": flt(d.base_amount, 2)
 					}))
 					
+					# Amount added through landed-cost-voucher
 					if flt(d.landed_cost_voucher_amount):
 						gl_entries.append(self.get_gl_dict({
 							"account": expenses_included_in_valuation,
@@ -335,15 +325,22 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(d.landed_cost_voucher_amount)
 						}))
+						
+					# sub-contracting warehouse
+					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+						gl_entries.append(self.get_gl_dict({
+							"account": warehouse_account[self.supplier_warehouse],
+							"against": warehouse_account[d.warehouse],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"credit": flt(d.rm_supp_cost)
+						}))
 				
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
-				
-		if warehouse_with_no_account:
-			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
-				"\n".join(warehouse_with_no_account))
-				
+		
+		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("other_charges"):
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
@@ -353,9 +350,14 @@ class PurchaseReceipt(BuyingController):
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
+		# Backward compatibility:
+		# If PI exists and charges added via Landed Cost Voucher, 
+		# post valuation related charges on "Stock Received But Not Billed" 
+		# as that account has been debited in PI
 		if frappe.db.get_value("Purchase Invoice Item", {"purchase_receipt": self.name, "docstatus": 1}):
 			expenses_included_in_valuation = stock_rbnb
 			
+		# Expense included in valuation
 		for cost_center, amount in valuation_tax.items():
 			gl_entries.append(
 				self.get_gl_dict({
@@ -366,6 +368,10 @@ class PurchaseReceipt(BuyingController):
 					"remarks": self.remarks or "Accounting Entry for Stock"
 				})
 			)
+
+		if warehouse_with_no_account:
+			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
+				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
 
