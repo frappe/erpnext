@@ -1,0 +1,66 @@
+{
+ "creation": "2014-07-09 16:14:23.672922", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "", 
+ "fields": [
+  {
+   "fieldname": "invoice_type", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Invoice Type", 
+   "options": "Sales Invoice\nPurchase Invoice\nJournal Voucher", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "invoice_number", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Invoice Number", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "invoice_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Invoice Date", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "label": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "amount", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Amount", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "outstanding_amount", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Outstanding Amount", 
+   "permlevel": 0, 
+   "read_only": 1
+  }
+ ], 
+ "istable": 1, 
+ "modified": "2014-07-18 12:20:51.269974", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Payment Reconciliation Invoice", 
+ "name_case": "", 
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
+}
