@@ -82,7 +82,7 @@ def get_child_groups(item_group_name):
 def get_item_for_list_in_html(context):
 	# add missing absolute link in files
 	# user may forget it during upload
-	if context.get("website_image", "").startswith("files/"):
+	if (context.get("website_image") or "").startswith("files/"):
 		context["website_image"] = "/" + context["website_image"]
 	return frappe.get_template("templates/includes/product_in_grid.html").render(context)
 

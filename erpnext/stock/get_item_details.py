@@ -152,6 +152,7 @@ def get_basic_details(args, item_doc):
 		"min_order_qty": flt(item.min_order_qty) if args.parenttype == "Material Request" else "",
 		"conversion_factor": 1.0,
 		"qty": 1.0,
+		"stock_qty": 1.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,

@@ -20,16 +20,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				currency: currency,
 				price_list_currency: currency,
 				status: "Draft",
-				fiscal_year: frappe.defaults.get_user_default("fiscal_year"),
 				is_subcontracted: "No",
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
 			});
 
-			if(!this.frm.doc.company) {
-				this.frm.set_value("company", frappe.defaults.get_user_default("company"));
-			} else {
+			if(this.frm.doc.company) {
 				cur_frm.script_manager.trigger("company");
 			}
 		}
@@ -332,7 +329,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: this._get_args(item) },
 			callback: function(r) {
-				if (!r.exc) {
+				if (!r.exc && r.message) {
 					me._set_values_for_item_list(r.message);
 					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 				}

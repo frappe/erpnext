@@ -36,7 +36,8 @@ class SalesInvoice(SellingController):
 			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
-			'keyword': 'Billed'
+			'keyword': 'Billed',
+			'overflow_type': 'billing'
 		}]
 
 	def validate(self):
@@ -134,7 +135,8 @@ class SalesInvoice(SellingController):
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'prevdoc_detail_docname'
+				'second_join_field': 'prevdoc_detail_docname',
+				'overflow_type': 'delivery'
 			})
 
 	def on_update_after_submit(self):
@@ -339,8 +341,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
-			msgprint(_("Cash or Bank Account is mandatory for making payment entry"))
-			raise Exception
+			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
+			
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
 				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
@@ -431,9 +433,8 @@ class SalesInvoice(SellingController):
 				submitted = frappe.db.sql("""select name from `tabSales Order`
 					where docstatus = 1 and name = %s""", d.sales_order)
 				if not submitted:
-					msgprint(_("Sales Order {0} is not submitted").format(d.sales_order))
-					raise Exception
-
+					frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
+					
 			if d.delivery_note:
 				submitted = frappe.db.sql("""select name from `tabDelivery Note`
 					where docstatus = 1 and name = %s""", d.delivery_note)
@@ -682,7 +683,7 @@ def manage_recurring_invoices(next_date=None, commit=True):
 
 	if exception_list:
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
-		raise Exception, exception_message
+		frappe.throw(exception_message)
 
 def make_new_invoice(ref_wrapper, posting_date):
 	from erpnext.accounts.utils import get_fiscal_year

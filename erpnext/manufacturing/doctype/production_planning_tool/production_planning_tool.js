@@ -37,8 +37,8 @@ cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = functi
 	});
 }
 
-cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc) {
-	var d = locals[this.doctype][this.docname];
+cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return {
 			query: "erpnext.controllers.queries.bom",

@@ -150,7 +150,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Supplier Addresses And Contacts",
+					"name": "Supplier Addresses and Contacts",
 					"doctype": "Supplier"
 				},
 				{

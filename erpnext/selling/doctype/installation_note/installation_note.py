@@ -28,7 +28,8 @@ class InstallationNote(TransactionBase):
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
 			'status_field': 'installation_status',
-			'keyword': 'Installed'
+			'keyword': 'Installed',
+			'overflow_type': 'installation'
 		}]
 
 	def validate(self):

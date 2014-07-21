@@ -190,3 +190,22 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			"posting_date": posting_date,
 			"posting_time": posting_time
 		})
+
+def reset_serial_no_status_and_warehouse(serial_nos=None):
+	if not serial_nos:
+		serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where status != 'Not in Use'
+			and docstatus = 0""")
+		for serial_no in serial_nos:
+			try:
+				sr = frappe.get_doc("Serial No", serial_no)
+				last_sle = sr.get_last_sle()
+				if flt(last_sle.actual_qty) > 0:
+					sr.warehouse = last_sle.warehouse
+					
+				sr.via_stock_ledger = True
+				sr.save()
+			except:
+				pass
+		
+		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
+		
