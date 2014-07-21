@@ -1,5 +1,5 @@
 {%- from "templates/print_formats/standard_macros.html" import print_value -%}
-{%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom") -%}
+{%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom") -%}
 {%- set visible_columns = get_visible_columns(doc.get(df.fieldname), table_meta) -%}
 
 <table class="table table-bordered">
@@ -30,7 +30,7 @@
 							{{ frappe.format_value(row[field.fieldname], field, doc) }}</p>
 						{%- endif -%}
 					{%- endfor -%}
-			<td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.stock_uom }}</td>
+			<td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock_uom }}</td>
 			<td style="width: 15%; text-align: right;">{{
 				frappe.format_value(row.rate,
 					table_meta.get_field("rate"), doc) }}</td>

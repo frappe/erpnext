@@ -11,6 +11,13 @@ from erpnext.accounts.party import get_party_details
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
+	def __setup__(self):
+		if hasattr(self, "fname"):
+			self.table_print_templates = {
+				self.fname: "templates/print_formats/includes/item_grid.html",
+				"other_charges": "templates/print_formats/includes/taxes.html",
+			}
+
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:

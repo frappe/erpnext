@@ -12,9 +12,7 @@ frappe.pages['stock-balance'].onload = function(wrapper) {
 
 	new erpnext.StockBalance(wrapper);
 
-
-	wrapper.appframe.add_module_icon("Stock")
-
+	wrapper.appframe.add_module_icon("Stock");
 }
 
 erpnext.StockBalance = erpnext.StockAnalytics.extend({
