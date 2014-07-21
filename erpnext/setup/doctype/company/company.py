@@ -241,7 +241,7 @@ class Company(Document):
 					[_('Sales'),_('Direct Income'),'Ledger','Income Account','Profit and Loss', None, 'Income'],
 					[_('Service'),_('Direct Income'),'Ledger','Income Account','Profit and Loss', None, 'Income'],
 				[_('Indirect Income'),_('Income'),'Group','Income Account','Profit and Loss', None, 'Income'],
-			[_('Source of Funds (Liabilities)'), None,'Group', None,'Balance Sheet', None, 'Income'],
+			[_('Source of Funds (Liabilities)'), None,'Group', None,'Balance Sheet', None, 'Liability'],
 				[_('Capital Account'),_('Source of Funds (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
 					[_('Reserves and Surplus'),_('Capital Account'),'Ledger', None,'Balance Sheet', None, 'Liability'],
 					[_('Shareholders Funds'),_('Capital Account'),'Ledger', None,'Balance Sheet', None, 'Liability'],

@@ -29,7 +29,8 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
-			'keyword': 'Delivered'
+			'keyword': 'Delivered',
+			'overflow_type': 'delivery'
 		}]
 
 	def onload(self):

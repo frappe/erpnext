@@ -55,7 +55,7 @@ class Project(Document):
 					"event_type": "Private",
 					"ref_type": self.doctype,
 					"ref_name": self.name
-				}).insert()
+				}).insert(ignore_permissions=True)
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)

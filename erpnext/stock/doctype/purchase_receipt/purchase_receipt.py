@@ -27,6 +27,7 @@ class PurchaseReceipt(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
+			'overflow_type': 'receipt'
 		}]
 
 	def onload(self):

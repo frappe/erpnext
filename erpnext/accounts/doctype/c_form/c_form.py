@@ -55,12 +55,12 @@ class CForm(Document):
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
-
-		inv = frappe.db.get_value("Sales Invoice", invoice_no,
-			["posting_date", "territory", "net_total", "grand_total"], as_dict=True)
-		return {
-			'invoice_date' : inv.posting_date,
-			'territory'    : inv.territory,
-			'net_total'    : inv.net_total,
-			'grand_total'  : inv.grand_total
-		}
+		if invoice_no:
+			inv = frappe.db.get_value("Sales Invoice", invoice_no,
+				["posting_date", "territory", "net_total", "grand_total"], as_dict=True)
+			return {
+				'invoice_date' : inv.posting_date,
+				'territory'    : inv.territory,
+				'net_total'    : inv.net_total,
+				'grand_total'  : inv.grand_total
+			}

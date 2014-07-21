@@ -176,7 +176,6 @@ def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
-
 	# if initial setup not completed, return
 	if not frappe.db.sql("select name from `tabFiscal Year` limit 1"):
 		return
@@ -185,46 +184,69 @@ def reorder_item():
 		frappe.local.auto_indent = cint(frappe.db.get_value('Stock Settings', None, 'auto_indent'))
 
 	if frappe.local.auto_indent:
-		material_requests = {}
-		bin_list = frappe.db.sql("""select item_code, warehouse, projected_qty
-			from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
-			and exists (select name from `tabItem`
-				where `tabItem`.name = `tabBin`.item_code and
-				is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
-				(ifnull(end_of_life, '0000-00-00')='0000-00-00' or end_of_life > curdate()))""",
-				as_dict=True)
+		_reorder_item()
 
-		for bin in bin_list:
-			#check if re-order is required
-			item_reorder = frappe.db.get("Item Reorder",
-				{"parent": bin.item_code, "warehouse": bin.warehouse})
-			if item_reorder:
-				reorder_level = item_reorder.warehouse_reorder_level
-				reorder_qty = item_reorder.warehouse_reorder_qty
-				material_request_type = item_reorder.material_request_type or "Purchase"
-			else:
-				reorder_level, reorder_qty = frappe.db.get_value("Item", bin.item_code,
-					["re_order_level", "re_order_qty"])
-				material_request_type = "Purchase"
+def _reorder_item():
+	# {"Purchase": {"Company": [{"item_code": "", "warehouse": "", "reorder_qty": 0.0}]}, "Transfer": {...}}
+	material_requests = {"Purchase": {}, "Transfer": {}}
 
-			if flt(reorder_level) and flt(bin.projected_qty) < flt(reorder_level):
-				if flt(reorder_level) - flt(bin.projected_qty) > flt(reorder_qty):
-					reorder_qty = flt(reorder_level) - flt(bin.projected_qty)
+	item_warehouse_projected_qty = get_item_warehouse_projected_qty()
+	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`"""))
+	default_company = (frappe.defaults.get_defaults().get("company") or
+		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 
-				company = frappe.db.get_value("Warehouse", bin.warehouse, "company") or \
-					frappe.defaults.get_defaults()["company"] or \
-					frappe.db.sql("""select name from tabCompany limit 1""")[0][0]
+	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type):
+		if warehouse not in item_warehouse_projected_qty[item_code]:
+			# likely a disabled warehouse or a warehouse where BIN does not exist
+			return
 
-				material_requests.setdefault(material_request_type, frappe._dict()).setdefault(
-					company, []).append(frappe._dict({
-						"item_code": bin.item_code,
-						"warehouse": bin.warehouse,
-						"reorder_qty": reorder_qty
-					})
-				)
+		reorder_level = flt(reorder_level)
+		reorder_qty = flt(reorder_qty)
+		projected_qty = item_warehouse_projected_qty[item_code][warehouse]
 
-		if material_requests:
-			create_material_request(material_requests)
+		if reorder_level and projected_qty < reorder_level:
+			deficiency = reorder_level - projected_qty
+			if deficiency > reorder_qty:
+				reorder_qty = deficiency
+
+			company = warehouse_company.get(warehouse) or default_company
+
+			material_requests[material_request_type].setdefault(company, []).append({
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"reorder_qty": reorder_qty
+			})
+
+	for item_code in item_warehouse_projected_qty:
+		item = frappe.get_doc("Item", item_code)
+		if item.get("item_reorder"):
+			for d in item.get("item_reorder"):
+				add_to_material_request(item_code, d.warehouse, d.warehouse_reorder_level,
+					d.warehouse_reorder_qty, d.material_request_type)
+
+		else:
+			# raise for default warehouse
+			add_to_material_request(item_code, item.default_warehouse, item.re_order_level, item.re_order_qty, "Purchase")
+
+	if material_requests:
+		create_material_request(material_requests)
+
+def get_item_warehouse_projected_qty():
+	item_warehouse_projected_qty = {}
+
+	for item_code, warehouse, projected_qty in frappe.db.sql("""select item_code, warehouse, projected_qty
+		from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
+		and exists (select name from `tabItem`
+			where `tabItem`.name = `tabBin`.item_code and
+			is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
+			(ifnull(end_of_life, '0000-00-00')='0000-00-00' or end_of_life > %s))
+		and exists (select name from `tabWarehouse`
+			where `tabWarehouse`.name = `tabBin`.warehouse
+			and ifnull(disabled, 0)=0)""", nowdate()):
+
+		item_warehouse_projected_qty.setdefault(item_code, {})[warehouse] = flt(projected_qty)
+
+	return item_warehouse_projected_qty
 
 def create_material_request(material_requests):
 	"""	Create indent on reaching reorder level	"""
@@ -263,6 +285,7 @@ def create_material_request(material_requests):
 				})
 
 				for d in items:
+					d = frappe._dict(d)
 					item = frappe.get_doc("Item", d.item_code)
 					mr.append("indent_details", {
 						"doctype": "Material Request Item",
