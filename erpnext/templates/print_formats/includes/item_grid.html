@@ -1,3 +1,7 @@
+{%- from "templates/print_formats/standard_macros.html" import print_value -%}
+{%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom") -%}
+{%- set visible_columns = get_visible_columns(doc.get(df.fieldname), table_meta) -%}
+
 <table class="table table-bordered">
 	<tbody>
 		<tr>
@@ -18,11 +22,21 @@
 				{%- endif %}
 			</td>
 			<td style="width: 37%;">
-				<div style="border: 0px;">{{ row.description }}</div></td>
+				<div style="border: 0px;">{{ row.description }}
+					{%- for field in visible_columns -%}
+						{%- if (field.fieldname not in std_fields) and
+								(row[field.fieldname] not in (None, "")) -%}
+						<br><strong>{{ field.label }}:</strong>
+							{{ frappe.format_value(row[field.fieldname], field, doc) }}</p>
+						{%- endif -%}
+					{%- endfor -%}
 			<td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.stock_uom }}</td>
 			<td style="width: 15%; text-align: right;">{{
-				format(row.rate, table_meta.get_field("rate"), doc) }}</td>
-			<td style="width: 15%; text-align: right;">{{ format(row.amount, table_meta.get_field("amount"), doc) }}</td>
+				frappe.format_value(row.rate,
+					table_meta.get_field("rate"), doc) }}</td>
+			<td style="width: 15%; text-align: right;">{{
+				frappe.format_value(row.amount,
+					table_meta.get_field("amount"), doc) }}</td>
 		</tr>
 		{%- endfor -%}
 	</tbody>
