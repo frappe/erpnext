@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, _dict
 from frappe.utils import (flt, cint, getdate, get_first_day, get_last_day,
-	add_months, add_days, now_datetime, formatdate)
+	add_months, add_days, formatdate)
 
 def process_filters(filters):
 	filters.depth = cint(filters.depth) or 3
@@ -19,7 +19,6 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 	start_date, end_date = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])
 	start_date = getdate(start_date)
 	end_date = getdate(end_date)
-	today = now_datetime().date()
 
 	if periodicity == "Yearly":
 		period_list = [_dict({"to_date": end_date, "key": fiscal_year, "label": fiscal_year})]
@@ -45,18 +44,9 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 				# to_date should be the last day of the new to_date's month
 				to_date = get_last_day(to_date)
 
-			if to_date > today:
-				# checking in the middle of the currenct fiscal year? don't show future periods
-				key = today.strftime("%b_%Y").lower()
-				label = formatdate(today, "MMM YYYY")
-				period_list.append(_dict({"to_date": today, "key": key, "label": label}))
-				break
-
-			elif to_date <= end_date:
+			if to_date <= end_date:
 				# the normal case
-				key = to_date.strftime("%b_%Y").lower()
-				label = formatdate(to_date, "MMM YYYY")
-				period_list.append(_dict({"to_date": to_date, "key": key, "label": label}))
+				period_list.append(_dict({ "to_date": to_date }))
 
 				# if it ends before a full year
 				if to_date == end_date:
@@ -64,14 +54,19 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 
 			else:
 				# if a fiscal year ends before a 12 month period
-				key = end_date.strftime("%b_%Y").lower()
-				label = formatdate(end_date, "MMM YYYY")
-				period_list.append(_dict({"to_date": end_date, "key": key, "label": label}))
+				period_list.append(_dict({ "to_date": end_date }))
 				break
 
 	# common processing
 	for opts in period_list:
-		opts["key"] = opts["key"].replace(" ", "_").replace("-", "_")
+		key = opts["to_date"].strftime("%b_%Y").lower()
+		label = formatdate(opts["to_date"], "MMM YYYY")
+		opts.update({
+			"key": key.replace(" ", "_").replace("-", "_"),
+			"label": label,
+			"year_start_date": start_date,
+			"year_end_date": end_date
+		})
 
 		if from_beginning:
 			# set start date as None for all fiscal periods, used in case of Balance Sheet
@@ -81,14 +76,14 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 
 	return period_list
 
-def get_data(company, root_type, balance_must_be, period_list, depth, ignore_opening_and_closing_entries=False):
+def get_data(company, root_type, balance_must_be, period_list, depth, ignore_closing_entries=False):
 	accounts = get_accounts(company, root_type)
 	if not accounts:
 		return None
 
 	accounts, accounts_by_name = filter_accounts(accounts, depth)
 	gl_entries_by_account = get_gl_entries(company, root_type, period_list[0]["from_date"], period_list[-1]["to_date"],
-		accounts[0].lft, accounts[0].rgt, ignore_opening_and_closing_entries=ignore_opening_and_closing_entries)
+		accounts[0].lft, accounts[0].rgt, ignore_closing_entries=ignore_closing_entries)
 
 	calculate_values(accounts, gl_entries_by_account, period_list)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
@@ -121,6 +116,9 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 
 def prepare_data(accounts, balance_must_be, period_list):
 	out = []
+	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
+	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
+
 	for d in accounts:
 		# add to output
 		has_value = False
@@ -128,7 +126,9 @@ def prepare_data(accounts, balance_must_be, period_list):
 			"account_name": d.account_name,
 			"account": d.name,
 			"parent_account": d.parent_account,
-			"indent": flt(d.indent)
+			"indent": flt(d.indent),
+			"year_start_date": year_start_date,
+			"year_end_date": year_end_date
 		}
 		for period in period_list:
 			if d.get(period.key):
@@ -204,12 +204,12 @@ def filter_accounts(accounts, depth):
 
 	return filtered_accounts, accounts_by_name
 
-def get_gl_entries(company, root_type, from_date, to_date, root_lft, root_rgt, ignore_opening_and_closing_entries=False):
+def get_gl_entries(company, root_type, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []
 
-	if ignore_opening_and_closing_entries:
-		additional_conditions.append("and ifnull(is_opening, 'No')='No' and ifnull(voucher_type, '')!='Period Closing Voucher'")
+	if ignore_closing_entries:
+		additional_conditions.append("and ifnull(voucher_type, '')!='Period Closing Voucher'")
 
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")

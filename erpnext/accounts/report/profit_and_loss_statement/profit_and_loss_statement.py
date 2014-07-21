@@ -11,30 +11,29 @@ def execute(filters=None):
 	process_filters(filters)
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity)
 
-	data = []
-	income = get_data(filters.company, "Income", "Credit", period_list, filters.depth,
-				ignore_opening_and_closing_entries=True)
-	expense = get_data(filters.company, "Expense", "Debit", period_list, filters.depth,
-				ignore_opening_and_closing_entries=True)
-	net_total = get_net_total(income, expense, period_list)
+	income = get_data(filters.company, "Income", "Credit", period_list, filters.depth, ignore_closing_entries=True)
+	expense = get_data(filters.company, "Expense", "Debit", period_list, filters.depth, ignore_closing_entries=True)
+	net_profit_loss = get_net_profit_loss(income, expense, period_list)
 
+	data = []
 	data.extend(income or [])
 	data.extend(expense or [])
-	if net_total:
-		data.append(net_total)
+	if net_profit_loss:
+		data.append(net_profit_loss)
 
 	columns = get_columns(period_list)
 
 	return columns, data
 
-def get_net_total(income, expense, period_list):
+def get_net_profit_loss(income, expense, period_list):
 	if income and expense:
-		net_total = {
+		net_profit_loss = {
 			"account_name": _("Net Profit / Loss"),
-			"account": None
+			"account": None,
+			"is_profit_loss": True
 		}
 
 		for period in period_list:
-			net_total[period.key] = flt(income[-2][period.key] - expense[-2][period.key], 3)
+			net_profit_loss[period.key] = flt(income[-2][period.key] - expense[-2][period.key], 3)
 
-		return net_total
+		return net_profit_loss

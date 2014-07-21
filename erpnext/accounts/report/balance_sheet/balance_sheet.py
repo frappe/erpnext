@@ -3,19 +3,51 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
+from frappe.utils import flt
 from erpnext.accounts.report.financial_statements import (process_filters, get_period_list, get_columns, get_data)
 
 def execute(filters=None):
 	process_filters(filters)
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity, from_beginning=True)
 
+	asset = get_data(filters.company, "Asset", "Debit", period_list, filters.depth)
+	liability = get_data(filters.company, "Liability", "Credit", period_list, filters.depth)
+	equity = get_data(filters.company, "Equity", "Credit", period_list, filters.depth)
+	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, period_list)
+
 	data = []
-	for (root_type, balance_must_be) in (("Asset", "Debit"), ("Liability", "Credit"), ("Equity", "Credit")):
-		result = get_data(filters.company, root_type, balance_must_be, period_list, filters.depth)
-		data.extend(result or [])
+	data.extend(asset or [])
+	data.extend(liability or [])
+	data.extend(equity or [])
+	if provisional_profit_loss:
+		data.append(provisional_profit_loss)
 
 	columns = get_columns(period_list)
 
 	return columns, data
 
+def get_provisional_profit_loss(asset, liability, equity, period_list):
+	if asset and (liability or equity):
+		provisional_profit_loss = {
+			"account_name": _("Provisional Profit / Loss (Credit)"),
+			"account": None,
+			"is_profit_loss": True
+		}
 
+		has_value = False
+
+		for period in period_list:
+			effective_liability = 0.0
+			if liability:
+				effective_liability += flt(liability[-2][period.key])
+			if equity:
+				effective_liability += flt(equity[-2][period.key])
+
+			provisional_profit_loss[period.key] = flt(asset[-2][period.key]) - effective_liability
+
+			if provisional_profit_loss[period.key]:
+				has_value = True
+
+		if has_value:
+			return provisional_profit_loss

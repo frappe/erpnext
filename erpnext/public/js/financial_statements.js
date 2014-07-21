@@ -38,7 +38,7 @@ erpnext.financial_statements = {
 		if (columnDef.df.fieldname=="account") {
 			var link = $("<a></a>")
 				.text(dataContext.account_name)
-				.attr("onclick", 'erpnext.financial_statements.open_general_ledger("' + dataContext.account + '")');
+				.attr("onclick", "erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")");
 
 			var span = $("<span></span>")
 				.css("padding-left", (cint(dataContext.indent) * 21) + "px")
@@ -51,17 +51,24 @@ erpnext.financial_statements = {
 		}
 
 		if (!dataContext.parent_account) {
-			value = $(value).css("font-weight", "bold").wrap("<p></p>").parent().html();
+			var $value = $(value).css("font-weight", "bold");
+			if (dataContext.is_profit_loss && dataContext[columnDef.df.fieldname] < 0) {
+				$value.addClass("text-danger");
+			}
+
+			value = $value.wrap("<p></p>").parent().html();
 		}
 
 		return value;
 	},
-	"open_general_ledger": function(account) {
-		if (!account) return;
+	"open_general_ledger": function(data) {
+		if (!data.account) return;
 
 		frappe.route_options = {
-			"account": account,
-			"company": frappe.query_report.filters_by_name.company.get_value()
+			"account": data.account,
+			"company": frappe.query_report.filters_by_name.company.get_value(),
+			"from_date": data.year_start_date,
+			"to_date": data.year_end_date
 		};
 		frappe.set_route("query-report", "General Ledger");
 	}
