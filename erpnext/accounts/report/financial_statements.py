@@ -4,8 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, _dict
-from frappe.utils import (cstr, flt, cint,
-	getdate, get_first_day, get_last_day, add_months, add_days, now_datetime, localize_date)
+from frappe.utils import (flt, cint, getdate, get_first_day, get_last_day,
+	add_months, add_days, now_datetime, formatdate)
 
 def process_filters(filters):
 	filters.depth = cint(filters.depth) or 3
@@ -48,14 +48,14 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 			if to_date > today:
 				# checking in the middle of the currenct fiscal year? don't show future periods
 				key = today.strftime("%b_%Y").lower()
-				label = localize_date(today, "MMM YYYY")
+				label = formatdate(today, "MMM YYYY")
 				period_list.append(_dict({"to_date": today, "key": key, "label": label}))
 				break
 
 			elif to_date <= end_date:
 				# the normal case
 				key = to_date.strftime("%b_%Y").lower()
-				label = localize_date(to_date, "MMM YYYY")
+				label = formatdate(to_date, "MMM YYYY")
 				period_list.append(_dict({"to_date": to_date, "key": key, "label": label}))
 
 				# if it ends before a full year
@@ -65,7 +65,7 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 			else:
 				# if a fiscal year ends before a 12 month period
 				key = end_date.strftime("%b_%Y").lower()
-				label = localize_date(end_date, "MMM YYYY")
+				label = formatdate(end_date, "MMM YYYY")
 				period_list.append(_dict({"to_date": end_date, "key": key, "label": label}))
 				break
 
