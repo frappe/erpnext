@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from erpnext.accounts.report.financial_statements import (process_filters, get_period_list, get_columns, get_data)
 
-print_path = "accounts/report/financial_statements.html"
-
 def execute(filters=None):
 	process_filters(filters)
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity, from_beginning=True)
