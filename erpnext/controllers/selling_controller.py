@@ -11,10 +11,11 @@ from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
 	def __setup__(self):
-		self.table_print_templates = {
-			self.fname: "templates/print_formats/includes/item_grid.html",
-			"other_charges": "templates/print_formats/includes/taxes.html",
-		}
+		if hasattr(self, "fname"):
+			self.table_print_templates = {
+				self.fname: "templates/print_formats/includes/item_grid.html",
+				"other_charges": "templates/print_formats/includes/taxes.html",
+			}
 
 	def validate(self):
 		super(SellingController, self).validate()

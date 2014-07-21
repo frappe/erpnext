@@ -342,17 +342,17 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "column_break_33", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "net_total_export", 
    "fieldtype": "Currency", 
    "label": "Net Total", 
    "options": "currency", 
    "permlevel": 0, 
    "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_33", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
   }, 
   {
    "fieldname": "net_total", 
@@ -1009,7 +1009,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-07-10 02:45:47.673011", 
+ "modified": "2014-07-21 05:28:55.380728", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 

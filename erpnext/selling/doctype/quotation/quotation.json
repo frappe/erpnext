@@ -314,19 +314,6 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "net_total_export", 
-   "fieldtype": "Currency", 
-   "label": "Net Total", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_28", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total (Company Currency)", 
@@ -339,6 +326,19 @@
    "read_only": 1, 
    "reqd": 0, 
    "width": "100px"
+  }, 
+  {
+   "fieldname": "column_break_28", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "net_total_export", 
+   "fieldtype": "Currency", 
+   "label": "Net Total", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "taxes", 
@@ -449,6 +449,55 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "grand_total", 
+   "fieldtype": "Currency", 
+   "label": "Grand Total (Company Currency)", 
+   "no_copy": 0, 
+   "oldfieldname": "grand_total", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 0, 
+   "width": "200px"
+  }, 
+  {
+   "fieldname": "rounded_total", 
+   "fieldtype": "Currency", 
+   "label": "Rounded Total (Company Currency)", 
+   "no_copy": 0, 
+   "oldfieldname": "rounded_total", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "width": "200px"
+  }, 
+  {
+   "description": "In Words will be visible once you save the Quotation.", 
+   "fieldname": "in_words", 
+   "fieldtype": "Data", 
+   "label": "In Words (Company Currency)", 
+   "no_copy": 0, 
+   "oldfieldname": "in_words", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "width": "200px"
+  }, 
+  {
+   "fieldname": "column_break3", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "width": "50%"
+  }, 
+  {
    "fieldname": "grand_total_export", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
@@ -486,55 +535,6 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "print_hide": 0, 
-   "read_only": 1, 
-   "width": "200px"
-  }, 
-  {
-   "fieldname": "column_break3", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
-   "fieldname": "grand_total", 
-   "fieldtype": "Currency", 
-   "label": "Grand Total (Company Currency)", 
-   "no_copy": 0, 
-   "oldfieldname": "grand_total", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "reqd": 0, 
-   "width": "200px"
-  }, 
-  {
-   "fieldname": "rounded_total", 
-   "fieldtype": "Currency", 
-   "label": "Rounded Total (Company Currency)", 
-   "no_copy": 0, 
-   "oldfieldname": "rounded_total", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "width": "200px"
-  }, 
-  {
-   "description": "In Words will be visible once you save the Quotation.", 
-   "fieldname": "in_words", 
-   "fieldtype": "Data", 
-   "label": "In Words (Company Currency)", 
-   "no_copy": 0, 
-   "oldfieldname": "in_words", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "print_hide": 1, 
    "read_only": 1, 
    "width": "200px"
   }, 
@@ -827,7 +827,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2014-06-23 07:55:51.859025", 
+ "modified": "2014-07-21 05:44:26.800041", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 

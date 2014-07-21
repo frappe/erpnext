@@ -231,6 +231,24 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "net_total", 
+   "fieldtype": "Currency", 
+   "label": "Net Total (Company Currency)", 
+   "no_copy": 1, 
+   "oldfieldname": "net_total", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "column_break_26", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "net_total_import", 
    "fieldtype": "Currency", 
    "label": "Net Total", 
@@ -249,24 +267,6 @@
    "oldfieldtype": "Button", 
    "permlevel": 0, 
    "print_hide": 0
-  }, 
-  {
-   "fieldname": "column_break_26", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "net_total", 
-   "fieldtype": "Currency", 
-   "label": "Net Total (Company Currency)", 
-   "no_copy": 1, 
-   "oldfieldname": "net_total", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "reqd": 0
   }, 
   {
    "fieldname": "taxes", 
@@ -317,63 +317,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "other_charges_added_import", 
-   "fieldtype": "Currency", 
-   "label": "Taxes and Charges Added", 
-   "no_copy": 0, 
-   "oldfieldname": "other_charges_added_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "report_hide": 0
-  }, 
-  {
-   "fieldname": "other_charges_deducted_import", 
-   "fieldtype": "Currency", 
-   "label": "Taxes and Charges Deducted", 
-   "no_copy": 0, 
-   "oldfieldname": "other_charges_deducted_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "report_hide": 0
-  }, 
-  {
-   "fieldname": "grand_total_import", 
-   "fieldtype": "Currency", 
-   "in_list_view": 1, 
-   "label": "Grand Total", 
-   "no_copy": 0, 
-   "oldfieldname": "grand_total_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1, 
-   "report_hide": 0
-  }, 
-  {
-   "fieldname": "in_words_import", 
-   "fieldtype": "Data", 
-   "label": "In Words", 
-   "oldfieldname": "in_words_import", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break4", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "print_hide": 0
-  }, 
-  {
    "fieldname": "other_charges_added", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Added (Company Currency)", 
@@ -422,6 +365,17 @@
    "read_only": 1
   }, 
   {
+   "description": "In Words will be visible once you save the Purchase Order.", 
+   "fieldname": "in_words", 
+   "fieldtype": "Data", 
+   "label": "In Words (Company Currency)", 
+   "oldfieldname": "in_words", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "rounded_total", 
    "fieldtype": "Currency", 
    "label": "Rounded Total (Company Currency)", 
@@ -433,14 +387,60 @@
    "read_only": 1
   }, 
   {
-   "description": "In Words will be visible once you save the Purchase Order.", 
-   "fieldname": "in_words", 
-   "fieldtype": "Data", 
-   "label": "In Words (Company Currency)", 
-   "oldfieldname": "in_words", 
-   "oldfieldtype": "Data", 
+   "fieldname": "column_break4", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "print_hide": 0
+  }, 
+  {
+   "fieldname": "other_charges_added_import", 
+   "fieldtype": "Currency", 
+   "label": "Taxes and Charges Added", 
+   "no_copy": 0, 
+   "oldfieldname": "other_charges_added_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
    "permlevel": 0, 
    "print_hide": 1, 
+   "read_only": 1, 
+   "report_hide": 0
+  }, 
+  {
+   "fieldname": "other_charges_deducted_import", 
+   "fieldtype": "Currency", 
+   "label": "Taxes and Charges Deducted", 
+   "no_copy": 0, 
+   "oldfieldname": "other_charges_deducted_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "report_hide": 0
+  }, 
+  {
+   "fieldname": "grand_total_import", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Grand Total", 
+   "no_copy": 0, 
+   "oldfieldname": "grand_total_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 1, 
+   "report_hide": 0
+  }, 
+  {
+   "fieldname": "in_words_import", 
+   "fieldtype": "Data", 
+   "label": "In Words", 
+   "oldfieldname": "in_words_import", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 0, 
    "read_only": 1
   }, 
   {
@@ -645,7 +645,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:50.372486", 
+ "modified": "2014-07-21 05:34:36.390448", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
