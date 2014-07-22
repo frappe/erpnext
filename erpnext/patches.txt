@@ -73,3 +73,5 @@ execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool")
 execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool Detail")
 execute:frappe.delete_doc("Page", "trial-balance") #2014-07-22
 erpnext.patches.v4_2.delete_old_print_formats
+execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool")
+execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool Detail")
