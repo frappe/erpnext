@@ -8,11 +8,12 @@ import frappe.utils
 from frappe.utils import cstr
 from frappe import throw, _
 from frappe.model.document import Document
+import erpnext.tasks
 
 class Newsletter(Document):
 	def onload(self):
 		if self.email_sent:
-			self.get("__onload").status_count = dict(frappe.db.sql("""select status, count(*)
+			self.get("__onload").status_count = dict(frappe.db.sql("""select status, count(name)
 				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
 				group by status""", (self.doctype, self.name))) or None
 
@@ -28,7 +29,13 @@ class Newsletter(Document):
 			throw(_("Newsletter has already been sent"))
 
 		self.recipients = self.get_recipients()
-		self.send_bulk()
+
+		if frappe.local.is_ajax:
+			# to avoid request timed out!
+			self.validate_send()
+			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name)
+		else:
+			self.send_bulk()
 
 		frappe.msgprint(_("Scheduled to send to {0} recipients").format(len(self.recipients)))
 
@@ -77,6 +84,10 @@ class Newsletter(Document):
 			return email_list
 
 	def send_bulk(self):
+		if not self.get("recipients"):
+			# in case it is called via worker
+			self.recipients = self.get_recipients()
+
 		self.validate_send()
 
 		sender = self.send_from or frappe.utils.get_formatted_email(self.owner)
@@ -97,10 +108,6 @@ class Newsletter(Document):
 	def validate_send(self):
 		if self.get("__islocal"):
 			throw(_("Please save the Newsletter before sending"))
-
-		from frappe import conf
-		if (conf.get("status") or None) == "Trial":
-			throw(_("Newsletters is not allowed for Trial users"))
 
 @frappe.whitelist()
 def get_lead_options():
