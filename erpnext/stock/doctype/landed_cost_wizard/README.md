@@ -1,1 +1,0 @@
-Tool to distribute costs as part of Item value after the Item has been received. This is typically in case where bills related to Items are received much later and for multiple Item. (specially Custom Duty)

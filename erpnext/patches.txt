@@ -76,3 +76,4 @@ erpnext.patches.v4_2.toggle_rounded_total #2014-07-30
 erpnext.patches.v4_2.fix_account_master_type
 erpnext.patches.v4_2.update_project_milestones
 erpnext.patches.v4_2.add_currency_turkish_lira #2014-08-08
+execute:frappe.delete_doc("DocType", "Landed Cost Wizard")
