@@ -1,8 +1,6 @@
-### Note: ERPNext is part of the Frappe Platform
+### Note: ERPNext is now part of the Frappe Platform
 
-#### This repository is only for version 3.
-
-For latest version (4 onward) and updates: [https://github.com/frappe/erpnext](https://github.com/frappe/erpnext)
+#### This repository is only for version 3 and for archival purposes. For latest version (4 onward) and updates: [https://github.com/frappe/erpnext](https://github.com/frappe/erpnext)
 
 ---
 
