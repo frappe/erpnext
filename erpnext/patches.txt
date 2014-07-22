@@ -71,3 +71,4 @@ erpnext.patches.v4_1.fix_delivery_and_billing_status
 execute:frappe.db.sql("update `tabAccount` set root_type='Liability' where root_type='Income' and report_type='Balance Sheet'")
 execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool")
 execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool Detail")
+execute:frappe.delete_doc("Page", "trial-balance") #2014-07-22

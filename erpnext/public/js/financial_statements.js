@@ -25,34 +25,21 @@ erpnext.financial_statements = {
 			"options": "Yearly\nHalf-yearly\nQuarterly\nMonthly",
 			"default": "Yearly",
 			"reqd": 1
-		},
-		{
-			"fieldname": "depth",
-			"label": __("Depth"),
-			"fieldtype": "Select",
-			"options": "3\n4\n5",
-			"default": "3"
 		}
 	],
-	"formatter": function(row, cell, value, columnDef, dataContext) {
+	"formatter": function(row, cell, value, columnDef, dataContext, default_formatter) {
 		if (columnDef.df.fieldname=="account") {
-			var link = $("<a></a>")
-				.text(dataContext.account_name)
-				.attr("onclick", "erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")");
+			value = dataContext.account_name;
 
-			var span = $("<span></span>")
-				.css("padding-left", (cint(dataContext.indent) * 21) + "px")
-				.append(link);
-
-			value = span.wrap("<p></p>").parent().html();
-
-		} else {
-			value = erpnext.financial_statements.default_formatter(row, cell, value, columnDef, dataContext);
+			columnDef.df.link_onclick = "erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")";
+			columnDef.df.is_tree = true;
 		}
+
+		value = default_formatter(row, cell, value, columnDef, dataContext);
 
 		if (!dataContext.parent_account) {
 			var $value = $(value).css("font-weight", "bold");
-			if (dataContext.is_profit_loss && dataContext[columnDef.df.fieldname] < 0) {
+			if (dataContext.warn_if_negative && dataContext[columnDef.df.fieldname] < 0) {
 				$value.addClass("text-danger");
 			}
 
@@ -67,9 +54,13 @@ erpnext.financial_statements = {
 		frappe.route_options = {
 			"account": data.account,
 			"company": frappe.query_report.filters_by_name.company.get_value(),
-			"from_date": data.year_start_date,
-			"to_date": data.year_end_date
+			"from_date": data.from_date,
+			"to_date": data.to_date
 		};
 		frappe.set_route("query-report", "General Ledger");
-	}
+	},
+	"tree": true,
+	"name_field": "account",
+	"parent_field": "parent_account",
+	"initial_depth": 3
 };

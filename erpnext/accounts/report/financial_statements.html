@@ -1,5 +1,5 @@
 {%
-	if (report.columns.length > 6) {
+	if (report.columns.length > 8) {
 		frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
 	}
 %}
@@ -17,11 +17,14 @@
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.company %}</h3>
 <h4 class="text-center">{%= filters.fiscal_year %}</h3>
+{% if (filters.from_date) { %}
+	<h4 class="text-center">{%= dateutil.str_to_user(filters.from_date) %} - {%= dateutil.str_to_user(filters.to_date) %}</h3>
+{% } %}
 <hr>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: {%= 100 - (report.columns.length - 2) * 15 %}%"></th>
+			<th style="width: {%= 100 - (report.columns.length - 2) * 13 %}%"></th>
 			{% for(var i=2, l=report.columns.length; i<l; i++) { %}
 				<th class="text-right">{%= report.columns[i].label %}</th>
 			{% } %}
