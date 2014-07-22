@@ -31,7 +31,7 @@
    "hidden": 1, 
    "in_list_view": 1, 
    "label": "Party Type", 
-   "options": "\nCustomer\nSupplier", 
+   "options": "Customer\nSupplier", 
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 0
@@ -129,7 +129,7 @@
  ], 
  "hide_toolbar": 1, 
  "issingle": 1, 
- "modified": "2014-07-21 16:54:31.454679", 
+ "modified": "2014-07-22 14:53:59.084438", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation", 
@@ -139,7 +139,7 @@
   {
    "cancel": 0, 
    "create": 1, 
-   "delete": 1, 
+   "delete": 0, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Accounts Manager", 
@@ -149,7 +149,7 @@
   {
    "cancel": 0, 
    "create": 1, 
-   "delete": 1, 
+   "delete": 0, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Accounts User", 
