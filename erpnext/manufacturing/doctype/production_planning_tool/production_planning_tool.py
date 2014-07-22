@@ -287,17 +287,16 @@ class ProductionPlanningTool(Document):
 		 	'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
 		for item in self.item_dict:
 			total_qty = sum([flt(d[0]) for d in self.item_dict[item]])
-			for item_details in self.item_dict[item]:
-				item_list.append([item, item_details[1], item_details[2], item_details[0]])
-				item_qty = frappe.db.sql("""select warehouse, indented_qty, ordered_qty, actual_qty
-					from `tabBin` where item_code = %s""", item, as_dict=1)
-				i_qty, o_qty, a_qty = 0, 0, 0
-				for w in item_qty:
-					i_qty, o_qty, a_qty = i_qty + flt(w.indented_qty), o_qty + flt(w.ordered_qty), a_qty + flt(w.actual_qty)
-					item_list.append(['', '', '', '', w.warehouse, flt(w.indented_qty),
-						flt(w.ordered_qty), flt(w.actual_qty)])
-				if item_qty:
-					item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
+			item_list.append([item, self.item_dict[item][0][1], self.item_dict[item][0][2], total_qty])
+			item_qty = frappe.db.sql("""select warehouse, indented_qty, ordered_qty, actual_qty
+				from `tabBin` where item_code = %s""", item, as_dict=1)
+			i_qty, o_qty, a_qty = 0, 0, 0
+			for w in item_qty:
+				i_qty, o_qty, a_qty = i_qty + flt(w.indented_qty), o_qty + flt(w.ordered_qty), a_qty + flt(w.actual_qty)
+				item_list.append(['', '', '', '', w.warehouse, flt(w.indented_qty),
+					flt(w.ordered_qty), flt(w.actual_qty)])
+			if item_qty:
+				item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
 
 		return item_list
 
