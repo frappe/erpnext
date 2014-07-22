@@ -340,7 +340,7 @@ class PurchaseReceipt(BuyingController):
 						warehouse_with_no_account.append(d.warehouse)
 
 		if warehouse_with_no_account:
-			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
+			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
