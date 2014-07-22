@@ -27,16 +27,14 @@
 						{%- if (field.fieldname not in std_fields) and
 								(row[field.fieldname] not in (None, "")) -%}
 						<br><strong>{{ field.label }}:</strong>
-							{{ frappe.format_value(row[field.fieldname], field, doc) }}</p>
+							{{ row.get_formatted(field.fieldname, doc) }}</p>
 						{%- endif -%}
 					{%- endfor -%}
 			<td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock_uom }}</td>
 			<td style="width: 15%; text-align: right;">{{
-				frappe.format_value(row.rate,
-					table_meta.get_field("rate"), doc) }}</td>
+				row.get_formatted("rate", doc) }}</td>
 			<td style="width: 15%; text-align: right;">{{
-				frappe.format_value(row.amount,
-					table_meta.get_field("amount"), doc) }}</td>
+				row.get_formatted("amount", doc) }}</td>
 		</tr>
 		{%- endfor -%}
 	</tbody>
