@@ -36,6 +36,35 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		
 	}, 
 	
+	refresh: function() {
+		var help_content = ['<table class="table table-bordered" style="background-color: #f9f9f9;">',
+			'<tr><td>',
+				'<h4><i class="icon-hand-right"></i> ',
+					__('Notes'),
+				':</h4>',
+				'<ul>',
+					'<li>',
+						__("Charges will be distributed proportionately based on item amount"),
+					'</li>',
+					'<li>',
+						__("Remove item if charges is not applicable to that item"),
+					'</li>',
+					'<li>',
+						__("Charges are updated in Purchase Receipt against each item"),
+					'</li>',
+					'<li>',
+						__("Item valuation rate is recalculated considering landed cost voucher amount"),
+					'</li>',
+					'<li>',
+						__("Stock Ledger Entries and GL Entries are reposted for the selected Purchase Receipts"),
+					'</li>',
+				'</ul>',
+			'</td></tr>',
+		'</table>'].join("\n");
+
+		set_field_options("landed_cost_help", help_content);
+	},
+	
 	get_items_from_purchase_receipts: function() {
 		var me = this;
 		if(!this.frm.doc.landed_cost_purchase_receipts.length) {
