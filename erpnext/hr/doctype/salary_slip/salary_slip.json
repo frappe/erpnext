@@ -76,14 +76,8 @@
    "fieldtype": "Link", 
    "label": "Letter Head", 
    "options": "Letter Head", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "column_break1", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
    "permlevel": 0, 
-   "width": "50%"
+   "print_hide": 1
   }, 
   {
    "fieldname": "fiscal_year", 
@@ -108,6 +102,13 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
    "fieldname": "month", 
    "fieldtype": "Select", 
    "in_filter": 1, 
@@ -123,8 +124,8 @@
   }, 
   {
    "fieldname": "total_days_in_month", 
-   "fieldtype": "Data", 
-   "label": "Total Working Days In The Month", 
+   "fieldtype": "Float", 
+   "label": "Working Days", 
    "oldfieldname": "total_days_in_month", 
    "oldfieldtype": "Int", 
    "permlevel": 0, 
@@ -209,6 +210,12 @@
    "width": "50%"
   }, 
   {
+   "fieldname": "html_21", 
+   "fieldtype": "HTML", 
+   "options": "<label>Earnings</label>", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "earning_details", 
    "fieldtype": "Table", 
    "label": "Salary Structure Earnings", 
@@ -224,6 +231,12 @@
    "oldfieldtype": "Column Break", 
    "permlevel": 0, 
    "width": "50%"
+  }, 
+  {
+   "fieldname": "html_24", 
+   "fieldtype": "HTML", 
+   "options": "<label>Deductions</label>", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "deduction_details", 
@@ -242,11 +255,14 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "column_break2", 
+   "fieldname": "column_break_25", 
    "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break_26", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "arrear_amount", 
@@ -287,13 +303,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break3", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
-  }, 
-  {
    "description": "Gross Pay + Arrear Amount +Encashment Amount - Total Deduction", 
    "fieldname": "net_pay", 
    "fieldtype": "Currency", 
@@ -326,7 +335,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:52.259962", 
+ "modified": "2014-07-21 07:58:08.033784", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
