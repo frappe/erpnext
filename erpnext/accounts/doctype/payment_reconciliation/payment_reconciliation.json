@@ -31,7 +31,7 @@
    "hidden": 1, 
    "in_list_view": 1, 
    "label": "Party Type", 
-   "options": "Customer\nSupplier", 
+   "options": "\nCustomer\nSupplier", 
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 0
