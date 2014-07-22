@@ -51,11 +51,11 @@ def get_data():
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
 				},
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Payment to Invoice Matching Tool",
-				# 	"description": _("Match non-linked Invoices and Payments.")
-				# },
+				{
+					"type": "doctype",
+					"name": "Payment Reconciliation",
+					"description": _("Match non-linked Invoices and Payments.")
+				},
 				{
 					"type": "doctype",
 					"name": "Period Closing Voucher",
