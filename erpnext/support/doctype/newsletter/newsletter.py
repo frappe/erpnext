@@ -30,7 +30,7 @@ class Newsletter(Document):
 
 		self.recipients = self.get_recipients()
 
-		if frappe.local.is_ajax:
+		if getattr(frappe.local, "is_ajax", False):
 			# to avoid request timed out!
 			self.validate_send()
 			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name)
