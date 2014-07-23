@@ -13,9 +13,9 @@ ERPNext is built on [frappe](https://github.com/frappe/frappe)
 
 ---
 
-### Development install
+### Install
 
-Use the bench, https://github.com/frappe/frappe-bench.
+Use the bench, https://github.com/frappe/bench
 
 ### Admin Login
 
