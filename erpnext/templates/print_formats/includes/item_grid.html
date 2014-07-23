@@ -30,7 +30,7 @@
 							{{ row.get_formatted(field.fieldname, doc) }}</p>
 						{%- endif -%}
 					{%- endfor -%}
-			<td style="width: 10%; text-align: right;">{{ row.qty }} {{ row.uom or row.stock_uom }}</td>
+			<td style="width: 10%; text-align: right;">{{ row.get_formatted("qty", doc) }} {{ row.uom or row.stock_uom }}</td>
 			<td style="width: 15%; text-align: right;">{{
 				row.get_formatted("rate", doc) }}</td>
 			<td style="width: 15%; text-align: right;">{{
