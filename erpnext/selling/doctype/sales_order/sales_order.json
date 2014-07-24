@@ -476,6 +476,13 @@
    "print_hide": 1
   }, 
   {
+   "fieldname": "advance_paid", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Advance Paid", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "grand_total", 
    "fieldtype": "Currency", 
    "label": "Grand Total (Company Currency)", 
@@ -889,7 +896,11 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
+<<<<<<< HEAD
  "modified": "2014-07-31 06:34:14.727868", 
+=======
+ "modified": "2014-07-24 17:43:10.273016", 
+>>>>>>> Add Payment Tool
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
