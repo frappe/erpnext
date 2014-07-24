@@ -695,7 +695,7 @@
    "oldfieldname": "due_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0, 
-   "print_hide": 0, 
+   "print_hide": 1, 
    "read_only": 0, 
    "search_index": 1
   }, 
@@ -753,7 +753,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-21 05:33:36.332474", 
+ "modified": "2014-07-24 08:46:13.099099", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
