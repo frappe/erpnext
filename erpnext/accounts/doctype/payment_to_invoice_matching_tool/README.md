@@ -1,1 +1,0 @@
-Tool for mapping (cancelling) unpaid invoices and payments.
