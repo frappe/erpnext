@@ -316,16 +316,25 @@ class PurchaseInvoice(BuyingController):
 		stock_item_and_auto_accounting_for_stock = False
 		stock_items = self.get_stock_items()
 		for item in self.get("entries"):
-			if auto_accounting_for_stock and item.item_code in stock_items:
-				if flt(item.valuation_rate):
+			if flt(item.base_amount):
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.expense_account,
+						"against": self.credit_to,
+						"debit": item.base_amount,
+						"remarks": self.remarks,
+						"cost_center": item.cost_center
+					})
+				)
+			
+			if auto_accounting_for_stock and item.item_code in stock_items and item.valuation_rate:
 					# if auto inventory accounting enabled and stock item,
 					# then do stock related gl entries
 					# expense will be booked in sales invoice
 					stock_item_and_auto_accounting_for_stock = True
 
-					valuation_amt = flt(item.base_amount + item.item_tax_amount,
-						self.precision("base_amount", item))
-
+					
+					
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": item.expense_account,
@@ -352,7 +361,10 @@ class PurchaseInvoice(BuyingController):
 			# this will balance out valuation amount included in cost of goods sold
 			expenses_included_in_valuation = \
 				self.get_company_default("expenses_included_in_valuation")
-
+				
+			# Backward compatibility:
+			# Post expenses_included_in_valuation only if it is not booked in Purchase Receipt
+			
 			for cost_center, amount in valuation_tax.items():
 				gl_entries.append(
 					self.get_gl_dict({

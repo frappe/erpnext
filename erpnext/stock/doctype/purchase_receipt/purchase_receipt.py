@@ -312,7 +312,7 @@ class PurchaseReceipt(BuyingController):
 						"against": warehouse_account[d.warehouse],
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
-						"credit": flt(d.base_amount + d.item_tax_amount, self.precision("base_amount", d))
+						"credit": flt(d.base_amount, self.precision("base_amount", d))
 					}))
 					
 					# Amount added through landed-cost-voucher
@@ -338,6 +338,40 @@ class PurchaseReceipt(BuyingController):
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
+						
+		# Cost center-wise amount breakup for other charges included for valuation
+		valuation_tax = {}
+		for tax in self.get("other_charges"):
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+				if not tax.cost_center:
+					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
+				valuation_tax.setdefault(tax.cost_center, 0)
+				valuation_tax[tax.cost_center] += \
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+					
+		# Backward compatibility:
+		# If expenses_included_in_valuation account has been credited in against PI 
+		# and charges added via Landed Cost Voucher, 
+		# post valuation related charges on "Stock Received But Not Billed" 
+
+		pi_exists = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
+			where docstatus = 1 and purchase_receipt=%s 
+			and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice' 
+				and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
+		
+		if pi_exists:
+			expenses_included_in_valuation = stock_rbnb
+			
+		# Expense included in valuation
+		for cost_center, amount in valuation_tax.items():
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": expenses_included_in_valuation,
+					"cost_center": cost_center,
+					"credit": amount,
+					"remarks": self.remarks or "Accounting Entry for Stock"
+				})
+			)
 
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
