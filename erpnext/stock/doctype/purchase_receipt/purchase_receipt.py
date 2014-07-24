@@ -354,12 +354,12 @@ class PurchaseReceipt(BuyingController):
 		# and charges added via Landed Cost Voucher, 
 		# post valuation related charges on "Stock Received But Not Billed" 
 
-		pi_exists = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
+		stock_rbnb_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
 			where docstatus = 1 and purchase_receipt=%s 
 			and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice' 
-				and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
+				and voucher_no=pi.parent and account=%s)""", (self.name, stock_rbnb))
 		
-		if pi_exists:
+		if stock_rbnb_booked_in_pi:
 			expenses_included_in_valuation = stock_rbnb
 			
 		# Expense included in valuation

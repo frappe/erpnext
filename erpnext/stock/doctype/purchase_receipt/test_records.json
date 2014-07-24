@@ -19,7 +19,8 @@
     "doctype": "Purchase Taxes and Charges", 
     "parentfield": "other_charges", 
     "rate": 100.0, 
-    "tax_amount": 100.0
+    "tax_amount": 100.0,
+	"cost_center": "Main - _TC"
    }, 
    {
     "account_head": "_Test Account VAT - _TC", 
@@ -30,7 +31,8 @@
     "doctype": "Purchase Taxes and Charges", 
     "parentfield": "other_charges", 
     "rate": 120.0, 
-    "tax_amount": 120.0
+    "tax_amount": 120.0,
+	"cost_center": "Main - _TC"
    }, 
    {
     "account_head": "_Test Account Customs Duty - _TC", 
@@ -41,7 +43,8 @@
     "doctype": "Purchase Taxes and Charges", 
     "parentfield": "other_charges", 
     "rate": 150.0, 
-    "tax_amount": 150.0
+    "tax_amount": 150.0,
+	"cost_center": "Main - _TC"
    }
   ], 
   "posting_date": "2013-02-12", 
@@ -61,7 +64,8 @@
     "rejected_qty": 0.0, 
     "stock_uom": "Nos", 
     "uom": "_Test UOM", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TC",
+	"cost_center": "Main - _TC"
    }, 
    {
     "base_amount": 250.0, 
@@ -77,7 +81,8 @@
     "rejected_qty": 0.0, 
     "stock_uom": "Nos", 
     "uom": "_Test UOM", 
-    "warehouse": "_Test Warehouse 1 - _TC"
+    "warehouse": "_Test Warehouse 1 - _TC",
+	"cost_center": "Main - _TC"
    }
   ], 
   "supplier": "_Test Supplier"
@@ -109,7 +114,8 @@
     "rejected_qty": 0.0, 
     "stock_uom": "Nos", 
     "uom": "_Test UOM", 
-    "warehouse": "_Test Warehouse - _TC"
+    "warehouse": "_Test Warehouse - _TC",
+	"cost_center": "Main - _TC"
    }
   ], 
   "supplier": "_Test Supplier", 

@@ -138,6 +138,7 @@
    }
   ],
   "posting_date": "2013-02-03",
+  "supplier": "_Test Supplier",
   "supplier_name": "_Test Supplier"
  },
  {
@@ -201,6 +202,7 @@
    }
   ],
   "posting_date": "2013-02-03",
+  "supplier": "_Test Supplier",
   "supplier_name": "_Test Supplier"
  }
 ]

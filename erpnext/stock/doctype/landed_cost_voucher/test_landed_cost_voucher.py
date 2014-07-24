@@ -11,7 +11,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
-		frappe.db.set_default("cost_center", "Main - _TC")
 		set_perpetual_inventory(1)
 		pr = self.submit_pr()
 		self.submit_landed_cost_voucher(pr)
@@ -30,8 +29,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 		expected_values = {
 			stock_in_hand_account: [400.0, 0.0],
 			fixed_asset_account: [400.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 750.0],
-			"Expenses Included In Valuation - _TC": [0.0, 50.0]
+			"Stock Received But Not Billed - _TC": [0.0, 500.0],
+			"Expenses Included In Valuation - _TC": [0.0, 300.0]
 		}
 
 		for gle in gl_entries:

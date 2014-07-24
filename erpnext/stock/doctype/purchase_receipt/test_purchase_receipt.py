@@ -55,7 +55,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-
 		pr = frappe.copy_doc(test_records[0])
 		pr.insert()
 		pr.submit()
@@ -72,7 +71,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		expected_values = {
 			stock_in_hand_account: [375.0, 0.0],
 			fixed_asset_account: [375.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 750.0]
+			"Stock Received But Not Billed - _TC": [0.0, 500.0],
+			"Expenses Included In Valuation - _TC": [0.0, 250.0]
 		}
 
 		for gle in gl_entries:

@@ -273,6 +273,8 @@ class PurchaseInvoice(BuyingController):
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
+			
+		stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
 
 		gl_entries = []
 
@@ -313,7 +315,7 @@ class PurchaseInvoice(BuyingController):
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 
 		# item gl entries
-		stock_item_and_auto_accounting_for_stock = False
+		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
 		for item in self.get("entries"):
 			if flt(item.base_amount):
@@ -327,54 +329,53 @@ class PurchaseInvoice(BuyingController):
 					})
 				)
 			
-			if auto_accounting_for_stock and item.item_code in stock_items and item.valuation_rate:
-					# if auto inventory accounting enabled and stock item,
-					# then do stock related gl entries
-					# expense will be booked in sales invoice
-					stock_item_and_auto_accounting_for_stock = True
-
+			if auto_accounting_for_stock and item.item_code in stock_items and item.item_tax_amount:
+					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+					stock_rbnb_booked_in_pr = None
+					if item.purchase_receipt:
+						stock_rbnb_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
+							where voucher_type='Purchase Receipt' and voucher_no=%s and account=%s""", 
+							(item.purchase_receipt, stock_received_but_not_billed))
 					
-					
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.expense_account,
-							"against": self.credit_to,
-							"debit": valuation_amt,
-							"remarks": self.remarks or "Accounting Entry for Stock"
-						})
-					)
+					if stock_rbnb_booked_in_pr:
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": stock_received_but_not_billed,
+								"against": self.credit_to,
+								"debit": flt(item.item_tax_amount),
+								"remarks": self.remarks or "Accounting Entry for Stock"
+							})
+						)
+						
+						negative_expense_to_be_booked += flt(item.item_tax_amount)
 
-			elif flt(item.base_amount):
-				# if not a stock item or auto inventory accounting disabled, book the expense
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.expense_account,
-						"against": self.credit_to,
-						"debit": item.base_amount,
-						"remarks": self.remarks,
-						"cost_center": item.cost_center
-					})
-				)
 
-		if stock_item_and_auto_accounting_for_stock and valuation_tax:
+		if negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
-			expenses_included_in_valuation = \
-				self.get_company_default("expenses_included_in_valuation")
-				
-			# Backward compatibility:
-			# Post expenses_included_in_valuation only if it is not booked in Purchase Receipt
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 			
+			total_valuation_amount = sum(valuation_tax.values())
+			amount_including_divisional_loss = negative_expense_to_be_booked
+			i = 1
 			for cost_center, amount in valuation_tax.items():
+				if i == len(valuation_tax):
+					applicable_amount = amount_including_divisional_loss
+				else:
+					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
+					amount_including_divisional_loss -= applicable_amount
+				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": expenses_included_in_valuation,
 						"cost_center": cost_center,
 						"against": self.credit_to,
-						"credit": amount,
+						"credit": applicable_amount,
 						"remarks": self.remarks or "Accounting Entry for Stock"
 					})
 				)
+				
+				i += 1
 
 		# writeoff account includes petty difference in the invoice amount
 		# and the amount that is paid
