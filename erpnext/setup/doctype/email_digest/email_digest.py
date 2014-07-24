@@ -312,7 +312,7 @@ class EmailDigest(Document):
 
 	def get_todo_list(self, user_id):
 		todo_list = frappe.db.sql("""select *
-			from `tabToDo` where (owner=%s or assigned_by=%s)
+			from `tabToDo` where (owner=%s or assigned_by=%s) and status="Open"
 			order by field(priority, 'High', 'Medium', 'Low') asc, date asc""",
 			(user_id, user_id), as_dict=True)
 
