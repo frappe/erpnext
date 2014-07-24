@@ -110,6 +110,7 @@
    "oldfieldtype": "Select", 
    "options": "Draft\nSubmitted\nQuotation\nLost\nCancelled\nReplied\nOpen", 
    "permlevel": 0, 
+   "print_hide": 1, 
    "read_only": 1, 
    "reqd": 1
   }, 
@@ -410,7 +411,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:49.718301", 
+ "modified": "2014-07-24 08:55:09.807048", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 

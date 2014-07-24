@@ -107,7 +107,7 @@
   }, 
   {
    "fieldname": "discount_percentage", 
-   "fieldtype": "Float", 
+   "fieldtype": "Percent", 
    "in_list_view": 0, 
    "label": "Discount (%)", 
    "oldfieldname": "adj_rate", 
@@ -345,7 +345,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-28 12:41:40.811916", 
+ "modified": "2014-07-24 05:52:49.665788", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

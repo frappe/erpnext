@@ -167,7 +167,7 @@
   }, 
   {
    "fieldname": "discount_percentage", 
-   "fieldtype": "Float", 
+   "fieldtype": "Percent", 
    "in_list_view": 0, 
    "label": "Discount %", 
    "permlevel": 0, 
@@ -466,7 +466,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-28 12:42:53.018610", 
+ "modified": "2014-07-24 05:49:51.099682", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 
