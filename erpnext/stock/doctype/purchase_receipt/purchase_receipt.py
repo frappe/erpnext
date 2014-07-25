@@ -292,11 +292,12 @@ class PurchaseReceipt(BuyingController):
 		
 		gl_entries = []
 		warehouse_with_no_account = []
+		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
 		for d in self.get("purchase_receipt_details"):
 			if d.item_code in stock_items and flt(d.valuation_rate):
 				if warehouse_account.get(d.warehouse) and flt(d.qty) and flt(d.valuation_rate):
-
+					
 					# warehouse account
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse],
@@ -314,6 +315,8 @@ class PurchaseReceipt(BuyingController):
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
 						"credit": flt(d.base_amount, self.precision("base_amount", d))
 					}))
+					
+					negative_expense_to_be_booked += flt(d.item_tax_amount)
 					
 					# Amount added through landed-cost-voucher
 					if flt(d.landed_cost_voucher_amount):
@@ -349,29 +352,42 @@ class PurchaseReceipt(BuyingController):
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
 					
-		# Backward compatibility:
-		# If expenses_included_in_valuation account has been credited in against PI 
-		# and charges added via Landed Cost Voucher, 
-		# post valuation related charges on "Stock Received But Not Billed" 
+		if negative_expense_to_be_booked and valuation_tax:
+			# Backward compatibility:
+			# If expenses_included_in_valuation account has been credited in against PI 
+			# and charges added via Landed Cost Voucher, 
+			# post valuation related charges on "Stock Received But Not Billed" 
 
-		stock_rbnb_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
-			where docstatus = 1 and purchase_receipt=%s 
-			and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice' 
-				and voucher_no=pi.parent and account=%s)""", (self.name, stock_rbnb))
+			stock_rbnb_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
+				where docstatus = 1 and purchase_receipt=%s 
+				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice' 
+					and voucher_no=pi.parent and account=%s)""", (self.name, stock_rbnb))
 		
-		if stock_rbnb_booked_in_pi:
-			expenses_included_in_valuation = stock_rbnb
+			if stock_rbnb_booked_in_pi:
+				expenses_included_in_valuation = stock_rbnb
 			
-		# Expense included in valuation
-		for cost_center, amount in valuation_tax.items():
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": expenses_included_in_valuation,
-					"cost_center": cost_center,
-					"credit": amount,
-					"remarks": self.remarks or "Accounting Entry for Stock"
-				})
-			)
+			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
+			total_valuation_amount = sum(valuation_tax.values())
+			amount_including_divisional_loss = negative_expense_to_be_booked
+			i = 1
+			for cost_center, amount in valuation_tax.items():
+				if i == len(valuation_tax):
+					applicable_amount = amount_including_divisional_loss
+				else:
+					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
+					amount_including_divisional_loss -= applicable_amount
+					
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": expenses_included_in_valuation,
+						"cost_center": cost_center,
+						"credit": applicable_amount,
+						"remarks": self.remarks or "Accounting Entry for Stock",
+						"against": against_account
+					})
+				)
+				
+				i += 1
 
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +

@@ -502,7 +502,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC"
 		})
 
-		pos_setting.insert()
+		if not frappe.db.exists("POS Setting", "_Test POS Setting"):
+			pos_setting.insert()
 
 	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
 		self.clear_stock_account_balance()
