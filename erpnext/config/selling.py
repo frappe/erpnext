@@ -57,6 +57,11 @@ def get_data():
 					"name": "SMS Center",
 					"description":_("Send mass SMS to your contacts"),
 				},
+				{
+					"type": "doctype",
+					"name": "Newsletter",
+					"description": _("Newsletters to contacts, leads."),
+				},
 			]
 		},
 		{

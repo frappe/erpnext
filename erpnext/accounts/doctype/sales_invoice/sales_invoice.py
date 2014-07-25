@@ -342,7 +342,7 @@ class SalesInvoice(SellingController):
 	def validate_pos(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
-			
+
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
 				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
@@ -434,7 +434,7 @@ class SalesInvoice(SellingController):
 					where docstatus = 1 and name = %s""", d.sales_order)
 				if not submitted:
 					frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
-					
+
 			if d.delivery_note:
 				submitted = frappe.db.sql("""select name from `tabDelivery Note`
 					where docstatus = 1 and name = %s""", d.delivery_note)
@@ -721,15 +721,17 @@ def make_new_invoice(ref_wrapper, posting_date):
 
 def send_notification(new_rv):
 	"""Notify concerned persons about recurring invoice generation"""
-
-	from frappe.core.doctype.print_format.print_format import get_html
 	frappe.sendmail(new_rv.notification_email_address,
 		subject="New Invoice : " + new_rv.name,
-		message = get_html(new_rv, new_rv, "Sales Invoice"))
+		message = _("Please find attached Sales Invoice #{0}").format(new_rv.name),
+		attachments = [{
+			"fname": new_rv.name + ".pdf",
+			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True)
+		}])
 
 def notify_errors(inv, customer, owner):
 	from frappe.utils.user import get_system_managers
-	recipients=get_system_managers()
+	recipients=get_system_managers(only_name=True)
 
 	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
 		subject="[Urgent] Error while creating recurring invoice for %s" % inv,

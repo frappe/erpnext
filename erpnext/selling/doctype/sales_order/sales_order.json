@@ -223,7 +223,8 @@
    "fieldtype": "Section Break", 
    "label": "Currency and Price List", 
    "options": "icon-tag", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "print_hide": 1
   }, 
   {
    "fieldname": "currency", 
@@ -342,17 +343,22 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "column_break_33a", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break_33", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "net_total_export", 
    "fieldtype": "Currency", 
    "label": "Net Total", 
    "options": "currency", 
    "permlevel": 0, 
    "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_33", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
   }, 
   {
    "fieldname": "net_total", 
@@ -470,50 +476,6 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "grand_total_export", 
-   "fieldtype": "Currency", 
-   "label": "Grand Total", 
-   "oldfieldname": "grand_total_export", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1, 
-   "reqd": 0, 
-   "width": "150px"
-  }, 
-  {
-   "fieldname": "rounded_total_export", 
-   "fieldtype": "Currency", 
-   "label": "Rounded Total", 
-   "oldfieldname": "rounded_total_export", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1, 
-   "width": "150px"
-  }, 
-  {
-   "fieldname": "in_words_export", 
-   "fieldtype": "Data", 
-   "label": "In Words", 
-   "oldfieldname": "in_words_export", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1, 
-   "width": "200px"
-  }, 
-  {
-   "fieldname": "column_break3", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "grand_total", 
    "fieldtype": "Currency", 
    "label": "Grand Total (Company Currency)", 
@@ -547,6 +509,50 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "print_hide": 1, 
+   "read_only": 1, 
+   "width": "200px"
+  }, 
+  {
+   "fieldname": "column_break3", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "grand_total_export", 
+   "fieldtype": "Currency", 
+   "label": "Grand Total", 
+   "oldfieldname": "grand_total_export", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 1, 
+   "reqd": 0, 
+   "width": "150px"
+  }, 
+  {
+   "fieldname": "rounded_total_export", 
+   "fieldtype": "Currency", 
+   "label": "Rounded Total", 
+   "oldfieldname": "rounded_total_export", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 1, 
+   "width": "150px"
+  }, 
+  {
+   "fieldname": "in_words_export", 
+   "fieldtype": "Data", 
+   "label": "In Words", 
+   "oldfieldname": "in_words_export", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 0, 
    "read_only": 1, 
    "width": "200px"
   }, 
@@ -883,7 +889,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2014-07-10 02:43:45.504009", 
+ "modified": "2014-07-16 16:32:16.459587", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 

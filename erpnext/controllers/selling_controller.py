@@ -3,13 +3,20 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, _round, cstr, comma_or
+from frappe.utils import cint, flt, rounded, cstr, comma_or
 from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
 
 from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
+	def __setup__(self):
+		if hasattr(self, "fname"):
+			self.table_print_templates = {
+				self.fname: "templates/print_formats/includes/item_grid.html",
+				"other_charges": "templates/print_formats/includes/taxes.html",
+			}
+
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_max_discount()
@@ -142,6 +149,7 @@ class SellingController(StockController):
 					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 
 				item.base_rate = flt(item.base_amount / item.qty, self.precision("base_rate", item))
+				item.discount_percentage = flt(item.discount_percentage, self.precision("discount_percentage", item))
 
 				if item.discount_percentage == 100:
 					item.base_price_list_rate = item.base_rate
@@ -213,8 +221,8 @@ class SellingController(StockController):
 			self.net_total_export + flt(self.discount_amount),
 			self.precision("other_charges_total_export"))
 
-		self.rounded_total = _round(self.grand_total)
-		self.rounded_total_export = _round(self.grand_total_export)
+		self.rounded_total = rounded(self.grand_total)
+		self.rounded_total_export = rounded(self.grand_total_export)
 
 	def apply_discount_amount(self):
 		if self.discount_amount:

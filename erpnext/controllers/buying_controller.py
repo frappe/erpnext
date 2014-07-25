@@ -4,13 +4,20 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt, _round
+from frappe.utils import flt, rounded
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
+	def __setup__(self):
+		if hasattr(self, "fname"):
+			self.table_print_templates = {
+				self.fname: "templates/print_formats/includes/item_grid.html",
+				"other_charges": "templates/print_formats/includes/taxes.html",
+			}
+
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
@@ -111,10 +118,10 @@ class BuyingController(StockController):
 			self.precision("total_tax"))
 
 		if self.meta.get_field("rounded_total"):
-			self.rounded_total = _round(self.grand_total)
+			self.rounded_total = rounded(self.grand_total)
 
 		if self.meta.get_field("rounded_total_import"):
-			self.rounded_total_import = _round(self.grand_total_import)
+			self.rounded_total_import = rounded(self.grand_total_import)
 
 		if self.meta.get_field("other_charges_added"):
 			self.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.tax_doclist

@@ -95,7 +95,7 @@
   }, 
   {
    "fieldname": "discount_percentage", 
-   "fieldtype": "Float", 
+   "fieldtype": "Percent", 
    "in_list_view": 0, 
    "label": "Discount %", 
    "permlevel": 0, 
@@ -346,7 +346,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-28 12:44:17.347236", 
+ "modified": "2014-07-24 05:45:04.371142", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation Item", 
