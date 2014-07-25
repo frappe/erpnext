@@ -4,13 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, _dict
-from frappe.utils import (flt, cint, getdate, get_first_day, get_last_day,
+from frappe.utils import (flt, getdate, get_first_day, get_last_day,
 	add_months, add_days, formatdate)
-
-def process_filters(filters):
-	filters.depth = cint(filters.depth) or 3
-	if not filters.periodicity:
-		filters.periodicity = "Yearly"
 
 def get_period_list(fiscal_year, periodicity, from_beginning=False):
 	"""Get a list of dict {"to_date": to_date, "key": key, "label": label}
@@ -76,13 +71,13 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 
 	return period_list
 
-def get_data(company, root_type, balance_must_be, period_list, depth, ignore_closing_entries=False):
+def get_data(company, root_type, balance_must_be, period_list, ignore_closing_entries=False):
 	accounts = get_accounts(company, root_type)
 	if not accounts:
 		return None
 
-	accounts, accounts_by_name = filter_accounts(accounts, depth)
-	gl_entries_by_account = get_gl_entries(company, root_type, period_list[0]["from_date"], period_list[-1]["to_date"],
+	accounts, accounts_by_name = filter_accounts(accounts)
+	gl_entries_by_account = get_gl_entries(company, period_list[0]["from_date"], period_list[-1]["to_date"],
 		accounts[0].lft, accounts[0].rgt, ignore_closing_entries=ignore_closing_entries)
 
 	calculate_values(accounts, gl_entries_by_account, period_list)
@@ -127,8 +122,8 @@ def prepare_data(accounts, balance_must_be, period_list):
 			"account": d.name,
 			"parent_account": d.parent_account,
 			"indent": flt(d.indent),
-			"year_start_date": year_start_date,
-			"year_end_date": year_end_date
+			"from_date": year_start_date,
+			"to_date": year_end_date
 		}
 		for period in period_list:
 			if d.get(period.key):
@@ -177,7 +172,7 @@ def get_accounts(company, root_type):
 
 	return accounts
 
-def filter_accounts(accounts, depth):
+def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
 	accounts_by_name = {}
 	for d in accounts:
@@ -204,7 +199,7 @@ def filter_accounts(accounts, depth):
 
 	return filtered_accounts, accounts_by_name
 
-def get_gl_entries(company, root_type, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
+def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []
 

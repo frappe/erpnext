@@ -166,10 +166,10 @@ def get_data():
 					"is_query_report": True,
 				},
 				{
-					"type": "page",
-					"name": "trial-balance",
-					"label": _("Trial Balance"),
-					"icon": "icon-table"
+					"type": "report",
+					"name": "Trial Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True,
 				},
 				{
 					"type": "report",

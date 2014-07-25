@@ -5,15 +5,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.accounts.report.financial_statements import (process_filters, get_period_list, get_columns, get_data)
+from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 
 def execute(filters=None):
-	process_filters(filters)
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity, from_beginning=True)
 
-	asset = get_data(filters.company, "Asset", "Debit", period_list, filters.depth)
-	liability = get_data(filters.company, "Liability", "Credit", period_list, filters.depth)
-	equity = get_data(filters.company, "Equity", "Credit", period_list, filters.depth)
+	asset = get_data(filters.company, "Asset", "Debit", period_list)
+	liability = get_data(filters.company, "Liability", "Credit", period_list)
+	equity = get_data(filters.company, "Equity", "Credit", period_list)
 	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, period_list)
 
 	data = []
@@ -32,7 +31,7 @@ def get_provisional_profit_loss(asset, liability, equity, period_list):
 		provisional_profit_loss = {
 			"account_name": _("Provisional Profit / Loss (Credit)"),
 			"account": None,
-			"is_profit_loss": True
+			"warn_if_negative": True
 		}
 
 		has_value = False
