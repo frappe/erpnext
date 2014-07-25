@@ -302,6 +302,6 @@ class StockReconciliation(StockController):
 
 @frappe.whitelist()
 def upload():
-	from frappe.utils.datautils import read_csv_content_from_uploaded_file
+	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
 	csv_content = read_csv_content_from_uploaded_file()
 	return filter(lambda x: x and any(x), csv_content)

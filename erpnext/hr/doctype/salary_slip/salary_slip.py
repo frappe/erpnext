@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, _round
+from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -152,7 +152,7 @@ class SalarySlip(TransactionBase):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
 		for d in self.get("earning_details"):
 			if cint(d.e_depends_on_lwp) == 1:
-				d.e_modified_amount = _round(flt(d.e_amount) * flt(self.payment_days)
+				d.e_modified_amount = rounded(flt(d.e_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month), 2)
 			elif not self.payment_days:
 				d.e_modified_amount = 0
@@ -164,7 +164,7 @@ class SalarySlip(TransactionBase):
 		self.total_deduction = 0
 		for d in self.get('deduction_details'):
 			if cint(d.d_depends_on_lwp) == 1:
-				d.d_modified_amount = _round(flt(d.d_amount) * flt(self.payment_days)
+				d.d_modified_amount = rounded(flt(d.d_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month), 2)
 			elif not self.payment_days:
 				d.d_modified_amount = 0
@@ -177,7 +177,7 @@ class SalarySlip(TransactionBase):
 		self.calculate_earning_total()
 		self.calculate_ded_total()
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
-		self.rounded_total = _round(self.net_pay)
+		self.rounded_total = rounded(self.net_pay)
 
 	def on_submit(self):
 		if(self.email_check == 1):

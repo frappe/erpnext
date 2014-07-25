@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 import os, json
 import ast
 from xml.etree import ElementTree as ET
-from frappe.utils.datautils import read_csv_content
+from frappe.utils.csvutils import read_csv_content
 from frappe.utils import cstr
 import frappe
 
