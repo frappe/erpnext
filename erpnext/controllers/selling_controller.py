@@ -149,6 +149,7 @@ class SellingController(StockController):
 					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 
 				item.base_rate = flt(item.base_amount / item.qty, self.precision("base_rate", item))
+				item.discount_percentage = flt(item.discount_percentage, self.precision("discount_percentage", item))
 
 				if item.discount_percentage == 100:
 					item.base_price_list_rate = item.base_rate
