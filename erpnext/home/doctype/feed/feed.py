@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
+import frappe.permissions
 from frappe.model.document import Document
 
 class Feed(Document):
@@ -18,6 +19,9 @@ def on_doctype_update():
 
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
+
+	if not frappe.permissions.apply_user_permissions("Feed", "read", user):
+		return ""
 
 	user_permissions = frappe.defaults.get_user_permissions(user)
 	can_read = frappe.get_user(user).get_can_read()
