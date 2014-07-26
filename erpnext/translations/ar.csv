@@ -474,7 +474,7 @@ Chart Name,اسم الرسم البياني
 Chart of Accounts,دليل الحسابات
 Chart of Cost Centers,بيانيا من مراكز التكلفة
 Check how the newsletter looks in an email by sending it to your email.,التحقق من كيفية النشرة الإخبارية يبدو في رسالة بالبريد الالكتروني عن طريق إرساله إلى البريد الإلكتروني الخاص بك.
-"Check if recurring invoice, uncheck to stop recurring or put proper End Date",تحقق مما إذا الفاتورة متكررة، قم بإلغاء المتكررة لوقف أو وضع نهاية التاريخ الصحيح
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","اختر إذا الفاتورة متكررة. قم بإزالة الإختيار لأيقاف التكرار أو لوضع تاريخ إنتهاء"
 "Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",تحقق مما إذا كنت بحاجة الفواتير المتكررة التلقائي. بعد تقديم أي فاتورة المبيعات، وقسم التكراري تكون مرئية.
 Check if you want to send salary slip in mail to each employee while submitting salary slip,تحقق مما إذا كنت ترغب في إرسال قسيمة الراتب في البريد إلى كل موظف أثناء قيامهم بتقديم قسيمة الراتب
 Check this if you want to force the user to select a series before saving. There will be no default if you check this.,التحقق من ذلك إذا كنت تريد لإجبار المستخدم لتحديد سلسلة قبل الحفظ. لن يكون هناك الافتراضي إذا قمت بتحديد هذا.
@@ -501,7 +501,7 @@ Clearance Date not mentioned,إزالة التاريخ لم يرد ذكرها
 Clearance date cannot be before check date in row {0},تاريخ التخليص لا يمكن أن يكون قبل تاريخ الاختيار في الصف {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,انقر على &#39;جعل مبيعات الفاتورة &quot;الزر لإنشاء فاتورة مبيعات جديدة.
 Click on a link to get options to expand get options ,
-Client,زبون
+Client,عميل	
 Close Balance Sheet and book Profit or Loss.,وثيقة الميزانية العمومية و كتاب الربح أو الخسارة .
 Closed,مغلق
 Closing Account Head,إغلاق حساب رئيس
@@ -590,7 +590,7 @@ Conversion Factor is required,مطلوب عامل التحويل
 Conversion factor cannot be in fractions,عامل التحويل لا يمكن أن يكون في الكسور
 Conversion factor for default Unit of Measure must be 1 in row {0},معامل تحويل وحدة القياس الافتراضية يجب أن تكون 1 في الصف {0}
 Conversion rate cannot be 0 or 1,معدل التحويل لا يمكن أن يكون 0 أو 1
-Convert into Recurring Invoice,تحويل الفاتورة إلى التكراري
+Convert into Recurring Invoice,تحويل الفاتورة إلى فاتورة متكرر
 Convert to Group,تحويل إلى المجموعة
 Convert to Ledger,تحويل ل يدجر
 Converted,تحويل
@@ -782,7 +782,7 @@ Delivery Note {0} is not submitted,تسليم مذكرة {0} لم تقدم
 Delivery Note {0} must not be submitted,تسليم مذكرة {0} يجب ألا المقدمة
 Delivery Notes {0} must be cancelled before cancelling this Sales Order,تسليم ملاحظات {0} يجب أن يتم إلغاء هذا الأمر قبل إلغاء المبيعات
 Delivery Status,حالة التسليم
-Delivery Time,التسليم في الوقت المحدد
+Delivery Time,وقت التسليم
 Delivery To,التسليم إلى
 Department,قسم
 Department Stores,المتاجر
@@ -1061,7 +1061,7 @@ From Package No.,من رقم حزمة
 From Purchase Order,من أمر الشراء
 From Purchase Receipt,من إيصال الشراء
 From Quotation,من اقتباس
-From Sales Order,من ترتيب المبيعات
+From Sales Order,من طلب مبيعات
 From Supplier Quotation,من مزود اقتباس
 From Time,من وقت
 From Value,من القيمة
@@ -1093,7 +1093,7 @@ Get Advances Received,الحصول على السلف المتلقاة
 Get Against Entries,الحصول ضد مقالات
 Get Current Stock,الحصول على المخزون الحالي
 Get Items,الحصول على العناصر
-Get Items From Sales Orders,الحصول على سلع من أوامر المبيعات
+Get Items From Sales Orders,الحصول على سلع من طلبات البيع
 Get Items from BOM,الحصول على عناصر من BOM
 Get Last Purchase Rate,الحصول على آخر سعر شراء
 Get Outstanding Invoices,الحصول على الفواتير المستحقة
@@ -1684,7 +1684,7 @@ New Material Requests,تطلب المواد الجديدة
 New Projects,مشاريع جديدة
 New Purchase Orders,أوامر الشراء الجديدة
 New Purchase Receipts,إيصالات شراء جديدة
-New Quotations,الاقتباسات الجديدة
+New Quotations,تسعيرات جديدة
 New Sales Orders,أوامر المبيعات الجديدة
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,المسلسل الجديد لا يمكن أن يكون المستودع. يجب تعيين مستودع من قبل دخول الأسهم أو شراء الإيصال
 New Stock Entries,مقالات جديدة للأسهم
@@ -2205,13 +2205,13 @@ Quantity required for Item {0} in row {1},الكمية المطلوبة القط
 Quarter,ربع
 Quarterly,فصلي
 Quick Help,مساعدة سريعة
-Quotation,اقتباس
-Quotation Date,اقتباس تاريخ
-Quotation Item,اقتباس الإغلاق
-Quotation Items,اقتباس عناصر
-Quotation Lost Reason,فقدت اقتباس السبب
-Quotation Message,اقتباس رسالة
-Quotation To,اقتباس
+Quotation,تسعيرة
+Quotation Date,تاريخ التسعيرة
+Quotation Item,عنصر تسعيرة
+Quotation Items,عناصر تسعيرة
+Quotation Lost Reason,خسارة التسعيرة بسبب
+Quotation Message,رسالة التسعيرة
+Quotation To,تسعيرة إلى
 Quotation Trends,اتجاهات الاقتباس
 Quotation {0} is cancelled,اقتباس {0} تم إلغاء
 Quotation {0} not of type {1},اقتباس {0} ليست من نوع {1}
@@ -2901,7 +2901,7 @@ Total Amount To Pay,المبلغ الكلي لدفع
 Total Amount in Words,المبلغ الكلي في كلمات
 Total Billing This Year: ,مجموع الفواتير هذا العام:
 Total Claimed Amount,إجمالي المبلغ المطالب به
-Total Commission,مجموع جنة
+Total Commission,مجموع العمولة
 Total Cost,التكلفة الكلية لل
 Total Credit,إجمالي الائتمان
 Total Debit,مجموع الخصم
@@ -3045,14 +3045,14 @@ Verified By,التحقق من
 View Ledger,عرض ليدجر
 View Now,عرض الآن
 Visit report for maintenance call.,تقرير زيارة للدعوة الصيانة.
-Voucher #,قسيمة #
+Voucher #,سند #
 Voucher Detail No,تفاصيل قسيمة لا
 Voucher ID,قسيمة ID
-Voucher No,لا قسيمة
-Voucher No is not valid,لا القسيمة غير صالحة
-Voucher Type,قسيمة نوع
+Voucher No,رقم السند
+Voucher No is not valid,رقم السند غير صالح
+Voucher Type,نوع السند
 Voucher Type and Date,نوع قسيمة والتسجيل
-Walk In,المشي في
+Walk In,عميل غير مسجل
 Warehouse,مستودع
 Warehouse Contact Info,مستودع معلومات الاتصال
 Warehouse Detail,مستودع التفاصيل
@@ -3087,18 +3087,18 @@ Warranty Period (in days),فترة الضمان (بالأيام)
 We buy this Item,نشتري هذه القطعة
 We sell this Item,نبيع هذه القطعة
 Website,الموقع
-Website Description,الموقع وصف
-Website Item Group,موقع السلعة المجموعة
-Website Item Groups,موقع السلعة المجموعات
-Website Settings,موقع إعدادات
-Website Warehouse,موقع مستودع
+Website Description,وصف الموقع
+Website Item Group,مجموعة الأصناف للموقع
+Website Item Groups,مجموعات الأصناف للموقع
+Website Settings,إعدادات الموقع
+Website Warehouse,مستودع الموقع
 Wednesday,الأربعاء
 Weekly,الأسبوعية
 Weekly Off,العطلة الأسبوعية
-Weight UOM,الوزن UOM
-"Weight is mentioned,\nPlease mention ""Weight UOM"" too","يذكر الوزن ، \ n الرجاء ذكر ""الوزن UOM "" للغاية"
-Weightage,الترجيح
-Weightage (%),الترجيح (٪)
+Weight UOM,وحدة قياس الوزن
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","تم ذكر الوزن,\nالرجا ذكر ""وحدة قياس الوزن"" أيضاً"
+Weightage,الوزن
+Weightage (%),الوزن(٪)
 Welcome,ترحيب
 Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,مرحبا بكم في ERPNext . خلال الدقائق القليلة القادمة ونحن سوف تساعدك على إعداد الحساب ERPNext الخاص بك. محاولة ل ملء أكبر قدر من المعلومات لديك حتى لو كان يستغرق وقتا أطول قليلا. سيوفر لك الكثير من الوقت في وقت لاحق . حظا سعيدا !
 Welcome to ERPNext. Please select your language to begin the Setup Wizard.,مرحبا بكم في ERPNext . الرجاء تحديد اللغة لبدء معالج الإعداد.
@@ -3122,7 +3122,7 @@ Work-in-Progress Warehouse,مستودع العمل قيد التنفيذ
 Work-in-Progress Warehouse is required before Submit,مطلوب العمل في و التقدم في معرض النماذج ثلاثية قبل إرسال
 Working,عامل
 Workstation,محطة العمل
-Workstation Name,محطة العمل اسم
+Workstation Name,اسم محطة العمل
 Write Off Account,شطب حساب
 Write Off Amount,شطب المبلغ
 Write Off Amount <=,شطب المبلغ &lt;=
@@ -3134,8 +3134,8 @@ Wrong Template: Unable to find head row.,قالب الخطأ: تعذر العث�
 Year,عام
 Year Closed,مغلق العام
 Year End Date,نهاية التاريخ العام
-Year Name,العام اسم
-Year Start Date,سنة بدء التاريخ
+Year Name,اسم العام
+Year Start Date,تاريخ بدء العام
 Year Start Date and Year End Date are already set in Fiscal Year {0},يتم تعيين السنة تاريخ بدء و نهاية السنة التسجيل بالفعل في السنة المالية {0}
 Year Start Date and Year End Date are not within Fiscal Year.,العام تاريخ بدء و نهاية السنة تاريخ ليست ضمن السنة المالية.
 Year Start Date should not be greater than Year End Date,لا ينبغي أن يكون تاريخ بدء السنة أكبر من سنة تاريخ الانتهاء
