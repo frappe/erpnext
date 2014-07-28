@@ -17,8 +17,8 @@
 			<td style="width: 3%;">{{ row.idx }}</td>
 			<td style="width: 20%;">
 				{{ row.item_name }}
-				{% if row.item_code != row.item_name -%}
-				<br>Item Code: {{ row.item_code}}
+				{% if row.item_code != row.item_name and not row.meta.get_field("item_code").print_hide -%}
+				<br>Item Code: {{ row.item_code }}
 				{%- endif %}
 			</td>
 			<td style="width: 37%;">
