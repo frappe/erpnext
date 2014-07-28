@@ -12,7 +12,7 @@ def execute(filters=None):
 	employee_filters = filters.get("company") and \
 		[["Employee", "company", "=", filters.get("company")]] or None
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
-		filters=employee_filters)
+		filters=employee_filters, limit_page_length=None)
 
 	if not employees:
 		frappe.throw(_("No employee found!"))
