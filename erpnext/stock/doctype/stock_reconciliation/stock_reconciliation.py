@@ -153,10 +153,10 @@ class StockReconciliation(StockController):
 					flt(previous_sle.get("qty_after_transaction")) <= 0:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
-			change_in_qty = row.qty != "" and \
+			change_in_qty = row.qty not in ["", None] and \
 				(flt(row.qty) - flt(previous_sle.get("qty_after_transaction")))
-
-			change_in_rate = row.valuation_rate != "" and \
+				
+			change_in_rate = row.valuation_rate not in ["", None] and \
 				(flt(row.valuation_rate) - flt(previous_sle.get("valuation_rate")))
 
 			if get_valuation_method(row.item_code) == "Moving Average":
