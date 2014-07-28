@@ -26,7 +26,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 					me.frm.set_value(fieldname, value);
 			});
 
-			if(this.frm.doc.company) {
+			if(this.frm.doc.company && !this.frm.doc.amended_from) {
 				cur_frm.script_manager.trigger("company");
 			}
 		}
