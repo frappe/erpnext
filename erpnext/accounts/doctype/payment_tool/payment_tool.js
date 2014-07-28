@@ -11,7 +11,15 @@ erpnext.accounts.PaymentToolController = frappe.ui.form.Controller.extend({
 			doc: me.frm.doc,
 			method: 'get_outstanding_vouchers'
 		});
-	}
+	},
+
+	make_sales_invoice: function() {
+		frappe.model.open_mapped_doc({
+			doc: me.frm.doc,
+			method: 'make_journal_voucher'
+		})
+	},
+
 
 });
 

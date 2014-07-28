@@ -21,7 +21,7 @@
    "no_copy": 0, 
    "permlevel": 0, 
    "print_hide": 0, 
-   "read_only": 0, 
+   "read_only": 1, 
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
@@ -32,21 +32,24 @@
    "fieldtype": "Data", 
    "in_list_view": 1, 
    "label": "Against Voucher No", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "total_amount", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
    "label": "Total Amount", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
-   "fieldname": "oustanding_amount", 
+   "fieldname": "outstanding_amount", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
-   "label": "Oustanding Amount", 
-   "permlevel": 0
+   "label": "Outstanding Amount", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "payment_amount", 
@@ -63,7 +66,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2014-07-23 16:59:24.176938", 
+ "modified": "2014-07-28 18:13:15.371048", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Outstanding Voucher", 
