@@ -86,8 +86,8 @@ cur_frm.cscript.make_address = function() {
 			page_length: 5,
 			new_doctype: "Address",
 			get_query: function() {
-				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='" + 
-					cur_frm.doc.name.replace("'", "\\'") + "' and docstatus != 2 order by is_primary_address desc"
+				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where customer='" +
+					cur_frm.doc.name.replace(/'/g, "\\'") + "' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
 			no_results_message: __('No addresses created'),
@@ -105,8 +105,8 @@ cur_frm.cscript.make_contact = function() {
 			page_length: 5,
 			new_doctype: "Contact",
 			get_query: function() {
-				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='" + 
-					cur_frm.doc.name.replace("'", "\\'") + "' and docstatus != 2 order by is_primary_contact desc"
+				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where customer='" +
+					cur_frm.doc.name.replace(/'/g, "\\'") + "' and docstatus != 2 order by is_primary_contact desc"
 			},
 			as_dict: 1,
 			no_results_message: __('No contacts created'),
