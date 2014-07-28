@@ -265,41 +265,59 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	customer: function() {
-		return this.frm.call({
-			method: "erpnext.accounts.party.get_party_details",
-			args: { party: this.frm.doc.customer, party_type:"Customer", doctype: this.frm.doc.doctype }
+		this.get_party_details({
+			party: this.frm.doc.customer, 
+			party_type:"Customer", 
+			doctype: this.frm.doc.doctype
 		});
 	},
 
 	supplier: function() {
-		return this.frm.call({
+		this.get_party_details({
+			party: this.frm.doc.supplier, 
+			party_type:"Supplier", 
+			doctype: this.frm.doc.doctype
+		});
+	},
+	
+	get_party_details: function(args) {
+		var me = this;
+		frappe.call({
 			method: "erpnext.accounts.party.get_party_details",
-			args: { party: this.frm.doc.supplier, party_type:"Supplier", doctype: this.frm.doc.doctype }
+			args: args,
+			callback: function(r) {
+				if(r.message) {
+					me.frm.set_value({
+						"customer_name": r.message["customer_name"],
+						"customer_address": r.message["address_display"]
+					});
+				}
+			}
 		});
 	},
 
 	delivery_note_no: function() {
-		this.get_party_details({
+		this.get_party_details_from_against_voucher({
 			ref_dt: "Delivery Note",
 			ref_dn: this.frm.doc.delivery_note_no
 		})
 	},
 
 	sales_invoice_no: function() {
-		this.get_party_details({
+		this.get_party_details_from_against_voucher({
 			ref_dt: "Sales Invoice",
 			ref_dn: this.frm.doc.sales_invoice_no
 		})
 	},
 
 	purchase_receipt_no: function() {
-		this.get_party_details({
+		this.get_party_details_from_against_voucher({
 			ref_dt: "Purchase Receipt",
 			ref_dn: this.frm.doc.purchase_receipt_no
 		})
 	},
 
-	get_party_details: function(args) {
+	get_party_details_from_against_voucher: function(args) {
 		return this.frm.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_party_details",
 			args: args,
