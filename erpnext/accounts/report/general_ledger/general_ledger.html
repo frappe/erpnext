@@ -2,7 +2,7 @@
 	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
-<h4 class="text-center">{%= filters.account || "General Ledger" %}</h4>
+<h4 class="text-center">{%= filters.account && (filters.account + ", ")  || "" %} {%= filters.company %}</h4>
 <h5 class="text-center">
 	{%= dateutil.str_to_user(filters.from_date) %}
 	{%= __("to") %}
@@ -12,9 +12,9 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: 10%">{%= __("Date") %}</th>
+			<th style="width: 15%">{%= __("Date") %}</th>
 			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 45%">{%= __("Party") %}</th>
+			<th style="width: 40%">{%= __("Party") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
 		</tr>
