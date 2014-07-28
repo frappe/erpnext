@@ -34,8 +34,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 
-		// if document is POS then change default print format to "POS Invoice"
-		if(cur_frm.doc.is_pos && cur_frm.doc.docstatus===1) {
+		// if document is POS then change default print format to "POS Invoice" if no default is specified
+		if(cur_frm.doc.is_pos && cur_frm.doc.docstatus===1 && cint(frappe.defaults.get_user_defaults("fs_pos_view"))===1
+			&& !locals.DocType[cur_frm.doctype].default_print_format) {
 			locals.DocType[cur_frm.doctype].default_print_format = "POS Invoice";
 			cur_frm.setup_print_layout();
 		}
