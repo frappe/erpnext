@@ -160,6 +160,7 @@ class PaymentTool(Document):
 def make_journal_voucher(source_name, target_doc=None):
 
 	def postprocess(source, target):
+		print source.as_dict()
 		target.cheque_no = source.reference_no
 		target.cheque_date = source.reference_date
 
