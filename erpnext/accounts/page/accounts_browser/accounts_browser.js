@@ -24,17 +24,17 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		'<ol>'+
 			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
 			'<li>'+
-			      __('Accounting Entries can be made against leaf nodes, called ')+
-				 '<b>' +__('Ledgers')+'</b>.'+ __('Entries against ') +
-				 '<b>' +__('Groups') + '</b>'+ __(' are not allowed.')+
+			      __('Accounting Entries can be made against leaf nodes, called')+
+				 ' <b>' +__('Ledgers')+'</b>. '+ __('Entries against ') +
+				 '<b>' +__('Groups') + '</b> '+ __('are not allowed.')+
 		    '</li>'+
 			'<li>'+__('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
 			'<li>'+
-			     '<b>'+__('To create a Bank Account: ')+'</b>'+
+			     '<b>'+__('To create a Bank Account')+'</b>: '+
 			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
 			'</li>'+
 			'<li>'+
-			      '<b>'+__('To create a Tax Account: ')+'</b>'+
+			      '<b>'+__('To create a Tax Account') +'</b>: '+
 			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
 			'</li>'+
 		'</ol>'+
