@@ -5,38 +5,41 @@
 <table class="table table-bordered">
 	<tbody>
 		<tr>
-			<th>{{ _("Sr") }}</th>
-			<th>{{ _("Item Name") }}</th>
-			<th>{{ _("Description") }}</th>
-			<th class="text-right">{{ _("Qty") }}</th>
-			<th class="text-right">{{ _("Rate") }}</th>
-			<th class="text-right">{{ _("Amount") }}</th>
+			<th style="width: 3%">{{ _("Sr") }}</th>
+			<th style="width: 57%">{{ _("Item") }}</th>
+			<th style="width: 10%;" class="text-right">{{ _("Qty") }}</th>
+			<th style="width: 15%;" class="text-right">{{ _("Rate") }}</th>
+			<th style="width: 15%;" class="text-right">{{ _("Amount") }}</th>
 		</tr>
 		{%- for row in data -%}
 		<tr>
-			<td style="width: 3%;">{{ row.idx }}</td>
-			<td style="width: 20%;">
-				{{ row.item_name }}
-				{% if row.item_code != row.item_name and not row.meta.get_field("item_code").print_hide -%}
-				<br>Item Code: {{ row.item_code }}
+			<td>{{ row.idx }}</td>
+			<td>
+				{% if not row.meta.is_print_hide("item_code") -%}
+					<div class="primary">{{ row.item_code }}</div>
 				{%- endif %}
+				{% if (not row.meta.is_print_hide("item_name") and
+					(row.meta.is_print_hide("item_code") or row.item_code != row.item_name)) -%}
+					<div class="primary">{{ row.item_name }}</div>
+				{%- endif %}
+				{% if (not row.meta.is_print_hide("description") and row.description and
+					((row.meta.is_print_hide("item_code") and row.meta.is_print_hide("item_name"))
+						or not (row.item_code == row.item_name == row.description))) -%}
+					<p>{{ row.description }}</p>
+				{%- endif %}
+				{%- for field in visible_columns -%}
+					{%- if (field.fieldname not in std_fields) and
+							(row[field.fieldname] not in (None, "", 0)) -%}
+					<div><strong>{{ _(field.label) }}:</strong></div>
+						{{ row.get_formatted(field.fieldname, doc) }}
+					{%- endif -%}
+				{%- endfor -%}
 			</td>
-			<td style="width: 37%;">
-				<div style="border: 0px;">{{ row.description }}
-					{%- for field in visible_columns -%}
-						{%- if (field.fieldname not in std_fields) and
-								(row[field.fieldname] not in (None, "", 0)) -%}
-						<br><strong>{{ _(field.label) }}:</strong>
-							{{ row.get_formatted(field.fieldname, doc) }}
-						{%- endif -%}
-					{%- endfor -%}
-				</div>
-			</td>
-			<td style="width: 10%; text-align: right;">{{ row.get_formatted("qty", doc) }}<br>
+			<td style="text-align: right;">{{ row.get_formatted("qty", doc) }}<br>
 				<small>{{ row.uom or row.stock_uom }}</small></td>
-			<td style="width: 15%; text-align: right;">{{
+			<td style="text-align: right;">{{
 				row.get_formatted("rate", doc) }}</td>
-			<td style="width: 15%; text-align: right;">{{
+			<td style="text-align: right;">{{
 				row.get_formatted("amount", doc) }}</td>
 		</tr>
 		{%- endfor -%}
