@@ -13,13 +13,13 @@ erpnext.accounts.PaymentToolController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	make_sales_invoice: function() {
+	make_journal_voucher: function() {
+		var me = this;
 		frappe.model.open_mapped_doc({
-			doc: me.frm.doc,
-			method: 'make_journal_voucher'
-		})
-	},
-
+			frm: me.frm,
+			method: 'erpnext.accounts.doctype.payment_tool.payment_tool.make_journal_voucher'
+		});
+	}
 
 });
 

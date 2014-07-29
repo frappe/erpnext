@@ -16,27 +16,23 @@ class PaymentTool(Document):
 	def get_outstanding_vouchers(self):
 		self.check_mandatory_to_fetch()
 
-		if recieved_or_paid == "Recieved":
-
-			if self.party_type == "Customer":
-				amount_query = "ifnull(debit, 0) - ifnull(credit, 0)"
-				party_name = self.customer
-				order_list = self.sales_order_list(amount_query, party_name)
-			else:
-				amount_query = "ifnull(credit, 0) - ifnull(debit, 0)"
-				party_name = self.supplier
-				order_list = self.purchase_order_list(amount_query, party_name)
-
-			account_name = self.get_account_name(party_name)
-			all_outstanding_vouchers = self.outstanding_voucher_list(amount_query, account_name)
-
-			if len(order_list):		
-				all_outstanding_vouchers.append(order_list)
-
+		if self.party_type == "Customer" and self.received_or_paid == "Received":
+			amount_query = "ifnull(debit, 0) - ifnull(credit, 0)"
+			order_list = self.sales_order_list(amount_query, self.customer)
+		
+		elif self.party_type == "Supplier" and self.received_or_paid == "Paid":
+			amount_query = "ifnull(credit, 0) - ifnull(debit, 0)"
+			order_list = self.purchase_order_list(amount_query, self.supplier)
 		else:
-			pass
+			frappe.throw(_("Please enter the Against Invoice details manually to create JV"))
 
-		self.add_outstanding_vouchers(all_outstanding_vouchers)
+		account_name = self.get_account_name(self.customer if self.customer else self.supplier)
+		all_outstanding_vouchers = self.outstanding_voucher_list(amount_query, account_name)
+
+		if len(order_list):		
+			all_outstanding_vouchers.extend(order_list)
+
+		self.add_outstanding_vouchers(all_outstanding_vouchers, account_name)
 
 	def outstanding_voucher_list(self, amount_query, account_name):
 		all_outstanding_vouchers = []
@@ -75,7 +71,8 @@ class PaymentTool(Document):
 					'voucher_type': d.voucher_type, 
 					'posting_date': d.posting_date, 
 					'invoice_amount': flt(d.invoice_amount), 
-					'outstanding_amount': d.invoice_amount - payment_amount})
+					'outstanding_amount': d.invoice_amount - payment_amount
+					})
 
 		return all_outstanding_vouchers
 
@@ -123,9 +120,8 @@ class PaymentTool(Document):
 
 		return purchase_order_list
 
-	def add_outstanding_vouchers(self, all_outstanding_vouchers):
+	def add_outstanding_vouchers(self, all_outstanding_vouchers, account_name):
 		self.set('outstanding_vouchers', [])
-		print all_outstanding_vouchers
 		for e in all_outstanding_vouchers:
 			ent = self.append('outstanding_vouchers', {})
 			ent.against_voucher_type = e.get('voucher_type')
@@ -133,11 +129,24 @@ class PaymentTool(Document):
 			ent.total_amount = e.get('invoice_amount')
 			ent.outstanding_amount = e.get('outstanding_amount')
 
-	def filter_vouchers(self):
-		pass
+		self.account_name = account_name
 
-	def make_journal_voucher(self):
-		print True
+	def get_account_name(self, party_name):
+		# account_name = frappe.db.sql("""
+		# 	select
+		# 		name, group_or_ledger
+		# 	from
+		# 		`tabAccount`
+		# 	where
+		# 		account_name = %(party_name)s and master_type = %(party_type)s
+		# 	""", {
+		# 		"party_name": party_name,
+		# 		"party_type": self.party_type
+		# 	}, as_dict = True)
+
+		account_name = frappe.db.get_value("Account", {"account_name": party_name, 
+			"master_type": self.party_type}, fieldname = "name")
+		return account_name
 
 	def check_mandatory_to_fetch(self):
 
@@ -146,3 +155,20 @@ class PaymentTool(Document):
 		for fieldname in ["party_type", party_field_value_check, "received_or_paid"]:
 			if not self.get(fieldname):
 				frappe.throw(_("Please select {0} field first").format(self.meta.get_label(fieldname)))
+
+@frappe.whitelist()
+def make_journal_voucher(source_name, target_doc=None):
+
+	def postprocess(source, target):
+		target.cheque_no = source.reference_no
+		target.cheque_date = source.reference_date
+
+		print source.received_or_paid
+
+	doclist = get_mapped_doc("Payment Tool", source_name, {
+		"Payment Tool": {
+			"doctype": "Journal Voucher",
+		}
+	}, target_doc, postprocess)
+
+	return doclist
