@@ -13,7 +13,7 @@
  },
  {
   "company": "_Test Company 1",
-  "create_account_under": "Stock Assets - _TC",
+  "create_account_under": "Stock Assets - _TC1",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Warehouse 2"
  },

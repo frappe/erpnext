@@ -15,7 +15,8 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True,
 	if gl_map:
 		if not cancel:
 			gl_map = process_gl_map(gl_map, merge_entries)
-			save_entries(gl_map, adv_adj, update_outstanding)
+			if gl_map:
+				save_entries(gl_map, adv_adj, update_outstanding)
 		else:
 			delete_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
