@@ -24,7 +24,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				return {
 					filters:[
 						['Account', 'group_or_ledger', '=', 'Ledger'],
-						['Account', 'account_type', 'in', ['Tax', 'Chargeable']],
+						['Account', 'account_type', 'in', ['Tax', 'Chargeable', 'Expense Account']],
 						['Account', 'company', '=', me.frm.doc.company]
 					]
 				}
