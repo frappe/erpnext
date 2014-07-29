@@ -74,14 +74,14 @@ class StockLedgerEntry(Document):
 		if stock_frozen_upto:
 			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
 			if getdate(self.posting_date) <= getdate(stock_frozen_upto) and not stock_auth_role in frappe.user.get_roles():
-				frappe.throw(_("Entries before {0} are frozen").format(formatdate(stock_frozen_upto)), StockFreezeError)
+				frappe.throw(_("Stock transactions before {0} are frozen").format(formatdate(stock_frozen_upto)), StockFreezeError)
 
 		stock_frozen_upto_days = int(frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto_days') or 0)
 		if stock_frozen_upto_days:
 			stock_auth_role = frappe.db.get_value('Stock Settings', None,'stock_auth_role')
 			older_than_x_days_ago = (add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today())
 			if older_than_x_days_ago and not stock_auth_role in frappe.user.get_roles():
-				frappe.throw(_("Not allowed to update entries older than {0}").format(stock_frozen_upto_days), StockFreezeError)
+				frappe.throw(_("Not allowed to update stock transactions older than {0}").format(stock_frozen_upto_days), StockFreezeError)
 
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == '00:0':
