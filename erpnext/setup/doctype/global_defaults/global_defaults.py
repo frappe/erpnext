@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 """Global Defaults"""
 import frappe
 import frappe.defaults
+from frappe.utils import cint
+from frappe.core.doctype.property_setter.property_setter import make_property_setter
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
@@ -42,8 +44,19 @@ class GlobalDefaults(Document):
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
+		self.toggle_rounded_total()
+
 		# clear cache
 		frappe.clear_cache()
 
 	def get_defaults(self):
 		return frappe.defaults.get_defaults()
+
+	def toggle_rounded_total(self):
+		self.disable_rounded_total = cint(self.disable_rounded_total)
+
+		# Make property setters to hide rounded total fields
+		for doctype in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note"):
+			for fieldname in ("rounded_total", "rounded_total_export"):
+				make_property_setter(doctype, fieldname, "hidden", self.disable_rounded_total, "Check")
+				make_property_setter(doctype, fieldname, "print_hide", self.disable_rounded_total, "Check")

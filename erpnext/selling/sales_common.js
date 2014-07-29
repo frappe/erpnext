@@ -16,7 +16,6 @@ frappe.require("assets/erpnext/js/transaction.js");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this._super();
-		this.toggle_rounded_total();
 		this.setup_queries();
 		this.toggle_editable_price_list_rate();
 	},
@@ -225,16 +224,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					item_code: item.item_code,
 					warehouse: item.warehouse,
 				},
-			});
-		}
-	},
-
-	toggle_rounded_total: function() {
-		var me = this;
-		if(cint(frappe.defaults.get_global_default("disable_rounded_total"))) {
-			$.each(["rounded_total", "rounded_total_export"], function(i, fieldname) {
-				me.frm.set_df_property(fieldname, "print_hide", 1);
-				me.frm.toggle_display(fieldname, false);
 			});
 		}
 	},
