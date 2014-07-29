@@ -40,6 +40,20 @@ class DeliveryNote(SellingController):
 			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
 			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
 
+	def before_print(self):
+		def toggle_print_hide(meta, fieldname):
+			df = meta.get_field(fieldname)
+			if self.get("print_without_amount"):
+				df.set("__print_hide", 1)
+			else:
+				df.delete_key("__print_hide")
+
+		toggle_print_hide(self.meta, "currency")
+
+		item_meta = frappe.get_meta("Delivery Note Item")
+		for fieldname in ("rate", "amount", "price_list_rate", "discount_percentage"):
+			toggle_print_hide(item_meta, fieldname)
+
 	def get_portal_page(self):
 		return "shipment" if self.docstatus==1 else None
 
