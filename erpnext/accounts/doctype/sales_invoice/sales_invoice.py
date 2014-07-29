@@ -18,6 +18,10 @@ month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 from erpnext.controllers.selling_controller import SellingController
 
+form_grid_templates = {
+	"entries": "templates/form_grid/item_grid.html"
+}
+
 class SalesInvoice(SellingController):
 	tname = 'Sales Invoice Item'
 	fname = 'entries'

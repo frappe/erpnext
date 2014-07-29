@@ -1,0 +1,42 @@
+{% var visible_columns = row.get_visible_columns(["item_code",
+	"item_name", "description", "amount", "stock_uom", "uom", "qty",
+	"s_warehouse", "t_warehouse", "incoming_rate"]);
+%}
+
+{% if(!doc) { %}
+	<div class="row">
+		<div class="col-sm-8">{%= __("Item") %}</div>
+		<div class="col-sm-2 text-right">{%= __("Qty") %}</div>
+		<div class="col-sm-2 text-right">{%= __("Amount") %}</div>
+	</div>
+{% } else { %}
+	<div class="row">
+		<div class="col-sm-8"><strong>{%= doc.item_code %}</strong>
+			{% if(doc.item_name != doc.item_code) { %}
+				<br>{%= doc.item_name %}{% } %}
+			{% if(doc.item_name != doc.description) { %}
+				<p>{%= doc.description %}</p>{% } %}
+			{% include "templates/form_grid/includes/visible_cols.html" %}
+			<div>
+				{% if(doc.s_warehouse) { %}<span class="label label-default">
+					{%= doc.s_warehouse || "" %}</span>{% } %}
+				<i class="icon-long-arrow-right"></i>
+				{% if(doc.t_warehouse) { %}<span class="label label-primary">
+					{%= doc.t_warehouse || "" %}</span>{% } %}
+			</div>
+		</div>
+
+		<!-- qty -->
+		<div class="col-sm-2 text-right">
+			{%= row.get_formatted("qty") %}
+			<br><small>{%= doc.uom || doc.stock_uom %}</small>
+		</div>
+
+		<!-- amount -->
+		<div class="col-sm-2 text-right">
+			{%= row.get_formatted("amount") %}
+			<div class="small text-muted">
+				{%= row.get_formatted("incoming_rate") %}</div>
+		</div>
+	</div>
+{% } %}

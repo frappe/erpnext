@@ -16,7 +16,6 @@ class Account(Document):
 		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.user.get_roles():
 			self.get("__onload").can_freeze_account = True
 
-
 	def autoname(self):
 		self.name = self.account_name.strip() + ' - ' + \
 			frappe.db.get_value("Company", self.company, "abbr")

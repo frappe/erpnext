@@ -9,6 +9,10 @@ from frappe import _
 
 from erpnext.controllers.selling_controller import SellingController
 
+form_grid_templates = {
+	"quotation_details": "templates/form_grid/item_grid.html"
+}
+
 class Quotation(SellingController):
 	tname = 'Quotation Item'
 	fname = 'quotation_details'
