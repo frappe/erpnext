@@ -11,6 +11,11 @@ import frappe.defaults
 from erpnext.stock.utils import update_bin
 
 from erpnext.controllers.buying_controller import BuyingController
+
+form_grid_templates = {
+	"purchase_receipt_details": "templates/form_grid/item_grid.html"
+}
+
 class PurchaseReceipt(BuyingController):
 	tname = 'Purchase Receipt Item'
 	fname = 'purchase_receipt_details'

@@ -6,6 +6,11 @@ import frappe
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
+
+form_grid_templates = {
+	"quotation_items": "templates/form_grid/item_grid.html"
+}
+
 class SupplierQuotation(BuyingController):
 	tname = "Supplier Quotation Item"
 	fname = "quotation_items"

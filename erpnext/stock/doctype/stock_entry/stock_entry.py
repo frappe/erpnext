@@ -19,6 +19,10 @@ class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
 
 from erpnext.controllers.stock_controller import StockController
 
+form_grid_templates = {
+	"mtn_details": "templates/form_grid/stock_entry_grid.html"
+}
+
 class StockEntry(StockController):
 	fname = 'mtn_details'
 

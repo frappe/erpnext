@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import cint, flt, rounded, cstr, comma_or
 from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
+from erpnext.stock.get_item_details import get_available_qty
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -16,6 +17,12 @@ class SellingController(StockController):
 				self.fname: "templates/print_formats/includes/item_grid.html",
 				"other_charges": "templates/print_formats/includes/taxes.html",
 			}
+
+	def onload(self):
+		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
+			for item in self.get(self.fname):
+				item.update(get_available_qty(item.item_code,
+					item.warehouse))
 
 	def validate(self):
 		super(SellingController, self).validate()
