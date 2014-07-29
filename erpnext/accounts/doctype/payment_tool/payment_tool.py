@@ -32,7 +32,8 @@ class PaymentTool(Document):
 		if len(order_list):		
 			all_outstanding_vouchers.extend(order_list)
 
-		self.add_outstanding_vouchers(all_outstanding_vouchers, account_name)
+		self.add_outstanding_vouchers(all_outstanding_vouchers)
+		self.account_name = account_name
 
 	def outstanding_voucher_list(self, amount_query, account_name):
 		all_outstanding_vouchers = []
@@ -120,7 +121,7 @@ class PaymentTool(Document):
 
 		return purchase_order_list
 
-	def add_outstanding_vouchers(self, all_outstanding_vouchers, account_name):
+	def add_outstanding_vouchers(self, all_outstanding_vouchers):
 		self.set('outstanding_vouchers', [])
 		for e in all_outstanding_vouchers:
 			ent = self.append('outstanding_vouchers', {})
@@ -128,8 +129,6 @@ class PaymentTool(Document):
 			ent.against_voucher_no = e.get('voucher_no')
 			ent.total_amount = e.get('invoice_amount')
 			ent.outstanding_amount = e.get('outstanding_amount')
-
-		self.account_name = account_name
 
 	def get_account_name(self, party_name):
 		# account_name = frappe.db.sql("""
@@ -156,20 +155,22 @@ class PaymentTool(Document):
 			if not self.get(fieldname):
 				frappe.throw(_("Please select {0} field first").format(self.meta.get_label(fieldname)))
 
-@frappe.whitelist()
-def make_journal_voucher(source_name, target_doc=None):
 
-	def postprocess(source, target):
-		print source.as_dict()
-		target.cheque_no = source.reference_no
-		target.cheque_date = source.reference_date
+	def make_journal_voucher(self):
+		from erpnext.accounts.utils import get_balance_on
+		
+		jv = frappe.new_doc('Journal Voucher')
+		jv.voucher_type = 'Journal Entry'
+		jv.company = self.company
 
-		print source.received_or_paid
+		for v in self.get("outstanding_vouchers"): ##Point to child table
+			d1 = jv.append("entries")
+			d1.account = self.account_name
+			d1.credit = v.payment_amount 			##Add Customer / supplier check
+			self.total_payment_amount = flt(self.total_payment_amount) + flt(v.payment_amount)
 
-	doclist = get_mapped_doc("Payment Tool", source_name, {
-		"Payment Tool": {
-			"doctype": "Journal Voucher",
-		}
-	}, target_doc, postprocess)
+		d2 = jv.append("entries")
+		d2.account = self.payment_account
+		d2.debit = self.total_payment_amount
 
-	return doclist
+		return jv
