@@ -15,9 +15,9 @@ def execute():
 	for fmt in old_formats:
 		# update property setter
 		for ps in frappe.db.sql_list("""select name from `tabProperty Setter`
-			where property_type='default_print_format' and value=%s""", fmt):
+			where property='default_print_format' and value=%s""", fmt):
 			ps = frappe.get_doc("Property Setter", ps)
 			ps.value = "Standard"
 			ps.save(ignore_permissions = True)
 
-		frappe.delete_doc("Print Format", fmt)
+		frappe.delete_doc_if_exists("Print Format", fmt)
