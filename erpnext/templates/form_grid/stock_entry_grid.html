@@ -28,15 +28,15 @@
 
 		<!-- qty -->
 		<div class="col-sm-2 text-right">
-			{%= row.get_formatted("qty") %}
+			{%= doc.get_formatted("qty") %}
 			<br><small>{%= doc.uom || doc.stock_uom %}</small>
 		</div>
 
 		<!-- amount -->
 		<div class="col-sm-2 text-right">
-			{%= row.get_formatted("amount") %}
+			{%= doc.get_formatted("amount") %}
 			<div class="small text-muted">
-				{%= row.get_formatted("incoming_rate") %}</div>
+				{%= doc.get_formatted("incoming_rate") %}</div>
 		</div>
 	</div>
 {% } %}

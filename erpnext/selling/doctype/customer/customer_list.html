@@ -1,0 +1,29 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% if(doc.customer_name != doc.name) { %}
+			<span style="margin-right: 8px; display: inline-block">
+				{%= doc.customer_name %}</span>
+			{% } %}
+			<span style="margin-right: 8px; display: inline-block"
+				title="{%= doc.customer_type %}" class="filterable"
+				data-filter="customer_type,=,{%= doc.customer_type %}">
+			{% if(doc.customer_type==="Company") { %}
+				<i class="icon-building"></i>
+			{% } else { %}
+				<i class="icon-user"></i>
+			{% } %}
+			</span>
+			<span class="label label-info filterable"
+				data-filter="customer_group,=,{%= doc.customer_group %}">
+					{%= doc.customer_group %}</span>
+			{% if(doc.territory) { %}
+			<span class="label label-default filterable"
+				data-filter="territory,=,{%= doc.territory %}">
+					<i class="icon-map-marker"></i>
+					{%= doc.territory %}</span>
+			{% } %}
+		</div>
+	</div>
+</div>

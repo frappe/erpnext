@@ -1,4 +1,4 @@
-{% var visible_columns = row.get_visible_columns(["item_code",
+{% var visible_columns = row.get_visible_columns(["item_code", "warehouse",
 	"item_name", "description", "amount", "stock_uom", "uom", "qty"]); %}
 
 {% if(!doc) { %}
@@ -16,28 +16,21 @@
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			{% if(doc.schedule_date) { %}
 			<br><span title="{%= __("Reqd By Date") %}" class="label {%=
-				(frappe.datetime.get_diff(doc.schedule_date) < 1
+				(frappe.datetime.get_diff(doc.schedule_date) < 0
 					&& doc.ordered_qty < doc.qty)
 					? "label-danger" : "label-default" %}">
-					{%= row.get_formatted("schedule_date") %}</span>
+					{%= doc.get_formatted("schedule_date") %}</span>
 			{% } %}
 		</div>
 
 		<!-- qty -->
 		<div class="col-sm-3 text-right">
-			{%= row.get_formatted("qty") %}
+			{%= doc.get_formatted("qty") %}
 			<small>{%= doc.uom || doc.stock_uom %}</small>
-			{% var percent_delivered =
-				100 - cint((doc.qty - cint(doc.ordered_qty)) * 100 / doc.qty); %}
-			<div class="progress" title="% {%= __("Ordered") %}"
-				style="margin-bottom: 4px;">
-				<div class="progress-bar" role="progressbar"
-					aria-valuenow="{%= percent_delivered %}"
-					aria-valuemin="0" aria-valuemax="100"
-					style="width: {%= percent_delivered %}%">
-					{%= percent_delivered %}%
-				</div>
-			</div>
+			{% var completed =
+				100 - cint((doc.qty - cint(doc.ordered_qty)) * 100 / doc.qty),
+				title = __("Ordered"); %}
+			{% include "templates/form_grid/includes/progress.html" %}
 			{% if(doc.warehouse) { %}
 				<div style="overflow:hidden; min-height: 25px;
 					white-space:nowrap; text-overflow: ellipsis;"
