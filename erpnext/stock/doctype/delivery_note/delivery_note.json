@@ -104,7 +104,7 @@
   }, 
   {
    "fieldname": "contact_mobile", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "hidden": 1, 
    "label": "Mobile No", 
    "permlevel": 0, 
@@ -112,7 +112,7 @@
   }, 
   {
    "fieldname": "contact_email", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "hidden": 1, 
    "label": "Contact Email", 
    "permlevel": 0, 
@@ -1009,7 +1009,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-07-24 08:48:06.944540", 
+ "modified": "2014-07-30 03:37:31.908351", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
