@@ -27,30 +27,23 @@
 				(frappe.datetime.get_diff(doc.schedule_date) < 1
 					&& doc.received_qty < doc.qty)
 					? "label-danger" : "label-default" %}">
-					{%= row.get_formatted("schedule_date") %}</span>
+					{%= doc.get_formatted("schedule_date") %}</span>
 			{% } %}
 		</div>
 
 		<!-- qty -->
 		<div class="col-sm-2 text-right">
-			{%= row.get_formatted("qty") %}
+			{%= doc.get_formatted("qty") %}
 			<br><small>{%= doc.uom || doc.stock_uom %}</small>
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
 				doc.doctype) && frm.doc.docstatus===1) {
 				var delivered = doc.doctype==="Sales Order Item" ?
 						doc.delivered_qty : doc.received_qty,
-					percent_delivered =
-						100 - cint((doc.qty - delivered) * 100 / doc.qty);
+					completed =
+						100 - cint((doc.qty - delivered) * 100 / doc.qty),
+					title = __("Delivered");
 				%}
-				<div class="progress" title="% {%= __("Delivered") %}"
-					style="margin-bottom: 4px;">
-					<div class="progress-bar" role="progressbar"
-						aria-valuenow="{%= percent_delivered %}"
-						aria-valuemin="0" aria-valuemax="100"
-						style="width: {%= percent_delivered %}%">
-						{%= percent_delivered %}%
-					</div>
-				</div>
+				{% include "templates/form_grid/includes/progress.html" %}
 			{% } %}
 			{% if(doc.warehouse) {
 				var label_class = "label-default",
@@ -78,7 +71,7 @@
 
 		<!-- rate -->
 		<div class="col-sm-2 text-right">
-			{%= row.get_formatted("rate") %}
+			{%= doc.get_formatted("rate") %}
 			{% if(doc.discount_percentage) { %}
 			<br><span class="label label-default pull-right"
 				title="{%= __("Discount")  %}">
@@ -88,21 +81,15 @@
 
 		<!-- amount -->
 		<div class="col-sm-2 text-right">
-			{%= row.get_formatted("amount") %}
+			{%= doc.get_formatted("amount") %}
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
 				doc.doctype) && frm.doc.docstatus===1 && doc.amount) {
-				var percent_billed =
-					100 - cint((doc.amount - doc.billed_amt) * 100 / doc.amount);
+				var completed =
+					100 - cint((doc.amount - doc.billed_amt) * 100 / doc.amount),
+					title = __("Billed");
 				%}
 				<br><small>&nbsp;</small>
-				<div class="progress" title="% {%= __("Billed") %}">
-					<div class="progress-bar" role="progressbar"
-						aria-valuenow="{%= percent_billed %}"
-						aria-valuemin="0" aria-valuemax="100"
-						style="width: {%= percent_billed %}%">
-						{%= percent_billed %}%
-					</div>
-				</div>
+				{% include "templates/form_grid/includes/progress.html" %}
 			{% } %}
 		</div>
 	</div>

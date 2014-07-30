@@ -9,7 +9,7 @@
   {
    "fieldname": "title", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Title", 
    "permlevel": 0, 
    "print_hide": 1, 
@@ -19,7 +19,7 @@
    "description": "Help: To link to another record in the system, use \"#Form/Note/[Note Name]\" as the Link URL. (don't use \"http://\")", 
    "fieldname": "content", 
    "fieldtype": "Text Editor", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Content", 
    "permlevel": 0
   }, 
@@ -49,7 +49,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-07-09 12:54:11.897597", 
+ "modified": "2014-07-30 03:24:38.302928", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Note", 
