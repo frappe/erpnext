@@ -22,6 +22,7 @@ install:
 before_script:
   - mysql -e 'create database test_frappe'
   - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - echo "USE mysql;\nGRANT ALL PRIVILEGES ON `test_frappe`.* TO 'test_frappe'@'localhost;\n" | mysql -u root
 
 script:
   - cd ./test_sites/
