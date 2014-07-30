@@ -91,7 +91,7 @@
   {
    "depends_on": "customer", 
    "fieldname": "contact_mobile", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "label": "Mobile No", 
    "permlevel": 0, 
    "read_only": 1
@@ -99,7 +99,7 @@
   {
    "depends_on": "customer", 
    "fieldname": "contact_email", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "label": "Contact Email", 
    "permlevel": 0, 
    "print_hide": 1, 
@@ -236,7 +236,7 @@
  "icon": "icon-wrench", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:48.805241", 
+ "modified": "2014-07-30 03:37:31.118791", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 

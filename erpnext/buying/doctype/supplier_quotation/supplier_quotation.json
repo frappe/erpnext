@@ -67,7 +67,7 @@
   }, 
   {
    "fieldname": "contact_mobile", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "hidden": 1, 
    "label": "Mobile No", 
    "permlevel": 0, 
@@ -75,7 +75,7 @@
   }, 
   {
    "fieldname": "contact_email", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "hidden": 1, 
    "label": "Contact Email", 
    "permlevel": 0, 
@@ -571,7 +571,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-24 05:16:47.062261", 
+ "modified": "2014-07-30 03:37:33.735264", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 

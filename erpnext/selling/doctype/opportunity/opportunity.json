@@ -243,7 +243,7 @@
   {
    "depends_on": "eval:doc.lead || doc.customer", 
    "fieldname": "contact_email", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "label": "Contact Email", 
    "permlevel": 0, 
    "read_only": 1
@@ -251,7 +251,7 @@
   {
    "depends_on": "eval:doc.lead || doc.customer", 
    "fieldname": "contact_mobile", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "label": "Contact Mobile No", 
    "permlevel": 0, 
    "read_only": 1
@@ -411,7 +411,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-24 08:55:09.807048", 
+ "modified": "2014-07-30 03:37:31.687489", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 
