@@ -37,7 +37,7 @@ class PurchaseReceipt(BuyingController):
 
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
-			where purchase_receipt=%s""", self.name)
+			where purchase_receipt=%s and docstatus=1""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("purchase_receipt_details")))
 			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
@@ -358,12 +358,12 @@ class PurchaseReceipt(BuyingController):
 			# and charges added via Landed Cost Voucher, 
 			# post valuation related charges on "Stock Received But Not Billed" 
 
-			stock_rbnb_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
+			negative_expense_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
 				where docstatus = 1 and purchase_receipt=%s 
 				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice' 
-					and voucher_no=pi.parent and account=%s)""", (self.name, stock_rbnb))
+					and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
 		
-			if stock_rbnb_booked_in_pi:
+			if negative_expense_booked_in_pi:
 				expenses_included_in_valuation = stock_rbnb
 			
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
