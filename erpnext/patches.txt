@@ -73,4 +73,4 @@ execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool") # 29-07
 execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool Detail") # 29-07-2014
 execute:frappe.delete_doc("Page", "trial-balance") #2014-07-22
 erpnext.patches.v4_2.delete_old_print_formats #2014-07-29
-erpnext.patches.v4_2.toggle_rounded_total
+erpnext.patches.v4_2.toggle_rounded_total #2014-07-30

@@ -252,7 +252,7 @@ def get_events(start, end):
 	if "Employee" in frappe.get_roles():
 		add_department_leaves(events, start, end, employee, company)
 
-	add_leaves(events, start, end, employee, company, match_conditions)
+	add_leaves(events, start, end, match_conditions)
 
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
@@ -270,9 +270,9 @@ def add_department_leaves(events, start, end, employee, company):
 		and company=%s""", (department, company))
 
 	match_conditions = "employee in (\"%s\")" % '", "'.join(department_employees)
-	add_leaves(events, start, end, employee, company, match_conditions=match_conditions)
+	add_leaves(events, start, end, match_conditions=match_conditions)
 
-def add_leaves(events, start, end, employee, company, match_conditions=None):
+def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where
