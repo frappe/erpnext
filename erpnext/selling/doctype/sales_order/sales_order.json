@@ -75,7 +75,7 @@
   }, 
   {
    "fieldname": "contact_mobile", 
-   "fieldtype": "Small Text", 
+   "fieldtype": "Text", 
    "hidden": 1, 
    "label": "Mobile No", 
    "permlevel": 0, 
@@ -83,7 +83,7 @@
   }, 
   {
    "fieldname": "contact_email", 
-   "fieldtype": "Small Text", 
+   "fieldtype": "Text", 
    "hidden": 1, 
    "label": "Contact Email", 
    "permlevel": 0, 
@@ -555,6 +555,13 @@
    "print_hide": 0, 
    "read_only": 1, 
    "width": "200px"
+  }, 
+  {
+   "fieldname": "advance_paid", 
+   "fieldtype": "Currency", 
+   "label": "Advance Paid", 
+   "permlevel": 0, 
+   "read_only": 0
   }, 
   {
    "fieldname": "terms_section_break", 

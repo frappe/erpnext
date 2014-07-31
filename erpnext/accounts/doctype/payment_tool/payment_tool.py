@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt
+from frappe.utils import flt, cint
 
 from frappe import msgprint, _
 
@@ -18,11 +18,11 @@ class PaymentTool(Document):
 
 		if self.party_type == "Customer" and self.received_or_paid == "Received":
 			amount_query = "ifnull(debit, 0) - ifnull(credit, 0)"
-			order_list = self.sales_order_list(amount_query, self.customer)
+			order_list = self.sales_order_list(self.customer)
 		
 		elif self.party_type == "Supplier" and self.received_or_paid == "Paid":
 			amount_query = "ifnull(credit, 0) - ifnull(debit, 0)"
-			order_list = self.purchase_order_list(amount_query, self.supplier)
+			order_list = self.purchase_order_list(self.supplier)
 		else:
 			frappe.throw(_("Please enter the Against Invoice details manually to create JV"))
 
@@ -77,21 +77,33 @@ class PaymentTool(Document):
 
 		return all_outstanding_vouchers
 
-	def sales_order_list(self, amount_query, party_name):
-		sales_order_list = frappe.db.sql("""
+	def sales_order_list(self, party_name):
+		sales_order_list = []
+
+		order_list = frappe.db.sql("""
 			select
 				voucher_no, voucher_type, posting_date, 
 				ifnull(sum({amount_query}), 0) as invoice_amount
 			from
 				`tabGL Entry`
 			where
-				customer = %s and advance_paid > grand_total
-			group by voucher_type, voucher_no			 
-			""".format(**{
-			"amount_query": amount_query
-			}), (party_type_name), as_dict = True)
+				customer = %s
+				and docstatus = 1
+				and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
+			""", party_name, as_dict = True)
 
-	def purchase_order_list(self, amount_query, party_name):
+		for d in order_list:
+			sales_order_list.append({
+				'voucher_no': d.voucher_no, 
+				'voucher_type': "Sales Order", 
+				'posting_date': d.posting_date, 
+				'invoice_amount': flt(d.invoice_amount), 
+				'outstanding_amount': flt(d.invoice_amount) - flt(d.advance_paid)
+				})
+
+		return sales_order_list
+
+	def purchase_order_list(self, party_name):
 		purchase_order_list = []
 
 		order_list = frappe.db.sql("""
@@ -101,14 +113,11 @@ class PaymentTool(Document):
 			from
 				`tabPurchase Order`
 			where
-				customer = %(party_name)s 
+				supplier = %s 
+				and docstatus = 1
 				and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
 			group by voucher_no			 
-			""".format(**{
-			"amount_query": amount_query
-			}), {
-				"party_name": party_name
-			}, as_dict = True)
+			""", party_name, as_dict = True)
 
 		for d in order_list:
 			purchase_order_list.append({
@@ -122,7 +131,8 @@ class PaymentTool(Document):
 		return purchase_order_list
 
 	def add_outstanding_vouchers(self, all_outstanding_vouchers):
-		self.set('outstanding_vouchers', [])
+		self.set('outstanding_vouchers', []) ##Points to child table
+
 		for e in all_outstanding_vouchers:
 			ent = self.append('outstanding_vouchers', {})
 			ent.against_voucher_type = e.get('voucher_type')
@@ -131,18 +141,6 @@ class PaymentTool(Document):
 			ent.outstanding_amount = e.get('outstanding_amount')
 
 	def get_account_name(self, party_name):
-		# account_name = frappe.db.sql("""
-		# 	select
-		# 		name, group_or_ledger
-		# 	from
-		# 		`tabAccount`
-		# 	where
-		# 		account_name = %(party_name)s and master_type = %(party_type)s
-		# 	""", {
-		# 		"party_name": party_name,
-		# 		"party_type": self.party_type
-		# 	}, as_dict = True)
-
 		account_name = frappe.db.get_value("Account", {"account_name": party_name, 
 			"master_type": self.party_type}, fieldname = "name")
 		return account_name
@@ -158,19 +156,40 @@ class PaymentTool(Document):
 
 	def make_journal_voucher(self):
 		from erpnext.accounts.utils import get_balance_on
+
+		total_payment_amount = 0.00
+		invoice_voucher_type = {'Sales Invoice': 'against_invoice', 
+								'Purchase Invoice': 'against_voucher',
+								'Journal Voucher': 'against_jv',
+								'Sales Order': 'against_sales_order',
+								'Purchase Order': 'against_purchase_order',
+								}
 		
 		jv = frappe.new_doc('Journal Voucher')
 		jv.voucher_type = 'Journal Entry'
 		jv.company = self.company
+		jv.cheque_no = self.reference_no
+		jv.cheque_date = self.reference_date
 
-		for v in self.get("outstanding_vouchers"): ##Point to child table
+		for v in self.get("outstanding_vouchers"): ##Points to child table
 			d1 = jv.append("entries")
 			d1.account = self.account_name
-			d1.credit = v.payment_amount 			##Add Customer / supplier check
-			self.total_payment_amount = flt(self.total_payment_amount) + flt(v.payment_amount)
+
+			if self.party_type == "Customer" and self.received_or_paid == "Received" \
+			or self.party_type == "Supplier" and self.received_or_paid == "Received":
+				d1.credit = flt(v.payment_amount)
+
+			elif self.party_type == "Customer" and self.received_or_paid == "Paid" \
+			or self.party_type == "Supplier" and self.received_or_paid == "Paid":
+				d1.debit = flt(v.payment_amount)
+
+			d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
+			d1.set('is_advance', 'Yes' if v.against_voucher_type == 'Sales Order' or 
+				v.against_voucher_type == 'Purchase Order' else 'No')
+			total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
 
 		d2 = jv.append("entries")
 		d2.account = self.payment_account
-		d2.debit = self.total_payment_amount
+		d2.set('debit' if total_payment_amount < 0 else 'credit', abs(total_payment_amount))
 
 		return jv

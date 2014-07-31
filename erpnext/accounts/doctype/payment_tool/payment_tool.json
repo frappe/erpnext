@@ -258,7 +258,7 @@
   }, 
   {
    "fieldname": "total_payment_amount", 
-   "fieldtype": "Data", 
+   "fieldtype": "Currency", 
    "label": "Total Payment Amount", 
    "permlevel": 0, 
    "read_only": 1
@@ -307,7 +307,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2014-07-29 18:39:13.393110", 
+ "modified": "2014-07-30 14:27:33.297551", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Tool", 

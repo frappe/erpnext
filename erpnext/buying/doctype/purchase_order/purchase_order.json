@@ -444,6 +444,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "advance_paid", 
+   "fieldtype": "Currency", 
+   "label": "Advance Paid", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "terms_section_break", 
    "fieldtype": "Section Break", 
    "label": "Terms and Conditions", 
@@ -645,7 +651,11 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
+<<<<<<< HEAD
  "modified": "2014-07-31 04:59:24.561351", 
+=======
+ "modified": "2014-07-31 15:21:06.239630", 
+>>>>>>> Add Payment Tool and Add advance_paid field to SO/PO
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
