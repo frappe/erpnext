@@ -226,7 +226,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 	par_flds = ['project_name', 'due_date', 'is_opening', 'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
-	'total_commission', 'advances'];
+	'total_commission', 'advances', 'invoice_period_from_date', 'invoice_period_to_date'];
 
 	item_flds_normal = ['sales_order', 'delivery_note']
 
