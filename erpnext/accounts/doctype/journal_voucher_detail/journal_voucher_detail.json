@@ -118,6 +118,20 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "against_sales_order", 
+   "fieldtype": "Link", 
+   "label": "Against Sales Order", 
+   "options": "Sales Order", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "against_purchase_order", 
+   "fieldtype": "Link", 
+   "label": "Against Purchase Order", 
+   "options": "Purchase Order", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -160,7 +174,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-07-25 03:16:51.149899", 
+ "modified": "2014-07-30 14:50:20.851921", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Voucher Detail", 

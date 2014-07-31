@@ -41,6 +41,25 @@ class JournalVoucher(AccountsController):
 			self.check_credit_days()
 		self.make_gl_entries()
 		self.check_credit_limit()
+		self.update_advance_paid()
+
+	def update_advance_paid(self):
+		advance_paid = frappe._dict()
+		for d in self.get("entries"):
+			if d.is_advance:
+				if d.against_sales_order:
+					advance_paid.setdefault("Sales Order", {}).setdefault(d.against_sales_order, []) \
+						.append(flt(d.credit) - flt(d.debit))
+				elif d.against_purchase_order:
+					advance_paid.setdefault("Purchase Order", {}).setdefault(d.against_purchase_order, []) \
+						.append(flt(d.debit) - flt(d.credit))
+
+		for voucher_type, voucher_advance in advance_paid.items():
+			for voucher_no, advance in voucher_advance.items():
+				frappe.db.set_value(voucher_type, voucher_no, "advance_paid", sum(advance))
+
+
+
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import remove_against_link_from_jv
@@ -147,7 +166,13 @@ class JournalVoucher(AccountsController):
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
-				r.append(_("{0} {1} against Invoice {2}").format(currency, fmt_money(flt(d.credit)), d.against_invoice))
+				r.append(_("{0} {1} against Invoice {2}").format(currency, \
+					fmt_money(flt(d.credit)), d.against_invoice))
+
+			if d.against_sales_order and d.credit:
+				currency = frappe.db.get_value("Sales Order", d.against_sales_order, "currency")
+				r.append(_("{0} {1} against Sales Order {2}").format(currency, \
+					fmt_money(flt(d.credit)), d.against_sales_order))
 
 			if d.against_voucher and d.debit:
 				bill_no = frappe.db.sql("""select bill_no, bill_date, currency
@@ -158,13 +183,17 @@ class JournalVoucher(AccountsController):
 						fmt_money(flt(d.debit)), bill_no[0][0],
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d'))))
 
+			if d.against_purchase_order and d.debit:
+				currency = frappe.db.get_value("Purchase Order", d.against_purchase_order, "currency")
+				r.append(_("{0} {1} against Purchase Order {2}").format(currency, \
+					fmt_money(flt(d.debit)), d.against_purchase_order))				
+
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))
 
 		if r:
-			self.remark = ("\n").join(r)
-		else:
-			frappe.msgprint(_("User Remarks is mandatory"), raise_exception=frappe.MandatoryError)
+			self.remark = ("\n").join(r) #User Remarks is not mandatory
+
 
 	def set_aging_date(self):
 		if self.is_opening != 'Yes':
