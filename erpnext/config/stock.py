@@ -197,7 +197,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"is_query_report": True,
 					"name": "Serial No Service Contract Expiry",
 					"doctype": "Serial No"
 				},
