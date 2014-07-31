@@ -73,7 +73,7 @@ erpnext.ActivityFeed = Class.extend({
 		var last = erpnext.last_feed_date;
 		
 		if((last && dateutil.obj_to_str(last) != dateutil.obj_to_str(date)) || (!last)) {
-			var diff = dateutil.get_day_diff(new Date(), date);
+			var diff = dateutil.get_day_diff(dateutil.get_today(), dateutil.obj_to_str(date));
 			if(diff < 1) {
 				pdate = 'Today';
 			} else if(diff < 2) {
