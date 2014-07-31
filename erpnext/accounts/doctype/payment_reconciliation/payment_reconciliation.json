@@ -128,8 +128,9 @@
   }
  ], 
  "hide_toolbar": 1, 
+ "icon": "icon-resize-horizontal", 
  "issingle": 1, 
- "modified": "2014-07-22 14:53:59.084438", 
+ "modified": "2014-07-31 05:43:03.410832", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation", 
@@ -139,7 +140,7 @@
   {
    "cancel": 0, 
    "create": 1, 
-   "delete": 0, 
+   "delete": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Accounts Manager", 
@@ -149,7 +150,7 @@
   {
    "cancel": 0, 
    "create": 1, 
-   "delete": 0, 
+   "delete": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Accounts User", 
