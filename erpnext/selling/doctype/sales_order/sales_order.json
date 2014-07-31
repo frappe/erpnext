@@ -434,20 +434,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "other_charges_total_export", 
-   "fieldtype": "Currency", 
-   "label": "Taxes and Charges Total", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_46", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "other_charges_total", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Total (Company Currency)", 
@@ -458,6 +444,20 @@
    "print_hide": 1, 
    "read_only": 1, 
    "width": "150px"
+  }, 
+  {
+   "fieldname": "column_break_46", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "other_charges_total_export", 
+   "fieldtype": "Currency", 
+   "label": "Taxes and Charges Total", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "discount_amount", 
@@ -889,7 +889,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2014-07-31 04:59:21.856833", 
+ "modified": "2014-07-31 06:34:14.727868", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
