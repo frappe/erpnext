@@ -22,11 +22,16 @@ class Warehouse(Document):
 		self.update_parent_account()
 
 	def update_parent_account(self):
-		if not getattr(self, "__islocal", None) and (self.create_account_under !=
-			frappe.db.get_value("Warehouse", self.name, "create_account_under")):
-				warehouse_account = frappe.db.get_value("Account",
-					{"account_type": "Warehouse", "company": self.company,
-					"master_name": self.name}, ["name", "parent_account"])
+		
+		if not getattr(self, "__islocal", None) \
+			and (self.create_account_under != frappe.db.get_value("Warehouse", self.name, "create_account_under")):
+				
+				self.validate_parent_account()
+				
+				warehouse_account = frappe.db.get_value("Account", 
+					{"account_type": "Warehouse", "company": self.company, "master_name": self.name}, 
+					["name", "parent_account"])
+					
 				if warehouse_account and warehouse_account[1] != self.create_account_under:
 					acc_doc = frappe.get_doc("Account", warehouse_account[0])
 					acc_doc.parent_account = self.create_account_under
@@ -57,13 +62,21 @@ class Warehouse(Document):
 					msgprint(_("Account head {0} created").format(ac_doc.name))
 
 	def validate_parent_account(self):
+		if not self.company:
+			frappe.throw(_("Warehouse {0}: Company is mandatory").format(self.name))
+		
 		if not self.create_account_under:
 			parent_account = frappe.db.get_value("Account",
 				{"account_name": "Stock Assets", "company": self.company})
+			
 			if parent_account:
 				self.create_account_under = parent_account
 			else:
 				frappe.throw(_("Please enter parent account group for warehouse account"))
+		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
+			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
+				.format(self.name, self.create_account_under, self.company))
+			
 
 	def on_trash(self):
 		# delete bin

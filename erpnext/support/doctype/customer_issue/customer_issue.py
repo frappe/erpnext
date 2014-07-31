@@ -20,7 +20,6 @@ class CustomerIssue(TransactionBase):
 		if self.status=="Closed" and \
 			frappe.db.get_value("Customer Issue", self.name, "status")!="Closed":
 			self.resolution_date = today()
-			self.resolved_by = frappe.session.user
 
 	def on_cancel(self):
 		lst = frappe.db.sql("""select t1.name

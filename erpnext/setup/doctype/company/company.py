@@ -35,6 +35,18 @@ class Company(Document):
 			self.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
 				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
+				
+		self.validate_default_accounts()
+		
+	def validate_default_accounts(self):
+		for field in ["default_bank_account", "default_cash_account", "receivables_group", "payables_group", 
+			"default_expense_account", "default_income_account", "stock_received_but_not_billed", 
+			"stock_adjustment_account", "expenses_included_in_valuation"]:
+				if self.get(field):
+					for_company = frappe.db.get_value("Account", self.get(field), "company")
+					if for_company != self.name:
+						frappe.throw(_("Account {0} does not belong to company: {1}")
+							.format(self.get(field), self.name))
 
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount
@@ -60,7 +72,7 @@ class Company(Document):
 		for whname in (_("Stores"), _("Work In Progress"), _("Finished Goods")):
 			if not frappe.db.exists("Warehouse", whname + " - " + self.abbr):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
-					"group_or_ledger": "Group"})
+					"group_or_ledger": "Group", "company": self.name})
 				if stock_group:
 					frappe.get_doc({
 						"doctype":"Warehouse",
@@ -115,7 +127,8 @@ class Company(Document):
 			_set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
 
 		if not self.default_income_account:
-			self.db_set("default_income_account", frappe.db.get_value("Account", {"account_name": _("Sales")}))
+			self.db_set("default_income_account", frappe.db.get_value("Account", 
+				{"account_name": _("Sales"), "company": self.name}))
 
 	def create_default_cost_center(self):
 		cc_list = [

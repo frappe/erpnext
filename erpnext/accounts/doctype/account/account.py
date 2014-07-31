@@ -41,21 +41,24 @@ class Account(Document):
 				throw(_("Invalid Master Name"))
 
 	def validate_parent(self):
-		"""Fetch Parent Details and validation for account not to be created under ledger"""
+		"""Fetch Parent Details and validate parent account"""
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["name", "group_or_ledger", "report_type", "root_type"], as_dict=1)
+				["name", "group_or_ledger", "report_type", "root_type", "company"], as_dict=1)
 			if not par:
-				throw(_("Parent account does not exist"))
-			elif par["name"] == self.name:
-				throw(_("You can not assign itself as parent account"))
-			elif par["group_or_ledger"] != 'Group':
-				throw(_("Parent account can not be a ledger"))
+				throw(_("Account {0}: Parent account {1} does not exist").format(self.name, self.parent_account))
+			elif par.name == self.name:
+				throw(_("Account {0}: You can not assign itself as parent account").format(self.name))
+			elif par.group_or_ledger != 'Group':
+				throw(_("Account {0}: Parent account {1} can not be a ledger").format(self.name, self.parent_account))
+			elif par.company != self.company:
+				throw(_("Account {0}: Parent account {1} does not belong to company: {2}")
+					.format(self.name, self.parent_account, self.company))
 
-			if par["report_type"]:
-				self.report_type = par["report_type"]
-			if par["root_type"]:
-				self.root_type = par["root_type"]
+			if par.report_type:
+				self.report_type = par.report_type
+			if par.root_type:
+				self.root_type = par.root_type
 
 	def validate_root_details(self):
 		#does not exists parent

@@ -53,7 +53,7 @@ erpnext.bom.set_operation_no = function(doc) {
 	refresh_field("bom_materials");
 }
 
-cur_frm.fields_dict["bom_operations"].grid.on_row_delete = function(cdt, cdn){
+cur_frm.cscript.bom_operations_remove = function(){
 	erpnext.bom.set_operation_no(doc);
 }
 
