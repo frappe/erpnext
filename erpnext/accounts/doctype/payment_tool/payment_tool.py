@@ -175,13 +175,7 @@ class PaymentTool(Document):
 			d1 = jv.append("entries")
 			d1.account = self.account_name
 
-			if self.party_type == "Customer" and self.received_or_paid == "Received" \
-			or self.party_type == "Supplier" and self.received_or_paid == "Received":
-				d1.credit = flt(v.payment_amount)
-
-			elif self.party_type == "Customer" and self.received_or_paid == "Paid" \
-			or self.party_type == "Supplier" and self.received_or_paid == "Paid":
-				d1.debit = flt(v.payment_amount)
+			d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount)
 
 			d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
 			d1.set('is_advance', 'Yes' if v.against_voucher_type == 'Sales Order' or 

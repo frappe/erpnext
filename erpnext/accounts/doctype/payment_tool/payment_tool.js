@@ -4,6 +4,13 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.accounts.PaymentToolController = frappe.ui.form.Controller.extend({
+	onload: function() {	
+
+		var help_content = '<i class="icon-hand-right"></i> Note:<br>'+
+			'<ul>If payment is not made against any reference, make Journal Voucher manually.</ul>';
+		this.frm.set_value("make_jv_help", help_content);
+	},
+
 	get_outstanding_vouchers: function() {
 		var me = this;
 		return this.frm.call({
