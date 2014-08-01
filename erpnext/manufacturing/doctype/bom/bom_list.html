@@ -4,11 +4,13 @@
 			{%= list.get_avatar_and_id(doc) %}
 			{% if(cint(doc.is_active)) { %}
 				<span class="label label-success filterable"
-					data-filter="is_active,=,Yes">{%= __("Active") %}</span>
+					data-filter="is_active,=,Yes">
+					<i class="icon-ok-sign"></i> {%= __("Active") %}</span>
 			{% } %}
 			{% if(cint(doc.is_default)) { %}
-				<span class="label label-success filterable"
-					data-filter="is_default,=,Yes">{%= __("Default") %}</span>
+				<span class="label label-primary filterable"
+					data-filter="is_default,=,Yes">
+					<i class="icon-ok-sign"></i> {%= __("Default") %}</span>
 			{% } %}
 		</div>
 	</div>

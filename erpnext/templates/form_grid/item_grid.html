@@ -23,11 +23,12 @@
 			{% } %}
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			{% if(doc.schedule_date) { %}
-			<br><span title="{%= __("Reqd By Date") %}" class="label {%=
+			<div><span title="{%= __("Reqd By Date") %}" class="label {%=
 				(frappe.datetime.get_diff(doc.schedule_date) < 1
 					&& doc.received_qty < doc.qty)
 					? "label-danger" : "label-default" %}">
 					{%= doc.get_formatted("schedule_date") %}</span>
+			</div>
 			{% } %}
 		</div>
 

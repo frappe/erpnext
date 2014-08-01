@@ -11,6 +11,7 @@ from frappe import _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
+from erpnext.stock.get_item_details import get_available_qty
 
 class NotUpdateStockError(frappe.ValidationError): pass
 class StockOverReturnError(frappe.ValidationError): pass
@@ -25,6 +26,11 @@ form_grid_templates = {
 
 class StockEntry(StockController):
 	fname = 'mtn_details'
+	def onload(self):
+		if self.docstatus==1:
+			for item in self.get(self.fname):
+				item.update(get_available_qty(item.item_code,
+					item.s_warehouse))
 
 	def validate(self):
 		self.validate_posting_time()

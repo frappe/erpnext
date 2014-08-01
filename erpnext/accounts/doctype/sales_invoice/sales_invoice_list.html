@@ -10,12 +10,12 @@
 				{% if(frappe.datetime.get_diff(doc.due_date) < 0) { %}
 				<span class="label label-danger filterable"
 					title="{%= doc.get_formatted("due_date")%}"
-					data-filter="outstanding_amount,>,0|due,<,Today">
+					data-filter="outstanding_amount,>,0|due_date,<,Today">
 						{%= __("Overdue: ") + comment_when(doc.due_date) %}
 				</span>
 				{% } else { %}
 				<span class="label label-warning filterable"
-					data-filter="outstanding_amount,>,0|due,>=,Today"
+					data-filter="outstanding_amount,>,0|due_date,>=,Today"
 					title="{%= __("Payment Pending") %}">
 					{%= doc.get_formatted("due_date") %}</span>
 				{% } %}
