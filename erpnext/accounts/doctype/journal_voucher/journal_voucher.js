@@ -7,6 +7,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	onload: function() {
 		this.load_defaults();
 		this.setup_queries();
+		this.setup_balance_formatter();
 	},
 
 	onload_post_render: function() {
@@ -66,6 +67,18 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 		});
 	},
 
+	setup_balance_formatter: function() {
+		var df = frappe.meta.get_docfield("Journal Voucher Detail", "balance", this.frm.doc.name);
+		df.formatter = function(value, df, options, doc) {
+			var currency = frappe.meta.get_field_currency(df, doc);
+			var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
+			return "<div style='text-align: right'>"
+				+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
+				+ " " + dr_or_cr
+				+ "</div>";
+		}
+	},
+
 	against_voucher: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 		if (d.against_voucher && !flt(d.debit)) {
@@ -108,7 +121,6 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 			}
 		});
 	}
-
 });
 
 cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
