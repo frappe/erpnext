@@ -16,6 +16,11 @@
 				<span class="label label-danger filterable"
 					data-filter="status,=,Stopped">{%= __(doc.status) %}</span>
 			{% } %}
+			{% if(doc.per_received == 100 && doc.status!=="Stopped") { %}
+				<span class="filterable text-muted"
+					data-filter="per_received,=,100|status,!=,Stopped">
+					<i class="icon-ok-sign"></i></span>
+			{% } %}
 		</div>
 	</div>
 	<div class="col-xs-1 text-right">

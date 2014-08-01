@@ -4,5 +4,6 @@
 // render
 frappe.listview_settings['Sales Invoice'] = {
 	add_fields: ["customer", "customer_name", "grand_total", "outstanding_amount", "due_date", "company",
-		"currency"]
+		"currency"],
+	filters: [["outstanding_amount", ">", "0"]]
 };

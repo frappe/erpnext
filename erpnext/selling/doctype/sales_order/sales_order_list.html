@@ -21,6 +21,11 @@
 					{%= doc.get_formatted("delivery_date")%}</span>
 				{% } %}
 			{% } %}
+			{% if(doc.per_delivered == 100 && doc.status!=="Stopped") { %}
+				<span class="filterable text-muted"
+					data-filter="per_delivered,=,100|status,!=,Stopped">
+					<i class="icon-ok-sign"></i></span>
+			{% } %}
 			{% if(doc.status==="Stopped") { %}
 				<span class="label label-danger filterable"
 					data-filter="status,=,Stopped">{%= __("Stopped") %}</span>
