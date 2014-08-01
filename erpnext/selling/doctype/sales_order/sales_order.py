@@ -249,6 +249,23 @@ class SalesOrder(SellingController):
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
 
+	def set_total_advance_paid(self):
+		against_order_advance_paid = frappe.db.sql("""
+			select
+				sum(ifnull(credit, 0)) as credit
+			from
+				`tabJournal Voucher Detail`
+			where
+				against_sales_order = %(so_name)s and docstatus = 1 and is_advance = "Yes"
+		""", {
+			"so_name": self.name
+		}, as_dict = True)
+
+		for pay in against_order_advance_paid:
+			advance_paid_value = flt(self.advance_paid) + flt(pay.get('credit'))
+		
+		frappe.db.set_value("Sales Order", self.name, "advance_paid", advance_paid_value)
+
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

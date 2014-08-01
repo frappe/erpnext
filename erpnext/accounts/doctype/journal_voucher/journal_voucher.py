@@ -35,6 +35,8 @@ class JournalVoucher(AccountsController):
 		self.create_remarks()
 		self.set_aging_date()
 		self.set_print_format_fields()
+		self.validate_against_sales_order()
+		self.validate_against_purchase_order()
 
 	def on_submit(self):
 		if self.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
@@ -48,18 +50,13 @@ class JournalVoucher(AccountsController):
 		for d in self.get("entries"):
 			if d.is_advance:
 				if d.against_sales_order:
-					advance_paid.setdefault("Sales Order", {}).setdefault(d.against_sales_order, []) \
-						.append(flt(d.credit) - flt(d.debit))
+					advance_paid.setdefault("Sales Order", []).append(d.against_sales_order)
 				elif d.against_purchase_order:
-					advance_paid.setdefault("Purchase Order", {}).setdefault(d.against_purchase_order, []) \
-						.append(flt(d.debit) - flt(d.credit))
+					advance_paid.setdefault("Purchase Order", []).append(d.against_purchase_order)
 
-		for voucher_type, voucher_advance in advance_paid.items():
-			for voucher_no, advance in voucher_advance.items():
-				frappe.db.set_value(voucher_type, voucher_no, "advance_paid", sum(advance))
-
-
-
+		for voucher_type, unique_order_list in advance_paid.items():
+			for voucher_no in list(set(unique_order_list)):
+				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import remove_against_link_from_jv
@@ -127,6 +124,28 @@ class JournalVoucher(AccountsController):
 				if frappe.db.get_value("Purchase Invoice", d.against_voucher, "credit_to") != d.account:
 					frappe.throw(_("Row {0}: Account does not match with \
 						Purchase Invoice Credit To account").format(d.idx, d.account))
+
+	def validate_against_sales_order(self):
+		for d in self.get("entries"):
+			if d.against_sales_order:
+				if d.debit > 0:
+					frappe.throw(_("Row {0}: Debit entry can not be linked with a Sales Order")
+						.format(d.idx))
+				if frappe.db.get_value("Sales Order", d.against_sales_order, "customer") != \
+				frappe.db.get_value("Account", d.account, "master_name"):
+					frappe.throw(_("Row {0}: Account {1} does not match with \
+						Sales Order Customer").format(d.idx, d.account))
+
+	def validate_against_purchase_order(self):
+		for d in self.get("entries"):
+			if d.against_purchase_order:
+				if d.credit > 0:
+					frappe.throw(_("Row {0}: Credit entry can not be linked with a Purchase Order")
+						.format(d.idx))
+				if frappe.db.get_value("Purchase Order", d.against_purchase_order, "supplier") != \
+				frappe.db.get_value("Account", d.account, "master_name"):
+					frappe.throw(_("Row {0}: Account {1} does not match with \
+						Purchase Order Supplier").format(d.idx, d.account))
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
