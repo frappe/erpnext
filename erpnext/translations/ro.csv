@@ -13,13 +13,12 @@
 % of materials delivered against this Delivery Note,% Din materiale livrate de această livrare Nota
 % of materials delivered against this Sales Order,% Din materiale livrate de această comandă de vânzări
 % of materials ordered against this Material Request,% Din materiale comandate în această cerere Material
-% of materials received against this Purchase Order,% Din materialele primite în acest Comandă
-%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s,% (Conversion_rate_label) s este obligatorie. Poate înregistrare de schimb valutar nu este creat pentru% (from_currency) s la% (to_currency) s
+% of materials received against this Purchase Order,% Din materiale au primit în această Comandă
 'Actual Start Date' can not be greater than 'Actual End Date',"""Data de începere efectivă"" nu poate fi mai mare decât ""Actual Data de încheiere"""
 'Based On' and 'Group By' can not be same,"""Bazat pe"" și ""grup de"" nu poate fi același"
 'Days Since Last Order' must be greater than or equal to zero,"""Zile de la ultima comandă"" trebuie să fie mai mare sau egal cu zero"
 'Entries' cannot be empty,"""Intrările"" nu poate fi gol"
-'Expected Start Date' can not be greater than 'Expected End Date',"""Data Start așteptat"" nu poate fi mai mare decât ""Date End așteptat"""
+'Expected Start Date' can not be greater than 'Expected End Date',"""Data de începere așteptată"" nu poate fi mai mare decât ""Date End așteptat"""
 'From Date' is required,"""De la data"" este necesară"
 'From Date' must be after 'To Date',"""De la data"" trebuie să fie după ""To Date"""
 'Has Serial No' can not be 'Yes' for non-stock item,"""Nu are de serie"" nu poate fi ""Da"" pentru element non-stoc"
@@ -30,11 +29,35 @@
 'Update Stock' for Sales Invoice {0} must be set,"""Actualizare Stock"" pentru Vânzări Factura {0} trebuie să fie stabilite"
 * Will be calculated in the transaction.,* Vor fi calculate în tranzacție.
 "1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 valutar = [?] Fracțiune \ nPentru de exemplu, 1 USD = 100 Cent"
-1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 De a menține codul de client element înțelept și să le căutate bazate pe utilizarea lor de cod aceasta optiune
+For e.g. 1 USD = 100 Cent","1 valutar = [?] Fractiune 
+ De exemplu, 1 USD = 100 Cent"
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 Pentru a menține codul de client element înțelept și pentru a le face pe baza utilizării lor cod de această opțiune
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Add / Edit </ a>"
+"<h4>Default Template</h4>
+<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
+<pre><code>{{ address_line1 }}&lt;br&gt;
+{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
+{{ city }}&lt;br&gt;
+{% if state %}{{ state }}&lt;br&gt;{% endif -%}
+{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
+{{ country }}&lt;br&gt;
+{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
+{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
+{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
+</code></pre>","<h4> implicit Format </ h4> 
+ <p> Utilizeaza <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja templating </ a> și toate domeniile de Adresa ( inclusiv Câmpuri personalizate dacă este cazul) va fi disponibil </ p> 
+ <pre> <code> {{}} address_line1 <br> 
+ {% dacă address_line2%} {{}} address_line2 cui { % endif -%} 
+ {{oras}} <br> 
+ {%, în cazul în care de stat%} {{}} stat {cui% endif -%} 
+ {%, în cazul în care parola așa%} PIN: {{}} parola așa cui {% endif -%} 
+ {{țară}} <br> 
+ {%, în cazul în care telefonul%} Telefon: {{telefon}} cui { % endif -%} 
+ {% dacă fax%} Fax: {{fax}} cui {% endif -%} 
+ {% dacă email_id%} Email: {{}} email_id <br> ; {% endif -%} 
+ </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,Există un grup de clienți cu același nume vă rugăm să schimbați numele clientului sau redenumi Grupul Customer
 A Customer exists with same name,Există un client cu același nume
 A Lead with this email id should exist,Un plumb cu acest id-ul de e-mail ar trebui să existe
@@ -44,7 +67,6 @@ A symbol for this currency. For e.g. $,"Un simbol pentru această monedă. De ex
 AMC Expiry Date,AMC Data expirării
 Abbr,Abbr
 Abbreviation cannot have more than 5 characters,Abreviere nu poate avea mai mult de 5 caractere
-About,Despre
 Above Value,Valoarea de mai sus
 Absent,Absent
 Acceptance Criteria,Criteriile de acceptare
@@ -59,6 +81,8 @@ Account Details,Detalii cont
 Account Head,Cont Șeful
 Account Name,Nume cont
 Account Type,Tip de cont
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Soldul contului deja în credit, tu nu sunt permise pentru a seta ""Balanța trebuie să fie"" la fel de ""debit"""
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Soldul contului deja în debit, nu vi se permite să stabilească ""Balanța trebuie să fie"" drept ""credit"""
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Cont de depozit (Inventar Perpetual) va fi creat sub acest cont.
 Account head {0} created,Cap cont {0} a creat
 Account must be a balance sheet account,Contul trebuie să fie un cont de bilanț
@@ -68,13 +92,20 @@ Account with existing transaction can not be deleted,Cont cu tranzacții existen
 Account with existing transaction cannot be converted to ledger,Cont cu tranzacții existente nu pot fi convertite în registrul
 Account {0} cannot be a Group,Contul {0} nu poate fi un grup
 Account {0} does not belong to Company {1},Contul {0} nu aparține companiei {1}
+Account {0} does not belong to company: {1},Contul {0} nu apartine companiei: {1}
 Account {0} does not exist,Contul {0} nu există
 Account {0} has been entered more than once for fiscal year {1},Contul {0} a fost introdus mai mult de o dată pentru anul fiscal {1}
 Account {0} is frozen,Contul {0} este înghețat
 Account {0} is inactive,Contul {0} este inactiv
+Account {0} is not valid,Contul {0} nu este valid
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Contul {0} trebuie să fie de tip ""active fixe"", ca Item {1} este un element activ"
+Account {0}: Parent account {1} can not be a ledger,Contul {0}: cont Părinte {1} nu poate fi un registru
+Account {0}: Parent account {1} does not belong to company: {2},Contul {0}: cont Părinte {1} nu apartine companiei: {2}
+Account {0}: Parent account {1} does not exist,Contul {0}: cont Părinte {1} nu exista
+Account {0}: You can not assign itself as parent account,Contul {0}: Nu se poate atribui ca cont părinte
 "Account: {0} can only be updated via \
-					Stock Transactions",Cont: {0} poate fi actualizat doar prin \ \ n Tranzacții stoc
+					Stock Transactions","Cont: {0} poate fi actualizat doar prin \
+ Tranzacții stoc"
 Accountant,Contabil
 Accounting,Contabilitate
 "Accounting Entries can be made against leaf nodes, called","Înregistrări contabile pot fi făcute împotriva nodurile frunză, numit"
@@ -124,6 +155,7 @@ Address Details,Detalii Adresa
 Address HTML,Adresa HTML
 Address Line 1,Adresa Linia 1
 Address Line 2,Adresa Linia 2
+Address Template,Format adresa
 Address Title,Adresa Titlu
 Address Title is mandatory.,Adresa Titlul este obligatoriu.
 Address Type,Adresa Tip
@@ -144,7 +176,6 @@ Against Docname,Împotriva Docname
 Against Doctype,Împotriva Doctype
 Against Document Detail No,Împotriva Document Detaliu Nu
 Against Document No,Împotriva Documentul nr
-Against Entries,Împotriva Entries
 Against Expense Account,Împotriva cont de cheltuieli
 Against Income Account,Împotriva contul de venit
 Against Journal Voucher,Împotriva Jurnalul Voucher
@@ -180,10 +211,8 @@ All Territories,Toate teritoriile
 "All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Domenii legate de toate de export, cum ar fi moneda, rata de conversie, numărul total export, export mare etc totală sunt disponibile în nota de livrare, POS, cotatie, Factura Vanzare, comandă de vânzări, etc"
 "All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Toate domeniile legate de import, cum ar fi moneda, rata de conversie, total de import, de import de mare etc totală sunt disponibile în Primirea de cumparare, furnizor cotatie, cumparare factură, Ordinul de cumparare, etc"
 All items have already been invoiced,Toate elementele au fost deja facturate
-All items have already been transferred for this Production Order.,Toate elementele au fost deja transferate pentru această comandă de producție.
 All these items have already been invoiced,Toate aceste elemente au fost deja facturate
 Allocate,Alocarea
-Allocate Amount Automatically,Suma aloca automat
 Allocate leaves for a period.,Alocați frunze pentru o perioadă.
 Allocate leaves for the year.,Alocarea de frunze pentru anul.
 Allocated Amount,Suma alocată
@@ -204,16 +233,16 @@ Allow Users,Se permite utilizatorilor
 Allow the following users to approve Leave Applications for block days.,Permite următoarele utilizatorilor să aprobe cererile de concediu pentru zile bloc.
 Allow user to edit Price List Rate in transactions,Permite utilizatorului să editeze Lista de preturi Rate în tranzacții
 Allowance Percent,Alocație Procent
-Allowance for over-delivery / over-billing crossed for Item {0},Reduceri pentru mai mult de-livrare / supra-facturare trecut pentru postul {0}
+Allowance for over-{0} crossed for Item {1},Reduceri pentru mai mult de-{0} a trecut pentru postul {1}
+Allowance for over-{0} crossed for Item {1}.,Reduceri pentru mai mult de-{0} a trecut pentru postul {1}.
 Allowed Role to Edit Entries Before Frozen Date,Rolul permisiunea de a edita intrările înainte de Frozen Data
 Amended From,A fost modificat de la
 Amount,Suma
 Amount (Company Currency),Suma (Compania de valuta)
-Amount <=,Suma <=
-Amount >=,Suma> =
+Amount Paid,Suma plătită
 Amount to Bill,Se ridică la Bill
 An Customer exists with same name,Există un client cu același nume
-"An Item Group exists with same name, please change the item name or rename the item group","Există un grup articol cu ​​același nume, vă rugăm să schimbați numele elementului sau redenumi grupul element"
+"An Item Group exists with same name, please change the item name or rename the item group","Există un grup articol cu același nume, vă rugăm să schimbați numele elementului sau redenumi grupul element"
 "An item exists with same name ({0}), please change the item group name or rename the item","Un element există cu același nume ({0}), vă rugăm să schimbați numele grupului element sau redenumi elementul"
 Analyst,Analist
 Annual,Anual
@@ -260,6 +289,7 @@ As per Stock UOM,Ca pe Stock UOM
 Asset,Asset
 Assistant,Asistent
 Associate,Asociat
+Atleast one of the Selling or Buying must be selected,Cel putin una din vânzarea sau cumpărarea trebuie să fie selectată
 Atleast one warehouse is mandatory,Cel putin un antrepozit este obligatorie
 Attach Image,Atașați Image
 Attach Letterhead,Atașați cu antet
@@ -306,7 +336,7 @@ BOM number is required for manufactured Item {0} in row {1},Este necesară numă
 BOM number not allowed for non-manufactured Item {0} in row {1},Număr BOM nu este permis pentru postul non-fabricat {0} în rândul {1}
 BOM recursion: {0} cannot be parent or child of {2},BOM recursivitate: {0} nu poate fi parinte sau copil din {2}
 BOM replaced,BOM înlocuit
-BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} pentru postul {1} ​​în rândul {2} este inactiv sau nu a prezentat
+BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} pentru postul {1} în rândul {2} este inactiv sau nu a prezentat
 BOM {0} is not active or not submitted,BOM {0} nu este activ sau nu a prezentat
 BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} nu este depusă sau inactiv BOM pentru postul {1}
 Backup Manager,Backup Manager
@@ -319,6 +349,7 @@ Balance for Account {0} must always be {1},Bilant pentru Contul {0} trebuie să 
 Balance must be,Echilibru trebuie să fie
 "Balances of Accounts of type ""Bank"" or ""Cash""","Soldurile de conturi de tip ""Banca"" sau ""Cash"""
 Bank,Banca
+Bank / Cash Account,Bank / cont Cash
 Bank A/C No.,Bank A / C Nr
 Bank Account,Cont bancar
 Bank Account No.,Cont bancar nr
@@ -397,18 +428,24 @@ Budget Distribution Details,Detalii buget de distribuție
 Budget Variance Report,Buget Variance Raportul
 Budget cannot be set for Group Cost Centers,Bugetul nu poate fi setat pentru centre de cost Group
 Build Report,Construi Raport
-Built on,Construit pe
 Bundle items at time of sale.,Bundle elemente la momentul de vânzare.
 Business Development Manager,Business Development Manager de
 Buying,Cumpărare
 Buying & Selling,De cumparare si vânzare
 Buying Amount,Suma de cumpărare
 Buying Settings,Cumpararea Setări
+"Buying must be checked, if Applicable For is selected as {0}","De cumpărare trebuie să fie verificate, dacă este cazul Pentru este selectat ca {0}"
 C-Form,C-Form
 C-Form Applicable,C-forma aplicabila
 C-Form Invoice Detail,C-Form Factura Detalii
 C-Form No,C-Form No
 C-Form records,Înregistrări C-Form
+CENVAT Capital Goods,CENVAT bunurilor de capital
+CENVAT Edu Cess,CENVAT Edu Cess
+CENVAT SHE Cess,CENVAT SHE Cess
+CENVAT Service Tax,CENVAT Serviciul Fiscal
+CENVAT Service Tax Cess 1,CENVAT Serviciul Fiscal de Cess 1
+CENVAT Service Tax Cess 2,CENVAT Serviciul Fiscal de Cess 2
 Calculate Based On,Calculează pe baza
 Calculate Total Score,Calcula Scor total
 Calendar Events,Calendar Evenimente
@@ -432,7 +469,7 @@ Cannot approve leave as you are not authorized to approve leaves on Block Dates,
 Cannot cancel because Employee {0} is already approved for {1},Nu pot anula din cauza angajaților {0} este deja aprobat pentru {1}
 Cannot cancel because submitted Stock Entry {0} exists,"Nu pot anula, deoarece a prezentat Bursa de intrare {0} există"
 Cannot carry forward {0},Nu se poate duce mai departe {0}
-Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,Nu se poate schimba An Data de începere și de sfârșit de an Data odată ce anul fiscal este salvată.
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Nu se poate schimba anul fiscal Data de începere și se termină anul fiscal Data odată ce anul fiscal este salvată.
 "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Nu se poate schimba implicit moneda companiei, deoarece există tranzacții existente. Tranzacțiile trebuie să fie anulate de a schimba moneda implicit."
 Cannot convert Cost Center to ledger as it has child nodes,"Nu se poate converti de cost Centrul de registru, deoarece are noduri copil"
 Cannot covert to Group because Master Type or Account Type is selected.,Nu se poate sub acoperire să Group deoarece este selectat de Master de tip sau de tip de cont.
@@ -441,7 +478,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,"Nu pot DEACTIVE s
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',"Nu se poate deduce când categorie este de ""evaluare"" sau ""de evaluare și total"""
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.","Nu se poate șterge Nu Serial {0} în stoc. Mai întâi se scoate din stoc, apoi ștergeți."
 "Cannot directly set amount. For 'Actual' charge type, use the rate field","Nu se poate seta direct sumă. De tip taxă ""real"", utilizați câmpul rata"
-"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'","Nu pot overbill pentru postul {0} în rândul {0} mai mult de {1}. Pentru a permite supraîncărcată, vă rugăm să setați în ""Configurare""> ""Implicite Globale"""
+"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings","Nu pot overbill pentru postul {0} în rândul {0} mai mult de {1}. Pentru a permite supraîncărcată, vă rugăm să setați în stoc Setări"
 Cannot produce more Item {0} than Sales Order quantity {1},Nu poate produce mai mult Postul {0} decât cantitatea de vânzări Ordine {1}
 Cannot refer row number greater than or equal to current row number for this Charge type,Nu se poate referi număr de rând mai mare sau egal cu numărul actual rând pentru acest tip de încărcare
 Cannot return more than {0} for Item {1},Nu se poate reveni mai mult de {0} pentru postul {1}
@@ -504,6 +541,8 @@ Click on a link to get options to expand get options ,
 Client,Client
 Close Balance Sheet and book Profit or Loss.,Aproape Bilanțul și carte profit sau pierdere.
 Closed,Inchisa
+Closing (Cr),De închidere (Cr)
+Closing (Dr),De închidere (Dr)
 Closing Account Head,Închiderea contului cap
 Closing Account {0} must be of type 'Liability',"Contul {0} de închidere trebuie să fie de tip ""Răspunderea"""
 Closing Date,Data de închidere
@@ -514,7 +553,9 @@ CoA Help,CoA Ajutor
 Code,Cod
 Cold Calling,De asteptare la rece
 Color,Culorarea
+Column Break,Coloana Break
 Comma separated list of email addresses,Virgulă listă de adrese de e-mail separat
+Comment,Comentariu
 Comments,Comentarii
 Commercial,Comercial
 Commission,Comision
@@ -532,7 +573,7 @@ Company (not Customer or Supplier) master.,Compania (nu client sau furnizor) de 
 Company Abbreviation,Abreviere de companie
 Company Details,Detalii companie
 Company Email,Compania de e-mail
-"Company Email ID not found, hence mail not sent","Compania ID-ul de e-mail, nu a fost găsit, prin urmare, nu e-mail trimis"
+"Company Email ID not found, hence mail not sent","Compania ID-ul de e-mail nu a fost găsit, prin urmare, nu e-mail trimis"
 Company Info,Informatii companie
 Company Name,Nume firma acasa
 Company Settings,Setări Company
@@ -599,7 +640,6 @@ Cosmetics,Cosmetică
 Cost Center,Cost Center
 Cost Center Details,Cost Center Detalii
 Cost Center Name,Cost Numele Center
-Cost Center is mandatory for Item {0},Cost Center este obligatorie pentru postul {0}
 Cost Center is required for 'Profit and Loss' account {0},"Cost Center este necesară pentru contul ""Profit și pierdere"" {0}"
 Cost Center is required in row {0} in Taxes table for type {1},Cost Center este necesară în rândul {0} în tabelul Taxele de tip {1}
 Cost Center with existing transactions can not be converted to group,Centrul de cost cu tranzacțiile existente nu pot fi transformate în grup
@@ -609,6 +649,7 @@ Cost of Goods Sold,Costul bunurilor vândute
 Costing,Costing
 Country,Ţară
 Country Name,Nume țară
+Country wise default Address Templates,Șabloanele țară înțelept adresa implicită
 "Country, Timezone and Currency","Țară, Timezone și valutar"
 Create Bank Voucher for the total salary paid for the above selected criteria,Crea Bank Voucher pentru salariul totală plătită pentru criteriile selectate de mai sus
 Create Customer,Creare client
@@ -626,7 +667,7 @@ Created By,Creat de
 Creates salary slip for above mentioned criteria.,Creează alunecare salariu pentru criteriile de mai sus.
 Creation Date,Data creării
 Creation Document No,Creare de documente Nu
-Creation Document Type,Document Type creație
+Creation Document Type,Tip de document creație
 Creation Time,Timp de creație
 Credentials,Scrisori de acreditare
 Credit,credit
@@ -662,10 +703,12 @@ Customer (Receivable) Account,Client (de încasat) Cont
 Customer / Item Name,Client / Denumire
 Customer / Lead Address,Client / plumb Adresa
 Customer / Lead Name,Client / Nume de plumb
+Customer > Customer Group > Territory,Client> Client Group> Teritoriul
 Customer Account Head,Cont client cap
 Customer Acquisition and Loyalty,Achiziționarea client și Loialitate
 Customer Address,Client Adresa
 Customer Addresses And Contacts,Adrese de clienți și Contacte
+Customer Addresses and Contacts,Adrese clienților și Contacte
 Customer Code,Cod client
 Customer Codes,Coduri de client
 Customer Details,Detalii client
@@ -727,6 +770,8 @@ Deduction1,Deduction1
 Deductions,Deduceri
 Default,Implicit
 Default Account,Contul implicit
+Default Address Template cannot be deleted,Format implicit Adresa nu poate fi șters
+Default Amount,Implicit Suma
 Default BOM,Implicit BOM
 Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,"Default cont bancar / numerar vor fi actualizate în mod automat în POS Factura, atunci când acest mod este selectat."
 Default Bank Account,Implicit cont bancar
@@ -734,7 +779,6 @@ Default Buying Cost Center,Implicit de cumparare cost Center
 Default Buying Price List,Implicit de cumparare Lista de prețuri
 Default Cash Account,Contul Cash implicit
 Default Company,Implicit de companie
-Default Cost Center for tracking expense for this item.,Centrul de cost standard pentru cheltuieli de urmărire pentru acest articol.
 Default Currency,Monedă implicită
 Default Customer Group,Implicit Client Group
 Default Expense Account,Cont implicit de cheltuieli
@@ -761,6 +805,7 @@ Default settings for selling transactions.,Setările implicite pentru tranzacți
 Default settings for stock transactions.,Setările implicite pentru tranzacțiile bursiere.
 Defense,Apărare
 "Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Definirea Bugetul pentru acest centru de cost. Pentru a seta o acțiune buget, consultați <a href = ""#!Lista / Compania ""> Compania Maestrul </ a>"
+Del,Del
 Delete,Șterge
 Delete {0} {1}?,Șterge {0} {1}?
 Delivered,Livrat
@@ -809,6 +854,7 @@ Discount (%),Discount (%)
 Discount Amount,Discount Suma
 "Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Discount Fields va fi disponibil în cumparare Ordine, Primirea de cumparare, cumparare factura"
 Discount Percentage,Procentul de reducere
+Discount Percentage can be applied either against a Price List or for all Price List.,Procentul de reducere se poate aplica fie pe o listă de prețuri sau pentru toate lista de prețuri.
 Discount must be less than 100,Reducere trebuie să fie mai mică de 100
 Discount(%),Discount (%)
 Dispatch,Expedierea
@@ -841,13 +887,14 @@ Download Template,Descărcați Format
 Download a report containing all raw materials with their latest inventory status,Descărca un raport care conține toate materiile prime cu statutul lor ultimul inventar
 "Download the Template, fill appropriate data and attach the modified file.","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat."
 "Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat. \ NTot data și combinație de angajat în perioada selectată va veni în șablon, cu înregistrări de prezență existente"
+All dates and employee combination in the selected period will come in the template, with existing attendance records","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat.
+ TOATE DATELE ȘI combinație angajat în perioada selectată va veni în șablon, cu înregistrări de prezență existente"
 Draft,Ciornă
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox de acces permise
 Dropbox Access Key,Dropbox Access Key
 Dropbox Access Secret,Dropbox Access Secret
-Due Date,Datorită Data
+Due Date,Data scadenței
 Due Date cannot be after {0},Datorită Data nu poate fi după {0}
 Due Date cannot be before Posting Date,Datorită Data nu poate fi înainte de a posta Data
 Duplicate Entry. Please check Authorization Rule {0},Duplicat de intrare. Vă rugăm să verificați de autorizare Regula {0}
@@ -862,7 +909,10 @@ Earning,Câștigul salarial
 Earning & Deduction,Câștigul salarial & Deducerea
 Earning Type,Câștigul salarial Tip
 Earning1,Earning1
-Edit,Editare
+Edit,Editează
+Edu. Cess on Excise,Edu. Cess pe accize
+Edu. Cess on Service Tax,Edu. Cess la Serviciul Fiscal
+Edu. Cess on TDS,Edu. Cess pe TDS
 Education,Educație
 Educational Qualification,Calificare de învățământ
 Educational Qualification Details,De învățământ de calificare Detalii
@@ -937,16 +987,27 @@ Enter url parameter for receiver nos,Introduceți parametru url pentru receptor 
 Entertainment & Leisure,Entertainment & Leisure
 Entertainment Expenses,Cheltuieli de divertisment
 Entries,Intrări
-Entries against,Intrări împotriva
+Entries against ,
 Entries are not allowed against this Fiscal Year if the year is closed.,"Lucrările nu sunt permise în acest an fiscal, dacă anul este închis."
-Entries before {0} are frozen,Intrări înainte de {0} sunt înghețate
 Equity,Echitate
 Error: {0} > {1},Eroare: {0}> {1}
 Estimated Material Cost,Costul estimat Material
+"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Chiar dacă există mai multe reguli de stabilire a prețurilor, cu cea mai mare prioritate, se aplică apoi următoarele priorități interne:"
 Everyone can read,Oricine poate citi
 "Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemplu:. ABCD # # # # # \ nDacă serie este setat și nu de serie nu este menționat în tranzacții, atunci numărul de automate de serie va fi creat pe baza acestei serii. Dacă vrei mereu să menționeze în mod explicit de serie nr pentru acest articol. părăsi acest gol."
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Exemplu: ABCD # # # # # 
+ În cazul în care seria este setat și nu de serie nu este menționat în tranzacții, numărul de atunci automat de serie va fi creat pe baza acestei serii. Dacă vrei mereu să menționeze în mod explicit de serie nr pentru acest articol. părăsi acest gol."
 Exchange Rate,Rata de schimb
+Excise Duty 10,Accize 10
+Excise Duty 14,Accize 14
+Excise Duty 4,Accize 4
+Excise Duty 8,Accize 8
+Excise Duty @ 10,Accize @ 10
+Excise Duty @ 14,Accize @ 14
+Excise Duty @ 4,Accize @ 4
+Excise Duty @ 8,Accize @ 8
+Excise Duty Edu Cess 2,Accizele Edu Cess 2
+Excise Duty SHE Cess 1,Accizele SHE Cess 1
 Excise Page Number,Numărul de accize Page
 Excise Voucher,Accize Voucher
 Execution,Detalii de fabricaţie
@@ -965,6 +1026,7 @@ Expected Delivery Date cannot be before Sales Order Date,Așteptat Data de livra
 Expected End Date,Așteptat Data de încheiere
 Expected Start Date,Data de începere așteptată
 Expense,cheltuială
+Expense / Difference account ({0}) must be a 'Profit or Loss' account,"Cheltuială cont / Diferența ({0}) trebuie să fie un cont de ""profit sau pierdere"""
 Expense Account,Decont
 Expense Account is mandatory,Contul de cheltuieli este obligatorie
 Expense Claim,Cheltuieli de revendicare
@@ -1015,12 +1077,16 @@ Finished Goods,Produse finite
 First Name,Prenume
 First Responded On,Primul răspuns la
 Fiscal Year,Exercițiu financiar
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Data începerii anului fiscal și se termină anul fiscal la data sunt deja stabilite în anul fiscal {0}
+Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,Anul fiscal Data de începere și se termină anul fiscal Data nu poate fi mai mult de un an în afară.
+Fiscal Year Start Date should not be greater than Fiscal Year End Date,Anul fiscal Data începerii nu trebuie să fie mai mare decât anul fiscal Data de încheiere
 Fixed Asset,Activelor fixe
 Fixed Assets,Mijloace Fixe
 Follow via Email,Urmați prin e-mail
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.","Tabelul de mai jos va arata valori în cazul în care elementele sunt sub - contractate. Aceste valori vor fi preluat de la maestru de ""Bill of Materials"" de sub - contractate elemente."
 Food,Alimente
 "Food, Beverage & Tobacco","Produse alimentare, bauturi si tutun"
+"For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Pentru ""Vanzari BOM"" elemente, Warehouse, Serial No și lot nu vor fi luate în considerare de la masa ""Lista de ambalare"". Dacă Warehouse și lot nu sunt aceleași pentru toate elementele de ambalare pentru orice 'Sales BOM ""element, aceste valori pot fi introduse în tabelul Articol principal, valori vor fi copiate la masa"" Lista de ambalare ""."
 For Company,Pentru companie
 For Employee,Pentru Angajat
 For Employee Name,Pentru numele angajatului
@@ -1050,7 +1116,9 @@ From Currency and To Currency cannot be same,Din valutar și a valutar nu poate 
 From Customer,De la client
 From Customer Issue,De la client Issue
 From Date,De la data
+From Date cannot be greater than To Date,De la data nu poate fi mai mare decât la data
 From Date must be before To Date,De la data trebuie să fie înainte de a Dată
+From Date should be within the Fiscal Year. Assuming From Date = {0},De la data trebuie să fie în anul fiscal. Presupunând că la data = {0}
 From Delivery Note,De la livrare Nota
 From Employee,Din Angajat
 From Lead,Din plumb
@@ -1059,7 +1127,7 @@ From Material Request,Din Material Cerere
 From Opportunity,De oportunitate
 From Package No.,Din Pachetul Nu
 From Purchase Order,De Comandă
-From Purchase Receipt,Primirea de cumparare
+From Purchase Receipt,Primirea de la cumparare
 From Quotation,Din ofertă
 From Sales Order,De comandă de vânzări
 From Supplier Quotation,Furnizor de ofertă
@@ -1072,7 +1140,9 @@ Frozen Accounts Modifier,Congelate Conturi modificator
 Fulfilled,Îndeplinite
 Full Name,Numele complet
 Full-time,Full-time
+Fully Billed,Complet Taxat
 Fully Completed,Completata
+Fully Delivered,Livrat complet
 Furniture and Fixture,Și mobilier
 Further accounts can be made under Groups but entries can be made against Ledger,Conturile suplimentare pot fi făcute sub Grupa dar intrări pot fi făcute împotriva Ledger
 "Further accounts can be made under Groups, but entries can be made against Ledger","Conturile suplimentare pot fi făcute în grupurile, dar înregistrări pot fi făcute împotriva Ledger"
@@ -1090,7 +1160,6 @@ Generate Schedule,Genera Program
 Generates HTML to include selected image in the description,Genereaza HTML pentru a include imagini selectate în descrierea
 Get Advances Paid,Ia avansurile plătite
 Get Advances Received,Ia Avansuri primite
-Get Against Entries,Ia împotriva Entries
 Get Current Stock,Get Current Stock
 Get Items,Ia Articole
 Get Items From Sales Orders,Obține elemente din comenzi de vânzări
@@ -1103,6 +1172,7 @@ Get Specification Details,Ia Specificatii Detalii
 Get Stock and Rate,Ia Stock și Rate
 Get Template,Ia Format
 Get Terms and Conditions,Ia Termeni și condiții
+Get Unreconciled Entries,Ia nereconciliate Entries
 Get Weekly Off Dates,Ia săptămânal Off Perioada
 "Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Ia rata de evaluare și stocul disponibil la sursă / depozit țintă pe menționat detașarea data-timp. Dacă serializat element, vă rugăm să apăsați acest buton după ce a intrat nr de serie."
 Global Defaults,Prestabilite la nivel mondial
@@ -1153,7 +1223,7 @@ Health Details,Sănătate Detalii
 Held On,A avut loc pe
 Help HTML,Ajutor HTML
 "Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Ajutor: Pentru a lega la altă înregistrare în sistem, utilizați ""# Form / Note / [Nota Name]"" ca URL Link. (Nu folositi ""http://"")"
-"Here you can maintain family details like name and occupation of parent, spouse and children","Aici vă puteți menține detalii de familie, cum ar fi numele și ocupația de mamă, soțul și copiii"
+"Here you can maintain family details like name and occupation of parent, spouse and children","Aici vă puteți menține detalii de familie cum ar fi numele și ocupația de mamă, soție și copii"
 "Here you can maintain height, weight, allergies, medical concerns etc","Aici vă puteți menține inaltime, greutate, alergii, probleme medicale etc"
 Hide Currency Symbol,Ascunde Valuta Simbol
 High,Ridicată
@@ -1171,6 +1241,7 @@ Hour,Oră
 Hour Rate,Rate oră
 Hour Rate Labour,Ora Rate de muncă
 Hours,Ore
+How Pricing Rule is applied?,Cum se aplică regula pret?
 How frequently?,Cât de des?
 "How should this currency be formatted? If not set, will use system defaults","Cum ar trebui să fie formatat aceasta moneda? Dacă nu setați, va folosi valorile implicite de sistem"
 Human Resources,Managementul resurselor umane
@@ -1184,15 +1255,18 @@ If Yearly Budget Exceeded,Dacă bugetul anual depășită
 "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Dacă este bifată, nu total. de zile de lucru va include concediu, iar acest lucru va reduce valoarea Salariul pe zi"
 "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","Dacă este bifată, suma taxei va fi considerată ca fiind deja incluse în Print Tarif / Print Suma"
 If different than customer address,Dacă este diferită de adresa clientului
-"If disable, 'Rounded Total' field will not be visible in any transaction","Dacă dezactivați, câmpul ""rotunjit Total"" nu vor fi vizibile in orice tranzacție"
+"If disable, 'Rounded Total' field will not be visible in any transaction","Dacă dezactivați, câmpul ""rotunjit Total"" nu vor fi vizibile în orice tranzacție"
 "If enabled, the system will post accounting entries for inventory automatically.","Dacă este activat, sistemul va posta automat înregistrări contabile pentru inventar."
 If more than one package of the same type (for print),În cazul în care mai mult de un pachet de același tip (de imprimare)
+"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","În cazul în care mai multe reguli de stabilire a prețurilor continuă să prevaleze, utilizatorii sunt rugați să setați manual prioritate pentru a rezolva conflictul."
 "If no change in either Quantity or Valuation Rate, leave the cell blank.","În cazul în care nici o schimbare în nici Cantitate sau Evaluează evaluare, lăsați necompletată celula."
 If not applicable please enter: NA,"Dacă nu este cazul, vă rugăm să introduceți: NA"
 "If not checked, the list will have to be added to each Department where it has to be applied.","Dacă nu verificat, lista trebuie să fie adăugate la fiecare Departament unde trebuie aplicată."
-"If specified, send the newsletter using this email address","Daca este specificat, trimite newsletter-ul care utilizează această adresă e-mail"
+"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Dacă Regula Preturi selectat se face pentru ""Pret"", se va suprascrie lista de prețuri. Preț Regula de stabilire a prețurilor este prețul final, astfel încât ar trebui să se aplice nici o reducere în continuare. Prin urmare, în tranzacții, cum ar fi Vânzări Ordine, Ordinul de cumparare, etc, el va fi preluat în câmpul ""Rate"", domeniul ""Lista de prețuri Rate"", mai degrabă decât."
+"If specified, send the newsletter using this email address","Daca este specificat, trimite newsletter-ul prin această adresă de e-mail"
 "If the account is frozen, entries are allowed to restricted users.","În cazul în care contul este blocat, intrările li se permite utilizatorilor restricționate."
 "If this Account represents a Customer, Supplier or Employee, set it here.","În cazul în care acest cont reprezintă un client, furnizor sau angajat, a stabilit aici."
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","În cazul în care se găsesc două sau mai multe reguli de stabilire a prețurilor în funcție de condițiile de mai sus, se aplică prioritate. Prioritatea este un număr între 0 și 20 în timp ce valoarea implicită este zero (martor). Număr mai mare înseamnă că va avea prioritate în cazul în care există mai multe reguli de stabilire a prețurilor, cu aceleași condiții."
 If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,Dacă urmați Inspecție de calitate. Permite Articol QA obligatorii și de asigurare a calității nu în Primirea cumparare
 If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,"Dacă aveți echipa de vanzari si vandute Partners (parteneri), ele pot fi etichetate și menține contribuția lor la activitatea de vânzări"
 "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","Dacă ați creat un model standard la taxele de cumpărare și de masterat taxe, selectați una și faceți clic pe butonul de mai jos."
@@ -1200,6 +1274,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 "If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","Dacă aveți formate de imprimare lungi, această caracteristică poate fi folosit pentru a împărți pagina pentru a fi imprimate pe mai multe pagini, cu toate anteturile și subsolurile de pe fiecare pagină"
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',"Dacă vă implica în activitatea de producție. Permite Articol ""este fabricat"""
 Ignore,Ignora
+Ignore Pricing Rule,Ignora Regula Preturi
 Ignored: ,
 Image,Imagine
 Image View,Imagine Vizualizare
@@ -1236,8 +1311,9 @@ Income booked for the digest period,Venituri rezervat pentru perioada Digest
 Incoming,Primite
 Incoming Rate,Rate de intrare
 Incoming quality inspection.,Control de calitate de intrare.
-Incorrect or Inactive BOM {0} for Item {1} at row {2},Incorectă sau inactivă BOM {0} pentru postul {1} ​​la rând {2}
-Indicates that the package is a part of this delivery,Indică faptul că pachetul este o parte din această livrare
+Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Număr incorect de contabilitate intrările găsit. Este posibil să fi selectat un cont greșit în tranzacție.
+Incorrect or Inactive BOM {0} for Item {1} at row {2},Incorectă sau inactivă BOM {0} pentru postul {1} la rând {2}
+Indicates that the package is a part of this delivery (Only Draft),Indică faptul că pachetul este o parte din această livrare (Proiect de numai)
 Indirect Expenses,Cheltuieli indirecte
 Indirect Income,Venituri indirecte
 Individual,Individual
@@ -1263,7 +1339,8 @@ Intern,Interna
 Internal,Intern
 Internet Publishing,Editura Internet
 Introduction,Introducere
-Invalid Barcode or Serial No,De coduri de bare de invalid sau de ordine
+Invalid Barcode,Coduri de bare invalid
+Invalid Barcode or Serial No,Coduri de bare invalid sau de ordine
 Invalid Mail Server. Please rectify and try again.,Server de mail invalid. Vă rugăm să rectifice și să încercați din nou.
 Invalid Master Name,Maestru valabil Numele
 Invalid User Name or Support Password. Please rectify and try again.,Nume utilizator invalid sau suport Parola. Vă rugăm să rectifice și să încercați din nou.
@@ -1275,9 +1352,12 @@ Investments,Investiții
 Invoice Date,Data facturii
 Invoice Details,Factură Detalii
 Invoice No,Factura Nu
-Invoice Period From Date,Perioada factura la data
+Invoice Number,Numar factura
+Invoice Period From,Perioada factura la
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Perioada factura la și facturilor perioadă la date obligatorii pentru facturi recurente
-Invoice Period To Date,Perioada factură Pentru a Data
+Invoice Period To,Perioada de facturare a
+Invoice Type,Factura Tip
+Invoice/Journal Voucher Details,Factura / Jurnalul Voucher Detalii
 Invoiced Amount (Exculsive Tax),Facturate Suma (Exculsive Tax)
 Is Active,Este activ
 Is Advance,Este Advance
@@ -1285,7 +1365,7 @@ Is Cancelled,Este anulat
 Is Carry Forward,Este Carry Forward
 Is Default,Este Implicit
 Is Encash,Este încasa
-Is Fixed Asset Item,Este fixă ​​Asset Postul
+Is Fixed Asset Item,Este fixă Asset Postul
 Is LWP,Este LWP
 Is Opening,Se deschide
 Is Opening Entry,Deschiderea este de intrare
@@ -1301,13 +1381,14 @@ Is this Tax included in Basic Rate?,Este acest fiscală inclusă în rata de baz
 Issue,Problem
 Issue Date,Data emiterii
 Issue Details,Detalii emisiune
-Issued Items Against Production Order,Emise Articole împotriva producției Ordine
+Issued Items Against Production Order,Emise Articole împotriva producției de comandă
 It can also be used to create opening stock entries and to fix stock value.,Acesta poate fi de asemenea utilizat pentru a crea intrări de stocuri de deschidere și de a stabili o valoare de stoc.
 Item,Obiect
 Item Advanced,Articol avansate
 Item Barcode,Element de coduri de bare
 Item Batch Nos,Lot nr element
 Item Code,Cod articol
+Item Code > Item Group > Brand,Cod articol> Articol Grupa> Brand
 Item Code and Warehouse should already exist.,Articol Cod și Warehouse trebuie să existe deja.
 Item Code cannot be changed for Serial No.,Cod articol nu pot fi schimbate pentru Serial No.
 Item Code is mandatory because Item is not automatically numbered,"Cod articol este obligatorie, deoarece postul nu este numerotat automat"
@@ -1319,6 +1400,7 @@ Item Details,Detalii despre articol
 Item Group,Grupa de articole
 Item Group Name,Nume Grupa de articole
 Item Group Tree,Grupa de articole copac
+Item Group not mentioned in item master for item {0},Grupa de articole care nu sunt menționate la punctul de master pentru element {0}
 Item Groups in Details,Articol Grupuri în Detalii
 Item Image (if not slideshow),Element de imagine (dacă nu slideshow)
 Item Name,Denumire
@@ -1358,7 +1440,7 @@ Item {0} does not exist in the system or has expired,Element {0} nu există în 
 Item {0} does not exist in {1} {2},Element {0} nu există în {1} {2}
 Item {0} has already been returned,Element {0} a fost deja returnate
 Item {0} has been entered multiple times against same operation,Element {0} a fost introdus de mai multe ori față de aceeași operație
-Item {0} has been entered multiple times with same description or date,Postul {0} a fost introdus de mai multe ori cu aceeași descriere sau data
+Item {0} has been entered multiple times with same description or date,Element {0} a fost introdus de mai multe ori cu aceeași descriere sau data
 Item {0} has been entered multiple times with same description or date or warehouse,Element {0} a fost introdus de mai multe ori cu aceeași descriere sau data sau antrepozit
 Item {0} has been entered twice,Element {0} a fost introdusă de două ori
 Item {0} has reached its end of life on {1},Element {0} a ajuns la sfârșitul său de viață pe {1}
@@ -1373,7 +1455,7 @@ Item {0} is not setup for Serial Nos. Column must be blank,Element {0} nu este d
 Item {0} must be Sales Item,Element {0} trebuie să fie produs de vânzări
 Item {0} must be Sales or Service Item in {1},Element {0} trebuie să fie vânzări sau de service Articol din {1}
 Item {0} must be Service Item,Element {0} trebuie să fie de service Articol
-Item {0} must be a Purchase Item,Postul {0} trebuie sa fie un element de cumparare
+Item {0} must be a Purchase Item,Element {0} trebuie sa fie un element de cumparare
 Item {0} must be a Sales Item,Element {0} trebuie sa fie un element de vânzări
 Item {0} must be a Service Item.,Element {0} trebuie sa fie un element de service.
 Item {0} must be a Sub-contracted Item,Element {0} trebuie sa fie un element sub-contractat
@@ -1389,7 +1471,8 @@ Item-wise Purchase Register,-Element înțelept cumparare Inregistrare
 Item-wise Sales History,-Element înțelept Sales Istorie
 Item-wise Sales Register,-Element înțelept vânzări Înregistrare
 "Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Postul: {0}-lot înțelept a reușit, nu pot fi reconciliate folosind \ \ n Bursa de reconciliere, folosiți în schimb Bursa de intrare"
+					Stock Reconciliation, instead use Stock Entry","Postul: {0}-lot înțelept a reușit, nu pot fi reconciliate cu ajutorul \
+ Bursa de reconciliere, folosiți în schimb Bursa de intrare"
 Item: {0} not found in the system,Postul: {0} nu a fost găsit în sistemul
 Items,Obiecte
 Items To Be Requested,Elemente care vor fi solicitate
@@ -1492,6 +1575,7 @@ Loading...,Încărcare...
 Loans (Liabilities),Credite (pasive)
 Loans and Advances (Assets),Împrumuturi și avansuri (Active)
 Local,Local
+Login,Conectare
 Login with your new User ID,Autentifica-te cu noul ID utilizator
 Logo,Logo
 Logo and Letter Heads,Logo și Scrisoare Heads
@@ -1536,6 +1620,7 @@ Make Maint. Schedule,Face Maint. Program
 Make Maint. Visit,Face Maint. Vizita
 Make Maintenance Visit,Face de întreținere Vizitați
 Make Packing Slip,Face bonul
+Make Payment,Face plată
 Make Payment Entry,Face plată de intrare
 Make Purchase Invoice,Face cumparare factură
 Make Purchase Order,Face Comandă
@@ -1545,8 +1630,10 @@ Make Salary Structure,Face Structura Salariul
 Make Sales Invoice,Face Factura Vanzare
 Make Sales Order,Face comandă de vânzări
 Make Supplier Quotation,Face Furnizor ofertă
+Make Time Log Batch,Ora face Log lot
 Male,Masculin
 Manage Customer Group Tree.,Gestiona Customer Group copac.
+Manage Sales Partners.,Gestiona vânzările Partners.
 Manage Sales Person Tree.,Gestiona vânzările Persoana copac.
 Manage Territory Tree.,Gestiona Teritoriul copac.
 Manage cost of operations,Gestiona costul operațiunilor
@@ -1584,7 +1671,7 @@ Material Request Item,Material Cerere Articol
 Material Request Items,Material Cerere Articole
 Material Request No,Cerere de material Nu
 Material Request Type,Material Cerere tip
-Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Cerere de material de maximum {0} se poate face pentru postul {1} ​​împotriva comandă de vânzări {2}
+Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Cerere de material de maximum {0} se poate face pentru postul {1} împotriva comandă de vânzări {2}
 Material Request used to make this Stock Entry,Cerere de material utilizat pentru a face acest stoc de intrare
 Material Request {0} is cancelled or stopped,Cerere de material {0} este anulată sau oprită
 Material Requests for which Supplier Quotations are not created,Cererile de materiale pentru care nu sunt create Cotațiile Furnizor
@@ -1597,6 +1684,8 @@ Max 5 characters,Max 5 caractere
 Max Days Leave Allowed,Max zile de concediu de companie
 Max Discount (%),Max Discount (%)
 Max Qty,Max Cantitate
+Max discount allowed for item: {0} is {1}%,Discount maxim permis pentru articol: {0} este {1}%
+Maximum Amount,Suma maximă
 Maximum allowed credit is {0} days after posting date,Credit maximă permisă este de {0} zile de la postarea data
 Maximum {0} rows allowed,Maxime {0} rânduri permis
 Maxiumm discount for Item {0} is {1}%,Reducere Maxiumm pentru postul {0} este {1}%
@@ -1617,6 +1706,7 @@ Milestones will be added as Events in the Calendar,Repere vor fi adăugate ca ev
 Min Order Qty,Min Ordine Cantitate
 Min Qty,Min Cantitate
 Min Qty can not be greater than Max Qty,Min Cantitate nu poate fi mai mare decât Max Cantitate
+Minimum Amount,Suma minima
 Minimum Order Qty,Comanda minima Cantitate
 Minute,Minut
 Misc Details,Misc Detalii
@@ -1626,7 +1716,6 @@ Mobile No,Mobil Nu
 Mobile No.,Mobil Nu.
 Mode of Payment,Mod de plata
 Modern,Modern
-Modified Amount,Modificat Suma
 Monday,Luni
 Month,Lună
 Monthly,Lunar
@@ -1643,7 +1732,8 @@ Mr,Mr
 Ms,Ms
 Multiple Item prices.,Mai multe prețuri element.
 "Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Există Prețul multiple Regula cu aceleași criterii, vă rugăm să rezolve \ \ n conflict prin atribuirea de prioritate. Reguli Pret: {0}"
+			conflict by assigning priority. Price Rules: {0}","Există Prețul multiple Regula cu aceleași criterii, vă rugăm să rezolve \
+ conflictelor de acordând prioritate. Reguli Pret: {0}"
 Music,Muzica
 Must be Whole Number,Trebuie să fie Număr întreg
 Name,Nume
@@ -1656,9 +1746,10 @@ Naming Series,Naming Series
 Negative Quantity is not allowed,Negativ Cantitatea nu este permis
 Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},Eroare negativ Stock ({6}) pentru postul {0} în Depozit {1} la {2} {3} în {4} {5}
 Negative Valuation Rate is not allowed,Negativ Rata de evaluare nu este permis
-Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},Sold negativ în Lot {0} pentru postul {1} ​​de la Warehouse {2} pe {3} {4}
+Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},Sold negativ în Lot {0} pentru postul {1} la Warehouse {2} pe {3} {4}
 Net Pay,Net plată
 Net Pay (in words) will be visible once you save the Salary Slip.,Pay net (în cuvinte) vor fi vizibile după ce salvați fișa de salariu.
+Net Profit / Loss,Profit / pierdere net
 Net Total,Net total
 Net Total (Company Currency),Net total (Compania de valuta)
 Net Weight,Greutate netă
@@ -1699,7 +1790,6 @@ Newsletter,Newsletter
 Newsletter Content,Newsletter Conținut
 Newsletter Status,Newsletter Starea
 Newsletter has already been sent,Newsletter a fost deja trimisa
-Newsletters is not allowed for Trial users,Buletine de știri nu este permis pentru utilizatorii Trial
 "Newsletters to contacts, leads.","Buletine de contacte, conduce."
 Newspaper Publishers,Editorii de ziare
 Next,Urmatorea
@@ -1711,8 +1801,8 @@ No,Nu
 No Customer Accounts found.,Niciun Conturi client gasit.
 No Customer or Supplier Accounts found,Nici un client sau furnizor Conturi a constatat
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,"Nu sunt Aprobatori cheltuieli. Vă rugăm să atribui Rolul ""Cheltuieli aprobator"" la cel putin un utilizator"
-No Item with Barcode {0},Nici un articol cu ​​coduri de bare {0}
-No Item with Serial No {0},Nici un articol cu ​​ordine {0}
+No Item with Barcode {0},Nici un articol cu coduri de bare {0}
+No Item with Serial No {0},Nici un articol cu ordine {0}
 No Items to pack,Nu sunt produse în ambalaj
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,"Nu sunt Aprobatori plece. Vă rugăm să atribui 'Leave aprobator ""Rolul de cel putin un utilizator"
 No Permission,Lipsă acces
@@ -1721,6 +1811,7 @@ No Supplier Accounts found. Supplier Accounts are identified based on 'Master Ty
 No accounting entries for the following warehouses,Nici o intrare contabile pentru următoarele depozite
 No addresses created,Nici o adresa create
 No contacts created,Nici un contact create
+No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,Nu Format implicit Adresa găsit. Vă rugăm să creați unul nou de la Setup> Imprimare și Branding> Format Adresa.
 No default BOM exists for Item {0},Nu există implicit BOM pentru postul {0}
 No description given,Nici o descriere dat
 No employee found,Nu a fost gasit angajat
@@ -1730,6 +1821,8 @@ No of Sent SMS,Nu de SMS-uri trimise
 No of Visits,Nu de vizite
 No permission,Nici o permisiune
 No record found,Nu au găsit înregistrări
+No records found in the Invoice table,Nu sunt găsite în tabelul de factură înregistrări
+No records found in the Payment table,Nu sunt găsite în tabelul de plăți înregistrări
 No salary slip found for month: ,
 Non Profit,Non-Profit
 Nos,Nos
@@ -1739,7 +1832,7 @@ Not Available,Indisponibil
 Not Billed,Nu Taxat
 Not Delivered,Nu Pronunțată
 Not Set,Nu a fost setat
-Not allowed to update entries older than {0},Nu este permis să actualizeze înregistrări mai vechi de {0}
+Not allowed to update stock transactions older than {0},Nu este permis să actualizeze tranzacțiile bursiere mai vechi de {0}
 Not authorized to edit frozen Account {0},Nu este autorizat pentru a edita contul congelate {0}
 Not authroized since {0} exceeds limits,Nu authroized din {0} depășește limitele
 Not permitted,Nu este permisă
@@ -1780,7 +1873,6 @@ Only the selected Leave Approver can submit this Leave Application,Numai selecta
 Open,Deschide
 Open Production Orders,Comenzi deschis de producție
 Open Tickets,Bilete deschise
-Open source ERP built for the web,ERP open source construit pentru web
 Opening (Cr),Deschidere (Cr)
 Opening (Dr),Deschidere (Dr)
 Opening Date,Data deschiderii
@@ -1801,11 +1893,11 @@ Opportunity Date,Oportunitate Data
 Opportunity From,Oportunitate de la
 Opportunity Item,Oportunitate Articol
 Opportunity Items,Articole de oportunitate
-Opportunity Lost,Opportunity Lost
+Opportunity Lost,Oportunitate pierdută
 Opportunity Type,Tip de oportunitate
 Optional. This setting will be used to filter in various transactions.,Opțional. Această setare va fi utilizat pentru a filtra în diverse tranzacții.
 Order Type,Tip comandă
-Order Type must be one of {1},Pentru Tipul trebuie să fie una din {1}
+Order Type must be one of {0},Pentru Tipul trebuie să fie una dintre {0}
 Ordered,Ordonat
 Ordered Items To Be Billed,Comandat de Articole Pentru a fi facturat
 Ordered Items To Be Delivered,Comandat de elemente pentru a fi livrate
@@ -1817,7 +1909,6 @@ Organization Name,Numele organizației
 Organization Profile,Organizație de profil
 Organization branch master.,Ramură organizație maestru.
 Organization unit (department) master.,Unitate de organizare (departament) maestru.
-Original Amount,Suma inițială
 Other,Altul
 Other Details,Alte detalii
 Others,Altel
@@ -1834,6 +1925,7 @@ Overlapping conditions found between:,Condiții se suprapun găsite între:
 Overview,Prezentare generală
 Owned,Owned
 Owner,Proprietar
+P L A - Cess Portion,PLA - Cess portii
 PL or BS,PL sau BS
 PO Date,PO Data
 PO No,PO Nu
@@ -1846,7 +1938,6 @@ POS Setting required to make POS Entry,Setarea POS necesare pentru a face POS in
 POS Setting {0} already created for user: {1} and company {2},Setarea POS {0} deja creat pentru utilizator: {1} și companie {2}
 POS View,POS View
 PR Detail,PR Detaliu
-PR Posting Date,PR Dată postare
 Package Item Details,Detalii pachet Postul
 Package Items,Pachet Articole
 Package Weight Details,Pachetul Greutate Detalii
@@ -1876,8 +1967,6 @@ Parent Sales Person,Mamă Sales Person
 Parent Territory,Teritoriul părinte
 Parent Website Page,Părinte Site Page
 Parent Website Route,Părinte Site Route
-Parent account can not be a ledger,Cont părinte nu poate fi un registru
-Parent account does not exist,Cont părinte nu există
 Parenttype,ParentType
 Part-time,Part-time
 Partially Completed,Parțial finalizate
@@ -1886,6 +1975,8 @@ Partly Delivered,Parțial livrate
 Partner Target Detail,Partener țintă Detaliu
 Partner Type,Tip partener
 Partner's Website,Site-ul partenerului
+Party,Grup
+Party Account,Party Account
 Party Type,Tip de partid
 Party Type Name,Tip partid Nume
 Passive,Pasiv
@@ -1898,10 +1989,14 @@ Payables Group,Datorii Group
 Payment Days,Zile de plată
 Payment Due Date,Data scadentă de plată
 Payment Period Based On Invoice Date,Perioada de plată Bazat pe Data facturii
-Payment Type,Tip de plată
+Payment Reconciliation,Reconcilierea plată
+Payment Reconciliation Invoice,Reconcilierea plata facturii
+Payment Reconciliation Invoices,Facturi de reconciliere plată
+Payment Reconciliation Payment,Reconciliere de plata
+Payment Reconciliation Payments,Plăți de reconciliere plată
+Payment Type,Tipul de plată
+Payment cannot be made for empty cart,Plata nu se poate face pentru cart gol
 Payment of salary for the month {0} and year {1},Plata salariului pentru luna {0} și {1 an}
-Payment to Invoice Matching Tool,Plata la factură Tool potrivire
-Payment to Invoice Matching Tool Detail,Plată să factureze Tool potrivire Detaliu
 Payments,Plăți
 Payments Made,Plățile efectuate
 Payments Received,Plăți primite
@@ -1919,7 +2014,7 @@ Percentage Allocation,Alocarea procent
 Percentage Allocation should be equal to 100%,Alocarea procent ar trebui să fie egală cu 100%
 Percentage variation in quantity to be allowed while receiving or delivering this item.,"Variație procentuală, în cantitate va fi permisă în timp ce primirea sau livrarea acestui articol."
 Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,"Procentul vi se permite de a primi sau livra mai mult față de cantitatea comandata. De exemplu: Dacă ați comandat 100 de unități. și alocația este de 10%, atunci vi se permite să primească 110 de unități."
-Performance appraisal.,De evaluare a performantei.
+Performance appraisal.,De evaluare a performanțelor.
 Period,Perioada
 Period Closing Voucher,Voucher perioadă de închidere
 Periodicity,Periodicitate
@@ -1944,7 +2039,9 @@ Planning,Planificare
 Plant,Instalarea
 Plant and Machinery,Instalații tehnice și mașini
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Vă rugăm Introduceți abreviere sau Numele Scurt corect ca acesta va fi adăugat ca sufix la toate capetele de cont.
+Please Update SMS Settings,Vă rugăm să actualizați Setări SMS
 Please add expense voucher details,Vă rugăm să adăugați cheltuieli detalii voucher
+Please add to Modes of Payment from Setup.,Vă rugăm să adăugați la Moduri de plată de la instalare.
 Please check 'Is Advance' against Account {0} if this is an advance entry.,"Vă rugăm să verificați ""Este Advance"" împotriva Contul {0} în cazul în care acest lucru este o intrare în avans."
 Please click on 'Generate Schedule',"Vă rugăm să faceți clic pe ""Generate Program"""
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},"Vă rugăm să faceți clic pe ""Generate Program"", pentru a aduce ordine adăugat pentru postul {0}"
@@ -1957,7 +2054,7 @@ Please enter 'Expected Delivery Date',"Vă rugăm să introduceți ""Data de liv
 Please enter 'Is Subcontracted' as Yes or No,"Va rugam sa introduceti ""este subcontractată"" ca Da sau Nu"
 Please enter 'Repeat on Day of Month' field value,"Va rugam sa introduceti ""Repeat la zi a lunii"" valoare de câmp"
 Please enter Account Receivable/Payable group in company master,Va rugam sa introduceti cont de încasat / de grup se plateste in companie de master
-Please enter Approving Role or Approving User,Vă rugăm să introduceți Aprobarea Rolul sau aprobarea de utilizare
+Please enter Approving Role or Approving User,Va rugam sa introduceti Aprobarea Rolul sau aprobarea de utilizare
 Please enter BOM for Item {0} at row {1},Va rugam sa introduceti BOM pentru postul {0} la rândul {1}
 Please enter Company,Va rugam sa introduceti de companie
 Please enter Cost Center,Va rugam sa introduceti Cost Center
@@ -1992,12 +2089,13 @@ Please enter valid Company Email,Va rugam sa introduceti email valida de compani
 Please enter valid Email Id,Va rugam sa introduceti email valida Id
 Please enter valid Personal Email,Va rugam sa introduceti email valida personale
 Please enter valid mobile nos,Va rugam sa introduceti nos mobile valabile
+Please find attached Sales Invoice #{0},Vă rugăm să găsiți atașat Factura Vanzare # {0}
 Please install dropbox python module,Vă rugăm să instalați dropbox modul python
 Please mention no of visits required,Vă rugăm să menționați nici de vizite necesare
 Please pull items from Delivery Note,Vă rugăm să trage elemente de livrare Nota
 Please save the Newsletter before sending,Vă rugăm să salvați Newsletter înainte de a trimite
 Please save the document before generating maintenance schedule,Vă rugăm să salvați documentul înainte de a genera programul de întreținere
-Please select Account first,Vă rugăm să selectați cont în primul rând
+Please see attachment,Vă rugăm să consultați atașament
 Please select Bank Account,Vă rugăm să selectați cont bancar
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Vă rugăm să selectați reporta dacă doriți și să includă echilibrul de anul precedent fiscal lasă în acest an fiscal
 Please select Category first,Vă rugăm să selectați categoria întâi
@@ -2005,14 +2103,17 @@ Please select Charge Type first,Vă rugăm să selectați de încărcare Tip în
 Please select Fiscal Year,Vă rugăm să selectați Anul fiscal
 Please select Group or Ledger value,Vă rugăm să selectați Group sau Ledger valoare
 Please select Incharge Person's name,Vă rugăm să selectați numele Incharge Persoana
+Please select Invoice Type and Invoice Number in atleast one row,Vă rugăm să selectați Factura Tip și factura Numărul din cel putin un rând
 "Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","Vă rugăm să selectați element, de unde ""Este Piesa"" este ""Nu"" și ""E Articol de vânzări"" este ""da"", și nu există nici un alt Vanzari BOM"
 Please select Price List,Vă rugăm să selectați lista de prețuri
 Please select Start Date and End Date for Item {0},Vă rugăm să selectați data de început și Data de final pentru postul {0}
+Please select Time Logs.,Vă rugăm să selectați Ora Activitate.
 Please select a csv file,Vă rugăm să selectați un fișier csv
 Please select a valid csv file with data,Vă rugăm să selectați un fișier csv valid cu date
 Please select a value for {0} quotation_to {1},Vă rugăm să selectați o valoare de {0} {1} quotation_to
 "Please select an ""Image"" first","Vă rugăm să selectați o ""imagine"" în primul rând"
 Please select charge type first,Vă rugăm să selectați tipul de taxă în primul rând
+Please select company first,Vă rugăm să selectați prima companie
 Please select company first.,Vă rugăm să selectați prima companie.
 Please select item code,Vă rugăm să selectați codul de articol
 Please select month and year,Vă rugăm selectați luna și anul
@@ -2020,7 +2121,8 @@ Please select prefix first,Vă rugăm să selectați prefix întâi
 Please select the document type first,Vă rugăm să selectați tipul de document primul
 Please select weekly off day,Vă rugăm să selectați zi liberă pe săptămână
 Please select {0},Vă rugăm să selectați {0}
-Please select {0} first,Vă rugăm selectați 0} {întâi
+Please select {0} first,Vă rugăm să selectați {0} primul
+Please select {0} first.,Vă rugăm să selectați {0} primul.
 Please set Dropbox access keys in your site config,Vă rugăm să setați tastele de acces Dropbox pe site-ul dvs. de configurare
 Please set Google Drive access keys in {0},Vă rugăm să setați tastele de acces disk Google în {0}
 Please set default Cash or Bank account in Mode of Payment {0},Vă rugăm să setați Cash implicit sau cont bancar în modul de plată {0}
@@ -2032,7 +2134,7 @@ Please setup your chart of accounts before you start Accounting Entries,Vă rug�
 Please specify,Vă rugăm să specificați
 Please specify Company,Vă rugăm să specificați companiei
 Please specify Company to proceed,Vă rugăm să specificați companiei pentru a continua
-Please specify Default Currency in Company Master and Global Defaults,Vă rugăm să precizați implicit de valuta în Compania de Master și setări implicite globale
+Please specify Default Currency in Company Master and Global Defaults,Vă rugăm să specificați Monedă implicită în Compania de Master și setări implicite globale
 Please specify a,Vă rugăm să specificați un
 Please specify a valid 'From Case No.',"Vă rugăm să specificați un valabil ""Din cauza nr"""
 Please specify a valid Row ID for {0} in row {1},Vă rugăm să specificați un ID valid de linie pentru {0} în rândul {1}
@@ -2047,6 +2149,7 @@ Postal,Poștal
 Postal Expenses,Cheltuieli poștale
 Posting Date,Dată postare
 Posting Time,Postarea de timp
+Posting date and posting time is mandatory,Data postării și postarea de timp este obligatorie
 Posting timestamp must be after {0},Timestamp postarea trebuie să fie după {0}
 Potential opportunities for selling.,Potențiale oportunități de vânzare.
 Preferred Billing Address,Adresa de facturare preferat
@@ -2064,7 +2167,7 @@ Price List,Lista de prețuri
 Price List Currency,Lista de pret Valuta
 Price List Currency not selected,Lista de pret Valuta nu selectat
 Price List Exchange Rate,Lista de prețuri Cursul de schimb
-Price List Name,Lista de prețuri Nume
+Price List Name,Lista de preț Nume
 Price List Rate,Lista de prețuri Rate
 Price List Rate (Company Currency),Lista de prețuri Rate (Compania de valuta)
 Price List master.,Maestru Lista de prețuri.
@@ -2073,8 +2176,10 @@ Price List not selected,Lista de prețuri nu selectat
 Price List {0} is disabled,Lista de prețuri {0} este dezactivat
 Price or Discount,Preț sau Reducere
 Pricing Rule,Regula de stabilire a prețurilor
-Pricing Rule For Discount,De stabilire a prețurilor De regulă Discount
-Pricing Rule For Price,De stabilire a prețurilor De regulă Pret
+Pricing Rule Help,Regula de stabilire a prețurilor de ajutor
+"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","Regula de stabilire a prețurilor este selectat în primul rând bazat pe ""Aplicați pe"" teren, care poate fi produs, Grupa de articole sau de brand."
+"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","Regula de stabilire a prețurilor se face pentru a suprascrie Pret / defini procent de reducere, pe baza unor criterii."
+Pricing Rules are further filtered based on quantity.,Regulile de stabilire a prețurilor sunt filtrate în continuare în funcție de cantitate.
 Print Format Style,Print Style Format
 Print Heading,Imprimare Titlu
 Print Without Amount,Imprima Fără Suma
@@ -2102,7 +2207,9 @@ Production Plan Sales Orders,Planul de producție comenzi de vânzări
 Production Planning Tool,Producție instrument de planificare
 Products,Instrumente
 "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Produsele vor fi clasificate în funcție de greutate, vârstă în căutări implicite. Mai mult greutate de vârstă, mai mare produsul va apărea în listă."
+Professional Tax,Taxa profesional
 Profit and Loss,Profit și pierdere
+Profit and Loss Statement,Profit și pierdere
 Project,Proiectarea
 Project Costing,Proiect de calculație a costurilor
 Project Details,Detalii proiect
@@ -2125,7 +2232,9 @@ Projects & System,Proiecte & System
 Prompt for Email on Submission of,Prompt de e-mail pe Depunerea
 Proposal Writing,Propunere de scriere
 Provide email id registered in company,Furnizarea id-ul de e-mail înregistrată în societate
+Provisional Profit / Loss (Credit),Profit provizorie / Pierdere (Credit)
 Public,Public
+Published on website at: {0},Publicat pe site-ul la: {0}
 Publishing,Editare
 Pull sales orders (pending to deliver) based on the above criteria,"Trage comenzi de vânzări (în curs de a livra), pe baza criteriilor de mai sus"
 Purchase,Cumpărarea
@@ -2134,7 +2243,6 @@ Purchase Analytics,Analytics de cumpărare
 Purchase Common,Cumpărare comună
 Purchase Details,Detalii de cumpărare
 Purchase Discounts,Cumpărare Reduceri
-Purchase In Transit,Cumpărare în tranzit
 Purchase Invoice,Factura de cumpărare
 Purchase Invoice Advance,Factura de cumpărare în avans
 Purchase Invoice Advances,Avansuri factura de cumpărare
@@ -2142,7 +2250,6 @@ Purchase Invoice Item,Factura de cumpărare Postul
 Purchase Invoice Trends,Cumpărare Tendințe factură
 Purchase Invoice {0} is already submitted,Factura de cumpărare {0} este deja depusă
 Purchase Order,Comandă de aprovizionare
-Purchase Order Date,Comandă de aprovizionare Date
 Purchase Order Item,Comandă de aprovizionare Articol
 Purchase Order Item No,Comandă de aprovizionare Punctul nr
 Purchase Order Item Supplied,Comandă de aprovizionare Articol Livrat
@@ -2206,7 +2313,6 @@ Quarter,Trimestru
 Quarterly,Trimestrial
 Quick Help,Ajutor rapid
 Quotation,Citat
-Quotation Date,Citat Data
 Quotation Item,Citat Articol
 Quotation Items,Cotație Articole
 Quotation Lost Reason,Citat pierdut rațiunea
@@ -2284,6 +2390,7 @@ Recurring Invoice,Factura recurent
 Recurring Type,Tip recurent
 Reduce Deduction for Leave Without Pay (LWP),Reduce Deducerea pentru concediu fără plată (LWP)
 Reduce Earning for Leave Without Pay (LWP),Reduce Câștigul salarial de concediu fără plată (LWP)
+Ref,Re
 Ref Code,Cod de Ref
 Ref SQ,Ref SQ
 Reference,Referinta
@@ -2307,6 +2414,7 @@ Relieving Date,Alinarea Data
 Relieving Date must be greater than Date of Joining,Alinarea Data trebuie să fie mai mare decât Data aderării
 Remark,Remarcă
 Remarks,Remarci
+Remarks Custom,Observații personalizat
 Rename,Redenumire
 Rename Log,Redenumi Conectare
 Rename Tool,Redenumirea Tool
@@ -2322,6 +2430,7 @@ Report Type,Tip de raport
 Report Type is mandatory,Tip de raport este obligatorie
 Reports to,Rapoarte
 Reqd By Date,Reqd de Date
+Reqd by Date,Reqd de Date
 Request Type,Cerere tip
 Request for Information,Cerere de informații
 Request for purchase.,Cere pentru cumpărare.
@@ -2375,21 +2484,34 @@ Rounded Total,Rotunjite total
 Rounded Total (Company Currency),Rotunjite total (Compania de valuta)
 Row # ,
 Row # {0}: ,
+Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Rând # {0}: Cantitate Comandat poate nu mai puțin de cantitate minimă de comandă item (definit la punctul de master).
+Row #{0}: Please specify Serial No for Item {1},Rând # {0}: Vă rugăm să specificați Nu serial pentru postul {1}
 "Row {0}: Account does not match with \
-						Purchase Invoice Credit To account",Rând {0}: Contul nu se potrivește cu \ \ n cumparare factura de credit a contului
+						Purchase Invoice Credit To account","Rând {0}: Contul nu se potrivește cu \
+ cumparare Facturi de credit a contului"
 "Row {0}: Account does not match with \
-						Sales Invoice Debit To account",Rând {0}: Contul nu se potrivește cu \ \ n Factura Vanzare de debit a contului
+						Sales Invoice Debit To account","Rând {0}: Contul nu se potrivește cu \
+ Vânzări Facturi de debit a contului"
+Row {0}: Conversion Factor is mandatory,Rând {0}: Factorul de conversie este obligatorie
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Rând {0}: intrare de credit nu poate fi legat cu o factura de cumpărare
 Row {0}: Debit entry can not be linked with a Sales Invoice,Rând {0}: intrare de debit nu poate fi legat de o factură de vânzare
+Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Rând {0}: Suma de plată trebuie să fie mai mic sau egal cu factura suma restante. Vă rugăm să consultați nota de mai jos.
+Row {0}: Qty is mandatory,Rând {0}: Cant este obligatorie
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
+					Available Qty: {4}, Transfer Qty: {5}","Rând {0}: Cantitate nu avalable în depozit {1} la {2} {3}.
+ Disponibil Cantitate: {4}, transfer Cantitate: {5}"
 "Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Rând {0}: Pentru a seta {1} periodicitate, diferența între data de început și \ \ n trebuie să fie mai mare sau egal cu {2}"
+						must be greater than or equal to {2}","Rând {0}: Pentru a seta {1} periodicitate, diferența între de la și până la data \
+ trebuie să fie mai mare sau egal cu {2}"
 Row {0}:Start Date must be before End Date,Rând {0}: Data începerii trebuie să fie înainte de Data de încheiere
 Rules for adding shipping costs.,Reguli pentru a adăuga costurile de transport maritim.
 Rules for applying pricing and discount.,Normele de aplicare de stabilire a prețurilor și de scont.
 Rules to calculate shipping amount for a sale,Reguli pentru a calcula suma de transport maritim pentru o vânzare
 S.O. No.,SO Nu.
+SHE Cess on Excise,SHE Cess pe accize
+SHE Cess on Service Tax,SHE Cess la Serviciul Fiscal
+SHE Cess on TDS,SHE Cess pe TDS
 SMS Center,SMS Center
-SMS Control,Controlul SMS
 SMS Gateway URL,SMS Gateway URL
 SMS Log,SMS Conectare
 SMS Parameter,SMS Parametru
@@ -2494,15 +2616,20 @@ Securities and Deposits,Titluri de valoare și depozite
 "Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Selectați ""Da"" în cazul în care acest articol reprezintă ceva de lucru cum ar fi formarea, proiectare, consultanta etc"
 "Select ""Yes"" if you are maintaining stock of this item in your Inventory.","Selectați ""Da"", dacă sunteți menținerea stocului de acest element în inventar."
 "Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.","Selectați ""Da"", dacă aprovizionarea cu materii prime a furnizorului dumneavoastră pentru a fabrica acest articol."
+Select Brand...,Selectați Brand ...
 Select Budget Distribution to unevenly distribute targets across months.,Selectați Bugetul de distribuție pentru a distribui uniform obiective pe luni.
 "Select Budget Distribution, if you want to track based on seasonality.","Selectați Buget Distribution, dacă doriți să urmăriți în funcție de sezonalitate."
+Select Company...,Selectați Company ...
 Select DocType,Selectați DocType
+Select Fiscal Year...,Selectați anul fiscal ...
 Select Items,Selectați Elemente
+Select Project...,Selectați Project ...
 Select Purchase Receipts,Selectați Încasări de cumpărare
 Select Sales Orders,Selectați comenzi de vânzări
 Select Sales Orders from which you want to create Production Orders.,Selectați comenzi de vânzări de la care doriți să creați comenzi de producție.
 Select Time Logs and Submit to create a new Sales Invoice.,Selectați Timp Busteni Trimite pentru a crea o nouă factură de vânzare.
 Select Transaction,Selectați Transaction
+Select Warehouse...,Selectați Warehouse ...
 Select Your Language,Selectați limba
 Select account head of the bank where cheque was deposited.,"Selectați contul șef al băncii, unde de verificare a fost depus."
 Select company name first.,Selectați numele companiei în primul rând.
@@ -2520,6 +2647,7 @@ Select your home country and check the timezone and currency.,Selectați țara d
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","Selectând ""Da"", va da o identitate unică pentru fiecare entitate din acest articol, care poate fi vizualizat în ordine maestru."
 Selling,De vânzare
 Selling Settings,Vanzarea Setări
+"Selling must be checked, if Applicable For is selected as {0}","De vânzare trebuie să fie verificate, dacă este cazul Pentru este selectat ca {0}"
 Send,Trimiteți
 Send Autoreply,Trimite Răspuns automat
 Send Email,Trimiteți-ne email
@@ -2542,7 +2670,7 @@ Serial No Status,Serial Nu Statut
 Serial No Warranty Expiry,Serial Nu Garantie pana
 Serial No is mandatory for Item {0},Nu serial este obligatorie pentru postul {0}
 Serial No {0} created,Serial Nu {0} a creat
-Serial No {0} does not belong to Delivery Note {1},Serial No {0} nu aparține de livrare Nota {1}
+Serial No {0} does not belong to Delivery Note {1},Serial Nu {0} nu face parte din livrare Nota {1}
 Serial No {0} does not belong to Item {1},Serial Nu {0} nu aparține postul {1}
 Serial No {0} does not belong to Warehouse {1},Serial Nu {0} nu apartine Warehouse {1}
 Serial No {0} does not exist,Serial Nu {0} nu există
@@ -2553,27 +2681,31 @@ Serial No {0} not in stock,Serial Nu {0} nu este în stoc
 Serial No {0} quantity {1} cannot be a fraction,Serial Nu {0} {1} cantitate nu poate fi o fracțiune
 Serial No {0} status must be 'Available' to Deliver,"Nu {0} Stare de serie trebuie să fie ""disponibile"" pentru a oferi"
 Serial Nos Required for Serialized Item {0},Serial nr necesare pentru postul serializat {0}
-Serial Number Series,Serial Number Series
+Serial Number Series,Număr de serie de serie
 Serial number {0} entered more than once,Număr de serie {0} a intrat de mai multe ori
 "Serialized Item {0} cannot be updated \
-					using Stock Reconciliation",Postul serializat {0} nu poate fi actualizat \ \ n folosind Bursa de reconciliere
+					using Stock Reconciliation","Postul serializat {0} nu poate fi actualizat \
+ folosind Bursa de reconciliere"
 Series,Serie
 Series List for this Transaction,Lista de serie pentru această tranzacție
 Series Updated,Seria Actualizat
 Series Updated Successfully,Seria Actualizat cu succes
 Series is mandatory,Seria este obligatorie
-Series {0} already used in {1},Series {0} folosit deja în {1}
+Series {0} already used in {1},Seria {0} folosit deja în {1}
 Service,Servicii
 Service Address,Adresa serviciu
+Service Tax,Serviciul Fiscal
 Services,Servicii
 Set,Setează
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.","Seta valorile implicite, cum ar fi Compania, valutar, Current Anul fiscal, etc"
 Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,"Set bugetelor Grupa înțelept Articol de pe acest teritoriu. Puteți include, de asemenea, sezonier prin setarea distribuție."
+Set Status as Available,Setați Starea ca Disponibil
 Set as Default,Setat ca implicit
 Set as Lost,Setați ca Lost
 Set prefix for numbering series on your transactions,Set prefix pentru seria de numerotare pe tranzacțiile dvs.
 Set targets Item Group-wise for this Sales Person.,Stabilească obiective Articol Grupa-înțelept pentru această persoană de vânzări.
 Setting Account Type helps in selecting this Account in transactions.,Setarea Tipul de cont ajută în selectarea acest cont în tranzacții.
+Setting this Address Template as default as there is no other default,Setarea acestei Format Adresa implicit ca nu exista nici un alt implicit
 Setting up...,Configurarea ...
 Settings,Setări
 Settings for HR Module,Setările pentru modul HR
@@ -2581,6 +2713,7 @@ Settings for HR Module,Setările pentru modul HR
 Setup,Setare
 Setup Already Complete!!,Setup deja complet!
 Setup Complete,Configurare complet
+Setup SMS gateway settings,Setări de configurare SMS gateway-ul
 Setup Series,Seria de configurare
 Setup Wizard,Setup Wizard
 Setup incoming server for jobs email id. (e.g. jobs@example.com),Configurare de server de intrare pentru ocuparea forței de muncă id-ul de e-mail. (De exemplu jobs@example.com)
@@ -2606,6 +2739,7 @@ Short biography for website and other publications.,Scurta biografie pentru site
 Show In Website,Arată în site-ul
 Show a slideshow at the top of the page,Arata un slideshow din partea de sus a paginii
 Show in Website,Arata pe site-ul
+Show rows with zero values,Arată rânduri cu valori de zero
 Show this slideshow at the top of the page,Arată această prezentare în partea de sus a paginii
 Sick Leave,A concediului medical
 Signature,Semnătura
@@ -2635,9 +2769,9 @@ Specifications,Specificaţii:
 "Specify the operations, operating cost and give a unique Operation no to your operations.","Specifica operațiunilor, costurile de exploatare și să dea o operațiune unică nu pentru operațiunile dumneavoastră."
 Split Delivery Note into packages.,Împărțit de livrare Notă în pachete.
 Sports,Sport
+Sr,Sr
 Standard,Standard
 Standard Buying,Cumpararea Standard
-Standard Rate,Rate Standard
 Standard Reports,Rapoarte standard
 Standard Selling,Vanzarea Standard
 Standard contract terms for Sales or Purchase.,Clauzele contractuale standard pentru vânzări sau de cumpărare.
@@ -2646,6 +2780,7 @@ Start Date,Data începerii
 Start date of current invoice's period,Data perioadei de factura de curent începem
 Start date should be less than end date for Item {0},Data de începere trebuie să fie mai mică decât data de sfârșit pentru postul {0}
 State,Stat
+Statement of Account,Extras de cont
 Static Parameters,Parametrii statice
 Status,Stare
 Status must be one of {0},Starea trebuie să fie una din {0}
@@ -2687,6 +2822,7 @@ Stock Value Difference,Valoarea Stock Diferența
 Stock balances updated,Solduri stoc actualizate
 Stock cannot be updated against Delivery Note {0},Stock nu poate fi actualizat împotriva livrare Nota {0}
 Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name',"Intrări de stocuri exista împotriva depozit {0} nu poate re-aloca sau modifica ""Maestru Name"""
+Stock transactions before {0} are frozen,Tranzacțiilor bursiere înainte de {0} sunt înghețate
 Stop,Oprire
 Stop Birthday Reminders,De oprire de naștere Memento
 Stop Material Request,Oprire Material Cerere
@@ -2706,13 +2842,13 @@ Submit this Production Order for further processing.,Trimiteți acest comandă d
 Submitted,Inscrisa
 Subsidiary,Filială
 Successful: ,
-Successfully allocated,Alocate cu succes
+Successfully Reconciled,Împăcați cu succes
 Suggestions,Sugestii
 Sunday,Duminică
 Supplier,Furnizor
 Supplier (Payable) Account,Furnizor (furnizori) de cont
 Supplier (vendor) name as entered in supplier master,"Furnizor (furnizor), nume ca a intrat in legatura cu furnizorul de master"
-Supplier Account,Furnizor de cont
+Supplier > Supplier Type,Furnizor> Furnizor Tip
 Supplier Account Head,Furnizor de cont Șeful
 Supplier Address,Furnizor Adresa
 Supplier Addresses and Contacts,Adrese furnizorului și de Contacte
@@ -2750,6 +2886,12 @@ Sync with Google Drive,Sincronizare cu Google Drive
 System,Sistem
 System Settings,Setări de sistem
 "System User (login) ID. If set, it will become default for all HR forms.","Utilizator de sistem (login) de identitate. Dacă este setat, el va deveni implicit pentru toate formele de resurse umane."
+TDS (Advertisement),TDS (Publicitate)
+TDS (Commission),TDS (Comisia)
+TDS (Contractor),TDS (Contractor)
+TDS (Interest),TDS (dobânzi)
+TDS (Rent),TDS (inchiriere)
+TDS (Salary),TDS (salariu)
 Target  Amount,Suma țintă
 Target Detail,Țintă Detaliu
 Target Details,Țintă Detalii
@@ -2770,10 +2912,12 @@ Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are no
 Tax Rate,Cota de impozitare
 Tax and other salary deductions.,Impozitul și alte rețineri salariale.
 "Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges",Taxa detaliu tabel preluat de la maestru element ca un șir și stocate în acest domeniu. \ NUtilizat pentru Impozite și Taxe
+Used for Taxes and Charges","Masă detaliu impozit preluat de la postul de master ca un șir și stocate în acest domeniu.
+ Folosit pentru Impozite și Taxe"
 Tax template for buying transactions.,Șablon taxa pentru tranzacțiilor de cumpărare.
 Tax template for selling transactions.,Șablon impozit pentru tranzacțiile de vânzare.
 Taxable,Impozabil
+Taxes,Impozite
 Taxes and Charges,Impozite și Taxe
 Taxes and Charges Added,Impozite și Taxe Added
 Taxes and Charges Added (Company Currency),Impozite și Taxe adăugate (Compania de valuta)
@@ -2786,6 +2930,7 @@ Technology,Tehnologia nou-aparuta
 Telecommunications,Telecomunicații
 Telephone Expenses,Cheltuieli de telefon
 Television,Televiziune
+Template,Sablon
 Template for performance appraisals.,Șablon pentru evaluările de performanță.
 Template of terms or contract.,Șablon de termeni sau contractului.
 Temporary Accounts (Assets),Conturile temporare (Active)
@@ -2815,7 +2960,8 @@ The First User: You,Primul utilizator:
 The Organization,Organizația
 "The account head under Liability, in which Profit/Loss will be booked","Contul capul sub răspunderii, în care Profit / pierdere va fi rezervat"
 "The date on which next invoice will be generated. It is generated on submit.
-",Data la care va fi generat următoarea factură. Acesta este generat pe prezinte. \ N
+","Data la care va fi generat următoarea factură. Acesta este generat pe prezinte.
+"
 The date on which recurring invoice will be stop,La data la care factura recurente vor fi opri
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,A doua zi (e) pe care aplici pentru concediu sunt vacanță. Tu nu trebuie să se aplice pentru concediu.
@@ -2827,6 +2973,7 @@ The net weight of this package. (calculated automatically as sum of net weight o
 The new BOM after replacement,Noul BOM după înlocuirea
 The rate at which Bill Currency is converted into company's base currency,Rata la care Bill valuta este convertit în moneda de bază a companiei
 The unique id for tracking all recurring invoices. It is generated on submit.,Id-ul unic pentru urmărirea toate facturile recurente. Acesta este generat pe prezinte.
+"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Apoi normelor privind prețurile sunt filtrate pe baza Customer, Client Group, Territory, furnizor, furnizor de tip, Campania, Vanzari Partener etc"
 There are more holidays than working days this month.,Există mai multe sărbători decât de zile de lucru în această lună.
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","Nu poate fi doar o singură regulă Condiții presetate cu 0 sau o valoare necompletată pentru ""la valoarea"""
 There is not enough leave balance for Leave Type {0},Nu există echilibru concediu suficient pentru concediul de tip {0}
@@ -2838,6 +2985,7 @@ This Leave Application is pending approval. Only the Leave Apporver can update s
 This Time Log Batch has been billed.,Acest lot Timpul Log a fost facturat.
 This Time Log Batch has been cancelled.,Acest lot Timpul Log a fost anulat.
 This Time Log conflicts with {0},This Time Log conflict cu {0}
+This format is used if country specific format is not found,Acest format este utilizat în cazul în format specific țării nu este găsit
 This is a root account and cannot be edited.,Acesta este un cont de rădăcină și nu pot fi editate.
 This is a root customer group and cannot be edited.,Acesta este un grup de clienți rădăcină și nu pot fi editate.
 This is a root item group and cannot be edited.,Acesta este un grup element rădăcină și nu pot fi editate.
@@ -2853,7 +3001,9 @@ Time Log Batch,Timp Log lot
 Time Log Batch Detail,Ora Log lot Detaliu
 Time Log Batch Details,Timp Jurnal Detalii lot
 Time Log Batch {0} must be 'Submitted',"Ora Log Lot {0} trebuie să fie ""Înscris"""
+Time Log Status must be Submitted.,Ora Log Starea trebuie să fie prezentate.
 Time Log for tasks.,Log timp de sarcini.
+Time Log is not billable,Timpul Conectare nu este facturabile
 Time Log {0} must be 'Submitted',"Ora Log {0} trebuie să fie ""Înscris"""
 Time Zone,Time Zone
 Time Zones,Time Zones
@@ -2866,6 +3016,7 @@ To,Până la data
 To Currency,Pentru a valutar
 To Date,La Data
 To Date should be same as From Date for Half Day leave,Pentru a Data trebuie să fie aceeași ca la data de concediu de jumatate de zi
+To Date should be within the Fiscal Year. Assuming To Date = {0},Pentru a Data ar trebui să fie în anul fiscal. Presupunând Pentru a Data = {0}
 To Discuss,Pentru a discuta
 To Do List,To do list
 To Package No.,La pachetul Nr
@@ -2875,8 +3026,8 @@ To Value,La valoarea
 To Warehouse,Pentru Warehouse
 "To add child nodes, explore tree and click on the node under which you want to add more nodes.","Pentru a adăuga noduri copil, explora copac și faceți clic pe nodul în care doriți să adăugați mai multe noduri."
 "To assign this issue, use the ""Assign"" button in the sidebar.","Pentru a atribui această problemă, utilizați butonul ""Assign"" în bara laterală."
-To create a Bank Account:,Pentru a crea un cont bancar:
-To create a Tax Account:,Pentru a crea un cont fiscal:
+To create a Bank Account,Pentru a crea un cont bancar
+To create a Tax Account,Pentru a crea un cont fiscală
 "To create an Account Head under a different company, select the company and save customer.","Pentru a crea un cap de cont sub o altă companie, selecta compania și de a salva client."
 To date cannot be before from date,Până în prezent nu poate fi înainte de data
 To enable <b>Point of Sale</b> features,Pentru a permite <b> Point of Sale </ b> caracteristici
@@ -2884,22 +3035,23 @@ To enable <b>Point of Sale</b> view,Pentru a permite <b> Point of Sale </ b> de 
 To get Item Group in details table,Pentru a obține Grupa de articole în detalii de masă
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Pentru a include taxa în rândul {0} în rata articol, impozitele în rânduri {1} trebuie de asemenea să fie incluse"
 "To merge, following properties must be same for both items","Pentru a îmbina, următoarele proprietăți trebuie să fie aceeași pentru ambele elemente"
-"To report an issue, go to ",
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","De a nu aplica regula Preturi într-o anumită tranzacție, ar trebui să fie dezactivat toate regulile de tarifare aplicabile."
 "To set this Fiscal Year as Default, click on 'Set as Default'","Pentru a seta acest an fiscal ca implicit, faceți clic pe ""Set as Default"""
 To track any installation or commissioning related work after sales,Pentru a urmări orice instalare sau punere în lucrările conexe după vânzări
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Pentru a urmări nume de marcă în următoarele documente nota de livrare, oportunitate, cerere Material, Item, Ordinul de cumparare, cumparare Voucherul, Cumpărătorul Primirea, cotatie, Factura Vanzare, Vanzari BOM, comandă de vânzări, Serial nr"
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,"Pentru a urmări element în vânzări și a documentelor de achiziție, pe baza lor de serie nr. Acest lucru se poate, de asemenea, utilizat pentru a urmări detalii de garanție ale produsului."
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,"Pentru a urmări elementele din vânzări și achiziționarea de documente, cu lot nr cui <b> Industrie preferată: Produse chimice etc </ b>"
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Pentru a urmări elemente utilizând coduri de bare. Va fi capabil de a intra articole în nota de livrare și factură de vânzare prin scanarea codului de bare de element.
+Too many columns. Export the report and print it using a spreadsheet application.,Prea multe coloane. Exporta raportul și imprima utilizând o aplicație de calcul tabelar.
 Tools,Instrumentele
 Total,totală
+Total ({0}),Total ({0})
 Total Advance,Total de Advance
-Total Allocated Amount,Suma totală alocată
-Total Allocated Amount can not be greater than unmatched amount,Suma totală alocată nu poate fi mai mare decât valoarea de neegalat
 Total Amount,Suma totală
 Total Amount To Pay,Suma totală să plătească
 Total Amount in Words,Suma totală în cuvinte
 Total Billing This Year: ,
+Total Characters,Total de caractere
 Total Claimed Amount,Total suma pretinsă
 Total Commission,Total de Comisie
 Total Cost,Cost total
@@ -2923,14 +3075,13 @@ Total Score (Out of 5),Scor total (din 5)
 Total Tax (Company Currency),Totală Brut (Compania de valuta)
 Total Taxes and Charges,Total Impozite și Taxe
 Total Taxes and Charges (Company Currency),Total Impozite si Taxe (Compania valutar)
-Total Words,Totalul Cuvinte
-Total Working Days In The Month,Zile de lucru total în luna
 Total allocated percentage for sales team should be 100,Procentul total alocat pentru echipa de vânzări ar trebui să fie de 100
 Total amount of invoices received from suppliers during the digest period,Suma totală a facturilor primite de la furnizori în timpul perioadei Digest
 Total amount of invoices sent to the customer during the digest period,Suma totală a facturilor trimise clientului în timpul perioadei Digest
-Total cannot be zero,Totală nu poate să fie zero
+Total cannot be zero,Totală nu poate fi zero
 Total in words,Totală în cuvinte
-Total points for all goals should be 100. It is {0},Numărul total de puncte pentru toate obiectivele trebuie să fie de 100. Este {0}
+Total points for all goals should be 100. It is {0},Numărul total de puncte pentru toate obiectivele ar trebui să fie de 100. Este {0}
+Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials,Evaluare totală de element fabricate sau reambalate (e) nu poate fi mai mică de evaluare totală de materii prime
 Total weightage assigned should be 100%. It is {0},Weightage total alocat este de 100%. Este {0}
 Totals,Totaluri
 Track Leads by Industry Type.,Track conduce de Industrie tip.
@@ -2966,7 +3117,7 @@ UOM Conversion Details,UOM Detalii de conversie
 UOM Conversion Factor,Factorul de conversie UOM
 UOM Conversion factor is required in row {0},Factor UOM de conversie este necesară în rândul {0}
 UOM Name,Numele UOM
-UOM coversion factor required for UOM {0} in Item {1},Factor coversion UOM necesar pentru UOM {0} de la postul {1}
+UOM coversion factor required for UOM: {0} in Item: {1},Factor coversion UOM UOM necesare pentru: {0} in articol: {1}
 Under AMC,Sub AMC
 Under Graduate,Sub Absolvent
 Under Warranty,Sub garanție
@@ -2976,8 +3127,8 @@ Unit of Measure {0} has been entered more than once in Conversion Factor Table,U
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Unitatea de măsură a acestui articol (de exemplu, Kg, Unitatea, Nu, pereche)."
 Units/Hour,Unități / oră
 Units/Shifts,Unități / Schimburi
-Unmatched Amount,Suma de neegalat
 Unpaid,Neachitat
+Unreconciled Payment Details,Nereconciliate Detalii de plată
 Unscheduled,Neprogramat
 Unsecured Loans,Creditele negarantate
 Unstop,Unstop
@@ -2992,7 +3143,6 @@ Update Landed Cost,Actualizare Landed Cost
 Update Series,Actualizare Series
 Update Series Number,Actualizare Serii Număr
 Update Stock,Actualizați Stock
-"Update allocated amount in the above table and then click ""Allocate"" button","Actualizare a alocat sume în tabelul de mai sus și apoi faceți clic pe butonul ""Alocarea"""
 Update bank payment dates with journals.,Actualizați datele de plată bancar cu reviste.
 Update clearance date of Journal Entries marked as 'Bank Vouchers',"Data de clearance-ul de actualizare de jurnal intrările marcate ca ""Tichete Bank"""
 Updated,Actualizat
@@ -3009,6 +3159,7 @@ Upper Income,Venituri de sus
 Urgent,De urgență
 Use Multi-Level BOM,Utilizarea Multi-Level BOM
 Use SSL,Utilizați SSL
+Used for Production Plan,Folosit pentru Planul de producție
 User,Utilizator
 User ID,ID-ul de utilizator
 User ID not set for Employee {0},ID-ul de utilizator nu este setat pentru Angajat {0}
@@ -3023,7 +3174,7 @@ User {0} is already assigned to Employee {1},Utilizatorul {0} este deja alocat A
 User {0} is disabled,Utilizatorul {0} este dezactivat
 Username,Nume utilizator
 Users with this role are allowed to create / modify accounting entry before frozen date,Utilizatorii cu acest rol sunt permise pentru a crea / modifica intrare contabilitate înainte de data congelate
-Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Utilizatorii cu acest rol li se permite să stabilească în conturile înghețate și de a crea / modifica intrări contabile împotriva conturile înghețate
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Utilizatorii cu acest rol le este permis să stabilească conturile înghețate și de a crea / modifica intrări contabile împotriva conturile înghețate
 Utilities,Utilities
 Utility Expenses,Cheltuieli de utilitate
 Valid For Territories,Valabil pentru teritoriile
@@ -3043,13 +3194,13 @@ Vehicle No,Vehicul Nici
 Venture Capital,Capital de Risc
 Verified By,Verificate de
 View Ledger,Vezi Ledger
-View Now,Vizualizează acum
+View Now,Vezi acum
 Visit report for maintenance call.,Vizitați raport de apel de întreținere.
 Voucher #,Voucher #
 Voucher Detail No,Detaliu voucher Nu
+Voucher Detail Number,Voucher Numărul de Detaliu
 Voucher ID,ID Voucher
 Voucher No,Voletul nr
-Voucher No is not valid,Nu voucher nu este valid
 Voucher Type,Tip Voucher
 Voucher Type and Date,Tipul Voucher și data
 Walk In,Walk In
@@ -3065,11 +3216,12 @@ Warehouse is mandatory for stock Item {0} in row {1},Depozit este obligatorie pe
 Warehouse is missing in Purchase Order,Depozit lipsește în Comandă
 Warehouse not found in the system,Depozit nu a fost găsit în sistemul
 Warehouse required for stock Item {0},Depozit necesar pentru stocul de postul {0}
-Warehouse required in POS Setting,Depozit necesare în Setarea POS
 Warehouse where you are maintaining stock of rejected items,Depozit în cazul în care se menține stocul de articole respinse
 Warehouse {0} can not be deleted as quantity exists for Item {1},Depozit {0} nu poate fi ștearsă ca exista cantitate pentru postul {1}
 Warehouse {0} does not belong to company {1},Depozit {0} nu aparține companiei {1}
 Warehouse {0} does not exist,Depozit {0} nu există
+Warehouse {0}: Company is mandatory,Depozit {0}: Company este obligatorie
+Warehouse {0}: Parent account {1} does not bolong to the company {2},Depozit {0}: cont Părinte {1} nu Bolong a companiei {2}
 Warehouse-Wise Stock Balance,Depozit-înțelept Stock Balance
 Warehouse-wise Item Reorder,-Depozit înțelept Postul de Comandă
 Warehouses,Depozite
@@ -3096,7 +3248,7 @@ Wednesday,Miercuri
 Weekly,Saptamanal
 Weekly Off,Săptămânal Off
 Weight UOM,Greutate UOM
-"Weight is mentioned,\nPlease mention ""Weight UOM"" too",
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Greutate este menționat, \n Vă rugăm să menționați ""Greutate UOM"" prea"
 Weightage,Weightage
 Weightage (%),Weightage (%)
 Welcome,Bine ați venit
@@ -3114,13 +3266,14 @@ Will be updated when batched.,Vor fi actualizate atunci când dozate.
 Will be updated when billed.,Vor fi actualizate atunci când facturat.
 Wire Transfer,Transfer
 With Operations,Cu Operațiuni
-With period closing entry,Cu intrare perioadă de închidere
+With Period Closing Entry,Cu intrare Perioada de închidere
 Work Details,Detalii de lucru
 Work Done,Activitatea desfășurată
 Work In Progress,Lucrări în curs
 Work-in-Progress Warehouse,De lucru-in-Progress Warehouse
 Work-in-Progress Warehouse is required before Submit,De lucru-in-Progress Warehouse este necesară înainte Trimite
 Working,De lucru
+Working Days,Zile lucratoare
 Workstation,Stație de lucru
 Workstation Name,Stație de lucru Nume
 Write Off Account,Scrie Off cont
@@ -3136,19 +3289,15 @@ Year Closed,An Închis
 Year End Date,Anul Data de încheiere
 Year Name,An Denumire
 Year Start Date,An Data începerii
-Year Start Date and Year End Date are already set in Fiscal Year {0},Data începerii an și de sfârșit de an data sunt deja stabilite în anul fiscal {0}
-Year Start Date and Year End Date are not within Fiscal Year.,Data începerii an și Anul Data de încheiere nu sunt în anul fiscal.
-Year Start Date should not be greater than Year End Date,An Data începerii nu trebuie să fie mai mare de sfârșit de an Data
 Year of Passing,Ani de la promovarea
 Yearly,Anual
 Yes,Da
-You are not authorized to add or update entries before {0},Tu nu sunt autorizate să adăugați sau actualizare intrări înainte de {0}
+You are not authorized to add or update entries before {0},Tu nu sunt autorizate pentru a adăuga sau actualiza intrări înainte de {0}
 You are not authorized to set Frozen value,Tu nu sunt autorizate pentru a seta valoarea Frozen
 You are the Expense Approver for this record. Please Update the 'Status' and Save,"Sunteți aprobator cheltuieli pentru acest record. Vă rugăm Actualizați ""statutul"" și Salvare"
 You are the Leave Approver for this record. Please Update the 'Status' and Save,"Sunteți aprobator Lăsați pentru această înregistrare. Vă rugăm Actualizați ""statutul"" și Salvare"
 You can enter any date manually,Puteți introduce manual orice dată
 You can enter the minimum quantity of this item to be ordered.,Puteți introduce cantitatea minimă de acest element pentru a fi comandat.
-You can not assign itself as parent account,Nu se poate atribui ca cont părinte
 You can not change rate if BOM mentioned agianst any item,Nu puteți schimba rata dacă BOM menționat agianst orice element
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Nu puteți introduce atât de livrare Notă Nu și Factura Vanzare Nr Vă rugăm să introduceți nici una.
 You can not enter current voucher in 'Against Journal Voucher' column,"Nu puteți introduce voucher curent în ""Împotriva Jurnalul Voucher"" coloana"
@@ -3160,7 +3309,6 @@ You cannot credit and debit same account at the same time,"Nu puteți credit și
 You have entered duplicate items. Please rectify and try again.,Ați introdus elemente cu dubluri. Vă rugăm să rectifice și să încercați din nou.
 You may need to update: {0},Posibil să aveți nevoie pentru a actualiza: {0}
 You must Save the form before proceeding,Trebuie să salvați formularul înainte de a începe
-You must allocate amount before reconcile,Trebuie să aloce sume înainte de reconciliere
 Your Customer's TAX registration numbers (if applicable) or any general information,Numerele de înregistrare fiscală clientului dumneavoastră (dacă este cazul) sau orice informații generale
 Your Customers,Clienții dvs.
 Your Login Id,Intra Id-ul dvs.
@@ -3173,11 +3321,13 @@ Your sales person who will contact the customer in future,Persoana de vânzări 
 Your sales person will get a reminder on this date to contact the customer,Persoană de vânzări va primi un memento la această dată pentru a lua legătura cu clientul
 Your setup is complete. Refreshing...,Configurarea este completă. Refreshing ...
 Your support email id - must be a valid email - this is where your emails will come!,Suport e-mail id-ul dvs. - trebuie să fie un e-mail validă - aceasta este în cazul în care e-mailurile tale vor veni!
+[Error],[Eroare]
 [Select],[Select]
 `Freeze Stocks Older Than` should be smaller than %d days.,`Stocuri Freeze mai în vârstă decât` ar trebui să fie mai mică decât% d zile.
 and,și
 are not allowed.,nu sunt permise.
 assigned by,atribuit de către
+cannot be greater than 100,nu poate fi mai mare de 100
 "e.g. ""Build tools for builders""","de exemplu ""Construi instrumente de constructori """
 "e.g. ""MC""","de exemplu ""MC """
 "e.g. ""My Company LLC""","de exemplu ""My Company LLC """
@@ -3190,32 +3340,34 @@ example: Next Day Shipping,exemplu: Next Day Shipping
 lft,LFT
 old_parent,old_parent
 rgt,RGT
+subject,subiect
+to,către
 website page link,pagina site-ului link-ul
 {0} '{1}' not in Fiscal Year {2},"{0} {1} ""nu este în anul fiscal {2}"
 {0} Credit limit {0} crossed,{0} Limita de credit {0} trecut
 {0} Serial Numbers required for Item {0}. Only {0} provided.,{0} numere de serie necesare pentru postul {0}. Numai {0} furnizate.
-{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} de buget pentru contul {1} ​​contra cost Centrul de {2} va depăși de {3}
-{0} created,{0} creat
+{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} de buget pentru contul {1} contra cost Centrul de {2} va depăși de {3}
+{0} can not be negative,{0} nu poate fi negativ
+{0} created,{0} a creat
 {0} does not belong to Company {1},{0} nu aparține companiei {1}
 {0} entered twice in Item Tax,{0} a intrat de două ori în postul fiscal
 {0} is an invalid email address in 'Notification Email Address',"{0} este o adresă de e-mail nevalidă în ""Notificarea Adresa de e-mail"""
 {0} is mandatory,{0} este obligatorie
 {0} is mandatory for Item {1},{0} este obligatorie pentru postul {1}
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} este obligatorie. Poate înregistrare de schimb valutar nu este creat pentru {1} la {2}.
 {0} is not a stock Item,{0} nu este un element de stoc
 {0} is not a valid Batch Number for Item {1},{0} nu este un număr de lot valabil pentru postul {1}
-{0} is not a valid Leave Approver,{0} nu este un concediu aprobator valid
+{0} is not a valid Leave Approver. Removing row #{1}.,{0} nu este un concediu aprobator valabil. Scoaterea rând # {1}.
 {0} is not a valid email id,{0} nu este un id-ul de e-mail validă
 {0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} este acum implicit anul fiscal. Vă rugăm să reîmprospătați browser-ul dvs. pentru ca modificarea să aibă efect.
 {0} is required,{0} este necesară
 {0} must be a Purchased or Sub-Contracted Item in row {1},{0} trebuie sa fie un element Achiziționat sau subcontractate în rândul {1}
-{0} must be less than or equal to {1},{0} trebuie să fie mai mic sau egal cu {1}
+{0} must be reduced by {1} or you should increase overflow tolerance,{0} trebuie să fie redusă cu {1} sau ar trebui să crească toleranța preaplin
 {0} must have role 'Leave Approver',"{0} trebuie să aibă rol de ""Leave aprobator"""
 {0} valid serial nos for Item {1},{0} nos serie valabile pentru postul {1}
 {0} {1} against Bill {2} dated {3},{0} {1} împotriva Bill {2} din {3}
 {0} {1} against Invoice {2},{0} {1} împotriva Factura {2}
 {0} {1} has already been submitted,{0} {1} a fost deja prezentat
-{0} {1} has been modified. Please Refresh,{0} {1} a fost modificat. Va rugam sa Refresh
-{0} {1} has been modified. Please refresh,{0} {1} a fost modificat. Vă rugăm să reîmprospătați
 {0} {1} has been modified. Please refresh.,{0} {1} a fost modificat. Vă rugăm să reîmprospătați.
 {0} {1} is not submitted,{0} {1} nu este prezentată
 {0} {1} must be submitted,{0} {1} trebuie să fie prezentate
@@ -3223,3 +3375,5 @@ website page link,pagina site-ului link-ul
 {0} {1} status is 'Stopped',"{0} {1} statut este ""Oprit"""
 {0} {1} status is Stopped,{0} {1} statut este oprit
 {0} {1} status is Unstopped,{0} {1} statut este destupate
+{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Cost Center este obligatorie pentru postul {2}
+{0}: {1} not found in Invoice Details table,{0}: {1} nu a fost găsit în factură Detalii masă

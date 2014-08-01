@@ -14,7 +14,6 @@
 % of materials delivered against this Sales Order,% Материјала испоручених против овог налога за продају
 % of materials ordered against this Material Request,% Материјала изрећи овај материјал захтеву
 % of materials received against this Purchase Order,% Материјала добио против ове нарудзбенице
-%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s,% ( цонверсион_рате_лабел ) с је обавезан . Можда Мењачница запис није створен за % ( фром_цурренци ) с до % ( то_цурренци ) и
 'Actual Start Date' can not be greater than 'Actual End Date',""" Фактическое начало Дата "" не может быть больше, чем «Актуальные Дата окончания '"
 'Based On' and 'Group By' can not be same,""" На основе "" и "" Группировка по "" не может быть таким же,"
 'Days Since Last Order' must be greater than or equal to zero,""" Дни с последнего Порядке так должно быть больше или равно нулю"
@@ -30,11 +29,35 @@
 'Update Stock' for Sales Invoice {0} must be set,""" Обновление со 'для Расходная накладная {0} должен быть установлен"
 * Will be calculated in the transaction.,* Хоће ли бити обрачуната у трансакцији.
 "1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent",1 Валута = [ ? ] Фракција \ нНа пример
+For e.g. 1 USD = 100 Cent","1 Валута = [?] Фракција 
+ За пример 1 УСД = 100 Цент"
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Да бисте задржали купца мудрог код ставке и да их претраживати на основу њиховог кода користили ову опцију
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<а хреф=""#Салес Бровсер/Цустомер Гроуп""> Додај / Уреди < />"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<а хреф=""#Салес Бровсер/Итем Гроуп""> Додај / Уреди < />"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<а хреф=""#Салес Бровсер/Территори""> Додај / Уреди < />"
+"<h4>Default Template</h4>
+<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
+<pre><code>{{ address_line1 }}&lt;br&gt;
+{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
+{{ city }}&lt;br&gt;
+{% if state %}{{ state }}&lt;br&gt;{% endif -%}
+{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
+{{ country }}&lt;br&gt;
+{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
+{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
+{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
+</code></pre>","<х4> Уобичајено шаблона </ х4> 
+ <п> Користи <а хреф=""хттп://јиња.поцоо.орг/доцс/темплатес/""> Џинџа темплатинг </ а> и сва поља Адреса ( укључујући прилагођена поља ако има) ће бити доступан </ п> 
+ <пре> <цоде> {{}} аддресс_лине1 <бр> 
+ {% ако аддресс_лине2%} {{}} аддресс_лине2 <бр> { ендиф% -%} 
+ {{}} <бр> град 
+ {% ако држава%} {{}} држава <бр> {ендиф% -%} 
+ {% ако Пинцоде%} ПИН: {{}} Пинцоде <бр> {ендиф% -%} 
+ {{}} земља <бр> 
+ {% ако телефон%} Тел: {{}} телефон <бр> { ендиф% -%} 
+ {% ако факс%} Факс: {{}} факс <бр> {ендиф% -%} 
+ {% ако емаил_ид%} Емаил: {{}} емаил_ид <бр> ; {ендиф% -%} 
+ </ цоде> </ пре>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Группа клиентов существует с тем же именем , пожалуйста изменить имя клиентов или переименовать группу клиентов"
 A Customer exists with same name,Кориснички постоји са истим именом
 A Lead with this email id should exist,Олово са овом е ид треба да постоје
@@ -44,7 +67,6 @@ A symbol for this currency. For e.g. $,Симбол за ову валуту. З
 AMC Expiry Date,АМЦ Датум истека
 Abbr,Аббр
 Abbreviation cannot have more than 5 characters,Аббревиатура не может иметь более 5 символов
-About,Око
 Above Value,Изнад Вредност
 Absent,Одсутан
 Acceptance Criteria,Критеријуми за пријем
@@ -59,6 +81,8 @@ Account Details,Детаљи рачуна
 Account Head,Рачун шеф
 Account Name,Име налога
 Account Type,Тип налога
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Стања на рачуну већ у Кредит, није вам дозвољено да поставите 'биланс треба да се' као 'Дебит """
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Стање рачуна већ у задуживање, није вам дозвољено да поставите 'Стање Муст Бе' као 'Кредит'"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Рачун за складишта ( сталне инвентуре ) ће бити направљен у оквиру овог рачуна .
 Account head {0} created,Глава счета {0} создан
 Account must be a balance sheet account,Счет должен быть балансовый счет
@@ -68,13 +92,20 @@ Account with existing transaction can not be deleted,Счет с существ�
 Account with existing transaction cannot be converted to ledger,Счет с существующей сделки не могут быть преобразованы в книге
 Account {0} cannot be a Group,Счет {0} не может быть группа
 Account {0} does not belong to Company {1},Счет {0} не принадлежит компании {1}
+Account {0} does not belong to company: {1},Рачун {0} не припада компанији: {1}
 Account {0} does not exist,Счет {0} не существует
 Account {0} has been entered more than once for fiscal year {1},Счет {0} был введен более чем один раз в течение финансового года {1}
 Account {0} is frozen,Счет {0} заморожен
 Account {0} is inactive,Счет {0} неактивен
+Account {0} is not valid,Рачун {0} није важећа
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Счет {0} должен быть типа "" Fixed Asset "", как товара {1} является активом Пункт"
+Account {0}: Parent account {1} can not be a ledger,Рачун {0}: {1 Родитељ рачун} не може бити књига
+Account {0}: Parent account {1} does not belong to company: {2},Рачун {0}: {1 Родитељ рачун} не припада компанији: {2}
+Account {0}: Parent account {1} does not exist,Рачун {0}: {1 Родитељ рачун} не постоји
+Account {0}: You can not assign itself as parent account,Рачун {0}: Не може да се доделити као родитељ налог
 "Account: {0} can only be updated via \
-					Stock Transactions",Рачун : {0} може да се ажурира само преко \ \ н Сток трансакција
+					Stock Transactions","Рачун: {0} може да се ажурира само преко \
+ Сток трансакција"
 Accountant,рачуновођа
 Accounting,Рачуноводство
 "Accounting Entries can be made against leaf nodes, called","Рачуноводствене Уноси могу бити против листа чворова , зове"
@@ -124,6 +155,7 @@ Address Details,Адреса Детаљи
 Address HTML,Адреса ХТМЛ
 Address Line 1,Аддресс Лине 1
 Address Line 2,Аддресс Лине 2
+Address Template,Адреса шаблона
 Address Title,Адреса Наслов
 Address Title is mandatory.,Адрес Название является обязательным.
 Address Type,Врста адресе
@@ -144,7 +176,6 @@ Against Docname,Против Доцнаме
 Against Doctype,Против ДОЦТИПЕ
 Against Document Detail No,Против докумената детаља Нема
 Against Document No,Против документу Нема
-Against Entries,Против Ентриес
 Against Expense Account,Против трошковником налог
 Against Income Account,Против приход
 Against Journal Voucher,Против Јоурнал ваучер
@@ -180,10 +211,8 @@ All Territories,Все территории
 "All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Все экспорт смежных областях , как валюты, обменный курс , экспорт Количество , экспорт общего итога и т.д. доступны в накладной , POS, цитаты , счет-фактура , заказ клиента и т.д."
 "All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Все импорта смежных областях , как валюты, обменный курс , общий объем импорта , импорт общего итога и т.д. доступны в ТОВАРНЫЙ ЧЕК , поставщиков цитаты , счета-фактуры Заказа т.д."
 All items have already been invoiced,Све ставке су већ фактурисано
-All items have already been transferred for this Production Order.,Все детали уже переданы для этого производственного заказа .
 All these items have already been invoiced,Все эти предметы уже выставлен счет
 Allocate,Доделити
-Allocate Amount Automatically,Алокација износ Аутоматски
 Allocate leaves for a period.,Выделите листья на определенный срок.
 Allocate leaves for the year.,Додела лишће за годину.
 Allocated Amount,Издвојена Износ
@@ -204,13 +233,13 @@ Allow Users,Дозволи корисницима
 Allow the following users to approve Leave Applications for block days.,Дозволи следеће корисницима да одобри Апликације оставити за блок дана.
 Allow user to edit Price List Rate in transactions,Дозволите кориснику да измените Рате Ценовник у трансакцијама
 Allowance Percent,Исправка Проценат
-Allowance for over-delivery / over-billing crossed for Item {0},Учет по - доставки / Over- биллинга скрещенными за Пункт {0}
+Allowance for over-{0} crossed for Item {1},Исправка за преко-{0} {прешао за тачке 1}
+Allowance for over-{0} crossed for Item {1}.,Исправка за преко-{0} прешао за пункт {1}.
 Allowed Role to Edit Entries Before Frozen Date,Дозвољено Улога на Измене уноса Пре Фрозен Дате
 Amended From,Измењена од
 Amount,Износ
 Amount (Company Currency),Износ (Друштво валута)
-Amount <=,Износ &lt;=
-Amount >=,Износ&gt; =
+Amount Paid,Износ Плаћени
 Amount to Bill,Износ на Предлог закона
 An Customer exists with same name,Существуетклиентов с одноименным названием
 "An Item Group exists with same name, please change the item name or rename the item group","Пункт Группа существует с тем же именем , пожалуйста, измените имя элемента или переименовать группу товаров"
@@ -260,6 +289,7 @@ As per Stock UOM,По берза ЗОЦГ
 Asset,преимућство
 Assistant,асистент
 Associate,помоћник
+Atleast one of the Selling or Buying must be selected,Барем један од продајете или купујете морају бити изабрани
 Atleast one warehouse is mandatory,Атлеаст једно складиште је обавезно
 Attach Image,Прикрепите изображение
 Attach Letterhead,Прикрепите бланке
@@ -319,6 +349,7 @@ Balance for Account {0} must always be {1},Весы для счета {0} дол
 Balance must be,Баланс должен быть
 "Balances of Accounts of type ""Bank"" or ""Cash""",Остатки на счетах типа «Банк» или «Денежные средства»
 Bank,Банка
+Bank / Cash Account,Банка / готовински рачун
 Bank A/C No.,Банка / Ц бр
 Bank Account,Банковни рачун
 Bank Account No.,Банковни рачун бр
@@ -397,18 +428,24 @@ Budget Distribution Details,Буџетски Дистрибуција Детаљ
 Budget Variance Report,Буџет Разлика извештај
 Budget cannot be set for Group Cost Centers,Бюджет не может быть установлено для группы МВЗ
 Build Report,Буилд Пријави
-Built on,Построенный на
 Bundle items at time of sale.,Бундле ставке у време продаје.
 Business Development Manager,Менаџер за пословни развој
 Buying,Куповина
 Buying & Selling,Покупка и продажа
 Buying Amount,Куповина Износ
 Buying Settings,Куповина Сеттингс
+"Buying must be checked, if Applicable For is selected as {0}","Куповина се мора проверити, ако је применљиво Јер је изабрана као {0}"
 C-Form,Ц-Форм
 C-Form Applicable,Ц-примењује
 C-Form Invoice Detail,Ц-Форм Рачун Детаљ
 C-Form No,Ц-Образац бр
 C-Form records,Ц - Форма евиденција
+CENVAT Capital Goods,ЦЕНВАТ Капитал робе
+CENVAT Edu Cess,ЦЕНВАТ Еду Цесс
+CENVAT SHE Cess,ЦЕНВАТ ОНА Цесс
+CENVAT Service Tax,ЦЕНВАТ пореза на услуге
+CENVAT Service Tax Cess 1,ЦЕНВАТ сервис Пореска Цесс 1
+CENVAT Service Tax Cess 2,ЦЕНВАТ сервис Пореска Цесс 2
 Calculate Based On,Израчунајте Басед Он
 Calculate Total Score,Израчунајте Укупна оцена
 Calendar Events,Календар догађаја
@@ -432,7 +469,7 @@ Cannot approve leave as you are not authorized to approve leaves on Block Dates,
 Cannot cancel because Employee {0} is already approved for {1},"Нельзя отменить , потому что сотрудников {0} уже одобрен для {1}"
 Cannot cancel because submitted Stock Entry {0} exists,"Нельзя отменить , потому что представляется со Вступление {0} существует"
 Cannot carry forward {0},Не можете переносить {0}
-Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,Не можете да промените Година датум почетка и датум завршетка Година једномФискална година је сачувана .
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Не можете променити фискалну годину и датум почетка фискалне године Датум завршетка једном Фискална година је сачувана.
 "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Невозможно изменить Базовая валюта компании , потому что есть существующие операции . Сделки должны быть отменены , чтобы поменять валюту ."
 Cannot convert Cost Center to ledger as it has child nodes,"Невозможно преобразовать МВЗ в книге , как это имеет дочерние узлы"
 Cannot covert to Group because Master Type or Account Type is selected.,"Не можете скрытые в группу , потому что выбран Мастер Введите или счета Тип ."
@@ -441,7 +478,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,Не можете 
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',"Не можете вычесть , когда категория для "" Оценка "" или "" Оценка и Всего"""
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.","Не удается удалить серийный номер {0} в наличии . Сначала снимите со склада , а затем удалить ."
 "Cannot directly set amount. For 'Actual' charge type, use the rate field","Не можете непосредственно установить сумму. Для «Актуальные ' типа заряда , используйте поле скорости"
-"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'","Не можете overbill по пункту {0} в строке {0} более {1} . Чтобы разрешить overbilling , пожалуйста, установите в ' Setup ' > ' Глобальные умолчанию '"
+"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings","Не могу овербилл за пункт {0} у реду {0} {1 више него}. Да бисте дозволили Овербиллинг, молимо вас да поставите у складишту Сеттингс"
 Cannot produce more Item {0} than Sales Order quantity {1},"Не можете производить больше элемент {0} , чем количество продаж Заказать {1}"
 Cannot refer row number greater than or equal to current row number for this Charge type,"Не можете обратиться номер строки , превышающую или равную текущему номеру строки для этого типа зарядки"
 Cannot return more than {0} for Item {1},Не можете вернуть более {0} для Пункт {1}
@@ -504,6 +541,8 @@ Click on a link to get options to expand get options ,
 Client,Клијент
 Close Balance Sheet and book Profit or Loss.,Затвори Биланс стања и књига добитак или губитак .
 Closed,Затворено
+Closing (Cr),Затварање (Цр)
+Closing (Dr),Затварање (др)
 Closing Account Head,Затварање рачуна Хеад
 Closing Account {0} must be of type 'Liability',"Закрытие счета {0} должен быть типа "" ответственности """
 Closing Date,Датум затварања
@@ -514,7 +553,9 @@ CoA Help,ЦоА Помоћ
 Code,Код
 Cold Calling,Хладна Позивање
 Color,Боја
+Column Break,Колона Пауза
 Comma separated list of email addresses,Зарез раздвојен списак емаил адреса
+Comment,Коментар
 Comments,Коментари
 Commercial,коммерческий
 Commission,комисија
@@ -599,7 +640,6 @@ Cosmetics,козметика
 Cost Center,Трошкови центар
 Cost Center Details,Трошкови Детаљи центар
 Cost Center Name,Трошкови Име центар
-Cost Center is mandatory for Item {0},МВЗ является обязательным для п. {0}
 Cost Center is required for 'Profit and Loss' account {0},Стоимость Центр необходим для ' о прибылях и убытках » счета {0}
 Cost Center is required in row {0} in Taxes table for type {1},МВЗ требуется в строке {0} в виде налогов таблицы для типа {1}
 Cost Center with existing transactions can not be converted to group,МВЗ с существующими сделок не могут быть преобразованы в группе
@@ -609,6 +649,7 @@ Cost of Goods Sold,Себестоимость реализованных тов�
 Costing,Коштање
 Country,Земља
 Country Name,Земља Име
+Country wise default Address Templates,Земља мудар подразумевана адреса шаблон
 "Country, Timezone and Currency","Земља , временску зону и валута"
 Create Bank Voucher for the total salary paid for the above selected criteria,Креирање ваучера банка за укупне плате исплаћене за горе изабраним критеријумима
 Create Customer,Креирање корисника
@@ -662,10 +703,12 @@ Customer (Receivable) Account,Кориснички (потраживања) Ра
 Customer / Item Name,Кориснички / Назив
 Customer / Lead Address,Кориснички / Олово Адреса
 Customer / Lead Name,Заказчик / Ведущий Имя
+Customer > Customer Group > Territory,Кориснички> Кориснички Група> Територија
 Customer Account Head,Кориснички налог је шеф
 Customer Acquisition and Loyalty,Кориснички Стицање и лојалности
 Customer Address,Кориснички Адреса
 Customer Addresses And Contacts,Кориснички Адресе и контакти
+Customer Addresses and Contacts,Адресе корисника и контакти
 Customer Code,Кориснички Код
 Customer Codes,Кориснички Кодови
 Customer Details,Кориснички Детаљи
@@ -727,6 +770,8 @@ Deduction1,Дедуцтион1
 Deductions,Одбици
 Default,Уобичајено
 Default Account,Уобичајено Рачун
+Default Address Template cannot be deleted,Уобичајено Адреса Шаблон не може бити обрисан
+Default Amount,Уобичајено Износ
 Default BOM,Уобичајено БОМ
 Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,"Уобичајено банка / Готовина налог ће аутоматски бити ажуриран у ПОС фактура, када је овај режим изабран."
 Default Bank Account,Уобичајено банковног рачуна
@@ -734,7 +779,6 @@ Default Buying Cost Center,По умолчанию Покупка МВЗ
 Default Buying Price List,Уобичајено Куповина Ценовник
 Default Cash Account,Уобичајено готовински рачун
 Default Company,Уобичајено Компанија
-Default Cost Center for tracking expense for this item.,Уобичајено Трошкови Центар за праћење трошкова за ову ставку.
 Default Currency,Уобичајено валута
 Default Customer Group,Уобичајено групу потрошача
 Default Expense Account,Уобичајено Трошкови налога
@@ -761,6 +805,7 @@ Default settings for selling transactions.,Настройки по умолча�
 Default settings for stock transactions.,Настройки по умолчанию для биржевых операций .
 Defense,одбрана
 "Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Дефинисање буџета за ову трошкова Центра. Да бисте поставили радњу буџета, види <a href=""#!List/Company"">Мастер Цомпани</a>"
+Del,Дел
 Delete,Избрисати
 Delete {0} {1}?,Удалить {0} {1} ?
 Delivered,Испоручено
@@ -809,6 +854,7 @@ Discount (%),Попуст (%)
 Discount Amount,Сумма скидки
 "Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Попуст Поља ће бити доступан у нарудзбенице, Куповина записа, фактури"
 Discount Percentage,Скидка в процентах
+Discount Percentage can be applied either against a Price List or for all Price List.,Попуст Проценат може да се примени било против ценовнику или за све Ценовником.
 Discount must be less than 100,Скидка должна быть меньше 100
 Discount(%),Попуст (%)
 Dispatch,депеша
@@ -841,7 +887,8 @@ Download Template,Преузмите шаблон
 Download a report containing all raw materials with their latest inventory status,Преузмите извештај садржи све сировине са њиховим најновијим инвентара статусу
 "Download the Template, fill appropriate data and attach the modified file.","Скачать шаблон , заполнить соответствующие данные и приложить измененный файл ."
 "Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Преузмите шаблон , попуните одговарајуће податке и приложите измењену датотеку \ . НАЛЛ датира и комбинација запослени у изабраном периоду ће доћи у шаблону , са постојећим евиденцију радног"
+All dates and employee combination in the selected period will come in the template, with existing attendance records","Преузмите шаблон, попуните одговарајуће податке и приложите измењену датотеку.
+ Сви датуми и комбинација запослени у изабраном периоду ће доћи у шаблону, са постојећим евиденцију радног"
 Draft,Нацрт
 Dropbox,Дропбок
 Dropbox Access Allowed,Дропбок дозвољен приступ
@@ -863,6 +910,9 @@ Earning & Deduction,Зарада и дедукције
 Earning Type,Зарада Вид
 Earning1,Еарнинг1
 Edit,Едит
+Edu. Cess on Excise,Еду. Цесс о акцизама
+Edu. Cess on Service Tax,Еду. Успех на сервис порезу
+Edu. Cess on TDS,Еду. Цесс на ЛПТ
 Education,образовање
 Educational Qualification,Образовни Квалификације
 Educational Qualification Details,Образовни Квалификације Детаљи
@@ -937,16 +987,27 @@ Enter url parameter for receiver nos,Унесите УРЛ параметар з
 Entertainment & Leisure,Забава и слободно време
 Entertainment Expenses,представительские расходы
 Entries,Уноси
-Entries against,Уноси против
+Entries against ,
 Entries are not allowed against this Fiscal Year if the year is closed.,Уноси нису дозвољени против фискалне године ако је затворен.
-Entries before {0} are frozen,Записи до {0} заморожены
 Equity,капитал
 Error: {0} > {1},Ошибка: {0} > {1}
 Estimated Material Cost,Процењени трошкови материјала
+"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Чак и ако постоји више Цене правила са највишим приоритетом, онда следећи интерни приоритети се примењују:"
 Everyone can read,Свако може да чита
 "Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Пример : . АБЦД # # # # # \ нАко је смештена и серијски Не се не помиње у трансакцијама , онда аутоматски серијски број ће бити креирана на основу ове серије ."
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Пример: АБЦД # # # # # 
+ Ако је смештена и серијски Не се не помиње у трансакцијама, онда аутоматски серијски број ће бити креирана на основу ове серије. Ако увек желите да експлицитно поменути серијски Нос за ову ставку. оставите празно."
 Exchange Rate,Курс
+Excise Duty 10,Акцизе 10
+Excise Duty 14,Акцизе 14
+Excise Duty 4,Акцизе 4
+Excise Duty 8,Акцизе 8
+Excise Duty @ 10,Акцизе @ 10
+Excise Duty @ 14,Акцизе @ 14
+Excise Duty @ 4,Акцизе @ 4
+Excise Duty @ 8,Акцизе @ 8
+Excise Duty Edu Cess 2,Акцизе Еду Цесс 2
+Excise Duty SHE Cess 1,Акцизе ОНА Цесс 1
 Excise Page Number,Акцизе Број странице
 Excise Voucher,Акцизе ваучера
 Execution,извршење
@@ -965,6 +1026,7 @@ Expected Delivery Date cannot be before Sales Order Date,Ожидаемая да
 Expected End Date,Очекивани датум завршетка
 Expected Start Date,Очекивани датум почетка
 Expense,расход
+Expense / Difference account ({0}) must be a 'Profit or Loss' account,"Расходи / Разлика налог ({0}) мора бити ""Добитак или губитак 'налога"
 Expense Account,Трошкови налога
 Expense Account is mandatory,Расходи Рачун је обавезан
 Expense Claim,Расходи потраживање
@@ -1015,12 +1077,16 @@ Finished Goods,готове робе
 First Name,Име
 First Responded On,Прво одговорила
 Fiscal Year,Фискална година
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Фискална година Датум почетка и фискалну годину Датум завршетка су већ постављена у фискалној {0}
+Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,"Фискална година Датум почетка и завршетка Фискална година Датум не може бити више од годину дана, осим."
+Fiscal Year Start Date should not be greater than Fiscal Year End Date,Фискална година Датум почетка не би требало да буде већа од Фискална година Датум завршетка
 Fixed Asset,Исправлена ​​активами
 Fixed Assets,капитальные активы
 Follow via Email,Пратите преко е-поште
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Након сто ће показати вредности ако су ставке под - уговорена. Ове вредности ће бити преузета од мајстора &quot;Бил материјала&quot; за под - уговорених ставки.
 Food,еда
 "Food, Beverage & Tobacco","Храна , пиће и дуван"
+"For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","За 'продаје' БОМ артикала, Магацин, серијски број и Батцх Не ће се сматрати из 'листе паковања' табели. Ако Складиште и Серије Не су исти за све ставке за паковање било 'продаје' бом ставке, те вредности могу се унети у главној табели артикла, вредности ће бити копирани 'Паковање' Лист табели."
 For Company,За компаније
 For Employee,За запосленог
 For Employee Name,За запосленог Име
@@ -1050,7 +1116,9 @@ From Currency and To Currency cannot be same,Од Валуте и до валу�
 From Customer,Од купца
 From Customer Issue,Од Цустомер Иссуе
 From Date,Од датума
+From Date cannot be greater than To Date,Од датума не може бити већа него до сада
 From Date must be before To Date,Од датума мора да буде пре датума
+From Date should be within the Fiscal Year. Assuming From Date = {0},Од датума треба да буде у оквиру фискалне године. Под претпоставком Од датума = {0}
 From Delivery Note,Из доставница
 From Employee,Од запосленог
 From Lead,Од Леад
@@ -1072,7 +1140,9 @@ Frozen Accounts Modifier,Смрзнута Рачуни Модификатор
 Fulfilled,Испуњена
 Full Name,Пуно име
 Full-time,Пуно радно време
+Fully Billed,Потпуно Изграђена
 Fully Completed,Потпуно Завршено
+Fully Delivered,Потпуно Испоручено
 Furniture and Fixture,Мебель и приспособления
 Further accounts can be made under Groups but entries can be made against Ledger,"Дальнейшие счета могут быть сделаны в соответствии с группами , но записи могут быть сделаны против Леджер"
 "Further accounts can be made under Groups, but entries can be made against Ledger","Дальнейшие счета могут быть сделаны в соответствии с группами , но Вы можете быть предъявлен Леджер"
@@ -1090,7 +1160,6 @@ Generate Schedule,Генериши Распоред
 Generates HTML to include selected image in the description,Ствара ХТМЛ укључити изабрану слику у опису
 Get Advances Paid,Гет аванси
 Get Advances Received,Гет аванси
-Get Against Entries,Гет Против Ентриес
 Get Current Stock,Гет тренутним залихама
 Get Items,Гет ставке
 Get Items From Sales Orders,Набавите ставке из наруџбина купаца
@@ -1103,6 +1172,7 @@ Get Specification Details,Гет Детаљи Спецификација
 Get Stock and Rate,Гет Стоцк анд рате
 Get Template,Гет шаблона
 Get Terms and Conditions,Гет Услове
+Get Unreconciled Entries,Гет неусаглашених уносе
 Get Weekly Off Dates,Гет Офф Недељно Датуми
 "Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Гет стопу процене и доступну кундак на извор / мета складишта на поменуто постављање датум-време. Ако серијализованом ставку, притисните ово дугме након уласка серијски бр."
 Global Defaults,Глобални Дефаултс
@@ -1171,6 +1241,7 @@ Hour,час
 Hour Rate,Стопа час
 Hour Rate Labour,Стопа час рада
 Hours,Радно време
+How Pricing Rule is applied?,Како се примењује Правилник о ценама?
 How frequently?,Колико често?
 "How should this currency be formatted? If not set, will use system defaults","Како би ова валута се форматира? Ако нису подешене, неће користити подразумеване системске"
 Human Resources,Человеческие ресурсы
@@ -1187,12 +1258,15 @@ If different than customer address,Если отличается от адрес
 "If disable, 'Rounded Total' field will not be visible in any transaction","Ако онемогућите, &quot;заобљени&quot; Тотал поље неће бити видљив у свакој трансакцији"
 "If enabled, the system will post accounting entries for inventory automatically.","Ако је укључен, систем ће писати уносе рачуноводствене инвентар аутоматски."
 If more than one package of the same type (for print),Ако више од једног пакета истог типа (за штампу)
+"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","Ако више Цене Правила наставити да превлада, корисници су упитани да подесите приоритет ручно да реши конфликт."
 "If no change in either Quantity or Valuation Rate, leave the cell blank.","Ако нема промене у било Количина или вредновања курс , оставите празно ћелија ."
 If not applicable please enter: NA,Ако није примењиво унесите: НА
 "If not checked, the list will have to be added to each Department where it has to be applied.","Ако се не проверава, листа ће морати да се дода сваком одељењу где има да се примењује."
+"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Ако изабрана Правилник о ценама је направљена за 'цена', он ће преписати Ценовник. Правилник о ценама цена је коначна цена, тако да треба применити даље попуст. Дакле, у трансакцијама као што су продаје Реда, Наруџбеница итд, то ће бити продата у 'курс' пољу, него 'Ценовник курс' области."
 "If specified, send the newsletter using this email address","Ако је наведено, пошаљите билтен користећи ову адресу"
 "If the account is frozen, entries are allowed to restricted users.","Аконалог је замрзнут , уноси могу да ограничене корисницима ."
 "If this Account represents a Customer, Supplier or Employee, set it here.","Ако је ово налог представља купац, добављач или запослени, подесите га овде."
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","Ако два или више Цене Правила се наћи на горе наведеним условима, Приоритет се примењује. Приоритет је број између 0 до 20, а подразумевана вредност је нула (празан). Већи број значи да ће имати предност ако постоји више Цене правила са истим условима."
 If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,Если вы будете следовать осмотра качества . Разрешает Item требуется и QA QA Нет в ТОВАРНЫЙ ЧЕК
 If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,Уколико имате продајни тим и продаја партнерима (Цханнел Партнерс) они могу бити означене и одржава свој допринос у активностима продаје
 "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","Ако сте направили стандардну предложак за куповину пореза и накнада мајстор, изаберите један и кликните на дугме испод."
@@ -1200,6 +1274,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 "If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","Ако сте дуго штампање формата, ова функција може да се користи да подели страница на којој се штампа на више страница са свим заглавља и подножја на свакој страници"
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',Если вы привлечь в производственной деятельности. Включает элемент ' производится '
 Ignore,Игнорисати
+Ignore Pricing Rule,Игноре Правилник о ценама
 Ignored: ,Занемарени:
 Image,Слика
 Image View,Слика Погледај
@@ -1236,8 +1311,9 @@ Income booked for the digest period,Приходи резервисано за �
 Incoming,Долазни
 Incoming Rate,Долазни Оцени
 Incoming quality inspection.,Долазни контрола квалитета.
+Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Погрешан број уноса Главне књиге нашао. Можда сте изабрали погрешну налог у трансакцији.
 Incorrect or Inactive BOM {0} for Item {1} at row {2},Неправильное или Неактивный BOM {0} для Пункт {1} в строке {2}
-Indicates that the package is a part of this delivery,Показује да је пакет део ове испоруке
+Indicates that the package is a part of this delivery (Only Draft),Указује на то да пакет је део ове испоруке (само нацрт)
 Indirect Expenses,косвенные расходы
 Indirect Income,Косвенная прибыль
 Individual,Појединац
@@ -1263,6 +1339,7 @@ Intern,стажиста
 Internal,Интерни
 Internet Publishing,Интернет издаваштво
 Introduction,Увод
+Invalid Barcode,Неважећи Баркод
 Invalid Barcode or Serial No,Неверный код или Серийный номер
 Invalid Mail Server. Please rectify and try again.,"Неверный Сервер Почта . Пожалуйста, исправить и попробовать еще раз."
 Invalid Master Name,Неважећи мајстор Име
@@ -1275,9 +1352,12 @@ Investments,инвестиции
 Invoice Date,Фактуре
 Invoice Details,Детаљи фактуре
 Invoice No,Рачун Нема
-Invoice Period From Date,Рачун периоду од датума
+Invoice Number,Фактура број
+Invoice Period From,Фактура периоду од
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Счет Период С и счет-фактура Период до даты обязательных для повторяющихся счет
-Invoice Period To Date,Рачун Период до данас
+Invoice Period To,Фактура период до
+Invoice Type,Фактура Тип
+Invoice/Journal Voucher Details,Рачун / Часопис ваучера Детаљи
 Invoiced Amount (Exculsive Tax),Износ фактуре ( Екцулсиве Пореска )
 Is Active,Је активан
 Is Advance,Да ли Адванце
@@ -1308,6 +1388,7 @@ Item Advanced,Ставка Напредна
 Item Barcode,Ставка Баркод
 Item Batch Nos,Итем Батцх Нос
 Item Code,Шифра
+Item Code > Item Group > Brand,Код товара> товара Група> Бренд
 Item Code and Warehouse should already exist.,Шифра и складишта треба да већ постоје .
 Item Code cannot be changed for Serial No.,Шифра не може се мењати за серијским бројем
 Item Code is mandatory because Item is not automatically numbered,"Код товара является обязательным, поскольку Деталь не автоматически нумеруются"
@@ -1319,6 +1400,7 @@ Item Details,Детаљи артикла
 Item Group,Ставка Група
 Item Group Name,Ставка Назив групе
 Item Group Tree,Ставка Група дрво
+Item Group not mentioned in item master for item {0},Ставка група не помиње у тачки мајстор за ставку {0}
 Item Groups in Details,Ставка Групе у детаљима
 Item Image (if not slideshow),Артикал слика (ако не слидесхов)
 Item Name,Назив
@@ -1389,7 +1471,8 @@ Item-wise Purchase Register,Тачка-мудар Куповина Регист�
 Item-wise Sales History,Тачка-мудар Продаја Историја
 Item-wise Sales Register,Предмет продаје-мудре Регистрација
 "Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Шифра : {0} је успео серије питању , не може да се помири користећи \ \ н со помирење , уместо тога користите Стоцк Ентри"
+					Stock Reconciliation, instead use Stock Entry","Шифра: {0} је успео серије питању, не може да се помири користећи \
+ Сток помирење, уместо тога користите Стоцк Ентри"
 Item: {0} not found in the system,Шифра : {0} није пронађен у систему
 Items,Артикли
 Items To Be Requested,Артикли бити затражено
@@ -1492,6 +1575,7 @@ Loading...,Учитавање ...
 Loans (Liabilities),Кредиты ( обязательства)
 Loans and Advances (Assets),Кредиты и авансы ( активы )
 Local,местный
+Login,Пријава
 Login with your new User ID,Пријавите се вашим новим Усер ИД
 Logo,Лого
 Logo and Letter Heads,Лого и Леттер Шефови
@@ -1536,6 +1620,7 @@ Make Maint. Schedule,Маке Маинт . распоред
 Make Maint. Visit,Маке Маинт . посета
 Make Maintenance Visit,Маке одржавање Посетите
 Make Packing Slip,Маке отпремници
+Make Payment,Маке плаћања
 Make Payment Entry,Уплатите Ентри
 Make Purchase Invoice,Маке фактури
 Make Purchase Order,Маке наруџбенице
@@ -1545,8 +1630,10 @@ Make Salary Structure,Маке плата Структура
 Make Sales Invoice,Маке Салес фактура
 Make Sales Order,Маке Продаја Наручите
 Make Supplier Quotation,Маке добављача цитат
+Make Time Log Batch,Маке Тиме Лог Батцх
 Male,Мушки
 Manage Customer Group Tree.,Управление групповой клиентов дерево .
+Manage Sales Partners.,Управљање продајних партнера.
 Manage Sales Person Tree.,Управление менеджера по продажам дерево .
 Manage Territory Tree.,Управление Территория дерево .
 Manage cost of operations,Управљање трошкове пословања
@@ -1597,6 +1684,8 @@ Max 5 characters,Макс 5 знакова
 Max Days Leave Allowed,Мак Дани Оставите животиње
 Max Discount (%),Максимална Попуст (%)
 Max Qty,Макс Кол-во
+Max discount allowed for item: {0} is {1}%,Максимална дозвољена попуст за ставку: {0} је {1}%
+Maximum Amount,Максимални износ
 Maximum allowed credit is {0} days after posting date,Максимально допустимое кредит {0} дней после размещения дату
 Maximum {0} rows allowed,Максимальные {0} строк разрешено
 Maxiumm discount for Item {0} is {1}%,Maxiumm скидка на Пункт {0} {1} %
@@ -1617,6 +1706,7 @@ Milestones will be added as Events in the Calendar,Прекретнице ће �
 Min Order Qty,Минимална количина за поручивање
 Min Qty,Мин Кол-во
 Min Qty can not be greater than Max Qty,Минимална Кол не може бити већи од Мак Кол
+Minimum Amount,Минимални износ
 Minimum Order Qty,Минимална количина за поручивање
 Minute,минут
 Misc Details,Остало Детаљи
@@ -1626,7 +1716,6 @@ Mobile No,Мобилни Нема
 Mobile No.,Мобиле Но
 Mode of Payment,Начин плаћања
 Modern,Модеран
-Modified Amount,Измењено Износ
 Monday,Понедељак
 Month,Месец
 Monthly,Месечно
@@ -1643,7 +1732,8 @@ Mr,Господин
 Ms,Мс
 Multiple Item prices.,Више цене аукцији .
 "Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Вишеструки Цена Правило постоји са истим критеријумима , молимо вас да реши \ \ н сукоб са приоритетом ."
+			conflict by assigning priority. Price Rules: {0}","Вишеструки Цена Правило постоји са истим критеријумима, молимо вас да реши \
+ сукоб са приоритетом. Цена Правила: {0}"
 Music,музика
 Must be Whole Number,Мора да буде цео број
 Name,Име
@@ -1659,6 +1749,7 @@ Negative Valuation Rate is not allowed,Негативно Вредновање �
 Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},Отрицательное сальдо в пакетном {0} для Пункт {1} в Хранилище {2} на {3} {4}
 Net Pay,Нето плата
 Net Pay (in words) will be visible once you save the Salary Slip.,Нето плата (у речи) ће бити видљив када сачувате Слип плату.
+Net Profit / Loss,Нето добит / губитак
 Net Total,Нето Укупно
 Net Total (Company Currency),Нето Укупно (Друштво валута)
 Net Weight,Нето тежина
@@ -1699,7 +1790,6 @@ Newsletter,Билтен
 Newsletter Content,Билтен Садржај
 Newsletter Status,Билтен статус
 Newsletter has already been sent,Информационный бюллетень уже был отправлен
-Newsletters is not allowed for Trial users,"Бюллетени не допускается, за Trial пользователей"
 "Newsletters to contacts, leads.","Билтене контактима, води."
 Newspaper Publishers,Новински издавачи
 Next,следующий
@@ -1721,6 +1811,7 @@ No Supplier Accounts found. Supplier Accounts are identified based on 'Master Ty
 No accounting entries for the following warehouses,Нет учетной записи для следующих складов
 No addresses created,Нема адресе створене
 No contacts created,Нема контаката створене
+No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,Не стандардна Адреса шаблона пронађен. Молимо креирајте нови из Подешавања> Штампа и брендирања> Адреса шаблон.
 No default BOM exists for Item {0},Нет умолчанию спецификации не существует Пункт {0}
 No description given,Не введено описание
 No employee found,Не работник не найдено
@@ -1730,6 +1821,8 @@ No of Sent SMS,Број послатих СМС
 No of Visits,Број посета
 No permission,Нет доступа
 No record found,Нема података фоунд
+No records found in the Invoice table,Нема резултата у фактури табели записи
+No records found in the Payment table,Нема резултата у табели плаћања записи
 No salary slip found for month: ,Нема плата за месец пронађен клизање:
 Non Profit,Некоммерческое
 Nos,Нос
@@ -1739,7 +1832,7 @@ Not Available,Није доступно
 Not Billed,Није Изграђена
 Not Delivered,Није Испоручено
 Not Set,Нот Сет
-Not allowed to update entries older than {0},"Не допускается , чтобы обновить записи старше {0}"
+Not allowed to update stock transactions older than {0},Није дозвољено да ажурирате акција трансакције старије од {0}
 Not authorized to edit frozen Account {0},Не разрешается редактировать замороженный счет {0}
 Not authroized since {0} exceeds limits,Не Authroized с {0} превышает пределы
 Not permitted,Не допускается
@@ -1780,7 +1873,6 @@ Only the selected Leave Approver can submit this Leave Application,Только 
 Open,Отворено
 Open Production Orders,Отворена Продуцтион Поруџбине
 Open Tickets,Отворене Улазнице
-Open source ERP built for the web,Открытый исходный код ERP построен для веб
 Opening (Cr),Открытие (Cr)
 Opening (Dr),Открытие (д-р )
 Opening Date,Датум отварања
@@ -1805,7 +1897,7 @@ Opportunity Lost,Прилика Лост
 Opportunity Type,Прилика Тип
 Optional. This setting will be used to filter in various transactions.,Опционо . Ова поставка ће се користити за филтрирање у различитим трансакцијама .
 Order Type,Врста поруџбине
-Order Type must be one of {1},Тип заказа должен быть одним из {1}
+Order Type must be one of {0},Наручи Тип мора бити један од {0}
 Ordered,Ж
 Ordered Items To Be Billed,Ж артикала буду наплаћени
 Ordered Items To Be Delivered,Ж Ставке да буде испоручена
@@ -1817,7 +1909,6 @@ Organization Name,Име организације
 Organization Profile,Профиль организации
 Organization branch master.,Организация филиал мастер .
 Organization unit (department) master.,Название подразделения (департамент) хозяин.
-Original Amount,Оригинални Износ
 Other,Други
 Other Details,Остали детаљи
 Others,другие
@@ -1834,6 +1925,7 @@ Overlapping conditions found between:,Перекрытие условия най
 Overview,преглед
 Owned,Овнед
 Owner,власник
+P L A - Cess Portion,ПЛА - Цесс Порција
 PL or BS,ПЛ или БС
 PO Date,ПО Датум
 PO No,ПО Нема
@@ -1846,7 +1938,6 @@ POS Setting required to make POS Entry,POS Настройка требуется
 POS Setting {0} already created for user: {1} and company {2},POS Установка {0} уже создали для пользователя: {1} и компания {2}
 POS View,ПОС Погледај
 PR Detail,ПР Детаљ
-PR Posting Date,ПР датум постовања
 Package Item Details,Пакет Детаљи артикла
 Package Items,Пакет Артикли
 Package Weight Details,Пакет Тежина Детаљи
@@ -1876,8 +1967,6 @@ Parent Sales Person,Продаја Родитељ Особа
 Parent Territory,Родитељ Територија
 Parent Website Page,Родитель Сайт Страница
 Parent Website Route,Родитель Сайт Маршрут
-Parent account can not be a ledger,Родитель счета не может быть книга
-Parent account does not exist,Родитель счета не существует
 Parenttype,Паренттипе
 Part-time,Скраћено
 Partially Completed,Дјелимично Завршено
@@ -1886,6 +1975,8 @@ Partly Delivered,Делимично Испоручено
 Partner Target Detail,Партнер Циљна Детаљ
 Partner Type,Партнер Тип
 Partner's Website,Партнер аутора
+Party,Странка
+Party Account,Странка налог
 Party Type,партия Тип
 Party Type Name,Партия Тип Название
 Passive,Пасиван
@@ -1898,10 +1989,14 @@ Payables Group,Обавезе Група
 Payment Days,Дана исплате
 Payment Due Date,Плаћање Дуе Дате
 Payment Period Based On Invoice Date,Период отплате Басед Он Фактура Дате
+Payment Reconciliation,Плаћање Помирење
+Payment Reconciliation Invoice,Плаћање Помирење Фактура
+Payment Reconciliation Invoices,Плаћање помирење Фактуре
+Payment Reconciliation Payment,Плаћање Плаћање Помирење
+Payment Reconciliation Payments,Плаћање помирење Плаћања
 Payment Type,Плаћање Тип
+Payment cannot be made for empty cart,Плаћање не може се за празан корпу
 Payment of salary for the month {0} and year {1},Выплата заработной платы за месяц {0} и год {1}
-Payment to Invoice Matching Tool,Плаћање фактуре Матцхинг Тоол
-Payment to Invoice Matching Tool Detail,Плаћање фактуре Матцхинг Тоол Детаљ
 Payments,Исплате
 Payments Made,Исплате Маде
 Payments Received,Уплате примљене
@@ -1944,7 +2039,9 @@ Planning,планирање
 Plant,Биљка
 Plant and Machinery,Сооружения и оборудование
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,"Молимо Вас да унесете знак или скраћени назив исправно, јер ће бити додат као суфикса свим налог шефовима."
+Please Update SMS Settings,Молимо Упдате СМС Сеттингс
 Please add expense voucher details,"Пожалуйста, добавьте расходов Детали ваучеров"
+Please add to Modes of Payment from Setup.,Молимо додати начина плаћања из Сетуп.
 Please check 'Is Advance' against Account {0} if this is an advance entry.,"Пожалуйста, проверьте ""Есть Advance "" против Счет {0} , если это такой шаг вперед запись ."
 Please click on 'Generate Schedule',"Пожалуйста, нажмите на кнопку "" Generate Расписание """
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},"Пожалуйста, нажмите на кнопку "" Generate Расписание "" , чтобы принести Серийный номер добавлен для Пункт {0}"
@@ -1992,12 +2089,13 @@ Please enter valid Company Email,"Пожалуйста, введите дейс�
 Please enter valid Email Id,"Пожалуйста, введите действительный адрес электронной почты Id"
 Please enter valid Personal Email,"Пожалуйста, введите действительный Личная на e-mail"
 Please enter valid mobile nos,Введите действительные мобильных NOS
+Please find attached Sales Invoice #{0},У прилогу продаје Фактура # {0}
 Please install dropbox python module,Молимо вас да инсталирате Дропбок питон модул
 Please mention no of visits required,"Пожалуйста, укажите кол-во посещений , необходимых"
 Please pull items from Delivery Note,Пожалуйста вытяните элементов из накладной
 Please save the Newsletter before sending,"Пожалуйста, сохраните бюллетень перед отправкой"
 Please save the document before generating maintenance schedule,Сачувајте документ пре генерисања план одржавања
-Please select Account first,Прво изаберите налог
+Please see attachment,Молимо погледајте прилог
 Please select Bank Account,Изаберите банковни рачун
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Молимо изаберите пренети ако такође желите да укључите претходну фискалну годину је биланс оставља на ову фискалну годину
 Please select Category first,Прво изаберите категорију
@@ -2005,14 +2103,17 @@ Please select Charge Type first,Изаберите Тип пуњења први
 Please select Fiscal Year,"Пожалуйста, выберите финансовый год"
 Please select Group or Ledger value,"Пожалуйста, выберите Group или Ledger значение"
 Please select Incharge Person's name,"Пожалуйста, выберите имя InCharge Лица"
+Please select Invoice Type and Invoice Number in atleast one row,Молимо изаберите Фактура Тип и број фактуре у атлеаст једном реду
 "Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","Пожалуйста, выберите пункт , где ""это со Пункт "" является ""Нет"" и "" является продажа товара "" ""да"" и нет никакой другой Продажи BOM"
 Please select Price List,Изаберите Ценовник
 Please select Start Date and End Date for Item {0},"Пожалуйста, выберите дату начала и дату окончания Пункт {0}"
+Please select Time Logs.,Изаберите време Протоколи.
 Please select a csv file,Изаберите ЦСВ датотеку
 Please select a valid csv file with data,"Пожалуйста, выберите правильный файл CSV с данными"
 Please select a value for {0} quotation_to {1},"Пожалуйста, выберите значение для {0} quotation_to {1}"
 "Please select an ""Image"" first","Молимо изаберите ""имаге"" први"
 Please select charge type first,"Пожалуйста, выберите тип заряда первым"
+Please select company first,Прво изаберите компанију
 Please select company first.,"Пожалуйста, выберите компанию в первую очередь."
 Please select item code,"Пожалуйста, выберите элемент кода"
 Please select month and year,Изаберите месец и годину
@@ -2021,6 +2122,7 @@ Please select the document type first,Прво изаберите врсту д�
 Please select weekly off day,"Пожалуйста, выберите в неделю выходной"
 Please select {0},"Пожалуйста, выберите {0}"
 Please select {0} first,Изаберите {0} први
+Please select {0} first.,Изаберите {0} прво.
 Please set Dropbox access keys in your site config,"Пожалуйста, установите ключи доступа Dropbox на своем сайте конфигурации"
 Please set Google Drive access keys in {0},"Пожалуйста, установите ключи доступа Google Drive, в {0}"
 Please set default Cash or Bank account in Mode of Payment {0},"Пожалуйста, установите Cash умолчанию или банковский счет в режим оплаты {0}"
@@ -2047,6 +2149,7 @@ Postal,Поштански
 Postal Expenses,Почтовые расходы
 Posting Date,Постављање Дате
 Posting Time,Постављање Време
+Posting date and posting time is mandatory,Дата публикации и постављање време је обавезна
 Posting timestamp must be after {0},Средняя отметка должна быть после {0}
 Potential opportunities for selling.,Потенцијалне могућности за продају.
 Preferred Billing Address,Жељени Адреса за наплату
@@ -2073,8 +2176,10 @@ Price List not selected,Прайс-лист не выбран
 Price List {0} is disabled,Прайс-лист {0} отключена
 Price or Discount,Цена или Скидка
 Pricing Rule,Цены Правило
-Pricing Rule For Discount,Цены Правило Для Скидка
-Pricing Rule For Price,Цены Правило Для Цена
+Pricing Rule Help,Правилник о ценама Помоћ
+"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","Правилник о ценама је први изабран на основу 'Примени на ""терену, који могу бити артикла, шифра групе или Марка."
+"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","Правилник о ценама је направљен да замени Ценовник / дефинисати попуст проценат, на основу неких критеријума."
+Pricing Rules are further filtered based on quantity.,Цене Правила се даље филтрира на основу количине.
 Print Format Style,Штампаном формату Стил
 Print Heading,Штампање наслова
 Print Without Amount,Принт Без Износ
@@ -2102,7 +2207,9 @@ Production Plan Sales Orders,Производни план продаје Пор
 Production Planning Tool,Планирање производње алата
 Products,Продукты
 "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Производи ће бити сортирани по тежини узраста у подразумеваним претрагама. Више тежине старости, већа производ ће се појавити на листи."
+Professional Tax,Професионални Пореска
 Profit and Loss,Прибыль и убытки
+Profit and Loss Statement,Биланс успјеха
 Project,Пројекат
 Project Costing,Трошкови пројекта
 Project Details,Пројекат Детаљи
@@ -2125,7 +2232,9 @@ Projects & System,Проекты и система
 Prompt for Email on Submission of,Упитај Емаил за подношење
 Proposal Writing,Писање предлога
 Provide email id registered in company,Обезбедити ид е регистрован у предузећу
+Provisional Profit / Loss (Credit),Привремени Добитак / Губитак (кредит)
 Public,Јавност
+Published on website at: {0},Објављено на сајту на адреси: {0}
 Publishing,објављивање
 Pull sales orders (pending to deliver) based on the above criteria,Повуците продајне налоге (чека да испоручи) на основу наведених критеријума
 Purchase,Куповина
@@ -2134,7 +2243,6 @@ Purchase Analytics,Куповина Аналитика
 Purchase Common,Куповина Заједнички
 Purchase Details,Куповина Детаљи
 Purchase Discounts,Куповина Попусти
-Purchase In Transit,Куповина Ин Трансит
 Purchase Invoice,Фактури
 Purchase Invoice Advance,Фактури Адванце
 Purchase Invoice Advances,Фактури Аванси
@@ -2142,7 +2250,6 @@ Purchase Invoice Item,Фактури Итем
 Purchase Invoice Trends,Фактури Трендови
 Purchase Invoice {0} is already submitted,Покупка Счет {0} уже подано
 Purchase Order,Налог за куповину
-Purchase Order Date,Куповина Дате Ордер
 Purchase Order Item,Куповина ставке поруџбине
 Purchase Order Item No,Налог за куповину артикал број
 Purchase Order Item Supplied,Наруџбенице артикла у комплету
@@ -2206,7 +2313,6 @@ Quarter,Четврт
 Quarterly,Тромесечни
 Quick Help,Брзо Помоћ
 Quotation,Цитат
-Quotation Date,Понуда Датум
 Quotation Item,Понуда шифра
 Quotation Items,Цитат Артикли
 Quotation Lost Reason,Понуда Лост разлог
@@ -2284,6 +2390,7 @@ Recurring Invoice,Понављајући Рачун
 Recurring Type,Понављајући Тип
 Reduce Deduction for Leave Without Pay (LWP),Смањите одбитка за дозволу без плате (ЛВП)
 Reduce Earning for Leave Without Pay (LWP),Смањите Зарада за дозволу без плате (ЛВП)
+Ref,Реф
 Ref Code,Реф Код
 Ref SQ,Реф СК
 Reference,Упућивање
@@ -2307,6 +2414,7 @@ Relieving Date,Разрешење Дате
 Relieving Date must be greater than Date of Joining,Освобождение Дата должна быть больше даты присоединения
 Remark,Примедба
 Remarks,Примедбе
+Remarks Custom,Примедбе Прилагођена
 Rename,Преименовање
 Rename Log,Преименовање Лог
 Rename Tool,Преименовање Тоол
@@ -2322,6 +2430,7 @@ Report Type,Врста извештаја
 Report Type is mandatory,Тип отчета является обязательным
 Reports to,Извештаји
 Reqd By Date,Рекд по датуму
+Reqd by Date,Рекд по датуму
 Request Type,Захтев Тип
 Request for Information,Захтев за информације
 Request for purchase.,Захтев за куповину.
@@ -2375,21 +2484,34 @@ Rounded Total,Роундед Укупно
 Rounded Total (Company Currency),Заобљени Укупно (Друштво валута)
 Row # ,Ред #
 Row # {0}: ,
+Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Ред # {0}: Ж количина не може мање од ставке Минимална количина за поручивање (дефинисано у тачки мастер).
+Row #{0}: Please specify Serial No for Item {1},Ред # {0}: Наведите Сериал но за пункт {1}
 "Row {0}: Account does not match with \
-						Purchase Invoice Credit To account",Ред {0} : Рачун не подудара са \ \ н фактури кредита на рачун
+						Purchase Invoice Credit To account","Ред {0}: Рачун не одговара \
+ фактури Кредит на рачун"
 "Row {0}: Account does not match with \
-						Sales Invoice Debit To account",Ред {0} : Рачун не подудара са \ \ н продаје Фактура Дебит на рачун
+						Sales Invoice Debit To account","Ред {0}: Рачун не одговара \
+ Продаја Рачун Дебитна на рачун"
+Row {0}: Conversion Factor is mandatory,Ред {0}: Фактор конверзије је обавезно
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Ред {0} : Кредитни унос не може да буде повезан са фактури
 Row {0}: Debit entry can not be linked with a Sales Invoice,Ред {0} : Дебит унос не може да буде повезан са продаје фактуре
+Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Ред {0}: Износ уплате мора бити мања или једнака фактуре изузетан износ. Молимо Вас да погледате Напомена испод.
+Row {0}: Qty is mandatory,Ред {0}: Кол је обавезно
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
+					Available Qty: {4}, Transfer Qty: {5}","Ред {0}: Кол не авалабле у складишту {1} {2} на {3}.
+ Расположив Кол: {4}, Трансфер Кти: {5}"
 "Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Ред {0} : За постављање {1} периодику , разлика између од и до данас \ \ н мора бити већи од или једнака {2}"
+						must be greater than or equal to {2}","Ред {0}: Да подесите {1} периодику, разлика између од и до датума \
+ мора бити већи или једнак {2}"
 Row {0}:Start Date must be before End Date,Ред {0} : Датум почетка мора да буде пре крајњег датума
 Rules for adding shipping costs.,Правила для добавления стоимости доставки .
 Rules for applying pricing and discount.,Правила применения цен и скидки .
 Rules to calculate shipping amount for a sale,Правила за израчунавање износа испоруке за продају
 S.O. No.,С.О. Не.
+SHE Cess on Excise,ОНА ЦЕСС о акцизама
+SHE Cess on Service Tax,ОНА ЦЕСС на сервис порезу
+SHE Cess on TDS,ОНА ЦЕСС на ЛПТ
 SMS Center,СМС центар
-SMS Control,СМС Цонтрол
 SMS Gateway URL,СМС Гатеваи УРЛ адреса
 SMS Log,СМС Пријава
 SMS Parameter,СМС Параметар
@@ -2494,15 +2616,20 @@ Securities and Deposits,Ценные бумаги и депозиты
 "Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Изаберите &quot;Да&quot; ако ова ставка представља неки посао као тренинг, пројектовање, консалтинг, итд"
 "Select ""Yes"" if you are maintaining stock of this item in your Inventory.",Изаберите &quot;Да&quot; ако се одржавање залихе ове ставке у свом инвентару.
 "Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",Изаберите &quot;Да&quot; ако снабдевање сировинама да у свом добављачу за производњу ову ставку.
+Select Brand...,Изаберите бренд ...
 Select Budget Distribution to unevenly distribute targets across months.,Изаберите Дистрибуција буџету неравномерно дистрибуирају широм мете месеци.
 "Select Budget Distribution, if you want to track based on seasonality.","Изаберите Дистрибуција буџета, ако желите да пратите на основу сезоне."
+Select Company...,Изаберите фирму ...
 Select DocType,Изаберите ДОЦТИПЕ
+Select Fiscal Year...,Изаберите Фискална година ...
 Select Items,Изаберите ставке
+Select Project...,Изаберите Пројецт ...
 Select Purchase Receipts,Изаберите Пурцхасе Приливи
 Select Sales Orders,Избор продајних налога
 Select Sales Orders from which you want to create Production Orders.,Изаберите продајних налога из које желите да креирате налоге производњу.
 Select Time Logs and Submit to create a new Sales Invoice.,Изаберите Протоколи време и слање да створи нову продајну фактуру.
 Select Transaction,Изаберите трансакцију
+Select Warehouse...,Изаберите Варехоусе ...
 Select Your Language,Выбор языка
 Select account head of the bank where cheque was deposited.,Изаберите главу рачуна банке у којој је депонован чек.
 Select company name first.,Изаберите прво име компаније.
@@ -2520,6 +2647,7 @@ Select your home country and check the timezone and currency.,Изаберите
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",Избор &quot;Да&quot; ће дати јединствени идентитет сваком ентитету ове тачке које се могу видети у серијским Но мајстора.
 Selling,Продаја
 Selling Settings,Продаја Сеттингс
+"Selling must be checked, if Applicable For is selected as {0}","Продаја се мора проверити, ако је применљиво Јер је изабрана као {0}"
 Send,Послати
 Send Autoreply,Пошаљи Ауторепли
 Send Email,Сенд Емаил
@@ -2556,7 +2684,8 @@ Serial Nos Required for Serialized Item {0},Серийный Нос Требуе
 Serial Number Series,Серијски број серија
 Serial number {0} entered more than once,Серийный номер {0} вошли более одного раза
 "Serialized Item {0} cannot be updated \
-					using Stock Reconciliation",Серијализованој шифра {0} не може да се ажурира \ \ н користећи Стоцк помирење
+					using Stock Reconciliation","Серијализованој шифра {0} не може да се ажурира \
+ користећи Стоцк помирење"
 Series,серија
 Series List for this Transaction,Серија Листа за ову трансакције
 Series Updated,Серия Обновлено
@@ -2565,15 +2694,18 @@ Series is mandatory,Серия является обязательным
 Series {0} already used in {1},Серия {0} уже используется в {1}
 Service,служба
 Service Address,Услуга Адреса
+Service Tax,Порез на услуге
 Services,Услуге
 Set,набор
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.","Установить значения по умолчанию , как Болгарии, Валюта , текущий финансовый год и т.д."
 Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,Сет тачка Групе мудрих буџете на овој територији. Такође можете укључити сезонски постављањем дистрибуције.
+Set Status as Available,Сет статус као Доступан
 Set as Default,Постави као подразумевано
 Set as Lost,Постави као Лост
 Set prefix for numbering series on your transactions,Сет префикс за нумерисање серију на својим трансакцијама
 Set targets Item Group-wise for this Sales Person.,Поставите циљеве ставку Групе мудро ову особу продаје.
 Setting Account Type helps in selecting this Account in transactions.,Подешавање Тип налога помаже у одабиру овог рачуна у трансакцијама.
+Setting this Address Template as default as there is no other default,"Постављање Ова адреса шаблон као подразумевани, јер не постоји други подразумевани"
 Setting up...,Подешавање ...
 Settings,Подешавања
 Settings for HR Module,Настройки для модуля HR
@@ -2581,6 +2713,7 @@ Settings for HR Module,Настройки для модуля HR
 Setup,Намештаљка
 Setup Already Complete!!,Подешавање Већ Комплетна !
 Setup Complete,Завершение установки
+Setup SMS gateway settings,Подешавање Подешавања СМС Гатеваи
 Setup Series,Подешавање Серија
 Setup Wizard,Мастер установки
 Setup incoming server for jobs email id. (e.g. jobs@example.com),Настройка сервера входящей подрабатывать электронный идентификатор . (например jobs@example.com )
@@ -2606,6 +2739,7 @@ Short biography for website and other publications.,Кратка биограф�
 Show In Website,Схов у сајт
 Show a slideshow at the top of the page,Приказивање слајдова на врху странице
 Show in Website,Прикажи у сајту
+Show rows with zero values,Покажи редове са нула вредностима
 Show this slideshow at the top of the page,Покажи ову пројекцију слајдова на врху странице
 Sick Leave,Отпуск по болезни
 Signature,Потпис
@@ -2635,9 +2769,9 @@ Specifications,технические условия
 "Specify the operations, operating cost and give a unique Operation no to your operations.","Наведите операције , оперативне трошкове и дају јединствену операцију без своје пословање ."
 Split Delivery Note into packages.,Сплит Напомена Испорука у пакетима.
 Sports,спортски
+Sr,Ср
 Standard,Стандард
 Standard Buying,Стандардна Куповина
-Standard Rate,Стандардна стопа
 Standard Reports,Стандартные отчеты
 Standard Selling,Стандардна Продаја
 Standard contract terms for Sales or Purchase.,Стандартные условия договора для продажи или покупки.
@@ -2646,6 +2780,7 @@ Start Date,Датум почетка
 Start date of current invoice's period,Почетак датум периода текуће фактуре за
 Start date should be less than end date for Item {0},Дата начала должна быть меньше даты окончания для Пункт {0}
 State,Држава
+Statement of Account,Изјава рачуна
 Static Parameters,Статички параметри
 Status,Статус
 Status must be one of {0},Статус должен быть одним из {0}
@@ -2687,6 +2822,7 @@ Stock Value Difference,Вредност акције Разлика
 Stock balances updated,Акции остатки обновляются
 Stock cannot be updated against Delivery Note {0},Фото не могут быть обновлены против накладной {0}
 Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name',"Акции записи существуют в отношении склада {0} не может повторно назначить или изменить "" Master Имя '"
+Stock transactions before {0} are frozen,Сток трансакције пре {0} су замрзнути
 Stop,Стоп
 Stop Birthday Reminders,Стани Рођендан Подсетници
 Stop Material Request,Стани Материјал Захтев
@@ -2706,13 +2842,13 @@ Submit this Production Order for further processing.,Пошаљите ова п�
 Submitted,Поднет
 Subsidiary,Подружница
 Successful: ,Успешно:
-Successfully allocated,Успешно выделено
+Successfully Reconciled,Успешно помирили
 Suggestions,Предлози
 Sunday,Недеља
 Supplier,Добављач
 Supplier (Payable) Account,Добављач (наплаћује се) налог
 Supplier (vendor) name as entered in supplier master,"Добављач (продавац), име као ушао у добављача мастер"
-Supplier Account,Снабдевач налог
+Supplier > Supplier Type,Добављач> Добављач Тип
 Supplier Account Head,Снабдевач рачуна Хеад
 Supplier Address,Снабдевач Адреса
 Supplier Addresses and Contacts,Добављач Адресе и контакти
@@ -2750,6 +2886,12 @@ Sync with Google Drive,Синхронизација са Гоогле Дриве
 System,Систем
 System Settings,Систем Сеттингс
 "System User (login) ID. If set, it will become default for all HR forms.","Систем Корисник (пријављивање) ИД. Ако се постави, она ће постати стандардна за све ХР облицима."
+TDS (Advertisement),ТДС (Оглас)
+TDS (Commission),ТДС (Комисија)
+TDS (Contractor),ТДС (Извођач)
+TDS (Interest),ТДС (камата)
+TDS (Rent),ТДС (Рент)
+TDS (Salary),ТДС (Плата)
 Target  Amount,Циљна Износ
 Target Detail,Циљна Детаљ
 Target Details,Циљне Детаљи
@@ -2770,10 +2912,12 @@ Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are no
 Tax Rate,Пореска стопа
 Tax and other salary deductions.,Порески и други плата одбитака.
 "Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges",Пореска детаљ табела преузета из тачке мајстора као стринг и складишти у овој области . \ НУсед за порезе и накнаде
+Used for Taxes and Charges","Пореска детаљ табела преузета из тачке мајстора као стринг и складишти у овој области.
+ Користи се за порезе и накнаде"
 Tax template for buying transactions.,Налоговый шаблон для покупки сделок.
 Tax template for selling transactions.,Налоговый шаблон для продажи сделок.
 Taxable,Опорезиви
+Taxes,Порези
 Taxes and Charges,Порези и накнаде
 Taxes and Charges Added,Порези и накнаде додавања
 Taxes and Charges Added (Company Currency),Порези и накнаде додавања (Друштво валута)
@@ -2786,6 +2930,7 @@ Technology,технологија
 Telecommunications,телекомуникација
 Telephone Expenses,Телефон Расходы
 Television,телевизија
+Template,Шаблон
 Template for performance appraisals.,Шаблон для аттестации .
 Template of terms or contract.,Предложак термина или уговору.
 Temporary Accounts (Assets),Временные счета ( активы )
@@ -2815,7 +2960,8 @@ The First User: You,Први Корисник : Ви
 The Organization,Организација
 "The account head under Liability, in which Profit/Loss will be booked","Глава рачун под одговорности , у којој ће Добитак / Губитак се резервисати"
 "The date on which next invoice will be generated. It is generated on submit.
-",Датум на који ће бити генерисан следећи фактура .
+","Датум на који ће бити генерисан следећи фактура. Она се генерише на достави.
+"
 The date on which recurring invoice will be stop,Датум на који се понавља фактура ће бити зауставити
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","Дан у месецу за који ће аутоматски бити генерисан фактура нпр 05, 28 итд"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,"День (дни) , на котором вы подаете заявление на отпуск , отпуск . Вам не нужно обратиться за разрешением ."
@@ -2827,6 +2973,7 @@ The net weight of this package. (calculated automatically as sum of net weight o
 The new BOM after replacement,Нови БОМ након замене
 The rate at which Bill Currency is converted into company's base currency,Стопа по којој је Бил валута претвара у основну валуту компаније
 The unique id for tracking all recurring invoices. It is generated on submit.,Стеам ИД за праћење свих понавља фактуре. Генерише се на субмит.
+"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Онда Ценовник Правила се филтрирају на основу клијента, корисника услуга Група, Територија, добављача, добављач Тип, кампање, продаја партнер итд"
 There are more holidays than working days this month.,"Есть больше праздников , чем рабочих дней в этом месяце."
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","Там может быть только один Правило Начальные с 0 или пустое значение для "" To Размер """
 There is not enough leave balance for Leave Type {0},Существует не хватает отпуск баланс для отпуске Тип {0}
@@ -2838,6 +2985,7 @@ This Leave Application is pending approval. Only the Leave Apporver can update s
 This Time Log Batch has been billed.,Ово време Пријава Групно је наплаћена.
 This Time Log Batch has been cancelled.,Ово време Пријава серија је отказана.
 This Time Log conflicts with {0},Это время входа в противоречии с {0}
+This format is used if country specific format is not found,Овај формат се користи ако земља специфична формат није пронађен
 This is a root account and cannot be edited.,То јекорен рачун и не може се мењати .
 This is a root customer group and cannot be edited.,То јекорен група купац и не може се мењати .
 This is a root item group and cannot be edited.,То јекорен ставка група и не може се мењати .
@@ -2853,7 +3001,9 @@ Time Log Batch,Време Лог Групно
 Time Log Batch Detail,Време Лог Групно Детаљ
 Time Log Batch Details,Тиме Лог Батцх Детаљније
 Time Log Batch {0} must be 'Submitted',Время входа Пакетная {0} должен быть ' Представленные '
+Time Log Status must be Submitted.,Време Пријави статус мора да се поднесе.
 Time Log for tasks.,Време Пријава за задатке.
+Time Log is not billable,Време Пријави се не наплаћују
 Time Log {0} must be 'Submitted',Время входа {0} должен быть ' Представленные '
 Time Zone,Временска зона
 Time Zones,Тиме зоне
@@ -2866,6 +3016,7 @@ To,До
 To Currency,Валутном
 To Date,За датум
 To Date should be same as From Date for Half Day leave,Да Дате треба да буде исти као Од датума за полудневни одсуство
+To Date should be within the Fiscal Year. Assuming To Date = {0},Да би требало да буде дата у фискалну годину. Под претпоставком То Дате = {0}
 To Discuss,Да Дисцусс
 To Do List,То до лист
 To Package No.,За Пакет број
@@ -2875,8 +3026,8 @@ To Value,Да вредност
 To Warehouse,Да Варехоусе
 "To add child nodes, explore tree and click on the node under which you want to add more nodes.","Да бисте додали дете чворове , истражују дрво и кликните на чвору под којим желите да додате још чворова ."
 "To assign this issue, use the ""Assign"" button in the sidebar.","Да бисте доделили овај проблем, користите &quot;Ассигн&quot; дугме у сидебар."
-To create a Bank Account:,Да бисте креирали банковни рачун :
-To create a Tax Account:,Да бисте креирали пореском билансу :
+To create a Bank Account,Да бисте креирали банковни рачун
+To create a Tax Account,Да бисте креирали пореском билансу
 "To create an Account Head under a different company, select the company and save customer.","Да бисте направили шефа налога под различитим компаније, изаберите компанију и сачувајте купца."
 To date cannot be before from date,До данас не може бити раније од датума
 To enable <b>Point of Sale</b> features,Да бисте омогућили <b>Поинт оф Сале</b> функција
@@ -2884,22 +3035,23 @@ To enable <b>Point of Sale</b> view,Да бисте омогућили <б> По
 To get Item Group in details table,Да бисте добили групу ставка у табели детаљније
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Для учета налога в строке {0} в размере Item , налоги в строках должны быть также включены {1}"
 "To merge, following properties must be same for both items","Да бисте објединили , следеће особине морају бити исти за обе ставке"
-"To report an issue, go to ",
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","Да не примењује Правилник о ценама у одређеном трансакцијом, све важеће Цене Правила би требало да буде онемогућен."
 "To set this Fiscal Year as Default, click on 'Set as Default'","Да бисте подесили ову фискалну годину , као подразумевајуће , кликните на "" Сет ас Дефаулт '"
 To track any installation or commissioning related work after sales,Да бисте пратили сваку инсталацију или пуштање у вези рада након продаје
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Для отслеживания бренд в следующих документах накладной , редкая возможность , материал запрос , Пункт , Заказа , ЧЕКОМ , Покупателя получения, цитаты , счет-фактура , в продаже спецификации , заказ клиента , серийный номер"
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Да бисте пратили ставку у продаји и куповини докумената на основу њихових серијских бр. Ово се такође може користити за праћење детаље гаранције производа.
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,Да бисте пратили ставке у продаји и куповини докумената са батцх бр <br> <b>Жељена индустрија: хемикалије итд</b>
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Да бисте пратили ставки помоћу баркод. Моћи ћете да унесете ставке у испоруци напомени и продаје фактуру за скенирање баркода на ставке.
+Too many columns. Export the report and print it using a spreadsheet application.,Превише колоне. Извоз извештај и одштампајте га помоћу тих апликација.
 Tools,Алат
 Total,Укупан
+Total ({0}),Укупно ({0})
 Total Advance,Укупно Адванце
-Total Allocated Amount,Укупан износ Издвојена
-Total Allocated Amount can not be greater than unmatched amount,Укупан износ Додељени не може бити већи од износа премца
 Total Amount,Укупан износ
 Total Amount To Pay,Укупан износ за исплату
 Total Amount in Words,Укупан износ у речи
 Total Billing This Year: ,Укупна наплата ове године:
+Total Characters,Укупно Карактери
 Total Claimed Amount,Укупан износ полаже
 Total Commission,Укупно Комисија
 Total Cost,Укупни трошкови
@@ -2923,14 +3075,13 @@ Total Score (Out of 5),Укупна оцена (Оут оф 5)
 Total Tax (Company Currency),Укупан порески (Друштво валута)
 Total Taxes and Charges,Укупно Порези и накнаде
 Total Taxes and Charges (Company Currency),Укупни порези и таксе (Друштво валута)
-Total Words,Всего Слова
-Total Working Days In The Month,Укупно радних дана у месецу
 Total allocated percentage for sales team should be 100,Всего выделено процент для отдела продаж должен быть 100
 Total amount of invoices received from suppliers during the digest period,Укупан износ примљених рачуна од добављача током периода дигест
 Total amount of invoices sent to the customer during the digest period,Укупан износ фактура шаље купцу у току периода дигест
 Total cannot be zero,Всего не может быть нулевым
 Total in words,Укупно у речима
 Total points for all goals should be 100. It is {0},Общее количество очков для всех целей должна быть 100 . Это {0}
+Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials,Укупна процена за произведени или препакује итем (с) не може бити мања од укупне процене сировина
 Total weightage assigned should be 100%. It is {0},Всего Weightage назначен должна быть 100% . Это {0}
 Totals,Укупно
 Track Leads by Industry Type.,Стаза води од индустрије Типе .
@@ -2966,7 +3117,7 @@ UOM Conversion Details,УОМ конверзије Детаљи
 UOM Conversion Factor,УОМ конверзије фактор
 UOM Conversion factor is required in row {0},Фактор Единица измерения преобразования требуется в строке {0}
 UOM Name,УОМ Име
-UOM coversion factor required for UOM {0} in Item {1},Единица измерения фактором Конверсия требуется для UOM {0} в пункте {1}
+UOM coversion factor required for UOM: {0} in Item: {1},УОМ цоверсион фактор потребан за УЦГ: {0} тачке: {1}
 Under AMC,Под АМЦ
 Under Graduate,Под Дипломац
 Under Warranty,Под гаранцијом
@@ -2976,8 +3127,8 @@ Unit of Measure {0} has been entered more than once in Conversion Factor Table,�
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Јединица за мерење ове тачке (нпр. кг, Јединица, Не Паир)."
 Units/Hour,Јединице / сат
 Units/Shifts,Јединице / Смене
-Unmatched Amount,Ненадмашна Износ
 Unpaid,Неплаћен
+Unreconciled Payment Details,Неусаглашена Детаљи плаћања
 Unscheduled,Неплански
 Unsecured Loans,необеспеченных кредитов
 Unstop,отпушити
@@ -2992,7 +3143,6 @@ Update Landed Cost,Ажурирање Слетео Цост
 Update Series,Упдате
 Update Series Number,Упдате Број
 Update Stock,Упдате Стоцк
-"Update allocated amount in the above table and then click ""Allocate"" button","Ажурирајте додељен износ у табели, а затим кликните на &quot;издвоји&quot; дугме"
 Update bank payment dates with journals.,Ажурирање банка плаћање датира са часописима.
 Update clearance date of Journal Entries marked as 'Bank Vouchers',"Клиренс Ажурирање датум уноса у дневник означена као "" банка "" Ваучери"
 Updated,Ажурирано
@@ -3009,6 +3159,7 @@ Upper Income,Горња прихода
 Urgent,Хитан
 Use Multi-Level BOM,Користите Мулти-Левел бом
 Use SSL,Користи ССЛ
+Used for Production Plan,Користи се за производни план
 User,Корисник
 User ID,Кориснички ИД
 User ID not set for Employee {0},ID пользователя не установлен Требуются {0}
@@ -3047,9 +3198,9 @@ View Now,Погледај Сада
 Visit report for maintenance call.,Посетите извештаја за одржавање разговора.
 Voucher #,Ваучер #
 Voucher Detail No,Ваучер Детаљ Нема
+Voucher Detail Number,Ваучер Детаљ Број
 Voucher ID,Ваучер ИД
 Voucher No,Ваучер Нема
-Voucher No is not valid,Ваучер Не није важећа
 Voucher Type,Ваучер Тип
 Voucher Type and Date,Ваучер врсту и датум
 Walk In,Шетња у
@@ -3065,11 +3216,12 @@ Warehouse is mandatory for stock Item {0} in row {1},Склад является
 Warehouse is missing in Purchase Order,Магацин недостаје у Наруџбеница
 Warehouse not found in the system,Складиште није пронађен у систему
 Warehouse required for stock Item {0},Склад требуется для складе Пункт {0}
-Warehouse required in POS Setting,Склад требуется в POS Настройка
 Warehouse where you are maintaining stock of rejected items,Магацин где се одржава залихе одбачених предмета
 Warehouse {0} can not be deleted as quantity exists for Item {1},Склад {0} не может быть удален как существует количество для Пункт {1}
 Warehouse {0} does not belong to company {1},Склад {0} не принадлежит компания {1}
 Warehouse {0} does not exist,Склад {0} не существует
+Warehouse {0}: Company is mandatory,Магацин {0}: Предузеће је обавезно
+Warehouse {0}: Parent account {1} does not bolong to the company {2},Магацин {0}: {1 Родитељ рачун} не Болонг предузећу {2}
 Warehouse-Wise Stock Balance,Магацин-Висе салда залиха
 Warehouse-wise Item Reorder,Магацин у питању шифра Реордер
 Warehouses,Складишта
@@ -3114,13 +3266,14 @@ Will be updated when batched.,Да ли ће се ажурирати када д
 Will be updated when billed.,Да ли ће се ажурирати када наплаћени.
 Wire Transfer,Вире Трансфер
 With Operations,Са операције
-With period closing entry,Ступањем затварања периода
+With Period Closing Entry,Са период затварања Ентри
 Work Details,Радни Детаљније
 Work Done,Рад Доне
 Work In Progress,Ворк Ин Прогресс
 Work-in-Progress Warehouse,Рад у прогресу Магацин
 Work-in-Progress Warehouse is required before Submit,Работа -в- Прогресс Склад требуется перед Отправить
 Working,Радни
+Working Days,Радних дана
 Workstation,Воркстатион
 Workstation Name,Воркстатион Име
 Write Off Account,Отпис налог
@@ -3136,9 +3289,6 @@ Year Closed,Година Цлосед
 Year End Date,Година Датум завршетка
 Year Name,Година Име
 Year Start Date,Године Датум почетка
-Year Start Date and Year End Date are already set in Fiscal Year {0},Год Дата начала и год Дата окончания уже установлены в финансовый год {0}
-Year Start Date and Year End Date are not within Fiscal Year.,Година Датум почетка и завршетка Година датум нису у фискалну годину .
-Year Start Date should not be greater than Year End Date,Година Датум почетка не би требало да буде већа од Година Датум завршетка
 Year of Passing,Година Пассинг
 Yearly,Годишње
 Yes,Да
@@ -3148,7 +3298,6 @@ You are the Expense Approver for this record. Please Update the 'Status' and Sav
 You are the Leave Approver for this record. Please Update the 'Status' and Save,Ви стеНапусти одобраватељ за овај запис . Молимо Ажурирајте 'статус' и Саве
 You can enter any date manually,Можете да ручно унесете било који датум
 You can enter the minimum quantity of this item to be ordered.,Можете да унесете минималну количину ове ставке се могу наручити.
-You can not assign itself as parent account,Вы не можете назначить себя как родительским счетом
 You can not change rate if BOM mentioned agianst any item,Не можете променити стопу ако бом помиње агианст било које ставке
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Не можете да унесете како доставници Не и продаје Фактура бр Унесите било коју .
 You can not enter current voucher in 'Against Journal Voucher' column,"Вы не можете ввести текущий ваучер в ""Против Journal ваучер ' колонке"
@@ -3160,7 +3309,6 @@ You cannot credit and debit same account at the same time,Ви не можете
 You have entered duplicate items. Please rectify and try again.,Унели дупликате . Молимо исправи и покушајте поново .
 You may need to update: {0},"Возможно, вам придется обновить : {0}"
 You must Save the form before proceeding,"Вы должны Сохраните форму , прежде чем приступить"
-You must allocate amount before reconcile,Морате издвоји износ пре помире
 Your Customer's TAX registration numbers (if applicable) or any general information,Ваш клијент је ПОРЕСКЕ регистарски бројеви (ако постоји) или било опште информације
 Your Customers,Ваши Купци
 Your Login Id,Ваше корисничко име
@@ -3173,11 +3321,13 @@ Your sales person who will contact the customer in future,Ваш продава�
 Your sales person will get a reminder on this date to contact the customer,Ваша особа продаја ће добити подсетник на овај датум да се контактира купца
 Your setup is complete. Refreshing...,Ваш подешавање је завршено . Освежавање ...
 Your support email id - must be a valid email - this is where your emails will come!,Ваш емаил подршка ид - мора бити важећа е-маил - то је место где ваше емаил-ови ће доћи!
+[Error],[Грешка]
 [Select],[ Изаберите ]
 `Freeze Stocks Older Than` should be smaller than %d days.,` Мораторий Акции старше ` должен быть меньше % D дней.
 and,и
 are not allowed.,нису дозвољени .
 assigned by,додељује
+cannot be greater than 100,не може бити већи од 100
 "e.g. ""Build tools for builders""","например ""Build инструменты для строителей """
 "e.g. ""MC""","например ""МС """
 "e.g. ""My Company LLC""","например "" Моя компания ООО """
@@ -3190,32 +3340,34 @@ example: Next Day Shipping,Пример: Нект Даи Схиппинг
 lft,ЛФТ
 old_parent,олд_парент
 rgt,пука
+subject,предмет
+to,до
 website page link,веб страница веза
 {0} '{1}' not in Fiscal Year {2},{0} ' {1}' не в финансовом году {2}
 {0} Credit limit {0} crossed,{0} Кредитный лимит {0} пересек
 {0} Serial Numbers required for Item {0}. Only {0} provided.,"{0} Серийные номера , необходимые для Пункт {0} . Только {0} предусмотрено."
 {0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} бюджет на счет {1} против МВЗ {2} будет превышать {3}
+{0} can not be negative,{0} не може бити негативан
 {0} created,{0} создан
 {0} does not belong to Company {1},{0} не принадлежит компании {1}
 {0} entered twice in Item Tax,{0} вводится дважды в пункт налоге
 {0} is an invalid email address in 'Notification Email Address',"{0} является недопустимым адрес электронной почты в "" Notification адрес электронной почты"""
 {0} is mandatory,{0} является обязательным
 {0} is mandatory for Item {1},{0} является обязательным для п. {1}
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} је обавезно. Можда Мењачница запис није створен за {1} на {2}.
 {0} is not a stock Item,{0} не является акционерным Пункт
 {0} is not a valid Batch Number for Item {1},{0} не является допустимым номер партии по пункту {1}
-{0} is not a valid Leave Approver,{0} не является допустимым Оставить утверждающий
+{0} is not a valid Leave Approver. Removing row #{1}.,{0} није правилан Напусти одобраватељ. Уклањање ред # {1}.
 {0} is not a valid email id,{0} не является допустимым ID E-mail
 {0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,"{0} теперь используется по умолчанию финансовый год . Пожалуйста, обновите страницу в браузере , чтобы изменения вступили в силу."
 {0} is required,{0} требуется
 {0} must be a Purchased or Sub-Contracted Item in row {1},{0} должен быть куплены или субподрядчиком Пункт в строке {1}
-{0} must be less than or equal to {1},{0} должно быть меньше или равно {1}
+{0} must be reduced by {1} or you should increase overflow tolerance,{0} мора бити смањена за {1} или би требало да повећа толеранцију преливања
 {0} must have role 'Leave Approver',"{0} должен иметь роль "" Оставить утверждающего '"
 {0} valid serial nos for Item {1},{0} действительные серийные NOS для Пункт {1}
 {0} {1} against Bill {2} dated {3},{0} {1} против Билла {2} от {3}
 {0} {1} against Invoice {2},{0} {1} против Invoice {2}
 {0} {1} has already been submitted,{0} {1} уже представлен
-{0} {1} has been modified. Please Refresh,{0} {1} был изменен. Пожалуйста Обновить
-{0} {1} has been modified. Please refresh,"{0} {1} был изменен. Пожалуйста, обновите"
 {0} {1} has been modified. Please refresh.,{0} {1} был изменен. Обновите .
 {0} {1} is not submitted,{0} {1} не представлено
 {0} {1} must be submitted,{0} {1} должны быть представлены
@@ -3223,3 +3375,5 @@ website page link,веб страница веза
 {0} {1} status is 'Stopped',"{0} {1} статус "" Остановлен """
 {0} {1} status is Stopped,{0} {1} положение остановлен
 {0} {1} status is Unstopped,{0} {1} статус отверзутся
+{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Трошкови Центар је обавезан за пункт {2}
+{0}: {1} not found in Invoice Details table,{0}: {1} није пронађен у табели Фактура Детаљи
