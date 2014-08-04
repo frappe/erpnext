@@ -314,12 +314,16 @@ class JournalVoucher(AccountsController):
 						"credit": flt(d.credit, self.precision("credit", "entries")),
 						"against_voucher_type": ((d.against_voucher and "Purchase Invoice")
 							or (d.against_invoice and "Sales Invoice")
-							or (d.against_jv and "Journal Voucher")),
-						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv,
+							or (d.against_jv and "Journal Voucher")
+							or (d.against_sales_order and "Sales Order")
+							or (d.against_purchase_order and "Purchase Order")),
+						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv
+							or d.against_sales_order or d.against_purchase_order,
 						"remarks": self.remark,
 						"cost_center": d.cost_center
 					})
 				)
+
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 

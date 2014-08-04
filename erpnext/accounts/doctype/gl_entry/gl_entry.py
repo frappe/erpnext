@@ -25,7 +25,7 @@ class GLEntry(Document):
 		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
-		if self.against_voucher and update_outstanding == 'Yes':
+		if self.against_voucher in ['Journal Voucher', 'Sales Invoice', 'Purchase Invoice'] and update_outstanding == 'Yes':
 				update_outstanding_amt(self.account, self.against_voucher_type,
 					self.against_voucher)
 

@@ -82,14 +82,15 @@ class PaymentTool(Document):
 
 		order_list = frappe.db.sql("""
 			select
-				voucher_no, voucher_type, posting_date, 
-				ifnull(sum({amount_query}), 0) as invoice_amount
+				name as voucher_no, ifnull(grand_total, 0) as invoice_amount,
+				ifnull(advance_paid, 0), transaction_date as posting_date
 			from
-				`tabGL Entry`
+				`tabSales Order`
 			where
-				customer = %s
+				customer = %s 
 				and docstatus = 1
 				and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
+			group by voucher_no			 
 			""", party_name, as_dict = True)
 
 		for d in order_list:
