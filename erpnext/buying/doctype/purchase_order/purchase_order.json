@@ -95,7 +95,7 @@
    "fieldname": "transaction_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
-   "label": "Date", 
+   "label": "Purchase Order Date", 
    "oldfieldname": "transaction_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0, 
@@ -447,7 +447,9 @@
    "fieldname": "advance_paid", 
    "fieldtype": "Currency", 
    "label": "Advance Paid", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "terms_section_break", 
@@ -651,11 +653,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
-<<<<<<< HEAD
- "modified": "2014-07-31 04:59:24.561351", 
-=======
- "modified": "2014-07-31 15:21:06.239630", 
->>>>>>> Add Payment Tool and Add advance_paid field to SO/PO
+ "modified": "2014-08-04 11:21:06.387391", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

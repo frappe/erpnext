@@ -17,7 +17,7 @@ erpnext.accounts.PaymentToolController = frappe.ui.form.Controller.extend({
 			doc: me.frm.doc,
 			method: 'get_outstanding_vouchers',
 			callback: function(r, rt) {
-				refresh_field("outstanding_vouchers"); //Points to child table
+				refresh_field("payment_tool_voucher_details");
 			}
 		});
 	},
@@ -26,7 +26,7 @@ erpnext.accounts.PaymentToolController = frappe.ui.form.Controller.extend({
 		this.calculate_total_payment_amount();	
 	},
 
-	outstanding_vouchers_remove: function() {
+	payment_tool_voucher_details_remove: function() {
 		this.calculate_total_payment_amount();
 	},
 
@@ -34,7 +34,7 @@ erpnext.accounts.PaymentToolController = frappe.ui.form.Controller.extend({
 		var me = this;
 		var total_amount = 0;
 		
-		$.each(me.frm.doc.outstanding_vouchers || [], function(i, row) { //Points to child table
+		$.each(me.frm.doc.payment_tool_voucher_details || [], function(i, row) {
 				if (row.payment_amount)
 					total_amount = total_amount + row.payment_amount
 		});

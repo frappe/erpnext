@@ -5,5 +5,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class OutstandingVoucher(Document):
+class PaymentToolVoucherDetail(Document):
 	pass

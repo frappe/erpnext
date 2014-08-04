@@ -131,10 +131,10 @@ class PaymentTool(Document):
 		return purchase_order_list
 
 	def add_outstanding_vouchers(self, all_outstanding_vouchers):
-		self.set('outstanding_vouchers', []) ##Points to child table
+		self.set('payment_tool_voucher_details', [])
 
 		for e in all_outstanding_vouchers:
-			ent = self.append('outstanding_vouchers', {})
+			ent = self.append('payment_tool_voucher_details', {})
 			ent.against_voucher_type = e.get('voucher_type')
 			ent.against_voucher_no = e.get('voucher_no')
 			ent.total_amount = e.get('invoice_amount')
@@ -155,7 +155,6 @@ class PaymentTool(Document):
 
 
 	def make_journal_voucher(self):
-		from erpnext.accounts.utils import get_balance_on
 
 		total_payment_amount = 0.00
 		invoice_voucher_type = {'Sales Invoice': 'against_invoice', 
@@ -171,14 +170,13 @@ class PaymentTool(Document):
 		jv.cheque_no = self.reference_no
 		jv.cheque_date = self.reference_date
 
-		for v in self.get("outstanding_vouchers"): ##Points to child table
+		for v in self.get("payment_tool_voucher_details"):
 			d1 = jv.append("entries")
 			d1.account = self.account_name
 
-			d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount)
-
+			d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount))
 			d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
-			d1.set('is_advance', 'Yes' if v.against_voucher_type == 'Sales Order' or 
+			d1.set('is_advance', 'Yes' if v.against_voucher_type == 'Sales Order' or
 				v.against_voucher_type == 'Purchase Order' else 'No')
 			total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
 
