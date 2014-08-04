@@ -3,10 +3,10 @@
 
 // render
 frappe.listview_settings['Time Log'] = {
-	add_fields: ["`tabTime Log`.`status`", "`tabTime Log`.`billable`", "`tabTime Log`.`activity_type`"],
+	add_fields: ["status", "billable", "activity_type", "task", "project", "hours"],
 	selectable: true,
 	onload: function(me) {
-		me.appframe.add_button(__("Make Time Log Batch"), function() {
+		me.appframe.add_primary_action(__("Make Time Log Batch"), function() {
 			var selected = me.get_checked_items() || [];
 
 			if(!selected.length) {
