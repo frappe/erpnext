@@ -1,0 +1,18 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span class="label label-{%= frappe.utils.guess_style(doc.status) %} filterable"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}
+			</span>
+		</div>
+	</div>
+	<div class="col-xs-2">
+		<div class="text-ellipsis">
+			<span class="filterable text-muted small" style="margin-right: 8px;"
+				data-filter="raised_by,=,{%= doc.raised_by %}">
+				{%= doc.raised_by %}</span>
+		</div>
+	</div>
+</div>
