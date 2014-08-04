@@ -1,0 +1,28 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span class="filterable" style="margin-right: 8px;"
+				data-filter="item_code,=,{%= doc.item_code %}">
+				{%= doc.item_code %}</span>
+			{% var icon = {
+				"Available": ["icon-ok", "label-success"],
+				"Not Available": ["icon-remove", "label-danger"],
+				"Delivered": ["icon-truck", "label-success"],
+				"Purchase Returned": ["icon-retweet", "label-warning"],
+				"Sales Returned": ["icon-retweet", "label-warning"],
+			}[doc.status]; %}
+			<span class="label {%= icon[1] %} filterable"
+				data-filter="status,=,{%= doc.status %}"
+				title="{%= doc.purpose %}">
+				<i class="{%= icon[0] %}"></i> {%= doc.status %}
+			</span>
+			{% if(doc.warehouse) { %}
+				<span class="label label-default filterable"
+					data-filter="warehouse,=,{%= doc.warehouse %}">
+					{%= doc.warehouse %}
+				</span>
+			{% } %}
+		</div>
+	</div>
+</div>

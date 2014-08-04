@@ -26,6 +26,13 @@ class Project(Document):
 			if getdate(self.completion_date) < getdate(self.project_start_date):
 				frappe.throw(_("Expected Completion Date can not be less than Project Start Date"))
 
+		self.update_milestones_completed()
+
+	def update_milestones_completed(self):
+		if self.project_milestones:
+			completed = filter(lambda x: x.status=="Completed", self.project_milestones)
+			self.percent_milestones_completed =  len(completed) * 100 / len(self.project_milestones)
+
 	def on_update(self):
 		self.add_calendar_event()
 
@@ -37,6 +44,7 @@ class Project(Document):
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 			frappe.db.set_value("Project", self.name, "percent_complete",
 			 	int(float(completed) / total * 100))
+
 
 	def add_calendar_event(self):
 		# delete any earlier event for this project

@@ -43,6 +43,7 @@
    "description": "Account for the warehouse (Perpetual Inventory) will be created under this Account.", 
    "fieldname": "create_account_under", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Parent Account", 
    "options": "Account", 
    "permlevel": 0
@@ -150,7 +151,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:22.483111", 
+ "modified": "2014-08-04 02:55:16.750848", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Warehouse", 
