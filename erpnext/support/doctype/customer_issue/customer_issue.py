@@ -52,11 +52,7 @@ def make_maintenance_visit(source_name, target_doc=None):
 		target_doc = get_mapped_doc("Customer Issue", source_name, {
 			"Customer Issue": {
 				"doctype": "Maintenance Visit",
-				"field_map": {
-					"complaint": "description",
-					"doctype": "prevdoc_doctype",
-					"name": "prevdoc_docname"
-				}
+				"field_map": {}
 			}
 		}, target_doc)
 
