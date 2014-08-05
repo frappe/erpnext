@@ -1,8 +1,8 @@
 {%- from "templates/print_formats/standard_macros.html" import print_value -%}
 {%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom") -%}
 {%- set visible_columns = get_visible_columns(doc.get(df.fieldname), table_meta) -%}
-{%- set hide_rate = data[0].meta.is_print_hide("rate") -%}
-{%- set hide_amount = data[0].meta.is_print_hide("amount") -%}
+{%- set hide_rate = data[0].meta.is_print_hide("rate") if len(data) else False-%}
+{%- set hide_amount = data[0].meta.is_print_hide("amount") if len(data) else False-%}
 
 <table class="table table-bordered">
 	<tbody>
