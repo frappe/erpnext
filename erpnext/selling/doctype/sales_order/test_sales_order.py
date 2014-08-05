@@ -312,6 +312,25 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
 		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
 
+	def test_block_delivery_note_against_cancelled_sales_order(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import _insert_purchase_receipt
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		sales_order = frappe.copy_doc(test_records[0])
+		sales_order.sales_order_details[0].qty = 5
+		sales_order.insert()
+		sales_order.submit()
+
+		_insert_purchase_receipt(sales_order.get("sales_order_details")[0].item_code)
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.posting_date = sales_order.transaction_date
+		delivery_note.insert()
+
+		sales_order.cancel()
+
+		self.assertRaises(frappe.CancelledLinkError, delivery_note.submit)
+
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 
 test_records = frappe.get_test_records('Sales Order')
