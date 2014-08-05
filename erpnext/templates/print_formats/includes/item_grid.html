@@ -1,8 +1,8 @@
 {%- from "templates/print_formats/standard_macros.html" import print_value -%}
 {%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom") -%}
 {%- set visible_columns = get_visible_columns(doc.get(df.fieldname), table_meta) -%}
-{%- set hide_rate = data[0].meta.is_print_hide("rate") -%}
-{%- set hide_amount = data[0].meta.is_print_hide("amount") -%}
+{%- set hide_rate = data[0].meta.is_print_hide("rate") if data|length else False-%}
+{%- set hide_amount = data[0].meta.is_print_hide("amount") if data|length else False-%}
 
 <table class="table table-bordered">
 	<tbody>
@@ -22,12 +22,12 @@
 				{%- endif %}
 				{% if (not row.meta.is_print_hide("item_name") and
 					(row.meta.is_print_hide("item_code") or row.item_code != row.item_name)) -%}
-					<div class="primary">{{ row.get_formatted("item_name",as_html=True) }}</div>
+					<div class="primary">{{ row.get_formatted("item_name") }}</div>
 				{%- endif %}
 				{% if (not row.meta.is_print_hide("description") and row.description and
 					((row.meta.is_print_hide("item_code") and row.meta.is_print_hide("item_name"))
 						or not (row.item_code == row.item_name == row.description))) -%}
-					<p>{{ row.get_formatted("description", as_html=True) }}</p>
+					<p>{{ row.get_formatted("description") }}</p>
 				{%- endif %}
 				{%- for field in visible_columns -%}
 					{%- if (field.fieldname not in std_fields) and
