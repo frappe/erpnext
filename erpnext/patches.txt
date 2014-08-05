@@ -17,7 +17,6 @@ execute:frappe.reload_doc('accounts', 'doctype', 'purchase_invoice') # 2014-01-2
 execute:frappe.reload_doc('buying', 'doctype', 'purchase_order') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier_quotation') # 2014-01-29
 execute:frappe.reload_doc('stock', 'doctype', 'purchase_receipt') # 2014-01-29
-erpnext.patches.v4_0.reload_purchase_print_format
 execute:frappe.reload_doc('accounts', 'doctype', 'pos_setting') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
