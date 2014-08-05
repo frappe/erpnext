@@ -129,7 +129,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-27 03:49:07.580876", 
+ "modified": "2014-08-05 06:52:02.226904", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Attendance", 
@@ -178,5 +178,6 @@
  ], 
  "search_fields": "employee, employee_name, att_date, status", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

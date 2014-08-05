@@ -13,13 +13,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Salary Slip",
-					"description": _("Monthly salary statement."),
+					"name": "Leave Application",
+					"description": _("Applications for leave."),
 				},
 				{
 					"type": "doctype",
-					"name": "Leave Application",
-					"description": _("Applications for leave."),
+					"name": "Expense Claim",
+					"description": _("Claims for company expense."),
 				},
 				{
 					"type": "doctype",
@@ -28,8 +28,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Expense Claim",
-					"description": _("Claims for company expense."),
+					"name": "Salary Slip",
+					"description": _("Monthly salary statement."),
 				},
 				{
 					"type": "doctype",

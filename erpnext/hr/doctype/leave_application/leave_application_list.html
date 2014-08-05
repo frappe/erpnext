@@ -1,0 +1,28 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			<span style="margin-right: 8px;" class="filterable"
+					data-filter="employee,=,{%= doc.employee %}">
+					{%= doc.employee_name %}</span>
+
+			<span style="margin-right: 8px;" class="text-muted">
+					{%= __("{0} days from {1}",
+						[doc.total_leave_days, doc.get_formatted("from_date")]) %}</span>
+
+			<span class="label
+				label-{%= frappe.utils.guess_style(doc.status) %} filterable"
+				title="{%= __("Status") %}"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}
+			</span>
+
+			<span class="label label-default filterable"
+				title="{%= __("Leave Type") %}"
+				data-filter="leave_type,=,{%= doc.leave_type %}">
+				{%= doc.leave_type %}
+			</span>
+		</div>
+	</div>
+</div>

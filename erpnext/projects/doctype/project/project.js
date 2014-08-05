@@ -7,11 +7,11 @@ cur_frm.cscript.refresh = function(doc) {
 		cur_frm.add_custom_button(__("Gantt Chart"), function() {
 			frappe.route_options = {"project": doc.name}
 			frappe.set_route("Gantt", "Task");
-		}, "icon-tasks");
+		}, "icon-tasks", true);
 		cur_frm.add_custom_button(__("Tasks"), function() {
 			frappe.route_options = {"project": doc.name}
 			frappe.set_route("List", "Task");
-		}, "icon-list");
+		}, "icon-list", true);
 	}
 }
 
