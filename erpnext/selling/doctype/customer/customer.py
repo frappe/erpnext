@@ -121,7 +121,7 @@ class Customer(TransactionBase):
 
 	def before_rename(self, olddn, newdn, merge=False):
 		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Customer", olddn, newdn, merge, self.company)
+		rename_account_for("Customer", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''

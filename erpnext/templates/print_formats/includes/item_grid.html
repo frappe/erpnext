@@ -22,12 +22,12 @@
 				{%- endif %}
 				{% if (not row.meta.is_print_hide("item_name") and
 					(row.meta.is_print_hide("item_code") or row.item_code != row.item_name)) -%}
-					<div class="primary">{{ row.item_name }}</div>
+					<div class="primary">{{ row.get_formatted("item_name",as_html=True) }}</div>
 				{%- endif %}
 				{% if (not row.meta.is_print_hide("description") and row.description and
 					((row.meta.is_print_hide("item_code") and row.meta.is_print_hide("item_name"))
 						or not (row.item_code == row.item_name == row.description))) -%}
-					<p>{{ row.description }}</p>
+					<p>{{ row.get_formatted("description", as_html=True) }}</p>
 				{%- endif %}
 				{%- for field in visible_columns -%}
 					{%- if (field.fieldname not in std_fields) and
