@@ -1,0 +1,23 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			<span style="margin-right: 8px;" class="filterable"
+					data-filter="employee,=,{%= doc.employee %}">
+					{%= doc.employee_name %}</span>
+
+			<span class="label
+				label-{%= frappe.utils.guess_style(doc.approval_status) %} filterable"
+				title="{%= __("Status") %}"
+				data-filter="status,=,{%= doc.approval_status %}">
+				{%= doc.approval_status %}
+			</span>
+
+		</div>
+	</div>
+	<!-- sample graph -->
+	<div class="col-xs-2 text-right">
+		{%= doc.get_formatted("total_claimed_amount") %}
+	</div>
+</div>
