@@ -54,17 +54,26 @@ class SalaryStructure(Document):
 	def check_existing(self):
 		ret = frappe.db.sql("""select name from `tabSalary Structure` where is_active = 'Yes'
 			and employee = %s and name!=%s""", (self.employee,self.name))
+
 		if ret and self.is_active=='Yes':
-			frappe.throw(_("Another Salary Structure {0} is active for employee {0}. Please make its status 'Inactive' to proceed.").format(cstr(ret), self.employee))
+			frappe.throw(_("Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.").format(cstr(ret[0][0]), self.employee))
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0:
 			frappe.throw(_("Net pay cannot be negative"))
 
+	def validate_employee(self):
+		old_employee = frappe.db.get_value("Salary Structure", self.name, "employee")
+		if old_employee and self.employee != old_employee:
+			frappe.throw(_("Employee can not be changed"))
+
+
 	def validate(self):
 		self.check_existing()
 		self.validate_amount()
+		self.validate_employee()
 		set_employee_name(self)
+
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
