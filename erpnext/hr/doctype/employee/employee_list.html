@@ -1,0 +1,35 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			{% if(doc.status==="Active") { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Active") %}" class="filterable"
+				data-filter="status,=,Active">
+				<i class="icon-ok"></i>
+			</span>
+			{% } %}
+
+			{% if(doc.designation) { %}
+			<span style="margin-right: 8px;" class="filterable"
+					data-filter="designation,=,{%= doc.designation %}">
+					{%= doc.designation %}</span>
+			{% } %}
+
+			{% if(doc.branch) { %}
+			<span class="label label-default filterable"
+				data-filter="branch,=,{%= doc.branch %}">
+				<i class="icon-map-marker"></i> {%= doc.branch %}
+			</span>
+			{% } %}
+
+			{% if(doc.department) { %}
+			<span class="label label-default filterable"
+				data-filter="department,=,{%= doc.department %}">
+				<i class="icon-sitemap"></i> {%= doc.department %}
+			</span>
+			{% } %}
+		</div>
+	</div>
+</div>

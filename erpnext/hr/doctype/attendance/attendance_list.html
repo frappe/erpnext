@@ -1,0 +1,19 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			<span class="label
+				label-{%= {"Present":"success", "Absent":"default", "Half Day": "warning"}[doc.status] %} filterable"
+				title="{%= __("Status") %}"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}
+			</span>
+		</div>
+	</div>
+	<div class="col-xs-2 text-right">
+		<span style="margin-right: 8px;" class="filterable"
+				data-filter="att_date,=,{%= doc.att_date %}">
+				{%= doc.get_formatted("att_date") %}</span>
+	</div>
+</div>

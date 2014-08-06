@@ -1,0 +1,23 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="{%= doc.enquiry_from.toLowerCase() %},=,{%= doc[doc.enquiry_from.toLowerCase()] %}">
+					{%= doc.customer_name %}</span> ({%= doc.enquiry_from %})</span>
+			<span style="margin-right: 8px; display: inline-block"
+				title="{%= doc.enquiry_type %}" class="filterable"
+				data-filter="enquiry_type,=,{%= doc.enquiry_type %}">
+			{% if(doc.enquiry_type==="Sales") { %}
+				<i class="icon-tag"></i>
+			{% } else { %}
+				<i class="icon-wrench"></i>
+			{% } %}
+			</span>
+			<span class="label
+				{%= doc.status=="Draft" ? "label-danger" : "label-info" %} filterable"
+				data-filter="status,=,{%= doc.status %}">{%= doc.status %}</span>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,97 @@
+{% var visible_columns = row.get_visible_columns(["item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom", "discount_percentage", "schedule_date", "warehouse", "against_sales_order", "sales_order"]); %}
+
+{% if(!doc) { %}
+	<div class="row">
+		<div class="col-sm-6">{%= __("Item") %}</div>
+		<div class="col-sm-2 text-right">{%= __("Qty") %}</div>
+		<div class="col-sm-2 text-right">{%= __("Rate") %}</div>
+		<div class="col-sm-2 text-right">{%= __("Amount") %}</div>
+	</div>
+{% } else { %}
+	<div class="row">
+		<div class="col-sm-6"><strong>{%= doc.item_code %}</strong>
+			{% if(doc.item_name != doc.item_code) { %}
+				<br>{%= doc.item_name %}{% } %}
+			{% if(doc.item_name != doc.description) { %}
+				<p>{%= doc.description %}</p>{% } %}
+			{% if(doc.sales_order || doc.against_sales_order) { %}
+				<p><span class="label label-default"
+					title="{%= __("Sales Order") %}">
+					<i class="icon-file"></i>
+					{%= doc.sales_order || doc.against_sales_order %}
+				</span></p>
+			{% } %}
+			{% include "templates/form_grid/includes/visible_cols.html" %}
+			{% if(doc.schedule_date) { %}
+			<div><span title="{%= __("Reqd By Date") %}" class="label {%=
+				(frappe.datetime.get_diff(doc.schedule_date) < 1
+					&& doc.received_qty < doc.qty)
+					? "label-danger" : "label-default" %}">
+					{%= doc.get_formatted("schedule_date") %}</span>
+			</div>
+			{% } %}
+		</div>
+
+		<!-- qty -->
+		<div class="col-sm-2 text-right">
+			{%= doc.get_formatted("qty") %}
+			<br><small>{%= doc.uom || doc.stock_uom %}</small>
+			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
+				doc.doctype) && frm.doc.docstatus===1) {
+				var delivered = doc.doctype==="Sales Order Item" ?
+						doc.delivered_qty : doc.received_qty,
+					completed =
+						100 - cint((doc.qty - delivered) * 100 / doc.qty),
+					title = __("Delivered");
+				%}
+				{% include "templates/form_grid/includes/progress.html" %}
+			{% } %}
+			{% if(doc.warehouse) {
+				var label_class = "label-default",
+					title = "Warehouse",
+					actual_qty = (doc.doctype==="Sales Order"
+						? doc.projected_qty : doc.actual_qty);
+				if(actual_qty != undefined) {
+					if(actual_qty > doc.qty) {
+						var label_class = "label-success";
+						var title = "In Stock"
+					} else {
+						var title = "Not In Stock"
+					}
+				}
+				%}
+				<div style="overflow:hidden; min-height: 25px;
+					white-space:nowrap; text-overflow: ellipsis;"
+					title="{%= title %}">
+					<span class="label {%= label_class %}">
+						{%= doc.warehouse %}
+					</span>
+				</div>
+			{% } %}
+		</div>
+
+		<!-- rate -->
+		<div class="col-sm-2 text-right">
+			{%= doc.get_formatted("rate") %}
+			{% if(doc.discount_percentage) { %}
+			<br><span class="label label-default pull-right"
+				title="{%= __("Discount")  %}">
+				{%= -1 * doc.discount_percentage %}%</span>
+			{% }%}
+		</div>
+
+		<!-- amount -->
+		<div class="col-sm-2 text-right">
+			{%= doc.get_formatted("amount") %}
+			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
+				doc.doctype) && frm.doc.docstatus===1 && doc.amount) {
+				var completed =
+					100 - cint((doc.amount - doc.billed_amt) * 100 / doc.amount),
+					title = __("Billed");
+				%}
+				<br><small>&nbsp;</small>
+				{% include "templates/form_grid/includes/progress.html" %}
+			{% } %}
+		</div>
+	</div>
+{% } %}

@@ -3,12 +3,27 @@
 
 frappe.provide("erpnext.projects");
 
-erpnext.projects.TimeLog = frappe.ui.form.Controller.extend({
-	onload: function() {
-		this.frm.set_query("task", erpnext.queries.task);
-	}
+frappe.ui.form.on("Time Log", "onload", function(frm) {
+	frm.set_query("task", erpnext.queries.task);
 });
 
-cur_frm.cscript = new erpnext.projects.TimeLog({frm: cur_frm});
+// set to time if hours is updated
+frappe.ui.form.on("Time Log", "hours", function(frm) {
+	if(!frm.doc.from_time) {
+		frm.set_value("from_time", frappe.datetime.now_datetime());
+	}
+	var d = moment(frm.doc.from_time);
+	d.add(frm.doc.hours, "hours");
+	frm._setting_hours = true;
+	frm.set_value("to_time", d.format(moment.defaultDatetimeFormat));
+	frm._setting_hours = false;
+});
+
+// set hours if to_time is updated
+frappe.ui.form.on("Time Log", "to_time", function(frm) {
+	if(frm._setting_hours) return;
+	frm.set_value("hours", moment(cur_frm.doc.to_time).diff(moment(cur_frm.doc.from_time),
+		"hours"));
+});
 
 cur_frm.add_fetch('task','project','project');

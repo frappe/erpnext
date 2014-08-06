@@ -1,0 +1,25 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% if(doc.billable) { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Billable") %}" class="filterable"
+				data-filter="billable,=,Yes">
+				<i class="icon-money text-muted"></i>
+			</span>
+			{% } %}
+			<span class="label label-info filterable" style="margin-right: 8px;"
+				data-filter="activity_type,=,{%= doc.activity_type %}">
+				{%= doc.activity_type %}</span>
+			<span style="margin-right: 8px;" class="text-muted">
+				({%= doc.hours + " " + __("hours") %})
+			</span>
+			{% if(doc.project) { %}
+			<span class="filterable" style="margin-right: 8px;"
+				data-filter="project,=,{%= doc.project %}">
+				{%= doc.project %}</span>
+			{% } %}
+		</div>
+	</div>
+</div>

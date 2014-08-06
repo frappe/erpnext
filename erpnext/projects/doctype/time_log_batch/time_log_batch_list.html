@@ -1,0 +1,15 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span class="label label-{%= doc.status=="Billed" ? "success" :
+				frappe.utils.guess_style(doc.status) %} filterable"
+				style="margin-right: 8px;"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}</span>
+			<span style="margin-right: 8px;" class="text-muted">
+				({%= doc.total_hours + " " + __("hours") %})
+			</span>
+		</div>
+	</div>
+</div>

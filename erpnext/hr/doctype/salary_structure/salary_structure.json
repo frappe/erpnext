@@ -227,7 +227,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:17.438605", 
+ "modified": "2014-08-05 06:56:27.038404", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure", 
@@ -260,5 +260,6 @@
   }
  ], 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }
