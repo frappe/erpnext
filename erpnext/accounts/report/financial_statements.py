@@ -11,9 +11,12 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 	"""Get a list of dict {"to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
-	start_date, end_date = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])
-	start_date = getdate(start_date)
-	end_date = getdate(end_date)
+	fy_start_end_date = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])
+	if not fy_start_end_date:
+		frappe.throw(_("Fiscal Year {0} not found.").format(fiscal_year))
+
+	start_date = getdate(fy_start_end_date[0])
+	end_date = getdate(fy_start_end_date[1])
 
 	if periodicity == "Yearly":
 		period_list = [_dict({"to_date": end_date, "key": fiscal_year, "label": fiscal_year})]
