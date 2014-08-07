@@ -780,14 +780,10 @@ def make_return_jv(stock_entry):
 	from erpnext.accounts.utils import get_balance_on
 	for r in result:
 		jv.append("entries", {
-			"__islocal": 1,
-			"doctype": "Journal Voucher Detail",
-			"parentfield": "entries",
 			"account": r.get("account"),
 			"against_invoice": r.get("against_invoice"),
 			"against_voucher": r.get("against_voucher"),
-			"balance": get_balance_on(r.get("account"), se.posting_date) \
-				if r.get("account") else 0
+			"balance": get_balance_on(r.get("account"), se.posting_date) if r.get("account") else 0
 		})
 
 	return jv
