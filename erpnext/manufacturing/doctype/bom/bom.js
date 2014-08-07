@@ -7,7 +7,8 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
 
 	if (!doc.__islocal && doc.docstatus<2) {
-		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost);
+		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost,
+			"icon-money", "btn-default");
 	}
 
 	cur_frm.cscript.with_operations(doc);

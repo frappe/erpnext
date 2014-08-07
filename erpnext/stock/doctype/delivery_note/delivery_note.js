@@ -38,7 +38,8 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button(__('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(__('Make Packing Slip'),
+				cur_frm.cscript['Make Packing Slip'], frappe.boot.doctype_icons["Packing Slip"], "btn-default");
 		}
 
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
@@ -62,7 +63,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 
 	},

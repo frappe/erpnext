@@ -57,23 +57,23 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.set_dynamic_labels();
 
 		// Show POS button only if it is enabled from features setup
-		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
+		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request" && this.frm.doc.docstatus===0)
 			this.make_pos_btn();
 	},
 
 	make_pos_btn: function() {
 		if(!this.pos_active) {
 			var btn_label = __("POS View"),
-				icon = "icon-desktop";
+				icon = "icon-th";
 		} else {
-			var btn_label = __(this.frm.doctype) + __(" View"),
+			var btn_label = __("Form View"),
 				icon = "icon-file-text";
 		}
 		var me = this;
 
-		this.$pos_btn = this.frm.appframe.add_button(btn_label, function() {
+		this.$pos_btn = this.frm.appframe.add_primary_action(btn_label, function() {
 			me.toggle_pos();
-		}, icon);
+		}, icon, "btn-default");
 	},
 
 	toggle_pos: function(show) {

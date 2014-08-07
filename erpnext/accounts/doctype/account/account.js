@@ -65,10 +65,10 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
 		cur_frm.add_custom_button(__('Convert to Ledger'),
-			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet')
+			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet', 'btn-default');
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
 		cur_frm.add_custom_button(__('Convert to Group'),
-			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet')
+			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
 
 		cur_frm.appframe.add_button(__('View Ledger'), function() {
 			frappe.route_options = {

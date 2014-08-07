@@ -28,7 +28,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		} else {
 			msgprint(save_msg);
 		}
-	}, 1);
+	}, "icon-eye-open", "btn-default");
 	cur_frm.add_custom_button(__('Send Now'), function() {
 		doc = locals[dt][dn];
 		if(doc.__unsaved != 1) {
@@ -44,7 +44,7 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		} else {
 			msgprint(save_msg);
 		}
-	}, 1);
+	}, "icon-envelope", "btn-default");
 }
 
 cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {

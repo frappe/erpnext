@@ -3,18 +3,18 @@
 
 frappe.provide("erpnext.support");
 
-frappe.ui.form.on_change("Maintenance Visit", "customer", function(frm) { 
+frappe.ui.form.on_change("Maintenance Visit", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Maintenance Visit", "customer_address", 
+frappe.ui.form.on_change("Maintenance Visit", "customer_address",
 	erpnext.utils.get_address_display);
-frappe.ui.form.on_change("Maintenance Visit", "contact_person", 
-	erpnext.utils.get_contact_details);	
+frappe.ui.form.on_change("Maintenance Visit", "contact_person",
+	erpnext.utils.get_contact_details);
 
 // TODO commonify this code
 erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		if (this.frm.doc.docstatus===0) {
-			cur_frm.add_custom_button(__('From Maintenance Schedule'), 
+			cur_frm.add_custom_button(__('From Maintenance Schedule'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.support.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
@@ -25,8 +25,8 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
-			cur_frm.add_custom_button(__('From Customer Issue'), 
+				}, "icon-download", "btn-default");
+			cur_frm.add_custom_button(__('From Customer Issue'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.support.doctype.customer_issue.customer_issue.make_maintenance_visit",
@@ -37,8 +37,8 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
-			cur_frm.add_custom_button(__('From Sales Order'), 
+				}, "icon-download", "btn-default");
+			cur_frm.add_custom_button(__('From Sales Order'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
@@ -50,7 +50,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 	},
 });

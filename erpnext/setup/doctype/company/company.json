@@ -40,6 +40,13 @@
    "reqd": 1
   }, 
   {
+   "depends_on": "eval:!doc.__islocal && in_list(user_roles, \"System Manager\")", 
+   "fieldname": "change_abbr", 
+   "fieldtype": "Button", 
+   "label": "Change Abbreviation", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "cb0", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -349,7 +356,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-07-17 19:30:24.487672", 
+ "modified": "2014-08-07 05:20:47.711849", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

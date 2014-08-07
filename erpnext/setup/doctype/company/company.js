@@ -4,8 +4,6 @@
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	if(doc.abbr && !doc.__islocal) {
 		cur_frm.set_df_property("abbr", "read_only", 1);
-		if(in_list(user_roles, "System Manager"))
-			cur_frm.add_custom_button("Replace Abbreviation", cur_frm.cscript.replace_abbr)
 	}
 
 	if(!doc.__islocal) {
@@ -14,7 +12,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.replace_abbr = function() {
+cur_frm.cscript.change_abbr = function() {
 	var dialog = new frappe.ui.Dialog({
 		title: "Replace Abbr",
 		fields: [
