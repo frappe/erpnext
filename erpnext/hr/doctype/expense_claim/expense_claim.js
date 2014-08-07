@@ -45,18 +45,18 @@ cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	if(!doc.approval_status)
 		cur_frm.set_value("approval_status", "Draft")
-			
+
 	if (doc.__islocal) {
 		cur_frm.set_value("posting_date", dateutil.get_today());
-		if(doc.amended_from) 
+		if(doc.amended_from)
 			cur_frm.set_value("approval_status", "Draft");
 		cur_frm.cscript.clear_sanctioned(doc);
 	}
-	
+
 	cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {
 		return{
 			query: "erpnext.controllers.queries.employee_query"
-		}	
+		}
 	}
 	var exp_approver = doc.exp_approver;
 	return cur_frm.call({
@@ -75,7 +75,7 @@ cur_frm.cscript.clear_sanctioned = function(doc) {
 	}
 
 	doc.total_sanctioned_amount = '';
-	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);	
+	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
 }
 
 cur_frm.cscript.refresh = function(doc,cdt,cdn){
@@ -84,15 +84,16 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 	if(!doc.__islocal) {
 		cur_frm.toggle_enable("exp_approver", (doc.owner==user && doc.approval_status=="Draft"));
 		cur_frm.toggle_enable("approval_status", (doc.exp_approver==user && doc.docstatus==0));
-	
-		if(!doc.__islocal && user!=doc.exp_approver) 
+
+		if(!doc.__islocal && user!=doc.exp_approver)
 			cur_frm.frm_head.appframe.set_title_right("");
-	
+
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();
-		
+
 		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher"))
-			 cur_frm.add_custom_button(__("Make Bank Voucher"), cur_frm.cscript.make_bank_voucher);
+			 cur_frm.add_custom_button(__("Make Bank Voucher"),
+			 	cur_frm.cscript.make_bank_voucher, frappe.boot.doctype_icons["Journal Voucher"]);
 	}
 }
 
@@ -131,7 +132,7 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 		}
 		doc.total_sanctioned_amount += d.sanctioned_amount;
 	});
-	
+
 	refresh_field("total_claimed_amount");
 	refresh_field('total_sanctioned_amount');
 
@@ -142,7 +143,7 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 }
 cur_frm.cscript.claim_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-	
+
 	var child = locals[cdt][cdn];
 	refresh_field("sanctioned_amount", child.name, child.parentfield);
 }

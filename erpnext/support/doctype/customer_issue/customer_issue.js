@@ -13,7 +13,8 @@ frappe.ui.form.on_change("Customer Issue", "contact_person",
 erpnext.support.CustomerIssue = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
-			cur_frm.add_custom_button(__('Make Maintenance Visit'), this.make_maintenance_visit)
+			cur_frm.add_custom_button(__('Make Maintenance Visit'),
+				this.make_maintenance_visit, frappe.boot.doctype_icons["Maintenance Visit"], "btn-default")
 		}
 	},
 

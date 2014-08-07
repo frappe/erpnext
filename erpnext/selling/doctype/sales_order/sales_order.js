@@ -25,30 +25,36 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
 					doc.per_billed);
 
-				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
-					cur_frm.add_custom_button(__('Make Delivery'), this.make_delivery_note);
-
-				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
-					cur_frm.add_custom_button(__('Make Maint. Visit'), this.make_maintenance_visit);
-					cur_frm.add_custom_button(__('Make Maint. Schedule'),
-						this.make_maintenance_schedule);
-				}
+					cur_frm.add_custom_button(__('Make Delivery'), this.make_delivery_note, "icon-truck");
 
 				// indent
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
 					cur_frm.add_custom_button(__('Make ') + __('Material Request'),
-						this.make_material_request);
+						this.make_material_request, "icon-ticket");
 
 				// sales invoice
-				if(flt(doc.per_billed, 2) < 100)
-					cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice);
+				if(flt(doc.per_billed, 2) < 100) {
+					cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice,
+						frappe.boot.doctype_icons["Sales Invoice"]);
+				}
 
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(__('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
+					cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'],
+						"icon-exclamation", "btn-default")
+
+						// maintenance
+						if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+							cur_frm.add_custom_button(__('Make Maint. Visit'),
+								this.make_maintenance_visit, null, "btn-default");
+							cur_frm.add_custom_button(__('Make Maint. Schedule'),
+								this.make_maintenance_schedule, null, "btn-default");
+						}
+
+				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone", true);
+
 			} else {
 				// un-stop
 				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
@@ -70,7 +76,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 
 		this.order_type(doc);
