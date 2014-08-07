@@ -1,5 +1,5 @@
 {% var visible_columns = row.get_visible_columns(["item_code", "warehouse",
-	"item_name", "description", "amount", "stock_uom", "uom", "qty"]); %}
+	"item_name", "description", "amount", "stock_uom", "uom", "qty", "schedule_date"]); %}
 
 {% if(!doc) { %}
 	<div class="row">
@@ -16,7 +16,7 @@
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			{% if(doc.schedule_date) { %}
 			<br><span title="{%= __("Reqd By Date") %}" class="label {%=
-				(frappe.datetime.get_diff(doc.schedule_date) < 0
+				(frappe.datetime.get_diff(doc.schedule_date, frappe.datetime.get_today()) < 0
 					&& doc.ordered_qty < doc.qty)
 					? "label-danger" : "label-default" %}">
 					{%= doc.get_formatted("schedule_date") %}</span>

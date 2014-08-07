@@ -282,7 +282,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:09.208254", 
+ "modified": "2014-08-07 06:57:25.248707", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 
@@ -332,5 +332,6 @@
    "write": 1
   }
  ], 
- "search_fields": "customer_name,customer_group,territory"
+ "search_fields": "customer_name,customer_group,territory", 
+ "title_field": "customer_name"
 }

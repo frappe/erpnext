@@ -14,6 +14,10 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 
+form_grid_templates = {
+	"entries": "templates/form_grid/item_grid.html"
+}
+
 class PurchaseInvoice(BuyingController):
 	tname = 'Purchase Invoice Item'
 	fname = 'entries'

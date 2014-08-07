@@ -22,7 +22,9 @@
 					{%= doc.from_warehouse %}
 				</span>
 			{% } %}
-			<i class="icon-arrow-right text-muted"></i>
+			{% if(doc.from_warehouse || doc.to_warehouse) { %}
+				<i class="icon-arrow-right text-muted"></i>
+			{% } %}
 			{% if(doc.to_warehouse) { %}
 				<span class="label label-primary filterable"
 					data-filter="to_warehouse,=,{%= doc.to_warehouse %}">

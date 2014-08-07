@@ -63,13 +63,12 @@ def get_events(start, end, filters=None):
 	data = frappe.db.sql("""select name, exp_start_date, exp_end_date,
 		subject, status, project from `tabTask`
 		where ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
-				and (exp_start_date between '%(start)s' and '%(end)s') \
+				and (exp_start_date between %(start)s and %(end)s) \
 			or ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
-				and exp_end_date between '%(start)s' and '%(end)s'))
-		%(conditions)s""" % {
+				and exp_end_date between %(start)s and %(end)s))
+		{conditions}""".format(conditions=conditions), {
 			"start": start,
-			"end": end,
-			"conditions": conditions
+			"end": end
 		}, as_dict=True, update={"allDay": 0})
 
 	return data

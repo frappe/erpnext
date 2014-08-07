@@ -17,14 +17,14 @@
 				</span>
 				{% } else { %}
 				<span class="label label-warning filterable"
-					data-filter="produced_qty,<,qty|status,!=,Stopped"
+					data-filter="produced_qty,<,{%= doc.qty %}|status,!=,Stopped"
 					title="{%= __("Pending") %}">
 					{%= doc.get_formatted("expected_delivery_date")%}</span>
 				{% } %}
 			{% } %}
 			{% if(per == 100 && doc.status!=="Stopped") { %}
 				<span class="filterable text-muted"
-					data-filter="produced_qty,=,qty|status,!=,Stopped">
+					data-filter="produced_qty,=,{%= doc.qty %}|status,!=,Stopped">
 					<i class="icon-ok-sign"></i></span>
 			{% } %}
 			{% if(doc.status==="Stopped") { %}

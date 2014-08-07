@@ -41,6 +41,8 @@
 		{% include "templates/form_grid/includes/progress.html" %}
 	</div>
 	<div class="col-xs-2 text-right">
-		{%= doc.get_formatted("grand_total") %}
+		<div class="text-ellipsis" title="{%= doc.get_formatted('grand_total_export') %}">
+			{%= doc.get_formatted("grand_total_export") %}
+		</div>
 	</div>
 </div>
