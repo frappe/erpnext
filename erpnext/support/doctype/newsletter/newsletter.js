@@ -20,7 +20,7 @@ cur_frm.cscript.refresh = function(doc) {
 			return $c_obj(doc, 'send_emails', '', function(r) {
 				cur_frm.refresh();
 			});
-		})
+		}, "icon-play", "btn-success");
 	}
 
 	cur_frm.cscript.setup_dashboard();

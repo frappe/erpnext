@@ -15,27 +15,29 @@ $.extend(cur_frm.cscript, {
 				<span class="help">'+__("Integrate incoming support emails to Support Ticket")+'</span></p>';
 		}
 	},
-	
+
 	refresh: function(doc) {
 		erpnext.toggle_naming_series();
 		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {
 			if(cur_frm.fields_dict.status.get_status()=="Write") {
-				if(doc.status!='Closed') cur_frm.add_custom_button('Close Ticket', cur_frm.cscript['Close Ticket']);
-				if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket', cur_frm.cscript['Re-Open Ticket']);
+				if(doc.status!='Closed') cur_frm.add_custom_button('Close',
+					cur_frm.cscript['Close Ticket'], "icon-ok", "btn-success");
+				if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket',
+					cur_frm.cscript['Re-Open Ticket'], null, "btn-default");
 			}
-			
+
 			cur_frm.toggle_enable(["subject", "raised_by"], false);
 			cur_frm.toggle_display("description", false);
 		}
 		refresh_field('status');
 	},
-	
+
 	make_listing: function(doc) {
 		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
-		
+
 		var comm_list = frappe.get_list("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
-		
+
 		if(!comm_list.length) {
 			comm_list.push({
 				"sender": doc.raised_by,
@@ -43,7 +45,7 @@ $.extend(cur_frm.cscript, {
 				"subject": doc.subject,
 				"content": doc.description});
 		}
-					
+
 		cur_frm.communication_view = new frappe.views.CommunicationList({
 			list: comm_list,
 			parent: wrapper,
@@ -52,11 +54,11 @@ $.extend(cur_frm.cscript, {
 		})
 
 	},
-		
+
 	'Close Ticket': function() {
 		cur_frm.cscript.set_status("Closed");
 	},
-	
+
 	'Re-Open Ticket': function() {
 		cur_frm.cscript.set_status("Open");
 	},
@@ -72,8 +74,8 @@ $.extend(cur_frm.cscript, {
 				if(!r.exc) cur_frm.reload_doc();
 			}
 		})
-		
+
 	}
-	
+
 })
 

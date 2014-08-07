@@ -71,10 +71,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.docstatus === 1 &&
 				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
-				this.frm.add_custom_button(__("Make Credit Note"), function() { me.make_return_jv(); });
+				this.frm.add_custom_button(__("Make Credit Note"),
+					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Voucher"]);
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
-				this.frm.add_custom_button(__("Make Debit Note"), function() { me.make_return_jv(); });
+				this.frm.add_custom_button(__("Make Debit Note"),
+					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Voucher"]);
 				this.add_excise_button();
 			}
 		}
@@ -199,7 +201,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise = locals['Journal Voucher'][excise];
 				excise.voucher_type = 'Excise Voucher';
 				loaddoc('Journal Voucher', excise.name);
-			});
+			}, frappe.boot.doctype_icons["Journal Voucher"], "btn-default");
 	},
 
 	make_return_jv: function() {

@@ -124,7 +124,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				this.title = __("Stock Reconcilation Data");
 				frappe.tools.downloadify(JSON.parse(me.frm.doc.reconciliation_json), null, this);
 				return false;
-			}, "icon-download");
+			}, "icon-download", "btn-default");
 		}
 	},
 
