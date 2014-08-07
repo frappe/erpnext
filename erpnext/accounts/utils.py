@@ -363,3 +363,30 @@ def get_currency_precision(currency=None):
 
 	from frappe.utils import get_number_format_info
 	return get_number_format_info(currency_format)[2]
+
+def get_stock_rbnb_difference(posting_date, company):
+	stock_items = frappe.db.sql_list("""select distinct item_code
+		from `tabStock Ledger Entry` where comapny=%s""", company)
+
+	pr_valuation_amount = frappe.db.sql("""
+		select sum(ifnull(pr_item.valuation_rate, 0) * ifnull(pr_item.qty, 0) * ifnull(pr_item.conversion_factor, 0))
+		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
+	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
+		and pr.posting_date <= %s and pr_item.item_code in (%s)""" %
+	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+
+	pi_valuation_amount = frappe.db.sql("""
+		select sum(ifnull(pi_item.valuation_rate, 0) * ifnull(pi_item.qty, 0) * ifnull(pi_item.conversion_factor, 0))
+		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
+	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
+		and pi.posting_date <= %s and pi_item.item_code in (%s)""" %
+	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+
+	# Balance should be
+	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
+
+	# Balance as per system
+	sys_bal = get_balance_on("Stock Received But Not Billed - RIGPL", posting_date)
+
+	# Amount should be credited
+	return flt(stock_rbnb) + flt(sys_bal)
