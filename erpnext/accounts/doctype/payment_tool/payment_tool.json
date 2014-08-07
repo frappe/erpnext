@@ -58,7 +58,7 @@
   {
    "fieldname": "account_name", 
    "fieldtype": "Data", 
-   "hidden": 1, 
+   "hidden": 0, 
    "label": "Account Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -301,7 +301,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2014-08-04 11:38:26.728322", 
+ "modified": "2014-08-05 17:00:42.409622", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Tool", 
