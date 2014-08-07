@@ -366,7 +366,7 @@ def get_currency_precision(currency=None):
 
 def get_stock_rbnb_difference(posting_date, company):
 	stock_items = frappe.db.sql_list("""select distinct item_code
-		from `tabStock Ledger Entry` where comapny=%s""", company)
+		from `tabStock Ledger Entry` where company=%s""", company)
 
 	pr_valuation_amount = frappe.db.sql("""
 		select sum(ifnull(pr_item.valuation_rate, 0) * ifnull(pr_item.qty, 0) * ifnull(pr_item.conversion_factor, 0))
@@ -386,7 +386,8 @@ def get_stock_rbnb_difference(posting_date, company):
 	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
 
 	# Balance as per system
-	sys_bal = get_balance_on("Stock Received But Not Billed - RIGPL", posting_date)
+	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("Company", company, "abbr")
+	sys_bal = get_balance_on(stock_rbnb_account, posting_date)
 
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
