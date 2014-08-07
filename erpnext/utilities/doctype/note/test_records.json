@@ -1,6 +1,7 @@
 [
 	{
 		"doctype": "Note",
-		"name": "_Test Note 1"
+		"name": "_Test Note 1",
+		"title": "Test Note Title"
 	}
 ]
