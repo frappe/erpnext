@@ -28,28 +28,31 @@ def import_country_and_currency():
 
 	for name in data:
 		country = frappe._dict(data[name])
-		if not frappe.db.exists("Country", name):
-			frappe.get_doc({
-				"doctype": "Country",
-				"country_name": name,
-				"code": country.code,
-				"date_format": country.date_format or "dd-mm-yyyy",
-				"time_zones": "\n".join(country.timezones or [])
-			}).insert()
-
-		if country.currency and not frappe.db.exists("Currency", country.currency):
-			frappe.get_doc({
-				"doctype": "Currency",
-				"currency_name": country.currency,
-				"fraction": country.currency_fraction,
-				"symbol": country.currency_symbol,
-				"fraction_units": country.currency_fraction_units,
-				"number_format": country.number_format
-			}).insert()
+		add_country_and_currency(name, country)
 
 	# enable frequently used currencies
 	for currency in ("INR", "USD", "GBP", "EUR", "AED", "AUD", "JPY", "CNY", "CHF"):
 		frappe.db.set_value("Currency", currency, "enabled", 1)
+
+def add_country_and_currency(name, country):
+	if not frappe.db.exists("Country", name):
+		frappe.get_doc({
+			"doctype": "Country",
+			"country_name": name,
+			"code": country.code,
+			"date_format": country.date_format or "dd-mm-yyyy",
+			"time_zones": "\n".join(country.timezones or [])
+		}).insert()
+
+	if country.currency and not frappe.db.exists("Currency", country.currency):
+		frappe.get_doc({
+			"doctype": "Currency",
+			"currency_name": country.currency,
+			"fraction": country.currency_fraction,
+			"symbol": country.currency_symbol,
+			"fraction_units": country.currency_fraction_units,
+			"number_format": country.number_format
+		}).insert()
 
 def feature_setup():
 	"""save global defaults and features setup"""
