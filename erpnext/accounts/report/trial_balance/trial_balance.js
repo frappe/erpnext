@@ -47,13 +47,13 @@ frappe.query_reports["Trial Balance"] = {
 		},
 		{
 			"fieldname": "with_period_closing_entry",
-			"label": __("With Period Closing Entry"),
+			"label": __("Period Closing Entry"),
 			"fieldtype": "Check",
 			"default": 1
 		},
 		{
 			"fieldname": "show_zero_values",
-			"label": __("Show rows with zero values"),
+			"label": __("Show zero values"),
 			"fieldtype": "Check"
 		},
 	],
