@@ -74,6 +74,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.$pos_btn = this.frm.appframe.add_primary_action(btn_label, function() {
 			me.toggle_pos();
 		}, icon, "btn-default");
+
+		if(erpnext.open_as_pos) {
+			me.toggle_pos(true);
+			erpnext.open_as_pos = false;
+		}
 	},
 
 	toggle_pos: function(show) {
