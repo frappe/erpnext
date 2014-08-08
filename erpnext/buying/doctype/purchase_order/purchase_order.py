@@ -203,7 +203,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
 		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.base_rate)
+		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * \
+			flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -235,8 +236,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		if flt(obj.base_rate):
-			target.qty = target.base_amount / flt(obj.base_rate)
+		target.qty = target.amount / flt(obj.rate) if flt(obj.rate) else flt(obj.qty)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
