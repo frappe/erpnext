@@ -2,7 +2,7 @@
 
 [https://erpnext.com](https://erpnext.com)
 
-Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on Python / MySQL.
+Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on Python / MariaDB.
 
 ERPNext is built on [frappe](https://github.com/frappe/frappe)
 
