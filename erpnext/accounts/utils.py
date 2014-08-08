@@ -364,6 +364,7 @@ def get_currency_precision(currency=None):
 	from frappe.utils import get_number_format_info
 	return get_number_format_info(currency_format)[2]
 
+<<<<<<< HEAD
 def get_stock_rbnb_difference(posting_date, company):
 	stock_items = frappe.db.sql_list("""select distinct item_code
 		from `tabStock Ledger Entry` where company=%s""", company)
@@ -392,21 +393,20 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
-def outstanding_voucher_list(amount_query, account_name):
+def get_outstanding_invoices(amount_query, account):
 	all_outstanding_vouchers = []
-	print account_name
 	outstanding_voucher_list = frappe.db.sql("""
 		select
-			voucher_no, voucher_type, posting_date, 
+			voucher_no, voucher_type, posting_date,
 			ifnull(sum({amount_query}), 0) as invoice_amount
 		from
 			`tabGL Entry`
 		where
 			account = %s and {amount_query} > 0
-		group by voucher_type, voucher_no			 
+		group by voucher_type, voucher_no
 		""".format(**{
 		"amount_query": amount_query
-		}), account_name, as_dict = True)
+		}), account, as_dict = True)
 
 	for d in outstanding_voucher_list:
 		payment_amount = frappe.db.sql("""
@@ -414,21 +414,21 @@ def outstanding_voucher_list(amount_query, account_name):
 			from
 				`tabGL Entry`
 			where
-				account = %s and {amount_query} < 0 
+				account = %s and {amount_query} < 0
 				and against_voucher_type = %s and ifnull(against_voucher, '') = %s
 			""".format(**{
 			"amount_query": amount_query
-			}), (account_name, d.voucher_type, d.voucher_no))
-			
+			}), (account, d.voucher_type, d.voucher_no))
+
 		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
-			
+
 		if d.invoice_amount > payment_amount:
-			
+
 			all_outstanding_vouchers.append({
-				'voucher_no': d.voucher_no, 
-				'voucher_type': d.voucher_type, 
-				'posting_date': d.posting_date, 
-				'invoice_amount': flt(d.invoice_amount), 
+				'voucher_no': d.voucher_no,
+				'voucher_type': d.voucher_type,
+				'posting_date': d.posting_date,
+				'invoice_amount': flt(d.invoice_amount),
 				'outstanding_amount': d.invoice_amount - payment_amount
 				})
 
