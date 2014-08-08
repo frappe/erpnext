@@ -57,7 +57,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_values = sorted([
 			["_Test Supplier - _TC", 0, 720],
-			["Stock Received But Not Billed - _TC", 500.0, 0],
+			["Stock Received But Not Billed - _TC", 750.0, 0],
+			["Expenses Included In Valuation - _TC", 0.0, 250.0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
 			["_Test Account VAT - _TC", 120.0, 0],
 		])
@@ -68,11 +69,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[i][2], gle.credit)
 
 		set_perpetual_inventory(0)
-		
+
 	def test_gl_entries_with_auto_accounting_for_stock_against_pr(self):
 		set_perpetual_inventory(1)
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-		
+
 		pr = frappe.copy_doc(pr_test_records[0])
 		pr.submit()
 
@@ -89,10 +90,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		expected_values = sorted([
 			["_Test Supplier - _TC", 0, 720],
-			["Stock Received But Not Billed - _TC", 750.0, 0],
+			["Stock Received But Not Billed - _TC", 500.0, 0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
 			["_Test Account VAT - _TC", 120.0, 0],
-			["Expenses Included In Valuation - _TC", 0, 250.0],
 		])
 
 		for i, gle in enumerate(gl_entries):
