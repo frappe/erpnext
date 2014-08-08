@@ -28,7 +28,7 @@ class LandedCostVoucher(Document):
 				item.rate = d.rate
 				item.amount = d.amount
 				item.purchase_receipt = pr.purchase_receipt
-				item.pr_item_row_id = d.name
+				item.purchase_receipt_item = d.name
 
 		if self.get("landed_cost_taxes_and_charges"):
 			self.set_applicable_charges_for_item()

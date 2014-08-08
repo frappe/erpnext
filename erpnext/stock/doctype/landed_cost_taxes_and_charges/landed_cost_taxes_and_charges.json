@@ -34,12 +34,13 @@
    "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Amount", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "reqd": 1
   }
  ], 
  "istable": 1, 
- "modified": "2014-07-11 13:00:14.770284", 
+ "modified": "2014-08-08 13:12:02.594698", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Taxes and Charges", 

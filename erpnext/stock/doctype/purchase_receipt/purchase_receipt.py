@@ -69,14 +69,14 @@ class PurchaseReceipt(BuyingController):
 		self.create_raw_materials_supplied("pr_raw_material_details")
 		self.set_landed_cost_voucher_amount()
 		self.update_valuation_rate("purchase_receipt_details")
-		
+
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("purchase_receipt_details"):
-			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0)) 
-				from `tabLanded Cost Item` 
-				where docstatus = 1 and pr_item_row_id = %s""", d.name)
+			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0))
+				from `tabLanded Cost Item`
+				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
-			
+
 	def validate_rejected_warehouse(self):
 		for d in self.get("purchase_receipt_details"):
 			if flt(d.rejected_qty) and not d.rejected_warehouse:
@@ -285,26 +285,26 @@ class PurchaseReceipt(BuyingController):
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
-		
+
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		default_cost_center = self.get_company_default("cost_center")
-		
+
 		gl_entries = []
 		warehouse_with_no_account = []
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
 		for d in self.get("purchase_receipt_details"):
-			if d.item_code in stock_items and flt(d.valuation_rate):
-				if warehouse_account.get(d.warehouse) and flt(d.qty) and flt(d.valuation_rate):
-					
+			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
+				if warehouse_account.get(d.warehouse):
+
 					# warehouse account
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse],
 						"against": stock_rbnb,
 						"cost_center": d.cost_center,
-						"remarks": self.get("remarks") or "Accounting Entry for Stock",
-						"debit": flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor)
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"debit": flt(flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor),
+							self.precision("valuation_rate", d))
 					}))
 
 					# stock received but not billed
@@ -312,36 +312,36 @@ class PurchaseReceipt(BuyingController):
 						"account": stock_rbnb,
 						"against": warehouse_account[d.warehouse],
 						"cost_center": d.cost_center,
-						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"credit": flt(d.base_amount, self.precision("base_amount", d))
 					}))
-					
+
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
-					
+
 					# Amount added through landed-cost-voucher
 					if flt(d.landed_cost_voucher_amount):
 						gl_entries.append(self.get_gl_dict({
 							"account": expenses_included_in_valuation,
 							"against": warehouse_account[d.warehouse],
 							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount)
 						}))
-						
+
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
 						gl_entries.append(self.get_gl_dict({
 							"account": warehouse_account[self.supplier_warehouse],
 							"against": warehouse_account[d.warehouse],
 							"cost_center": d.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
 						}))
-				
+
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
-						
+
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("other_charges"):
@@ -351,21 +351,21 @@ class PurchaseReceipt(BuyingController):
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
-					
+
 		if negative_expense_to_be_booked and valuation_tax:
 			# Backward compatibility:
-			# If expenses_included_in_valuation account has been credited in against PI 
-			# and charges added via Landed Cost Voucher, 
-			# post valuation related charges on "Stock Received But Not Billed" 
+			# If expenses_included_in_valuation account has been credited in against PI
+			# and charges added via Landed Cost Voucher,
+			# post valuation related charges on "Stock Received But Not Billed"
 
 			negative_expense_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
-				where docstatus = 1 and purchase_receipt=%s 
-				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice' 
+				where docstatus = 1 and purchase_receipt=%s
+				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
 					and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
-		
+
 			if negative_expense_booked_in_pi:
 				expenses_included_in_valuation = stock_rbnb
-			
+
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
@@ -376,17 +376,17 @@ class PurchaseReceipt(BuyingController):
 				else:
 					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
 					amount_including_divisional_loss -= applicable_amount
-					
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": expenses_included_in_valuation,
 						"cost_center": cost_center,
 						"credit": applicable_amount,
-						"remarks": self.remarks or "Accounting Entry for Stock",
+						"remarks": self.remarks or _("Accounting Entry for Stock"),
 						"against": against_account
 					})
 				)
-				
+
 				i += 1
 
 		if warehouse_with_no_account:
