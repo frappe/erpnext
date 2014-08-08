@@ -73,8 +73,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						return item.delivery_note ? true : false;
 					});
 
-				if(!from_delivery_note)
+				if(!from_delivery_note) {
 					cur_frm.appframe.add_primary_action(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'], "icon-truck")
+				}
 			}
 
 			if(doc.outstanding_amount!=0) {
