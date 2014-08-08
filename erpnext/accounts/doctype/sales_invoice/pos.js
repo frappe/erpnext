@@ -367,10 +367,8 @@ erpnext.POS = Class.extend({
 		this.hide_payment_button();
 
 		// If quotation to is not Customer then remove party
-		if (this.frm.doctype == "Quotation") {
+		if (this.frm.doctype == "Quotation" && this.frm.doc.quotation_to!="Customer") {
 			this.party_field.$wrapper.remove();
-			if (this.frm.doc.quotation_to == "Customer")
-				this.make_party();
 		}
 	},
 	refresh_item_list: function() {
@@ -489,7 +487,7 @@ erpnext.POS = Class.extend({
 
 		if (operation == "increase-qty")
 			this.update_qty(item_code, item_qty + 1);
-		else if (operation == "decrease-qty" && item_qty != 1)
+		else if (operation == "decrease-qty" && item_qty != 0)
 			this.update_qty(item_code, item_qty - 1);
 	},
 	disable_text_box_and_button: function() {
