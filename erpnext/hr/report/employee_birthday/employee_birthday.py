@@ -15,14 +15,15 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		"Employee:Link/Employee:120", "Date of Birth:Date:100", "Branch:Link/Branch:120",
-		"Department:Link/Department:120", "Designation:Link/Designation:120", "Gender::60",
-		"Company:Link/Company:120"
+		"Employee:Link/Employee:120", "Name:Data:200", "Date of Birth:Date:100",
+		"Branch:Link/Branch:120", "Department:Link/Department:120",
+		"Designation:Link/Designation:120", "Gender::60", "Company:Link/Company:120"
 	]
 
 def get_employees(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, date_of_birth, branch, department, designation,
+	return frappe.db.sql("""select name, employee_name, date_of_birth,
+	branch, department, designation,
 	gender, company from tabEmployee where status = 'Active' %s""" % conditions, as_list=1)
 
 def get_conditions(filters):
