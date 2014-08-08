@@ -82,11 +82,15 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
 
 	if(doc.docstatus === 1 && doc.status!=="Lost") {
-		cur_frm.add_custom_button(__('Create Quotation'), cur_frm.cscript.create_quotation);
+		cur_frm.add_custom_button(__('Create Quotation'),
+			cur_frm.cscript.create_quotation, frappe.boot.doctype_icons["Quotation"],
+			"btn-default");
 		if(doc.status!=="Quotation")
-			cur_frm.add_custom_button(__('Opportunity Lost'), cur_frm.cscript['Declare Opportunity Lost']);
+			cur_frm.add_custom_button(__('Opportunity Lost'),
+				cur_frm.cscript['Declare Opportunity Lost'], "icon-remove", "btn-default");
 
-		cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+		cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms,
+			"icon-mobile-phone", true);
 	}
 }
 

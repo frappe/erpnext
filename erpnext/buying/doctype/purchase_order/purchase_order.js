@@ -22,14 +22,18 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
 				doc.per_billed);
 
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
-
 			if(flt(doc.per_received, 2) < 100)
-				cur_frm.add_custom_button(__('Make Purchase Receipt'), this.make_purchase_receipt);
+				cur_frm.add_custom_button(__('Make Purchase Receipt'),
+					this.make_purchase_receipt, frappe.boot.doctype_icons["Purchase Receipt"]);
 			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice);
+				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice,
+					frappe.boot.doctype_icons["Purchase Invoice"]);
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
-				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order'], "icon-exclamation");
+				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order'],
+					"icon-exclamation", "btn-default");
+
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms, "icon-mobile-phone", true);
+
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
@@ -67,7 +71,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}
+			}, "icon-download", "btn-default"
 		);
 
 		cur_frm.add_custom_button(__('From Supplier Quotation'),
@@ -81,7 +85,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}
+			}, "icon-download", "btn-default"
 		);
 
 		cur_frm.add_custom_button(__('For Supplier'),
@@ -93,7 +97,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						docstatus: ["!=", 2],
 					}
 				})
-			}
+			}, "icon-download", "btn-default"
 		);
 	},
 

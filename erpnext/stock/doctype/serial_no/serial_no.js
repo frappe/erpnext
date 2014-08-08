@@ -22,5 +22,5 @@ frappe.ui.form.on("Serial No", "refresh", function(frm) {
 		cur_frm.add_custom_button(__('Set Status as Available'), function() {
 			cur_frm.set_value("status", "Available");
 			cur_frm.save();
-		});
+		}, "icon-ok", "btn-default");
 });
