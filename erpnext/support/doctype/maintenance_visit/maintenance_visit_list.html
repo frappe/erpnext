@@ -1,0 +1,35 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			<!-- sample text -->
+			<span style="margin-right: 8px;" class="filterable"
+					data-filter="customer,=,{%= doc.customer %}">
+					{%= doc.customer_name %}</span>
+
+			<!-- sample label -->
+			{% var style = {
+					"Scheduled": "default",
+					"Unscheduled": "default",
+					"Breakdown": "danger"
+				}[doc.maintenance_type] %}
+			<span class="label
+				label-{%= style %} filterable"
+				data-filter="maintenance_type,=,{%= doc.maintenance_type %}">
+				{%= doc.maintenance_type %}
+			</span>
+			{% var style = doc.completion_status==="Partially Completed" ? "warning" : "success" %}
+			<span class="label
+				label-{%= style %} filterable"
+				data-filter="completion_status,=,{%= doc.completion_status %}">
+				{%= doc.completion_status %}
+			</span>
+		</div>
+	</div>
+	<!-- sample graph -->
+	<div class="col-xs-1 text-right">
+		{% var completed = doc.completed, title = __("Completed") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+</div>

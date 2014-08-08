@@ -1,0 +1,45 @@
+{% var visible_columns = row.get_visible_columns(["item_code", "warehouse",
+	"item_name", "description", "amount", "stock_uom", "uom", "qty", "schedule_date"]); %}
+
+{% if(!doc) { %}
+	<div class="row">
+		<div class="col-sm-9">{%= __("Item") %}</div>
+		<div class="col-sm-3 text-right">{%= __("Qty") %}</div>
+	</div>
+{% } else { %}
+	<div class="row">
+		<div class="col-sm-9"><strong>{%= doc.item_code %}</strong>
+			{% if(doc.item_name != doc.item_code) { %}
+				<br>{%= doc.item_name %}{% } %}
+			{% if(doc.item_name != doc.description) { %}
+				<p>{%= doc.description %}</p>{% } %}
+			{% include "templates/form_grid/includes/visible_cols.html" %}
+			{% if(doc.schedule_date) { %}
+			<br><span title="{%= __("Reqd By Date") %}" class="label {%=
+				(frappe.datetime.get_diff(doc.schedule_date, frappe.datetime.get_today()) < 0
+					&& doc.ordered_qty < doc.qty)
+					? "label-danger" : "label-default" %}">
+					{%= doc.get_formatted("schedule_date") %}</span>
+			{% } %}
+		</div>
+
+		<!-- qty -->
+		<div class="col-sm-3 text-right">
+			{%= doc.get_formatted("qty") %}
+			<small>{%= doc.uom || doc.stock_uom %}</small>
+			{% var completed =
+				100 - cint((doc.qty - cint(doc.ordered_qty)) * 100 / doc.qty),
+				title = __("Ordered"); %}
+			{% include "templates/form_grid/includes/progress.html" %}
+			{% if(doc.warehouse) { %}
+				<div style="overflow:hidden; min-height: 25px;
+					white-space:nowrap; text-overflow: ellipsis;"
+					title="{%= __("For Warehouse") %}">
+					<span class="label label-default">
+						{%= doc.warehouse %}
+					</span>
+				</div>
+			{% } %}
+		</div>
+	</div>
+{% } %}

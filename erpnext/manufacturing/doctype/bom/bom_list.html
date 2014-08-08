@@ -1,0 +1,20 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% if(cint(doc.is_active)) { %}
+				<span class="label label-success filterable"
+					data-filter="is_active,=,Yes">
+					<i class="icon-ok-sign"></i> {%= __("Active") %}</span>
+			{% } %}
+			{% if(cint(doc.is_default)) { %}
+				<span class="label label-primary filterable"
+					data-filter="is_default,=,Yes">
+					<i class="icon-ok-sign"></i> {%= __("Default") %}</span>
+			{% } %}
+		</div>
+	</div>
+	<div class="col-xs-2 text-right">
+		{%= doc.get_formatted("total_cost") %}
+	</div>
+</div>

@@ -1,0 +1,20 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span class="text-muted" style="margin-right: 8px;">
+				{%= doc.get_formatted("posting_date") %}</span>
+			<span class="label label-info filterable"
+				data-filter="voucher_type,=,{%= doc.voucher_type %}">
+					{%= doc.voucher_type %}
+			</span>
+			{% if(doc.docstatus===0) { %}
+				<span class="label label-danger filterable"
+					data-filter="docstatus,=,0">{%= __("Draft") %}</span>
+			{% } %}
+		</div>
+	</div>
+	<div class="col-xs-2 text-right">
+		{%= doc.get_formatted("total_debit") %}
+	</div>
+</div>

@@ -12,6 +12,10 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
 
+form_grid_templates = {
+	"sales_order_details": "templates/form_grid/item_grid.html"
+}
+
 class SalesOrder(SellingController):
 	tname = 'Sales Order Item'
 	fname = 'sales_order_details'

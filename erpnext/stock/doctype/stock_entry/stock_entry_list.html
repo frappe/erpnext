@@ -1,0 +1,50 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% var icon = {
+				"Material Issue": "icon-arrow-right",
+				"Material Receipt": "icon-arrow-left",
+				"Material Transfer": "icon-resize-horizontal",
+				"Manufacture/Repack": "icon-wrench",
+				"Sales Return": "icon-warning-sign",
+				"Purchase Return": "icon-warning-sign",
+				"Subcontract": "icon-truck"
+			}[doc.purpose]; %}
+			<span class="label label-info filterable"
+				data-filter="purpose,=,{%= doc.purpose %}"
+				title="{%= doc.purpose %}">
+				<i class="{%= icon %}"></i>
+			</span>
+			{% if(doc.from_warehouse) { %}
+				<span class="label label-default filterable"
+					data-filter="from_warehouse,=,{%= doc.from_warehouse %}">
+					{%= doc.from_warehouse %}
+				</span>
+			{% } %}
+			{% if(doc.from_warehouse || doc.to_warehouse) { %}
+				<i class="icon-arrow-right text-muted"></i>
+			{% } %}
+			{% if(doc.to_warehouse) { %}
+				<span class="label label-primary filterable"
+					data-filter="to_warehouse,=,{%= doc.to_warehouse %}">
+					{%= doc.to_warehouse %}
+				</span>
+			{% } %}
+			{% if(doc.production_order) { %}
+				<span class="label label-info filterable"
+					data-filter="production_order,=,{%= doc.production_order %}"
+					title="{%= doc.production_order %}">
+					<i class="icon-wrench"></i>
+				</span>
+			{% } %}
+			{% if(doc.bom_no) { %}
+				<span class="label label-info filterable"
+					data-filter="bom_no,=,{%= doc.bom_no %}"
+					title="{%= doc.bom_no %}">
+					<i class="icon-sitemap"></i>
+				</span>
+			{% } %}
+		</div>
+	</div>
+</div>

@@ -12,6 +12,11 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
+
+form_grid_templates = {
+	"indent_details": "templates/form_grid/material_request_grid.html"
+}
+
 class MaterialRequest(BuyingController):
 	tname = 'Material Request Item'
 	fname = 'indent_details'

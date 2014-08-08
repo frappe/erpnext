@@ -1,0 +1,39 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-8">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="supplier,=,{%= doc.supplier %}">
+					{%= doc.supplier_name %}</span></span>
+			{% if(doc.per_received < 100 && doc.status!=="Stopped") { %}
+				<span class="label label-warning filterable"
+					data-filter="per_received,<,100|status,!=,Stopped">
+					{%= __("Pending") %}
+				</span>
+			{% } %}
+			{% if(doc.status==="Stopped" || doc.status==="Draft") { %}
+				<span class="label label-danger filterable"
+					data-filter="status,=,Stopped">{%= __(doc.status) %}</span>
+			{% } %}
+			{% if(doc.per_received == 100 && doc.status!=="Stopped") { %}
+				<span class="filterable text-muted"
+					data-filter="per_received,=,100|status,!=,Stopped">
+					<i class="icon-ok-sign"></i></span>
+			{% } %}
+		</div>
+	</div>
+	<div class="col-xs-1 text-right">
+		{% var completed = doc.per_received, title = __("Received") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+	<div class="col-xs-1 text-right">
+		{% var completed = doc.per_billed, title = __("Billed") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+	<div class="col-xs-2 text-right">
+		<div class="text-ellipsis" title="{%= doc.get_formatted('grand_total_import') %}">
+			{%= doc.get_formatted("grand_total_import") %}
+		</div>
+	</div>
+</div>

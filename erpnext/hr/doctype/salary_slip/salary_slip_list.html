@@ -1,0 +1,26 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-9">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			<!-- sample text -->
+			<span style="margin-right: 8px;" class="filterable"
+					data-filter="employee,=,{%= doc.employee %}">
+					{%= doc.employee_name %}</span>
+
+		</div>
+	</div>
+	<div class="col-xs-3 text-right">
+		<span class="label label-default filterable"
+			title="{%= __("Month") %}"
+			data-filter="month,=,{%= doc.month %}">
+			{%= doc.month %}
+		</span>
+
+		<span class="label label-default filterable"
+			title="{%= __("Fiscal Year") %}"
+			data-filter="fiscal_year,=,{%= doc.fiscal_year %}">
+			{%= doc.fiscal_year %}
+		</span>
+	</div>
+</div>

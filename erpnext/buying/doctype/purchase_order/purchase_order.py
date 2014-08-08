@@ -8,6 +8,10 @@ from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 
+form_grid_templates = {
+	"po_details": "templates/form_grid/item_grid.html"
+}
+
 class PurchaseOrder(BuyingController):
 	tname = 'Purchase Order Item'
 	fname = 'po_details'

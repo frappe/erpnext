@@ -137,6 +137,13 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "percent_milestones_completed", 
+   "fieldtype": "Percent", 
+   "label": "% Milestones Completed", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
    "label": "Project Details", 
@@ -158,7 +165,7 @@
    "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
    "in_list_view": 1, 
-   "label": "Percent Complete", 
+   "label": "% Tasks Completed", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -259,7 +266,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-06-24 12:44:19.530707", 
+ "modified": "2014-08-04 03:22:11.416219", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

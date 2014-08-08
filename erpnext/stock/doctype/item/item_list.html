@@ -1,0 +1,53 @@
+<div class="row">
+	<div class="col-xs-11">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% if(doc.item_name != doc.name) { %}
+			<span style="margin-right: 8px;">{%= doc.item_name %}</span>
+			{% } %}
+			{% if(doc.is_stock_item==="Yes") { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Stock Item") %}" class="filterable"
+				data-filter="is_stock_item,=,Yes">
+				<i class="icon-inbox text-muted"></i>
+			</span>
+			{% } %}
+			{% if(doc.is_sales_item==="Yes") { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Sales Item") %}" class="filterable"
+				data-filter="is_sales_item,=,Yes">
+				<i class="icon-tag text-muted"></i>
+			</span>
+			{% } %}
+			{% if(doc.is_purchase_item==="Yes") { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Purchase Item") %}" class="filterable"
+				data-filter="is_purchase_item,=,Yes">
+				<i class="icon-shopping-cart text-muted"></i>
+			</span>
+			{% } %}
+			{% if(doc.is_manufactured_item==="Yes") { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Manufactured Item") %}" class="filterable"
+				data-filter="is_manufactured_item,=,Yes">
+				<i class="icon-wrench text-muted"></i>
+			</span>
+			{% } %}
+			{% if(doc.show_in_website) { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Shown in Website") %}" class="filterable"
+				data-filter="show_in_website,=,Yes">
+				<i class="icon-globe text-muted"></i>
+			</span>
+			{% } %}
+			<span class="label label-info filterable"
+				data-filter="item_group,=,{%= doc.item_group %}">
+				{%= doc.item_group %}</span>
+		</div>
+	</div>
+	<div class="col-xs-1">
+		{% if(doc.image) { %}
+		<img src="{%= doc.image %}" class="img-responsive" style="margin-bottom: 4px;">
+		{% } %}
+	</div>
+</div>

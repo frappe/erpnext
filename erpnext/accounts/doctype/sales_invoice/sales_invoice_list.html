@@ -1,0 +1,45 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-9">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="customer,=,{%= doc.customer %}">
+					{%= doc.customer_name %}</span></span>
+			{% if(doc.outstanding_amount > 0 && doc.docstatus==1) { %}
+				{% if(frappe.datetime.get_diff(doc.due_date) < 0) { %}
+				<span class="label label-danger filterable"
+					title="{%= doc.get_formatted("due_date")%}"
+					data-filter="outstanding_amount,>,0|due_date,<,Today">
+						{%= __("Overdue: ") + comment_when(doc.due_date) %}
+				</span>
+				{% } else { %}
+				<span class="label label-warning filterable"
+					data-filter="outstanding_amount,>,0|due_date,>=,Today"
+					title="{%= __("Payment Pending") %}">
+					{%= doc.get_formatted("due_date") %}</span>
+				{% } %}
+			{% } %}
+			{% if(doc.outstanding_amount==0 && doc.docstatus==1) { %}
+				<span class="label label-success filterable"
+					title="{%= doc.get_formatted("due_date")%}"
+					data-filter="outstanding_amount,=,0">
+						<i class="icon-ok-sign"></i> {%= __("Paid") %}
+				</span>
+			{% } %}
+			{% if(doc.docstatus===0) { %}
+				<span class="label label-danger filterable"
+					data-filter="docstatus,=,0">{%= __("Draft") %}</span>
+			{% } %}
+		</div>
+	</div>
+	<div class="col-xs-1 text-right">
+		{% var completed = cint((doc.grand_total - doc.outstanding_amount) * 100 / doc.grand_total), title = __("Outstanding Amount") + ": " + doc.get_formatted("outstanding_amount") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+	<div class="col-xs-2 text-right">
+		<div class="text-ellipsis" title="{%= doc.get_formatted("grand_total_export") %}">
+			{%= doc.get_formatted("grand_total_export") %}
+		</div>
+	</div>
+</div>
