@@ -34,7 +34,7 @@ def get_outstanding_vouchers(args):
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party_name"))
-
+	print outstanding_invoices + orders_to_be_billed
 	return outstanding_invoices + orders_to_be_billed
 
 def check_mandatory_to_fetch(args):
@@ -71,5 +71,5 @@ def get_orders_to_be_billed(party_type, party_name):
 	for d in orders:
 		d["voucher_type"] = voucher_type
 		order_list.append(d)
-	
+
 	return order_list

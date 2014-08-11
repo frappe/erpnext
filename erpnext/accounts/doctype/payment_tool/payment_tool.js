@@ -61,16 +61,16 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 			}
 		},
 		callback: function(r, rt) {
-			frm.set_value("payment_tool_voucher_details", []);
-			if(!r.exc && r.message) {
+			frm.set_value("payment_tool_details", []);
+			if(r.message) {
 				$.each(r.message, function(i, d) {
-					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Voucher Detail", "payment_tool_voucher_details");
+					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Detail", "payment_tool_details");
 					invoice_detail.against_voucher_type = d.voucher_type;
 					invoice_detail.against_voucher_no = d.voucher_no;
 					invoice_detail.total_amount = d.invoice_amount;
 					invoice_detail.outstanding_amount = d.outstanding_amount;
 				});
-				refresh_field("payment_tool_voucher_details");
+				refresh_field("payment_tool_details");
 			}
 			
 		}
@@ -78,17 +78,17 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 });
 
 // Set total payment amount
-frappe.ui.form.on("Payment Tool Voucher Detail", "payment_amount", function(frm) {
+frappe.ui.form.on("Payment Tool Detail", "payment_amount", function(frm) {
 	erpnext.payment_tool.set_total_payment_amount(frm);
 });
 
-frappe.ui.form.on("Payment Tool Voucher Detail", "payment_tool_voucher_details_remove", function(frm) {
+frappe.ui.form.on("Payment Tool Detail", "payment_tool_details_remove", function(frm) {
 	erpnext.payment_tool.set_total_payment_amount(frm);
 });
 
 erpnext.payment_tool.set_total_payment_amount = function(frm) {
 	var total_amount = 0.00;
-	$.each(frm.doc.payment_tool_voucher_details || [], function(i, row) {
+	$.each(frm.doc.payment_tool_details || [], function(i, row) {
 		if (row.payment_amount && (row.payment_amount <= row.outstanding_amount)) {
 			total_amount = total_amount + row.payment_amount;
 		} else {
@@ -126,7 +126,7 @@ erpnext.payment_tool.make_journal_voucher = function(frm) {
 	jv.cheque_no = frm.doc.reference_no;
 	jv.cheque_date = frm.doc.reference_date;
 
-	$.each(frm.doc.payment_tool_voucher_details || [], function(i, row) {
+	$.each(frm.doc.payment_tool_details || [], function(i, row) {
 		if(row.payment_amount) {
 			var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 			d1.account = frm.doc.party_account;
