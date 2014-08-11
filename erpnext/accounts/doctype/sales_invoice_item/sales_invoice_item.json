@@ -351,6 +351,7 @@
    "permlevel": 0
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "actual_qty", 
    "fieldtype": "Float", 
    "label": "Available Qty at Warehouse", 
@@ -448,7 +449,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-08-01 06:14:28.707601", 
+ "modified": "2014-08-11 03:52:58.926627", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 
