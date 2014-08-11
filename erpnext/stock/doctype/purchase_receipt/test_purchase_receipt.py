@@ -118,6 +118,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(frappe.db.get_value("Serial No", pr.get("purchase_receipt_details")[0].serial_no,
 			"warehouse"))
 
+	def test_rejected_serial_no(self):
+		pr = frappe.copy_doc(test_records[0])
+		pr.get("purchase_receipt_details")[0].item_code = "_Test Serialized Item With Series"
+		pr.get("purchase_receipt_details")[0].qty = 3
+		pr.get("purchase_receipt_details")[0].rejected_qty = 2
+		pr.get("purchase_receipt_details")[0].received_qty = 5
+		pr.get("purchase_receipt_details")[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.insert()
+		pr.submit()
+
+		accepted_serial_nos = pr.get("purchase_receipt_details")[0].serial_no.split("\n")
+		self.assertEquals(len(accepted_serial_nos), 3)
+		for serial_no in accepted_serial_nos:
+			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
+				pr.get("purchase_receipt_details")[0].warehouse)
+
+		rejected_serial_nos = pr.get("purchase_receipt_details")[0].rejected_serial_no.split("\n")
+		self.assertEquals(len(rejected_serial_nos), 2)
+		for serial_no in rejected_serial_nos:
+			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
+				pr.get("purchase_receipt_details")[0].rejected_warehouse)
+
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
