@@ -121,7 +121,7 @@ class SalesInvoice(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):

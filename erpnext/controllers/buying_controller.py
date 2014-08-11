@@ -193,9 +193,13 @@ class BuyingController(StockController):
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom},
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				rm_supp_cost = item.rm_supp_cost if self.doctype=="Purchase Receipt" else 0.0
-				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost)
-					/ qty_in_stock_uom)
+				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
+
+				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
+					if self.doctype == "Purchase Receipt" else 0.0
+				
+				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost
+					 + landed_cost_voucher_amount) / qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
 

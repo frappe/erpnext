@@ -55,7 +55,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-
 		pr = frappe.copy_doc(test_records[0])
 		pr.insert()
 		pr.submit()
@@ -72,7 +71,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		expected_values = {
 			stock_in_hand_account: [375.0, 0.0],
 			fixed_asset_account: [375.0, 0.0],
-			"Stock Received But Not Billed - _TC": [0.0, 750.0]
+			"Stock Received But Not Billed - _TC": [0.0, 500.0],
+			"Expenses Included In Valuation - _TC": [0.0, 250.0]
 		}
 
 		for gle in gl_entries:
@@ -117,6 +117,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertFalse(frappe.db.get_value("Serial No", pr.get("purchase_receipt_details")[0].serial_no,
 			"warehouse"))
+
+	def test_rejected_serial_no(self):
+		pr = frappe.copy_doc(test_records[0])
+		pr.get("purchase_receipt_details")[0].item_code = "_Test Serialized Item With Series"
+		pr.get("purchase_receipt_details")[0].qty = 3
+		pr.get("purchase_receipt_details")[0].rejected_qty = 2
+		pr.get("purchase_receipt_details")[0].received_qty = 5
+		pr.get("purchase_receipt_details")[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.insert()
+		pr.submit()
+
+		accepted_serial_nos = pr.get("purchase_receipt_details")[0].serial_no.split("\n")
+		self.assertEquals(len(accepted_serial_nos), 3)
+		for serial_no in accepted_serial_nos:
+			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
+				pr.get("purchase_receipt_details")[0].warehouse)
+
+		rejected_serial_nos = pr.get("purchase_receipt_details")[0].rejected_serial_no.split("\n")
+		self.assertEquals(len(rejected_serial_nos), 2)
+		for serial_no in rejected_serial_nos:
+			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
+				pr.get("purchase_receipt_details")[0].rejected_warehouse)
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit

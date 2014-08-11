@@ -16,3 +16,6 @@ class TestAddress(unittest.TestCase):
 		address = frappe.get_list("Address")[0].name
 		display = get_address_display(frappe.get_doc("Address", address).as_dict())
 		self.assertTrue(display)
+
+
+test_dependencies = ["Address Template"]

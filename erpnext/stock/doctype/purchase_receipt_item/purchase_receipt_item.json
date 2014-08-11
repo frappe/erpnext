@@ -426,6 +426,7 @@
    "fieldname": "rejected_serial_no", 
    "fieldtype": "Text", 
    "label": "Rejected Serial No", 
+   "no_copy": 1, 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0
@@ -502,6 +503,17 @@
    "width": "150px"
   }, 
   {
+   "allow_on_submit": 1, 
+   "fieldname": "landed_cost_voucher_amount", 
+   "fieldtype": "Currency", 
+   "label": "Landed Cost Voucher Amount", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "allow_on_submit": 1, 
    "fieldname": "valuation_rate", 
    "fieldtype": "Currency", 
    "hidden": 1, 
@@ -545,7 +557,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-07-24 05:56:12.997533", 
+ "modified": "2014-08-11 12:48:13.509109", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

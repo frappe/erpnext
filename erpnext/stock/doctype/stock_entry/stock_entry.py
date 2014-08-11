@@ -65,7 +65,7 @@ class StockEntry(StockController):
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.update_production_order()
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def validate_fiscal_year(self):
 		from erpnext.accounts.utils import validate_fiscal_year

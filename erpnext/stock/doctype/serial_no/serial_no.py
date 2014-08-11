@@ -295,19 +295,30 @@ def make_serial_no(serial_no, sle):
 	return sr.name
 
 def update_serial_nos_after_submit(controller, parentfield):
-	stock_ledger_entries = frappe.db.sql("""select voucher_detail_no, serial_no
+	stock_ledger_entries = frappe.db.sql("""select voucher_detail_no, serial_no, actual_qty, warehouse
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 		(controller.doctype, controller.name), as_dict=True)
 
 	if not stock_ledger_entries: return
 
 	for d in controller.get(parentfield):
-		serial_no = None
+		update_rejected_serial_nos = True if (controller.doctype=="Purchase Receipt" and d.rejected_qty) else False
+		accepted_serial_nos_updated = False
+		warehouse = d.t_warehouse if controller.doctype == "Stock Entry" else d.warehouse
+
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
-				serial_no = sle.serial_no
-				break
-
-		if d.serial_no != serial_no:
-			d.serial_no = serial_no
-			frappe.db.set_value(d.doctype, d.name, "serial_no", serial_no)
+				if not accepted_serial_nos_updated and d.qty and abs(sle.actual_qty)==d.qty \
+					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
+						d.serial_no = sle.serial_no
+						frappe.db.set_value(d.doctype, d.name, "serial_no", sle.serial_no)
+						accepted_serial_nos_updated = True
+						if not update_rejected_serial_nos:
+							break
+				elif update_rejected_serial_nos and abs(sle.actual_qty)==d.rejected_qty \
+					and sle.warehouse == d.rejected_warehouse and sle.serial_no != d.rejected_serial_no:
+						d.rejected_serial_no = sle.serial_no
+						frappe.db.set_value(d.doctype, d.name, "rejected_serial_no", sle.serial_no)
+						update_rejected_serial_nos = False
+						if accepted_serial_nos_updated:
+							break
