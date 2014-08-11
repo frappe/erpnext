@@ -23,7 +23,7 @@ def get_columns(filters, trans):
 
 	conditions = {"based_on_select": based_on_details["based_on_select"], "period_wise_select": period_select,
 		"columns": columns, "group_by": based_on_details["based_on_group_by"], "grbc": group_by_cols, "trans": trans,
-		"addl_tables": based_on_details["addl_tables"]}
+		"addl_tables": based_on_details["addl_tables"], "addl_tables_relational_cond": based_on_details.get("addl_tables_relational_cond", "")}
 
 	return conditions
 
@@ -60,10 +60,10 @@ def get_data(filters, conditions):
 			inc = 1
 		data1 = frappe.db.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and
-					t1.docstatus = 1 %s
+					t1.docstatus = 1 %s %s
 					group by %s
 				""" % (query_details,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], "%s",
-					"%s", cond, conditions["group_by"]), (filters.get("company"),
+					"%s", conditions.get("addl_tables_relational_cond"), cond, conditions["group_by"]), (filters.get("company"),
 					filters["fiscal_year"]),as_list=1)
 
 		for d in range(len(data1)):
@@ -75,10 +75,10 @@ def get_data(filters, conditions):
 			#to get distinct value of col specified by group_by in filter
 			row = frappe.db.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
 						where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s
-						and t1.docstatus = 1 and %s = %s
+						and t1.docstatus = 1 and %s = %s %s
 					""" %
 					(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"],
-						"%s", "%s", conditions["group_by"], "%s"),
+						"%s", "%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
 					(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), as_list=1)
 
 			for i in range(len(row)):
@@ -87,11 +87,11 @@ def get_data(filters, conditions):
 				#get data for group_by filter
 				row1 = frappe.db.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
 							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s
-							and t1.docstatus = 1 and %s = %s and %s = %s
+							and t1.docstatus = 1 and %s = %s and %s = %s %s
 						""" %
 						(sel_col, conditions["period_wise_select"], conditions["trans"],
 						 	conditions["trans"], conditions["addl_tables"], "%s", "%s", sel_col,
-							"%s", conditions["group_by"], "%s"),
+							"%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
 						(filters.get("company"), filters.get("fiscal_year"), row[i][0],
 							data1[d][0]), as_list=1)
 
@@ -103,11 +103,11 @@ def get_data(filters, conditions):
 	else:
 		data = frappe.db.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and
-					t1.docstatus = 1 %s
+					t1.docstatus = 1 %s %s
 					group by %s
 				""" %
 				(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"],
-					"%s", "%s", cond,conditions["group_by"]),
+					"%s", "%s", cond, conditions.get("addl_tables_relational_cond", ""), conditions["group_by"]),
 				(filters.get("company"), filters.get("fiscal_year")), as_list=1)
 
 	return data
@@ -224,12 +224,14 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_type,"
 		based_on_details["based_on_group_by"] = 't1.supplier'
 		based_on_details["addl_tables"] = ',`tabSupplier` t3'
+		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
 	elif based_on == 'Supplier Type':
 		based_on_details["based_on_cols"] = ["Supplier Type:Link/Supplier Type:140"]
 		based_on_details["based_on_select"] = "t3.supplier_type,"
 		based_on_details["based_on_group_by"] = 't3.supplier_type'
-		based_on_details["addl_tables"] =',`tabSupplier` t3'
+		based_on_details["addl_tables"] = ',`tabSupplier` t3'
+		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
 	elif based_on == "Territory":
 		based_on_details["based_on_cols"] = ["Territory:Link/Territory:120"]
