@@ -262,7 +262,10 @@ class SalesOrder(SellingController):
 		}, as_dict = True)
 
 		for pay in against_order_advance_paid:
-			advance_paid_value = flt(self.advance_paid) + flt(pay.get('credit'))
+			if flt(self.grand_total) > flt(self.advance_paid):
+				advance_paid_value = flt(self.advance_paid) + flt(pay.get('credit'))
+			else:
+				frappe.throw(_("Advance paid against Order cannot be greater than the Grand Total"))
 		
 		frappe.db.set_value("Sales Order", self.name, "advance_paid", advance_paid_value)
 
