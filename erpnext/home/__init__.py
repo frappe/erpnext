@@ -93,6 +93,10 @@ def update_feed(doc, method=None):
 
 def make_comment_feed(doc, method):
 	"""add comment to feed"""
+	comment = doc.comment
+	if len(comment) > 240:
+		comment = comment[:240] + "..."
+
 	make_feed('Comment', doc.comment_doctype, doc.comment_docname, doc.comment_by,
-		'<i>"' + doc.comment + '"</i>', '#6B24B3')
+		'<i>"' + comment + '"</i>', '#6B24B3')
 
