@@ -44,6 +44,11 @@ erpnext.payment_tool.set_party_account = function(frm) {
 
 // Get outstanding vouchers
 frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
+	if(frm.doc.party_type == "Customer") {
+		var party_name = frm.doc.customer;
+	} else {
+		var party_name = frm.doc.supplier;
+	}
 	return  frappe.call({
 		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers',
 		args: {
@@ -51,22 +56,23 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 				"company": frm.doc.company,
 				"party_type": frm.doc.party_type,
 				"received_or_paid": frm.doc.received_or_paid,
-				"customer": frm.doc.customer,
-				"supplier": frm.doc.supplier,
+				"party_name": party_name,
 				"party_account": frm.doc.party_account
 			}
 		},
 		callback: function(r, rt) {
 			frm.set_value("payment_tool_voucher_details", []);
-			$.each(r.message, function(i, d) {
-				var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Voucher Detail", "payment_tool_voucher_details");
-				invoice_detail.against_voucher_type = d.voucher_type;
-				invoice_detail.against_voucher_no = d.voucher_no;
-				invoice_detail.total_amount = d.invoice_amount;
-				invoice_detail.outstanding_amount = d.outstanding_amount;
-			});
-
-			refresh_field("payment_tool_voucher_details");
+			if(!r.exc && r.message) {
+				$.each(r.message, function(i, d) {
+					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Voucher Detail", "payment_tool_voucher_details");
+					invoice_detail.against_voucher_type = d.voucher_type;
+					invoice_detail.against_voucher_no = d.voucher_no;
+					invoice_detail.total_amount = d.invoice_amount;
+					invoice_detail.outstanding_amount = d.outstanding_amount;
+				});
+				refresh_field("payment_tool_voucher_details");
+			}
+			
 		}
 	});
 });
@@ -131,7 +137,7 @@ erpnext.payment_tool.make_journal_voucher = function(frm) {
 				d1.credit = flt(row.payment_amount);
 			}
 
-			d.is_advance = in_list(["Sales Order", "Purchase Order"], row.against_voucher_type) ? "Yes" : "No"
+			d1.is_advance = in_list(["Sales Order", "Purchase Order"], row.against_voucher_type) ? "Yes" : "No"
 
 			d1[against_voucher_type[row.against_voucher_type]] = row.against_voucher_no;
 

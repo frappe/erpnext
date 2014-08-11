@@ -42,7 +42,7 @@ def check_mandatory_to_fetch(args):
 		['Company', args.get("company")],
 		['Party Type', args.get("party_type")],
 		['Received Or Paid', args.get("received_or_paid")],
-		['Customer / Supplier', args.get("customer") if args.get("party_type") == "Customer" else args.get("supplier")]
+		['Customer / Supplier', args.get("party_name")]
 	]
 
 	for key, val in check_field:
@@ -60,16 +60,16 @@ def get_orders_to_be_billed(party_type, party_name):
 		from
 			`tab%s`
 		where
-			customer = %s
+			%s = %s
 			and docstatus = 1
 			and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
 			and ifnull(per_billed, 0) < 100.0
-		""" % (voucher_type, '%s'),
+		""" % (voucher_type, 'customer' if party_type == "Customer" else 'supplier', '%s'),
 		party_name, as_dict = True)
 
 	order_list = []
 	for d in orders:
 		d["voucher_type"] = voucher_type
 		order_list.append(d)
-
+	
 	return order_list
