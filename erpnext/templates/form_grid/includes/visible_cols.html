@@ -2,10 +2,10 @@
 	{% 	var val = doc.get_formatted(df.fieldname);
 	if(val) { %}
 		<div class="row">
-			<div class="col-xs-3">
-				<strong>{%= __(df.label) %}:</strong>
+			<div class="col-xs-4 text-ellipsis">
+				<strong title="{%= __(df.label) %}">{%= __(df.label) %}:</strong>
 			</div>
-			<div class="col-xs-9">
+			<div class="col-xs-8">
 				{%= doc.get_formatted(df.fieldname) %}
 			</div>
 		</div>
