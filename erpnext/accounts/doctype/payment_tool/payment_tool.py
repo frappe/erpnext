@@ -4,11 +4,52 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 import json
 
 class PaymentTool(Document):
-	pass
+	def make_journal_voucher(self):
+		from erpnext.accounts.utils import get_balance_on
+		total_payment_amount = 0.00
+		invoice_voucher_type = {'Sales Invoice': 'against_invoice', 
+								'Purchase Invoice': 'against_voucher',
+								'Journal Voucher': 'against_jv',
+								'Sales Order': 'against_sales_order',
+								'Purchase Order': 'against_purchase_order',
+								}
+		
+		jv = frappe.new_doc('Journal Voucher')
+		jv.voucher_type = 'Journal Entry'
+		jv.company = self.company
+		jv.cheque_no = self.reference_no
+		jv.cheque_date = self.reference_date
+
+		if not self.total_payment_amount:
+			frappe.throw(_("Please enter Payment Amount in atleast one row"))
+
+		for v in self.get("payment_tool_details"):
+			if not frappe.db.get_value(v.against_voucher_type, {"name": v.against_voucher_no}):
+				frappe.throw(_("Row {0}: {1} is not a valid {2}").format(v.idx, v.against_voucher_no, 
+					v.against_voucher_type))
+
+			if v.payment_amount:
+				d1 = jv.append("entries")
+				d1.account = self.party_account
+				d1.balance = get_balance_on(self.party_account)
+				d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount))
+				d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
+				d1.set('is_advance', 'Yes' if v.against_voucher_type == 'Sales Order' or
+					v.against_voucher_type == 'Purchase Order' else 'No')
+				total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
+
+		d2 = jv.append("entries")
+		d2.account = self.payment_account
+		d2.set('debit' if total_payment_amount < 0 else 'credit', abs(total_payment_amount))
+		if self.payment_account:
+			d2.balance = get_balance_on(self.payment_account)
+
+		return jv.as_dict()
 
 @frappe.whitelist()
 def get_party_account(party_type, party_name):
@@ -34,7 +75,6 @@ def get_outstanding_vouchers(args):
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party_name"))
-	print outstanding_invoices + orders_to_be_billed
 	return outstanding_invoices + orders_to_be_billed
 
 def check_mandatory_to_fetch(args):
@@ -73,3 +113,4 @@ def get_orders_to_be_billed(party_type, party_name):
 		order_list.append(d)
 
 	return order_list
+

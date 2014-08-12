@@ -106,56 +106,13 @@ erpnext.payment_tool.set_total_payment_amount = function(frm) {
 
 // Make Journal voucher
 frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
-	erpnext.payment_tool.make_journal_voucher(frm);
-});
-
-erpnext.payment_tool.make_journal_voucher = function(frm) {
-	var total_payment_amount = 0.00;
-	var jv = frappe.model.make_new_doc_and_get_name('Journal Voucher');
-	var against_voucher_type = {
-		"Sales Invoice": "against_invoice",
-		"Purchase Invoice": "against_voucher",
-		"Journal Voucher": "against_jv",
-		"Sales Order": "against_sales_order",
-		"Purchase Order": "against_purchase_order"
-	};
-
-	jv = locals['Journal Voucher'][jv];
-	jv.company = frm.doc.company;
-	jv.voucher_type = 'Journal Entry';
-	jv.cheque_no = frm.doc.reference_no;
-	jv.cheque_date = frm.doc.reference_date;
-
-	$.each(frm.doc.payment_tool_details || [], function(i, row) {
-		if(row.payment_amount) {
-			var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-			d1.account = frm.doc.party_account;
-
-			if (frm.doc.received_or_paid == "Paid") {
-				d1.debit = flt(row.payment_amount);
-			} else if (frm.doc.received_or_paid == "Received") {
-				d1.credit = flt(row.payment_amount);
-			}
-
-			d1.is_advance = in_list(["Sales Order", "Purchase Order"], row.against_voucher_type) ? "Yes" : "No"
-
-			d1[against_voucher_type[row.against_voucher_type]] = row.against_voucher_no;
-
-			total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit);
+	return  frappe.call({
+		method: 'make_journal_voucher',
+		doc: frm.doc,
+		callback: function(r) {
+			var doclist = frappe.model.sync(r.message);
+			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}
 	});
+});
 
-	if(!total_payment_amount) {
-		frappe.throw(__("Please enter Payment Amount in atleast one row"))
-	}
-
-	var d2 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
-	d2.account = frm.doc.payment_account;
-	if (total_payment_amount < 0.00) {
-		d2.debit = Math.abs(total_payment_amount);
-	} else {
-		d2.credit = Math.abs(total_payment_amount);
-	}
-
-	loaddoc('Journal Voucher', jv.name);
-}
