@@ -186,6 +186,12 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "fold", 
+   "fieldtype": "Fold", 
+   "label": "fold", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "contact_info", 
    "fieldtype": "Section Break", 
    "label": "Address & Contact", 
@@ -362,7 +368,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:12.570184", 
+ "modified": "2014-08-12 05:22:18.801092", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Lead", 

@@ -85,6 +85,7 @@ class StatusUpdater(Document):
 
 			if update:
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)
+				self.add_comment("Label", self.status)
 
 	def on_communication(self):
 		if not self.get("communications"): return

@@ -20,11 +20,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			cur_frm.fields_dict.contact_by.get_query = function(doc, cdt, cdn) {
 				return { query:"frappe.core.doctype.user.user.user_query" } }
 		}
-
-		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+__('Sales Email Settings')+'</a><br>\
-				<span class="help">'+__('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
-		}
 	},
 
 	refresh: function() {

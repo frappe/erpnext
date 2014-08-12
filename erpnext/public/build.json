@@ -7,7 +7,6 @@
 	],
 	"js/erpnext.min.js": [
 		"public/js/conf.js",
-		"public/js/toolbar.js",
 		"public/js/feature_setup.js",
 		"public/js/utils.js",
 		"public/js/queries.js",
