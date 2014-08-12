@@ -247,35 +247,40 @@ class EmailDigest(Document):
 		return self.get_new_count("Lead", self.meta.get_label("new_leads"))
 
 	def get_new_enquiries(self):
-		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"), docstatus=1)
+		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"), docstatus=1,
+			date_field="transaction_date")
 
 	def get_new_quotations(self):
-		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total")
+		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total",
+			date_field="transaction_date")
 
 	def get_new_sales_orders(self):
-		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total")
+		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total",
+			date_field="transaction_date")
 
 	def get_new_delivery_notes(self):
-		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total")
+		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total",
+			date_field="posting_date")
 
 	def get_new_purchase_requests(self):
-		return self.get_new_count("Material Request",
-			 self.meta.get_label("new_purchase_requests"), docstatus=1)
+		return self.get_new_count("Material Request", self.meta.get_label("new_purchase_requests"), docstatus=1,
+			date_field="transaction_date")
 
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
-			"grand_total")
+			"grand_total", date_field="transaction_date")
 
 	def get_new_purchase_orders(self):
 		return self.get_new_sum("Purchase Order", self.meta.get_label("new_purchase_orders"),
-			"grand_total")
+			"grand_total", date_field="transaction_date")
 
 	def get_new_purchase_receipts(self):
 		return self.get_new_sum("Purchase Receipt", self.meta.get_label("new_purchase_receipts"),
-			"grand_total")
+			"grand_total", date_field="posting_date")
 
 	def get_new_stock_entries(self):
-		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount")
+		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount",
+			date_field="posting_date")
 
 	def get_new_support_tickets(self):
 		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"),
@@ -333,24 +338,28 @@ class EmailDigest(Document):
 		else:
 			return 0, "<p>To Do</p>"
 
-	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True):
+	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True, date_field="creation"):
 		if filter_by_company:
-			company = """and company="%s" """ % self.company.replace('"', '\"')
+			company_condition = """and company="%s" """ % self.company.replace('"', '\"')
 		else:
-			company = ""
-		count = frappe.db.sql("""select count(*) from `tab%s`
-			where docstatus=%s %s and
-			date(creation)>=%s and date(creation)<=%s""" %
-			(doctype, docstatus, company, "%s", "%s"), (self.from_date, self.to_date))
+			company_condition = ""
+
+		count = frappe.db.sql("""select count(*) from `tab{doctype}`
+			where ifnull(`docstatus`, 0)=%s {company_condition} and
+			date(`{date_field}`)>=%s and date({date_field})<=%s""".format(doctype=doctype,
+			company_condition=company_condition, date_field=date_field),
+			(docstatus, self.from_date, self.to_date))
+
 		count = count and count[0][0] or 0
 
 		return count, self.get_html(label, None, count)
 
-	def get_new_sum(self, doctype, label, sum_field):
-		count_sum = frappe.db.sql("""select count(*), sum(ifnull(`%s`, 0))
-			from `tab%s` where docstatus=1 and company = %s and
-			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
-			"%s", "%s"), (self.company, self.from_date, self.to_date))
+	def get_new_sum(self, doctype, label, sum_field, date_field="creation"):
+		count_sum = frappe.db.sql("""select count(*), sum(ifnull(`{sum_field}`, 0))
+			from `tab{doctype}` where docstatus=1 and company = %s and
+			date(`{date_field}`)>=%s and date(`{date_field}`)<=%s""".format(sum_field=sum_field,
+			date_field=date_field, doctype=doctype), (self.company, self.from_date, self.to_date))
+
 		count, total = count_sum and count_sum[0] or (0, 0)
 
 		return count, self.get_html(label, self.currency,
