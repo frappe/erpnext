@@ -364,7 +364,6 @@ def get_currency_precision(currency=None):
 	from frappe.utils import get_number_format_info
 	return get_number_format_info(currency_format)[2]
 
-<<<<<<< HEAD
 def get_stock_rbnb_difference(posting_date, company):
 	stock_items = frappe.db.sql_list("""select distinct item_code
 		from `tabStock Ledger Entry` where company=%s""", company)

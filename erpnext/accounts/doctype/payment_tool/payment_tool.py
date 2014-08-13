@@ -114,3 +114,12 @@ def get_orders_to_be_billed(party_type, party_name):
 
 	return order_list
 
+# def get_voucher_selection_list(doctype, txt, searchfield, start, page_len, filters):
+# 	if 
+# 	conditions = " and company='%s' and %s = %s and docstatus = 1" 
+# 		% filters["company"].replace("'", "\'"),
+# 		"customer" if filters["voucher_type"].replace("'", "\'") in ["Sales Invoice", "Sales Order"] 
+# 		else ("supplier" if filters["voucher_type"].replace("'", "\'") in ["Purchase Invoice", "Purchase Order"]
+# 		else "pay_to_recd_from"),
+# 		filters["party_name"].replace("'", "\'")
+

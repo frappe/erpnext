@@ -116,3 +116,22 @@ frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
 	});
 });
 
+cur_frm.fields_dict['payment_tool_details'].grid.get_field('against_voucher_no').get_query = function(doc, cdt, cdn) {
+	var c = locals[cdt][cdn];
+	if (c.against_voucher_type) {
+		var dt = c.against_voucher_type;
+		return {
+			doctype: dt,
+			// query: "erpnext.accounts.doctype.account.account.get_voucher_selection_list",
+			filters: {
+				// "voucher_type": dt,
+				// "company": doc.company
+				// "party_name": doc.party_name
+				"doctype": 1
+			}
+		}
+	} else {
+		frappe.throw(__("Please specify the Voucher Type {1}"));
+	}
+}
+
