@@ -197,6 +197,7 @@
    "width": "70px"
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "projected_qty", 
    "fieldtype": "Float", 
    "label": "Projected Qty", 
@@ -234,7 +235,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-08-07 07:12:47.994668", 
+ "modified": "2014-08-14 08:37:28.991681", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 
