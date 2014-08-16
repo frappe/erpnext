@@ -1,4 +1,4 @@
- (Half Day),(نصف يوم)
+﻿ (Half Day),(نصف يوم)
  and year: ,والسنة:
 """ does not exists",""" لا يوجد"
 %  Delivered,ألقيت٪
@@ -1121,7 +1121,7 @@ From Date must be before To Date,يجب أن تكون من تاريخ إلى ت�
 From Date should be within the Fiscal Year. Assuming From Date = {0},من التسجيل ينبغي أن يكون ضمن السنة المالية. على افتراض من التسجيل = {0}
 From Delivery Note,من التسليم ملاحظة
 From Employee,من موظف
-From Lead,من الرصاص
+From Lead,من العميل المحتمل
 From Maintenance Schedule,من جدول الصيانة
 From Material Request,من المواد طلب
 From Opportunity,من الفرص
@@ -1138,7 +1138,7 @@ From value must be less than to value in row {0},من القيمة يجب أن �
 Frozen,تجميد
 Frozen Accounts Modifier,الحسابات المجمدة معدل
 Fulfilled,الوفاء
-Full Name,بدر تام
+Full Name,الاسم الكامل
 Full-time,بدوام كامل
 Fully Billed,وصفت تماما
 Fully Completed,يكتمل
@@ -1848,7 +1848,7 @@ Note: System will not check over-delivery and over-booking for Item {0} as quant
 Note: There is not enough leave balance for Leave Type {0},ملاحظة : ليس هناك ما يكفي من التوازن إجازة ل إجازة نوع {0}
 Note: This Cost Center is a Group. Cannot make accounting entries against groups.,ملاحظة : هذا هو مركز التكلفة المجموعة . لا يمكن إجراء القيود المحاسبية ضد الجماعات .
 Note: {0},ملاحظة : {0}
-Notes,تلاحظ
+Notes,ملاحظات
 Notes:,الملاحظات :
 Nothing to request,شيء أن تطلب
 Notice (days),إشعار (أيام )
@@ -1936,7 +1936,7 @@ POP3 server e.g. (pop.gmail.com),خادم POP3 مثل (pop.gmail.com)
 POS Setting,POS إعداد
 POS Setting required to make POS Entry,إعداد POS المطلوبة لجعل دخول POS
 POS Setting {0} already created for user: {1} and company {2},إعداد POS {0} تم إنشاؤها مسبقا للمستخدم : {1} و شركة {2}
-POS View,POS مشاهدة
+POS View,عرض نقطة مبيعات
 PR Detail,PR التفاصيل
 Package Item Details,تفاصيل حزمة الإغلاق
 Package Items,حزمة البنود
@@ -2143,7 +2143,7 @@ Please submit to update Leave Balance.,يرجى تقديم لتحديث اترك
 Plot,مؤامرة
 Plot By,مؤامرة بواسطة
 Point of Sale,نقطة بيع
-Point-of-Sale Setting,نقطة من بيع إعداد
+Point-of-Sale Setting,إعداد نقاط البيع
 Post Graduate,دكتوراة
 Postal,بريدي
 Postal Expenses,المصروفات البريدية
@@ -2243,8 +2243,8 @@ Purchase Analytics,شراء تحليلات
 Purchase Common,شراء المشتركة
 Purchase Details,تفاصيل شراء
 Purchase Discounts,شراء خصومات
-Purchase Invoice,شراء الفاتورة
-Purchase Invoice Advance,فاتورة الشراء مقدما
+Purchase Invoice,فاتورة شراء
+Purchase Invoice Advance,مقدم فاتورة الشراء
 Purchase Invoice Advances,شراء السلف الفاتورة
 Purchase Invoice Item,شراء السلعة الفاتورة
 Purchase Invoice Trends,شراء اتجاهات الفاتورة
@@ -2264,7 +2264,7 @@ Purchase Order number required for Item {0},عدد طلب شراء مطلوب ا
 Purchase Order {0} is 'Stopped',شراء بالدفع {0} ' توقف '
 Purchase Order {0} is not submitted,طلب شراء {0} لم تقدم
 Purchase Orders given to Suppliers.,أوامر الشراء نظرا للموردين.
-Purchase Receipt,شراء استلام
+Purchase Receipt,ايصال شراء
 Purchase Receipt Item,شراء السلعة استلام
 Purchase Receipt Item Supplied,شراء السلعة استلام الموردة
 Purchase Receipt Item Supplieds,شراء السلعة استلام Supplieds
@@ -2569,7 +2569,7 @@ Sales Order required for Item {0},ترتيب المبيعات المطلوبة �
 Sales Order {0} is not submitted,ترتيب المبيعات {0} لم تقدم
 Sales Order {0} is not valid,ترتيب المبيعات {0} غير صالح
 Sales Order {0} is stopped,ترتيب المبيعات {0} توقفت
-Sales Partner,مبيعات الشريك
+Sales Partner,شريك مبيعات
 Sales Partner Name,مبيعات الشريك الاسم
 Sales Partner Target,مبيعات الشريك الهدف
 Sales Partners Commission,مبيعات اللجنة الشركاء
@@ -2772,7 +2772,7 @@ Sports,الرياضة
 Sr,ريال
 Standard,معيار
 Standard Buying,شراء القياسية
-Standard Reports,تقارير القياسية
+Standard Reports,تقارير قياسية
 Standard Selling,البيع القياسية
 Standard contract terms for Sales or Purchase.,شروط العقد القياسية ل مبيعات أو شراء .
 Start,بداية
@@ -2788,7 +2788,7 @@ Status of {0} {1} is now {2},حالة {0} {1} الآن {2}
 Status updated to {0},الحالة المحدثة إلى {0}
 Statutory info and other general information about your Supplier,معلومات قانونية ومعلومات عامة أخرى عن بريدا
 Stay Updated,تحديث البقاء
-Stock,الأوراق المالية
+Stock,المخزون
 Stock Adjustment,الأسهم التكيف
 Stock Adjustment Account,حساب تسوية الأوراق المالية
 Stock Ageing,الأسهم شيخوخة
