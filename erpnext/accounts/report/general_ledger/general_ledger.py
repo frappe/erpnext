@@ -20,6 +20,9 @@ def execute(filters=None):
 	return columns, res
 
 def validate_filters(filters, account_details):
+	if filters.get("account") and not account_details.get(filters.account):
+		frappe.throw(_("Account {0} does not exists").format(filters.account))
+
 	if filters.get("account") and filters.get("group_by_account") \
 			and account_details[filters.account].group_or_ledger == "Ledger":
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
