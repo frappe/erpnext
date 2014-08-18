@@ -151,7 +151,7 @@ class SellingController(StockController):
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 
-			if cumulated_tax_fraction and not self.discount_amount_applied:
+			if cumulated_tax_fraction and not self.discount_amount_applied and item.qty:
 				item.base_amount = flt((item.amount * self.conversion_rate) /
 					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 
@@ -308,14 +308,23 @@ class SellingController(StockController):
 		customer_account = frappe.db.get_value("Account", {"company": self.company,
 			"master_name": self.customer}, "name")
 		if customer_account:
-			total_outstanding = frappe.db.sql("""select
+			invoice_outstanding = frappe.db.sql("""select
 				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 				from `tabGL Entry` where account = %s""", customer_account)
-			total_outstanding = total_outstanding[0][0] if total_outstanding else 0
+			invoice_outstanding = flt(invoice_outstanding[0][0]) if invoice_outstanding else 0
 
-			outstanding_including_current = flt(total_outstanding) + flt(grand_total)
-			frappe.get_doc('Account', customer_account).run_method("check_credit_limit",
-				outstanding_including_current)
+			ordered_amount_to_be_billed = frappe.db.sql("""
+				select sum(grand_total*(100 - ifnull(per_billed, 0))/100)
+				from `tabSales Order`
+				where customer=%s and docstatus = 1
+				and ifnull(per_billed, 0) < 100 and status != 'Stopped'""", self.customer)
+
+			ordered_amount_to_be_billed = flt(ordered_amount_to_be_billed[0][0]) \
+				if ordered_amount_to_be_billed else 0.0
+
+			total_outstanding = invoice_outstanding + ordered_amount_to_be_billed
+
+			frappe.get_doc('Account', customer_account).check_credit_limit(total_outstanding)
 
 	def validate_max_discount(self):
 		for d in self.get(self.fname):
@@ -329,6 +338,9 @@ class SellingController(StockController):
 		for d in self.get(self.fname):
 			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
+
+			if not d.qty:
+				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
 
 			if self.doctype == "Sales Order":
 				if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or
