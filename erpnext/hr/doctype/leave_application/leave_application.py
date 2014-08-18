@@ -242,8 +242,13 @@ def is_lwp(leave_type):
 @frappe.whitelist()
 def get_events(start, end):
 	events = []
-	employee = frappe.db.get_default("employee", frappe.session.user)
-	company = frappe.db.get_default("company", frappe.session.user)
+
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
+		as_dict=True)
+	if not employee:
+		return events
+
+	employee, company = employee.name, employee.company
 
 	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")

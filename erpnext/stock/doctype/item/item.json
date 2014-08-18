@@ -175,7 +175,7 @@
    "reqd": 1
   }, 
   {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+   "depends_on": "", 
    "description": "Mandatory if Stock Item is \"Yes\". Also the default warehouse where reserved quantity is set from Sales Order.", 
    "fieldname": "default_warehouse", 
    "fieldtype": "Link", 
@@ -825,7 +825,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-07-03 10:45:19.574737", 
+ "modified": "2014-08-18 09:32:57.268763", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
