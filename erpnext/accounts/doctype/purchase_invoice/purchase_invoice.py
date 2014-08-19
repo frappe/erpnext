@@ -88,7 +88,7 @@ class PurchaseInvoice(BuyingController):
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
-	def validate_bill_no(self):
+'''	def validate_bill_no(self):
 		if self.bill_no:
 			b_no = frappe.db.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice`
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""",
@@ -103,7 +103,7 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.remarks:
 			self.remarks = "No Remarks"
-
+'''
 	def validate_credit_acc(self):
 		if frappe.db.get_value("Account", self.credit_to, "report_type") != "Balance Sheet":
 			frappe.throw(_("Account must be a balance sheet account"))
