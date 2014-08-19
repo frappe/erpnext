@@ -47,7 +47,6 @@ class PurchaseInvoice(BuyingController):
 		self.pr_required()
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
-		self.validate_bill_no()
 		self.validate_credit_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
 		self.check_for_acc_head_of_supplier()
@@ -88,22 +87,6 @@ class PurchaseInvoice(BuyingController):
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
-'''	def validate_bill_no(self):
-		if self.bill_no:
-			b_no = frappe.db.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice`
-				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""",
-				(self.bill_no, self.credit_to, self.name))
-			if b_no and cstr(b_no[0][2]) == cstr(self.is_opening):
-				throw(_("Bill No {0} already booked in Purchase Invoice {1}").format(cstr(b_no[0][0]),
-					cstr(b_no[0][1])))
-
-			if not self.remarks and self.bill_date:
-				self.remarks = (self.remarks or '') + "\n" \
-					+ _("Against Bill {0} dated {1}").format(self.bill_no, formatdate(self.bill_date))
-
-		if not self.remarks:
-			self.remarks = "No Remarks"
-'''
 	def validate_credit_acc(self):
 		if frappe.db.get_value("Account", self.credit_to, "report_type") != "Balance Sheet":
 			frappe.throw(_("Account must be a balance sheet account"))

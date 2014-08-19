@@ -127,7 +127,7 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 1
   }, 
   {
@@ -758,7 +758,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-19 10:36:33.177267", 
+ "modified": "2014-08-19 12:01:12.133942", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
