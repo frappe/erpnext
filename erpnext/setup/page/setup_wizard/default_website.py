@@ -59,7 +59,7 @@ class website_maker(object):
 		website_settings.append("top_bar_items", {
 			"doctype": "Top Bar Item",
 			"label": _("Products"),
-			"url": frappe.db.get_value("Website Route", {"ref_doctype":"Item Group"})
+			"url": "products"
 		})
 		website_settings.save()
 
