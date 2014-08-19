@@ -96,7 +96,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			title: __("Get Items from BOM"),
 			fields: [
 				{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
-					options:"BOM"},
+					options:"BOM", reqd: 1},
 				{"fieldname":"fetch_exploded", "fieldtype":"Check",
 					"label":__("Fetch exploded BOM (including sub-assemblies)"), "default":1},
 				{fieldname:"fetch", "label":__("Get Items from BOM"), "fieldtype":"Button"}
