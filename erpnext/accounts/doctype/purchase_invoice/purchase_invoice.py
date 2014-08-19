@@ -89,8 +89,7 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_bill_no(self):
-		if self.bill_no and self.bill_no.lower().strip() \
-				not in ['na', 'not applicable', 'none']:
+		if self.bill_no:
 			b_no = frappe.db.sql("""select bill_no, name, ifnull(is_opening,'') from `tabPurchase Invoice`
 				where bill_no = %s and credit_to = %s and docstatus = 1 and name != %s""",
 				(self.bill_no, self.credit_to, self.name))

@@ -117,7 +117,7 @@
    "search_index": 1
   }, 
   {
-   "description": "If not applicable please enter: NA", 
+   "description": "", 
    "fieldname": "bill_no", 
    "fieldtype": "Data", 
    "in_filter": 1, 
@@ -758,7 +758,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-12 05:25:16.261614", 
+ "modified": "2014-08-19 10:36:33.177267", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
