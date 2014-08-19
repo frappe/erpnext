@@ -166,21 +166,19 @@ class StockController(AccountsController):
 
 
 	def get_future_stock_vouchers(self):
-		future_stock_vouchers = []
-
-		if hasattr(self, "fname"):
+		condition = ""
+		item_list = []
+		if getattr(self, "fname", None):
 			item_list = [d.item_code for d in self.get(self.fname)]
-			condition = ''.join(['and item_code in (\'', '\', \''.join(item_list) ,'\')'])
-		else:
-			condition = ""
+			if item_list:
+				condition = "and item_code in ({})".format(", ".join(["%s"] * len(item_list)))
 
-		for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+		future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
-			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
-			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" %
-			('%s', '%s', condition), (self.posting_date, self.posting_time),
-			as_dict=True):
-				future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(
+				condition=condition), tuple([self.posting_date, self.posting_date] + item_list),
+				as_list=True)
 
 		return future_stock_vouchers
 

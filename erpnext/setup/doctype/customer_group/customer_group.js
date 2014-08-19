@@ -19,8 +19,7 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 
 //get query select Customer Group
 cur_frm.fields_dict['parent_customer_group'].get_query = function(doc,cdt,cdn) {
-	return{
-		searchfield:['name', 'parent_customer_group'],
+	return {
 		filters: {
 			'is_group': "Yes"
 		}
