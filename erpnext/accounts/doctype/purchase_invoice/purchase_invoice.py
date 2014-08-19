@@ -60,6 +60,14 @@ class PurchaseInvoice(BuyingController):
 		self.update_valuation_rate("entries")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
 			"purchase_receipt_details")
+		self.create_remarks()
+
+	def create_remarks(self):
+		if not self.remarks:
+			if self.bill_no and self.bill_date:
+				self.remarks = _("Against Bill {0} dated {1}").format(self.bill_no, formatdate(self.bill_date))
+			else:
+				self.remarks = _("No Remarks")
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
