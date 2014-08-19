@@ -647,7 +647,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		// maintain actual tax rate based on idx
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			if (tax.charge_type == "Actual") {
-				actual_tax_dict[tax.idx] = flt(tax.rate);
+				actual_tax_dict[tax.idx] = flt(tax.rate, precision("tax_amount", tax));
 			}
 		});
 
