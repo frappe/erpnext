@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
+from frappe import _
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -35,10 +36,12 @@ def execute(filters=None):
 		+ amounts_not_reflected_in_system
 
 	data += [
-		get_balance_row("Balance as per system", balance_as_per_system),
-		["", "Amounts not reflected in bank", total_debit, total_credit, "", "", "", ""],
-		get_balance_row("Amounts not reflected in system", amounts_not_reflected_in_system),
-		get_balance_row("Balance as per bank", bank_bal)
+		get_balance_row(_("System Balance"), balance_as_per_system),
+		[""]*len(columns),
+		["", _("Amounts not reflected in bank"), total_debit, total_credit, "", "", "", ""],
+		get_balance_row(_("Amounts not reflected in system"), amounts_not_reflected_in_system),
+		[""]*len(columns),
+		get_balance_row(_("Expected balance as per bank"), bank_bal)
 	]
 
 	return columns, data
