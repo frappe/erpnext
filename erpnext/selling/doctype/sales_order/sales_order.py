@@ -4,10 +4,14 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.utils
+import frappe.defaults
 
-from frappe.utils import cstr, flt, getdate, comma_and
+from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day, comma_and
+from frappe.model.naming import make_autoname
 
-from frappe import _
+from frappe import _, msgprint, throw
+from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -15,6 +19,8 @@ from erpnext.controllers.selling_controller import SellingController
 form_grid_templates = {
 	"sales_order_details": "templates/form_grid/item_grid.html"
 }
+
+month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 class SalesOrder(SellingController):
 	tname = 'Sales Order Item'
@@ -120,6 +126,8 @@ class SalesOrder(SellingController):
 		if not self.billing_status: self.billing_status = 'Not Billed'
 		if not self.delivery_status: self.delivery_status = 'Not Delivered'
 
+		self.validate_recurring_order()
+
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
 
@@ -161,6 +169,7 @@ class SalesOrder(SellingController):
 
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')
+		self.convert_to_recurring()
 
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -249,6 +258,157 @@ class SalesOrder(SellingController):
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
 
+	def on_update_after_submit(self):
+		self.validate_recurring_order()
+		self.convert_to_recurring()
+
+	def validate_recurring_order(self):
+		if self.convert_into_recurring_order:
+			self.validate_notification_email_id()
+
+			if not self.recurring_type:
+				msgprint(_("Please select {0}").format(self.meta.get_label("recurring_type")),
+				raise_exception=1)
+
+			elif not (self.order_period_from and self.order_period_to):
+				throw(_("Order Period From and Order Period To dates mandatory for recurring order"))
+
+	def convert_to_recurring(self):
+		if self.convert_into_recurring_order:
+			if not self.recurring_id:
+				frappe.db.set(self, "recurring_id",
+					make_autoname("SO/REC/.#####"))
+
+			self.set_next_date()
+
+		elif self.recurring_id:
+			frappe.db.sql("""update `tabSales Order`
+				set convert_into_recurring_order = 0
+				where recurring_id = %s""", (self.recurring_id,))
+
+	def validate_notification_email_id(self):
+		if self.notification_email_address:
+			email_list = filter(None, [cstr(email).strip() for email in
+				self.notification_email_address.replace("\n", "").split(",")])
+
+			from frappe.utils import validate_email_add
+			for email in email_list:
+				if not validate_email_add(email):
+					throw(_("{0} is an invalid email address in 'Notification \
+						Email Address'").format(email))
+
+		else:
+			frappe.throw(_("'Notification Email Addresses' not specified for recurring order"))
+
+	def set_next_date(self):
+		""" Set next date on which auto order will be created"""
+		if not self.repeat_on_day_of_month:
+			msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
+
+		next_date = get_next_date(self.transaction_date, month_map[self.recurring_type], cint(self.repeat_on_day_of_month))
+
+		frappe.db.set(self, 'next_date', next_date)
+
+def manage_recurring_orders(next_date=None, commit=True):
+	"""
+		Create recurring order on specific date by copying the original one
+		and notify the concerned people
+	"""
+	next_date = next_date or nowdate()
+	recurring_orders = frappe.db.sql("""select name, recurring_id
+		from `tabSales Order` where ifnull(convert_into_recurring_order, 0)=1
+		and docstatus=1 and next_date=%s
+		and next_date <= ifnull(end_date, '2199-12-31')""", next_date)
+
+	exception_list = []
+	for ref_order, recurring_id in recurring_orders:
+		if not frappe.db.sql("""select name from `tabSales Order`
+				where transaction_date=%s and recurring_id=%s and docstatus=1""",
+				(next_date, recurring_id)):
+			try:
+				ref_wrapper = frappe.get_doc('Sales Order', ref_order)
+				new_order_wrapper = make_new_order(ref_wrapper, next_date)
+				send_notification(new_order_wrapper)
+				if commit:
+					frappe.db.commit()
+			except:
+				if commit:
+					frappe.db.rollback()
+
+					frappe.db.begin()
+					frappe.db.sql("update `tabSales Order` \
+						set convert_into_recurring_order = 0 where name = %s", ref_order)
+					notify_errors(ref_order, ref_wrapper.customer, ref_wrapper.owner)
+					frappe.db.commit()
+
+				exception_list.append(frappe.get_traceback())
+			finally:
+				if commit:
+					frappe.db.begin()
+
+	if exception_list:
+		exception_message = "\n\n".join([cstr(d) for d in exception_list])
+		frappe.throw(exception_message)
+
+def make_new_order(ref_wrapper, transaction_date):
+	from erpnext.accounts.utils import get_fiscal_year
+	new_order = frappe.copy_doc(ref_wrapper)
+
+	mcount = month_map[ref_wrapper.recurring_type]
+
+	order_period_from = get_next_date(ref_wrapper.order_period_from, mcount)
+
+	# get last day of the month to maintain period if the from date is first day of its own month
+	# and to date is the last day of its own month
+	if (cstr(get_first_day(ref_wrapper.order_period_from)) == \
+			cstr(ref_wrapper.order_period_from)) and \
+		(cstr(get_last_day(ref_wrapper.order_period_to)) == \
+			cstr(ref_wrapper.order_period_to)):
+		order_period_to = get_last_day(get_next_date(ref_wrapper.order_period_to,
+			mcount))
+	else:
+		order_period_to = get_next_date(ref_wrapper.order_period_to, mcount)
+
+	new_order.update({
+		"transaction_date": transaction_date,
+		"order_period_from": order_period_from,
+		"order_period_to": order_period_to,
+		"fiscal_year": get_fiscal_year(transaction_date)[0],
+		"owner": ref_wrapper.owner,
+	})
+
+	new_order.submit()
+
+	return new_order
+
+def get_next_date(dt, mcount, day=None):
+	dt = getdate(dt)
+
+	from dateutil.relativedelta import relativedelta
+	dt += relativedelta(months=mcount, day=day)
+
+	return dt
+
+def send_notification(new_rv):
+	"""Notify concerned persons about recurring order generation"""
+	frappe.sendmail(new_rv.notification_email_address,
+		subject="New Sales Order : " + new_rv.name,
+		message = _("Please find attached Sales Order #{0}").format(new_rv.name),
+		attachments = [{
+			"fname": new_rv.name + ".pdf",
+			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True)
+		}])
+
+def notify_errors(order, customer, owner):
+	from frappe.utils.user import get_system_managers
+	recipients=get_system_managers(only_name=True)
+
+	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
+		subject="[Urgent] Error while creating recurring sales order for %s" % order,
+		message = frappe.get_template("templates/emails/recurring_sales_order_failed.html").render({
+			"name": order,
+			"customer": customer
+		}))
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

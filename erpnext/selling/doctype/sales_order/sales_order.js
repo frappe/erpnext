@@ -199,3 +199,37 @@ cur_frm.cscript.send_sms = function() {
 	frappe.require("assets/erpnext/js/sms_manager.js");
 	var sms_man = new SMSManager(cur_frm.doc);
 };
+
+//Recurring Order
+cur_frm.cscript.convert_into_recurring_order = function(doc, dt, dn) {
+	// set default values for recurring orders
+	if(doc.convert_into_recurring_order) {
+		var owner_email = doc.owner=="Administrator"
+			? frappe.user_info("Administrator").email
+			: doc.owner;
+
+		doc.notification_email_address = $.map([cstr(owner_email),
+			cstr(doc.contact_email)], function(v) { return v || null; }).join(", ");
+		doc.repeat_on_day_of_month = frappe.datetime.str_to_obj(doc.posting_date).getDate();
+	}
+
+	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
+}
+
+cur_frm.cscript.order_period_from = function(doc, dt, dn) {
+	// set order_period_to_date
+	if(doc.order_period_from) {
+		var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
+			'Yearly': 12};
+
+		var months = recurring_type_map[doc.recurring_type];
+		if(months) {
+			var to_date = frappe.datetime.add_months(doc.order_period_from,
+				months);
+			doc.order_period_to = frappe.datetime.add_days(to_date, -1);
+			refresh_field('order_period_to');
+		}
+	}
+}
+
+//End of Recurring Order
