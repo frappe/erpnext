@@ -67,12 +67,10 @@ def make_packing_list(obj, item_table_fieldname):
 	packing_list_idx = 0
 	parent_items = []
 	for d in obj.get(item_table_fieldname):
-		warehouse = (item_table_fieldname == "sales_order_details") \
-			and d.warehouse or d.warehouse
 		if frappe.db.get_value("Sales BOM", {"new_item_code": d.item_code}):
 			for i in get_sales_bom_items(d.item_code):
 				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty),
-					warehouse, d, packing_list_idx)
+					d.warehouse, d, packing_list_idx)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])

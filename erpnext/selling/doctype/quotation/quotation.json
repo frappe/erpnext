@@ -539,6 +539,12 @@
    "width": "200px"
   }, 
   {
+   "fieldname": "fold", 
+   "fieldtype": "Fold", 
+   "label": "Fold", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "terms_section_break", 
    "fieldtype": "Section Break", 
    "label": "Terms and Conditions", 
@@ -827,7 +833,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2014-07-31 06:34:26.339765", 
+ "modified": "2014-08-12 05:04:36.157045", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 

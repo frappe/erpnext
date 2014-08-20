@@ -14,8 +14,8 @@
 
 /* toolbar */
 .toolbar-splash {
-	width: 32px; 
-	height: 32px; 
+	width: 32px;
+	height: 32px;
 	margin: -10px auto;
 }
 
@@ -32,5 +32,6 @@
 	margin-left: -30px;
 	margin-top: -10px;
 	padding: 20px 10px;
-	font-family: Monospace;
+	border-right: 1px solid #c7c7c7;
+	border-bottom: 1px solid #c7c7c7;
 }

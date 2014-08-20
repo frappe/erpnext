@@ -313,6 +313,7 @@
    "permlevel": 0
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "projected_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -433,7 +434,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-08-11 03:57:27.705699", 
+ "modified": "2014-08-14 08:36:39.773447", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order Item", 

@@ -190,16 +190,16 @@
   {
    "default": "partners", 
    "fieldname": "parent_website_route", 
-   "fieldtype": "Link", 
+   "fieldtype": "Read Only", 
    "label": "Parent Website Route", 
-   "options": "Website Route", 
+   "options": "", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-06-27 09:21:33.687012", 
+ "modified": "2014-08-19 06:42:33.103060", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

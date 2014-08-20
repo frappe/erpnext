@@ -209,7 +209,7 @@ class AccountsController(TransactionBase):
 
 	def calculate_taxes(self):
 		# maintain actual tax rate based on idx
-		actual_tax_dict = dict([[tax.idx, tax.rate] for tax in self.tax_doclist
+		actual_tax_dict = dict([[tax.idx, flt(tax.rate, self.precision("tax_amount", tax))] for tax in self.tax_doclist
 			if tax.charge_type == "Actual"])
 
 		for n, item in enumerate(self.item_doclist):

@@ -47,7 +47,7 @@ class ProductionOrder(Document):
 
 				self.validate_production_order_against_so()
 			else:
-				frappe.throw(_("Sales Order {0} is not valid") % self.sales_order)
+				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company

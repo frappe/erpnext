@@ -70,9 +70,14 @@ class PurchaseOrder(BuyingController):
 	def validate_minimum_order_qty(self):
 		itemwise_min_order_qty = frappe._dict(frappe.db.sql("select name, min_order_qty from tabItem"))
 
+		itemwise_qty = frappe._dict()
 		for d in self.get("po_details"):
-			if flt(d.stock_qty) < flt(itemwise_min_order_qty.get(d.item_code)):
-				frappe.throw(_("Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(d.idx))
+			itemwise_qty.setdefault(d.item_code, 0)
+			itemwise_qty[d.item_code] += flt(d.stock_qty)
+
+		for item_code, qty in itemwise_qty.items():
+			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
+				frappe.throw(_("Item #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(item_code))
 
 	def get_schedule_dates(self):
 		for d in self.get('po_details'):
