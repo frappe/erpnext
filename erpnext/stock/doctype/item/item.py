@@ -12,10 +12,12 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 
 class WarehouseNotSet(frappe.ValidationError): pass
 
-condition_field = "show_in_website"
-template = "templates/generators/item.html"
-
 class Item(WebsiteGenerator):
+	page_title_field = "item_name"
+	condition_field = "show_in_website"
+	template = "templates/generators/item.html"
+	parent_website_route_field = "item_group"
+
 	def onload(self):
 		super(Item, self).onload()
 		self.get("__onload").sle_exists = self.check_if_sle_exists()
@@ -48,9 +50,6 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_item_type_for_reorder()
-
-		if not self.parent_website_route:
-			self.parent_website_route = frappe.get_website_route("Item Group", self.item_group)
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -215,14 +214,6 @@ class Item(WebsiteGenerator):
 		frappe.db.sql("""update `tabItem Price` set item_name=%s,
 			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.item_name, self.description, self.name))
-
-	def get_page_title(self):
-		if self.name==self.item_name:
-			page_name_from = self.name
-		else:
-			page_name_from = self.name + " - " + self.item_name
-
-		return page_name_from
 
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": frappe.db.get_value("Account", tax_type, "tax_rate") }

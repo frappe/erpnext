@@ -83,10 +83,11 @@
   {
    "depends_on": "show_in_website", 
    "fieldname": "parent_website_route", 
-   "fieldtype": "Link", 
-   "label": "Parent Website Page", 
-   "options": "Website Route", 
-   "permlevel": 0
+   "fieldtype": "Read Only", 
+   "label": "Parent Website Route", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "depends_on": "show_in_website", 
@@ -163,7 +164,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-06-10 05:37:03.763185", 
+ "modified": "2014-08-19 06:42:03.262273", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 

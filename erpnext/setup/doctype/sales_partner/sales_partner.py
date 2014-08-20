@@ -6,14 +6,15 @@ import frappe
 from frappe.utils import cstr, filter_strip_join
 from frappe.website.website_generator import WebsiteGenerator
 
-condition_field = "show_in_website"
-template = "templates/generators/sales_partner.html"
-
 class SalesPartner(WebsiteGenerator):
+	page_title_field = "partner_name"
+	condition_field = "show_in_website"
+	template = "templates/generators/sales_partner.html"
 	def autoname(self):
 		self.name = self.partner_name
 
 	def validate(self):
+		self.parent_website_route = "partners"
 		super(SalesPartner, self).validate()
 		if self.partner_website and not self.partner_website.startswith("http"):
 			self.partner_website = "http://" + self.partner_website
@@ -26,9 +27,6 @@ class SalesPartner(WebsiteGenerator):
 				from `tabContact` where sales_partner = %s""", nm))
 		else:
 			return ''
-
-	def get_page_title(self):
-		return self.partner_name
 
 	def get_context(self, context):
 		address = frappe.db.get_value("Address",
@@ -46,7 +44,3 @@ class SalesPartner(WebsiteGenerator):
 			})
 
 		return context
-
-	def get_parent_website_route(self):
-		parent_website_sitemap = super(SalesPartner, self).get_parent_website_route()
-		return parent_website_sitemap or "partners"
