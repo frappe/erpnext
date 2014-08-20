@@ -9,21 +9,15 @@ from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 
-condition_field = "show_in_website"
-template = "templates/generators/item_group.html"
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
+	condition_field = "show_in_website"
+	template = "templates/generators/item_group.html"
+	parent_website_route_field = "parent_item_group"
 
 	def autoname(self):
 		self.name = self.item_group_name
-
-	def validate(self):
-		WebsiteGenerator.validate(self)
-		if not self.parent_website_route:
-			if frappe.db.get_value("Item Group", self.parent_item_group, "show_in_website"):
-				self.parent_website_route = frappe.get_website_route("Item Group",
-					self.parent_item_group)
 
 	def on_update(self):
 		NestedSet.on_update(self)
@@ -60,14 +54,16 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
-	query = """select t1.name, t1.item_name, t1.page_name, t1.website_image, t1.item_group,
-			t1.web_long_description as website_description, t2.name as route
-		from `tabItem` t1, `tabWebsite Route` t2
-		where t1.show_in_website = 1 and (item_group in (%s)
-			or t1.name in (select parent from `tabWebsite Item Group` where item_group in (%s)))
-			and t1.name = t2.docname and t2.ref_doctype='Item' """ % (child_groups, child_groups)
+	query = """select name, item_name, page_name, website_image, item_group,
+			web_long_description as website_description,
+			concat(parent_website_route, "/", page_name) as route
+		from `tabItem`
+		where show_in_website = 1
+			and (item_group in (%s)
+			or name in (select parent from `tabWebsite Item Group` where item_group in (%s)))
+			""" % (child_groups, child_groups)
 
-	query += """order by t1.weightage desc, t1.modified desc limit %s, %s""" % (start, limit)
+	query += """order by weightage desc, modified desc limit %s, %s""" % (start, limit)
 
 	data = frappe.db.sql(query, {"product_group": product_group}, as_dict=1)
 
@@ -107,6 +103,6 @@ def invalidate_cache_for(doc, item_group=None):
 		item_group = doc.name
 
 	for i in get_parent_item_groups(item_group):
-		route = frappe.db.get_value("Website Route", {"ref_doctype":"Item Group", "docname": i.name})
+		route = doc.get_route()
 		if route:
 			clear_cache(route)
