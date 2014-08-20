@@ -65,7 +65,7 @@ class PurchaseInvoice(BuyingController):
 	def create_remarks(self):
 		if not self.remarks:
 			if self.bill_no and self.bill_date:
-				self.remarks = _("Against Bill {0} dated {1}").format(self.bill_no, formatdate(self.bill_date))
+				self.remarks = _("Against Supplier Invoice {0} dated {1}").format(self.bill_no, formatdate(self.bill_date))
 			else:
 				self.remarks = _("No Remarks")
 
