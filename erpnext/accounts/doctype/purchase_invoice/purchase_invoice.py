@@ -263,10 +263,10 @@ class PurchaseInvoice(BuyingController):
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
-			
+
 		stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		
+
 		gl_entries = []
 
 		# parent's gl entry
@@ -319,32 +319,31 @@ class PurchaseInvoice(BuyingController):
 						"cost_center": item.cost_center
 					})
 				)
-			
+
 			if auto_accounting_for_stock and item.item_code in stock_items and item.item_tax_amount:
 					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
 					negative_expense_booked_in_pi = None
 					if item.purchase_receipt:
 						negative_expense_booked_in_pi = frappe.db.sql("""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account=%s""", 
+							where voucher_type='Purchase Receipt' and voucher_no=%s and account=%s""",
 							(item.purchase_receipt, expenses_included_in_valuation))
-					
+
 					if not negative_expense_booked_in_pi:
 						gl_entries.append(
 							self.get_gl_dict({
 								"account": stock_received_but_not_billed,
 								"against": self.credit_to,
-								"debit": flt(item.item_tax_amount),
+								"debit": flt(item.item_tax_amount, self.precision("item_tax_amount", item)),
 								"remarks": self.remarks or "Accounting Entry for Stock"
 							})
 						)
-						
-						negative_expense_to_be_booked += flt(item.item_tax_amount)
 
+						negative_expense_to_be_booked += flt(item.item_tax_amount, self.precision("item_tax_amount", item))
 
 		if negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
-			
+
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			i = 1
@@ -354,7 +353,7 @@ class PurchaseInvoice(BuyingController):
 				else:
 					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
 					amount_including_divisional_loss -= applicable_amount
-				
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": expenses_included_in_valuation,
@@ -364,7 +363,7 @@ class PurchaseInvoice(BuyingController):
 						"remarks": self.remarks or "Accounting Entry for Stock"
 					})
 				)
-				
+
 				i += 1
 
 		# writeoff account includes petty difference in the invoice amount
