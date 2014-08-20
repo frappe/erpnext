@@ -3,22 +3,31 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt
 from frappe.model.document import Document
 import json
 
 class PaymentTool(Document):
 	def make_journal_voucher(self):
+		check_mandatory_to_fetch({
+			"company": self.company,
+			"party_type": self.party_type,
+			"received_or_paid": self.received_or_paid,
+			"party_name": self.get(scrub(self.party_type)),
+			"party_account": self.party_account
+		})
+
 		from erpnext.accounts.utils import get_balance_on
 		total_payment_amount = 0.00
-		invoice_voucher_type = {'Sales Invoice': 'against_invoice', 
-								'Purchase Invoice': 'against_voucher',
-								'Journal Voucher': 'against_jv',
-								'Sales Order': 'against_sales_order',
-								'Purchase Order': 'against_purchase_order',
-								}
-		
+		invoice_voucher_type = {
+			'Sales Invoice': 'against_invoice',
+			'Purchase Invoice': 'against_voucher',
+			'Journal Voucher': 'against_jv',
+			'Sales Order': 'against_sales_order',
+			'Purchase Order': 'against_purchase_order',
+		}
+
 		jv = frappe.new_doc('Journal Voucher')
 		jv.voucher_type = 'Journal Entry'
 		jv.company = self.company
@@ -30,7 +39,7 @@ class PaymentTool(Document):
 
 		for v in self.get("payment_tool_details"):
 			if not frappe.db.get_value(v.against_voucher_type, {"name": v.against_voucher_no}):
-				frappe.throw(_("Row {0}: {1} is not a valid {2}").format(v.idx, v.against_voucher_no, 
+				frappe.throw(_("Row {0}: {1} is not a valid {2}").format(v.idx, v.against_voucher_no,
 					v.against_voucher_type))
 
 			if v.payment_amount:
@@ -39,8 +48,7 @@ class PaymentTool(Document):
 				d1.balance = get_balance_on(self.party_account)
 				d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount))
 				d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
-				d1.set('is_advance', 'Yes' if v.against_voucher_type == 'Sales Order' or
-					v.against_voucher_type == 'Purchase Order' else 'No')
+				d1.set('is_advance', 'Yes' if v.against_voucher_type in ['Sales Order', 'Purchase Order'] else 'No')
 				total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
 
 		d2 = jv.append("entries")
@@ -114,12 +122,16 @@ def get_orders_to_be_billed(party_type, party_name):
 
 	return order_list
 
-# def get_voucher_selection_list(doctype, txt, searchfield, start, page_len, filters):
-# 	if 
-# 	conditions = " and company='%s' and %s = %s and docstatus = 1" 
-# 		% filters["company"].replace("'", "\'"),
-# 		"customer" if filters["voucher_type"].replace("'", "\'") in ["Sales Invoice", "Sales Order"] 
-# 		else ("supplier" if filters["voucher_type"].replace("'", "\'") in ["Purchase Invoice", "Purchase Order"]
-# 		else "pay_to_recd_from"),
-# 		filters["party_name"].replace("'", "\'")
+@frappe.whitelist()
+def get_against_voucher_amount(against_voucher_type, against_voucher_no):
+	if against_voucher_type in ["Sales Order", "Purchase Order"]:
+		select_cond = "grand_total as total_amount, ifnull(grand_total, 0) - ifnull(advance_paid, 0) as outstanding_amount"
+	elif against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
+		select_cond = "grand_total as total_amount, outstanding_amount"
+	elif against_voucher_type == "Journal Voucher":
+		select_cond = "total_debit as total_amount"
 
+	details = frappe.db.sql("""select {0} from `tab{1}` where name = %s"""
+		.format(select_cond, against_voucher_type), against_voucher_no, as_dict=1)
+
+	return details[0] if details else {}
