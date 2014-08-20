@@ -118,6 +118,24 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "against_jv", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Against Journal Voucher", 
+   "no_copy": 1, 
+   "oldfieldname": "against_jv", 
+   "oldfieldtype": "Link", 
+   "options": "Journal Voucher", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "col_break3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "against_sales_order", 
    "fieldtype": "Link", 
    "label": "Against Sales Order", 
@@ -130,24 +148,6 @@
    "label": "Against Purchase Order", 
    "options": "Purchase Order", 
    "permlevel": 0
-  }, 
-  {
-   "fieldname": "col_break3", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "against_jv", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "label": "Against Journal Voucher", 
-   "no_copy": 1, 
-   "oldfieldname": "against_jv", 
-   "oldfieldtype": "Link", 
-   "options": "Journal Voucher", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "search_index": 1
   }, 
   {
    "fieldname": "is_advance", 
@@ -174,7 +174,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-07-30 14:50:20.851921", 
+ "modified": "2014-08-20 12:19:55.049973", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Voucher Detail", 
