@@ -231,5 +231,3 @@ cur_frm.cscript.order_period_from = function(doc, dt, dn) {
 		}
 	}
 }
-
-//End of Recurring Order

@@ -371,6 +371,8 @@ def make_new_order(ref_wrapper, transaction_date):
 
 	new_order.update({
 		"transaction_date": transaction_date,
+		"delivery_date": get_next_date(ref_wrapper.delivery_date, mcount, 
+			cint(ref_wrapper.repeat_on_day_of_month)),
 		"order_period_from": order_period_from,
 		"order_period_to": order_period_to,
 		"fiscal_year": get_fiscal_year(transaction_date)[0],
@@ -378,7 +380,7 @@ def make_new_order(ref_wrapper, transaction_date):
 	})
 
 	new_order.submit()
-
+	
 	return new_order
 
 def get_next_date(dt, mcount, day=None):
