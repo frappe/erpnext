@@ -94,7 +94,7 @@ class PaymentReconciliation(Document):
 			""".format("credit" if self.party_type == "Customer" else "debit"),
 			(self.party_account, d.voucher_type, d.voucher_no))
 
-			payment_amount = -1*payment_amount[0][0] if payment_amount else 0
+			payment_amount = payment_amount[0][0] if payment_amount else 0
 
 			if d.invoice_amount > payment_amount:
 				non_reconciled_invoices.append({
