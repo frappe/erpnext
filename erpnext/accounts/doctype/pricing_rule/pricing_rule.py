@@ -201,7 +201,7 @@ def get_pricing_rules(args):
 			and ifnull({transaction_type}, 0) = 1 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=item_group_condition,
-			transaction_type=args.transaction_type, conditions=conditions), args, as_dict=1, debug=1)
+			transaction_type=args.transaction_type, conditions=conditions), args, as_dict=1)
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
