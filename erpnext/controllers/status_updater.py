@@ -68,9 +68,8 @@ class StatusUpdater(Document):
 		if self.is_new():
 			return
 
-		_status = self.status
-
 		if self.doctype in status_map:
+			_status = self.status
 			sl = status_map[self.doctype][:]
 			sl.reverse()
 			for s in sl:
