@@ -142,16 +142,17 @@ def get_basic_details(args, item_doc):
 		"description": item.description_html or item.description,
 		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
 		"income_account": item.income_account \
-		    or frappe.db.get_value("Item Group", args.item_group, "default_income_account") \
+		    or frappe.db.get_value("Item Group", item.item_group, "default_income_account") \
 		    or args.income_account \
 			or frappe.db.get_value("Company", args.company, "default_income_account"),
 		"expense_account": item.expense_account \
-            or frappe.db.get_value("Item Group", args.item_group, "default_expense_account") \
+            or frappe.db.get_value("Item Group", item.item_group, "default_expense_account") \
 		    or args.expense_account \
 			or frappe.db.get_value("Company", args.company, "default_expense_account"),
-		"cost_center": item.selling_cost_center or \
-		    frappe.db.get_value("Item Group", args.item_group, "default_cost_center") \
-			if args.transaction_type == "selling" else item.buying_cost_center,
+		"cost_center": item.selling_cost_center  \
+		    or frappe.db.get_value("Item Group", item.item_group, "default_cost_center") \
+		    or frappe.db.get_value("Company", args.company, "cost_center") \
+		    if args.transaction_type == "selling" else item.buying_cost_center,
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item_doc.get("item_tax")))),
