@@ -194,6 +194,9 @@ class MaintenanceSchedule(TransactionBase):
 			sr_details = frappe.db.get_value("Serial No", serial_no,
 				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
 
+			if not sr_details:
+				frappe.throw(_("Serial No {0} not found").format(serial_no))
+
 			if sr_details.warranty_expiry_date and sr_details.warranty_expiry_date>=amc_start_date:
 				throw(_("Serial No {0} is under warranty upto {1}").format(serial_no, sr_details.warranty_expiry_date))
 
