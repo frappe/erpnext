@@ -26,10 +26,6 @@ pscript.feature_dict = {
 		'Stock Entry': {'fields':['project_name']},
 		'Timesheet': {'timesheet_details':['project_name']}
 	},
-	'fs_packing_details': {
-		//'Delivery Note': {'fields':['packing_details','print_packing_slip','packing_checked_by','packed_by','pack_size','shipping_mark'],'delivery_note_details':['no_of_packs','pack_gross_wt','pack_nett_wt','pack_no','pack_unit']},
-		//'Sales Order': {'fields':['packing_details']}
-	},
 	'fs_discounts': {
 		'Delivery Note': {'delivery_note_details':['discount_percentage']},
 		'Quotation': {'quotation_details':['discount_percentage']},
@@ -152,10 +148,10 @@ pscript.feature_dict = {
 		'Address': {'fields':['sales_partner']},
 		'Contact': {'fields':['sales_partner']},
 		'Customer': {'fields':['sales_team']},
-		'Delivery Note': {'fields':['sales_team','packing_list']},
+		'Delivery Note': {'fields':['sales_team']},
 		'Item': {'fields':['item_customer_details']},
-		'Sales Invoice': {'fields':['sales_team', 'packing_list']},
-		'Sales Order': {'fields':['sales_team','packing_list']}
+		'Sales Invoice': {'fields':['sales_team']},
+		'Sales Order': {'fields':['sales_team']}
 	},
 	'fs_more_info': {
 		"Customer Issue": {"fields": ["more_info"]},
@@ -190,7 +186,6 @@ $(document).bind('form_refresh', function() {
 	for(var sys_feat in sys_defaults) {
 		if(sys_defaults[sys_feat]=='0'
 			&& (sys_feat in pscript.feature_dict)) { //"Features to hide" exists
-
 			if(cur_frm.doc.doctype in pscript.feature_dict[sys_feat]) {
 				for(var fort in pscript.feature_dict[sys_feat][cur_frm.doc.doctype]) {
 					if(fort=='fields') {
