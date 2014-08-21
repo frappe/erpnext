@@ -200,7 +200,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
-	if filters['customer']:
+	if filters.get('customer'):
 		cond = '(`tabProject`.customer = "' + filters['customer'] + '" or ifnull(`tabProject`.customer,"")="") and'
 
 	return frappe.db.sql("""select `tabProject`.name from `tabProject`
