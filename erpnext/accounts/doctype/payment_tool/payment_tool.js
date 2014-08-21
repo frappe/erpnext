@@ -44,12 +44,7 @@ erpnext.payment_tool.set_party_account = function(frm) {
 
 // Get outstanding vouchers
 frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
-	if(frm.doc.party_type == "Customer") {
-		var party_name = frm.doc.customer;
-	} else {
-		var party_name = frm.doc.supplier;
-	}
-
+	erpnext.payment_tool.check_mandatory_to_fetch(frm.doc);
 	frm.set_value("payment_tool_details", []);
 
 	return  frappe.call({
@@ -59,7 +54,7 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 				"company": frm.doc.company,
 				"party_type": frm.doc.party_type,
 				"received_or_paid": frm.doc.received_or_paid,
-				"party_name": party_name,
+				"party_name": frm.doc.party_type == "Customer" ? frm.doc.customer : frm.doc.supplier,
 				"party_account": frm.doc.party_account
 			}
 		},
@@ -142,6 +137,8 @@ erpnext.payment_tool.set_total_payment_amount = function(frm) {
 
 // Make Journal voucher
 frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
+	erpnext.payment_tool.check_mandatory_to_fetch(frm.doc);
+
 	return  frappe.call({
 		method: 'make_journal_voucher',
 		doc: frm.doc,
@@ -154,16 +151,32 @@ frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
 
 cur_frm.fields_dict['payment_tool_details'].grid.get_field('against_voucher_no').get_query = function(doc, cdt, cdn) {
 	var c = locals[cdt][cdn];
+
+	erpnext.payment_tool.check_mandatory_to_fetch(doc);
+
+	args = { "docstatus": 1 };
 	var party_type = doc.party_type.toLowerCase()
+	args[party_type] = doc[party_type]
+
 	if (c.against_voucher_type) {
 		return {
 			doctype: c.against_voucher_type,
-			filters: {
-				"docstatus": 1,
-				party_type: doc[party_type]
-			}
+			filters: args
 		}
 	} else {
 		frappe.throw(__("Row {0}: Please specify the Against Voucher Type", [c.idx]));
 	}
+}
+
+erpnext.payment_tool.check_mandatory_to_fetch = function(doc) {
+	var check_fields = [
+		['Company', doc.company],
+		['Party Type', doc.party_type],
+		['Received Or Paid', doc.received_or_paid],
+		['Customer / Supplier', doc.party_type == "Customer" ? doc.customer : doc.supplier]
+	];
+
+	$.each(check_fields, function(i, v) {
+		if(!v[1]) frappe.throw(__("Please select {0} first", [v[0]]))
+	});
 }

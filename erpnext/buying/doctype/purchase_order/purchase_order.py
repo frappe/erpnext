@@ -197,27 +197,6 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
-	def set_total_advance_paid(self):
-		against_order_advance_paid = frappe.db.sql("""
-			select
-				sum(ifnull(debit, 0)) as debit
-			from
-				`tabJournal Voucher Detail`
-			where
-				against_purchase_order = %(po_name)s and docstatus = 1 and is_advance = "Yes"
-		""", {
-			"po_name": self.name
-		}, as_dict = True)
-
-		for pay in against_order_advance_paid:
-			if flt(self.grand_total) > flt(self.advance_paid):
-				advance_paid_value = flt(self.advance_paid) + flt(pay.get('credit'))
-			else:
-				frappe.throw(_("Total Advance paid against Order cannot be greater than \
-					the Grand Total"))
-		
-		frappe.db.set_value("Purchase Order", self.name, "advance_paid", advance_paid_value)
-
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1
 	target.run_method("set_missing_values")

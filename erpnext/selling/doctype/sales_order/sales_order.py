@@ -249,27 +249,6 @@ class SalesOrder(SellingController):
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
 
-	def set_total_advance_paid(self):
-		against_order_advance_paid = frappe.db.sql("""
-			select
-				sum(ifnull(credit, 0)) as credit
-			from
-				`tabJournal Voucher Detail`
-			where
-				against_sales_order = %(so_name)s and docstatus = 1 and is_advance = "Yes"
-		""", {
-			"so_name": self.name
-		}, as_dict = True)
-
-		for pay in against_order_advance_paid:
-			if flt(self.grand_total) > flt(self.advance_paid):
-				advance_paid_value = flt(self.advance_paid) + flt(pay.get('credit'))
-			else:
-				frappe.throw(_("Advance paid against Order cannot be greater than the Grand Total"))
-		
-		frappe.db.set_value("Sales Order", self.name, "advance_paid", advance_paid_value)
-
-
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):
@@ -383,7 +362,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 		advance_voucher = frappe.db.sql("""
 			select
-				t1.name as voucher_no, t1.posting_date, t1.remark, t2.account, 
+				t1.name as voucher_no, t1.posting_date, t1.remark, t2.account,
 				t2.name as voucher_detail_no, {amount_query} as payment_amount, t2.is_advance
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
