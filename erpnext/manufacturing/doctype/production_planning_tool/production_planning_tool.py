@@ -354,8 +354,8 @@ class ProductionPlanningTool(Document):
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
 		item_projected_qty = frappe.db.sql("""select item_code, sum(projected_qty)
-			from `tabBin` where item_code in (%s) group by item_code""" %
-			(", ".join(["%s"]*len(items)),), tuple(items))
+			from `tabBin` where item_code in (%s) and warehouse=%s group by item_code""" %
+			(", ".join(["%s"]*len(items)), '%s'), tuple(items + [self.purchase_request_for_warehouse]))
 
 		return dict(item_projected_qty)
 
