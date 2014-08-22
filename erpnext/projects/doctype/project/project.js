@@ -20,3 +20,4 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 		query: "erpnext.controllers.queries.customer_query"
 	}
 }
+
