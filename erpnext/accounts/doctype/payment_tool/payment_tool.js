@@ -49,6 +49,9 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 	} else {
 		var party_name = frm.doc.supplier;
 	}
+
+	frm.set_value("payment_tool_details", []);
+
 	return  frappe.call({
 		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers',
 		args: {
@@ -61,7 +64,6 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 			}
 		},
 		callback: function(r, rt) {
-			frm.set_value("payment_tool_details", []);
 			if(r.message) {
 				$.each(r.message, function(i, d) {
 					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Detail", "payment_tool_details");
@@ -72,7 +74,41 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 				});
 				refresh_field("payment_tool_details");
 			}
-			
+
+		}
+	});
+});
+
+// validate against_voucher_type
+frappe.ui.form.on("Payment Tool Detail", "against_voucher_type", function(frm) {
+	erpnext.payment_tool.validate_against_voucher(frm);
+});
+
+erpnext.payment_tool.validate_against_voucher = function(frm) {
+	$.each(frm.doc.payment_tool_details || [], function(i, row) {
+		if(frm.doc.party_type=="Customer" && frm.doc.received_or_paid=="Paid"
+			&& !in_list(["Sales Order", "Sales Invoice", "Journal Voucher"], row.against_voucher_type)) {
+				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
+				frappe.throw(__("Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Voucher"))
+			}
+	});
+}
+
+// validate against_voucher_type
+frappe.ui.form.on("Payment Tool Detail", "against_voucher_no", function(frm, cdt, cdn) {
+	var row = locals[cdt][cdn];
+	frappe.call({
+		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount',
+		args: {
+			"against_voucher_type": row.against_voucher_type,
+			"against_voucher_no": row.against_voucher_no
+		},
+		callback: function(r) {
+			if(!r.exc) {
+				$.each(r.message, function(k, v) {
+					frappe.model.set_value(cdt, cdn, k, v);
+				});
+			}
 		}
 	});
 });
@@ -93,7 +129,7 @@ erpnext.payment_tool.set_total_payment_amount = function(frm) {
 			total_amount = total_amount + row.payment_amount;
 		} else {
 			if(row.payment_amount < 0)
-				msgprint(__("Row {0}: Payment amount can not be negative", [__(row.idx)]));
+				msgprint(__("Row {0}: Payment amount can not be negative", [row.idx]));
 			else if(row.payment_amount >= row.outstanding_amount)
 				msgprint(__("Row {0}: Payment Amount cannot be greater than Outstanding Amount", [__(row.idx)]));
 
@@ -118,20 +154,16 @@ frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
 
 cur_frm.fields_dict['payment_tool_details'].grid.get_field('against_voucher_no').get_query = function(doc, cdt, cdn) {
 	var c = locals[cdt][cdn];
+	var party_type = doc.party_type.toLowerCase()
 	if (c.against_voucher_type) {
-		var dt = c.against_voucher_type;
 		return {
-			doctype: dt,
-			// query: "erpnext.accounts.doctype.account.account.get_voucher_selection_list",
+			doctype: c.against_voucher_type,
 			filters: {
-				// "voucher_type": dt,
-				// "company": doc.company
-				// "party_name": doc.party_name
-				"doctype": 1
+				"docstatus": 1,
+				party_type: doc[party_type]
 			}
 		}
 	} else {
-		frappe.throw(__("Please specify the Voucher Type {1}"));
+		frappe.throw(__("Row {0}: Please specify the Against Voucher Type", [c.idx]));
 	}
 }
-
