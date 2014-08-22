@@ -1,6 +1,5 @@
 {
- "allow_attach": 1,
- "autoname": "LAP/.#####",
+  "autoname": "LAP/.#####",
  "creation": "2013-02-20 11:18:11",
  "description": "Apply / Approve Leaves",
  "docstatus": 0,

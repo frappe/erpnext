@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "autoname": "field:applicant_name", 
+  "autoname": "field:applicant_name", 
  "creation": "2013-01-29 19:25:37", 
  "description": "Applicant for a Job", 
  "docstatus": 0, 

@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:item_group_name", 
  "creation": "2013-03-28 10:35:29", 

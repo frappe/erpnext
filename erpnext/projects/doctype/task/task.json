@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "autoname": "TASK.#####", 
  "creation": "2013-01-29 19:25:50", 
  "docstatus": 0, 
