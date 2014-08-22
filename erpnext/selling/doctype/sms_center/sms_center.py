@@ -51,7 +51,7 @@ class SMSCenter(Document):
 
 		for d in rec:
 			rec_list += d[0] + ' - ' + d[1] + '\n'
-			self.receiver_list = rec_list
+		self.receiver_list = rec_list
 
 	def get_receiver_nos(self):
 		receiver_nos = []
