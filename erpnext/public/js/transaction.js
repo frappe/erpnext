@@ -57,8 +57,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.set_dynamic_labels();
 
 		// Show POS button only if it is enabled from features setup
-		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
+		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request") {
 			this.make_pos_btn();
+		}
 	},
 
 	make_pos_btn: function() {
@@ -76,6 +77,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				me.toggle_pos(true);
 				erpnext.open_as_pos = false;
 			}
+
+			this.$pos_btn && this.$pos_btn.remove();
 
 			this.$pos_btn = this.frm.appframe.add_primary_action(btn_label, function() {
 				me.toggle_pos();
@@ -644,7 +647,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		// maintain actual tax rate based on idx
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			if (tax.charge_type == "Actual") {
-				actual_tax_dict[tax.idx] = flt(tax.rate);
+				actual_tax_dict[tax.idx] = flt(tax.rate, precision("tax_amount", tax));
 			}
 		});
 

@@ -54,8 +54,8 @@ class JournalVoucher(AccountsController):
 				elif d.against_purchase_order:
 					advance_paid.setdefault("Purchase Order", []).append(d.against_purchase_order)
 
-		for voucher_type, unique_order_list in advance_paid.items():
-			for voucher_no in list(set(unique_order_list)):
+		for voucher_type, order_list in advance_paid.items():
+			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
 	def on_cancel(self):
@@ -63,6 +63,7 @@ class JournalVoucher(AccountsController):
 		remove_against_link_from_jv(self.doctype, self.name, "against_jv")
 
 		self.make_gl_entries(1)
+		self.update_advance_paid()
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Voucher']:
@@ -205,7 +206,7 @@ class JournalVoucher(AccountsController):
 			if d.against_purchase_order and d.debit:
 				currency = frappe.db.get_value("Purchase Order", d.against_purchase_order, "currency")
 				r.append(_("{0} {1} against Purchase Order {2}").format(currency, \
-					fmt_money(flt(d.debit)), d.against_purchase_order))				
+					fmt_money(flt(d.debit)), d.against_purchase_order))
 
 		if self.user_remark:
 			r.append(_("Note: {0}").format(self.user_remark))

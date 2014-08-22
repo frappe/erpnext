@@ -327,7 +327,10 @@ class StockEntry(StockController):
 						frappe.DoesNotExistError)
 
 				# validate quantity <= ref item's qty - qty already returned
-				ref_item_qty = sum([flt(d.qty) for d in ref.doc.get({"item_code": item.item_code})])
+				if self.purpose == "Purchase Return":
+					ref_item_qty = sum([flt(d.qty)*flt(d.conversion_factor) for d in ref.doc.get({"item_code": item.item_code})])
+				elif self.purpose == "Sales Return":
+					ref_item_qty = sum([flt(d.qty) for d in ref.doc.get({"item_code": item.item_code})])
 				returnable_qty = ref_item_qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
 					frappe.throw(_("Item {0} has already been returned").format(item.item_code), StockOverReturnError)

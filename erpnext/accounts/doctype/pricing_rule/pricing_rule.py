@@ -135,8 +135,10 @@ def get_pricing_rule_for_item(args):
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
 	if args.customer and not (args.customer_group and args.territory):
-		args.customer_group, args.territory = frappe.db.get_value("Customer", args.customer,
-			["customer_group", "territory"])
+		customer = frappe.db.get_value("Customer", args.customer, ["customer_group", "territory"])
+		if customer:
+			args.customer_group, args.territory = customer
+
 	elif args.supplier and not args.supplier_type:
 		args.supplier_type = frappe.db.get_value("Supplier", args.supplier, "supplier_type")
 

@@ -90,6 +90,12 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "view_details", 
+   "fieldtype": "Fold", 
+   "label": "View Details", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "label": "More Info", 
@@ -230,7 +236,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:49.393708", 
+ "modified": "2014-08-11 07:11:55.802625", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 

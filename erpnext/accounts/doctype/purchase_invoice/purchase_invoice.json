@@ -534,6 +534,11 @@
    "report_hide": 0
   }, 
   {
+   "fieldname": "fold", 
+   "fieldtype": "Fold", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "advances", 
    "fieldtype": "Section Break", 
    "label": "Advances", 
@@ -753,7 +758,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-31 04:59:24.939856", 
+ "modified": "2014-08-12 05:25:16.261614", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

@@ -24,9 +24,9 @@ frappe.pages['activity'].onload = function(wrapper) {
 
 	// Build Report Button
 	if(frappe.boot.user.can_get_report.indexOf("Feed")!=-1) {
-		wrapper.appframe.add_primary_action(__('Build Report'), function() {
+		wrapper.appframe.add_button(__('Build Report'), function() {
 			frappe.set_route('Report', "Feed");
-		}, 'icon-th', true);
+		}, 'icon-th');
 	}
 }
 
@@ -81,7 +81,7 @@ erpnext.ActivityFeed = Class.extend({
 			} else {
 				pdate = dateutil.global_date_format(date);
 			}
-			$(row).html(repl('<div class="date-sep">%(date)s</div>', {date: pdate}));
+			$(row).html(repl('<div class="date-sep" style="padding-left: 15px;">%(date)s</div>', {date: pdate}));
 		}
 		erpnext.last_feed_date = date;
 	}

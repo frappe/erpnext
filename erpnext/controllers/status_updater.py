@@ -65,8 +65,10 @@ class StatusUpdater(Document):
 		self.validate_qty()
 
 	def set_status(self, update=False):
-		if self.get("__islocal"):
+		if self.is_new():
 			return
+
+		_status = self.status
 
 		if self.doctype in status_map:
 			sl = status_map[self.doctype][:]
@@ -82,6 +84,9 @@ class StatusUpdater(Document):
 				elif getattr(self, s[1])():
 					self.status = s[0]
 					break
+
+			if self.status != _status:
+				self.add_comment("Label", self.status)
 
 			if update:
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)

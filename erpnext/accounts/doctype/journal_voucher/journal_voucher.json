@@ -124,12 +124,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break99", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
    "fieldname": "difference", 
    "fieldtype": "Currency", 
    "label": "Difference (Dr - Cr)", 
@@ -150,10 +144,8 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "reference", 
-   "fieldtype": "Section Break", 
-   "label": "Reference", 
-   "options": "icon-pushpin", 
+   "fieldname": "column_break99", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -182,6 +174,31 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "user_remark", 
+   "fieldtype": "Small Text", 
+   "in_filter": 1, 
+   "label": "User Remark", 
+   "no_copy": 1, 
+   "oldfieldname": "user_remark", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "view_details", 
+   "fieldtype": "Fold", 
+   "label": "View Details", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "reference", 
+   "fieldtype": "Section Break", 
+   "label": "Reference", 
+   "options": "icon-pushpin", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "fieldname": "clearance_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
@@ -195,23 +212,6 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "column_break98", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "user_remark", 
-   "fieldtype": "Small Text", 
-   "in_filter": 1, 
-   "label": "User Remark", 
-   "no_copy": 1, 
-   "oldfieldname": "user_remark", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
    "description": "User Remark will be added to Auto Remark", 
    "fieldname": "remark", 
    "fieldtype": "Small Text", 
@@ -223,6 +223,12 @@
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "column_break98", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0
   }, 
   {
    "fieldname": "bill_no", 
@@ -440,7 +446,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-31 05:05:03.294068", 
+ "modified": "2014-08-14 01:37:14.822939", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Voucher", 

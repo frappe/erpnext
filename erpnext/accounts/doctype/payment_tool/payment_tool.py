@@ -69,8 +69,6 @@ def get_outstanding_vouchers(args):
 
 	args = json.loads(args)
 
-	check_mandatory_to_fetch(args)
-
 	if args.get("party_type") == "Customer" and args.get("received_or_paid") == "Received":
 		amount_query = "ifnull(debit, 0) - ifnull(credit, 0)"
 	elif args.get("party_type") == "Supplier" and args.get("received_or_paid") == "Paid":
@@ -84,18 +82,6 @@ def get_outstanding_vouchers(args):
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party_name"))
 	return outstanding_invoices + orders_to_be_billed
-
-def check_mandatory_to_fetch(args):
-	check_field = [
-		['Company', args.get("company")],
-		['Party Type', args.get("party_type")],
-		['Received Or Paid', args.get("received_or_paid")],
-		['Customer / Supplier', args.get("party_name")]
-	]
-
-	for key, val in check_field:
-		if not val:
-			frappe.throw(_("Please select {0} first").format(key))
 
 def get_orders_to_be_billed(party_type, party_name):
 	voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'

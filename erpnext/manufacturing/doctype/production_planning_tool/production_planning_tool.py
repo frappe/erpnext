@@ -122,7 +122,7 @@ class ProductionPlanningTool(Document):
 		if self.fg_item:
 			item_condition = ' and pi.item_code = "' + self.fg_item + '"'
 
-		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
+		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty)
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
@@ -324,7 +324,7 @@ class ProductionPlanningTool(Document):
 			total_qty = sum([flt(d[0]) for d in so_item_qty])
 			if total_qty > item_projected_qty.get(item, 0):
 				# shortage
-				requested_qty = total_qty - item_projected_qty.get(item, 0)
+				requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
 				requested_qty = requested_qty > flt(so_item_qty[0][3]) and \
 					requested_qty or flt(so_item_qty[0][3])

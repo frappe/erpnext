@@ -60,17 +60,14 @@ cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.add_toolbar_buttons = function(doc) {
-	cur_frm.appframe.add_button(__('Chart of Accounts'),
+	cur_frm.add_custom_button(__('Chart of Accounts'),
 		function() { frappe.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
 	if (cstr(doc.group_or_ledger) == 'Group') {
 		cur_frm.add_custom_button(__('Convert to Ledger'),
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet', 'btn-default');
 	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
-		cur_frm.add_custom_button(__('Convert to Group'),
-			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
-
-		cur_frm.appframe.add_button(__('View Ledger'), function() {
+		cur_frm.add_custom_button(__('View Ledger'), function() {
 			frappe.route_options = {
 				"account": doc.name,
 				"from_date": sys_defaults.year_start_date,
@@ -79,6 +76,9 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 			};
 			frappe.set_route("query-report", "General Ledger");
 		}, "icon-table");
+
+		cur_frm.add_custom_button(__('Convert to Group'),
+			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet', 'btn-default')
 	}
 }
 
