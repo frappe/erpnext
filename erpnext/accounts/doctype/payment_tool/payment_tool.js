@@ -45,6 +45,7 @@ erpnext.payment_tool.set_party_account = function(frm) {
 // Get outstanding vouchers
 frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_fetch(frm.doc);
+
 	frm.set_value("payment_tool_details", []);
 
 	return  frappe.call({
