@@ -31,6 +31,16 @@ cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
 	});
 }
 
+
+cur_frm.fields_dict['pp_so_details'].grid.get_field('sales_order').get_query = function(doc) {
+	var args = { "docstatus": 1 };
+	if(doc.customer) {
+		args["customer"] = doc.customer;
+	}
+
+ 	return { filters: args }
+}
+
 cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = function(doc) {
  	return erpnext.queries.item({
 		'is_pro_applicable': 'Yes'

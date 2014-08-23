@@ -276,7 +276,7 @@ class ProductionPlanningTool(Document):
 					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description,
 						item_details.stock_uom, item_details.min_order_qty, so_qty[0]])
 
-			self.make_items_dict(item_list)
+		self.make_items_dict(item_list)
 
 	def make_items_dict(self, item_list):
 		for i in item_list:
