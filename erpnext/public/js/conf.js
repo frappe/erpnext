@@ -15,4 +15,6 @@ $(document).bind('toolbar_setup', function() {
 		"text-overflow": "ellipsis",
 		"white-space": "nowrap"
 	});
+
+	$('[data-link="docs"]').attr("href", "https://erpnext.com/user-guide")
 });

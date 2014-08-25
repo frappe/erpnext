@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "autoname": "naming_series:", 
  "creation": "2013-04-03 16:38:41", 
  "description": "Log of Activities performed by users against Tasks that can be used for tracking time, billing.", 

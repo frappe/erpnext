@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "autoname": "field:batch_id", 
  "creation": "2013-03-05 14:50:38.000000", 
  "docstatus": 0, 
