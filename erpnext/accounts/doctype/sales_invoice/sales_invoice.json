@@ -1,5 +1,6 @@
 {
-  "allow_import": 1, 
+ "allow_attach": 1, 
+ "allow_import": 1, 
  "autoname": "naming_series:", 
  "creation": "2013-05-24 19:29:05", 
  "default_print_format": "Standard", 
@@ -172,7 +173,7 @@
    "allow_on_submit": 1, 
    "depends_on": "", 
    "description": "Start date of current invoice's period", 
-   "fieldname": "invoice_period_from_date", 
+   "fieldname": "period_from", 
    "fieldtype": "Date", 
    "label": "Invoice Period From", 
    "no_copy": 1, 
@@ -184,7 +185,7 @@
    "allow_on_submit": 1, 
    "depends_on": "", 
    "description": "End date of current invoice's period", 
-   "fieldname": "invoice_period_to_date", 
+   "fieldname": "period_to", 
    "fieldtype": "Date", 
    "label": "Invoice Period To", 
    "no_copy": 1, 
@@ -1087,7 +1088,7 @@
    "allow_on_submit": 1, 
    "depends_on": "eval:doc.docstatus<2", 
    "description": "Check if recurring invoice, uncheck to stop recurring or put proper End Date", 
-   "fieldname": "convert_into_recurring_invoice", 
+   "fieldname": "convert_into_recurring", 
    "fieldtype": "Check", 
    "label": "Convert into Recurring Invoice", 
    "no_copy": 1, 
@@ -1097,7 +1098,7 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+   "depends_on": "eval:doc.convert_into_recurring==1", 
    "description": "Select the period when the invoice will be generated automatically", 
    "fieldname": "recurring_type", 
    "fieldtype": "Select", 
@@ -1110,7 +1111,7 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+   "depends_on": "eval:doc.convert_into_recurring==1", 
    "description": "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ", 
    "fieldname": "repeat_on_day_of_month", 
    "fieldtype": "Int", 
@@ -1121,7 +1122,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+   "depends_on": "eval:doc.convert_into_recurring==1", 
    "description": "The date on which next invoice will be generated. It is generated on submit.\n", 
    "fieldname": "next_date", 
    "fieldtype": "Date", 
@@ -1133,7 +1134,7 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+   "depends_on": "eval:doc.convert_into_recurring==1", 
    "description": "The date on which recurring invoice will be stop", 
    "fieldname": "end_date", 
    "fieldtype": "Date", 
@@ -1153,7 +1154,7 @@
    "width": "50%"
   }, 
   {
-   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+   "depends_on": "eval:doc.convert_into_recurring==1", 
    "description": "The unique id for tracking all recurring invoices.\u00a0It is generated on submit.", 
    "fieldname": "recurring_id", 
    "fieldtype": "Data", 
@@ -1165,7 +1166,7 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "depends_on": "eval:doc.convert_into_recurring_invoice==1", 
+   "depends_on": "eval:doc.convert_into_recurring==1", 
    "description": "Enter email id separated by commas, invoice will be mailed automatically on particular date", 
    "fieldname": "notification_email_address", 
    "fieldtype": "Small Text", 
@@ -1192,7 +1193,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-14 02:13:09.673510", 
+ "modified": "2014-08-25 17:41:35.367233", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

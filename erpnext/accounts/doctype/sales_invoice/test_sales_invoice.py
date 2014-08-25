@@ -677,8 +677,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"posting_date": today,
 			"due_date": None,
 			"fiscal_year": get_fiscal_year(today)[0],
-			"invoice_period_from_date": get_first_day(today),
-			"invoice_period_to_date": get_last_day(today)
+			"period_from": get_first_day(today),
+			"period_to": get_last_day(today)
 		})
 
 		# monthly
@@ -690,8 +690,8 @@ class TestSalesInvoice(unittest.TestCase):
 		# monthly without a first and last day period
 		si2 = frappe.copy_doc(base_si)
 		si2.update({
-			"invoice_period_from_date": today,
-			"invoice_period_to_date": add_to_date(today, days=30)
+			"period_from": today,
+			"period_to": add_to_date(today, days=30)
 		})
 		si2.insert()
 		si2.submit()
@@ -701,8 +701,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si3 = frappe.copy_doc(base_si)
 		si3.update({
 			"recurring_type": "Quarterly",
-			"invoice_period_from_date": get_first_day(today),
-			"invoice_period_to_date": get_last_day(add_to_date(today, months=3))
+			"period_from": get_first_day(today),
+			"period_to": get_last_day(add_to_date(today, months=3))
 		})
 		si3.insert()
 		si3.submit()
@@ -712,8 +712,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si4 = frappe.copy_doc(base_si)
 		si4.update({
 			"recurring_type": "Quarterly",
-			"invoice_period_from_date": today,
-			"invoice_period_to_date": add_to_date(today, months=3)
+			"period_from": today,
+			"period_to": add_to_date(today, months=3)
 		})
 		si4.insert()
 		si4.submit()
@@ -723,8 +723,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si5 = frappe.copy_doc(base_si)
 		si5.update({
 			"recurring_type": "Yearly",
-			"invoice_period_from_date": get_first_day(today),
-			"invoice_period_to_date": get_last_day(add_to_date(today, years=1))
+			"period_from": get_first_day(today),
+			"period_to": get_last_day(add_to_date(today, years=1))
 		})
 		si5.insert()
 		si5.submit()
@@ -734,8 +734,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si6 = frappe.copy_doc(base_si)
 		si6.update({
 			"recurring_type": "Yearly",
-			"invoice_period_from_date": today,
-			"invoice_period_to_date": add_to_date(today, years=1)
+			"period_from": today,
+			"period_to": add_to_date(today, years=1)
 		})
 		si6.insert()
 		si6.submit()
@@ -784,16 +784,16 @@ class TestSalesInvoice(unittest.TestCase):
 
 			self.assertEquals(new_si.posting_date, unicode(next_date))
 
-			self.assertEquals(new_si.invoice_period_from_date,
-				unicode(add_months(base_si.invoice_period_from_date, no_of_months)))
+			self.assertEquals(new_si.period_from,
+				unicode(add_months(base_si.period_from, no_of_months)))
 
 			if first_and_last_day:
-				self.assertEquals(new_si.invoice_period_to_date,
-					unicode(get_last_day(add_months(base_si.invoice_period_to_date,
+				self.assertEquals(new_si.period_to,
+					unicode(get_last_day(add_months(base_si.period_to,
 						no_of_months))))
 			else:
-				self.assertEquals(new_si.invoice_period_to_date,
-					unicode(add_months(base_si.invoice_period_to_date, no_of_months)))
+				self.assertEquals(new_si.period_to,
+					unicode(add_months(base_si.period_to, no_of_months)))
 
 
 			return new_si

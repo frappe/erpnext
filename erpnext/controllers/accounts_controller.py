@@ -444,6 +444,57 @@ class AccountsController(TransactionBase):
 		if total_outstanding:
 			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
 
+	def validate_recurring_document(self):
+		if self.convert_into_recurring:
+			self.validate_notification_email_id()
+
+			if not self.recurring_type:
+				msgprint(_("Please select {0}").format(self.meta.get_label("recurring_type")),
+				raise_exception=1)
+
+			elif not (self.period_from and self.period_to):
+				throw(_("Period From and Period To dates mandatory for recurring %s") % self.doctype)
+
+	def convert_to_recurring(self, autoname, posting_date):
+		if self.convert_into_recurring:
+			if not self.recurring_id:
+				frappe.db.set(self, "recurring_id",
+					make_autoname(autoname))
+
+			self.set_next_date(posting_date)
+
+		elif self.recurring_id:
+			frappe.db.sql("""update `tab%s` \
+				set convert_into_recurring = 0 \
+				where recurring_id = %s""", % (self.doctype, '%s'), (self.recurring_id))
+
+	def validate_notification_email_id(self):
+		if self.notification_email_address:
+			email_list = filter(None, [cstr(email).strip() for email in
+				self.notification_email_address.replace("\n", "").split(",")])
+
+			from frappe.utils import validate_email_add
+			for email in email_list:
+				if not validate_email_add(email):
+					throw(_("{0} is an invalid email address in 'Notification \
+						Email Address'").format(email))
+
+		else:
+			frappe.throw(_("'Notification Email Addresses' not specified for recurring %s") \
+				% self.doctype)
+
+	def set_next_date(self, posting_date):
+		""" Set next date on which recurring document will be created"""
+		from erpnext.controllers.recurring_document import get_next_date
+
+		if not self.repeat_on_day_of_month:
+			msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
+
+		next_date = get_next_date(posting_date, month_map[self.recurring_type], 
+			cint(self.repeat_on_day_of_month))
+
+		frappe.db.set(self, 'next_date', next_date)
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
