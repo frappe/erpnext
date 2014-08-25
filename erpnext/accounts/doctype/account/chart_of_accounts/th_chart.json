@@ -1,0 +1,49 @@
+{
+    "country_code": "th", 
+    "name": "Thailand - Chart of Accounts", 
+    "tree": {
+        "Assets": {
+            "Account Receivable": {}, 
+            "Building": {
+                "Accumulated Depreciation - Building": {}
+            }, 
+            "Cash": {
+                "Cash at Bank": {}, 
+                "Petty Cash": {}
+            }, 
+            "Equipment": {
+                "Accumulated Depreciation - Equipment": {}
+            }, 
+            "Input VAT": {}, 
+            "Inventory": {}, 
+            "Outstanding Cheques": {}, 
+            "Withholding Income Tax": {}
+        }, 
+        "Equity": {
+            "Capital Stock": {}, 
+            "Dividends": {}, 
+            "Income Summary": {}, 
+            "Retained Earnings": {}
+        }, 
+        "Expenses": {
+            "Cost of goods sold": {}, 
+            "Income tax expenses": {}, 
+            "Interest expenses": {}, 
+            "Office Expenses": {}, 
+            "Rent": {}, 
+            "Salary": {}
+        }, 
+        "Income": {
+            "Income": {}
+        }, 
+        "Liabilities": {
+            "Account Payable": {}, 
+            "Accrued Expenses": {}, 
+            "Loans": {}, 
+            "Output VAT": {}, 
+            "Uninvoiced Receipts": {}, 
+            "Withholding Tax": {}
+        }, 
+        "name": "Simple chart of accounts"
+    }
+}

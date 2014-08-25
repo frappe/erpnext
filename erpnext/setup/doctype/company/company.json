@@ -72,17 +72,17 @@
   {
    "fieldname": "charts_section", 
    "fieldtype": "Section Break", 
-   "hidden": 1, 
+   "hidden": 0, 
    "label": "Chart of Accounts", 
    "permlevel": 0
   }, 
   {
    "fieldname": "chart_of_accounts", 
-   "fieldtype": "Link", 
+   "fieldtype": "Select", 
    "hidden": 0, 
    "ignore_user_permissions": 1, 
    "label": "Chart of Accounts", 
-   "options": "Chart of Accounts", 
+   "options": "", 
    "permlevel": 0
   }, 
   {
@@ -356,7 +356,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-08-07 05:20:47.711849", 
+ "modified": "2014-08-25 17:11:09.320856", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

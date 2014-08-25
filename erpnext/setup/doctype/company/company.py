@@ -83,15 +83,12 @@ class Company(Document):
 
 	def create_default_accounts(self):
 		if self.chart_of_accounts:
-			self.import_chart_of_account()
+			from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+			create_charts(self.chart_of_accounts, self.name)
 		else:
 			self.create_standard_accounts()
 			frappe.db.set(self, "receivables_group", _("Accounts Receivable") + " - " + self.abbr)
 			frappe.db.set(self, "payables_group", _("Accounts Payable") + " - " + self.abbr)
-
-	def import_chart_of_account(self):
-		chart = frappe.get_doc("Chart of Accounts", self.chart_of_accounts)
-		chart.create_accounts(self.name)
 
 	def add_acc(self, lst):
 		account = frappe.get_doc({

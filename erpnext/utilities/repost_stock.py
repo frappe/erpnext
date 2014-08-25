@@ -208,4 +208,3 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				pass
 
 		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
-
