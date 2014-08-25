@@ -77,7 +77,7 @@ def get_reserved_qty(item_code, warehouse):
 				(select qty as dnpi_qty, qty as so_item_qty,
 					ifnull(delivered_qty, 0) as so_item_delivered_qty, parent, name
 				from `tabSales Order Item` so_item
-				where item_code = %s and reserved_warehouse = %s
+				where item_code = %s and warehouse = %s
 				and exists(select * from `tabSales Order` so
 					where so.name = so_item.parent and so.docstatus = 1
 					and so.status != 'Stopped'))
