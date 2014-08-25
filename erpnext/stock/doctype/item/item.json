@@ -1,6 +1,5 @@
 {
- "allow_attach": 1,
- "allow_import": 1,
+  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
  "creation": "2013-05-03 10:45:46",

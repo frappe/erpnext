@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:project_name", 
  "creation": "2013-03-07 11:55:07", 

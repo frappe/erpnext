@@ -1,6 +1,5 @@
 {
- "allow_attach": 0, 
- "allow_copy": 0, 
+  "allow_copy": 0, 
  "allow_email": 1, 
  "allow_import": 1, 
  "allow_print": 1, 
