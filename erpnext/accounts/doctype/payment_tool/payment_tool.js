@@ -82,11 +82,18 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_type", function(frm) {
 
 erpnext.payment_tool.validate_against_voucher = function(frm) {
 	$.each(frm.doc.payment_tool_details || [], function(i, row) {
-		if(frm.doc.party_type=="Customer" && frm.doc.received_or_paid=="Paid"
+		if(frm.doc.party_type=="Customer"
 			&& !in_list(["Sales Order", "Sales Invoice", "Journal Voucher"], row.against_voucher_type)) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
 				frappe.throw(__("Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Voucher"))
 			}
+
+		if(frm.doc.party_type=="Supplier"
+			&& !in_list(["Sales Order", "Sales Invoice", "Journal Voucher"], row.against_voucher_type)) {
+				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
+				frappe.throw(__("Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Voucher"))
+			}
+
 	});
 }
 
@@ -156,10 +163,12 @@ cur_frm.fields_dict['payment_tool_details'].grid.get_field('against_voucher_no')
 	erpnext.payment_tool.check_mandatory_to_fetch(doc);
 
 	args = { "docstatus": 1 };
-	var party_type = doc.party_type.toLowerCase()
-	args[party_type] = doc[party_type]
 
 	if (c.against_voucher_type) {
+		if (in_list(["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"], c.against_voucher_type)) {
+			var party_type = doc.party_type.toLowerCase();
+			args[party_type] = doc[party_type];
+		}
 		return {
 			doctype: c.against_voucher_type,
 			filters: args
