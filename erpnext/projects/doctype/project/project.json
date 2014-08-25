@@ -241,6 +241,13 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "label": "Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "customer_details", 
    "fieldtype": "Section Break", 
    "label": "Customer Details", 
@@ -266,7 +273,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-08-04 03:22:11.416219", 
+ "modified": "2014-08-21 17:22:02.291138", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

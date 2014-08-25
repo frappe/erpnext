@@ -67,3 +67,7 @@ class Project(Document):
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
+
+@frappe.whitelist()
+def get_cost_center_name(project_name):
+	return frappe.db.get_value("Project", project_name, "cost_center"),
