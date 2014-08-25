@@ -15,5 +15,12 @@
   "doctype": "Cost Center", 
   "group_or_ledger": "Ledger", 
   "parent_cost_center": "_Test Company - _TC"
+ },
+ {
+  "company": "_Test Company",
+  "cost_center_name": "_Test Cost Center 2", 
+  "doctype": "Cost Center",
+  "group_or_ledger": "Ledger",
+  "parent_cost_center": "_Test Company - _TC"
  }
 ]

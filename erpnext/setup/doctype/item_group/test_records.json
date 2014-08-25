@@ -3,7 +3,8 @@
   "doctype": "Item Group", 
   "is_group": "No", 
   "item_group_name": "_Test Item Group", 
-  "parent_item_group": "All Item Groups"
+  "parent_item_group": "All Item Groups",
+  "default_cost_center": "_Test Cost Center 2 - _TC"
  }, 
  {
   "doctype": "Item Group", 

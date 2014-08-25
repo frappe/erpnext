@@ -27,7 +27,7 @@ class TestItem(unittest.TestCase):
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
+			"cost_center": "_Test Cost Center 2 - _TC",
 			"qty": 1.0,
 			"price_list_rate": 100.0,
 			"base_price_list_rate": 0.0,
