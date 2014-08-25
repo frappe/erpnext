@@ -65,6 +65,7 @@ scheduler_events = {
 	],
 	"daily": [
 		"erpnext.accounts.doctype.sales_invoice.sales_invoice.manage_recurring_invoices",
+		"erpnext.accounts.doctype.sales_order.sales_order.manage_recurring_orders",
 		"erpnext.stock.utils.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.support_ticket.support_ticket.auto_close_tickets"

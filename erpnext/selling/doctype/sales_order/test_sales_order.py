@@ -331,6 +331,147 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.CancelledLinkError, delivery_note.submit)
 
+	def test_recurring_order(self):
+		from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
+		from erpnext.accounts.utils import get_fiscal_year
+		today = nowdate()
+		base_so = frappe.copy_doc(test_records[0])
+		base_so.update({
+			"convert_into_recurring_order": 1,
+			"recurring_type": "Monthly",
+			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
+			"repeat_on_day_of_month": getdate(today).day,
+			"transaction_date": today,
+			"delivery_date": add_days(today, 15),
+			"due_date": None,
+			"fiscal_year": get_fiscal_year(today)[0],
+			"order_period_from": get_first_day(today),
+			"order_period_to": get_last_day(today)
+		})
+
+		# monthly
+		so1 = frappe.copy_doc(base_so)
+		so1.insert()
+		so1.submit()
+		self._test_recurring_order(so1, True)
+
+		# monthly without a first and last day period
+		so2 = frappe.copy_doc(base_so)
+		so2.update({
+			"order_period_from": today,
+			"order_period_to": add_to_date(today, days=30)
+		})
+		so2.insert()
+		so2.submit()
+		self._test_recurring_order(so2, False)
+
+		# quarterly
+		so3 = frappe.copy_doc(base_so)
+		so3.update({
+			"recurring_type": "Quarterly",
+			"order_period_from": get_first_day(today),
+			"order_period_to": get_last_day(add_to_date(today, months=3))
+		})
+		so3.insert()
+		so3.submit()
+		self._test_recurring_order(so3, True)
+
+		# quarterly without a first and last day period
+		so4 = frappe.copy_doc(base_so)
+		so4.update({
+			"recurring_type": "Quarterly",
+			"order_period_from": today,
+			"order_period_to": add_to_date(today, months=3)
+		})
+		so4.insert()
+		so4.submit()
+		self._test_recurring_order(so4, False)
+
+		# yearly
+		so5 = frappe.copy_doc(base_so)
+		so5.update({
+			"recurring_type": "Yearly",
+			"order_period_from": get_first_day(today),
+			"order_period_to": get_last_day(add_to_date(today, years=1))
+		})
+		so5.insert()
+		so5.submit()
+		self._test_recurring_order(so5, True)
+
+		# yearly without a first and last day period
+		so6 = frappe.copy_doc(base_so)
+		so6.update({
+			"recurring_type": "Yearly",
+			"order_period_from": today,
+			"order_period_to": add_to_date(today, years=1)
+		})
+		so6.insert()
+		so6.submit()
+		self._test_recurring_order(so6, False)
+
+		# change posting date but keep recuring day to be today
+		so7 = frappe.copy_doc(base_so)
+		so7.update({
+			"transaction_date": add_to_date(today, days=-1)
+		})
+		so7.insert()
+		so7.submit()
+
+		# setting so that _test function works
+		so7.transaction_date = today
+		self._test_recurring_order(so7, True)
+
+	def _test_recurring_order(self, base_so, first_and_last_day):
+		from frappe.utils import add_months, get_last_day
+		from erpnext.selling.doctype.sales_order.sales_order \
+			import manage_recurring_orders, get_next_date
+
+		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_so.recurring_type]
+
+		def _test(i):
+			self.assertEquals(i+1, frappe.db.sql("""select count(*) from `tabSales Order`
+				where recurring_id=%s and docstatus=1""", base_so.recurring_id)[0][0])
+
+			next_date = get_next_date(base_so.transaction_date, no_of_months,
+				base_so.repeat_on_day_of_month)
+
+			manage_recurring_orders(next_date=next_date, commit=False)
+
+			recurred_orders = frappe.db.sql("""select name from `tabSales Order`
+				where recurring_id=%s and docstatus=1 order by name desc""",
+				base_so.recurring_id)
+
+			self.assertEquals(i+2, len(recurred_orders))
+
+			new_so = frappe.get_doc("Sales Order", recurred_orders[0][0])
+
+			print "New", new_so
+
+			for fieldname in ["convert_into_recurring_order", "recurring_type",
+				"repeat_on_day_of_month", "notification_email_address"]:
+					self.assertEquals(base_so.get(fieldname),
+						new_so.get(fieldname))
+
+			self.assertEquals(new_so.transaction_date, unicode(next_date))
+
+			self.assertEquals(new_so.order_period_from,
+				unicode(add_months(base_so.order_period_from, no_of_months)))
+
+			if first_and_last_day:
+				self.assertEquals(new_so.order_period_to,
+					unicode(get_last_day(add_months(base_so.order_period_to,
+						no_of_months))))
+			else:
+				self.assertEquals(new_so.order_period_to,
+					unicode(add_months(base_so.order_period_to, no_of_months)))
+
+			return new_so
+
+		# if yearly, test 1 repetition, else test 5 repetitions
+		count = 1 if (no_of_months == 12) else 5
+		for i in xrange(count):
+			base_so = _test(i)
+
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 
 test_records = frappe.get_test_records('Sales Order')
