@@ -214,7 +214,8 @@
                 "TERJATVE ZA ODLO\u017dENI DAVEK IZ ODBITNIH ZA\u010cASNIH RAZLIK": {
                     "TERJATVE ZA ODLO\u017dENI DAVEK IZ ODBITNIH ZA\u010cASNIH RAZLIK": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "KAPITAL, DOLGORO\u010cNE OBVEZNOSTI (DOLGOVI) IN DOLGORO\u010cNE REZERVACIJE": {
             "DOLGORO\u010cNE FINAN\u010cNE OBVEZNOSTI": {
@@ -413,6 +414,7 @@
                     "VREDNOTNICE, IZDANE ZA OBRA\u010cUNAVANJE ZNOTRAJ PRAVNE OSEBE": {}
                 }
             }, 
+            "root_type": "", 
             "\u010cISTI DOBI\u010cEK ALI \u010cISTA IZGUBA": {
                 "NEUPORABLJENI DEL \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA": {
                     "NEUPORABLJENI DEL \u010cISTEGA DOBI\u010cKA POSLOVNEGA LETA": {}
@@ -657,7 +659,8 @@
                 "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV, POVEZANIH S FINAN\u010cNIMI PRIHODKI": {
                     "OSLABITEV VREDNOSTI KRATKORO\u010cNIH TERJATEV, POVEZANIH S FINAN\u010cNIMI PRIHODKI": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "KRATKORO\u010cNE OBVEZNOSTI (DOLGOVI) IN KRATKORO\u010cNE PASIVNE \u010cASOVNE RAZMEJITVE": {
             "DRUGE KRATKORO\u010cNE OBVEZNOSTI": {
@@ -817,7 +820,8 @@
                     }, 
                     "account_type": "Payable"
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "ODHODKI IN PRIHODKI": {
             "DRUGI FINAN\u010cNI ODHODKI IN OSTALI ODHODKI": {
@@ -989,7 +993,8 @@
                     "PREVREDNOTOVALNI POSLOVNI ODHODKI V ZVEZI Z NEOPREDMETENIMI SREDSTVI, OPREDMETENIMI OSNOVNIMI SREDSTVI IN NALO\u017dBENIMI NEPREMI\u010cNINAMI RAZPOREJENIMI IN IZMERJENIMI PO MODELU NABAVNE VREDNOSTI": {}
                 }
             }, 
-            "USREDSTVENI LASTNI PROIZVODI IN LASTNE STORITVE": {}
+            "USREDSTVENI LASTNI PROIZVODI IN LASTNE STORITVE": {}, 
+            "root_type": ""
         }, 
         "POSLOVNI IZID": {
             "DOBI\u010cEK ALI IZGUBA PRED OBDAV\u010cITVIJO": {
@@ -1038,9 +1043,12 @@
                 "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE ZAKONSKIH REZERV": {
                     "\u010cISTI DOBI\u010cEK ZA OBLIKOVANJE ZAKONSKIH REZERV": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
-        "PROSTO": {}, 
+        "PROSTO": {
+            "root_type": ""
+        }, 
         "STRO\u0160KI": {
             "AMORTIZACIJA": {
                 "AMORTIZACIJA DROBNEGA INVENTARJA": {
@@ -1189,7 +1197,8 @@
                 "STRO\u0160KI TRANSPORTNIH STORITEV": {
                     "STRO\u0160KI TRANSPORTNIH STORITEV": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "ZALOGE PROIZVODOV, STORITEV, BLAGA IN NEKRATKORO\u010cNIH SREDSTEV (SKUPINE ZA ODTUJITEV) ZA PRODAJO": {
             "NEDOKON\u010cANE PROIZVODNJA IN STORITVE": {
@@ -1279,7 +1288,8 @@
                 "VRA\u010cUNANA RAZLIKA V CENAH ZALOG BLAGA": {
                     "VRA\u010cUNANA RAZLIKA V CENAH ZALOG BLAGA": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "ZALOGE SUROVIN IN MATERIALA": {
             "OBRA\u010cUN NABAVE SUROVIN IN MATERIALA (TUDI DROBNEGA INVENTARJA IN EMBALA\u017dE)": {
@@ -1323,9 +1333,8 @@
                 "ZALOGE SUROVIN IN MATERIALA V SKLADI\u0160\u010cU": {
                     "ZALOGE SUROVIN IN MATERIALA V SKLADI\u0160\u010cU": {}
                 }
-            }
-        }, 
-        "name": "KONTNI NA\u010cRT ZA GOSPODARSKE DRU\u017dBE", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

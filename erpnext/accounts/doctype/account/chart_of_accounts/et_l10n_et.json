@@ -49,13 +49,15 @@
                     "Advance to supplier": {}
                 }
             }, 
-            "Stock": {}
+            "Stock": {}, 
+            "root_type": ""
         }, 
         "COST OF GOODS SOLD": {
             "Cost of Goods and Services": {}, 
             "Inventory Adjustments": {}, 
             "Other": {}, 
-            "Purchase Returns and Allowances": {}
+            "Purchase Returns and Allowances": {}, 
+            "root_type": ""
         }, 
         "EXPENSES": {
             "FIXED ASSETS AND CONSTRUCTION": {
@@ -137,7 +139,8 @@
                 "Pension Contributions": {
                     "Contribution to permanent staff pensions": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "LIABILITIES": {
             "Long-Term Debt": {
@@ -164,17 +167,18 @@
                 "Retentions": {
                     "Retention on contract": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "NET ASSETS/EQUITY": {
             "Profit and loss account": {}, 
             "Reserves": {}, 
-            "Share capital / equity": {}
+            "Share capital / equity": {}, 
+            "root_type": ""
         }, 
         "REVENUE": {
-            "Sales of Goods and Services": {}
-        }, 
-        "name": "Ethiopia", 
-        "parent_id": null
+            "Sales of Goods and Services": {}, 
+            "root_type": ""
+        }
     }
 }

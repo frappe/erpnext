@@ -74,7 +74,8 @@
                         "Reservas": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Estado de Resultados": {
             "Egresos": {
@@ -124,8 +125,8 @@
                         "Otros Gastos Financieros": {}
                     }
                 }
-            }
-        }, 
-        "name": "Plan contable de Guatemala (sencillo)"
+            }, 
+            "root_type": ""
+        }
     }
 }

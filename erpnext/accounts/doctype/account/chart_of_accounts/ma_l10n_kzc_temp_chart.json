@@ -867,7 +867,8 @@
                         "Diminution des dettes circulantes": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "COMPTES DE GESTION": {
             "COMPTES DE CHARGES": {
@@ -1411,7 +1412,8 @@
                         "Subventions d'\u00e9quilibre re\u00e7ues des exercices ant\u00e9rieurs": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "COMPTES DE RESULTATS": {
             "RESULTAT APRES IMPOTS": {}, 
@@ -1427,9 +1429,8 @@
                 "Valeur ajout\u00e9e": {}
             }, 
             "RESULTAT FINANCIER": {}, 
-            "RESULTAT NON COURANT": {}
-        }, 
-        "name": "Plan_Comptable_Maroc", 
-        "parent_id": null
+            "RESULTAT NON COURANT": {}, 
+            "root_type": ""
+        }
     }
 }

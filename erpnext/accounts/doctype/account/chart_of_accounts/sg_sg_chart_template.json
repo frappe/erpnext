@@ -147,7 +147,8 @@
                     }, 
                     "account_type": "Payable"
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Profit and Loss": {
             "Cost of sales": {
@@ -215,9 +216,8 @@
                     "Other Expense": {}, 
                     "Penalties and settlements": {}
                 }
-            }
-        }, 
-        "name": "Chart of Singapore", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

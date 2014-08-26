@@ -131,7 +131,8 @@
                     "Outras Contas": {}, 
                     "Valores Mobili\u00e1rios": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUSTOS DE PRODU\u00c7\u00c3O": {
             "CUSTO DOS BENS E SERVI\u00c7OS PRODUZIDOS": {
@@ -213,7 +214,8 @@
                     "Servi\u00e7os Prestados por Cooperativa de Trabalho": {}, 
                     "Servi\u00e7os Prestados por Pessoa F\u00edsica sem V\u00ednculo Empregat\u00edcio": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PASSIVO": {
             "CIRCULANTE": {
@@ -314,7 +316,8 @@
                     "Reservas Estatut\u00e1rias": {}, 
                     "Reservas Patrimoniais": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "RESULTADO L\u00cdQUIDO DO PER\u00cdODO": {
             "PROVIS\u00c3O PARA CSLL E IRPJ (ATIVIDADE RURAL)": {
@@ -603,7 +606,8 @@
                         }
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "SUPER\u00c1VIT/D\u00c9FICIT L\u00cdQUIDO DO PER\u00cdODO": {
             "OUTRAS RECEITAS E DESPESAS": {
@@ -786,9 +790,8 @@
                         }
                     }
                 }
-            }
-        }, 
-        "name": "Plano de Contas", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

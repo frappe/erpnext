@@ -39,7 +39,8 @@
                 "Outras reservas": {}, 
                 "Reservas legais": {}
             }, 
-            "Resultados transitados": {}
+            "Resultados transitados": {}, 
+            "root_type": ""
         }, 
         "Contas a receber e a pagar": {
             "Accionistas/s\u00f3cios": {
@@ -386,7 +387,8 @@
                     "account_type": "Equity"
                 }, 
                 "account_type": "Equity"
-            }
+            }, 
+            "root_type": ""
         }, 
         "Gastos": {
             "Custo das mercadorias vendidas e mat\u00e9rias consumidas": {
@@ -536,7 +538,8 @@
                 "Outras provis\u00f5es": {}, 
                 "Processos judiciais em curso": {}, 
                 "Reestrutura\u00e7\u00e3o": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Invent\u00e1rios e activos biol\u00f3gicos": {
             "Activos biol\u00f3gicos": {
@@ -587,7 +590,8 @@
                 "Desperd\u00edcios, res\u00edduos e refugos": {}, 
                 "Perdas por imparidade acumuladas": {}, 
                 "Subprodutos": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Investimentos": {
             "Activo fixos tang\u00edveis": {
@@ -653,7 +657,8 @@
                 "Outras propriedades de investimento": {}, 
                 "Perdas por imparidade acumuladas": {}, 
                 "Terrenos e recursos naturais": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Meios financeiros l\u00edquidos": {
             "Caixa": {
@@ -694,7 +699,8 @@
                     "account_type": "Cash"
                 }, 
                 "account_type": "Cash"
-            }
+            }, 
+            "root_type": ""
         }, 
         "Rendimentos": {
             "Ganhos por aumentos de justo valor": {
@@ -822,7 +828,8 @@
                 "Mercadoria": {}, 
                 "Produtos acabados e interm\u00e9dios": {}, 
                 "Subprodutos, desperd\u00edcios, res\u00edduos e refugos": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Resultados": {
             "Dividendos antecipados": {}, 
@@ -833,8 +840,8 @@
                 }, 
                 "Resultado antes de impostos": {}, 
                 "Resultado l\u00edquido": {}
-            }
-        }, 
-        "name": "SNC Portugal"
+            }, 
+            "root_type": ""
+        }
     }
 }

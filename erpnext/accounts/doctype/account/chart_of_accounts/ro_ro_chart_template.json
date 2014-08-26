@@ -750,7 +750,8 @@
                         "Venituri din sconturi obtinute": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CONTURI IN AFARA BILANTULUI": {
             "CONTURI DE GESTIUNE": {
@@ -807,8 +808,8 @@
                         "Dobanzi de platit": {}
                     }
                 }
-            }
-        }, 
-        "name": "PLAN DE CONTURI GENERAL"
+            }, 
+            "root_type": ""
+        }
     }
 }

@@ -737,7 +737,8 @@
                     "Parts dans des entreprises avec lesquelles la soci\u00e9t\u00e9 a un lien de participation": {}, 
                     "Parts dans des entreprises li\u00e9es": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "TOTAL CLASSES 6 ET 7": {
             "CLASSE 6 - COMPTES DE CHARGES": {
@@ -1446,9 +1447,8 @@
                         "Variation des stocks de produits r\u00e9siduels": {}
                     }
                 }
-            }
-        }, 
-        "name": "Plan de compte Luxembourgeois - Loi de Juin 2009 (THAMINI & ADN & ACSONE)", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

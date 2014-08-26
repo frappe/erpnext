@@ -988,7 +988,8 @@
                     "SOCI\u00c9T\u00c9S DE GESTION ET D'INTERM\u00c9DIATION (S.G.I.)": {}, 
                     "TR\u00c9SOR": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Comptes de gestion": {
             "Comptes de charges": {
@@ -1427,7 +1428,8 @@
                         "hors R\u00e9gion": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Comptes des engagements hors bilan et comptabilit\u00e9 analytique": {
             "COMPTES D'ECARTS SUR COUTS PREETABLIS": {}, 
@@ -1485,7 +1487,8 @@
                     "Autres engagements r\u00e9ciproques": {}, 
                     "Commandes fermes des clients": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Comptes sp\u00e9ciaux": {
             "CHARGES HORS ACTIVIT\u00c9S ORDINAIRES": {
@@ -1550,8 +1553,8 @@
                 "IMMOBILISATIONS CORPORELLES": {}, 
                 "IMMOBILISATIONS FINANCI\u00c8RES": {}, 
                 "IMMOBILISATIONS INCORPORELLES": {}
-            }
-        }, 
-        "name": "Plan Comptable SYSCOA"
+            }, 
+            "root_type": ""
+        }
     }
 }

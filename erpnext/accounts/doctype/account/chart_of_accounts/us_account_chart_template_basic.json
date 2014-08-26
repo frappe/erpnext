@@ -29,7 +29,8 @@
                 "Court Costs": {}, 
                 "Expert Witness Fees": {}, 
                 "Filing Fees": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cost of Goods Sold": {
             "Commissions Paid": {
@@ -68,7 +69,8 @@
             "Tools and Small Equipment": {
                 "account_type": "Cost of Goods Sold"
             }, 
-            "account_type": "Cost of Goods Sold"
+            "account_type": "Cost of Goods Sold", 
+            "root_type": ""
         }, 
         "Expenses": {
             "Advertising and Promotion": {}, 
@@ -116,7 +118,8 @@
             "Travel Expense": {}, 
             "Uniforms": {}, 
             "Utilities": {}, 
-            "Veterinary, Breeding, Medicine": {}
+            "Veterinary, Breeding, Medicine": {}, 
+            "root_type": ""
         }, 
         "Income": {
             "Administrative Fees": {}, 
@@ -138,7 +141,8 @@
             "Sales Discounts": {}, 
             "Service Income": {}, 
             "Settlement Income": {}, 
-            "Shipping and Delivery Income": {}
+            "Shipping and Delivery Income": {}, 
+            "root_type": ""
         }, 
         "Liabilities and Equity": {
             "Equity": {
@@ -168,15 +172,15 @@
                     "Sales Tax Payable": {}, 
                     "Use Tax Payable": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Other Income": {
             "Finance Charge Income": {}, 
             "Insurance Proceeds Received": {}, 
             "Interest Income": {}, 
-            "Proceeds from Sale of Assets": {}
-        }, 
-        "name": "Basic", 
-        "parent_id": null
+            "Proceeds from Sale of Assets": {}, 
+            "root_type": ""
+        }
     }
 }

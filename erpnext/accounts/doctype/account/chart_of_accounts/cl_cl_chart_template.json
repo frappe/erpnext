@@ -8,7 +8,8 @@
             }, 
             "Costos de Producci\u00f3n": {}, 
             "Gastos de Administraci\u00f3n": {}, 
-            "Gastos de Comercializaci\u00f3n": {}
+            "Gastos de Comercializaci\u00f3n": {}, 
+            "root_type": ""
         }, 
         "Cuentas de Orden": {
             "CUENTAS DE ORDEN ACREEDORAS": {
@@ -22,7 +23,8 @@
                 "Documentos Endosados": {}, 
                 "Garantias Otorgadas": {}, 
                 "Mercaderias Recibidas en Consignaci\u00f3n": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Resultado": {
             "RESULTADO GANANCIA": {
@@ -65,7 +67,8 @@
                     "Gastos en Servicios P\u00fablicos": {}, 
                     "Gastos en Sueldos y Jornales": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "inventario del Balance General": {
             "ACTIVOS": {
@@ -195,8 +198,8 @@
                     "Resultados Acumulados del Ejercicio Anterior": {}, 
                     "Utilidades y P\u00e9rdidas del Ejercicio": {}
                 }
-            }
-        }, 
-        "name": "Chile"
+            }, 
+            "root_type": ""
+        }
     }
 }

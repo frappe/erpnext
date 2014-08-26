@@ -31,7 +31,8 @@
                 "Gubitak koji tereti manjinski interes": {
                     "Gubitak koji tereti manjinski interes-a1": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "KAPITAL I PRI\u010cUVE TE IZVANBILAN\u010cNI ZAPISI": {
             "DOBITAK ILI GUBITAK POSLOVNE GODINE": {
@@ -286,7 +287,8 @@
                         "Zadr\u017eani dobitak \u010dlanova dru\u0161tva (analitika po \u010dlanovima)": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "KRATKORO\u010cNE I DUGORO\u010cNE OBVEZE, DUGORO\u010cNA REZERVIRANJA, ODGO\u0110ENA PLA\u0106ANJA I PRIHODI BUDU\u0106EG RAZDOBLJA": {
             "DUGORO\u010cNA REZERVIRANJA ZA RIZIKE I TRO\u0160KOVE": {
@@ -737,7 +739,8 @@
                 "Rezerviranje tro\u0161ka za neiskori\u0161tene godi\u0161nje odmore": {
                     "Rezerviranje tro\u0161ka za neiskori\u0161tene godi\u0161nje odmore-a1": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "NOVAC, KRATKOTRAJNA FINANCIJSKA IMOVINA, KRATKOTRAJNA POTRA\u017dIVANJA, TRO\u0160KOVI I PRIHOD BUDU\u0106EG RAZDOBLJA": {
             "KRATKOTRAJNA FINANCIJSKA IMOVINA (do jedne godine)": {
@@ -1159,7 +1162,8 @@
                 "Vrijednosno uskla\u0111enje potra\u017eivanja od zaposlenih \u010dlanova dru\u0161tva i ostalih potra\u017eivanja": {
                     "Vrijednosno uskla\u0111enje potra\u017eivanja od zaposlenih \u010dlanova dru\u0161tva i ostalih potra\u017eivanja-a1": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "POKRI\u0106E RASHODA I PRIHODI RAZDOBLJA": {
             "FINANCIJSKI PRIHODI": {
@@ -1501,7 +1505,8 @@
                     "Udio u gubitku ortaka": {}, 
                     "Udio u gubitku povezanih dru\u0161tava": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "POTRA\u017dIVANJA ZA UPISANI KAPITAL I DUGOTRAJNA IMOVINA": {
             "BIOLO\u0160KA IMOVINA": {
@@ -1933,7 +1938,8 @@
                     "Vrijednosno uskla\u0111enje ulaganja u gra\u0111evine": {}, 
                     "Vrijednosno uskla\u0111enje ulaganja u zemlji\u0161te": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PROIZVODNJA, BIOLO\u0160KA IMOVINA, GOTOVI PROIZVODI, ROBA I DUGOTRAJNA IMOVINA NAMIJENJENA PRODAJI": {
             "BIOLO\u0160KA IMOVINA": {
@@ -2153,7 +2159,8 @@
                 "Zalihe nekurentnih proizvoda i otpadaka": {
                     "Zalihe nekurentnih proizvoda i otpadaka-a1": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "TRO\u0160KOVI PREMA VRSTAMA, FINANCIJSKI I OSTALI RASHODI": {
             "AMORTIZACIJA": {
@@ -2726,7 +2733,8 @@
                 "Vrijednosno uskla\u0111enje zaliha (veza s 319, 329, 359 i 369)": {
                     "Vrijednosno uskla\u0111enje zaliha (veza s 319, 329, 359 i 369)-a1": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "ZALIHE SIROVINA I MATERIJALA, REZERVNIH DIJELOVA I SITNOG INVENTARA": {
             "OBRA\u010cUN TRO\u0160KOVA KUPNJE ZALIHA": {
@@ -2866,9 +2874,8 @@
                 "Vrijednosno uskla\u0111enje sitnog inventara, ambala\u017ee i autoguma": {
                     "Vrijednosno uskla\u0111enje sitnog inventara, ambala\u017ee i autoguma-a1": {}
                 }
-            }
-        }, 
-        "name": "KONTNI PLAN", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

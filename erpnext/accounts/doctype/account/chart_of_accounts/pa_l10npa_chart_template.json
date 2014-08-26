@@ -158,7 +158,8 @@
                     "Resultados Acumulados del Ejercicio Anterior": {}, 
                     "Utilidades y P\u00e9rdidas del Ejercicio": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Orden": {
             "CUENTAS DE ORDEN ACREEDORAS": {
@@ -172,7 +173,8 @@
                 "Documentos Endosados": {}, 
                 "Garantias Otorgadas": {}, 
                 "Mercaderias Recibidas en Consignaci\u00f3n": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Estado de Resultado": {
             "COSTOS": {
@@ -223,8 +225,8 @@
                         "Ventas - Categoria de productos 01": {}
                     }
                 }
-            }
-        }, 
-        "name": "Panam\u00e1"
+            }, 
+            "root_type": ""
+        }
     }
 }

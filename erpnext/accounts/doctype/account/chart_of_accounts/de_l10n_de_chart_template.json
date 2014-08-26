@@ -644,7 +644,8 @@
                         }
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Gewinn u. Verlust": {
             "Ergebnis vor Steuern": {
@@ -1249,7 +1250,8 @@
                 "Solidarit\u00e4tszuschlag": {}, 
                 "Solidarit\u00e4tszuschlag f\u00fcr Vorjahre": {}, 
                 "Zinsabschlagsteuer": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Vortrags- Kapital- und Statistische Konten": {
             "Aufgliederung der R\u00fcckstellungen": {
@@ -1556,8 +1558,8 @@
                 "Saldenvortr\u00e4ge Kreditoren": {}, 
                 "Saldenvortr\u00e4ge- Sachkonten": {}, 
                 "Summenvortragskonto": {}
-            }
-        }, 
-        "name": "Deutscher Kontenplan SKR03"
+            }, 
+            "root_type": ""
+        }
     }
 }

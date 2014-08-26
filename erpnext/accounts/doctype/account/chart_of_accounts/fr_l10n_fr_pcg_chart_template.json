@@ -923,7 +923,8 @@
                     }
                 }, 
                 "Virements internes": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Comptes de gestion": {
             "Comptes de charges": {
@@ -1280,8 +1281,8 @@
                     }, 
                     "Ventes de produits finis": {}
                 }
-            }
-        }, 
-        "name": "Plan Comptable G\u00e9n\u00e9ral"
+            }, 
+            "root_type": ""
+        }
     }
 }

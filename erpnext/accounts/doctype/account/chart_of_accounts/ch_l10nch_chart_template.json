@@ -838,7 +838,8 @@
                         }
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Compte de r\u00e9sultat": {
             "Autres charges d'exploitation": {
@@ -1991,8 +1992,8 @@
                         }
                     }
                 }
-            }
-        }, 
-        "name": "Plan comptable"
+            }, 
+            "root_type": ""
+        }
     }
 }

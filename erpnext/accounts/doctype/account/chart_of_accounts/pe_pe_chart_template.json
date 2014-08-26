@@ -1587,7 +1587,8 @@
                     "Tributos y aportes ...- Instituciones p\u00fablicas / otras instituciones ": {}
                 }, 
                 "Tributos y aportes al sistema de pensiones y de salud por pagar - Otros costos administrativos e intereses ": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Centros de Costo": {
             "Costo de Producci\u00f3n ": {
@@ -1775,7 +1776,8 @@
                     "Gastos financieros - Otras cargas financieras / intereses moratorios": {}, 
                     "Gastos financieros - Otras cargas financieras / pago tributos y contribuciones ": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Ganancias y Perdidas": {
             "Cargas cubiertas por provisiones": {
@@ -2622,7 +2624,8 @@
                         "Ventas - Subproductos, desechos ... / subproductos, terceros": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Orden": {
             "Acreedoras por el contrario": {}, 
@@ -2703,8 +2706,8 @@
                     "Otras cuentas de orden deudoras - Contratos aprobados / contratos en tr\u00e1mite ": {}
                 }, 
                 "Otras cuentas de orden deudoras - Diversas": {}
-            }
-        }, 
-        "name": "Per\u00fa - PCGE 2010"
+            }, 
+            "root_type": ""
+        }
     }
 }

@@ -68,6 +68,7 @@
                 "Verilen Depozito Ve Teminatlar": {}, 
                 "\u015e\u00fcpheli Ticari Alacaklar Kar\u015f\u0131l\u0131\u011f\u0131(-)": {}
             }, 
+            "root_type": "", 
             "\u00d6zel T\u00fckenmeye Tabi Varl\u0131klar": {
                 "Arama Giderleri": {}, 
                 "Birikmi\u015f T\u00fckenme Paylar\u0131(-)": {}, 
@@ -141,7 +142,8 @@
             "Y\u0131llara Yayg\u0131n \u0130n\u015faat ve Onar\u0131m Maliyetleri": {
                 "Ta\u015feronlara Verilen Avanslar": {}, 
                 "Y\u0131llara Yayg\u0131n \u0130n\u015faat Ve Onar\u0131m Maliyetleri": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Gelir Tablosu Hesaplar\u0131": {
             "Br\u00fct Sat\u0131\u015flar": {
@@ -205,7 +207,8 @@
                 "Sat\u0131lan Hizmet Maliyeti(-)": {}, 
                 "Sat\u0131lan Mamuller Maliyeti(-)": {}, 
                 "Sat\u0131lan Ticari Mallar Maliyeti(-)": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "K\u0131sa Vadeli Yabanc\u0131 Kaynaklar": {
             "Al\u0131nan Avanslar": {
@@ -322,6 +325,7 @@
                 }, 
                 "account_type": "Payable"
             }, 
+            "root_type": "", 
             "\u00d6denecek Vergi ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler": {
                 "Vadesi Ge\u00e7mi\u015f, Ertelenmi\u015f Veya Taksitlendirilmi\u015f Vergi Ve Di\u011fer Y\u00fck\u00fcml\u00fcl\u00fckler": {
                     "account_type": "Tax"
@@ -382,10 +386,15 @@
                 "Atra\u015ft\u0131rma Ve Geli\u015ftirme Giderleri": {}, 
                 "Pazarlama Sat\u0131\u015f Ve Dag\u0131t\u0131m Giderleri Yans\u0131tma Hesab\u0131": {}, 
                 "Pazarlama Sat\u0131\u015f Ve Da\u011f\u0131t\u0131m Giderleri Fark Hesab\u0131": {}
-            }
+            }, 
+            "root_type": ""
         }, 
-        "Naz\u0131m Hesaplar": {}, 
-        "Serbest Hesaplar": {}, 
+        "Naz\u0131m Hesaplar": {
+            "root_type": ""
+        }, 
+        "Serbest Hesaplar": {
+            "root_type": ""
+        }, 
         "Uzun Vadeli Yabanc\u0131 Kaynaklar": {
             "Al\u0131nan Avanslar": {
                 "Al\u0131nan Di\u011fer Avanslar": {
@@ -481,9 +490,9 @@
                     "account_type": "Payable"
                 }, 
                 "account_type": "Payable"
-            }
+            }, 
+            "root_type": ""
         }, 
-        "name": "Tek D\u00fczen Hesap Plan\u0131", 
         "\u00d6z Kaynaklar": {
             "D\u00f6nem Net K\u00e2r\u0131 (Zarar\u0131)": {
                 "D\u00f6nem Net K\u00e2r\u0131": {}, 
@@ -510,6 +519,7 @@
                 "Maliyet Art\u0131\u015flar\u0131 Fonu": {}, 
                 "\u0130\u015ftirakler Yeniden De\u011ferleme Art\u0131\u015flar\u0131": {}
             }, 
+            "root_type": "", 
             "\u00d6denmi\u015f Sermaye": {
                 "Sermaye": {}, 
                 "\u00d6denmi\u015f Sermaye(-)": {

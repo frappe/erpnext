@@ -481,7 +481,8 @@
                     "account_type": "Payable"
                 }, 
                 "account_type": "Payable"
-            }
+            }, 
+            "root_type": ""
         }, 
         "Activo no corriente": {
             "Amortizaci\u00f3n acumulada del inmovilizado": {
@@ -885,7 +886,8 @@
                 "Valores representativos de deuda": {
                     "Valores representativos de deuda": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Compras y gastos": {
             "Ayudas monetarias de la entidad y otros gastos de gesti\u00f3n": {
@@ -1442,7 +1444,8 @@
                 "Variaci\u00f3n de existencias de otros aprovisionamientos": {
                     "Variaci\u00f3n de existencias de otros aprovisionamientos": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas financieras": {
             "Activos no corrientes mantenidos para la venta y activos y pasivos asociados": {
@@ -1929,7 +1932,8 @@
                 "Inversiones a corto plazo de gran liquidez": {
                     "Inversiones a corto plazo de gran liquidez": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Existencias": {
             "Comerciales": {
@@ -2037,7 +2041,8 @@
                 "Subproductos B": {
                     "Subproductos B": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Financiaci\u00f3n b\u00e1sica": {
             "Capital": {
@@ -2380,7 +2385,8 @@
                     }, 
                     "Subvenciones oficiales de capital": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Gastos imputados al patrimonio neto": {
             "Gastos de participaciones en empresas del grupo o asociadas con ajustes valorativos positivos previos": {
@@ -2475,7 +2481,8 @@
                 "Transferencia de subvenciones oficiales de capital": {
                     "Transferencia de subvenciones oficiales de capital": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Ingresos imputados al patrimonio neto": {
             "Ingresos de participaciones en empresas del grupo o asociadas con ajustes valorativos negativos previos": {
@@ -2548,7 +2555,8 @@
                 "Ingresos de subvenciones oficiales de capital": {
                     "Ingresos de subvenciones oficiales de capital": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Ventas e ingresos": {
             "Beneficios procedentes de activos no corrientes e ingresos excepcionales": {
@@ -3032,9 +3040,8 @@
                         "Ventas de subproductos y residuos en Espa\u00f1a": {}
                     }
                 }
-            }
-        }, 
-        "name": "Plan General Contable 2008", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

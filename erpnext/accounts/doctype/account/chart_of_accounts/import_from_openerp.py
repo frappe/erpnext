@@ -17,6 +17,7 @@ path = "/Users/nabinhait/projects/odoo/addons"
 accounts = {}
 charts = {}
 all_account_types = []
+all_roots = {}
 
 def go():
 	global accounts, charts
@@ -49,6 +50,8 @@ def go():
 			make_maps_for_csv(csv_content, account_types, country_dir)
 		make_account_trees()
 		make_charts()
+
+	create_all_roots_file()
 
 def get_default_account_types():
 	default_types_root = []
@@ -232,9 +235,28 @@ def make_charts():
 		chart["country_code"] = src["id"][5:]
 		chart["tree"] = accounts[src["account_root_id"]]
 
+
+		for key, val in chart["tree"].items():
+			if key in ["name", "parent_id"]:
+				chart["tree"].pop(key)
+			if type(val) == dict:
+				val["root_type"] = ""
+
 		with open(os.path.join("erpnext", "erpnext", "accounts", "doctype", "account", "chart_of_accounts",
 			filename + ".json"), "w") as chartfile:
 			chartfile.write(json.dumps(chart, indent=4, sort_keys=True))
+
+		all_roots.setdefault(filename, chart["tree"].keys())
+
+def create_all_roots_file():
+	with open('all_roots.txt', 'w') as f:
+		for filename, roots in sorted(all_roots.items()):
+			f.write(filename)
+			f.write('\n----------------------\n')
+			for r in sorted(roots):
+				f.write(r.encode('utf-8'))
+				f.write('\n')
+			f.write('\n\n\n')
 
 if __name__=="__main__":
 	go()

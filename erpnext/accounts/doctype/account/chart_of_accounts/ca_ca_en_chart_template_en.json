@@ -47,7 +47,8 @@
                 "TANGIBLE ASSETS": {
                     "ACCUMULATED DEPRECIATIONS": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "EQUITY": {
             "CONTRIBUTED SURPLUS": {}, 
@@ -55,7 +56,8 @@
             "PREMIUMS": {}, 
             "RETAINED EARNINGS": {}, 
             "SHARE CAPITAL": {}, 
-            "TRANSLATION ADJUSTMENTS": {}
+            "TRANSLATION ADJUSTMENTS": {}, 
+            "root_type": ""
         }, 
         "EXPENSES": {
             "NON-OPERATING EXPENSES": {
@@ -85,7 +87,8 @@
                 "OTHER OPERATING EXPENSES": {}, 
                 "RESEARCH AND DEVELOPMENT EXPENSES": {}, 
                 "SALES EXPENSES": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "INCOMES": {
             "NON-OPERATING INCOMES": {
@@ -98,7 +101,8 @@
                 "International Sales": {}, 
                 "Non-Harmonized Provinces Sales": {}, 
                 "OTHER OPERATING INCOMES": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "LIABILITIES": {
             "CURRENT LIABILITIES": {
@@ -161,7 +165,8 @@
                 "NON-CURRENT FINANCIAL DEBTS": {}, 
                 "OTHER NON-CURRENT LIABILITIES": {}, 
                 "PROVISIONS FOR PENSIONS AND OTHER POST-EMPLOYMENT ADVANTAGES": {}
-            }
+            }, 
+            "root_type": ""
         }
     }
 }

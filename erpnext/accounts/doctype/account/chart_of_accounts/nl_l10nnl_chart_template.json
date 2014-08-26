@@ -2,7 +2,9 @@
     "country_code": "nl", 
     "name": "Nederlands Grootboekschema", 
     "tree": {
-        "FABRIKAGEREKENINGEN": {}, 
+        "FABRIKAGEREKENINGEN": {
+            "root_type": ""
+        }, 
         "FINANCIELE REKENINGEN, KORTLOPENDE VORDERINGEN EN SCHULDEN": {
             "KORTLOPENDE SCHULDEN": {
                 "Accountantskosten": {}, 
@@ -98,9 +100,12 @@
                 "Voorschotten personeel": {}, 
                 "Vooruitbetaalde kosten": {}, 
                 "Voorziening dubieuze debiteuren": {}
-            }
+            }, 
+            "root_type": ""
         }, 
-        "INDIRECTE KOSTEN": {}, 
+        "INDIRECTE KOSTEN": {
+            "root_type": ""
+        }, 
         "KOSTENREKENINGEN": {
             "AFSCHRIJVINGEN": {
                 "Aanhangwagens": {}, 
@@ -273,7 +278,8 @@
                 "Overige vervoerskosten": {}, 
                 "Priv\u00e9-gebruik auto's": {}, 
                 "Wegenbelasting": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "OVERIGE RESULTATEN": {
             "Memoriaal": {
@@ -286,7 +292,8 @@
             "Vpb bijzonder resultaat": {}, 
             "Vpb normaal resultaat": {}, 
             "Winst": {}, 
-            "Winst bij verkoop deelnem.": {}
+            "Winst bij verkoop deelnem.": {}, 
+            "root_type": ""
         }, 
         "TUSSENREKENINGEN": {
             "Betaalwijze cadeaubonnen": {
@@ -369,7 +376,8 @@
             }, 
             "Vraagposten": {
                 "account_type": "Cash"
-            }
+            }, 
+            "root_type": ""
         }, 
         "VASTE ACTIVA, EIGEN VERMOGEN, LANGLOPEND VREEMD VERMOGEN EN VOORZIENINGEN": {
             "EIGEN VERMOGEN": {
@@ -589,7 +597,8 @@
                 "Voorziening deelnemingen": {
                     "account_type": "Equity"
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "VERKOOPRESULTATEN": {
             "Diensten fabric. 0% niet-EU": {}, 
@@ -612,7 +621,8 @@
             "Verkopen handel laag": {}, 
             "Verkopen handel overig": {}, 
             "Verleende Kredietbep. fabricage": {}, 
-            "Verleende Kredietbep. handel": {}
+            "Verleende Kredietbep. handel": {}, 
+            "root_type": ""
         }, 
         "VOORRAAD GEREED PRODUCT EN ONDERHANDEN WERK": {
             "Betalingskort. crediteuren": {}, 
@@ -645,7 +655,8 @@
             "Toevoeging voorz. incour. handelsgoed.": {}, 
             "Uitbesteed werk": {}, 
             "Voorz. Incourourant grondst.": {}, 
-            "Voorz.incour. handelsgoed.": {}
+            "Voorz.incour. handelsgoed.": {}, 
+            "root_type": ""
         }, 
         "VOORRAAD GRONDSTOFFEN, HULPMATERIALEN EN HANDELSGOEDEREN": {
             "Emballage": {
@@ -698,8 +709,8 @@
             }, 
             "Zegels": {
                 "account_type": "Cash"
-            }
-        }, 
-        "name": "NEDERLANDS STANDAARD GROOTBOEKSCHEMA"
+            }, 
+            "root_type": ""
+        }
     }
 }

@@ -128,7 +128,8 @@
             "SUBSIDES EN CAPITAL": {
                 "Montants obtenus": {}, 
                 "Montants transf\u00e9r\u00e9s aux r\u00e9sultats": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CLASSE 2. FRAIS D'ETABLISSEMENT. ACTIFS IMMOBILISES ET CREANCES A PLUS D'UN AN": {
             "AUTRES IMMOBILISATIONS CORPORELLES": {
@@ -438,7 +439,8 @@
                         "Voies de transport et ouvrages d'art": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CLASSE 3. STOCK ET COMMANDES EN COURS D'EXECUTION": {
             "ACOMPTES VERSES SUR ACHATS POUR STOCKS": {
@@ -585,7 +587,8 @@
                 }, 
                 "account_type": "Stock"
             }, 
-            "account_type": "Stock"
+            "account_type": "Stock", 
+            "root_type": ""
         }, 
         "CLASSE 4. CREANCES ET DETTES A UN AN AU PLUS": {
             "ACOMPTES RECUS SUR COMMANDES": {
@@ -1100,7 +1103,8 @@
                         "account_type": "Payable"
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CLASSE 5. PLACEMENTS DE TRESORERIE ET DE VALEURS DISPONIBLES": {
             "ACTIONS ET PARTS": {
@@ -1170,7 +1174,8 @@
             }, 
             "VIREMENTS INTERNES": {
                 "account_type": "Cash"
-            }
+            }, 
+            "root_type": ""
         }, 
         "CLASSE 6. - CHARGES": {
             "AFFECTATION DES RESULTATS": {
@@ -1413,7 +1418,8 @@
                     "Sous-traitants pour activit\u00e9s propres": {}
                 }
             }, 
-            "TRANSFERTS AUX RESERVES IMMUNISEES": {}
+            "TRANSFERTS AUX RESERVES IMMUNISEES": {}, 
+            "root_type": ""
         }, 
         "CLASSE 7. - PRODUITS": {
             "AFFECTATION AUX RESULTATS": {
@@ -1526,8 +1532,8 @@
                 "Des en cours de fabrication": {}, 
                 "Des immeubles construits destin\u00e9s \u00e0 la vente": {}, 
                 "Des produits finis": {}
-            }
-        }, 
-        "name": "PLAN COMPTABLE MINIMUM NORMALISE"
+            }, 
+            "root_type": ""
+        }
     }
 }

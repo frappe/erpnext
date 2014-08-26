@@ -78,7 +78,8 @@
                     "Loans": {}, 
                     "Mortgages": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Profit and Loss": {
             "Administrative expenses": {
@@ -171,9 +172,8 @@
                 "Sales category 2": {}, 
                 "Sales category 3": {}, 
                 "Sales category 4": {}
-            }
-        }, 
-        "name": "Company", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

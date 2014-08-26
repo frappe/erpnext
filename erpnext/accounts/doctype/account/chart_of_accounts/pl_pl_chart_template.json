@@ -69,6 +69,7 @@
                 "Nabyta warto\u015b\u0107 firmy": {}, 
                 "Zaliczki na warto\u015bci niematerialne i prawne": {}
             }, 
+            "root_type": "", 
             "\u015arodki Trwa\u0142e": {
                 "Budynki, lokale i obiekty in\u017cynierii l\u0105dowej i wodnej": {}, 
                 "Grunty w\u0142asne i prawa wieczystego u\u017cytkowania grunt\u00f3w": {}, 
@@ -128,7 +129,8 @@
                 "Ujemna warto\u015b\u0107 firmy": {}
             }, 
             "Rozliczenia wyniku finansowego": {}, 
-            "Wynik finansowy": {}
+            "Wynik finansowy": {}, 
+            "root_type": ""
         }, 
         "Koszty wed\u0142ug rodzaj\u00f3w i ich rozliczenie": {
             "Amortyzacja": {}, 
@@ -178,6 +180,7 @@
                 "Nie podlegaj\u0105ce rozliczeniu w czasie": {}, 
                 "Przypadaj\u0105ce na przysz\u0142e okresy": {}
             }, 
+            "root_type": "", 
             "\u015awiadczenia na rzecz pracownik\u00f3w": {}
         }, 
         "Koszty wed\u0142ug typ\u00f3w dzia\u0142alno\u015bci i ich rozliczenie": {
@@ -199,7 +202,8 @@
                 "Koszty zarz\u0105dzania jednostk\u0105": {}, 
                 "\u015awiadczenia us\u0142ug na potrzeby reprezentacji i reklamy": {}
             }, 
-            "Rozliczenie koszt\u00f3w dzia\u0142alno\u015bci": {}
+            "Rozliczenie koszt\u00f3w dzia\u0142alno\u015bci": {}, 
+            "root_type": ""
         }, 
         "Materia\u0142y i towary": {
             "Materia\u0142y i opakowania": {
@@ -237,7 +241,8 @@
                 "Towary w hurcie": {}, 
                 "Towary w zak\u0142adach gastronomicznych": {}
             }, 
-            "Zapasy obce": {}
+            "Zapasy obce": {}, 
+            "root_type": ""
         }, 
         "Produkty i rozliczenia mi\u0119dzyokresowe": {
             "Odchylenia od cen ewidencyjnych produkt\u00f3w": {
@@ -258,7 +263,8 @@
             "Rozliczenia mi\u0119dzyokresowe koszt\u00f3w": {
                 "Bierne rozliczenia mi\u0119dzyokresowe koszt\u00f3w": {}, 
                 "Czynne rozliczenia mi\u0119dzyokresowe koszt\u00f3w": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Przychody i koszty zwi\u0105zane z ich osi\u0105gni\u0119ciem": {
             "Koszt w\u0142asny obrot\u00f3w wewn\u0119trznych": {
@@ -338,7 +344,8 @@
                 "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy hurtowej": {}, 
                 "Warto\u015b\u0107 sprzedanych towar\u00f3w w sprzeda\u017cy wysy\u0142kowej": {}
             }, 
-            "Zyski nadzwyczajne": {}
+            "Zyski nadzwyczajne": {}, 
+            "root_type": ""
         }, 
         "Rozrachunki i roszczenia": {
             "Odpisy aktualizuj\u0105ce rozrachunki": {}, 
@@ -442,9 +449,9 @@
                 "Inne rozrachunki z pracownikami": {}, 
                 "Rozrachunki z tytu\u0142u po\u017cyczek udzielonych pracownikom": {}, 
                 "Rozrachunki z tytu\u0142u wynagrodze\u0144": {}
-            }
+            }, 
+            "root_type": ""
         }, 
-        "name": "Plan kont", 
         "\u015arodki pieni\u0119\u017cne, rachunki bankowe oraz inne kr\u00f3tkoterminowe aktywa finansowe": {
             "Inne aktywa pieni\u0119\u017cne": {}, 
             "Inne \u015brodki pieni\u0119\u017cne": {
@@ -480,6 +487,7 @@
                 "Rachunki kredyt\u00f3w bankowych": {}, 
                 "\u015arodki pieni\u0119\u017cne w drodze": {}
             }, 
+            "root_type": "", 
             "\u015arodki pieni\u0119\u017cne w kasie": {
                 "Kasa krajowych \u015brodk\u00f3w pieni\u0119\u017cnych": {}, 
                 "Kasa zagranicznych \u015brodk\u00f3w pieni\u0119\u017cnych": {}

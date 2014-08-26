@@ -2,9 +2,8 @@
     "country_code": "cr", 
     "name": "Costa Rica - Company 1", 
     "tree": {
-        "name": "xPlan Contable", 
-        "parent_id": null, 
         "xActivo": {
+            "root_type": "", 
             "xActivo circulante": {
                 "xActivo circulante disponible": {
                     "xBancos": {}, 
@@ -116,6 +115,7 @@
             }
         }, 
         "xGastos": {
+            "root_type": "", 
             "xGastos no deducibles": {
                 "xDiferencial cambiario": {}, 
                 "xDonaciones no deducibles": {}, 
@@ -194,6 +194,7 @@
             }
         }, 
         "xIngresos": {
+            "root_type": "", 
             "xIngresos financieros": {
                 "xIntereses ganados sobre cuentas corrientes": {}
             }, 
@@ -210,6 +211,7 @@
             }
         }, 
         "xPasivo": {
+            "root_type": "", 
             "xPasivo circulante": {
                 "xCuentas por pagar": {
                     "xCuentas por pagar a compa\u00f1\u00edas relacionadas": {}, 
@@ -231,6 +233,7 @@
             }
         }, 
         "xPatrimonio": {
+            "root_type": "", 
             "xAportes de capital": {
                 "xSocio 1": {}
             }, 

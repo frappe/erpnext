@@ -88,10 +88,12 @@
                 "fornitori c/acconti": {}, 
                 "materie di consumo": {}, 
                 "merci": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CONTI DI RISULTATO": {
             "conto di risultato economico": {}, 
+            "root_type": "", 
             "stato patrimoniale": {}
         }, 
         "COSTI DELLA PRODUZIONE": {
@@ -168,10 +170,12 @@
                 "svalutazione crediti": {}, 
                 "svalutazioni immobilizzazioni immateriali": {}, 
                 "svalutazioni immobilizzazioni materiali": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "IMPOSTE DELL'ESERCIZIO": {
-            "imposte dell'esercizio": {}
+            "imposte dell'esercizio": {}, 
+            "root_type": ""
         }, 
         "PASSIVO": {
             "CONTI DEI SISTEMI SUPPLEMENTARI": {
@@ -254,7 +258,8 @@
             }, 
             "TRATTAMENTO FINE RAPPORTO DI LAVORO": {
                 "debiti per TFRL": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "PROVENTI E ONERI FINANZIARI": {
             "ONERI FINANZIARI": {
@@ -269,7 +274,8 @@
                 "interessi attivi postali": {}, 
                 "interessi attivi v/clienti": {}, 
                 "proventi finanziari diversi": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "PROVENTI E ONERI STRAORDINARI": {
             "ONERI STRAORDINARI": {
@@ -282,7 +288,8 @@
                 "insussistenze attive straordinarie": {}, 
                 "plusvalenze straordinarie": {}, 
                 "sopravvenienze attive straordinarie": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "VALORE DELLA PRODUZIONE": {
             "RICAVI E PROVENTI DIVERSI": {
@@ -299,9 +306,8 @@
                 "resi su vendite": {}, 
                 "ribassi e abbuoni passivi": {}, 
                 "rimborsi spese di vendita": {}
-            }
-        }, 
-        "name": "Azienda", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

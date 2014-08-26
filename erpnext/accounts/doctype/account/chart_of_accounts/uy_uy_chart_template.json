@@ -116,7 +116,8 @@
                     "Titulos y Acciones": {}, 
                     "Valores orig. y revaluados s/anexo": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "GANANCIAS": {
             "INGRESOS FINANCIEROS": {
@@ -133,15 +134,18 @@
                 "Ventas Tasa B\u00e1sica": {}, 
                 "Ventas Tasa M\u00ednima": {}, 
                 "Ventas por Exportaciones": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "ORDEN ACTIVO": {
             "Acciones a Emitir": {}, 
-            "Suscriptores de acciones": {}
+            "Suscriptores de acciones": {}, 
+            "root_type": ""
         }, 
         "ORDEN PASIVO": {
             "Capital Autorizado a Suscribir": {}, 
-            "Capital suscripto": {}
+            "Capital suscripto": {}, 
+            "root_type": ""
         }, 
         "PASIVO": {
             "PASIVO CORRIENTE": {
@@ -241,7 +245,8 @@
                 "PREVISIONES NO CORRIENTES": {
                     "Previsiones No Corrientes": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PATRIMONIO": {
             "AJUSTES AL PATRIMONIO": {
@@ -282,7 +287,8 @@
                         "account_type": "Equity"
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PERDIDAS": {
             "AMORTIZACIONES": {
@@ -328,8 +334,8 @@
                 }, 
                 "Otros": {}, 
                 "Retenciones": {}
-            }
-        }, 
-        "name": "Uruguay - Plan de Cuentas"
+            }, 
+            "root_type": ""
+        }
     }
 }

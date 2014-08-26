@@ -118,7 +118,8 @@
                 "0-Gastos pagados por anticipado": {
                     "0-P\u00f3lizas de seguros prepagadas": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "0-Gastos": {
             "0-Gastos no deducibles": {
@@ -196,7 +197,8 @@
                 "0-Donaciones deducibles": {}, 
                 "0-Gastos Financieros": {}, 
                 "0-Perdida por robo": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "0-Ingresos": {
             "0-Ingresos financieros": {
@@ -212,7 +214,8 @@
             "0-Otros ingresos": {
                 "0-Ajustes": {}, 
                 "0-Donaciones": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "0-Pasivo": {
             "0-Pasivo circulante": {
@@ -233,7 +236,8 @@
                         "0-Impuesto de ventas por pagar": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "0-Patrimonio": {
             "0-Aportes de capital": {
@@ -262,9 +266,8 @@
             }, 
             "0-Utilidad o p\u00e9rdida del per\u00edodo actual": {
                 "0-Utilidad o p\u00e9rdida del per\u00edodo actual": {}
-            }
-        }, 
-        "name": "0-Plan Contable", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

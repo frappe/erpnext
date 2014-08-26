@@ -192,7 +192,8 @@
                         "DEPOSITOS GARANTIA PROVEEDORES": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "COSTO": {
             "COSTO DE VENTAS": {
@@ -201,7 +202,8 @@
                         "COSTO DE VENTAS": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS DE ORDEN": {
             "CUENTAS DE ORDEN": {
@@ -218,7 +220,8 @@
                         "MERCANCIA EN CONSIGNACION P. COMPRA0": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "GASTOS": {
             "GASTOS OPERATIVOS": {
@@ -330,7 +333,8 @@
                         "VIATICOS NO DEDUCIBLES": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "INGRESOS": {
             "INGRESOS OPERACIONALES": {
@@ -349,7 +353,8 @@
                         "VENTAS NACIONALES AL MAYOR": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "OTROS INGRESOS (EGRESOS)": {
             "EGRESOS": {
@@ -391,7 +396,8 @@
                         "OTROS INGRESOS": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PASIVO": {
             "OTROS PASIVOS A CORTO PLAZO": {
@@ -538,7 +544,8 @@
                         "RESERVAS OPERATIVAS": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PATRIMONIO": {
             "CAPITAL SOCIAL": {
@@ -598,8 +605,8 @@
                         "UTILIDADES NO DISTRIBUIDAS": {}
                     }
                 }
-            }
-        }, 
-        "name": "Main Account Company"
+            }, 
+            "root_type": ""
+        }
     }
 }

@@ -247,7 +247,8 @@
                         "Issued, Subscribed And Paid Up Capital": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Profit And Loss": {
             "Total Expenses": {
@@ -348,8 +349,8 @@
                     "Product Sales": {}, 
                     "Sales of Services": {}
                 }
-            }
-        }, 
-        "name": "Indian Chart of Accounts - Schedule VI"
+            }, 
+            "root_type": ""
+        }
     }
 }

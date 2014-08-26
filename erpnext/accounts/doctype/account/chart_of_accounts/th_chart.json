@@ -17,13 +17,15 @@
             "Input VAT": {}, 
             "Inventory": {}, 
             "Outstanding Cheques": {}, 
-            "Withholding Income Tax": {}
+            "Withholding Income Tax": {}, 
+            "root_type": ""
         }, 
         "Equity": {
             "Capital Stock": {}, 
             "Dividends": {}, 
             "Income Summary": {}, 
-            "Retained Earnings": {}
+            "Retained Earnings": {}, 
+            "root_type": ""
         }, 
         "Expenses": {
             "Cost of goods sold": {}, 
@@ -31,10 +33,12 @@
             "Interest expenses": {}, 
             "Office Expenses": {}, 
             "Rent": {}, 
-            "Salary": {}
+            "Salary": {}, 
+            "root_type": ""
         }, 
         "Income": {
-            "Income": {}
+            "Income": {}, 
+            "root_type": ""
         }, 
         "Liabilities": {
             "Account Payable": {}, 
@@ -42,8 +46,8 @@
             "Loans": {}, 
             "Output VAT": {}, 
             "Uninvoiced Receipts": {}, 
-            "Withholding Tax": {}
-        }, 
-        "name": "Simple chart of accounts"
+            "Withholding Tax": {}, 
+            "root_type": ""
+        }
     }
 }

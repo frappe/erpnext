@@ -837,13 +837,15 @@
                     "VIAS DE COMUNICACION": {}, 
                     "YACIMIENTOS": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "COSTOS DE PRODUCCION O DE OPERACION": {
             "CONTRATOS DE SERVICIOS": {}, 
             "COSTOS INDIRECTOS": {}, 
             "MANO DE OBRA DIRECTA": {}, 
-            "MATERIA PRIMA": {}
+            "MATERIA PRIMA": {}, 
+            "root_type": ""
         }, 
         "COSTOS DE VENTAS": {
             "COMPRAS": {
@@ -1145,7 +1147,8 @@
                     "SERVICIOS COMPLEMENTARIOS PARA EL TRANSPORTE": {}, 
                     "TRANSMISION DE SONIDO E IMAGENES POR CONTRATO": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS DE ORDEN ACREEDORAS": {
             "ACREEDORAS DE CONTROL": {
@@ -1206,7 +1209,8 @@
                 "OTRAS RESPONSABILIDADES CONTINGENTES": {}, 
                 "PROMESAS DE COMPRAVENTA": {}
             }, 
-            "RESPONSABILIDADES CONTINGENTES POR CONTRA (DB)": {}
+            "RESPONSABILIDADES CONTINGENTES POR CONTRA (DB)": {}, 
+            "root_type": ""
         }, 
         "CUENTAS DE ORDEN DEUDORAS": {
             "DERECHOS CONTINGENTES": {
@@ -1309,7 +1313,8 @@
             }, 
             "DEUDORAS DE CONTROL POR CONTRA (CR)": {}, 
             "DEUDORAS FISCALES": {}, 
-            "DEUDORAS FISCALES POR CONTRA (CR)": {}
+            "DEUDORAS FISCALES POR CONTRA (CR)": {}, 
+            "root_type": ""
         }, 
         "GASTOS": {
             "GANANCIAS Y PERDIDAS": {
@@ -1865,7 +1870,8 @@
                     "TEMPORALES": {}, 
                     "TRANSPORTE, FLETES Y ACARREOS": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "INGRESOS": {
             "AJUSTES POR INFLACION": {
@@ -2412,7 +2418,8 @@
                     "SERVICIOS COMPLEMENTARIOS PARA EL TRANSPORTE": {}, 
                     "TRANSMISION DE SONIDO E IMAGENES POR CONTRATO": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PASIVO": {
             "BONOS Y PAPELES COMERCIALES": {
@@ -2850,7 +2857,8 @@
                         "PROVEEDORES NACIONALES CXP": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PATRIMONIO": {
             "CAPITAL SOCIAL": {
@@ -2993,8 +3001,8 @@
                     "VIAS DE COMUNICACION": {}, 
                     "YACIMIENTOS": {}
                 }
-            }
-        }, 
-        "name": "PLAN DE CUENTAS VAUXOO"
+            }, 
+            "root_type": ""
+        }
     }
 }

@@ -20,7 +20,8 @@
                     "Cta. Cte. En el exterior": {}, 
                     "Cta. Cte. Moneda de curso legal": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "ACTIVOS BIOLOGICOS": {
             "Animales vivos": {
@@ -31,7 +32,8 @@
             "Plantas en crecimiento": {
                 "En desarrollo": {}, 
                 "En producci\u00f3n": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "ACTIVOS FINANCIEROS": {
             "A VALOR RAZONABLE CON CAMBIOS EN RESULTADOS": {
@@ -150,7 +152,8 @@
             "PROVISI\u00d3N POR DETERIORO DE ACTIVOS FINANCIEROS": {
                 "Inversiones mantenidas hasta el vencimiento ": {}, 
                 "Pr\u00e9stamos y partidas a cobrar": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "ACTIVOS NO CORRIENTES": {
             "ACTIVOS ADQUIRIDOS EN ARRENDAMIENTO FINANCIERO": {}, 
@@ -178,7 +181,8 @@
                 "Plusval\u00eda mercantil (Goodwill) ": {}, 
                 "Propiedades": {}, 
                 "Propiedades de inversi\u00f3n ": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS CONTINGENTES": {
             "ACREEDORAS": {
@@ -188,7 +192,8 @@
             "DEUDORAS": {
                 "Garant\u00edas ": {}, 
                 "Garant\u00edas en titularizaci\u00f3n": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS DE ORDEN": {
             "ACREEDORAS": {
@@ -267,7 +272,8 @@
                     "Valores en garant\u00eda": {}
                 }
             }, 
-            "DEUDORES POR  CONTRA": {}
+            "DEUDORES POR  CONTRA": {}, 
+            "root_type": ""
         }, 
         "CUENTAS DE RESULTADOS ACREEDORAS": {
             "COMISIONES GANADAS": {
@@ -327,7 +333,8 @@
                 "UTILIDAD EN VENTA DE PROPIEDAD": {}, 
                 "UTILIDAD EN VENTA DE VALORES": {}, 
                 "UTILIDAD POR OPERACIONES DESCONTINUADAS": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS DE RESULTADOS DEUDORAS": {
             "GASTOS ADMINISTRATIVOS": {
@@ -431,7 +438,8 @@
                 "OTROS GASTOS": {}, 
                 "PRIMA POR OPERACIONES DE REPORTO": {}, 
                 "PROPIEDADES DE INVERSI\u00d3N": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS Y DOCUMENTOS POR COBRAR": {
             "ANTICIPO A CONSTRUCTOR POR AVANCE DE OBRA": {}, 
@@ -480,21 +488,26 @@
             "RENDIMIENTOS POR COBRAR": {
                 "Dividendos": {}, 
                 "Intereses   ": {}
-            }
+            }, 
+            "root_type": ""
         }, 
-        "DEUDORES POR INTERMEDIACION": {}, 
+        "DEUDORES POR INTERMEDIACION": {
+            "root_type": ""
+        }, 
         "EXISTENCIAS": {
             "MATERIA PRIMA": {}, 
             "MATERIALES Y SUMINISTROS": {}, 
             "PRODUCTOS EN PROCESO": {}, 
             "PRODUCTOS TERMINADOS": {}, 
-            "PROVISI\u00d3N POR DETERIORO DE EXISTENCIAS": {}
+            "PROVISI\u00d3N POR DETERIORO DE EXISTENCIAS": {}, 
+            "root_type": ""
         }, 
         "OTROS ACTIVOS CORRIENTES": {
             "ACTIVO NO CORRIENTE DISPONIBLE PARA LA VENTA": {}, 
             "ACTIVO POR IMPUESTO CORRIENTE": {}, 
             "OTROS": {}, 
-            "UNIDADES DE PARTICIPACION": {}
+            "UNIDADES DE PARTICIPACION": {}, 
+            "root_type": ""
         }, 
         "OTROS ACTIVOS NO CORRIENTES": {
             "ACTIVO POR IMPUESTO DIFERIDO": {
@@ -526,7 +539,8 @@
                     "Dep\u00f3sitos en Garant\u00eda por operaciones burs\u00e1tiles": {}, 
                     "Dep\u00f3sitos en Garant\u00eda por reporto": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PASIVO": {
             "OTROS": {}, 
@@ -604,7 +618,8 @@
                     "Intereses diferidos": {}, 
                     "Pasivos por impuestos diferidos": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PATRIMONIO NETO": {
             "APORTES PARA FUTURAS CAPITALIZACIONES": {}, 
@@ -631,8 +646,8 @@
                 "ACUMULADOS": {}, 
                 "RESULTADOS ACUMULADOS POR APLICACI\u00d3N DE LAS NIIF POR PRIMERA VEZ": {}, 
                 "UTILIDAD (PERDIDA) DEL EJERCICIO": {}
-            }
-        }, 
-        "name": "PLAN DE CTAS. ECUADOR"
+            }, 
+            "root_type": ""
+        }
     }
 }

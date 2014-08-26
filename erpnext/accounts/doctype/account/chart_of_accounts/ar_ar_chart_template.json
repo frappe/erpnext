@@ -134,7 +134,8 @@
                     "Resultados Acumulados": {}, 
                     "Resultados Acumulados del Ejercicio Anterior": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Movimiento": {
             "Compras": {
@@ -142,7 +143,8 @@
             }, 
             "Costos de Producci\u00f3n": {}, 
             "Gastos de Administraci\u00f3n": {}, 
-            "Gastos de Comercializaci\u00f3n": {}
+            "Gastos de Comercializaci\u00f3n": {}, 
+            "root_type": ""
         }, 
         "Cuentas de Orden": {
             "CUENTAS DE ORDEN ACREEDORAS": {
@@ -156,7 +158,8 @@
                 "Documentos Endosados": {}, 
                 "Garantias Otorgadas": {}, 
                 "Mercaderias Recibidas en Consignaci\u00f3n": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "Cuentas de Resultado": {
             "RESULTADOS NEGATIVOS": {
@@ -199,8 +202,8 @@
                         "Ventas - Categoria de productos 01": {}
                     }
                 }
-            }
-        }, 
-        "name": "Argentina"
+            }, 
+            "root_type": ""
+        }
     }
 }

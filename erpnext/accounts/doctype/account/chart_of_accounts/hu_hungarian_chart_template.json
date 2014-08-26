@@ -151,7 +151,8 @@
                     "Terv szerinti egy\u00f6sszeg\u00fb (kis\u00e9rt\u00e9k\u00fbek)": {}, 
                     "Terv szerinti \u00e9rt\u00e9kcs\u00f6kken\u00e9s line\u00e1ris": {}
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "M\u00e9rleg sz\u00e1ml\u00e1k": {
             "BEFEKTETETT ESZK\u00d6Z\u00d6K": {
@@ -347,9 +348,8 @@
                     "R\u00e9szesed\u00e9s kapcsolt v\u00e1llalkoz\u00e1sban": {}, 
                     "Saj\u00e1t r\u00e9szv\u00e9nyek, saj\u00e1t \u00fczletr\u00e9szek": {}
                 }
-            }
-        }, 
-        "name": "Magyar f\u0151k\u00f6nyvi kivonat", 
-        "parent_id": null
+            }, 
+            "root_type": ""
+        }
     }
 }

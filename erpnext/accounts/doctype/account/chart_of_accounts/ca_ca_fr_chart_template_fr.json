@@ -37,7 +37,8 @@
                     "BREVETS, MARQUES DE COMMERCE ET DROITS D'AUTEURS": {}
                 }, 
                 "PLACEMENTS DISPONIBLES \u00c0 LA VENTE": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "CAPITAUX PROPRES": {
             "AUTRES \u00c9L\u00c9MENTS DU R\u00c9SULTAT GLOBAL": {}, 
@@ -46,6 +47,7 @@
             "DIVIDENDES": {}, 
             "PRIMES": {}, 
             "SURPLUS D'APPORT": {}, 
+            "root_type": "", 
             "\u00c9CARTS DE CONVERSION": {}
         }, 
         "CHARGES": {
@@ -76,7 +78,8 @@
             "FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION": {
                 "AUTRES FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION": {}, 
                 "INT\u00c9R\u00caTS D\u00c9BITEURS": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "PASSIF": {
             "PASSIFS COURANTS": {
@@ -129,7 +132,8 @@
                 "DETTES FINANCI\u00c8RES NON-COURANTES": {}, 
                 "IMP\u00d4TS DIFF\u00c9R\u00c9S": {}, 
                 "PROVISIONS POUR RETRAITES ET AUTRES AVANTAGES POST\u00c9RIEURS \u00c0 L'EMPLOI": {}
-            }
+            }, 
+            "root_type": ""
         }, 
         "PRODUITS": {
             "PRODUITS D'EXPLOITATION": {
@@ -142,8 +146,8 @@
             "PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION": {
                 "AUTRES PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION": {}, 
                 "INT\u00c9R\u00caTS": {}
-            }
-        }, 
-        "name": "Account Chart CA FR"
+            }, 
+            "root_type": ""
+        }
     }
 }

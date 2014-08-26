@@ -162,7 +162,8 @@
                         "DEPOSITOS GARANTIA PROVEEDORES": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CAPITAL": {
             "CAPITAL SOCIAL": {
@@ -213,7 +214,8 @@
                         "UTILIDADES NO DISTRIBUIDAS": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "COSTO": {
             "COSTO DE VENTAS": {
@@ -222,7 +224,8 @@
                         "COSTO DE VENTAS": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "CUENTAS DE ORDEN": {
             "CUENTAS DE ORDEN": {
@@ -241,7 +244,8 @@
                         "MERCANCIA VENDIDAS EN TRANSITO": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "GASTOS": {
             "GASTOS OPERATIVOS": {
@@ -351,7 +355,8 @@
                         "VIATICOS NO DEDUCIBLES": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "INGRESOS": {
             "INGRESOS OPERACIONALES": {
@@ -370,7 +375,8 @@
                         "VENTAS NACIONALES AL DETAL": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "OTROS INGRESOS (EGRESOS)": {
             "EGRESOS": {
@@ -412,7 +418,8 @@
                         "OTROS INGRESOS": {}
                     }
                 }
-            }
+            }, 
+            "root_type": ""
         }, 
         "PASIVO": {
             "OTROS PASIVOS A CORTO PLAZO": {
@@ -557,8 +564,8 @@
                         "PASIVOS INTERCOMPA\u00d1IAS": {}
                     }
                 }
-            }
-        }, 
-        "name": "PLAN CONTABLE"
+            }, 
+            "root_type": ""
+        }
     }
 }
