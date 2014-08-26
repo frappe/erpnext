@@ -155,6 +155,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							project_name: item.project_name || me.frm.doc.project_name
 						}
 					},
+					
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
