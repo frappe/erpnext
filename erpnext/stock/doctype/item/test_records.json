@@ -28,7 +28,6 @@
     "warehouse_reorder_qty": 20
    }
   ],
-  "selling_cost_center": "_Test Cost Center - _TC",
   "stock_uom": "_Test UOM",
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse - _TC"

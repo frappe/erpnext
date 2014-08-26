@@ -21,9 +21,10 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "cb0", 
-   "fieldtype": "Column Break", 
+   "fieldname": "gs", 
+   "fieldtype": "Section Break", 
    "in_list_view": 0, 
+   "label": "General Settings", 
    "permlevel": 0
   }, 
   {
@@ -54,6 +55,32 @@
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_income_account", 
+   "fieldtype": "Link", 
+   "label": "Default Income Account", 
+   "options": "Account", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_expense_account", 
+   "fieldtype": "Link", 
+   "label": "Default Expense Account", 
+   "options": "Account", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_cost_center", 
+   "fieldtype": "Link", 
+   "label": "Default Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "sb9", 
@@ -163,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-08-19 06:42:03.262273", 
+ "modified": "2014-08-20 17:48:34.489750", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 
