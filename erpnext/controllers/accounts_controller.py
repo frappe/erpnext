@@ -464,9 +464,9 @@ class AccountsController(TransactionBase):
 			self.set_next_date(posting_date)
 
 		elif self.recurring_id:
-			frappe.db.sql("""update `tab%s` \
-				set convert_into_recurring = 0 \
-				where recurring_id = %s""", % (self.doctype, '%s'), (self.recurring_id))
+			frappe.db.sql("""update `tab%s`
+				set convert_into_recurring = 0
+				where recurring_id = %s""" % (self.doctype, '%s'), (self.recurring_id))
 
 	def validate_notification_email_id(self):
 		if self.notification_email_address:

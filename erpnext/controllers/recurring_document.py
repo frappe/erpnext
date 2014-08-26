@@ -119,3 +119,17 @@ def notify_errors(doc, doctype, customer, owner):
 			"name": doc,
 			"customer": customer
 		}))
+
+	assign_task_to_owner(doc, doctype, "Recurring Invoice Failed", recipients)
+
+def assign_task_to_owner(doc, doctype, msg, users):
+	for d in users:
+		from frappe.widgets.form import assign_to
+		args = {
+			'assign_to' 	:	d,
+			'doctype'		:	doctype,
+			'name'			:	doc,
+			'description'	:	msg,
+			'priority'		:	'High'
+		}
+		assign_to.add(args)
