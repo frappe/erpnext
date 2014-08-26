@@ -4,7 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, today
+from frappe.utils import add_days, cint, cstr, today, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day
+from frappe.model.naming import make_autoname
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
@@ -428,22 +430,6 @@ class AccountsController(TransactionBase):
 
 		return stock_items
 
-	@property
-	def company_abbr(self):
-		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
-
-		return self._abbr
-
-	def check_credit_limit(self, account):
-		total_outstanding = frappe.db.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-			from `tabGL Entry` where account = %s""", account)
-
-		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
-		if total_outstanding:
-			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
-
 	def validate_recurring_document(self):
 		if self.convert_into_recurring:
 			self.validate_notification_email_id()
@@ -468,6 +454,22 @@ class AccountsController(TransactionBase):
 				set convert_into_recurring = 0
 				where recurring_id = %s""" % (self.doctype, '%s'), (self.recurring_id))
 
+	@property
+	def company_abbr(self):
+		if not hasattr(self, "_abbr"):
+			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
+
+		return self._abbr
+
+	def check_credit_limit(self, account):
+		total_outstanding = frappe.db.sql("""
+			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			from `tabGL Entry` where account = %s""", account)
+
+		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
+		if total_outstanding:
+			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
+
 	def validate_notification_email_id(self):
 		if self.notification_email_address:
 			email_list = filter(None, [cstr(email).strip() for email in
@@ -486,6 +488,8 @@ class AccountsController(TransactionBase):
 	def set_next_date(self, posting_date):
 		""" Set next date on which recurring document will be created"""
 		from erpnext.controllers.recurring_document import get_next_date
+
+		month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
 		if not self.repeat_on_day_of_month:
 			msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)

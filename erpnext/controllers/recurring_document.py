@@ -11,25 +11,33 @@ from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
 from frappe.model.mapper import get_mapped_doc
 
+month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+
 def manage_recurring_documents(doctype, next_date=None, commit=True):
 	"""
 		Create recurring documents on specific date by copying the original one
 		and notify the concerned people
 	"""
 	next_date = next_date or nowdate()
+
+	if doctype == "Sales Order":
+		date_field = "transaction_date"
+	elif doctype == "Sales Invoice":
+		date_field = "posting_date"
+
 	recurring_documents = frappe.db.sql("""select name, recurring_id
 		from `tab%s` where ifnull(convert_into_recurring, 0)=1
 		and docstatus=1 and next_date=%s
-		and next_date <= ifnull(end_date, '2199-12-31')""", % (doctype, '%s'), (next_date))
+		and next_date <= ifnull(end_date, '2199-12-31')""" % (doctype, '%s'), (next_date))
 
 	exception_list = []
 	for ref_document, recurring_id in recurring_documents:
 		if not frappe.db.sql("""select name from `tab%s`
-				where transaction_date=%s and recurring_id=%s and docstatus=1""",
-				% (doctype, '%s', '%s'), (next_date, recurring_id)):
+				where %s=%s and recurring_id=%s and docstatus=1"""
+				% (doctype, date_field, '%s', '%s'), (next_date, recurring_id)):
 			try:
 				ref_wrapper = frappe.get_doc(doctype, ref_document)
-				new_document_wrapper = make_new_document(ref_wrapper, next_date)
+				new_document_wrapper = make_new_document(ref_wrapper, date_field, next_date)
 				send_notification(new_document_wrapper)
 				if commit:
 					frappe.db.commit()
@@ -39,7 +47,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 					frappe.db.begin()
 					frappe.db.sql("update `tab%s` \
-						set convert_into_recurring = 0 where name = %s", % (doctype, '%s'), 
+						set convert_into_recurring = 0 where name = %s" % (doctype, '%s'), 
 						(ref_document))
 					notify_errors(ref_document, doctype, ref_wrapper.customer, ref_wrapper.owner)
 					frappe.db.commit()
@@ -53,10 +61,9 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 		exception_message = "\n\n".join([cstr(d) for d in exception_list])
 		frappe.throw(exception_message)
 
-def make_new_document(ref_wrapper, posting_date):
+def make_new_document(ref_wrapper, date_field, posting_date):
 	from erpnext.accounts.utils import get_fiscal_year
 	new_document = frappe.copy_doc(ref_wrapper)
-
 	mcount = month_map[ref_wrapper.recurring_type]
 
 	period_from = get_next_date(ref_wrapper.period_from, mcount)
@@ -73,7 +80,7 @@ def make_new_document(ref_wrapper, posting_date):
 		period_to = get_next_date(ref_wrapper.period_to, mcount)
 
 	new_document.update({
-		"transaction_date": posting_date,
+		date_field: posting_date,
 		"period_from": period_from,
 		"period_to": period_to,
 		"fiscal_year": get_fiscal_year(posting_date)[0],

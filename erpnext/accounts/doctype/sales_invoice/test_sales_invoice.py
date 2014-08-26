@@ -665,143 +665,148 @@ class TestSalesInvoice(unittest.TestCase):
 			where against_invoice=%s""", si.name))
 
 	def test_recurring_invoice(self):
-		from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
-		from erpnext.accounts.utils import get_fiscal_year
-		today = nowdate()
-		base_si = frappe.copy_doc(test_records[0])
-		base_si.update({
-			"convert_into_recurring_invoice": 1,
-			"recurring_type": "Monthly",
-			"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
-			"repeat_on_day_of_month": getdate(today).day,
-			"posting_date": today,
-			"due_date": None,
-			"fiscal_year": get_fiscal_year(today)[0],
-			"period_from": get_first_day(today),
-			"period_to": get_last_day(today)
-		})
+		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
 
-		# monthly
-		si1 = frappe.copy_doc(base_si)
-		si1.insert()
-		si1.submit()
-		self._test_recurring_invoice(si1, True)
+		test_recurring_document(self, test_records)
 
-		# monthly without a first and last day period
-		si2 = frappe.copy_doc(base_si)
-		si2.update({
-			"period_from": today,
-			"period_to": add_to_date(today, days=30)
-		})
-		si2.insert()
-		si2.submit()
-		self._test_recurring_invoice(si2, False)
+	# def test_recurring_invoice(self):
+	# 	from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate
+	# 	from erpnext.accounts.utils import get_fiscal_year
+	# 	today = nowdate()
+	# 	base_si = frappe.copy_doc(test_records[0])
+	# 	base_si.update({
+	# 		"convert_into_recurring_invoice": 1,
+	# 		"recurring_type": "Monthly",
+	# 		"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
+	# 		"repeat_on_day_of_month": getdate(today).day,
+	# 		"posting_date": today,
+	# 		"due_date": None,
+	# 		"fiscal_year": get_fiscal_year(today)[0],
+	# 		"period_from": get_first_day(today),
+	# 		"period_to": get_last_day(today)
+	# 	})
 
-		# quarterly
-		si3 = frappe.copy_doc(base_si)
-		si3.update({
-			"recurring_type": "Quarterly",
-			"period_from": get_first_day(today),
-			"period_to": get_last_day(add_to_date(today, months=3))
-		})
-		si3.insert()
-		si3.submit()
-		self._test_recurring_invoice(si3, True)
+	# 	# monthly
+	# 	si1 = frappe.copy_doc(base_si)
+	# 	si1.insert()
+	# 	si1.submit()
+	# 	self._test_recurring_invoice(si1, True)
 
-		# quarterly without a first and last day period
-		si4 = frappe.copy_doc(base_si)
-		si4.update({
-			"recurring_type": "Quarterly",
-			"period_from": today,
-			"period_to": add_to_date(today, months=3)
-		})
-		si4.insert()
-		si4.submit()
-		self._test_recurring_invoice(si4, False)
+	# 	# monthly without a first and last day period
+	# 	si2 = frappe.copy_doc(base_si)
+	# 	si2.update({
+	# 		"period_from": today,
+	# 		"period_to": add_to_date(today, days=30)
+	# 	})
+	# 	si2.insert()
+	# 	si2.submit()
+	# 	self._test_recurring_invoice(si2, False)
 
-		# yearly
-		si5 = frappe.copy_doc(base_si)
-		si5.update({
-			"recurring_type": "Yearly",
-			"period_from": get_first_day(today),
-			"period_to": get_last_day(add_to_date(today, years=1))
-		})
-		si5.insert()
-		si5.submit()
-		self._test_recurring_invoice(si5, True)
+	# 	# quarterly
+	# 	si3 = frappe.copy_doc(base_si)
+	# 	si3.update({
+	# 		"recurring_type": "Quarterly",
+	# 		"period_from": get_first_day(today),
+	# 		"period_to": get_last_day(add_to_date(today, months=3))
+	# 	})
+	# 	si3.insert()
+	# 	si3.submit()
+	# 	self._test_recurring_invoice(si3, True)
 
-		# yearly without a first and last day period
-		si6 = frappe.copy_doc(base_si)
-		si6.update({
-			"recurring_type": "Yearly",
-			"period_from": today,
-			"period_to": add_to_date(today, years=1)
-		})
-		si6.insert()
-		si6.submit()
-		self._test_recurring_invoice(si6, False)
+	# 	# quarterly without a first and last day period
+	# 	si4 = frappe.copy_doc(base_si)
+	# 	si4.update({
+	# 		"recurring_type": "Quarterly",
+	# 		"period_from": today,
+	# 		"period_to": add_to_date(today, months=3)
+	# 	})
+	# 	si4.insert()
+	# 	si4.submit()
+	# 	self._test_recurring_invoice(si4, False)
 
-		# change posting date but keep recuring day to be today
-		si7 = frappe.copy_doc(base_si)
-		si7.update({
-			"posting_date": add_to_date(today, days=-1)
-		})
-		si7.insert()
-		si7.submit()
+	# 	# yearly
+	# 	si5 = frappe.copy_doc(base_si)
+	# 	si5.update({
+	# 		"recurring_type": "Yearly",
+	# 		"period_from": get_first_day(today),
+	# 		"period_to": get_last_day(add_to_date(today, years=1))
+	# 	})
+	# 	si5.insert()
+	# 	si5.submit()
+	# 	self._test_recurring_invoice(si5, True)
 
-		# setting so that _test function works
-		si7.posting_date = today
-		self._test_recurring_invoice(si7, True)
+	# 	# yearly without a first and last day period
+	# 	si6 = frappe.copy_doc(base_si)
+	# 	si6.update({
+	# 		"recurring_type": "Yearly",
+	# 		"period_from": today,
+	# 		"period_to": add_to_date(today, years=1)
+	# 	})
+	# 	si6.insert()
+	# 	si6.submit()
+	# 	self._test_recurring_invoice(si6, False)
 
-	def _test_recurring_invoice(self, base_si, first_and_last_day):
-		from frappe.utils import add_months, get_last_day
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice \
-			import manage_recurring_invoices, get_next_date
+	# 	# change posting date but keep recuring day to be today
+	# 	si7 = frappe.copy_doc(base_si)
+	# 	si7.update({
+	# 		"posting_date": add_to_date(today, days=-1)
+	# 	})
+	# 	si7.insert()
+	# 	si7.submit()
 
-		no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.recurring_type]
+	# 	# setting so that _test function works
+	# 	si7.posting_date = today
+	# 	self._test_recurring_invoice(si7, True)
 
-		def _test(i):
-			self.assertEquals(i+1, frappe.db.sql("""select count(*) from `tabSales Invoice`
-				where recurring_id=%s and docstatus=1""", base_si.recurring_id)[0][0])
+	# def _test_recurring_invoice(self, base_si, first_and_last_day):
+	# 	from frappe.utils import add_months, get_last_day
+	# 	from erpnext.accounts.doctype.sales_invoice.sales_invoice \
+	# 		import manage_recurring_invoices, get_next_date
 
-			next_date = get_next_date(base_si.posting_date, no_of_months,
-				base_si.repeat_on_day_of_month)
+	# 	no_of_months = ({"Monthly": 1, "Quarterly": 3, "Yearly": 12})[base_si.recurring_type]
 
-			manage_recurring_invoices(next_date=next_date, commit=False)
+	# 	def _test(i):
+	# 		self.assertEquals(i+1, frappe.db.sql("""select count(*) from `tabSales Invoice`
+	# 			where recurring_id=%s and docstatus=1""", base_si.recurring_id)[0][0])
 
-			recurred_invoices = frappe.db.sql("""select name from `tabSales Invoice`
-				where recurring_id=%s and docstatus=1 order by name desc""",
-				base_si.recurring_id)
+	# 		next_date = get_next_date(base_si.posting_date, no_of_months,
+	# 			base_si.repeat_on_day_of_month)
 
-			self.assertEquals(i+2, len(recurred_invoices))
+	# 		manage_recurring_invoices(next_date=next_date, commit=False)
 
-			new_si = frappe.get_doc("Sales Invoice", recurred_invoices[0][0])
+	# 		recurred_invoices = frappe.db.sql("""select name from `tabSales Invoice`
+	# 			where recurring_id=%s and docstatus=1 order by name desc""",
+	# 			base_si.recurring_id)
 
-			for fieldname in ["convert_into_recurring_invoice", "recurring_type",
-				"repeat_on_day_of_month", "notification_email_address"]:
-					self.assertEquals(base_si.get(fieldname),
-						new_si.get(fieldname))
+	# 		self.assertEquals(i+2, len(recurred_invoices))
 
-			self.assertEquals(new_si.posting_date, unicode(next_date))
+	# 		new_si = frappe.get_doc("Sales Invoice", recurred_invoices[0][0])
 
-			self.assertEquals(new_si.period_from,
-				unicode(add_months(base_si.period_from, no_of_months)))
+	# 		for fieldname in ["convert_into_recurring_invoice", "recurring_type",
+	# 			"repeat_on_day_of_month", "notification_email_address"]:
+	# 				self.assertEquals(base_si.get(fieldname),
+	# 					new_si.get(fieldname))
 
-			if first_and_last_day:
-				self.assertEquals(new_si.period_to,
-					unicode(get_last_day(add_months(base_si.period_to,
-						no_of_months))))
-			else:
-				self.assertEquals(new_si.period_to,
-					unicode(add_months(base_si.period_to, no_of_months)))
+	# 		self.assertEquals(new_si.posting_date, unicode(next_date))
+
+	# 		self.assertEquals(new_si.period_from,
+	# 			unicode(add_months(base_si.period_from, no_of_months)))
+
+	# 		if first_and_last_day:
+	# 			self.assertEquals(new_si.period_to,
+	# 				unicode(get_last_day(add_months(base_si.period_to,
+	# 					no_of_months))))
+	# 		else:
+	# 			self.assertEquals(new_si.period_to,
+	# 				unicode(add_months(base_si.period_to, no_of_months)))
 
 
-			return new_si
+	# 		return new_si
 
-		# if yearly, test 1 repetition, else test 5 repetitions
-		count = 1 if (no_of_months == 12) else 5
-		for i in xrange(count):
-			base_si = _test(i)
+	# 	# if yearly, test 1 repetition, else test 5 repetitions
+	# 	count = 1 if (no_of_months == 12) else 5
+	# 	for i in xrange(count):
+	# 		base_si = _test(i)
 
 	def clear_stock_account_balance(self):
 		frappe.db.sql("delete from `tabStock Ledger Entry`")
