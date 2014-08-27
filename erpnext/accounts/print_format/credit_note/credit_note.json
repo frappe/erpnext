@@ -1,51 +1,19 @@
 {
- "creation": "2014-08-27 14:39:00.593377", 
+ "creation": "2014-08-28 11:11:39.796473", 
  "disabled": 0, 
  "doc_type": "Journal Voucher", 
  "docstatus": 0, 
  "doctype": "Print Format", 
- "html": "<h3 class="text-right">{{ doc.select_print_heading or _("Credit Note") }}</h3>
-<hr>
-<div class="row">
-  <div class="col-sm-3" align="right"><label>{{ _("Credit Note No") }}</label></div>
-  <div class="col-sm-9">{{ doc.name }}</div>
-</div>
-<div class="row">
-  <div class="col-sm-3" align="right"><label>{{ _("Credit Date") }}</label></div>
-  <div class="col-sm-9">{{ frappe.utils.formatdate(doc.voucher_date) }}</div>
-</div>
-<div class="row">
-  <div class="col-sm-3" align="right"><label>{{ _("Credit Type ") }}</label></div>
-  <div class="col-sm-9">{{ _("Credit Note ") }}</div>
-</div>
-<div class="row">
-  <div class="col-sm-3" align="right"><label>{{ _("Credit To") }}</label></div>
-  <div class="col-sm-9">{{ doc.pay_to_recd_from }}</div>
-</div>
-<hr>
-
-<div class="row">
-  <div class="col-sm-3" align="right"><label>{{ _("Total Amount") }}</label></div>
-  <div class="col-sm-9"><label>{{ doc.total_amount }}/-<br>{{ doc.total_amount_in_words }}</label></div>
-</div>
-<hr>
-<div class="row">
-  <div class="col-sm-3" align="right"><label>{{ _("Remarks") }}</label></div>
-  <div class="col-sm-9">{{ doc.remark }}</div>
-</div>
-<hr>
-<br>
-<p>
-{{ _("For") }} {{ doc.company }},<br>
-<br>
-<br>
-<br>
-{{ _("Authorized Signatory") }}</p>", 
- "modified": "2014-08-27 14:49:40.088410", 
+ "html": "<h3 class=\"text-right\">{{ doc.select_print_heading or _(\"Credit Note\") }}</h3>\n<hr>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Credit Note No\") }}</label></div>\n  <div class=\"col-sm-9\">{{ doc.name }}</div>\n</div>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Credit Date\") }}</label></div>\n  <div class=\"col-sm-9\">{{ frappe.utils.formatdate(doc.voucher_date) }}</div>\n</div>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Credit Type \") }}</label></div>\n  <div class=\"col-sm-9\">{{ _(\"Credit Note \") }}</div>\n</div>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Credit To\") }}</label></div>\n  <div class=\"col-sm-9\">{{ doc.pay_to_recd_from }}</div>\n</div>\n<hr>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Total Amount\") }}</label></div>\n  <div class=\"col-sm-9\"><label>{{ doc.total_amount }}/-<br>{{ doc.total_amount_in_words }}</label></div>\n</div>\n<hr>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Remarks\") }}</label></div>\n  <div class=\"col-sm-9\">{{ doc.remark }}</div>\n</div>\n<hr>\n<br>\n<p>\n{{ _(\"For\") }} {{ doc.company }},<br>\n<br>\n<br>\n<br>\n{{ _(\"Authorized Signatory\") }}</p>\n", 
+ "idx": 2, 
+ "modified": "2014-08-28 11:15:38.677618", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Credit Note", 
  "owner": "Administrator", 
+ "parent": "Journal Voucher", 
+ "parentfield": "__print_formats", 
+ "parenttype": "DocType", 
  "print_format_type": "Server", 
  "standard": "Yes"
 }
