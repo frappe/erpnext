@@ -4,11 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
-
-from frappe.utils import cint
 from frappe import msgprint, _
 from frappe.model.naming import make_autoname
-from erpnext.accounts.party import create_party_account
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -19,8 +16,6 @@ class Supplier(TransactionBase):
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')
 		if supp_master_name == 'Supplier Name':
-			if frappe.db.exists("Customer", self.supplier_name):
-				frappe.msgprint(_("A Customer exists with same name"), raise_exception=1)
 			self.name = self.supplier_name
 		else:
 			self.name = make_autoname(self.naming_series + '.#####')
@@ -33,22 +28,12 @@ class Supplier(TransactionBase):
 		frappe.db.sql("""update `tabContact` set supplier_name=%s, modified=NOW()
 			where supplier=%s""", (self.supplier_name, self.name))
 
-	def update_credit_days_limit(self):
-		frappe.db.sql("""update tabAccount set credit_days = %s where name = %s""",
-			(cint(self.credit_days), self.name + " - " + self.get_company_abbr()))
-
 	def on_update(self):
 		if not self.naming_series:
 			self.naming_series = ''
 
 		self.update_address()
 		self.update_contact()
-
-		# create account head
-		create_party_account(self.name, "Supplier", self.company)
-
-		# update credit days and limit in account
-		self.update_credit_days_limit()
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
@@ -87,10 +72,6 @@ class Supplier(TransactionBase):
 		self.delete_supplier_address()
 		self.delete_supplier_contact()
 		self.delete_supplier_account()
-
-	def before_rename(self, olddn, newdn, merge=False):
-		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Supplier", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''

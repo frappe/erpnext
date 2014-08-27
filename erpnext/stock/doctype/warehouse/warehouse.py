@@ -29,7 +29,7 @@ class Warehouse(Document):
 				self.validate_parent_account()
 
 				warehouse_account = frappe.db.get_value("Account",
-					{"account_type": "Warehouse", "company": self.company, "master_name": self.name},
+					{"account_type": "Warehouse", "company": self.company, "warehouse": self.name},
 					["name", "parent_account"])
 
 				if warehouse_account and warehouse_account[1] != self.create_account_under:
@@ -42,8 +42,7 @@ class Warehouse(Document):
 
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			if not frappe.db.get_value("Account", {"account_type": "Warehouse",
-					"master_name": self.name}):
+			if not self.get_account(self.name):
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
 					self.validate_parent_account()
@@ -54,7 +53,7 @@ class Warehouse(Document):
 						'group_or_ledger':'Ledger',
 						'company':self.company,
 						"account_type": "Warehouse",
-						"master_name": self.name,
+						"warehouse": self.name,
 						"freeze_account": "No"
 					})
 					ac_doc.ignore_permissions = True
@@ -89,8 +88,7 @@ class Warehouse(Document):
 			else:
 				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 
-		warehouse_account = frappe.db.get_value("Account",
-			{"account_type": "Warehouse", "master_name": self.name})
+		warehouse_account = self.get_account(self.name)
 		if warehouse_account:
 			frappe.delete_doc("Account", warehouse_account)
 
@@ -112,10 +110,32 @@ class Warehouse(Document):
 
 			frappe.db.sql("delete from `tabBin` where warehouse=%s", olddn)
 
-		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Warehouse", olddn, newdn, merge, self.company)
+		self.rename_account_for(olddn, newdn, merge)
 
 		return new_warehouse
+
+	def rename_account_for(self, olddn, newdn, merge):
+		old_account = self.get_account(olddn)
+
+		if old_account:
+			new_account = None
+			if not merge:
+				if old_account == self.add_abbr_if_missing(olddn):
+					new_account = frappe.rename_doc("Account", old_account, newdn)
+			else:
+				existing_new_account = self.get_account(newdn)
+				new_account = frappe.rename_doc("Account", old_account,
+					existing_new_account or newdn, merge=True if existing_new_account else False)
+
+			frappe.db.set_value("Account", new_account or old_account, "warehouse", newdn)
+
+	def add_abbr_if_missing(self, dn):
+		from erpnext.setup.doctype.company.company import get_name_with_abbr
+		return get_name_with_abbr(dn, self.company)
+
+	def get_account(self, warehouse):
+		return frappe.db.get_value("Account", {"account_type": "Warehouse",
+			"warehouse": warehouse, "company": self.company})
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if merge:

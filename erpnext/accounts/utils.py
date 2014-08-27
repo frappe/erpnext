@@ -244,8 +244,8 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 	difference = {}
 
-	account_warehouse = dict(frappe.db.sql("""select name, master_name from tabAccount
-		where account_type = 'Warehouse' and ifnull(master_name, '') != ''
+	account_warehouse = dict(frappe.db.sql("""select name, warehouse from tabAccount
+		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''
 		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
 
 	for account, warehouse in account_warehouse.items():
@@ -321,39 +321,6 @@ def get_actual_expense(args):
 		where account='%(account)s' and cost_center='%(cost_center)s'
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
 	""" % (args))[0][0]
-
-def rename_account_for(dt, olddn, newdn, merge, company=None):
-	if not company:
-		companies = [d[0] for d in frappe.db.sql("select name from tabCompany")]
-	else:
-		companies = [company]
-
-	for company in companies:
-		old_account = get_account_for(dt, olddn, company)
-		if old_account:
-			new_account = None
-			if not merge:
-				if old_account == add_abbr_if_missing(olddn, company):
-					new_account = frappe.rename_doc("Account", old_account, newdn)
-			else:
-				existing_new_account = get_account_for(dt, newdn, company)
-				new_account = frappe.rename_doc("Account", old_account,
-					existing_new_account or newdn, merge=True if existing_new_account else False)
-
-			frappe.db.set_value("Account", new_account or old_account, "master_name", newdn)
-
-def add_abbr_if_missing(dn, company):
-	from erpnext.setup.doctype.company.company import get_name_with_abbr
-	return get_name_with_abbr(dn, company)
-
-def get_account_for(account_for_doctype, account_for, company):
-	if account_for_doctype in ["Customer", "Supplier"]:
-		account_for_field = "master_type"
-	elif account_for_doctype == "Warehouse":
-		account_for_field = "account_type"
-
-	return frappe.db.get_value("Account", {account_for_field: account_for_doctype,
-		"master_name": account_for, "company": company})
 
 def get_currency_precision(currency=None):
 	if not currency:

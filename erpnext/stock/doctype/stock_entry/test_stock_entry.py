@@ -48,7 +48,7 @@ class TestStockEntry(unittest.TestCase):
 		mr.submit()
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mr.get("mtn_details")[0].t_warehouse})
+			"warehouse": mr.get("mtn_details")[0].t_warehouse})
 
 		self.check_stock_ledger_entries("Stock Entry", mr.name,
 			[["_Test Item", "_Test Warehouse - _TC", 50.0]])
@@ -83,7 +83,7 @@ class TestStockEntry(unittest.TestCase):
 			[["_Test Item", "_Test Warehouse - _TC", -40.0]])
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mi.get("mtn_details")[0].s_warehouse})
+			"warehouse": mi.get("mtn_details")[0].s_warehouse})
 
 		self.check_gl_entries("Stock Entry", mi.name,
 			sorted([
@@ -119,10 +119,10 @@ class TestStockEntry(unittest.TestCase):
 			[["_Test Item", "_Test Warehouse - _TC", -45.0], ["_Test Item", "_Test Warehouse 1 - _TC", 45.0]])
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mtn.get("mtn_details")[0].s_warehouse})
+			"warehouse": mtn.get("mtn_details")[0].s_warehouse})
 
 		fixed_asset_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": mtn.get("mtn_details")[0].t_warehouse})
+			"warehouse": mtn.get("mtn_details")[0].t_warehouse})
 
 
 		self.check_gl_entries("Stock Entry", mtn.name,
@@ -174,7 +174,7 @@ class TestStockEntry(unittest.TestCase):
 		repack.submit()
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"master_name": repack.get("mtn_details")[1].t_warehouse})
+			"warehouse": repack.get("mtn_details")[1].t_warehouse})
 
 		self.check_gl_entries("Stock Entry", repack.name,
 			sorted([

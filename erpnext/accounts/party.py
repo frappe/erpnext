@@ -136,9 +136,6 @@ def get_party_account(company, party, party_type):
 		acc_head = frappe.db.get_value("Account", {"master_name":party,
 			"master_type": party_type, "company": company})
 
-		if not acc_head:
-			create_party_account(party, party_type, company)
-
 		return acc_head
 
 def get_due_date(posting_date, party, party_type, account, company):
@@ -157,29 +154,3 @@ def get_due_date(posting_date, party, party_type, account, company):
 
 	return due_date
 
-def create_party_account(party, party_type, company):
-	if not company:
-		frappe.throw(_("Company is required"))
-
-	company_details = frappe.db.get_value("Company", company,
-		["abbr", "receivables_group", "payables_group"], as_dict=True)
-	if not frappe.db.exists("Account", (party.strip() + " - " + company_details.abbr)):
-		parent_account = company_details.receivables_group \
-			if party_type=="Customer" else company_details.payables_group
-		if not parent_account:
-			frappe.throw(_("Please enter Account Receivable/Payable group in company master"))
-
-		# create
-		account = frappe.get_doc({
-			"doctype": "Account",
-			'account_name': party,
-			'parent_account': parent_account,
-			'group_or_ledger':'Ledger',
-			'company': company,
-			'master_type': party_type,
-			'master_name': party,
-			"freeze_account": "No",
-			"report_type": "Balance Sheet"
-		}).insert(ignore_permissions=True)
-
-		frappe.msgprint(_("Account Created: {0}").format(account.name))

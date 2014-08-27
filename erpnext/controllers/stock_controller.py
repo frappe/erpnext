@@ -282,6 +282,6 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	return gl_entries
 
 def get_warehouse_account():
-	warehouse_account = dict(frappe.db.sql("""select master_name, name from tabAccount
-		where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
+	warehouse_account = dict(frappe.db.sql("""select warehouse, name from tabAccount
+		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''"""))
 	return warehouse_account

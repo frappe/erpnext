@@ -20,24 +20,13 @@ class Account(Document):
 		self.name = self.account_name.strip() + ' - ' + \
 			frappe.db.get_value("Company", self.company, "abbr")
 
-	def get_address(self):
-		return {'address': frappe.db.get_value(self.master_type, self.master_name, "address")}
-
 	def validate(self):
-		self.validate_master_name()
 		self.validate_parent()
 		self.validate_root_details()
 		self.validate_mandatory()
 		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
 		self.validate_balance_must_be_debit_or_credit()
-
-	def validate_master_name(self):
-		if self.master_type in ('Customer', 'Supplier') or self.account_type == "Warehouse":
-			if not self.master_name:
-				msgprint(_("Please enter Master Name once the account is created."))
-			elif not frappe.db.exists(self.master_type or self.account_type, self.master_name):
-				throw(_("Invalid Master Name"))
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
@@ -123,18 +112,19 @@ class Account(Document):
 			return
 
 		if self.account_type == "Warehouse":
-			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "master_name"))
-			if old_warehouse != cstr(self.master_name):
+			if not self.warehouse:
+				throw(_("Warehouse is mandatory if account type is Warehouse"))
+
+			old_warehouse = cstr(frappe.db.get_value("Account", self.name, "warehouse"))
+			if old_warehouse != cstr(self.warehouse):
 				if old_warehouse:
 					self.validate_warehouse(old_warehouse)
-				if self.master_name:
-					self.validate_warehouse(self.master_name)
-				else:
-					throw(_("Master Name is mandatory if account type is Warehouse"))
+				if self.warehouse:
+					self.validate_warehouse(self.warehouse)
 
 	def validate_warehouse(self, warehouse):
 		if frappe.db.get_value("Stock Ledger Entry", {"warehouse": warehouse}):
-			throw(_("Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name'").format(warehouse))
+			throw(_("Stock entries exist against warehouse {0}, hence you cannot re-assign or modify Warehouse").format(warehouse))
 
 	def update_nsm_model(self):
 		"""update lft, rgt indices for nested set model"""
@@ -225,14 +215,6 @@ class Account(Document):
 		else:
 			from frappe.utils.nestedset import rebuild_tree
 			rebuild_tree("Account", "parent_account")
-
-def get_master_name(doctype, txt, searchfield, start, page_len, filters):
-	conditions = (" and company='%s'"% filters["company"].replace("'", "\'")) if doctype == "Warehouse" else ""
-
-	return frappe.db.sql("""select name from `tab%s` where %s like %s %s
-		order by name limit %s, %s""" %
-		(filters["master_type"], searchfield, "%s", conditions, "%s", "%s"),
-		("%%%s%%" % txt, start, page_len), as_list=1)
 
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount

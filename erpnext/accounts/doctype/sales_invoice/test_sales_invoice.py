@@ -457,7 +457,7 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, debit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		stock_in_hand = frappe.db.get_value("Account", {"master_name": "_Test Warehouse - _TC"})
+		stock_in_hand = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
 
 		expected_gl_entries = sorted([
 			[si.debit_to, 630.0, 0.0],

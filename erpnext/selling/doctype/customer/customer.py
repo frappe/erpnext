@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.naming import make_autoname
-from frappe import msgprint, _
+from frappe import _
 import frappe.defaults
 
 
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import create_party_account
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -18,8 +17,6 @@ class Customer(TransactionBase):
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
-			if frappe.db.exists("Supplier", self.customer_name):
-				msgprint(_("A Supplier exists with same name"), raise_exception=1)
 			self.name = self.customer_name
 		else:
 			self.name = make_autoname(self.naming_series+'.#####')
@@ -45,11 +42,6 @@ class Customer(TransactionBase):
 	def update_contact(self):
 		frappe.db.sql("""update `tabContact` set customer_name=%s, modified=NOW()
 			where customer=%s""", (self.customer_name, self.name))
-
-	def update_credit_days_limit(self):
-		frappe.db.sql("""update tabAccount set credit_days = %s, credit_limit = %s
-			where master_type='Customer' and master_name = %s""",
-			(self.credit_days or 0, self.credit_limit or 0, self.name))
 
 	def create_lead_address_contact(self):
 		if self.lead_name:
@@ -78,13 +70,6 @@ class Customer(TransactionBase):
 		self.update_lead_status()
 		self.update_address()
 		self.update_contact()
-
-		# create account head
-		create_party_account(self.name, "Customer", self.company)
-
-		# update credit days and limit in account
-		self.update_credit_days_limit()
-		#create address and contact from lead
 		self.create_lead_address_contact()
 
 	def validate_name_with_customer_group(self):
@@ -120,10 +105,6 @@ class Customer(TransactionBase):
 		self.delete_customer_account()
 		if self.lead_name:
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s",self.lead_name)
-
-	def before_rename(self, olddn, newdn, merge=False):
-		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Customer", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''
