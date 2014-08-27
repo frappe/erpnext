@@ -33,7 +33,9 @@ class Newsletter(Document):
 		if getattr(frappe.local, "is_ajax", False):
 			# to avoid request timed out!
 			self.validate_send()
-			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name)
+
+			# hack! event="bulk_long" to queue in longjob queue
+			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name, event="bulk_long")
 		else:
 			self.send_bulk()
 
