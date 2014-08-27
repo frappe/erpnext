@@ -147,9 +147,15 @@ def get_due_date(posting_date, party_type, party, company):
 
 	return due_date
 
-def get_credit_days(self, party_type, party, company):
-	return frappe.db.get_value(party_type, party, "credit_days") or \
-			frappe.db.get_value("Company", company, "credit_days") if company else 0
+def get_credit_days(party_type, party, company):
+	party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+	credit_days, party_group = frappe.db.get_value(party_type, party, ["credit_days", frappe.scrub(party_group_doctype)])
+
+	if not credit_days:
+		credit_days = frappe.db.get_value(party_group_doctype, party_group, "credit_days") or \
+			frappe.db.get_value("Company", company, "credit_days")
+
+	return credit_days
 
 def validate_due_date(posting_date, due_date, party_type, party, company):
 	credit_days = get_credit_days(party_type, party, company)
@@ -164,8 +170,8 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 			"credit_controller") in frappe.user.get_roles()
 
 		if is_credit_controller:
-			msgprint(_("Note: Due / Reference Date exceeds the allowed credit days by {0} day(s)").format(
-				diff - flt(credit_days)))
+			msgprint(_("Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s)")
+				.format(diff - flt(credit_days)))
 		else:
 			max_due_date = formatdate(add_days(posting_date, credit_days))
 			frappe.throw(_("Due / Reference Date cannot be after {0}").format(max_due_date))

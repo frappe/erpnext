@@ -152,9 +152,7 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 def check_credit_limit(customer, company):
 	customer_outstanding = get_customer_outstanding(customer, company)
 
-	credit_limit = frappe.db.get_value("Customer", customer, "credit_limit") or \
-		frappe.db.get_value('Company', company, 'credit_limit')
-
+	credit_limit = get_credit_limit(customer, company)
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
 		msgprint(_("Credit limit has been crossed for customer {0} {1}/{2}")
 			.format(customer, customer_outstanding, credit_limit))
@@ -186,9 +184,9 @@ def get_customer_outstanding(customer, company):
 		select
 			sum(
 				(
-					(ifnull(dn_item.amount) - (select sum(ifnull(amount, 0))
+					(ifnull(dn_item.amount, 0) - ifnull((select sum(ifnull(amount, 0))
 						from `tabSales Invoice Item`
-						where ifnull(dn_detail, '') = dn_item.name and docstatus = 1)
+						where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)
 					)/dn.net_total
 				)*dn.grand_total
 			)
@@ -198,10 +196,19 @@ def get_customer_outstanding(customer, company):
 			and dn.docstatus = 1 and dn.status != 'Stopped'
 			and ifnull(dn_item.against_sales_order, '') = ''
 			and ifnull(dn_item.against_sales_invoice, '') = ''
-			and ifnull(dn_item.amount) > (select sum(ifnull(amount, 0))
+			and ifnull(dn_item.amount, 0) > ifnull((select sum(ifnull(amount, 0))
 				from `tabSales Invoice Item`
-				where ifnull(dn_detail, '') = dn_item.name and docstatus = 1)""", (customer, company))
+				where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)""", (customer, company))
 
 	outstanding_based_on_dn = flt(outstanding_based_on_dn[0][0]) if outstanding_based_on_dn else 0.0
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
+
+
+def get_credit_limit(customer, company):
+	credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
+	if not credit_limit:
+		credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit") or \
+			frappe.db.get_value("Company", company, "credit_limit")
+
+	return credit_limit

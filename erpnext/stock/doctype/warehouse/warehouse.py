@@ -9,7 +9,6 @@ from frappe import throw, msgprint, _
 from frappe.model.document import Document
 
 class Warehouse(Document):
-
 	def autoname(self):
 		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
 		if not self.warehouse_name.endswith(suffix):
@@ -22,7 +21,6 @@ class Warehouse(Document):
 		self.update_parent_account()
 
 	def update_parent_account(self):
-
 		if not getattr(self, "__islocal", None) \
 			and (self.create_account_under != frappe.db.get_value("Warehouse", self.name, "create_account_under")):
 
