@@ -6,7 +6,8 @@ import frappe
 from frappe.celery_app import celery_task, task_logger
 
 @celery_task()
-def send_newsletter(site, newsletter):
+def send_newsletter(site, newsletter, event):
+	# hack! pass event="bulk_long" to queue in longjob queue
 	try:
 		frappe.connect(site=site)
 		doc = frappe.get_doc("Newsletter", newsletter)
