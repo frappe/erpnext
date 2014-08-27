@@ -403,9 +403,7 @@ def get_outstanding_invoices(amount_query, account):
 		where
 			account = %s and {amount_query} > 0
 		group by voucher_type, voucher_no
-		""".format(**{
-		"amount_query": amount_query
-		}), account, as_dict = True)
+		""".format(amount_query = amount_query), account, as_dict = True)
 
 	for d in outstanding_voucher_list:
 		payment_amount = frappe.db.sql("""

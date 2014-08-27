@@ -64,7 +64,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Payment Tool",
-					"description": _("Create Journal Vouchers associated with Invoices.")
+					"description": _("Create Payment Entries against Orders or Invoices.")
 				},
 			]
 		},
