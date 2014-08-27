@@ -57,14 +57,12 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 		return{
 			query: "erpnext.controllers.queries.employee_query"
 		}
-	}
-	var exp_approver = doc.exp_approver;
-	return cur_frm.call({
-		method: "erpnext.hr.utils.get_expense_approver_list",
-		callback: function(r) {
-			cur_frm.set_df_property("exp_approver", "options", r.message);
-			if(exp_approver) cur_frm.set_value("exp_approver", exp_approver);
-		}
+	};
+
+	cur_frm.set_query("exp_approver", function() {
+		return {
+			filters: [["UserRole", "role", "=", "Expense Approver"]]
+		};
 	});
 }
 
