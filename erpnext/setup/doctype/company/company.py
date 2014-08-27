@@ -94,7 +94,6 @@ class Company(Document):
 		account = frappe.get_doc({
 			"doctype": "Account",
 			"freeze_account": "No",
-			"master_type": "",
 			"company": self.name
 		})
 

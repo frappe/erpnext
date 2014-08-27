@@ -66,9 +66,6 @@ class SalesInvoice(SellingController):
 			self.is_opening = 'No'
 
 		self.set_aging_date()
-
-		frappe.get_doc("Account", self.debit_to).validate_due_date(self.posting_date, self.due_date)
-
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
@@ -91,10 +88,9 @@ class SalesInvoice(SellingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-
+		self.check_credit_limit()
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		self.check_credit_limit(self.debit_to)
 
 		if not cint(self.is_pos) == 1:
 			self.update_against_document_in_jv()
@@ -149,8 +145,7 @@ class SalesInvoice(SellingController):
 		if not self.debit_to:
 			self.debit_to = get_party_account(self.company, self.customer, "Customer")
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, self.customer, "Customer",
-				self.debit_to, self.company)
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
@@ -603,8 +598,6 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type = "Income Account")
 				and tabAccount.group_or_ledger="Ledger"
 				and tabAccount.docstatus!=2
-				and ifnull(tabAccount.master_type, "")=""
-				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s'
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,

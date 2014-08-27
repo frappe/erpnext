@@ -3,11 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import cint, cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
-
 from erpnext.controllers.accounts_controller import AccountsController
 
 class JournalVoucher(AccountsController):
@@ -40,12 +38,11 @@ class JournalVoucher(AccountsController):
 		self.set_print_format_fields()
 		self.validate_against_sales_order()
 		self.validate_against_purchase_order()
+		self.check_credit_limit()
+		self.check_credit_days()
 
 	def on_submit(self):
-		if self.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
-			self.check_credit_days()
 		self.make_gl_entries()
-		self.check_credit_limit()
 		self.update_advance_paid()
 
 	def update_advance_paid(self):
@@ -67,6 +64,30 @@ class JournalVoucher(AccountsController):
 
 		self.make_gl_entries(1)
 		self.update_advance_paid()
+
+	def check_credit_limit(self):
+		customers = list(set([d.party for d in self.get("entries") if d.party_type=="Customer"]))
+		if customers:
+			from erpnext.selling.doctype.customer.customer import check_credit_limit
+			for customer in customers:
+				check_credit_limit(customer, self.company)
+
+	def check_credit_days(self):
+		posting_date = self.posting_date
+		company_credit_days = frappe.db.get_value("Company", self.company, "credit_days")
+		if self.cheque_date:
+			for d in self.get("entries"):
+				if d.party_type and d.party and d.get("credit" if d.party_type=="Customer" else "debit") > 0:
+					if d.against_invoice:
+						posting_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "posting_date")
+					elif d.against_voucher:
+						posting_date = frappe.db.get_value("Purchase Invoice", d.against_voucher, "posting_date")
+
+					credit_days = frappe.db.get_value(d.party_type, d.party, "credit_days") or company_credit_days
+					if credit_days:
+						if (getdate(self.cheque_date) - getdate(posting_date)).days > flt(credit_days):
+							msgprint(_("Note: Reference Date is after allowed credit days {0} for {1} {2}")
+								.format(credit_days, d.party_type, d.party))
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Voucher']:
@@ -155,7 +176,7 @@ class JournalVoucher(AccountsController):
 					and voucher_account != d.account:
 					frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} account") \
 						.format(d.idx, d.account, doctype, field_dict.get(doctype)))
-					
+
 				if against_field in ["against_sales_order", "against_purchase_order"]:
 					if voucher_account != account_master_name:
 						frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} Name") \
@@ -167,7 +188,7 @@ class JournalVoucher(AccountsController):
 
 	def validate_against_invoice_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
-			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
+			voucher_properties = frappe.db.get_value(doctype, voucher_no,
 				["docstatus", "outstanding_amount"])
 
 			if voucher_properties[0] != 1:
@@ -179,7 +200,7 @@ class JournalVoucher(AccountsController):
 
 	def validate_against_order_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
-			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
+			voucher_properties = frappe.db.get_value(doctype, voucher_no,
 				["docstatus", "per_billed", "advance_paid", "grand_total"])
 
 			if voucher_properties[0] != 1:
@@ -300,51 +321,6 @@ class JournalVoucher(AccountsController):
 				from frappe.utils import money_in_words
 				self.total_amount_in_words = money_in_words(amt, company_currency)
 
-	def check_credit_days(self):
-		date_diff = 0
-		if self.cheque_date:
-			date_diff = (getdate(self.cheque_date)-getdate(self.posting_date)).days
-
-		if date_diff <= 0: return
-
-		# Get List of Customer Account
-		acc_list = filter(lambda d: frappe.db.get_value("Account", d.account,
-		 	"master_type")=='Customer', self.get('entries'))
-
-		for d in acc_list:
-			credit_days = self.get_credit_days_for(d.account)
-			# Check credit days
-			if credit_days > 0 and not self.get_authorized_user() and cint(date_diff) > credit_days:
-				msgprint(_("Maximum allowed credit is {0} days after posting date").format(credit_days),
-					raise_exception=1)
-
-	def get_credit_days_for(self, ac):
-		if not self.credit_days_for.has_key(ac):
-			self.credit_days_for[ac] = cint(frappe.db.get_value("Account", ac, "credit_days"))
-
-		if not self.credit_days_for[ac]:
-			if self.credit_days_global==-1:
-				self.credit_days_global = cint(frappe.db.get_value("Company",
-					self.company, "credit_days"))
-
-			return self.credit_days_global
-		else:
-			return self.credit_days_for[ac]
-
-	def get_authorized_user(self):
-		if self.is_approving_authority==-1:
-			self.is_approving_authority = 0
-
-			# Fetch credit controller role
-			approving_authority = frappe.db.get_value("Accounts Settings", None,
-				"credit_controller")
-
-			# Check logged-in user is authorized
-			if approving_authority in frappe.user.get_roles():
-				self.is_approving_authority = 1
-
-		return self.is_approving_authority
-
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -371,13 +347,6 @@ class JournalVoucher(AccountsController):
 
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
-
-	def check_credit_limit(self):
-		for d in self.get("entries"):
-			master_type, master_name = frappe.db.get_value("Account", d.account,
-				["master_type", "master_name"])
-			if master_type == "Customer" and master_name:
-				super(JournalVoucher, self).check_credit_limit(d.account)
 
 	def get_balance(self):
 		if not self.get('entries'):

@@ -73,7 +73,6 @@ def install(company):
 	# 	account = frappe.get_doc({
 	# 		"doctype": "Account",
 	# 		"freeze_account": "No",
-	# 		"master_type": "",
 	# 		"company": company.name
 	# 	})
 	#

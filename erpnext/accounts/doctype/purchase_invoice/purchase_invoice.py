@@ -54,7 +54,6 @@ class PurchaseInvoice(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.set_aging_date()
-		frappe.get_doc("Account", self.credit_to).validate_due_date(self.posting_date, self.due_date)
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.update_valuation_rate("entries")
@@ -73,8 +72,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.credit_to:
 			self.credit_to = get_party_account(self.company, self.supplier, "Supplier")
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, self.supplier, "Supplier",
-				self.credit_to, self.company)
+			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
@@ -408,8 +406,6 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger"
 				and tabAccount.docstatus!=2
-				and ifnull(tabAccount.master_type, "")=""
-				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s'
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,

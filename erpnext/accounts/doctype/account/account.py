@@ -85,8 +85,8 @@ class Account(Document):
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
-		elif self.master_type or self.account_type:
-			throw(_("Cannot covert to Group because Master Type or Account Type is selected."))
+		elif self.account_type:
+			throw(_("Cannot covert to Group because Account Type is selected."))
 		else:
 			self.group_or_ledger = 'Group'
 			self.save()
@@ -134,47 +134,6 @@ class Account(Document):
 
 	def on_update(self):
 		self.update_nsm_model()
-
-	def get_authorized_user(self):
-		# Check logged-in user is authorized
-		if frappe.db.get_value('Accounts Settings', None, 'credit_controller') \
-				in frappe.user.get_roles():
-			return 1
-
-	def check_credit_limit(self, total_outstanding):
-		# Get credit limit
-		credit_limit_from = 'Customer'
-
-		cr_limit = frappe.db.sql("""select t1.credit_limit from tabCustomer t1, `tabAccount` t2
-			where t2.name=%s and t1.name = t2.master_name""", self.name)
-		credit_limit = cr_limit and flt(cr_limit[0][0]) or 0
-		if not credit_limit:
-			credit_limit = frappe.db.get_value('Company', self.company, 'credit_limit')
-			credit_limit_from = 'Company'
-
-		# If outstanding greater than credit limit and not authorized person raise exception
-		if credit_limit > 0 and flt(total_outstanding) > credit_limit \
-				and not self.get_authorized_user():
-			throw(_("{0} Credit limit {1} crossed").format(_(credit_limit_from), credit_limit))
-
-	def validate_due_date(self, posting_date, due_date):
-		credit_days = (self.credit_days or frappe.db.get_value("Company", self.company, "credit_days"))
-		posting_date, due_date = getdate(posting_date), getdate(due_date)
-		diff = (due_date - posting_date).days
-
-		if diff < 0:
-			frappe.throw(_("Due Date cannot be before Posting Date"))
-
-		elif credit_days is not None and diff > credit_days:
-			is_credit_controller = frappe.db.get_value("Accounts Settings", None,
-				"credit_controller") in frappe.user.get_roles()
-
-			if is_credit_controller:
-				msgprint(_("Note: Due Date exceeds the allowed credit days by {0} day(s)").format(
-					diff - credit_days))
-			else:
-				max_due_date = formatdate(add_days(posting_date, credit_days))
-				frappe.throw(_("Due Date cannot be after {0}").format(max_due_date))
 
 	def validate_trash(self):
 		"""checks gl entries and if child exists"""

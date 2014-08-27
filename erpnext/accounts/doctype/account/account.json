@@ -177,7 +177,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-08-26 18:18:30.173409", 
+ "modified": "2014-08-27 15:12:35.506765", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
@@ -243,18 +243,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
-   "create": 0, 
-   "delete": 0, 
-   "permlevel": 2, 
-   "read": 1, 
-   "report": 1, 
-   "role": "Auditor", 
-   "submit": 0, 
-   "write": 0
-  }, 
-  {
-   "amend": 0, 
    "apply_user_permissions": 0, 
    "create": 1, 
    "delete": 1, 
@@ -269,30 +257,6 @@
    "set_user_permissions": 1, 
    "submit": 0, 
    "write": 1
-  }, 
-  {
-   "amend": 0, 
-   "cancel": 0, 
-   "create": 0, 
-   "delete": 0, 
-   "permlevel": 2, 
-   "read": 1, 
-   "report": 1, 
-   "role": "Accounts Manager", 
-   "submit": 0, 
-   "write": 1
-  }, 
-  {
-   "amend": 0, 
-   "cancel": 0, 
-   "create": 0, 
-   "delete": 0, 
-   "permlevel": 2, 
-   "read": 1, 
-   "report": 1, 
-   "role": "Accounts User", 
-   "submit": 0, 
-   "write": 0
   }
  ], 
  "search_fields": "group_or_ledger"

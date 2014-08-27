@@ -61,17 +61,9 @@ class Supplier(TransactionBase):
 			where supplier=%s""", self.name):
 				frappe.delete_doc("Contact", contact)
 
-	def delete_supplier_account(self):
-		"""delete supplier's ledger if exist and check balance before deletion"""
-		acc = frappe.db.sql("select name from `tabAccount` where master_type = 'Supplier' \
-			and master_name = %s and docstatus < 2", self.name)
-		if acc:
-			frappe.delete_doc('Account', acc[0][0])
-
 	def on_trash(self):
 		self.delete_supplier_address()
 		self.delete_supplier_contact()
-		self.delete_supplier_account()
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''

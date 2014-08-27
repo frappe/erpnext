@@ -153,9 +153,8 @@ class SalesOrder(SellingController):
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()
 
+		self.check_credit_limit()
 		self.update_stock_ledger(update_stock = 1)
-
-		self.check_credit(self.grand_total)
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
 
@@ -356,17 +355,6 @@ def make_sales_invoice(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess)
-
-	def set_advance_vouchers(source, target):
-		advance_voucher_list = []
-
-		advance_voucher = frappe.db.sql("""
-			select
-				t1.name as voucher_no, t1.posting_date, t1.remark, t2.account,
-				t2.name as voucher_detail_no, {amount_query} as payment_amount, t2.is_advance
-			from
-				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
-			""")
 
 	return doclist
 
