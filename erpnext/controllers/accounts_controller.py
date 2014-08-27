@@ -21,7 +21,6 @@ class AccountsController(TransactionBase):
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 
-		self.validate_for_freezed_account()
 		self.validate_due_date()
 
 		if self.meta.get_field("is_recurring"):
@@ -68,17 +67,6 @@ class AccountsController(TransactionBase):
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
-
-	def validate_for_freezed_account(self):
-		for fieldname in ["customer", "supplier"]:
-			if self.meta.get_field(fieldname) and self.get(fieldname):
-				accounts = frappe.db.get_values("Account",
-					{"master_type": fieldname.title(), "master_name": self.get(fieldname),
-					"company": self.company}, "name")
-				if accounts:
-					from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
-					for account in accounts:
-						validate_frozen_account(account[0])
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):

@@ -46,10 +46,9 @@ class PurchaseInvoice(BuyingController):
 		self.pr_required()
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
-		self.validate_credit_acc()
+		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
 		self.validate_advance_jv("advance_allocation_details", "purchase_order")
-		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
@@ -93,21 +92,13 @@ class PurchaseInvoice(BuyingController):
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
-	def validate_credit_acc(self):
-		if frappe.db.get_value("Account", self.credit_to, "report_type") != "Balance Sheet":
-			frappe.throw(_("Account must be a balance sheet account"))
+	def validate_credit_to_acc(self):
+		root_type, account_type = frappe.db.get_value("Account", self.credit_to, ["root_type", "account_type"])
+		if root_type != "Liability":
+			frappe.throw(_("Credit To account must be a liability account"))
+		if account_type != "Payable":
+			frappe.throw(_("Credit To account must be a Payable account"))
 
-	# Validate Acc Head of Supplier and Credit To Account entered
-	# ------------------------------------------------------------
-	def check_for_acc_head_of_supplier(self):
-		if self.supplier and self.credit_to:
-			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s", self.credit_to)
-
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.supplier)) or (not acc_head and (self.credit_to != cstr(self.supplier) + " - " + self.company_abbr)):
-				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.credit_to,self.supplier,self.company), raise_exception=1)
-
-	# Check for Stopped PO
-	# ---------------------
 	def check_for_stopped_status(self):
 		check_list = []
 		for d in self.get('entries'):
@@ -274,6 +265,8 @@ class PurchaseInvoice(BuyingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
+					"party_type": "Supplier",
+					"party": self.supplier,
 					"against": self.against_expense_account,
 					"credit": self.total_amount_to_pay,
 					"remarks": self.remarks,
