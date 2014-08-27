@@ -13,6 +13,10 @@ from frappe.model.mapper import get_mapped_doc
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
+def create_recurring_documents():
+	manage_recurring_documents("Sales Order")
+	manage_recurring_documents("Sales Invoice")
+
 def manage_recurring_documents(doctype, next_date=None, commit=True):
 	"""
 		Create recurring documents on specific date by copying the original one
@@ -26,9 +30,9 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 		date_field = "posting_date"
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
-		from `tab%s` where ifnull(convert_into_recurring, 0)=1
-		and docstatus=1 and next_date=%s
-		and next_date <= ifnull(end_date, '2199-12-31')""" % (doctype, '%s'), (next_date))
+		from `tab{}` where ifnull(is_recurring, 0)=1
+		and docstatus=1 and next_date='{}'
+		and next_date <= ifnull(end_date, '2199-12-31')""".format(doctype, next_date))
 
 	exception_list = []
 	for ref_document, recurring_id in recurring_documents:
@@ -47,7 +51,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 					frappe.db.begin()
 					frappe.db.sql("update `tab%s` \
-						set convert_into_recurring = 0 where name = %s" % (doctype, '%s'), 
+						set is_recurring = 0 where name = %s" % (doctype, '%s'), 
 						(ref_document))
 					notify_errors(ref_document, doctype, ref_wrapper.customer, ref_wrapper.owner)
 					frappe.db.commit()
@@ -66,23 +70,23 @@ def make_new_document(ref_wrapper, date_field, posting_date):
 	new_document = frappe.copy_doc(ref_wrapper)
 	mcount = month_map[ref_wrapper.recurring_type]
 
-	period_from = get_next_date(ref_wrapper.period_from, mcount)
+	from_date = get_next_date(ref_wrapper.from_date, mcount)
 
 	# get last day of the month to maintain period if the from date is first day of its own month
 	# and to date is the last day of its own month
-	if (cstr(get_first_day(ref_wrapper.period_from)) == \
-			cstr(ref_wrapper.period_from)) and \
-		(cstr(get_last_day(ref_wrapper.period_to)) == \
-			cstr(ref_wrapper.period_to)):
-		period_to = get_last_day(get_next_date(ref_wrapper.period_to,
+	if (cstr(get_first_day(ref_wrapper.from_date)) == \
+			cstr(ref_wrapper.from_date)) and \
+		(cstr(get_last_day(ref_wrapper.to_date)) == \
+			cstr(ref_wrapper.to_date)):
+		to_date = get_last_day(get_next_date(ref_wrapper.to_date,
 			mcount))
 	else:
-		period_to = get_next_date(ref_wrapper.period_to, mcount)
+		to_date = get_next_date(ref_wrapper.to_date, mcount)
 
 	new_document.update({
 		date_field: posting_date,
-		"period_from": period_from,
-		"period_to": period_to,
+		"from_date": from_date,
+		"to_date": to_date,
 		"fiscal_year": get_fiscal_year(posting_date)[0],
 		"owner": ref_wrapper.owner,
 	})
@@ -112,7 +116,7 @@ def send_notification(new_rv):
 		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
 		attachments = [{
 			"fname": new_rv.name + ".pdf",
-			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True)
+			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True).encode('utf-8')
 		}])
 
 def notify_errors(doc, doctype, customer, owner):
@@ -121,7 +125,7 @@ def notify_errors(doc, doctype, customer, owner):
 
 	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
 		subject="[Urgent] Error while creating recurring %s for %s" % (doctype, doc),
-		message = frappe.get_template("templates/emails/recurring_sales_invoice_failed.html").render({
+		message = frappe.get_template("templates/emails/recurring_document_failed.html").render({
 			"type": doctype,
 			"name": doc,
 			"customer": customer
@@ -140,3 +144,54 @@ def assign_task_to_owner(doc, doctype, msg, users):
 			'priority'		:	'High'
 		}
 		assign_to.add(args)
+
+def validate_recurring_document(doc):
+	if doc.is_recurring:
+		validate_notification_email_id(doc)
+
+		if not doc.recurring_type:
+			msgprint(_("Please select {0}").format(doc.meta.get_label("recurring_type")),
+			raise_exception=1)
+
+		elif not (doc.from_date and doc.to_date):
+			throw(_("Period From and Period To dates mandatory for recurring %s") % doc.doctype)
+
+def convert_to_recurring(doc, autoname, posting_date):
+	if doc.is_recurring:
+		if not doc.recurring_id:
+			frappe.db.set(doc, "recurring_id",
+				make_autoname(autoname))
+
+		set_next_date(doc, posting_date)
+
+	elif doc.recurring_id:
+		frappe.db.sql("""update `tab%s`
+			set is_recurring = 0
+			where recurring_id = %s""" % (doc.doctype, '%s'), (doc.recurring_id))
+
+def validate_notification_email_id(doc):
+	if doc.notification_email_address:
+		email_list = filter(None, [cstr(email).strip() for email in
+			doc.notification_email_address.replace("\n", "").split(",")])
+
+		from frappe.utils import validate_email_add
+		for email in email_list:
+			if not validate_email_add(email):
+				throw(_("{0} is an invalid email address in 'Notification \
+					Email Address'").format(email))
+
+	else:
+		frappe.throw(_("'Notification Email Addresses' not specified for recurring %s") \
+			% doc.doctype)
+
+def set_next_date(doc, posting_date):
+	""" Set next date on which recurring document will be created"""
+	from erpnext.controllers.recurring_document import get_next_date
+
+	if not doc.repeat_on_day_of_month:
+		msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
+
+	next_date = get_next_date(posting_date, month_map[doc.recurring_type], 
+		cint(doc.repeat_on_day_of_month))
+
+	frappe.db.set(doc, 'next_date', next_date)

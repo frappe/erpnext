@@ -16,14 +16,14 @@ def test_recurring_document(obj, test_records):
 	base_doc = frappe.copy_doc(test_records[0])
 
 	base_doc.update({
-		"convert_into_recurring": 1,
+		"is_recurring": 1,
 		"recurring_type": "Monthly",
 		"notification_email_address": "test@example.com, test1@example.com, test2@example.com",
 		"repeat_on_day_of_month": getdate(today).day,
 		"due_date": None,
 		"fiscal_year": get_fiscal_year(today)[0],
-		"period_from": get_first_day(today),
-		"period_to": get_last_day(today)
+		"from_date": get_first_day(today),
+		"to_date": get_last_day(today)
 	})
 
 	if base_doc.doctype == "Sales Order":
@@ -50,8 +50,8 @@ def test_recurring_document(obj, test_records):
 	# monthly without a first and last day period
 	doc2 = frappe.copy_doc(base_doc)
 	doc2.update({
-		"period_from": today,
-		"period_to": add_to_date(today, days=30)
+		"from_date": today,
+		"to_date": add_to_date(today, days=30)
 	})
 	doc2.insert()
 	doc2.submit()
@@ -61,8 +61,8 @@ def test_recurring_document(obj, test_records):
 	doc3 = frappe.copy_doc(base_doc)
 	doc3.update({
 		"recurring_type": "Quarterly",
-		"period_from": get_first_day(today),
-		"period_to": get_last_day(add_to_date(today, months=3))
+		"from_date": get_first_day(today),
+		"to_date": get_last_day(add_to_date(today, months=3))
 	})
 	doc3.insert()
 	doc3.submit()
@@ -72,8 +72,8 @@ def test_recurring_document(obj, test_records):
 	doc4 = frappe.copy_doc(base_doc)
 	doc4.update({
 		"recurring_type": "Quarterly",
-		"period_from": today,
-		"period_to": add_to_date(today, months=3)
+		"from_date": today,
+		"to_date": add_to_date(today, months=3)
 	})
 	doc4.insert()
 	doc4.submit()
@@ -83,8 +83,8 @@ def test_recurring_document(obj, test_records):
 	doc5 = frappe.copy_doc(base_doc)
 	doc5.update({
 		"recurring_type": "Yearly",
-		"period_from": get_first_day(today),
-		"period_to": get_last_day(add_to_date(today, years=1))
+		"from_date": get_first_day(today),
+		"to_date": get_last_day(add_to_date(today, years=1))
 	})
 	doc5.insert()
 	doc5.submit()
@@ -94,8 +94,8 @@ def test_recurring_document(obj, test_records):
 	doc6 = frappe.copy_doc(base_doc)
 	doc6.update({
 		"recurring_type": "Yearly",
-		"period_from": today,
-		"period_to": add_to_date(today, years=1)
+		"from_date": today,
+		"to_date": add_to_date(today, years=1)
 	})
 	doc6.insert()
 	doc6.submit()
@@ -138,23 +138,23 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 
 		new_doc = frappe.get_doc(base_doc.doctype, recurred_documents[0][0])
 
-		for fieldname in ["convert_into_recurring", "recurring_type",
+		for fieldname in ["is_recurring", "recurring_type",
 			"repeat_on_day_of_month", "notification_email_address"]:
 				obj.assertEquals(base_doc.get(fieldname),
 					new_doc.get(fieldname))
 
 		obj.assertEquals(new_doc.get(date_field), unicode(next_date))
 
-		obj.assertEquals(new_doc.period_from,
-			unicode(add_months(base_doc.period_from, no_of_months)))
+		obj.assertEquals(new_doc.from_date,
+			unicode(add_months(base_doc.from_date, no_of_months)))
 
 		if first_and_last_day:
-			obj.assertEquals(new_doc.period_to,
-				unicode(get_last_day(add_months(base_doc.period_to,
+			obj.assertEquals(new_doc.to_date,
+				unicode(get_last_day(add_months(base_doc.to_date,
 					no_of_months))))
 		else:
-			obj.assertEquals(new_doc.period_to,
-				unicode(add_months(base_doc.period_to, no_of_months)))
+			obj.assertEquals(new_doc.to_date,
+				unicode(add_months(base_doc.to_date, no_of_months)))
 
 
 		return new_doc

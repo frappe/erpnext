@@ -14,7 +14,7 @@ from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 
-month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+from erpnext.controllers.recurring_document import *
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -75,7 +75,7 @@ class SalesInvoice(SellingController):
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
-		self.validate_recurring_document()
+		validate_recurring_document(self)
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount",
 			"delivery_note_details")
 
@@ -103,7 +103,7 @@ class SalesInvoice(SellingController):
 
 		self.update_c_form()
 		self.update_time_log_batch(self.name)
-		self.convert_to_recurring("RECINV.#####", self.posting_date)
+		convert_to_recurring(self, "RECINV.#####", self.posting_date)
 
 	def before_cancel(self):
 		self.update_time_log_batch(None)
@@ -144,8 +144,8 @@ class SalesInvoice(SellingController):
 			})
 
 	def on_update_after_submit(self):
-		self.validate_recurring_document()
-		self.convert_to_recurring("RECINV.#####", self.posting_date)
+		validate_recurring_document(self)
+		convert_to_recurring(self, "RECINV.#####", self.posting_date)
 
 	def get_portal_page(self):
 		return "invoice" if self.docstatus==1 else None
