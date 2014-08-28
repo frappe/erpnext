@@ -1,0 +1,15 @@
+{
+ "creation": "2014-08-28 11:54:02.587319", 
+ "disabled": 0, 
+ "doc_type": "Journal Voucher", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "html": "<h3 class=\"text-right\">{{ doc.select_print_heading or _(\"Debit Note\") }}</h3>\n<hr>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Debit Note No\") }}</label></div>\n  <div class=\"col-sm-9\">{{ doc.name }}</div>\n</div>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Debit Date\") }}</label></div>\n  <div class=\"col-sm-9\">{{ frappe.utils.formatdate(doc.voucher_date) }}</div>\n</div>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Debit Type \") }}</label></div>\n  <div class=\"col-sm-9\">{{ _(\"Debit Note \") }}</div>\n</div>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Debit To\") }}</label></div>\n  <div class=\"col-sm-9\">{{ doc.pay_to_recd_from }}</div>\n</div>\n<hr>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Total Amount\") }}</label></div>\n  <div class=\"col-sm-9\"><label>{{ doc.total_amount }}/-<br>{{ doc.total_amount_in_words }}</label></div>\n</div>\n<hr>\n<div class=\"row\">\n  <div class=\"col-sm-3\"><label align=right>{{ _(\"Remarks\") }}</label></div>\n  <div class=\"col-sm-9\">{{ doc.remark }}</div>\n</div>\n<hr>\n<br>\n<p>\n{{ _(\"For\") }} {{ doc.company }},<br>\n<br>\n<br>\n<br>\n{{ _(\"Authorized Signatory\") }}</p>\n", 
+ "modified": "2014-08-28 11:54:02.587319", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Debit Note", 
+ "owner": "Administrator", 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}
