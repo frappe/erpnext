@@ -108,18 +108,22 @@ class JournalVoucher(AccountsController):
 							.format(d.against_jv, dr_or_cr))
 
 	def validate_against_sales_invoice(self):
-		self.validate_payment_details("against_invoice", "Sales Invoice")
+		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Sales Invoice")
+		self.validate_against_invoice_fields(payment_against_voucher)
 
 	def validate_against_purchase_invoice(self):
-		self.validate_payment_details("against_voucher", "Purchase Invoice")
+		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Purchase Invoice")
+		self.validate_against_invoice_fields(payment_against_voucher)
 
 	def validate_against_sales_order(self):
-		self.validate_payment_details("against_sales_order", "Sales Order")
+		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Sales Order")
+		self.validate_against_order_fields(payment_against_voucher)
 
 	def validate_against_purchase_order(self):
-		self.validate_payment_details("against_purchase_order", "Purchase Order")
+		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Purchase Order")
+		self.validate_against_order_fields(payment_against_voucher)
 
-	def validate_payment_details(self, against_field, doctype):
+	def validate_account_in_against_voucher(self, against_field, doctype):
 		payment_against_voucher = frappe._dict()
 		field_dict = {'Sales Invoice': "Debit To",
 			'Purchase Invoice': "Credit To",
@@ -129,7 +133,8 @@ class JournalVoucher(AccountsController):
 
 		for d in self.get("entries"):
 			if d.get(against_field):
-				dr_or_cr = "credit" if against_field in ["against_invoice", "against_sales_order"] else "debit"
+				dr_or_cr = "credit" if against_field in ["against_invoice", "against_sales_order"] \
+					else "debit"
 				if against_field in ["against_invoice", "against_sales_order"] \
 					and flt(d.debit) > 0:
 					frappe.throw(_("Row {0}: Debit entry can not be linked with a {1}").format(d.idx, doctype))
@@ -143,41 +148,44 @@ class JournalVoucher(AccountsController):
 
 				account_master_name = frappe.db.get_value("Account", d.account, "master_name")
 
-				if d.get(against_field) in ["against_invoice", "against_voucher"] \
+				if against_field in ["against_invoice", "against_voucher"] \
 					and voucher_account != d.account:
 					frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} account") \
 						.format(d.idx, d.account, doctype, field_dict.get(doctype)))
 					
-				if d.get(against_field) in ["against_sales_order", "against_purchase_order"] \
-					and voucher_account != account_master_name:
-					frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} account") \
-						.format(d.idx, d.account, doctype, field_dict.get(doctype)))
+				if against_field in ["against_sales_order", "against_purchase_order"]:
+					if voucher_account != account_master_name:
+						frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} Name") \
+							.format(d.idx, d.account, doctype, field_dict.get(doctype)))
+					elif d.is_advance == "Yes":
+						payment_against_voucher.setdefault(d.get(against_field), []).append(flt(d.get(dr_or_cr)))
 
-				payment_against_voucher.setdefault(d.get(against_field), []).append(flt(d.get(dr_or_cr)))
+		return payment_against_voucher
 
+	def validate_against_invoice_fields(self, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
-			if doctype in ["Sales Invoice", "Purchase Invoice"]:
-				voucher_properties = frappe.db.get_value(doctype, voucher_no, 
-					["docstatus", "outstanding_amount"])
+			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
+				["docstatus", "outstanding_amount"])
 
-				if voucher_properties[0] != 1:
-					frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))
+			if voucher_properties[0] != 1:
+				frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))
 
-				if flt(voucher_properties[1]) < flt(sum(payment_list)):
-					frappe.throw(_("Payment against {0} {1} cannot be greater \
-						than Outstanding Amount {2}").format(doctype, voucher_no, voucher_properties[1]))
+			if flt(voucher_properties[1]) < flt(sum(payment_list)):
+				frappe.throw(_("Payment against {0} {1} cannot be greater \
+					than Outstanding Amount {2}").format(doctype, voucher_no, voucher_properties[1]))
 
-			if doctype in ["Sales Order", "Purchase Order"]:
-				voucher_properties = frappe.db.get_value(doctype, voucher_no, 
-					["docstatus", "per_billed", "advance_paid", "grand_total"])
+	def validate_against_order_fields(self, payment_against_voucher):
+		for voucher_no, payment_list in payment_against_voucher.items():
+			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
+				["docstatus", "per_billed", "advance_paid", "grand_total"])
 
-				if voucher_properties[0] != 1:
-					frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))
+			if voucher_properties[0] != 1:
+				frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))
 
-				if flt(voucher_properties[1]) >= 100:
-					frappe.throw(_("{0} {1} is fully billed").format(doctype, voucher_no))
+			if flt(voucher_properties[1]) >= 100:
+				frappe.throw(_("{0} {1} is fully billed").format(doctype, voucher_no))
 
-				print "advance_paid", voucher_properties[2], "grand_total", voucher_properties[3], "sum of list", sum(payment_list)
+			if d.is_advance == "Yes":
 				if flt(voucher_properties[3]) < flt(voucher_properties[2]) + flt(sum(payment_list)):
 					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
 						than Grand Total {2}").format(doctype, voucher_no, voucher_properties[3]))
@@ -225,7 +233,7 @@ class JournalVoucher(AccountsController):
 
 			if d.against_sales_order and d.credit:
 				currency = frappe.db.get_value("Sales Order", d.against_sales_order, "currency")
-				r.append(_("{0} against Sales Order {1}").format(fmt_money(flt(d.credit, currency = currency)), \
+				r.append(_("{0} against Sales Order {1}").format(fmt_money(flt(d.credit), currency = currency), \
 					d.against_sales_order))
 
 			if d.against_voucher and d.debit:
@@ -239,7 +247,7 @@ class JournalVoucher(AccountsController):
 
 			if d.against_purchase_order and d.debit:
 				currency = frappe.db.get_value("Purchase Order", d.against_purchase_order, "currency")
-				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit, currency = currency)), \
+				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = currency), \
 					d.against_purchase_order))
 
 		if self.user_remark:
