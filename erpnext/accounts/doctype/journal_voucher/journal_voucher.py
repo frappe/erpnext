@@ -203,7 +203,7 @@ class JournalVoucher(AccountsController):
 			if account_type in ['Bank', 'Cash']:
 				company_currency = get_company_currency(self.company)
 				amt = flt(d.debit) and d.debit or d.credit
-				self.total_amount = company_currency + ' ' + cstr(amt)
+				self.total_amount = fmt_money(amt, currency=company_currency)
 				from frappe.utils import money_in_words
 				self.total_amount_in_words = money_in_words(amt, company_currency)
 
