@@ -122,5 +122,5 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_expense_against_budget(entry)
 
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
-			update_outstanding_amt(entry["account"], entry.get("against_voucher_type"),
+			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

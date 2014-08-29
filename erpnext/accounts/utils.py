@@ -152,6 +152,7 @@ def check_if_jv_modified(args):
 	ret = frappe.db.sql("""
 		select t2.{dr_or_cr} from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 		where t1.name = t2.parent and t2.account = %(account)s
+		and t2.party_type = %(party_type)s and t2.party = %(party)s
 		and ifnull(t2.against_voucher, '')=''
 		and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
 		and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
@@ -180,6 +181,8 @@ def update_against_doc(d, jv_obj):
 		# new entry with balance amount
 		ch = jv_obj.append("entries")
 		ch.account = d['account']
+		ch.party_type = d["party_type"]
+		ch.party = d["party"]
 		ch.cost_center = cstr(jvd[0][0])
 		ch.balance = flt(jvd[0][1])
 		ch.set(d['dr_or_cr'], flt(d['unadjusted_amt']) - flt(d['allocated_amt']))

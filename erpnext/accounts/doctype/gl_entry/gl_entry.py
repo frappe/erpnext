@@ -27,7 +27,7 @@ class GLEntry(Document):
 		# Update outstanding amt on against voucher
 		if self.against_voucher_type in ['Journal Voucher', 'Sales Invoice', 'Purchase Invoice'] \
 			and self.against_voucher and update_outstanding == 'Yes':
-				update_outstanding_amt(self.account, self.against_voucher_type,
+				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 					self.against_voucher)
 
 	def check_mandatory(self):
@@ -35,6 +35,10 @@ class GLEntry(Document):
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
+
+		account_type = frappe.db.get_value("Account", self.account, "account_type")
+		if account_type in ["Receivable", "Payable"] and not (self.party_type and self.party):
+			frappe.throw(_("Party Type and Party is required for Receivable / Payable account {0}").format(self.account))
 
 		# Zero value transaction is not allowed
 		if not (flt(self.debit) or flt(self.credit)):
@@ -109,12 +113,13 @@ def check_freezing_date(posting_date, adv_adj=False):
 					and not frozen_accounts_modifier in frappe.user.get_roles():
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
-def update_outstanding_amt(account, against_voucher_type, against_voucher, on_cancel=False):
+def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
 	# get final outstanding amt
 	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s and account = %s""",
-		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
+		where against_voucher_type=%s and against_voucher=%s
+		and account = %s and party_type=%s and party=%s""",
+		(against_voucher_type, against_voucher, account, party_type, party))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
@@ -122,8 +127,8 @@ def update_outstanding_amt(account, against_voucher_type, against_voucher, on_ca
 		against_voucher_amount = flt(frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
-			and account = %s and ifnull(against_voucher, '') = ''""",
-			(against_voucher, account))[0][0])
+			and account = %s and party_type=%s and party=%s and ifnull(against_voucher, '') = ''""",
+			(against_voucher, account, party_type, party))[0][0])
 		bal = against_voucher_amount + bal
 		if against_voucher_amount < 0:
 			bal = -bal

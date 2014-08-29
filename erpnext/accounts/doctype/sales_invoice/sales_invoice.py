@@ -202,7 +202,7 @@ class SalesInvoice(SellingController):
 				self.set_taxes("other_charges", "taxes_and_charges")
 
 	def get_advances(self):
-		super(SalesInvoice, self).get_advances(self.debit_to,
+		super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
 			"Sales Invoice Advance", "advance_adjustment_details", "credit", "sales_order")
 
 	def get_company_abbr(self):
@@ -225,6 +225,8 @@ class SalesInvoice(SellingController):
 					'against_voucher_type' : 'Sales Invoice',
 					'against_voucher'  : self.name,
 					'account' : self.debit_to,
+					'party_type': 'Customer',
+					'party': self.customer,
 					'is_advance' : 'Yes',
 					'dr_or_cr' : 'credit',
 					'unadjusted_amt' : flt(d.advance_amount),
@@ -455,7 +457,7 @@ class SalesInvoice(SellingController):
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, self.doctype, self.name)
+				update_outstanding_amt(self.debit_to, "Customer", self.customer, self.doctype, self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):

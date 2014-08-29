@@ -3,9 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-
-
-from frappe.utils import cint, cstr, formatdate, flt
+from frappe.utils import cint, formatdate, flt
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
@@ -76,7 +74,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
 	def get_advances(self):
-		super(PurchaseInvoice, self).get_advances(self.credit_to,
+		super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
 			"Purchase Invoice Advance", "advance_allocation_details", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
@@ -226,6 +224,8 @@ class PurchaseInvoice(BuyingController):
 					'against_voucher_type' : 'Purchase Invoice',
 					'against_voucher'  : self.name,
 					'account' : self.credit_to,
+					'party_type': 'Supplier',
+					'party': self.supplier,
 					'is_advance' : 'Yes',
 					'dr_or_cr' : 'debit',
 					'unadjusted_amt' : flt(d.advance_amount),

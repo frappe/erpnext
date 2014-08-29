@@ -21,7 +21,7 @@ class JournalVoucher(AccountsController):
 		self.clearance_date = None
 
 		super(JournalVoucher, self).validate_date_with_fiscal_year()
-
+		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
 		self.validate_debit_and_credit()
@@ -60,6 +60,13 @@ class JournalVoucher(AccountsController):
 
 		self.make_gl_entries(1)
 		self.update_advance_paid()
+
+	def validate_party(self):
+		for d in self.get("entries"):
+			account_type = frappe.db.get_value("Account", d.account, "account_type")
+			if account_type in ["Receivable", "Payable"] and not (d.party_type and d.party):
+				frappe.throw(_("Row{0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
+
 
 	def check_credit_limit(self):
 		customers = list(set([d.party for d in self.get("entries") if d.party_type=="Customer"]))
@@ -247,6 +254,7 @@ class JournalVoucher(AccountsController):
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
+
 				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = currency), \
 					d.against_invoice))
 
@@ -260,7 +268,7 @@ class JournalVoucher(AccountsController):
 					from `tabPurchase Invoice` where name=%s""", d.against_voucher)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
-					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), bill_no[0][2]), bill_no[0][0],
+					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=bill_no[0][2]), bill_no[0][0],
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d'))))
 
 			if d.against_purchase_order and d.debit:
@@ -294,7 +302,7 @@ class JournalVoucher(AccountsController):
 					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				self.total_amount = fmt_money(d.debit or d.credit, currency)
+				self.total_amount = fmt_money(d.debit or d.credit, currency=currency)
 				self.total_amount_in_words = money_in_words(self.total_amount, currency)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):

@@ -364,6 +364,8 @@ class AccountsController(TransactionBase):
 			'debit': 0,
 			'credit': 0,
 			'is_opening': self.get("is_opening") or "No",
+			'party_type': None,
+			'party': None
 		})
 		gl_dict.update(args)
 		return gl_dict
@@ -374,7 +376,7 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
-	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr, against_order_field):
+	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
 		so_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
 		cond = ""
 		if so_list:
@@ -386,17 +388,18 @@ class AccountsController(TransactionBase):
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
-				t1.name = t2.parent and t2.account = %s and t2.is_advance = 'Yes' and t1.docstatus = 1
+				t1.name = t2.parent and t2.account = %s
+				and t2.party_type=%s and t2.party=%s
+				and t2.is_advance = 'Yes' and t1.docstatus = 1
 				and ((
 						ifnull(t2.against_voucher, '')  = ''
 						and ifnull(t2.against_invoice, '')  = ''
 						and ifnull(t2.against_jv, '')  = ''
 						and ifnull(t2.against_sales_order, '')  = ''
 						and ifnull(t2.against_purchase_order, '')  = ''
-					) %s)
+				) %s)
 			order by t1.posting_date""" %
-			(dr_or_cr, '%s', cond),
-			tuple([account_head] + so_list), as_dict= True)
+			(dr_or_cr, '%s', '%s', '%s', cond), tuple([account_head, party_type, party] + so_list), as_dict=1)
 
 		self.set(parentfield, [])
 		for d in res:
