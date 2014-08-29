@@ -151,9 +151,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							transaction_date: me.frm.doc.transaction_date,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
 							doctype: item.doctype,
-							name: item.name
+							name: item.name,
+							project_name: item.project_name || me.frm.doc.project_name
 						}
 					},
+					
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
