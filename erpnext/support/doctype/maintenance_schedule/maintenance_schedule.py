@@ -134,7 +134,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate_dates_with_periodicity(self):
 		for d in self.get("item_maintenance_detail"):
-			if d.start_date and d.end_date and d.periodicity:
+			if d.start_date and d.end_date and d.periodicity and d.periodicity!="Random":
 				date_diff = (getdate(d.end_date) - getdate(d.start_date)).days + 1
 				days_in_period = {
 					"Weekly": 7,

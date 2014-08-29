@@ -67,7 +67,7 @@ def get_incoming_rate(args):
 	from erpnext.stock.stock_ledger import get_previous_sle
 
 	in_rate = 0
-	if args.get("serial_no"):
+	if (args.get("serial_no") or "").strip():
 		in_rate = get_avg_purchase_rate(args.get("serial_no"))
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
