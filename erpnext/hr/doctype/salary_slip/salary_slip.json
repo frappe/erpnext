@@ -74,6 +74,7 @@
   {
    "fieldname": "letter_head", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "Letter Head", 
    "options": "Letter Head", 
    "permlevel": 0, 
@@ -335,7 +336,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-21 07:58:08.033784", 
+ "modified": "2014-08-27 06:38:10.006224", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -353,6 +354,7 @@
    "report": 1, 
    "role": "HR User", 
    "submit": 1, 
+   "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\",\"Fiscal Year\",\"Salary Slip\"]", 
    "write": 1
   }, 
   {

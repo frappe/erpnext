@@ -8,10 +8,11 @@
  "fields": [
   {
    "fieldname": "leave_approver", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "in_list_view": 1, 
    "label": "Leave Approver", 
-   "options": "[Select]", 
+   "options": "User", 
    "permlevel": 0, 
    "print_hide": 1, 
    "reqd": 1, 
@@ -20,7 +21,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-15 19:32:14.134420", 
+ "modified": "2014-08-27 06:21:36.887205", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee Leave Approver", 

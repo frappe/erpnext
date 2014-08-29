@@ -91,6 +91,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		from frappe.utils.user import add_role
 		add_role("test1@example.com", "HR User")
+		add_role("test1@example.com", "Leave Approver")
 		clear_user_permissions_for_doctype("Employee")
 
 		frappe.db.set_value("Department", "_Test Department",
@@ -157,6 +158,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		from frappe.utils.user import add_role
 		add_role("test@example.com", "Employee")
+		add_role("test1@example.com", "HR User")
 		add_role("test1@example.com", "Leave Approver")
 		add_role("test2@example.com", "Leave Approver")
 
