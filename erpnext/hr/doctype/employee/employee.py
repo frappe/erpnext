@@ -50,20 +50,10 @@ class Employee(Document):
 			self.update_user_permissions()
 
 		self.update_dob_event()
-		self.update_leave_approver_user_permissions()
 
 	def update_user_permissions(self):
 		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
 		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
-
-	def update_leave_approver_user_permissions(self):
-		"""add employee user permission for leave approver"""
-		employee_leave_approvers = [d.leave_approver for d in self.get("employee_leave_approvers")]
-		if self.reports_to and self.reports_to not in employee_leave_approvers:
-			employee_leave_approvers.append(frappe.db.get_value("Employee", self.reports_to, "user_id"))
-
-		for user in employee_leave_approvers:
-			frappe.permissions.add_user_permission("Employee", self.name, user)
 
 	def update_user(self):
 		# add employee role if missing

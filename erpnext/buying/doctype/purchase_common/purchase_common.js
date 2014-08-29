@@ -385,6 +385,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		});
 	}
 });
-
+cur_frm.add_fetch('project_name', 'cost_center', 'cost_center');
 var tname = cur_frm.cscript.tname;
 var fname = cur_frm.cscript.fname;

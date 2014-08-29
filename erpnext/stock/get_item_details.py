@@ -29,6 +29,7 @@ def get_item_details(args):
 			"is_subcontracted": "Yes" / "No",
 			"transaction_type": "selling",
 			"ignore_pricing_rule": 0/1
+			"project_name": "",
 		}
 	"""
 	args = process_args(args)
@@ -149,7 +150,8 @@ def get_basic_details(args, item_doc):
 			or args.expense_account
 			or frappe.db.get_value("Item Group", item.item_group, "default_expense_account")
 			or frappe.db.get_value("Company", args.company, "default_expense_account")),
-		"cost_center": ((item.selling_cost_center if args.transaction_type == "selling" else item.buying_cost_center)
+		"cost_center": (frappe.db.get_value("Project", args.project_name, "cost_center")
+			or (item.selling_cost_center if args.transaction_type == "selling" else item.buying_cost_center)
 			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
 			or frappe.db.get_value("Company", args.company, "cost_center")),
 		"batch_no": None,

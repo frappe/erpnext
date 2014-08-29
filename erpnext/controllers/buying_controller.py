@@ -197,7 +197,7 @@ class BuyingController(StockController):
 
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype == "Purchase Receipt" else 0.0
-				
+
 				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost
 					 + landed_cost_voucher_amount) / qty_in_stock_uom)
 			else:
@@ -289,7 +289,8 @@ class BuyingController(StockController):
 					self.append(raw_material_table, d)
 
 	def get_items_from_default_bom(self, item_code):
-		bom_items = frappe.db.sql("""select t2.item_code, t2.qty_consumed_per_unit,
+		bom_items = frappe.db.sql("""select t2.item_code,
+			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2
 			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1

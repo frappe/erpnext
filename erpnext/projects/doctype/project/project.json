@@ -1,5 +1,6 @@
 {
-  "allow_import": 1, 
+ "allow_attach": 1, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:project_name", 
  "creation": "2013-03-07 11:55:07", 
@@ -208,6 +209,13 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "label": "Default Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "label": "Margin", 
@@ -265,7 +273,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-08-04 03:22:11.416219", 
+ "modified": "2014-08-26 14:59:27.052172", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
