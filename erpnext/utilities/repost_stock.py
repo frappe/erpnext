@@ -22,7 +22,7 @@ def repost(allow_negative_stock=False):
 		(select item_code, warehouse from tabBin
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
-			repost_stock(d[0], d[1], allow_negative_stock)
+			repost_stock(d[0], d[1])
 
 	if allow_negative_stock:
 		frappe.db.set_default("allow_negative_stock",
@@ -33,7 +33,7 @@ def repost_stock(item_code, warehouse):
 	repost_actual_qty(item_code, warehouse)
 
 	if item_code and warehouse:
-		update_bin(item_code, warehouse, {
+		update_bin_qty(item_code, warehouse, {
 			"reserved_qty": get_reserved_qty(item_code, warehouse),
 			"indented_qty": get_indented_qty(item_code, warehouse),
 			"ordered_qty": get_ordered_qty(item_code, warehouse),
@@ -116,7 +116,7 @@ def get_planned_qty(item_code, warehouse):
 	return flt(planned_qty[0][0]) if planned_qty else 0
 
 
-def update_bin(item_code, warehouse, qty_dict=None):
+def update_bin_qty(item_code, warehouse, qty_dict=None):
 	from erpnext.stock.utils import get_bin
 	bin = get_bin(item_code, warehouse)
 	mismatch = False
@@ -201,11 +201,11 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				last_sle = sr.get_last_sle()
 				if flt(last_sle.actual_qty) > 0:
 					sr.warehouse = last_sle.warehouse
-					
+
 				sr.via_stock_ledger = True
 				sr.save()
 			except:
 				pass
-		
+
 		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
-		
+
