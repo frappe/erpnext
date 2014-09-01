@@ -12,6 +12,7 @@ from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
 def test_recurring_document(obj, test_records):
 	from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
 	from erpnext.accounts.utils import get_fiscal_year
+	frappe.db.set_value("Print Settings", "Print Settings", "send_print_as_pdf", 1)
 	today = nowdate()
 	base_doc = frappe.copy_doc(test_records[0])
 
@@ -104,13 +105,13 @@ def test_recurring_document(obj, test_records):
 	# change date field but keep recurring day to be today
 	doc7 = frappe.copy_doc(base_doc)
 	doc7.update({
-		date_field: add_to_date(today, days=-1)
+		date_field: today,
 	})
 	doc7.insert()
 	doc7.submit()
 
 	# setting so that _test function works
-	doc7.set(date_field, today)
+	# doc7.set(date_field, today)
 	_test_recurring_document(obj, doc7, date_field, True)
 
 def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):

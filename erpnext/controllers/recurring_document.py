@@ -111,12 +111,13 @@ def get_next_date(dt, mcount, day=None):
 
 def send_notification(new_rv):
 	"""Notify concerned persons about recurring document generation"""
+
 	frappe.sendmail(new_rv.notification_email_address,
 		subject=  _("New {0}: #{1}").format(new_rv.doctype, new_rv.name),
 		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
 		attachments = [{
 			"fname": new_rv.name + ".pdf",
-			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True).encode('utf-8')
+			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True)
 		}])
 
 def notify_errors(doc, doctype, customer, owner):
@@ -186,8 +187,7 @@ def validate_notification_email_id(doc):
 
 def set_next_date(doc, posting_date):
 	""" Set next date on which recurring document will be created"""
-	from erpnext.controllers.recurring_document import get_next_date
-
+	
 	if not doc.repeat_on_day_of_month:
 		msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
 
@@ -195,3 +195,5 @@ def set_next_date(doc, posting_date):
 		cint(doc.repeat_on_day_of_month))
 
 	frappe.db.set(doc, 'next_date', next_date)
+
+	msgprint(_("Next Recurring {0} will be created on {1}").format(doc.doctype, next_date))
