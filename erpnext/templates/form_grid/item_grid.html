@@ -72,7 +72,7 @@
 
 		<!-- rate -->
 		<div class="col-sm-2 text-right">
-			{% if (frappe.perm.is_visible("rate", doc, frm.perm)) { %}
+			{% if (!frappe.perm.is_visible("rate", doc, frm.perm)) { %}
 				<span class="text-muted">{%= __("hidden") %}</span>
 			{% } else { %}
 				{%= doc.get_formatted("rate") %}
@@ -86,7 +86,7 @@
 
 		<!-- amount -->
 		<div class="col-sm-2 text-right">
-			{% if (frappe.perm.is_visible("amount", doc, frm.perm)) { %}
+			{% if (!frappe.perm.is_visible("amount", doc, frm.perm)) { %}
 				<span class="text-muted">{%= __("hidden") %}</span>
 			{% } else { %}
 				{%= doc.get_formatted("amount") %}
