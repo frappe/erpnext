@@ -87,16 +87,26 @@ cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 
 cur_frm.fields_dict.default_cash_account.get_query = cur_frm.fields_dict.default_bank_account.get_query;
 
-cur_frm.fields_dict.receivables_group.get_query = function(doc) {
+cur_frm.fields_dict.default_receivable_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
-			'group_or_ledger': "Group"
+			'group_or_ledger': "Ledger",
+			"account_type": "Receivable"
 		}
 	}
 }
 
-cur_frm.fields_dict.payables_group.get_query = cur_frm.fields_dict.receivables_group.get_query;
+cur_frm.fields_dict.default_payable_account.get_query = function(doc) {
+	return{
+		filters:{
+			'company': doc.name,
+			'group_or_ledger': "Ledger",
+			"account_type": "Payable"
+		}
+	}
+}
+
 
 
 cur_frm.fields_dict.default_expense_account.get_query = function(doc) {

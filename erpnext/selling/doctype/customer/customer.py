@@ -22,9 +22,6 @@ class Customer(TransactionBase):
 		else:
 			self.name = make_autoname(self.naming_series+'.#####')
 
-	def get_company_abbr(self):
-		return frappe.db.get_value('Company', self.company, 'abbr')
-
 	def validate_values(self):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
 			frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
@@ -130,6 +127,7 @@ def get_dashboard_info(customer):
 
 	out["total_billing"] = billing[0][0]
 	out["total_unpaid"] = billing[0][1]
+	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
 
 	return out
 

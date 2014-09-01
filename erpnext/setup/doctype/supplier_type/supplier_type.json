@@ -22,11 +22,24 @@
    "fieldtype": "Int", 
    "label": "Credit Days", 
    "permlevel": 1
+  }, 
+  {
+   "fieldname": "default_payable_account", 
+   "fieldtype": "Section Break", 
+   "label": "Default Payable Account", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "party_accounts", 
+   "fieldtype": "Table", 
+   "label": "Party Accounts", 
+   "options": "Party Account", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-08-27 17:43:31.479133", 
+ "modified": "2014-08-29 16:38:22.219286", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Supplier Type", 

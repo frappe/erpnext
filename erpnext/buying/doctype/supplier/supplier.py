@@ -35,9 +35,6 @@ class Supplier(TransactionBase):
 		self.update_address()
 		self.update_contact()
 
-	def get_company_abbr(self):
-		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
-
 	def validate(self):
 		#validation for Naming Series mandatory field...
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
@@ -96,5 +93,6 @@ def get_dashboard_info(supplier):
 
 	out["total_billing"] = billing[0][0]
 	out["total_unpaid"] = billing[0][1]
+	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
 
 	return out

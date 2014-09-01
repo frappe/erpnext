@@ -4,3 +4,14 @@
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.set_intro(doc.__islocal ? "" : __("There is nothing to edit."))
 }
+
+cur_frm.fields_dict['party_accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
+	var d  = locals[cdt][cdn];
+	return {
+		filters: {
+			'account_type': 'Payable',
+			'company': d.company,
+			'group_or_ledger': 'Ledger'
+		}
+	}
+}

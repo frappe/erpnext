@@ -62,12 +62,14 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 		},
 		callback: function(r) {
 			if (in_list(user_roles, "Accounts User") || in_list(user_roles, "Accounts Manager")) {
-				cur_frm.dashboard.set_headline(
-					__("Total Billing This Year: ") + "<b>"
-					+ format_currency(r.message.total_billing, erpnext.get_currency(cur_frm.doc.company))
-					+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>"
-					+ format_currency(r.message.total_unpaid, erpnext.get_currency(cur_frm.doc.company))
-					+ '</b></span>');
+				if(r.message["company_currency"].length == 1) {
+					cur_frm.dashboard.set_headline(
+						__("Total Billing This Year: ") + "<b>"
+						+ format_currency(r.message.total_billing, company_currency[0])
+						+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>"
+						+ format_currency(r.message.total_unpaid, company_currency[0])
+						+ '</b></span>');
+				}
 			}
 			cur_frm.dashboard.set_badge_count(r.message);
 		}
@@ -127,5 +129,16 @@ cur_frm.fields_dict.lead_name.get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict['default_price_list'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{'selling': 1}
+	}
+}
+
+cur_frm.fields_dict['party_accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
+	var d  = locals[cdt][cdn];
+	return {
+		filters: {
+			'account_type': 'Receivable',
+			'company': d.company,
+			'group_or_ledger': 'Ledger'
+		}
 	}
 }
