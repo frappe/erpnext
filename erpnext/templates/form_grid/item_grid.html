@@ -72,17 +72,26 @@
 
 		<!-- rate -->
 		<div class="col-sm-2 text-right">
-			{%= doc.get_formatted("rate") %}
-			{% if(doc.discount_percentage) { %}
-			<br><span class="label label-default pull-right"
-				title="{%= __("Discount")  %}">
-				{%= -1 * doc.discount_percentage %}%</span>
-			{% }%}
+			{% if (frappe.perm.is_visible("rate", doc, frm.perm)) { %}
+				<span class="text-muted">{%= __("hidden") %}</span>
+			{% } else { %}
+				{%= doc.get_formatted("rate") %}
+				{% if(doc.discount_percentage) { %}
+				<br><span class="label label-default pull-right"
+					title="{%= __("Discount")  %}">
+					{%= -1 * doc.discount_percentage %}%</span>
+				{% }%}
+			{% } %}
 		</div>
 
 		<!-- amount -->
 		<div class="col-sm-2 text-right">
-			{%= doc.get_formatted("amount") %}
+			{% if (frappe.perm.is_visible("amount", doc, frm.perm)) { %}
+				<span class="text-muted">{%= __("hidden") %}</span>
+			{% } else { %}
+				{%= doc.get_formatted("amount") %}
+			{% } %}
+
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
 				doc.doctype) && frm.doc.docstatus===1 && doc.amount) {
 				var completed =
