@@ -71,8 +71,9 @@
    "read_only": 1
   }
  ], 
+ "icon": "icon-usd", 
  "is_submittable": 1, 
- "modified": "2014-08-08 13:11:55.764550", 
+ "modified": "2014-09-01 12:05:46.834513", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Voucher", 
