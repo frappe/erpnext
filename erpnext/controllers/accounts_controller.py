@@ -4,7 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, today
+from frappe.utils import add_days, cint, cstr, today, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day
+from frappe.model.naming import make_autoname
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
@@ -443,7 +445,6 @@ class AccountsController(TransactionBase):
 		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 		if total_outstanding:
 			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
-
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
