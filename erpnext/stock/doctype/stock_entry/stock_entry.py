@@ -206,7 +206,7 @@ class StockEntry(StockController):
 	def set_total_amount(self):
 		self.total_amount = sum([flt(item.amount) for item in self.get("mtn_details")])
 
-	def get_stock_and_rate(self):
+	def get_stock_and_rate(self, force=False):
 		"""get stock and incoming rate on posting date"""
 
 		raw_material_cost = 0.0
@@ -237,7 +237,7 @@ class StockEntry(StockController):
 
 			# get incoming rate
 			if not d.bom_no:
-				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return":
+				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
 					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
@@ -247,13 +247,18 @@ class StockEntry(StockController):
 
 		# set incoming rate for fg item
 		if self.purpose == "Manufacture/Repack":
+			number_of_fg_items = len([t.t_warehouse for t in self.get("mtn_details")])
+
 			for d in self.get("mtn_details"):
-				if d.bom_no:
-					if not flt(d.incoming_rate):
-						bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
-						operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
+					if not flt(d.incoming_rate) or force:
+						operation_cost_per_unit = 0
+						if d.bom_no:
+							bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
+							operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 						d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
 					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+					break
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
