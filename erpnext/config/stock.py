@@ -74,8 +74,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Landed Cost Wizard",
-					"description": _("Distribute transport overhead across items."),
+					"name": "Landed Cost Voucher",
+					"description": _("Update additional costs to calculate landed cost of items"),
 				},
 				{
 					"type": "doctype",
