@@ -269,6 +269,7 @@ class BOM(Document):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
+		self.calculate_fixed_cost()
 		self.total_cost = self.raw_material_cost + self.operating_cost
 
 	def calculate_op_cost(self):
@@ -281,6 +282,15 @@ class BOM(Document):
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
 			total_op_cost += flt(d.operating_cost)
 		self.operating_cost = total_op_cost
+
+	def calculate_fixed_cost(self):
+		"""Update workstation rate and calculates totals"""
+		fixed_cost = 0
+		for d in self.get('bom_operations'):
+			if d.workstation:
+				fixed_cost += flt(frappe.db.get_value("Workstation",d.workstation,"fixed_cycle_cost"))
+		self.total_fixed_cost = fixed_cost
+
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""

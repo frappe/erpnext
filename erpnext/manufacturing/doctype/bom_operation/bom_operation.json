@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:49.000000", 
+ "creation": "2013-02-22 01:27:49", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -69,13 +69,21 @@
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "fixed_cycle_cost", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Fixed Cycle Cost", 
+   "permlevel": 0
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:53:03.000000", 
+ "modified": "2014-08-30 17:40:08.402039", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

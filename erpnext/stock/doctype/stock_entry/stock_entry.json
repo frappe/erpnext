@@ -1,5 +1,6 @@
 {
-  "allow_copy": 0, 
+ "allow_attach": 0, 
+ "allow_copy": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
@@ -298,6 +299,14 @@
    "search_index": 0
   }, 
   {
+   "depends_on": "eval:inList([\"Manufacture/Repack\"], doc.purpose)", 
+   "fieldname": "total_fixed_cost", 
+   "fieldtype": "Float", 
+   "label": "Total Fixed Cost", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "cb1", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -577,7 +586,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-08-12 05:24:41.892586", 
+ "modified": "2014-09-03 12:11:45.253033", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

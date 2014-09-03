@@ -251,9 +251,10 @@ class StockEntry(StockController):
 				if d.bom_no:
 					if not flt(d.incoming_rate):
 						bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
+						total_fixed_cost = frappe.db.get_value("BOM",d.bom_no,"total_fixed_cost")
 						operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 						d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
-					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate) + flt(total_fixed_cost)
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0

@@ -457,3 +457,4 @@ cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.supplier_query" }
 }
+cur_frm.add_fetch('production_order', 'total_fixed_cost', 'total_fixed_cost');

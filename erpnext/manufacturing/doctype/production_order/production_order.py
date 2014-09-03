@@ -156,11 +156,10 @@ def get_item_details(item):
 		return {}
 
 	res = res[0]
-	bom = frappe.db.sql("""select name from `tabBOM` where item=%s
-		and ifnull(is_default, 0)=1""", item)
+	bom = frappe.db.sql("""select name as bom_no,total_fixed_cost  from `tabBOM` where item=%s
+		and ifnull(is_default, 0)=1""", item, as_dict=1)
 	if bom:
-		res.bom_no = bom[0][0]
-
+		res.update(bom[0])
 	return res
 
 @frappe.whitelist()
