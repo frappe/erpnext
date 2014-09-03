@@ -152,12 +152,12 @@ erpnext.bom.calculate_fixed_cost = function(doc) {
 	var op = doc.bom_operations || [];
 	total_fixed_cost = 0;
 	for(var i=0;i<op.length;i++) {
-		fixed_cost =	flt(op[i].fixed_cycle_cost);
-		set_multiple('BOM Operation',op[i].name, {'fixed_cycle_cost': fixed_cost}, 'bom_operations');
-		total_fixed_cost += fixed_cost;
+		total_fixed_cost += flt(op[i].fixed_cycle_cost);
 	}
 	doc.total_fixed_cost = total_fixed_cost;
 	refresh_field('total_fixed_cost');
+	doc.total_cost = flt(total_fixed_cost) + flt(doc.total_variable_cost);
+	refresh_field('total_cost');
 }
 
 erpnext.bom.calculate_rm_cost = function(doc) {
@@ -177,7 +177,9 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 
 // Calculate Total Cost
 erpnext.bom.calculate_total = function(doc) {
-	doc.total_cost = flt(doc.raw_material_cost) + flt(doc.operating_cost) ;
+	doc.total_variable_cost = flt(doc.raw_material_cost) + flt(doc.operating_cost) ;
+	refresh_field('total_variable_cost');
+	doc.total_cost = flt(doc.total_fixed_cost) + flt(doc.total_variable_cost);
 	refresh_field('total_cost');
 }
 
@@ -222,3 +224,4 @@ cur_frm.cscript.validate = function(doc, dt, dn) {
 	erpnext.bom.calculate_fixed_cost(doc);
 	erpnext.bom.calculate_total(doc);
 }
+

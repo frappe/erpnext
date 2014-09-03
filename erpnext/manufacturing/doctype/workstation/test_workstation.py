@@ -4,7 +4,9 @@
 import frappe
 import unittest
 
+test_dependencies = ["Warehouse"]
 test_records = frappe.get_test_records('Workstation')
+
 
 class TestWorkstation(unittest.TestCase):
 	pass

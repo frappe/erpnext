@@ -117,7 +117,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "total_cost", 
+   "fieldname": "total_variable_cost", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
    "label": "Total Variable Cost", 
@@ -128,6 +128,13 @@
    "fieldname": "total_fixed_cost", 
    "fieldtype": "Float", 
    "label": "Total Fixed Cost", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "total_cost", 
+   "fieldtype": "Float", 
+   "label": "Total Cost", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -240,7 +247,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-09-01 12:09:28.743676", 
+ "modified": "2014-09-03 15:14:21.145709", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
