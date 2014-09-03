@@ -10,14 +10,6 @@ import json
 
 class PaymentTool(Document):
 	def make_journal_voucher(self):
-		# check_mandatory_to_fetch({
-		# 	"company": self.company,
-		# 	"party_type": self.party_type,
-		# 	"received_or_paid": self.received_or_paid,
-		# 	"party_name": self.get(scrub(self.party_type)),
-		# 	"party_account": self.party_account
-		# })
-
 		from erpnext.accounts.utils import get_balance_on
 		total_payment_amount = 0.00
 		invoice_voucher_type = {
