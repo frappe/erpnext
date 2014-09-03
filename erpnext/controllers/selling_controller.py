@@ -339,7 +339,7 @@ class SellingController(StockController):
 			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
 
-			if not d.qty:
+			if d.qty is None:
 				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
 
 			if self.doctype == "Sales Order":
