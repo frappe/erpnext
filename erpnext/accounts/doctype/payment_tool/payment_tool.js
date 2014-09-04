@@ -9,7 +9,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 		'<ul>If payment is not made against any reference, make Journal Voucher manually.</ul>';
 	frm.set_value("make_jv_help", help_content);
 
-	frm.set_value("party_type", "Customer")
+	frm.set_value("party_type", "Customer");
 });
 
 frappe.ui.form.on("Payment Tool", "company", function(frm) {
@@ -21,7 +21,7 @@ frappe.ui.form.on("Payment Tool", "received_or_paid", function(frm) {
 });
 
 // Fetch bank/cash account based on payment mode
-cur_frm.add_fetch("payment_mode", "default_account", "payment_account")
+cur_frm.add_fetch("payment_mode", "default_account", "payment_account");
 
 // Set party account name
 frappe.ui.form.on("Payment Tool", "customer", function(frm) {
@@ -111,9 +111,9 @@ erpnext.payment_tool.validate_against_voucher = function(frm) {
 			}
 
 		if(frm.doc.party_type=="Supplier"
-			&& !in_list(["Sales Order", "Sales Invoice", "Journal Voucher"], row.against_voucher_type)) {
+			&& !in_list(["Purchase Order", "Purchase Invoice", "Journal Voucher"], row.against_voucher_type)) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
-				frappe.throw(__("Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Voucher"))
+				frappe.throw(__("Against Voucher Type must be one of Purchase Order, Purchase Invoice or Journal Voucher"))
 			}
 
 	});

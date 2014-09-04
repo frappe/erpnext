@@ -438,6 +438,32 @@ class AccountsController(TransactionBase):
 
 		return stock_items
 
+	def set_total_advance_paid(self):
+		if self.doctype == "Sales Order":
+			dr_or_cr = "credit"
+			against_field = "against_sales_order"
+		else:
+			dr_or_cr = "debit"
+			against_field = "against_purchase_order"
+
+		advance_paid = frappe.db.sql("""
+			select
+				sum(ifnull({dr_or_cr}, 0))
+			from
+				`tabJournal Voucher Detail`
+			where
+				{against_field} = %s and docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr, \
+					against_field=against_field), self.name)
+
+		if advance_paid:
+			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
+		if flt(self.grand_total) >= advance_paid:
+			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+		else:
+			frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater \
+				than the Grand Total ({2})")
+			.format(advance_paid, self.name, self.grand_total))
+
 	@property
 	def company_abbr(self):
 		if not hasattr(self, "_abbr"):

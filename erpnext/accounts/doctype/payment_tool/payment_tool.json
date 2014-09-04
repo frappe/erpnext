@@ -233,7 +233,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.payment_tool_details.length", 
+   "depends_on": "eval:(doc.company && doc.party_type && doc.received_or_paid && (doc.customer || doc.supplier))", 
    "fieldname": "sec_break3", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -320,7 +320,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2014-09-04 16:20:33.089958", 
+ "modified": "2014-09-05 11:15:55.484916", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Tool", 
