@@ -10,6 +10,30 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 
 class TestStockEntry(unittest.TestCase):
+	
+	def test_production_order(self):
+		production_order = frappe.new_doc("Production Order")
+		production_order.update({
+			"company": "_Test Company", 
+			"doctype": "Production Order", 
+			"fg_warehouse": "_Test Warehouse 1 - _TC", 
+			"production_item": "_Test FG Item 2", 
+			"qty": 1.0,
+			"stock_uom": "Nos", 
+			"wip_warehouse": "_Test Warehouse - _TC"
+		})
+		production_order.insert()
+		production_order.submit()
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.update({
+			"production_order":production_order_no.name,
+			"fg_compleated_qty":"1",
+			"total_fixed_cost":1000
+		})
+		stock_entry.insert()
+		stock_entry.submit()
+		stock_entry.get_items()
+	
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
