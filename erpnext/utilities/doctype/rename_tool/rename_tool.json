@@ -1,6 +1,5 @@
 {
- "allow_attach": 0, 
- "allow_email": 1, 
+  "allow_email": 1, 
  "allow_print": 1, 
  "creation": "2012-12-03 10:25:59.000000", 
  "docstatus": 0, 

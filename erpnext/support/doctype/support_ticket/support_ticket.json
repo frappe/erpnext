@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "autoname": "naming_series:", 
+  "autoname": "naming_series:", 
  "creation": "2013-02-01 10:36:25", 
  "docstatus": 0, 
  "doctype": "DocType", 

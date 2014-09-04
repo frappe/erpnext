@@ -1,11 +1,10 @@
 {
- "allow_attach": 1,
- "allow_import": 1,
- "autoname": "naming_series:",
- "creation": "2013-05-21 16:16:39",
- "docstatus": 0,
- "doctype": "DocType",
- "document_type": "Transaction",
+  "allow_import": 1, 
+ "autoname": "naming_series:", 
+ "creation": "2013-05-21 16:16:39", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "Transaction", 
  "fields": [
   {
    "fieldname": "supplier_section",

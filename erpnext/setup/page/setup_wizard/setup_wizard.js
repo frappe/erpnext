@@ -61,7 +61,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				fields: [
 					{"fieldname": "language", "label": __("Language"), "fieldtype": "Select",
 						options: ["english", "العربية", "deutsch", "ελληνικά", "español", "français", "हिंदी", "hrvatski",
-						"italiano", "nederlands", "português brasileiro", "português", "српски", "தமிழ்",
+						"italiano", "nederlands", "polski", "português brasileiro", "português", "српски", "தமிழ்",
 						"ไทย", "中国（简体）", "中國（繁體）"], reqd:1},
 				],
 				help: __("Welcome to ERPNext. Please select your language to begin the Setup Wizard."),

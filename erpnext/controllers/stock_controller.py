@@ -324,19 +324,21 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle):
 def get_future_stock_vouchers(posting_date, posting_time, warehouse_account=None, for_items=None):
 	future_stock_vouchers = []
 
+	values = []
 	condition = ""
 	if for_items:
-		condition = ''.join([' and item_code in (\'', '\', \''.join(for_items) ,'\')'])
+		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+		values += for_items
 
 	if warehouse_account:
-		condition += ''.join([' and warehouse in (\'', '\', \''.join(warehouse_account.keys()) ,'\')'])
+		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(warehouse_account.keys())))
+		values += warehouse_account.keys()
 
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
-		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
-		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" %
-		('%s', '%s', condition), (posting_date, posting_time),
-		as_dict=True):
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
+		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 
 	return future_stock_vouchers

@@ -1,6 +1,5 @@
 {
- "allow_attach": 0, 
- "allow_copy": 1, 
+  "allow_copy": 1, 
  "autoname": "SR/.######", 
  "creation": "2013-03-28 10:35:31", 
  "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 

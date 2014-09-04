@@ -20,11 +20,13 @@
    "search_index": 1
   }, 
   {
+   "description": "A user with \"Expense Approver\" role", 
    "fieldname": "exp_approver", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Approver", 
    "oldfieldname": "exp_approver", 
    "oldfieldtype": "Select", 
+   "options": "User", 
    "permlevel": 0, 
    "width": "160px"
   }, 
@@ -188,7 +190,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:48.580747", 
+ "modified": "2014-08-27 07:08:48.454580", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
@@ -204,6 +206,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
+   "user_permission_doctypes": "[\"Company\",\"Employee\",\"Expense Claim\",\"Fiscal Year\"]", 
    "write": 1
   }, 
   {
@@ -219,6 +222,7 @@
    "report": 1, 
    "role": "Expense Approver", 
    "submit": 1, 
+   "user_permission_doctypes": "[\"Expense Claim\",\"User\"]", 
    "write": 1
   }, 
   {
@@ -234,6 +238,7 @@
    "report": 1, 
    "role": "HR User", 
    "submit": 1, 
+   "user_permission_doctypes": "[\"Company\",\"Expense Claim\",\"Fiscal Year\"]", 
    "write": 1
   }
  ], 

@@ -250,23 +250,24 @@ class ProductionPlanningTool(Document):
 			bom_wise_item_details = {}
 			if self.use_multi_level_bom:
 				# get all raw materials with sub assembly childs
+				# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 				for d in frappe.db.sql("""select fb.item_code,
-					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty,
+					ifnull(sum(ifnull(fb.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
 					fb.description, fb.stock_uom, it.min_order_qty
-					from `tabBOM Explosion Item` fb,`tabItem` it
-					where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
+					where bom.name = fb.parent and it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
 					and ifnull(it.is_sub_contracted_item, 'No') = 'No'
-					and fb.docstatus<2 and fb.parent=%s
+					and fb.docstatus<2 and bom.name=%s
 					group by item_code, stock_uom""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				# Get all raw materials considering SA items as raw materials,
 				# so no childs of SA items
 				for d in frappe.db.sql("""select bom_item.item_code,
-					ifnull(sum(bom_item.qty_consumed_per_unit), 0) as qty,
+					ifnull(sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
 					bom_item.description, bom_item.stock_uom, item.min_order_qty
-					from `tabBOM Item` bom_item, tabItem item
-					where bom_item.parent = %s and bom_item.docstatus < 2
+					from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
+					where bom.name = bom_item.parent and bom.name = %s and bom_item.docstatus < 2
 					and bom_item.item_code = item.name
 					group by item_code""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
@@ -276,7 +277,7 @@ class ProductionPlanningTool(Document):
 					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description,
 						item_details.stock_uom, item_details.min_order_qty, so_qty[0]])
 
-			self.make_items_dict(item_list)
+		self.make_items_dict(item_list)
 
 	def make_items_dict(self, item_list):
 		for i in item_list:
@@ -354,8 +355,8 @@ class ProductionPlanningTool(Document):
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
 		item_projected_qty = frappe.db.sql("""select item_code, sum(projected_qty)
-			from `tabBin` where item_code in (%s) group by item_code""" %
-			(", ".join(["%s"]*len(items)),), tuple(items))
+			from `tabBin` where item_code in (%s) and warehouse=%s group by item_code""" %
+			(", ".join(["%s"]*len(items)), '%s'), tuple(items + [self.purchase_request_for_warehouse]))
 
 		return dict(item_projected_qty)
 

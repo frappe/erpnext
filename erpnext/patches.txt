@@ -77,3 +77,6 @@ erpnext.patches.v4_2.fix_account_master_type
 erpnext.patches.v4_2.update_project_milestones
 erpnext.patches.v4_2.add_currency_turkish_lira #2014-08-08
 execute:frappe.delete_doc("DocType", "Landed Cost Wizard")
+erpnext.patches.v4_2.default_website_style
+erpnext.patches.v4_2.set_company_country
+erpnext.patches.v4_2.update_sales_order_invoice_field_name

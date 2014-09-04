@@ -4,7 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, today
+from frappe.utils import add_days, cint, cstr, today, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day
+from frappe.model.naming import make_autoname
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
@@ -451,32 +453,6 @@ class AccountsController(TransactionBase):
 		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 		if total_outstanding:
 			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
-
-	def set_total_advance_paid(self):
-		if self.doctype == "Sales Order":
-			dr_or_cr = "credit"
-			against_field = "against_sales_order"
-		else:
-			dr_or_cr = "debit"
-			against_field = "against_purchase_order"
-
-		advance_paid = frappe.db.sql("""
-			select
-				sum(ifnull({dr_or_cr}, 0))
-			from
-				`tabJournal Voucher Detail`
-			where
-				{against_field} = %s and docstatus = 1 and is_advance = "Yes"
-		""".format(dr_or_cr=dr_or_cr, against_field=against_field), self.name)
-
-		if advance_paid:
-			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
-			if flt(self.grand_total) >= advance_paid:
-				frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-			else:
-				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
-					.format(advance_paid, self.name, self.grand_total))
-
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

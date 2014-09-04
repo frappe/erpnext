@@ -228,7 +228,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 	par_flds = ['project_name', 'due_date', 'is_opening', 'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
-	'total_commission', 'advances', 'invoice_period_from_date', 'invoice_period_to_date'];
+	'total_commission', 'advances', 'from_date', 'to_date'];
 
 	item_flds_normal = ['sales_order', 'delivery_note']
 
@@ -399,9 +399,9 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	})
 }
 
-cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
+cur_frm.cscript.is_recurring = function(doc, dt, dn) {
 	// set default values for recurring invoices
-	if(doc.convert_into_recurring_invoice) {
+	if(doc.is_recurring) {
 		var owner_email = doc.owner=="Administrator"
 			? frappe.user_info("Administrator").email
 			: doc.owner;
@@ -414,18 +414,18 @@ cur_frm.cscript.convert_into_recurring_invoice = function(doc, dt, dn) {
 	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
 }
 
-cur_frm.cscript.invoice_period_from_date = function(doc, dt, dn) {
-	// set invoice_period_to_date
-	if(doc.invoice_period_from_date) {
+cur_frm.cscript.from_date = function(doc, dt, dn) {
+	// set to_date
+	if(doc.from_date) {
 		var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
 			'Yearly': 12};
 
 		var months = recurring_type_map[doc.recurring_type];
 		if(months) {
-			var to_date = frappe.datetime.add_months(doc.invoice_period_from_date,
+			var to_date = frappe.datetime.add_months(doc.from_date,
 				months);
-			doc.invoice_period_to_date = frappe.datetime.add_days(to_date, -1);
-			refresh_field('invoice_period_to_date');
+			doc.to_date = frappe.datetime.add_days(to_date, -1);
+			refresh_field('to_date');
 		}
 	}
 }

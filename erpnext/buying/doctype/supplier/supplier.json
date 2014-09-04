@@ -186,7 +186,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-08-07 06:57:15.274795", 
+ "modified": "2014-08-26 04:55:32.004458", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 
@@ -201,7 +201,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Purchase Manager", 
+   "role": "Purchase User", 
    "submit": 0, 
    "write": 0
   }, 

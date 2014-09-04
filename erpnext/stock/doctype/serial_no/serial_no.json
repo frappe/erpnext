@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:serial_no", 
  "creation": "2013-05-16 10:59:15", 

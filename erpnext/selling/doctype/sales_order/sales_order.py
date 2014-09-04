@@ -10,6 +10,8 @@ from frappe.utils import cstr, flt, getdate, comma_and
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
+from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
+
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
@@ -120,6 +122,8 @@ class SalesOrder(SellingController):
 		if not self.billing_status: self.billing_status = 'Not Billed'
 		if not self.delivery_status: self.delivery_status = 'Not Delivered'
 
+		validate_recurring_document(self)
+
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
 
@@ -161,6 +165,8 @@ class SalesOrder(SellingController):
 
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')
+		
+		convert_to_recurring(self, "SO/REC/.#####", self.transaction_date)
 
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -248,6 +254,11 @@ class SalesOrder(SellingController):
 
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
+
+	def on_update_after_submit(self):
+		validate_recurring_document(self)
+		convert_to_recurring(self, "SO/REC/.#####", self.transaction_date)
+
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

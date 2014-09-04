@@ -1,6 +1,6 @@
 {
  "autoname": "MS.#####", 
- "creation": "2013-01-10 16:34:30.000000", 
+ "creation": "2013-01-10 16:34:30", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -213,12 +213,21 @@
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "amended_from", 
+   "fieldtype": "Link", 
+   "label": "Amended From", 
+   "no_copy": 1, 
+   "options": "Maintenance Schedule", 
+   "print_hide": 1, 
+   "read_only": 1
   }
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-01-20 17:48:56.000000", 
+ "modified": "2014-08-28 11:39:17.152817", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Schedule", 
@@ -239,5 +248,5 @@
    "write": 1
   }
  ], 
- "search_fields": "status,customer,customer_name, sales_order_no"
+ "search_fields": "status,customer,customer_name"
 }

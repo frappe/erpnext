@@ -1,5 +1,4 @@
 {
- "allow_attach": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "naming_series:", 
@@ -173,6 +172,7 @@
   {
    "fieldname": "employment_type", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Employment Type", 
@@ -186,6 +186,7 @@
    "description": "Applicable Holiday List", 
    "fieldname": "holiday_list", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "Holiday List", 
    "oldfieldname": "holiday_list", 
    "oldfieldtype": "Link", 
@@ -673,7 +674,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-27 07:34:49.337586", 
+ "modified": "2014-08-27 05:55:00.514660", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
@@ -705,6 +706,7 @@
    "report": 1, 
    "role": "HR User", 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\"]", 
    "write": 1
   }, 
   {
@@ -720,12 +722,6 @@
    "set_user_permissions": 1, 
    "submit": 0, 
    "write": 1
-  }, 
-  {
-   "apply_user_permissions": 1, 
-   "permlevel": 0, 
-   "read": 1, 
-   "role": "Leave Approver"
   }
  ], 
  "search_fields": "employee_name", 
