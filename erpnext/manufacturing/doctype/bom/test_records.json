@@ -83,5 +83,45 @@
   "is_default": 1, 
   "item": "_Test FG Item 2", 
   "quantity": 1.0
+ },
+ {
+  "bom_materials": [
+   {
+    "amount": 5000.0, 
+    "doctype": "BOM Item", 
+    "item_code": "_Test Item", 
+    "parentfield": "bom_materials", 
+    "qty": 1.0, 
+    "rate": 5000.0, 
+    "stock_uom": "_Test UOM"
+   }, 
+   {
+    "amount": 2000.0, 
+    "bom_no": "BOM/_Test Item Home Desktop Manufactured/001", 
+    "doctype": "BOM Item", 
+    "item_code": "_Test Item Home Desktop Manufactured", 
+    "parentfield": "bom_materials", 
+    "qty": 2.0, 
+    "rate": 1000.0, 
+    "stock_uom": "_Test UOM"
+   }
+  ],
+  "bom_operations": [
+   {
+    "operation_no": "1", 
+    "opn_description": "_Test", 
+    "workstation": "_Test workstation 2", 
+    "time_in_min": 60
+   }
+   ], 
+  "docstatus": 1, 
+  "doctype": "BOM", 
+  "is_active": 1, 
+  "is_default": 1, 
+  "item": "_Test FG Item 2", 
+  "quantity": 1.0,
+  "total_fixed_cost":1000,
+  "total_variable_cost":7100,
+  "total_cost":8100
  }
 ]
