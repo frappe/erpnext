@@ -94,16 +94,6 @@
     "qty": 1.0, 
     "rate": 5000.0, 
     "stock_uom": "_Test UOM"
-   }, 
-   {
-    "amount": 2000.0, 
-    "bom_no": "BOM/_Test Item Home Desktop Manufactured/001", 
-    "doctype": "BOM Item", 
-    "item_code": "_Test Item Home Desktop Manufactured", 
-    "parentfield": "bom_materials", 
-    "qty": 2.0, 
-    "rate": 1000.0, 
-    "stock_uom": "_Test UOM"
    }
   ],
   "bom_operations": [
@@ -121,7 +111,7 @@
   "item": "_Test FG Item 2", 
   "quantity": 1.0,
   "total_fixed_cost":1000,
-  "total_variable_cost":7100,
-  "total_cost":8100
+  "total_variable_cost":5100,
+  "total_cost":6100
  }
 ]

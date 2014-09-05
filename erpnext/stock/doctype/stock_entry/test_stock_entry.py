@@ -12,27 +12,36 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFre
 class TestStockEntry(unittest.TestCase):
 	
 	def test_production_order(self):
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", 
+			"is_default": 1, "docstatus": 1})
+
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
-			"company": "_Test Company", 
-			"doctype": "Production Order", 
+			"company": "_Test Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC", 
 			"production_item": "_Test FG Item 2", 
+			"bom_no": bom_no,
 			"qty": 1.0,
 			"stock_uom": "Nos", 
 			"wip_warehouse": "_Test Warehouse - _TC"
 		})
 		production_order.insert()
 		production_order.submit()
+
+		self._insert_material_receipt()
+
 		stock_entry = frappe.new_doc("Stock Entry")
 		stock_entry.update({
-			"production_order":production_order_no.name,
-			"fg_compleated_qty":"1",
-			"total_fixed_cost":1000
+			"purpose": "Manufacture/Repack",
+			"production_order": production_order.name,
+			"bom_no": bom_no,
+			"fg_completed_qty": "1",
+			"total_fixed_cost": 1000
 		})
-		stock_entry.insert()
-		stock_entry.submit()
 		stock_entry.get_items()
+
+		fg_rate = [d.incoming_rate for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
+		self.assertEqual(fg_rate, 6100.00)
 	
 	def tearDown(self):
 		frappe.set_user("Administrator")
