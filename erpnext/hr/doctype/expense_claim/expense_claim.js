@@ -80,7 +80,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 	cur_frm.cscript.set_help(doc);
 
 	if(!doc.__islocal) {
-		cur_frm.toggle_enable("exp_approver", (doc.owner==user && doc.approval_status=="Draft"));
+		cur_frm.toggle_enable("exp_approver", doc.approval_status=="Draft");
 		cur_frm.toggle_enable("approval_status", (doc.exp_approver==user && doc.docstatus==0));
 
 		if(!doc.__islocal && user!=doc.exp_approver)
