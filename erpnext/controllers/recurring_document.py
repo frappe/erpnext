@@ -2,14 +2,9 @@ from __future__ import unicode_literals
 import frappe
 import frappe.utils
 import frappe.defaults
-
-from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
-	get_first_day, get_last_day, comma_and
+from frappe.utils import cint, cstr, getdate, nowdate, get_first_day, get_last_day
 from frappe.model.naming import make_autoname
-
 from frappe import _, msgprint, throw
-from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
-from frappe.model.mapper import get_mapped_doc
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
@@ -51,7 +46,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 					frappe.db.begin()
 					frappe.db.sql("update `tab%s` \
-						set is_recurring = 0 where name = %s" % (doctype, '%s'), 
+						set is_recurring = 0 where name = %s" % (doctype, '%s'),
 						(ref_document))
 					notify_errors(ref_document, doctype, ref_wrapper.customer, ref_wrapper.owner)
 					frappe.db.commit()
@@ -93,12 +88,12 @@ def make_new_document(ref_wrapper, date_field, posting_date):
 
 	if ref_wrapper.doctype == "Sales Order":
 		new_document.update({
-			"delivery_date": get_next_date(ref_wrapper.delivery_date, mcount, 
+			"delivery_date": get_next_date(ref_wrapper.delivery_date, mcount,
 				cint(ref_wrapper.repeat_on_day_of_month))
 	})
 
 	new_document.submit()
-	
+
 	return new_document
 
 def get_next_date(dt, mcount, day=None):
@@ -187,11 +182,11 @@ def validate_notification_email_id(doc):
 
 def set_next_date(doc, posting_date):
 	""" Set next date on which recurring document will be created"""
-	
+
 	if not doc.repeat_on_day_of_month:
 		msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
 
-	next_date = get_next_date(posting_date, month_map[doc.recurring_type], 
+	next_date = get_next_date(posting_date, month_map[doc.recurring_type],
 		cint(doc.repeat_on_day_of_month))
 
 	frappe.db.set(doc, 'next_date', next_date)
