@@ -243,12 +243,12 @@ class StockEntry(StockController):
 						d.incoming_rate = incoming_rate
 
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
-				raw_material_cost += flt(d.amount)
+				if not d.t_warehouse:
+					raw_material_cost += flt(d.amount)
 
 		# set incoming rate for fg item
 		if self.purpose == "Manufacture/Repack":
-			number_of_fg_items = len([t.t_warehouse for t in self.get("mtn_details")])
-
+			number_of_fg_items = len([t.t_warehouse for t in self.get("mtn_details") if t.t_warehouse])
 			for d in self.get("mtn_details"):
 				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
 					if not flt(d.incoming_rate) or force:
