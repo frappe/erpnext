@@ -29,7 +29,7 @@
 'Update Stock' for Sales Invoice {0} must be set,'Update Stock' untuk Sales Invoice {0} harus diatur
 * Will be calculated in the transaction.,* Akan dihitung dalam transaksi.
 "1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 Currency = [?] Fraksi 
+For e.g. 1 USD = 100 Cent","1 Currency = [?] Fraksi
  Untuk misalnya 1 USD = 100 Cent"
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1.5. Untuk menjaga pelanggan bijaksana kode barang dan membuat mereka dicari berdasarkan penggunaan kode mereka pilihan ini
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
@@ -46,17 +46,17 @@ For e.g. 1 USD = 100 Cent","1 Currency = [?] Fraksi
 {% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
 {% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
 {% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> default Template </ h4> 
- <p> Menggunakan <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja template </ a> dan semua bidang Address ( termasuk Custom Fields jika ada) akan tersedia </ p> 
- <pre> <code> {{}} address_line1 <br> 
- {% jika% address_line2} {{}} address_line2 <br> { endif% -%} 
- {{kota}} <br> 
- {% jika negara%} {{negara}} <br> {% endif -%} 
- {% jika pincode%} PIN: {{}} pincode <br> {% endif -%} 
- {{negara}} <br> 
- {% jika telepon%} Telepon: {{ponsel}} {<br> endif% -%} 
- {% jika faks%} Fax: {{}} fax <br> {% endif -%} 
- {% jika email_id%} Email: {{}} email_id <br> ; {% endif -%} 
+</code></pre>","<h4> default Template </ h4>
+ <p> Menggunakan <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja template </ a> dan semua bidang Address ( termasuk Custom Fields jika ada) akan tersedia </ p>
+ <pre> <code> {{}} address_line1 <br>
+ {% jika% address_line2} {{}} address_line2 <br> { endif% -%}
+ {{kota}} <br>
+ {% jika negara%} {{negara}} <br> {% endif -%}
+ {% jika pincode%} PIN: {{}} pincode <br> {% endif -%}
+ {{negara}} <br>
+ {% jika telepon%} Telepon: {{ponsel}} {<br> endif% -%}
+ {% jika faks%} Fax: {{}} fax <br> {% endif -%}
+ {% jika email_id%} Email: {{}} email_id <br> ; {% endif -%}
  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Sebuah Kelompok Pelanggan ada dengan nama yang sama, silakan mengubah nama Nasabah atau mengubah nama Grup Pelanggan"
 A Customer exists with same name,Nasabah ada dengan nama yang sama
@@ -924,7 +924,7 @@ Electrical,Listrik
 Electricity Cost,Biaya Listrik
 Electricity cost per hour,Biaya listrik per jam
 Electronics,Elektronik
-Email,siska_chute34@yahoo.com
+Email,
 Email Digest,Email Digest
 Email Digest Settings,Email Digest Pengaturan
 Email Digest: ,
@@ -995,7 +995,7 @@ Estimated Material Cost,Perkiraan Biaya Material
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Bahkan jika ada beberapa Aturan Harga dengan prioritas tertinggi, kemudian mengikuti prioritas internal diterapkan:"
 Everyone can read,Setiap orang dapat membaca
 "Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Contoh: ABCD # # # # # 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Contoh: ABCD # # # # #
  Jika seri diatur Serial dan ada tidak disebutkan dalam transaksi, nomor seri maka otomatis akan dibuat berdasarkan seri ini. Jika Anda selalu ingin secara eksplisit menyebutkan Serial Nos untuk item ini. biarkan kosong ini."
 Exchange Rate,Nilai Tukar
 Excise Duty 10,Cukai Tugas 10

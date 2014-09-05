@@ -1,5 +1,5 @@
 {
-  "allow_copy": 0, 
+ "allow_copy": 0, 
  "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "naming_series:", 
@@ -577,7 +577,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-08-12 05:24:41.892586", 
+ "modified": "2014-09-03 11:01:23.159584", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -644,7 +644,7 @@
  ], 
  "read_only": 0, 
  "read_only_onload": 0, 
- "search_fields": "transfer_date, from_warehouse, to_warehouse, purpose, remarks", 
+ "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks", 
  "sort_field": "modified", 
  "sort_order": "DESC"
 }

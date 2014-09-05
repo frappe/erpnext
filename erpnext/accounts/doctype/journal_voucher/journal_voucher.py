@@ -109,19 +109,19 @@ class JournalVoucher(AccountsController):
 
 	def validate_against_sales_invoice(self):
 		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Sales Invoice")
-		self.validate_against_invoice_fields(payment_against_voucher)
+		self.validate_against_invoice_fields("Sales Invoice", payment_against_voucher)
 
 	def validate_against_purchase_invoice(self):
-		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Purchase Invoice")
-		self.validate_against_invoice_fields(payment_against_voucher)
+		payment_against_voucher = self.validate_account_in_against_voucher("against_voucher", "Purchase Invoice")
+		self.validate_against_invoice_fields("Purchase Invoice", payment_against_voucher)
 
 	def validate_against_sales_order(self):
-		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Sales Order")
-		self.validate_against_order_fields(payment_against_voucher)
+		payment_against_voucher = self.validate_account_in_against_voucher("against_sales_order", "Sales Order")
+		self.validate_against_order_fields("Sales Order", payment_against_voucher)
 
 	def validate_against_purchase_order(self):
-		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Purchase Order")
-		self.validate_against_order_fields(payment_against_voucher)
+		payment_against_voucher = self.validate_account_in_against_voucher("against_purchase_order", "Purchase Order")
+		self.validate_against_order_fields("Purchase Order", payment_against_voucher)
 
 	def validate_account_in_against_voucher(self, against_field, doctype):
 		payment_against_voucher = frappe._dict()
@@ -162,7 +162,7 @@ class JournalVoucher(AccountsController):
 
 		return payment_against_voucher
 
-	def validate_against_invoice_fields(self, payment_against_voucher):
+	def validate_against_invoice_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
 			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
 				["docstatus", "outstanding_amount"])
@@ -174,7 +174,7 @@ class JournalVoucher(AccountsController):
 				frappe.throw(_("Payment against {0} {1} cannot be greater \
 					than Outstanding Amount {2}").format(doctype, voucher_no, voucher_properties[1]))
 
-	def validate_against_order_fields(self, payment_against_voucher):
+	def validate_against_order_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
 			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
 				["docstatus", "per_billed", "advance_paid", "grand_total"])
@@ -185,10 +185,9 @@ class JournalVoucher(AccountsController):
 			if flt(voucher_properties[1]) >= 100:
 				frappe.throw(_("{0} {1} is fully billed").format(doctype, voucher_no))
 
-			if d.is_advance == "Yes":
-				if flt(voucher_properties[3]) < flt(voucher_properties[2]) + flt(sum(payment_list)):
-					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(doctype, voucher_no, voucher_properties[3]))
+			if flt(voucher_properties[3]) < flt(voucher_properties[2]) + flt(sum(payment_list)):
+				frappe.throw(_("Advance paid against {0} {1} cannot be greater \
+					than Grand Total {2}").format(doctype, voucher_no, voucher_properties[3]))
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
@@ -228,7 +227,7 @@ class JournalVoucher(AccountsController):
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
-				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit, currency = currency)), \
+				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = currency), \
 					d.against_invoice))
 
 			if d.against_sales_order and d.credit:
@@ -355,11 +354,11 @@ class JournalVoucher(AccountsController):
 						"against": d.against_account,
 						"debit": flt(d.debit, self.precision("debit", "entries")),
 						"credit": flt(d.credit, self.precision("credit", "entries")),
-						"against_voucher_type": ((d.against_voucher and "Purchase Invoice")
-							or (d.against_invoice and "Sales Invoice")
-							or (d.against_jv and "Journal Voucher")
-							or (d.against_sales_order and "Sales Order")
-							or (d.against_purchase_order and "Purchase Order")),
+						"against_voucher_type": (("Purchase Invoice" if d.against_voucher else None)
+							or ("Sales Invoice" if d.against_invoice else None)
+							or ("Journal Voucher" if d.against_jv else None)
+							or ("Sales Order" if d.against_sales_order else None)
+							or ("Purchase Order" if d.against_purchase_order else None)),
 						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv
 							or d.against_sales_order or d.against_purchase_order,
 						"remarks": self.remark,
