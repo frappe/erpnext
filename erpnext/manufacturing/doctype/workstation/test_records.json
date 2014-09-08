@@ -3,12 +3,6 @@
 		"doctype": "Workstation",
 		"name": "_Test Workstation 1",
 		"workstation_name": "_Test Workstation 1",
-		"warehouse": "_Test warehouse - _TC"
-	},
-	{
-		"doctype": "Workstation",
-		"name": "_Test Workstation 2",
-		"workstation_name": "_Test Workstation 2",
 		"warehouse": "_Test warehouse - _TC",
 		"fixed_cycle_cost": 1000,
 		"hour_rate":100

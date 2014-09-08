@@ -40,7 +40,7 @@ class TestStockEntry(unittest.TestCase):
 		})
 		stock_entry.get_items()
 		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
-		self.assertEqual(fg_rate, 1100.00)
+		self.assertEqual(fg_rate, 1200.00)
 	
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -252,7 +252,7 @@ class TestStockEntry(unittest.TestCase):
 		se1.submit()
 
 		se2 = frappe.copy_doc(test_records[0])
-		se2.get("mtn_details")[0].item_code = "_Test FG Item 2"
+		se2.get("mtn_details")[0].item_code = "_Test Item Home Desktop 100"
 		se2.insert()
 		se2.submit()
 

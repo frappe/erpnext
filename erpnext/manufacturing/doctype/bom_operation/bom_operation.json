@@ -16,7 +16,7 @@
   {
    "fieldname": "opn_description", 
    "fieldtype": "Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Operation Description", 
    "oldfieldname": "opn_description", 
    "oldfieldtype": "Text", 
@@ -80,7 +80,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-08-30 17:40:08.402039", 
+ "modified": "2014-09-08 16:29:22.293314", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 

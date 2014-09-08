@@ -24,6 +24,7 @@ class ProductionOrder(Document):
 		self.validate_bom_no()
 		self.validate_sales_order()
 		self.validate_warehouse()
+		self.set_fixed_cost()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
@@ -54,6 +55,10 @@ class ProductionOrder(Document):
 
 		for w in [self.fg_warehouse, self.wip_warehouse]:
 			validate_warehouse_company(w, self.company)
+
+	def set_fixed_cost(self):
+		if self.total_fixed_cost==None:
+			self.total_fixed_cost = frappe.db.get_value("BOM",self.bom_no,"total_fixed_cost")
 
 	def validate_production_order_against_so(self):
 		# already ordered qty

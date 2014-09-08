@@ -21,3 +21,4 @@ class Workstation(Document):
 		flt(self.hour_rate_consumable) + flt(self.hour_rate_rent))
 		frappe.db.set(self, 'hour_rate', flt(self.hour_rate_labour) + flt(self.overhead))
 		self.update_bom_operation()
+		print self.name

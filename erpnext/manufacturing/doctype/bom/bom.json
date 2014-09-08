@@ -87,6 +87,7 @@
   {
    "fieldname": "bom_operations", 
    "fieldtype": "Table", 
+   "in_list_view": 0, 
    "label": "BOM Operations", 
    "oldfieldname": "bom_operations", 
    "oldfieldtype": "Table", 
@@ -117,6 +118,25 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "raw_material_cost", 
+   "fieldtype": "Float", 
+   "label": "Total Raw Material Cost", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "operating_cost", 
+   "fieldtype": "Float", 
+   "label": "Total Operating Cost", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "cb1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "total_variable_cost", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
@@ -135,25 +155,6 @@
    "fieldname": "total_cost", 
    "fieldtype": "Float", 
    "label": "Total Cost", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "cb1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "raw_material_cost", 
-   "fieldtype": "Float", 
-   "label": "Total Raw Material Cost", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "operating_cost", 
-   "fieldtype": "Float", 
-   "label": "Total Operating Cost", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -247,7 +248,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-09-03 15:14:21.145709", 
+ "modified": "2014-09-08 16:30:46.265762", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
