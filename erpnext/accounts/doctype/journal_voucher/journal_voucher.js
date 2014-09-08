@@ -99,12 +99,13 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	against_purchase_order: function(doc, cdt, cdn) {
+	against_jv: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
-		if (d.against_invoice && !flt(d.debit)) {
+		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
 			this.get_outstanding({
-				'doctype': 'Purchase Order',
-				'docname': d.against_purchase_order
+				'doctype': 'Journal Voucher',
+				'docname': d.against_jv,
+				'account': d.account
 			}, d)
 		}
 	},

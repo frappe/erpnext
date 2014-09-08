@@ -5,7 +5,9 @@ from __future__ import unicode_literals
 import unittest, frappe, json
 from frappe.utils import flt
 
-class TestJournalVoucher(unittest.TestCase):
+test_dependencies = ["Item"]
+
+class TestPaymentTool(unittest.TestCase):
 	def test_make_journal_voucher(self):
 		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
 			import test_records as jv_test_records
@@ -20,146 +22,172 @@ class TestJournalVoucher(unittest.TestCase):
 
 		self.clear_table_entries()
 
-		base_customer_jv = frappe.copy_doc(jv_test_records[2])
-		base_customer_jv.insert()
-		base_customer_jv.submit()
+		base_customer_jv = self.create_against_jv(jv_test_records[2], { "account": "_Test Customer 3 - _TC"})
+		base_supplier_jv = self.create_against_jv(jv_test_records[1], { "account": "_Test Supplier 1 - _TC"})
 
-		base_supplier_jv = frappe.copy_doc(jv_test_records[1])
-		base_supplier_jv.insert()
-		base_supplier_jv.submit()
 
-		so = frappe.copy_doc(so_test_records[0])
-		so.insert()
-		so.submit()
+		#Create SO with partial outstanding
+		so1 = self.create_voucher(so_test_records[0], {
+			"customer": "_Test Customer 3"
+		})
 
-		po = frappe.copy_doc(po_test_records[0])
-		po.insert()
-		po.submit()
+		jv_against_so1 = self.create_against_jv(jv_test_records[0], { 
+			"account": "_Test Customer 3 - _TC",
+			"against_sales_order": so1.name
+		})
 
-		si = frappe.copy_doc(si_test_records[0])
-		si.insert()
-		si.submit()
 
-		pi = frappe.copy_doc(pi_test_records[0])
-		pi.insert()
-		pi.submit()
+		#Create SO with no outstanding
+		so2 = self.create_voucher(so_test_records[0], {
+			"customer": "_Test Customer 3"
+		})
 
-		self.make_voucher_for_customer()
-		self.make_voucher_for_supplier()
+		jv_against_so2 = self.create_against_jv(jv_test_records[0], { 
+			"account": "_Test Customer 3 - _TC",
+			"against_sales_order": so2.name,
+			"credit": 1000
+		})
+		po = self.create_voucher(po_test_records[1], {
+			"supplier": "_Test Supplier 1"
+		})
 
-	def make_voucher_for_supplier(self):
-		#Make Journal Voucher for Supplier
-		payment_tool_doc = frappe.new_doc("Payment Tool")
+		#Create SI with partial outstanding
+		si1 = self.create_voucher(si_test_records[0], {
+			"customer": "_Test Customer 3",
+			"debit_to": "_Test Customer 3 - _TC" 
+		})
+		
+		jv_against_si1 = self.create_against_jv(jv_test_records[0], { 
+			"account": "_Test Customer 3 - _TC",
+			"against_invoice": si1.name
+		})
+		#Create SI with no outstanding
+		si2 = self.create_voucher(si_test_records[0], {
+			"customer": "_Test Customer 3",
+			"debit_to": "_Test Customer 3 - _TC" 
+		})
+		
+		jv_against_si2 = self.create_against_jv(jv_test_records[0], { 
+			"account": "_Test Customer 3 - _TC",
+			"against_invoice": si2.name,
+			"credit": 561.80
+		})
 
-		payment_tool_doc.set("company", "_Test Company")
-		payment_tool_doc.set("party_type", "Supplier")
-		payment_tool_doc.set("customer", "_Test Supplier")
-		payment_tool_doc.set("received_or_paid", "Paid")
-		payment_tool_doc.set("party_account", "_Test Supplier - _TC")
+		pi = self.create_voucher(pi_test_records[0], {
+			"supplier": "_Test Supplier 1",
+			"credit_to": "_Test Supplier 1 - _TC" 
+		})
 
-		payment_tool_doc.set("payment_mode", "Cheque")
-		payment_tool_doc.set("payment_account", "_Test Account Bank Account - _TC")
-		payment_tool_doc.set("reference_no", "123456")
-		payment_tool_doc.set("reference_date", "2013-02-14")
-
-		args = {"company": "_Test Company",
-			"party_type": "Supplier",
-			"received_or_paid": "Paid",
-			"party_name": "_Test Supplier",
-			"party_account": "_Test Supplier - _TC"
+		#Create a dict containing properties and expected values
+		expected_outstanding = {
+			"Journal Voucher"	: [base_customer_jv.name, 400.00],
+			"Sales Invoice"				: [si1.name, 161.80],
+			"Purchase Invoice"			: [pi.name, 1512.30],
+			"Sales Order"				: [so1.name, 600.00],
+			"Purchase Order"			: [po.name, 5000.00]
 		}
 
-		self.check_new_voucher(payment_tool_doc, args)
-
-	def make_voucher_for_customer(self):
-		#Make Journal Voucher for Customer
-		payment_tool_doc = frappe.new_doc("Payment Tool")
-
-		payment_tool_doc.set("company", "_Test Company")
-		payment_tool_doc.set("party_type", "Customer")
-		payment_tool_doc.set("customer", "_Test Customer")
-		payment_tool_doc.set("received_or_paid", "Received")
-		payment_tool_doc.set("party_account", "_Test Customer - _TC")
-
-		payment_tool_doc.set("payment_mode", "Cheque")
-		payment_tool_doc.set("payment_account", "_Test Account Bank Account - _TC")
-		payment_tool_doc.set("reference_no", "123456")
-		payment_tool_doc.set("reference_date", "2013-02-14")
-
-		args = {"company": "_Test Company",
+		args = {
+			"company": "_Test Company",
 			"party_type": "Customer",
 			"received_or_paid": "Received",
-			"party_name": "_Test Customer",
-			"party_account": "_Test Customer - _TC"
+			"customer": "_Test Customer",
+			"party_account": "_Test Customer 3 - _TC",
+			"payment_mode": "Cheque",
+			"payment_account": "_Test Account Bank Account - _TC",
+			"reference_no": "123456",
+			"reference_date": "2013-02-14"
 		}
 
-		self.check_new_voucher(payment_tool_doc, args)
+		self.make_voucher_for_party(args, expected_outstanding)
 
-	def check_new_voucher(self, doc, args):
-		from erpnext.accounts.doctype.payment_tool.payment_tool import PaymentTool, \
-			get_outstanding_vouchers, get_orders_to_be_billed, get_against_voucher_amount, \
-			get_party_account
+		args.update({
+			"party_type": "Supplier",
+			"received_or_paid": "Paid",
+			"supplier": "_Test Supplier 1",
+			"party_account": "_Test Supplier 1 - _TC"
+		})
+		expected_outstanding["Journal Voucher"] = [base_supplier_jv.name, 400.00]
+		self.make_voucher_for_party(args, expected_outstanding)
 
-		expected_values = self.set_expected_values(doc, args)
-		doc.total_payment_amount = flt(300.00)
-		new_jv = doc.make_journal_voucher()
+	def create_voucher(self, test_record, args):
+		doc = frappe.copy_doc(test_record)
+		doc.update(args)
+		doc.insert()
+		doc.submit()
+		return doc
 
-		jv_entry_list = []
+	def create_against_jv(self, test_record, args):
+		jv = frappe.copy_doc(test_record)
+		jv.get("entries")[0].update(args)
+		if args.get("debit"):
+			jv.get("entries")[1].credit = args["debit"]
+		elif args.get("credit"):
+			jv.get("entries")[1].debit = args["credit"]
+
+		jv.insert()
+		jv.submit()
+		return jv
+
+	def make_voucher_for_party(self, args, expected_outstanding):
+		#Make Journal Voucher for Party
+		payment_tool_doc = frappe.new_doc("Payment Tool")
+
+		for k, v in args.items():
+			payment_tool_doc.set(k, v)
+
+		self.check_outstanding_vouchers(payment_tool_doc, args, expected_outstanding)
+		
+
+	def check_outstanding_vouchers(self, doc, args, expected_outstanding):
+		from erpnext.accounts.doctype.payment_tool.payment_tool import get_outstanding_vouchers
+
+		outstanding_entries = get_outstanding_vouchers(json.dumps(args))
+
+		for d in outstanding_entries:
+			self.assertEquals(flt(d.get("outstanding_amount"), 2), expected_outstanding.get(d.get("voucher_type"))[1])
+
+		self.check_jv_entries(doc, outstanding_entries, expected_outstanding)
+
+	def check_jv_entries(self, paytool, outstanding_entries, expected_outstanding):
+		for e in outstanding_entries:
+			d1 = paytool.append("payment_tool_details")
+			d1.against_voucher_type = e.get("voucher_type")
+			d1.against_voucher_no = e.get("voucher_no")
+			d1.total_amount = e.get("invoice_amount")
+			d1.outstanding_amount = e.get("outstanding_amount")
+			d1.payment_amount = 100.00
+		paytool.total_payment_amount = 300
+
+		new_jv = paytool.make_journal_voucher()
+
+		#Create a list of expected values as [party account, payment against, against_jv, against_invoice, 
+		#against_voucher, against_sales_order, against_purchase_order]
+		expected_values = [
+			[paytool.party_account, 100.00, expected_outstanding.get("Journal Voucher")[0], None, None, None, None],
+			[paytool.party_account, 100.00, None, expected_outstanding.get("Sales Invoice")[0], None, None, None],
+			[paytool.party_account, 100.00, None, None, expected_outstanding.get("Purchase Invoice")[0], None, None],
+			[paytool.party_account, 100.00, None, None, None, expected_outstanding.get("Sales Order")[0], None],
+			[paytool.party_account, 100.00, None, None, None, None, expected_outstanding.get("Purchase Order")[0]]
+		]
 
 		for jv_entry in new_jv.get("entries"): 
-			if doc.party_account == jv_entry.get("account"):
-				jv_entry_list.append([
+			if paytool.party_account == jv_entry.get("account"):
+				row = [
 					jv_entry.get("account"),
-					jv_entry.get("debit" if doc.received_or_paid=="Paid" \
-									 else "credit"),
+					jv_entry.get("debit" if paytool.party_type=="Supplier" else "credit"),
 					jv_entry.get("against_jv"),
 					jv_entry.get("against_invoice"),
 					jv_entry.get("against_voucher"),
 					jv_entry.get("against_sales_order"),
 					jv_entry.get("against_purchase_order"),
-				])
-
-		for entry in jv_entry_list:
-			self.assertTrue(entry in expected_values)
-
-		if doc.reference_no:
-			self.assertEquals(new_jv.get("cheque_no"), doc.reference_no)
-		if doc.reference_date:
-			self.assertEquals(new_jv.get("cheque_date"), doc.reference_date)
-
-	def set_expected_values(self, doc, args):
-		from erpnext.accounts.doctype.payment_tool.payment_tool import PaymentTool, \
-			get_outstanding_vouchers, get_orders_to_be_billed, get_against_voucher_amount, \
-			get_party_account
-
-		outstanding_entries = get_outstanding_vouchers(json.dumps(args))
-		expected_values = []
-
-		for e in outstanding_entries:
-			field_dict = {'Journal Voucher': [e.get("voucher_no"), None, None, None, None],
-				'Sales Invoice': [None, e.get("voucher_no"), None, None, None],
-				'Purchase Invoice': [None, None, e.get("voucher_no"), None, None],
-				'Sales Order': [None, None, None, e.get("voucher_no"), None],
-				'Purchase Order': [None, None, None, None, e.get("voucher_no")]
-				}
-
-			d1 = doc.append("payment_tool_details")
-			d1.against_voucher_type = e.get("voucher_type")
-			d1.against_voucher_no = e.get("voucher_no")
-			d1.total_amount = e.get("invoice_amount")
-			d1.outstanding_amount = e.get("outstanding_amount")
-			d1.set("payment_amount", flt(100.00))
-
-			expected_values.append([
-				doc.get("party_account"),
-				flt(100.00, 2)
-				])
-
-			expected_values[len(expected_values) - 1].extend(field_dict.get(e.get("voucher_type")))
-
-			return expected_values
+				]
+				self.assertTrue(row in expected_values)
+			
+		self.assertEquals(new_jv.get("cheque_no"), paytool.reference_no)
+		self.assertEquals(new_jv.get("cheque_date"), paytool.reference_date)
 
 	def clear_table_entries(self):
-		frappe.db.sql("""delete from `tabGL Entry`""")
-		frappe.db.sql("""delete from `tabSales Order`""")
-		frappe.db.sql("""delete from `tabPurchase Order`""")	
+		frappe.db.sql("""delete from `tabGL Entry` where (account = "_Test Customer 3 - _TC" or account = "_Test Supplier 1 - _TC")""")
+		frappe.db.sql("""delete from `tabSales Order` where customer_name = "_Test Customer 3" """)
+		frappe.db.sql("""delete from `tabPurchase Order` where supplier_name = "_Test Supplier 1" """)	
