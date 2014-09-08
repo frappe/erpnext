@@ -28,92 +28,66 @@
 'To Date' is required,' To Date' is vereist
 'Update Stock' for Sales Invoice {0} must be set,'Bijwerken Stock ' voor verkoopfactuur {0} moet worden ingesteld
 * Will be calculated in the transaction.,* Zal worden berekend in de transactie.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 Valuta = [?] Fractie 
- Voor bijv. 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Valuta = [?] Fractie  Voor bijv. 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Om de klant wijzen artikelcode te behouden en om ze doorzoekbaar te maken op basis van hun code te gebruiken van deze optie
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> Standaardsjabloon </ h4> 
- <p> Gebruikt <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> en alle velden van Address ( inclusief aangepaste velden indien aanwezig) zal beschikbaar zijn </ p> 
- <pre> <code> {{address_line1}} <br> 
- {% if address_line2%} {{address_line2}} {<br> % endif -%} 
- {{city}} <br> 
- {% if staat%} {{staat}} {% endif <br> -%} 
- {% if pincode%} PIN: {{pincode}} {% endif <br> -%} 
- {{land}} <br> 
- {% if telefoon%} Telefoon: {{telefoon}} {<br> % endif -%} 
- {% if fax%} Fax: {{fax}} {% endif <br> -%} 
- {% if email_id%} E-mail: {{email_id}} <br> ; {% endif -%} 
- </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,Een Customer Group bestaat met dezelfde naam wijzigt u de naam van de klant of de naam van de Klant Groep
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Standaardsjabloon </ h4>  <p> Gebruikt <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> en alle velden van Address ( inclusief aangepaste velden indien aanwezig) zal beschikbaar zijn </ p>  <pre> <code> {{address_line1}} <br>  {% if address_line2%} {{address_line2}} {<br> % endif -%}  {{city}} <br>  {% if staat%} {{staat}} {% endif <br> -%}  {% if pincode%} PIN: {{pincode}} {% endif <br> -%}  {{land}} <br>  {% if telefoon%} Telefoon: {{telefoon}} {<br> % endif -%}  {% if fax%} Fax: {{fax}} {% endif <br> -%}  {% if email_id%} E-mail: {{email_id}} <br> ; {% endif -%}  </ code> </ pre>"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Een Klantgroep met dezelfde naam bestaat.Gelieve de naam van de Klant of de Klantgroep te wijzigen
 A Customer exists with same name,Een Klant bestaat met dezelfde naam
 A Lead with this email id should exist,Een Lead met deze e-mail-ID moet bestaan
 A Product or Service,Een product of dienst
 A Supplier exists with same name,Een leverancier bestaat met dezelfde naam
 A symbol for this currency. For e.g. $,Een symbool voor deze valuta. Voor bijvoorbeeld $
 AMC Expiry Date,AMC Vervaldatum
-Abbr,Abbr
-Abbreviation cannot have more than 5 characters,Afkorting kan niet meer dan 5 tekens
-Above Value,Boven Value
+Abbr,Afk
+Abbreviation cannot have more than 5 characters,Afkorting kan niet meer dan 5 tekens lang zijn
+Above Value,Boven Waarde
 Absent,Afwezig
 Acceptance Criteria,Acceptatiecriteria
 Accepted,Aanvaard
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Geaccepteerde + Rejected Aantal moet gelijk zijn aan Ontvangen hoeveelheid zijn voor post {0}
-Accepted Quantity,Geaccepteerde Aantal
-Accepted Warehouse,Geaccepteerde Warehouse
-Account,rekening
-Account Balance,Account Balance
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Geaccepteerde + Verworpen Aantal moet gelijk zijn aan Ontvangen aantal zijn voor post {0}
+Accepted Quantity,Geaccepteerd Aantal
+Accepted Warehouse,Geaccepteerd Magazijn
+Account,Rekening
+Account Balance,Rekeningbalans
 Account Created: {0},Account Gemaakt : {0}
 Account Details,Account Details
-Account Head,Account Hoofd
-Account Name,Accountnaam
-Account Type,Account Type
+Account Head,Account Hoofding
+Account Name,Rekeningnaam
+Account Type,Rekening Type
 "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo reeds in Credit, is het niet toegestaan om 'evenwicht moet worden' als 'Debet'"
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Saldo reeds in Debit, is het niet toegestaan om 'evenwicht moet worden' als 'Credit'"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Rekening voor het magazijn ( Perpetual Inventory ) wordt aangemaakt onder deze account .
-Account head {0} created,Account hoofd {0} aangemaakt
+Account head {0} created,Account hoofding {0} aangemaakt
 Account must be a balance sheet account,Rekening moet een balansrekening zijn
 Account with child nodes cannot be converted to ledger,Rekening met kind nodes kunnen niet worden geconverteerd naar ledger
 Account with existing transaction can not be converted to group.,Rekening met bestaande transactie kan niet worden omgezet in groep .
 Account with existing transaction can not be deleted,Rekening met bestaande transactie kan niet worden verwijderd
 Account with existing transaction cannot be converted to ledger,Rekening met bestaande transactie kan niet worden geconverteerd naar grootboek
-Account {0} cannot be a Group,Account {0} kan een groep niet
-Account {0} does not belong to Company {1},Account {0} behoort niet tot Company {1}
-Account {0} does not belong to company: {1},Account {0} behoort niet tot bedrijf: {1}
+Account {0} cannot be a Group,Rekening {0} kan geen groep zijn
+Account {0} does not belong to Company {1},Rekening {0} behoort niet tot Bedrijf {1}
+Account {0} does not belong to company: {1},Rekening {0} behoort niet tot bedrijf: {1}
 Account {0} does not exist,Account {0} bestaat niet
-Account {0} has been entered more than once for fiscal year {1},Account {0} is ingevoerd meer dan een keer voor het fiscale jaar {1}
-Account {0} is frozen,Account {0} is bevroren
-Account {0} is inactive,Account {0} is niet actief
-Account {0} is not valid,Account {0} is niet geldig
-Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Account {0} moet van het type ' vaste activa ' zijn zoals Item {1} is een actiefpost
-Account {0}: Parent account {1} can not be a ledger,Account {0}: Parent rekening {1} kan een grootboek niet
-Account {0}: Parent account {1} does not belong to company: {2},Account {0}: Parent rekening {1} hoort niet bij bedrijf: {2}
-Account {0}: Parent account {1} does not exist,Account {0}: Parent rekening {1} bestaat niet
-Account {0}: You can not assign itself as parent account,Account {0}: U kunt niet zelf toewijzen als ouder rekening
-"Account: {0} can only be updated via \
-					Stock Transactions","Account: {0} kan alleen worden bijgewerkt via \
- Stock Transacties"
-Accountant,accountant
-Accounting,Rekening
+Account {0} has been entered more than once for fiscal year {1},Rekening {0} is meer dan een keer ingevoerd voor het fiscale jaar {1}
+Account {0} is frozen,Rekening {0} is bevroren
+Account {0} is inactive,Rekening {0} is niet actief
+Account {0} is not valid,Rekening {0} is niet geldig
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Rekening {0} moet van het type 'vaste activa' zijn  omdat Artikel {1} een actiefpost is
+Account {0}: Parent account {1} can not be a ledger,Rekening {0}: Bovenliggende rekening {1} kan geen grootboek zijn
+Account {0}: Parent account {1} does not belong to company: {2},Rekening {0}: Bovenliggende rekening {1} hoort niet bij bedrijf: {2}
+Account {0}: Parent account {1} does not exist,Rekening {0}: Bovenliggende rekening {1} bestaat niet
+Account {0}: You can not assign itself as parent account,Rekening {0}: U kunt niet zelf zichzelf toewijzen als bovenliggende rekening
+Account: {0} can only be updated via \					Stock Transactions,Rekening: {0} kan alleen worden bijgewerkt via \ Voorraad Transacties
+Accountant,Accountant
+Accounting,Boekhouding
 "Accounting Entries can be made against leaf nodes, called","Boekingen kunnen worden gemaakt tegen leaf nodes , genaamd"
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Boekhoudkundige afschrijving bevroren tot deze datum, kan niemand / te wijzigen toegang behalve rol hieronder aangegeven."
 Accounting journal entries.,Accounting journaalposten.
-Accounts,Accounts
-Accounts Browser,accounts Browser
-Accounts Frozen Upto,Accounts Frozen Tot
+Accounts,Rekeningen
+Accounts Browser,Rekeningen Browser
+Accounts Frozen Upto,Rekeningen bevroren Tot
 Accounts Payable,Accounts Payable
 Accounts Receivable,Debiteuren
 Accounts Settings,Accounts Settings
@@ -121,10 +95,10 @@ Active,Actief
 Active: Will extract emails from ,Actief: Zal ​​e-mails uittreksel uit
 Activity,Activiteit
 Activity Log,Activiteitenlogboek
-Activity Log:,Activity Log :
+Activity Log:,Activiteitenlogboek:
 Activity Type,Activiteit Type
-Actual,Daadwerkelijk
-Actual Budget,Werkelijk Begroting
+Actual,Werkelijk
+Actual Budget,Werkelijk Budget
 Actual Completion Date,Werkelijke Voltooiingsdatum
 Actual Date,Werkelijke Datum
 Actual End Date,Werkelijke Einddatum
@@ -133,12 +107,12 @@ Actual Posting Date,Werkelijke Boekingsdatum
 Actual Qty,Werkelijke Aantal
 Actual Qty (at source/target),Werkelijke Aantal (bij de bron / doel)
 Actual Qty After Transaction,Werkelijke Aantal Na Transactie
-Actual Qty: Quantity available in the warehouse.,Werkelijke Aantal : Aantal beschikbaar in het magazijn.
+Actual Qty: Quantity available in the warehouse.,Werkelijke Aantal: Aantal beschikbaar in het magazijn.
 Actual Quantity,Werkelijke hoeveelheid
 Actual Start Date,Werkelijke Startdatum
 Add,Toevoegen
-Add / Edit Taxes and Charges,Toevoegen / bewerken en-heffingen
-Add Child,Child
+Add / Edit Taxes and Charges,Toevoegen / Bewerken Belastingen en Heffingen
+Add Child,Onderliggende toevoegen
 Add Serial No,Voeg Serienummer
 Add Taxes,Belastingen toevoegen
 Add Taxes and Charges,Belastingen en heffingen toe te voegen
@@ -886,9 +860,7 @@ Download Reconcilation Data,Download Verzoening gegevens
 Download Template,Download Template
 Download a report containing all raw materials with their latest inventory status,Download een verslag met alle grondstoffen met hun nieuwste inventaris status
 "Download the Template, fill appropriate data and attach the modified file.","Download de Template , vul de juiste gegevens en bevestig het gewijzigde bestand ."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Download de Template, vul de juiste gegevens en bevestig het gewijzigde bestand.
- Alle data en werknemer combinatie in de gekozen periode zal komen in de template, met bestaande presentielijsten"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Download de Template, vul de juiste gegevens en bevestig het gewijzigde bestand. Alle data en werknemer combinatie in de gekozen periode zal komen in de template, met bestaande presentielijsten"
 Draft,Ontwerp
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox Toegang toegestaan
@@ -994,9 +966,7 @@ Error: {0} > {1},Fout : {0} > {1}
 Estimated Material Cost,Geschatte Materiaal Kosten
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Zelfs als er meerdere Prijzen Regels met de hoogste prioriteit, worden vervolgens volgende interne prioriteiten aangebracht:"
 Everyone can read,Iedereen kan lezen
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Voorbeeld: ABCD # # # # # 
- Als serie is ingesteld en volgnummer wordt niet bij transacties vermeld, zal dan automatisch het serienummer worden gemaakt op basis van deze serie. Als u wilt altijd expliciet te vermelden serienummers voor dit item. dit veld leeg laten."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Voorbeeld: ABCD # # # # #  Als serie is ingesteld en volgnummer wordt niet bij transacties vermeld, zal dan automatisch het serienummer worden gemaakt op basis van deze serie. Als u wilt altijd expliciet te vermelden serienummers voor dit item. dit veld leeg laten."
 Exchange Rate,Wisselkoers
 Excise Duty 10,Accijns 10
 Excise Duty 14,Excise Duty 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,Post-wise Aankoop Geschiedenis
 Item-wise Purchase Register,Post-wise Aankoop Register
 Item-wise Sales History,Post-wise Sales Geschiedenis
 Item-wise Sales Register,Post-wise sales Registreren
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Item: {0} beheerd batchgewijs, niet kan worden verzoend met behulp van \
- Stock Verzoening, in plaats daarvan gebruik Stock Entry"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Item: {0} beheerd batchgewijs, niet kan worden verzoend met behulp van \ Stock Verzoening, in plaats daarvan gebruik Stock Entry"
 Item: {0} not found in the system,Item: {0} niet gevonden in het systeem
 Items,Artikelen
 Items To Be Requested,Items worden aangevraagd
@@ -1731,9 +1699,7 @@ Moving Average Rate,Moving Average Rate
 Mr,De heer
 Ms,Mevrouw
 Multiple Item prices.,Meerdere Artikelprijzen .
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Prijs Regel Meerdere bestaat met dezelfde criteria, dan kunt u oplossen door \
- conflict door het toekennen van prioriteit. Prijs Regels: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Prijs Regel Meerdere bestaat met dezelfde criteria, dan kunt u oplossen door \ conflict door het toekennen van prioriteit. Prijs Regels: {0}"
 Music,muziek
 Must be Whole Number,Moet heel getal zijn
 Name,Naam
@@ -2486,23 +2452,15 @@ Row # ,Rij #
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Rij # {0}: Bestelde hoeveelheid kan niet minder dan minimum afname item (gedefinieerd in punt master).
 Row #{0}: Please specify Serial No for Item {1},Rij # {0}: Geef volgnummer voor post {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Rij {0}: Account komt niet overeen met \
- Aankoop Factuur Credit Om rekening te houden"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Rij {0}: Account komt niet overeen met \
- verkoopfactuur Debit Om rekening te houden"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Rij {0}: Account komt niet overeen met \ Aankoop Factuur Credit Om rekening te houden
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Rij {0}: Account komt niet overeen met \ verkoopfactuur Debit Om rekening te houden
 Row {0}: Conversion Factor is mandatory,Rij {0}: Conversie Factor is verplicht
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Rij {0} : Credit invoer kan niet worden gekoppeld aan een inkoopfactuur
 Row {0}: Debit entry can not be linked with a Sales Invoice,Rij {0} : debitering kan niet worden gekoppeld aan een verkoopfactuur
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Rij {0}: Betaling bedrag moet kleiner dan of gelijk aan openstaande bedrag factureren zijn. Raadpleeg onderstaande opmerking.
 Row {0}: Qty is mandatory,Rij {0}: Aantal is verplicht
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Rij {0}: Aantal niet voorraad in magazijn {1} op {2} {3}.
- Beschikbaar Aantal: {4}, Transfer Aantal: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Rij {0}: Voor het instellen van {1} periodiciteit, verschil tussen uit en tot op heden \
- moet groter zijn dan of gelijk aan {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Rij {0}: Aantal niet voorraad in magazijn {1} op {2} {3}. Beschikbaar Aantal: {4}, Transfer Aantal: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Rij {0}: Voor het instellen van {1} periodiciteit, verschil tussen uit en tot op heden \ moet groter zijn dan of gelijk aan {2}"
 Row {0}:Start Date must be before End Date,Rij {0} : Start Datum moet zijn voordat Einddatum
 Rules for adding shipping costs.,Regels voor het toevoegen van verzendkosten.
 Rules for applying pricing and discount.,Regels voor de toepassing van prijzen en kortingen .
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,Serienummer {0} statuut moet
 Serial Nos Required for Serialized Item {0},Volgnummers Vereiste voor Serialized Item {0}
 Serial Number Series,Serienummer Series
 Serial number {0} entered more than once,Serienummer {0} ingevoerd meer dan eens
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Geserialiseerde Item {0} niet kan worden bijgewerkt \
- met behulp van Stock Verzoening"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Geserialiseerde Item {0} niet kan worden bijgewerkt \ met behulp van Stock Verzoening
 Series,serie
 Series List for this Transaction,Series Lijst voor deze transactie
 Series Updated,serie update
@@ -2911,9 +2867,7 @@ Tax Assets,belastingvorderingen
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,Fiscale categorie kan ' Valuation ' of ' Valuation en Total ' als alle items zijn niet-voorraadartikelen niet
 Tax Rate,Belastingtarief
 Tax and other salary deductions.,Belastingen en andere inhoudingen op het loon.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Tax detail tafel haalde van post meester als een string en opgeslagen in dit gebied.
- Gebruikt voor belastingen en-heffingen"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Tax detail tafel haalde van post meester als een string en opgeslagen in dit gebied. Gebruikt voor belastingen en-heffingen
 Tax template for buying transactions.,Belasting sjabloon voor het kopen van transacties .
 Tax template for selling transactions.,Belasting sjabloon voor de verkoop transacties.
 Taxable,Belastbaar
@@ -2959,9 +2913,7 @@ The First User: You,De eerste gebruiker : U
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",Het item dat het pakket vertegenwoordigt. Dit artikel moet hebben &quot;Is Stock Item&quot; als &quot;No&quot; en &quot;Is Sales Item&quot; als &quot;Yes&quot;
 The Organization,de Organisatie
 "The account head under Liability, in which Profit/Loss will be booked","De rekening hoofd onder Aansprakelijkheid , waarin Winst / verlies zal worden geboekt"
-"The date on which next invoice will be generated. It is generated on submit.
-","De datum waarop de volgende factuur wordt gegenereerd. Het wordt geproduceerd op te dienen.
-"
+The date on which next invoice will be generated. It is generated on submit.,De datum waarop de volgende factuur wordt gegenereerd. Het wordt geproduceerd op te dienen.
 The date on which recurring invoice will be stop,De datum waarop terugkerende factuur stoppen
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","De dag van de maand waarop de automatische factuur wordt gegenereerd bv 05, 28 etc"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,De dag (en ) waarop je solliciteert verlof zijn vakantie . Je hoeft niet voor verlof .

@@ -28,36 +28,12 @@
 'To Date' is required,'To Date' требуется
 'Update Stock' for Sales Invoice {0} must be set,"""Обновление со 'для Расходная накладная {0} должен быть установлен"
 * Will be calculated in the transaction.,* Будет рассчитана в сделке.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 Валюта = [?] Фракция 
- Для например 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Валюта = [?] Фракция  Для например 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 Для поддержания клиентов мудрый пункт код и сделать их доступными для поиска в зависимости от их кода использовать эту опцию
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Добавить / Изменить </>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Добавить / Изменить </>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Добавить / Изменить </>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> умолчанию шаблона </ h4> 
- <p> Использует <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja шаблонов </ A> и все поля Адрес ( в том числе пользовательских полей если таковые имеются) будут доступны </ P> 
- <pre> <code> {{address_line1}} инструменты 
- {%, если address_line2%} {{address_line2}} инструменты { % ENDIF -%} 
- {{город}} инструменты 
- {%, если состояние%} {{состояние}} инструменты {% ENDIF -%} 
- {%, если пин-код%} PIN-код: {{пин-код}} инструменты {% ENDIF -%} 
- {{страна}} инструменты 
- {%, если телефон%} Телефон: {{телефон}} инструменты { % ENDIF -%} 
- {%, если факс%} Факс: {{факс}} инструменты {% ENDIF -%} 
- {%, если email_id%} Email: {{email_id}} инструменты ; {% ENDIF -%} 
- </ код> </ предварительно>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> умолчанию шаблона </ h4>  <p> Использует <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja шаблонов </ A> и все поля Адрес ( в том числе пользовательских полей если таковые имеются) будут доступны </ P>  <pre> <code> {{address_line1}} инструменты  {%, если address_line2%} {{address_line2}} инструменты { % ENDIF -%}  {{город}} инструменты  {%, если состояние%} {{состояние}} инструменты {% ENDIF -%}  {%, если пин-код%} PIN-код: {{пин-код}} инструменты {% ENDIF -%}  {{страна}} инструменты  {%, если телефон%} Телефон: {{телефон}} инструменты { % ENDIF -%}  {%, если факс%} Факс: {{факс}} инструменты {% ENDIF -%}  {%, если email_id%} Email: {{email_id}} инструменты ; {% ENDIF -%}  </ код> </ предварительно>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Группа клиентов существует с тем же именем, пожалуйста изменить имя клиентов или переименовать группу клиентов"
 A Customer exists with same name,Существует клиентов с одноименным названием
 A Lead with this email id should exist,Ведущий с этим электронный идентификатор должен существовать
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,Счет {0}: Родител
 Account {0}: Parent account {1} does not belong to company: {2},Счет {0}: Родитель счета {1} не принадлежит компании: {2}
 Account {0}: Parent account {1} does not exist,Счет {0}: Родитель счета {1} не существует
 Account {0}: You can not assign itself as parent account,Счет {0}: Вы не можете назначить себя как родительским счетом
-"Account: {0} can only be updated via \
-					Stock Transactions","Счета: {0} может быть обновлен только через \
- Биржевые операции"
+Account: {0} can only be updated via \					Stock Transactions,Счета: {0} может быть обновлен только через \ Биржевые операции
 Accountant,Бухгалтер
 Accounting,Пользователи
 "Accounting Entries can be made against leaf nodes, called","Бухгалтерские записи могут быть сделаны против конечных узлов, называется"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Скачать приведению данных
 Download Template,Скачать шаблон
 Download a report containing all raw materials with their latest inventory status,"Скачать доклад, содержащий все сырье с их последней инвентаризации статус"
 "Download the Template, fill appropriate data and attach the modified file.","Скачать шаблон, заполнить соответствующие данные и приложить измененный файл."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Скачать шаблон, заполнить соответствующие данные и приложить измененный файл.
- Все даты и сочетание работник в выбранном периоде придет в шаблоне, с существующими рекорды посещаемости"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Скачать шаблон, заполнить соответствующие данные и приложить измененный файл. Все даты и сочетание работник в выбранном периоде придет в шаблоне, с существующими рекорды посещаемости"
 Draft,Новый
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox доступ разрешен
@@ -994,9 +966,7 @@ Error: {0} > {1},Ошибка: {0}> {1}
 Estimated Material Cost,Расчетное Материал Стоимость
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Даже если есть несколько правил ценообразования с наивысшим приоритетом, то следующие внутренние приоритеты применяются:"
 Everyone can read,Каждый может читать
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Пример: ABCD # # # # # 
- Если серии установлен и Серийный номер не упоминается в сделках, то автоматическая серийный номер будет создана на основе этой серии. Если вы всегда хотите явно упомянуть серийный Нос для этого элемента. оставьте поле пустым."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Пример: ABCD # # # # #  Если серии установлен и Серийный номер не упоминается в сделках, то автоматическая серийный номер будет создана на основе этой серии. Если вы всегда хотите явно упомянуть серийный Нос для этого элемента. оставьте поле пустым."
 Exchange Rate,Курс обмена
 Excise Duty 10,Акцизе 10
 Excise Duty 14,Акцизе 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,Пункт мудрый История покупок
 Item-wise Purchase Register,Пункт мудрый Покупка Зарегистрироваться
 Item-wise Sales History,Пункт мудрый История продаж
 Item-wise Sales Register,Пункт мудрый Продажи Зарегистрироваться
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Пункт: {0} удалось порционно, не могут быть согласованы с помощью \
- со примирению, а не использовать складе запись"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Пункт: {0} удалось порционно, не могут быть согласованы с помощью \ со примирению, а не использовать складе запись"
 Item: {0} not found in the system,Пункт: {0} не найден в системе
 Items,Элементы
 Items To Be Requested,"Предметы, будет предложено"
@@ -1731,9 +1699,7 @@ Moving Average Rate,Moving Average Rate
 Mr,Г-н
 Ms,Госпожа
 Multiple Item prices.,Несколько цены товара.
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Несколько Цена Правило существует с тем же критериям, пожалуйста, решить \
- конфликта путем присвоения приоритет. Цена Правила: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Несколько Цена Правило существует с тем же критериям, пожалуйста, решить \ конфликта путем присвоения приоритет. Цена Правила: {0}"
 Music,Музыка
 Must be Whole Number,Должно быть Целое число
 Name,Имя
@@ -2486,23 +2452,15 @@ Row # ,
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Ряд # {0}: Заказал Количество может не менее минимального Кол порядка элемента (определяется в мастер пункт).
 Row #{0}: Please specify Serial No for Item {1},"Ряд # {0}: Пожалуйста, сформулируйте Серийный номер для Пункт {1}"
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Ряд {0}: Счет не соответствует \
- Покупка Счет в плюс на счет"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Ряд {0}: Счет не соответствует \
- Расходная накладная дебету счета"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Ряд {0}: Счет не соответствует \ Покупка Счет в плюс на счет
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Ряд {0}: Счет не соответствует \ Расходная накладная дебету счета
 Row {0}: Conversion Factor is mandatory,Ряд {0}: Коэффициент преобразования является обязательным
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Ряд {0}: Кредитная запись не может быть связан с товарным чеком
 Row {0}: Debit entry can not be linked with a Sales Invoice,Ряд {0}: Дебет запись не может быть связан с продаж счета-фактуры
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,"Ряд {0}: Сумма платежа должна быть меньше или равна выставлять счета суммы задолженности. Пожалуйста, обратитесь примечание ниже."
 Row {0}: Qty is mandatory,Ряд {0}: Кол-во является обязательным
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Ряд {0}: Кол-во не Имеющийся на складе {1} на {2} {3}.
- Доступное Кол-во: {4}, трансфер Количество: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Строка {0}: Чтобы установить {1} периодичность, разница между от и до настоящего времени \
- должно быть больше или равно {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Ряд {0}: Кол-во не Имеющийся на складе {1} на {2} {3}. Доступное Кол-во: {4}, трансфер Количество: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Строка {0}: Чтобы установить {1} периодичность, разница между от и до настоящего времени \ должно быть больше или равно {2}"
 Row {0}:Start Date must be before End Date,Ряд {0}: Дата начала должна быть раньше даты окончания
 Rules for adding shipping costs.,Правила для добавления стоимости доставки.
 Rules for applying pricing and discount.,Правила применения цен и скидки.
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,"Серийный номер
 Serial Nos Required for Serialized Item {0},Серийный Нос Требуется для сериализованный элемент {0}
 Serial Number Series,Серийный Номер серии
 Serial number {0} entered more than once,Серийный номер {0} вошли более одного раза
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Серийный Пункт {0} не может быть обновлен \
- с использованием со примирения"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Серийный Пункт {0} не может быть обновлен \ с использованием со примирения
 Series,Серии значений
 Series List for this Transaction,Список Серия для этого сделки
 Series Updated,Серия Обновлено
@@ -2911,9 +2867,7 @@ Tax Assets,Налоговые активы
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Налоговый Категория не может быть ""Оценка"" или ""Оценка и Всего», как все детали, нет в наличии"
 Tax Rate,Размер налога
 Tax and other salary deductions.,Налоговые и иные отчисления заработной платы.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Налоговый деталь стол принес от мастера пункт в виде строки и хранятся в этой области.
- Используется по налогам и сборам"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Налоговый деталь стол принес от мастера пункт в виде строки и хранятся в этой области. Используется по налогам и сборам
 Tax template for buying transactions.,Налоговый шаблон для покупки сделок.
 Tax template for selling transactions.,Налоговый шаблон для продажи сделок.
 Taxable,Облагаемый налогом
@@ -2959,9 +2913,7 @@ The First User: You,Первый пользователя: Вы
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Пункт, который представляет пакет. Этот элемент, должно быть, ""Является фонда Пункт"" а ""Нет"" и ""является продажа товара"", как ""Да"""
 The Organization,Организация
 "The account head under Liability, in which Profit/Loss will be booked","Счет голову под ответственности, в котором Прибыль / убыток будут забронированы"
-"The date on which next invoice will be generated. It is generated on submit.
-","Дата, на которую будет сгенерирован следующий счет-фактура. Он создается на представить.
-"
+The date on which next invoice will be generated. It is generated on submit.,"Дата, на которую будет сгенерирован следующий счет-фактура. Он создается на представить."
 The date on which recurring invoice will be stop,"Дата, на которую повторяющихся счет будет остановить"
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,"День (дни), на котором вы подаете заявление на отпуск, отпуск. Вам не нужно обратиться за разрешением."

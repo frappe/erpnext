@@ -28,117 +28,91 @@
 'To Date' is required,""" Hasta la fecha "" se requiere"
 'Update Stock' for Sales Invoice {0} must be set,"'Actualización de la "" factura de venta para {0} debe ajustarse"
 * Will be calculated in the transaction.,* Se calculará en la transacción.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 moneda = [?] Fracción 
- Por ejemplo, 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 moneda = [?] Fracción  Por ejemplo, 1 USD = 100 Cent"
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 . Para mantener el código del artículo sabia cliente y para efectuar búsquedas en ellos en función de su uso de código de esta opción
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer grupo""> Añadir / Editar < / a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item grupo""> Añadir / Editar < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Añadir / Editar < / a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> defecto plantilla </ h4> 
- <p> Usos <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja plantillas </ a> y todos los campos de la Dirección ( incluyendo campos personalizados en su caso) estará disponible </ p> 
- <pre> <code> {{}} address_line1 <br> 
- {% if address_line2%} {{}} address_line2 <br> { endif% -%} 
- {{city}} <br> 
- {% if estado%} {{Estado}} {% endif <br> -%} 
- {% if%} pincode PIN: {{pincode}} {% endif <br> -%} 
- {{país}} <br> 
- {% if%} de teléfono Teléfono: {{phone}} {<br> endif% -%} 
- {% if%} fax Fax: {{fax}} {% endif <br> -%} 
- {% if%} email_ID Email: {{}} email_ID <br> ; {% endif -%} 
- </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Existe un grupo de clientes con el mismo nombre, por favor cambie el nombre del cliente o cambie el nombre del grupo al Cliente"
-A Customer exists with same name,Existe un cliente con el mismo nombre
-A Lead with this email id should exist,Una iniciativa con este correo electrónico de identificación debería existir
-A Product or Service,Un producto o servicio
-A Supplier exists with same name,Existe un proveedor con el mismo nombre
-A symbol for this currency. For e.g. $,"Un símbolo de esta moneda. Por ejemplo, $"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> defecto plantilla </ h4>  <p> Usos <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja plantillas </ a> y todos los campos de la Dirección ( incluyendo campos personalizados en su caso) estará disponible </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { endif% -%}  {{city}} <br>  {% if estado%} {{Estado}} {% endif <br> -%}  {% if%} pincode PIN: {{pincode}} {% endif <br> -%}  {{país}} <br>  {% if%} de teléfono Teléfono: {{phone}} {<br> endif% -%}  {% if%} fax Fax: {{fax}} {% endif <br> -%}  {% if%} email_ID Email: {{}} email_ID <br> ; {% endif -%}  </ code> </ pre>"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Existe un Grupo de Clientes con el mismo nombre, por favor cambie el nombre del Cliente o cambie el nombre del Grupo de Clientes"
+A Customer exists with same name,Existe un Cliente con el mismo nombre
+A Lead with this email id should exist,Una Iniciativa con este correo electrónico debería existir
+A Product or Service,Un Producto o Servicio
+A Supplier exists with same name,Existe un Proveedor con el mismo nombre
+A symbol for this currency. For e.g. $,"Un símbolo para esta moneda. Por ejemplo, $"
 AMC Expiry Date,AMC Fecha de caducidad
-Abbr,abbr
+Abbr,Abrev
 Abbreviation cannot have more than 5 characters,Abreviatura no puede tener más de 5 caracteres
-Above Value,Por encima de Valor
-Absent,ausente
+Above Value,Valor Superior
+Absent,Ausente
 Acceptance Criteria,Criterios de Aceptación
 Accepted,Aceptado
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Aceptado Rechazado + Cantidad debe ser igual a la cantidad recibida por el elemento {0}
-Accepted Quantity,Cantidad Aceptado
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Cantidad Aceptada + Rechazada debe ser igual a la cantidad Recibida por el Artículo {0}
+Accepted Quantity,Cantidad Aceptada
 Accepted Warehouse,Almacén Aceptado
-Account,cuenta
-Account Balance,Saldo de la cuenta
+Account,Cuenta
+Account Balance,Balance de la Cuenta
 Account Created: {0},Cuenta Creada: {0}
-Account Details,Detalles de la cuenta
+Account Details,Detalles de la Cuenta
 Account Head,cuenta Head
-Account Name,Nombre de cuenta
-Account Type,Tipo de cuenta
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Balance de la cuenta ya de crédito, no le está permitido establecer 'El balance debe ser' como 'Débito'"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Balance de la cuenta que ya están en débito, no se le permite establecer ""El balance debe ser"" como ""crédito"""
+Account Name,Nombre de la Cuenta
+Account Type,Tipo de Cuenta
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Balance de la cuenta ya en Crédito, no le está permitido establecer 'Balance Debe Ser' como 'Débito'"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Balance de la cuenta ya en Débito, no le está permitido establecer ""Balance Debe Ser"" como ""Crédito"""
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Cuenta para el almacén ( inventario permanente ) se creará en esta Cuenta.
 Account head {0} created,Cabeza de cuenta {0} creado
 Account must be a balance sheet account,La cuenta debe ser una cuenta de balance
-Account with child nodes cannot be converted to ledger,Cuenta con nodos secundarios no se puede convertir en el libro mayor
-Account with existing transaction can not be converted to group.,Cuenta con la transacción existente no se puede convertir al grupo.
-Account with existing transaction can not be deleted,Cuenta con la transacción existente no se puede eliminar
+Account with child nodes cannot be converted to ledger,Cuenta con nodos hijos no se puede convertir en el libro mayor
+Account with existing transaction can not be converted to group.,Cuenta con transacción existente no se puede convertir al grupo.
+Account with existing transaction can not be deleted,Cuenta con transacción existente no se puede eliminar
 Account with existing transaction cannot be converted to ledger,Cuenta con la transacción existente no se puede convertir en el libro mayor
-Account {0} cannot be a Group,Cuenta {0} no puede ser un grupo
-Account {0} does not belong to Company {1},Cuenta {0} no pertenece a la empresa {1}
+Account {0} cannot be a Group,Cuenta {0} no puede ser un Grupo
+Account {0} does not belong to Company {1},Cuenta {0} no pertenece a la Compañía {1}
 Account {0} does not belong to company: {1},Cuenta {0} no pertenece a la compañía: {1}
 Account {0} does not exist,Cuenta {0} no existe
 Account {0} has been entered more than once for fiscal year {1},Cuenta {0} se ha introducido más de una vez para el año fiscal {1}
-Account {0} is frozen,Cuenta {0} está congelado
-Account {0} is inactive,Cuenta {0} está inactivo
-Account {0} is not valid,Cuenta {0} no es válido
-Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Cuenta {0} debe ser de tipo ' de activos fijos ""como elemento {1} es un elemento de activo"
-Account {0}: Parent account {1} can not be a ledger,Cuenta {0}: cuenta Parent {1} no puede ser un libro de contabilidad
-Account {0}: Parent account {1} does not belong to company: {2},Cuenta {0}: cuenta Parent {1} no pertenece a la compañía: {2}
-Account {0}: Parent account {1} does not exist,Cuenta {0}: la cuenta de Padres {1} no existe
-Account {0}: You can not assign itself as parent account,Cuenta {0}: no se puede asignar como cuenta primaria
-"Account: {0} can only be updated via \
-					Stock Transactions","Cuenta: {0} sólo puede ser actualizado a través de \
- Transacciones archivo"
-Accountant,contador
-Accounting,contabilidad
+Account {0} is frozen,Cuenta {0} está congelada
+Account {0} is inactive,Cuenta {0} está inactiva
+Account {0} is not valid,Cuenta {0} no es válida
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Cuenta {0} debe ser de tipo 'Activos Fijos' como Artículo {1} es un Elemento de Activo
+Account {0}: Parent account {1} can not be a ledger,Cuenta {0}: Cuenta Padre {1} no puede ser un libro de contabilidad
+Account {0}: Parent account {1} does not belong to company: {2},Cuenta {0}: Cuenta Padre {1} no pertenece a la compañía: {2}
+Account {0}: Parent account {1} does not exist,Cuenta {0}: Cuenta Padre {1} no existe
+Account {0}: You can not assign itself as parent account,Cuenta {0}: Usted no lo puede asignar como cuenta padre
+Account: {0} can only be updated via \					Stock Transactions,Cuenta: {0} sólo puede ser actualizado a través de \ Transacciones de Inventario
+Accountant,Contador
+Accounting,Contabilidad
 "Accounting Entries can be made against leaf nodes, called","Los comentarios de Contabilidad se pueden hacer contra los nodos hoja , llamada"
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Asiento contable congelado hasta la fecha , nadie puede hacer / modificar la entrada , excepto el papel se especifica a continuación ."
-Accounting journal entries.,Entradas de diario de contabilidad .
+Accounting journal entries.,Entradas de diario de contabilidad.
 Accounts,Cuentas
-Accounts Browser,Cuentas Browser
-Accounts Frozen Upto,Cuentas congeladas Hasta
-Accounts Payable,Cuentas por pagar
-Accounts Receivable,Cuentas por cobrar
-Accounts Settings,Cuentas Ajustes
-Active,activo
-Active: Will extract emails from ,Activo: Will extraer correos electrónicos de
-Activity,actividad
-Activity Log,Registro de actividades
-Activity Log:,Registro de actividad :
+Accounts Browser,Navegador de Cuentas
+Accounts Frozen Upto,Cuentas Congeladas Hasta
+Accounts Payable,Cuentas por Pagar
+Accounts Receivable,Cuentas por Cobrar
+Accounts Settings,Configuración de Cuentas
+Active,Activo
+Active: Will extract emails from ,Activo: Extraerá correos electrónicos de
+Activity,Actividad
+Activity Log,Registro de Actividad
+Activity Log:,Registro de Actividad:
 Activity Type,Tipo de Actividad
-Actual,real
+Actual,Real
 Actual Budget,Presupuesto Real
-Actual Completion Date,Fecha de Terminación del Real
-Actual Date,Fecha real
-Actual End Date,Actual Fecha de finalización
-Actual Invoice Date,Actual Fecha de la factura
-Actual Posting Date,Actual Día de envío
-Actual Qty,Actual Cantidad
-Actual Qty (at source/target),Actual Cantidad ( en origen / destino)
-Actual Qty After Transaction,Actual Cantidad Después de Transacción
-Actual Qty: Quantity available in the warehouse.,Actual Cantidad : Cantidad disponible en el almacén .
-Actual Quantity,Cantidad real
-Actual Start Date,Fecha de Comienzo real
-Add,añadir
-Add / Edit Taxes and Charges,Añadir / modificar las tasas y cargos
-Add Child,Añadir niño
+Actual Completion Date,Fecha Real de Terminación
+Actual Date,Fecha Real
+Actual End Date,Fecha Real de Finalización
+Actual Invoice Date,Fecha Real de Factura
+Actual Posting Date,Fecha Real de Envío
+Actual Qty,Cantidad Real
+Actual Qty (at source/target),Cantidad Real (en origen/destino)
+Actual Qty After Transaction,Cantidad Real Después de la Transacción
+Actual Qty: Quantity available in the warehouse.,Cantidad Actual: Cantidad disponible en el almacén.
+Actual Quantity,Cantidad Real
+Actual Start Date,Fecha de Comienzo Real
+Add,Añadir
+Add / Edit Taxes and Charges,Añadir / Editar las tasas y cargos
+Add Child,Añadir Hijo
 Add Serial No,Añadir Serial No
 Add Taxes,Añadir impuestos
 Add Taxes and Charges,Añadir las tasas y cargos
@@ -339,44 +313,44 @@ BOM replaced,BOM reemplazado
 BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} para el artículo {1} en la fila {2} está inactivo o no presentado
 BOM {0} is not active or not submitted,BOM {0} no está activo o no presentado
 BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} no se presenta o inactivo lista de materiales para el elemento {1}
-Backup Manager,Backup Manager
-Backup Right Now,Copia de seguridad ahora mismo
-Backups will be uploaded to,Las copias de seguridad se subirán a
-Balance Qty,Equilibrio Cantidad
-Balance Sheet,balance
-Balance Value,Valor de balance
-Balance for Account {0} must always be {1},Balance por cuenta {0} debe ser siempre {1}
-Balance must be,El balance debe ser
-"Balances of Accounts of type ""Bank"" or ""Cash""","Los saldos de las cuentas de tipo ""Banco"" o "" efectivo"""
+Backup Manager,Administrador de Respaldos
+Backup Right Now,Respaldar Ya
+Backups will be uploaded to,Respaldos serán subidos a
+Balance Qty,Cantidad en Balance
+Balance Sheet,Hoja de Balance
+Balance Value,Valor de Balance
+Balance for Account {0} must always be {1},Balance de Cuenta {0} debe ser siempre {1}
+Balance must be,Balance debe ser
+"Balances of Accounts of type ""Bank"" or ""Cash""","Los Balances de Cuentas de tipo ""Banco"" o ""Efectivo"""
 Bank,Banco
-Bank / Cash Account,Cuenta de banco / caja
-Bank A/C No.,Bank A / C No.
-Bank Account,cuenta Bancaria
-Bank Account No.,Cuenta Bancaria
-Bank Accounts,Cuentas bancarias
-Bank Clearance Summary,Resumen Liquidación del Banco
-Bank Draft,letra bancaria
-Bank Name,Nombre del banco
+Bank / Cash Account,Cuenta de Banco / Efectivo
+Bank A/C No.,Número de Cuenta de Banco
+Bank Account,Cuenta Bancaria
+Bank Account No.,Número de Cuenta Bancaria
+Bank Accounts,Cuentas Bancarias
+Bank Clearance Summary,Resumen de Liquidación del Banco
+Bank Draft,Cheque de Gerencia
+Bank Name,Nombre del Banco
 Bank Overdraft Account,Cuenta crédito en cuenta corriente
 Bank Reconciliation,Conciliación Bancaria
-Bank Reconciliation Detail,Detalle de conciliación bancaria
+Bank Reconciliation Detail,Detalle de Conciliación Bancaria
 Bank Reconciliation Statement,Declaración de Conciliación Bancaria
 Bank Voucher,Banco de Vales
 Bank/Cash Balance,Banco / Balance de Caja
-Banking,banca
-Barcode,Código de barras
+Banking,Banca
+Barcode,Código de Barras
 Barcode {0} already used in Item {1},Barcode {0} ya se utiliza en el elemento {1}
 Based On,Basado en el
-Basic,básico
+Basic,Básico
 Basic Info,Información Básica
 Basic Information,Datos Básicos
 Basic Rate,Tasa Básica
 Basic Rate (Company Currency),Basic Rate ( Compañía de divisas )
-Batch,lote
+Batch,Lote
 Batch (lot) of an Item.,Batch (lote ) de un elemento .
 Batch Finished Date,Fecha lotes Terminado
 Batch ID,ID de lote
-Batch No,lote n
+Batch No,Lote Nro
 Batch Started Date,Lotes Comienza Fecha
 Batch Time Logs for billing.,Registros de tiempo de lotes para la facturación .
 Batch-Wise Balance History,Batch- Wise Historial de saldo
@@ -398,27 +372,27 @@ Billing Address Name,Dirección de Facturación Nombre
 Billing Status,estado de facturación
 Bills raised by Suppliers.,Bills planteadas por los proveedores.
 Bills raised to Customers.,Bills planteadas a los clientes.
-Bin,papelera
+Bin,Papelera
 Bio,Bio
-Biotechnology,biotecnología
-Birthday,cumpleaños
+Biotechnology,Biotecnología
+Birthday,Cumpleaños
 Block Date,Bloquear Fecha
-Block Days,bloque días
+Block Days,Bloquear Días
 Block leave applications by department.,Bloquee aplicaciones de permiso por departamento.
 Blog Post,Blog
 Blog Subscriber,Blog suscriptor
 Blood Group,Grupos Sanguíneos
 Both Warehouse must belong to same Company,Tanto Almacén debe pertenecer a una misma empresa
 Box,caja
-Branch,rama
-Brand,marca
+Branch,Rama
+Brand,Marca
 Brand Name,Marca
 Brand master.,Master Marca .
 Brands,Marcas
 Breakdown,desglose
 Broadcasting,radiodifusión
 Brokerage,corretaje
-Budget,presupuesto
+Budget,Presupuesto
 Budget Allocated,Presupuesto asignado
 Budget Detail,Detalle del Presupuesto
 Budget Details,Presupuesto detalles
@@ -886,9 +860,7 @@ Download Reconcilation Data,Descarga reconciliación de datos
 Download Template,Descargar Plantilla
 Download a report containing all raw materials with their latest inventory status,Descargar un informe con todas las materias primas con su estado actual inventario
 "Download the Template, fill appropriate data and attach the modified file.","Descarga la plantilla , rellenar los datos correspondientes y adjuntar el archivo modificado."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Descarga la plantilla, rellenar los datos correspondientes y adjuntar el archivo modificado.
- Todas las fechas y combinación empleado en el período seleccionado vendrán en la plantilla, con los registros de asistencia existentes"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Descarga la plantilla, rellenar los datos correspondientes y adjuntar el archivo modificado. Todas las fechas y combinación empleado en el período seleccionado vendrán en la plantilla, con los registros de asistencia existentes"
 Draft,borrador
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox Acceso mascotas
@@ -994,9 +966,7 @@ Error: {0} > {1},Error: {0} > {1}
 Estimated Material Cost,Costo estimado del material
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Incluso si hay varias reglas de precios con mayor prioridad, se aplican entonces siguientes prioridades internas:"
 Everyone can read,Todo el mundo puede leer
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Ejemplo: ABCD # # # # # 
- Si la serie se establece y No de serie no se menciona en las transacciones, número de serie y luego automática se creará sobre la base de esta serie. Si siempre quiere mencionar explícitamente los números de serie para este artículo. déjelo en blanco."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Ejemplo: ABCD # # # # #  Si la serie se establece y No de serie no se menciona en las transacciones, número de serie y luego automática se creará sobre la base de esta serie. Si siempre quiere mencionar explícitamente los números de serie para este artículo. déjelo en blanco."
 Exchange Rate,Tipo de Cambio
 Excise Duty 10,Impuestos Especiales 10
 Excise Duty 14,Impuestos Especiales 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,- Artículo sabio Historial de compras
 Item-wise Purchase Register,- Artículo sabio Compra Registrarse
 Item-wise Sales History,- Artículo sabio Historia Ventas
 Item-wise Sales Register,- Artículo sabio ventas Registrarse
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Artículo: {0} gestionado por lotes, no se puede conciliar el uso de \
- Stock Reconciliación, en lugar utilizar la entrada Stock"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Artículo: {0} gestionado por lotes, no se puede conciliar el uso de \ Stock Reconciliación, en lugar utilizar la entrada Stock"
 Item: {0} not found in the system,Artículo: {0} no se encuentra en el sistema
 Items,Artículos
 Items To Be Requested,Los artículos que se solicitarán
@@ -1731,9 +1699,7 @@ Moving Average Rate,Mover Tarifa media
 Mr,Sr.
 Ms,ms
 Multiple Item prices.,Precios de los artículos múltiples.
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Múltiple Precio Regla existe con los mismos criterios, por favor resuelva \
- conflicto mediante la asignación de prioridad. Reglas Precio: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Múltiple Precio Regla existe con los mismos criterios, por favor resuelva \ conflicto mediante la asignación de prioridad. Reglas Precio: {0}"
 Music,música
 Must be Whole Number,Debe ser un número entero
 Name,nombre
@@ -2486,23 +2452,15 @@ Row # ,Fila #
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Fila # {0}: Cantidad ordenada no puede menos que mínima cantidad de pedido de material (definido en maestro de artículos).
 Row #{0}: Please specify Serial No for Item {1},"Fila # {0}: Por favor, especifique No para la serie de artículos {1}"
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Fila {0}: Cuenta no coincide con \
- Compra Factura de Crédito Para tener en cuenta"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Fila {0}: Cuenta no coincide con \
- Factura Débito Para tener en cuenta"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Fila {0}: Cuenta no coincide con \ Compra Factura de Crédito Para tener en cuenta
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Fila {0}: Cuenta no coincide con \ Factura Débito Para tener en cuenta
 Row {0}: Conversion Factor is mandatory,Fila {0}: Factor de conversión es obligatoria
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Fila {0}: entrada de crédito no puede vincularse con una factura de compra
 Row {0}: Debit entry can not be linked with a Sales Invoice,Fila {0}: entrada de débito no se puede vincular con una factura de venta
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,"Fila {0}: Cantidad de pagos debe ser menor o igual a facturar cantidad pendiente. Por favor, consulte la nota a continuación."
 Row {0}: Qty is mandatory,Fila {0}: Cantidad es obligatorio
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Fila {0}: Cantidad no avalable en almacén {1} del {2} {3}.
- Disponible Cantidad: {4}, Traslado Cantidad: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Fila {0}: Para establecer {1} periodicidad, diferencia entre desde y hasta la fecha \
- debe ser mayor o igual que {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Fila {0}: Cantidad no avalable en almacén {1} del {2} {3}. Disponible Cantidad: {4}, Traslado Cantidad: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Fila {0}: Para establecer {1} periodicidad, diferencia entre desde y hasta la fecha \ debe ser mayor o igual que {2}"
 Row {0}:Start Date must be before End Date,Fila {0}: Fecha de inicio debe ser anterior Fecha de finalización
 Rules for adding shipping costs.,Reglas para la adición de los gastos de envío .
 Rules for applying pricing and discount.,Reglas para la aplicación de precios y descuentos .
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,"Número de orden {0} Estado
 Serial Nos Required for Serialized Item {0},Serie n Necesario para artículo serializado {0}
 Serial Number Series,Número de Serie Serie
 Serial number {0} entered more than once,Número de serie {0} entraron más de una vez
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Artículo Serialized {0} no se puede actualizar \
- mediante Stock Reconciliación"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Artículo Serialized {0} no se puede actualizar \ mediante Stock Reconciliación
 Series,serie
 Series List for this Transaction,Lista de series para esta transacción
 Series Updated,Series Actualizado
@@ -2911,9 +2867,7 @@ Tax Assets,Activos por Impuestos
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Categoría de impuesto no puede ser ' Valoración ' o ' de Valoración y Total ""como todos los artículos son no-acción"
 Tax Rate,Tasa de Impuesto
 Tax and other salary deductions.,Tributaria y otras deducciones salariales.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Tabla de detalles de impuestos recoger del maestro de artículos en forma de cadena y se almacena en este campo.
- Se utiliza para las tasas y cargos"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Tabla de detalles de impuestos recoger del maestro de artículos en forma de cadena y se almacena en este campo. Se utiliza para las tasas y cargos
 Tax template for buying transactions.,Plantilla de impuestos para la compra de las transacciones.
 Tax template for selling transactions.,Plantilla Tributaria para la venta de las transacciones.
 Taxable,imponible
@@ -2959,9 +2913,7 @@ The First User: You,La Primera Usuario:
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","El artículo que representa el paquete . Este artículo debe haber "" Es Stock Item"" como "" No"" y ""¿ Punto de venta"" como "" Sí"""
 The Organization,La Organización
 "The account head under Liability, in which Profit/Loss will be booked","El director cuenta con la responsabilidad civil , en el que será reservado Ganancias / Pérdidas"
-"The date on which next invoice will be generated. It is generated on submit.
-","La fecha en que se generará la próxima factura. Se genera en enviar.
-"
+The date on which next invoice will be generated. It is generated on submit.,La fecha en que se generará la próxima factura. Se genera en enviar.
 The date on which recurring invoice will be stop,La fecha en que se detiene la factura recurrente
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","El día del mes en el que se generará factura auto por ejemplo 05, 28, etc"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,El día ( s ) sobre el cual está solicitando la licencia son vacaciones. Usted no tiene que solicitar la licencia .
