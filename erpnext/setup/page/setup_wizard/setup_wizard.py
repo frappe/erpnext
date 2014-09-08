@@ -171,18 +171,25 @@ def set_defaults(args):
 
 	global_defaults.save()
 
+	number_format = get_country_info(args.get("country")).get("number_format", "#,###.##")
+
+	# replace these as float number formats, as they have 0 precision
+	# and are currency number formats and not for floats
+	if number_format=="#.###":
+		number_format = "#.###,##"
+	elif number_format=="#,###":
+		number_format = "#,###.##"
+
 	system_settings = frappe.get_doc("System Settings", "System Settings")
 	system_settings.update({
 		"language": args.get("language"),
 		"time_zone": args.get("timezone"),
 		"float_precision": 3,
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
-		'number_format': get_country_info(args.get("country")).get("number_format", "#,###.##"),
+		'number_format': number_format,
 		'enable_scheduler': 1
 	})
-
 	system_settings.save()
-
 
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1

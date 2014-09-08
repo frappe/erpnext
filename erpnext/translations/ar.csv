@@ -1,4 +1,3 @@
-﻿ (Half Day),(نصف يوم)
  and year: ,والسنة:
 """ does not exists",""" لا يوجد"
 %  Delivered,ألقيت٪
@@ -28,36 +27,12 @@
 'To Date' is required,' إلى تاريخ ' مطلوب
 'Update Stock' for Sales Invoice {0} must be set,""" الأسهم تحديث ' ل فاتورة المبيعات {0} يجب تعيين"
 * Will be calculated in the transaction.,وسيتم احتساب * في المعاملة.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 العملة = [؟] جزء 
- لمثل 1 USD = 100 سنت"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 العملة = [؟] جزء  لمثل 1 USD = 100 سنت
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. للحفاظ على العملاء رمز البند الحكيمة والبحث فيها لجعلها تقوم على التعليمات البرمجية الخاصة بهم استخدام هذا الخيار
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> إضافة / تحرير < / A>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> إضافة / تحرير < / A>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> إضافة / تحرير < / A>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> افتراضي قالب </ H4> 
- <p> ويستخدم <a href=""http://jinja.pocoo.org/docs/templates/""> جنجا القولبة </ a> و كافة الحقول من العنوان ( بما في ذلك الحقول المخصصة إن وجدت) وسوف تكون متاحة </ P> 
- <PRE> على <code> {{}} address_line1 <BR> 
- {٪ إذا address_line2٪} {{}} address_line2 <BR> { ENDIF٪ -٪} 
- {{المدينة}} <BR> 
- {٪ إذا الدولة٪} {{الدولة}} {<BR>٪ ENDIF -٪} 
- {٪ إذا كان الرقم السري٪} PIN: {{}} الرقم السري {<BR>٪ ENDIF -٪} 
- {{البلد}} <BR> 
- {٪ إذا كان الهاتف٪} الهاتف: {{هاتف}} {<BR> ENDIF٪ -٪} 
- {٪ إذا الفاكس٪} فاكس: {{}} الفاكس <BR> {٪ ENDIF -٪} 
- {٪٪ إذا email_id} البريد الإلكتروني: {{}} email_id <BR> ؛ {٪ ENDIF -٪} 
- </ رمز> </ قبل>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> افتراضي قالب </ H4>  <p> ويستخدم <a href=""http://jinja.pocoo.org/docs/templates/""> جنجا القولبة </ a> و كافة الحقول من العنوان ( بما في ذلك الحقول المخصصة إن وجدت) وسوف تكون متاحة </ P>  <PRE> على <code> {{}} address_line1 <BR>  {٪ إذا address_line2٪} {{}} address_line2 <BR> { ENDIF٪ -٪}  {{المدينة}} <BR>  {٪ إذا الدولة٪} {{الدولة}} {<BR>٪ ENDIF -٪}  {٪ إذا كان الرقم السري٪} PIN: {{}} الرقم السري {<BR>٪ ENDIF -٪}  {{البلد}} <BR>  {٪ إذا كان الهاتف٪} الهاتف: {{هاتف}} {<BR> ENDIF٪ -٪}  {٪ إذا الفاكس٪} فاكس: {{}} الفاكس <BR> {٪ ENDIF -٪}  {٪٪ إذا email_id} البريد الإلكتروني: {{}} email_id <BR> ؛ {٪ ENDIF -٪}  </ رمز> </ قبل>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,يوجد مجموعة العملاء مع نفس الاسم الرجاء تغيير اسم العميل أو إعادة تسمية المجموعة العملاء
 A Customer exists with same name,العملاء من وجود نفس الاسم مع
 A Lead with this email id should exist,وينبغي أن يكون هذا المعرف الرصاص مع البريد الإلكتروني موجود
@@ -103,9 +78,7 @@ Account {0}: Parent account {1} can not be a ledger,حساب {0}: حساب ال�
 Account {0}: Parent account {1} does not belong to company: {2},حساب {0}: حساب الرئيسي {1} لا تنتمي إلى الشركة: {2}
 Account {0}: Parent account {1} does not exist,حساب {0}: حساب الرئيسي {1} غير موجود
 Account {0}: You can not assign itself as parent account,حساب {0}: لا يمكنك تعيين نفسه كحساب الأم
-"Account: {0} can only be updated via \
-					Stock Transactions","حساب: {0} لا يمكن تحديثها عبر \
- المعاملات المالية"
+Account: {0} can only be updated via \					Stock Transactions,حساب: {0} لا يمكن تحديثها عبر \ المعاملات المالية
 Accountant,محاسب
 Accounting,المحاسبة
 "Accounting Entries can be made against leaf nodes, called",مقالات المحاسبة ويمكن إجراء ضد أوراق العقد ، ودعا
@@ -125,7 +98,7 @@ Activity Log:,النشاط المفتاح:
 Activity Type,النشاط نوع
 Actual,فعلي
 Actual Budget,الميزانية الفعلية
-Actual Completion Date,تاريخ الانتهاء الفعلي
+Actual Completion Date,تاريخ الإنتهاء الفعلي
 Actual Date,تاريخ الفعلية
 Actual End Date,تاريخ الإنتهاء الفعلي
 Actual Invoice Date,الفعلي تاريخ الفاتورة
@@ -171,7 +144,7 @@ Aerospace,الفضاء
 After Sale Installations,بعد التثبيت بيع
 Against,ضد
 Against Account,ضد الحساب
-Against Bill {0} dated {1},ضد بيل {0} بتاريخ {1}
+Against Bill {0} dated {1},ضد فاتورة {0} بتاريخ {1}
 Against Docname,ضد Docname
 Against Doctype,DOCTYPE ضد
 Against Document Detail No,تفاصيل الوثيقة رقم ضد
@@ -350,7 +323,7 @@ Balance must be,يجب أن يكون التوازن
 "Balances of Accounts of type ""Bank"" or ""Cash""","أرصدة الحسابات من نوع ""البنك"" أو "" كاش """
 Bank,مصرف
 Bank / Cash Account,البنك حساب / النقدية
-Bank A/C No.,البنك A / C رقم
+Bank A/C No.,رقم الحساب المصرفي.
 Bank Account,الحساب المصرفي
 Bank Account No.,البنك رقم الحساب
 Bank Accounts,الحسابات المصرفية
@@ -886,9 +859,7 @@ Download Reconcilation Data,تحميل مصالحة البيانات
 Download Template,تحميل قالب
 Download a report containing all raw materials with their latest inventory status,تحميل تقريرا يتضمن جميع المواد الخام مع وضعهم أحدث المخزون
 "Download the Template, fill appropriate data and attach the modified file.",تحميل قالب ، وملء البيانات المناسبة وإرفاق الملف المعدل .
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","تحميل قالب، وملء البيانات المناسبة وإرفاق الملف المعدل.
- وجميع التواريخ والجمع بين الموظف في الفترة المختارة تأتي في القالب، مع سجلات الحضور القائمة"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records",تحميل قالب، وملء البيانات المناسبة وإرفاق الملف المعدل. وجميع التواريخ والجمع بين الموظف في الفترة المختارة تأتي في القالب، مع سجلات الحضور القائمة
 Draft,مسودة
 Dropbox,المربع المنسدل
 Dropbox Access Allowed,دروببوإكس الدخول الأليفة
@@ -994,9 +965,7 @@ Error: {0} > {1},الخطأ: {0} > {1}
 Estimated Material Cost,تقدر تكلفة المواد
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:",حتى لو كانت هناك قوانين التسعير متعددة مع الأولوية القصوى، يتم تطبيق الأولويات الداخلية ثم التالية:
 Everyone can read,يمكن أن يقرأها الجميع
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". سبيل المثال: ABCD # # # # # 
- إذا تم تعيين سلسلة ولم يرد ذكرها لا في المعاملات المسلسل، سيتم إنشاء رقم تسلسلي ثم التلقائي على أساس هذه السلسلة. إذا كنت تريد دائما أن يذكر صراحة نص المسلسل لهذا البند. ترك هذا فارغا."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",. سبيل المثال: ABCD # # # # #  إذا تم تعيين سلسلة ولم يرد ذكرها لا في المعاملات المسلسل، سيتم إنشاء رقم تسلسلي ثم التلقائي على أساس هذه السلسلة. إذا كنت تريد دائما أن يذكر صراحة نص المسلسل لهذا البند. ترك هذا فارغا.
 Exchange Rate,سعر الصرف
 Excise Duty 10,المكوس واجب 10
 Excise Duty 14,المكوس واجب 14
@@ -1470,9 +1439,7 @@ Item-wise Purchase History,البند الحكيم تاريخ الشراء
 Item-wise Purchase Register,البند من الحكمة الشراء تسجيل
 Item-wise Sales History,البند الحكيم تاريخ المبيعات
 Item-wise Sales Register,مبيعات البند الحكيم سجل
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","البند: {0} المدارة دفعة حكيمة، لا يمكن التوفيق بينها باستخدام \
- ألبوم المصالحة، بدلا من استخدام دخول الأسهم"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry",البند: {0} المدارة دفعة حكيمة، لا يمكن التوفيق بينها باستخدام \ ألبوم المصالحة، بدلا من استخدام دخول الأسهم
 Item: {0} not found in the system,البند : {0} لم يتم العثور في النظام
 Items,البنود
 Items To Be Requested,البنود يمكن طلبه
@@ -1598,8 +1565,8 @@ Maintenance Schedule is not generated for all the items. Please click on 'Genera
 Maintenance Schedule {0} exists against {0},جدول الصيانة {0} موجود ضد {0}
 Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,{0} يجب أن يتم إلغاء جدول الصيانة قبل إلغاء هذا الأمر المبيعات
 Maintenance Schedules,جداول الصيانة
-Maintenance Status,الحالة الصيانة
-Maintenance Time,صيانة الزمن
+Maintenance Status,حالة الصيانة
+Maintenance Time,وقت الصيانة
 Maintenance Type,صيانة نوع
 Maintenance Visit,صيانة زيارة
 Maintenance Visit Purpose,صيانة زيارة الغرض
@@ -1731,9 +1698,7 @@ Moving Average Rate,الانتقال متوسط ​​معدل
 Mr,السيد
 Ms,MS
 Multiple Item prices.,أسعار الإغلاق متعددة .
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","موجود متعددة سعر القاعدة مع المعايير نفسها، يرجى حل \
- النزاع عن طريق تعيين الأولوية. قواعد السعر: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}",موجود متعددة سعر القاعدة مع المعايير نفسها، يرجى حل \ النزاع عن طريق تعيين الأولوية. قواعد السعر: {0}
 Music,موسيقى
 Must be Whole Number,يجب أن يكون عدد صحيح
 Name,اسم
@@ -1896,7 +1861,7 @@ Opportunity Items,فرصة الأصناف
 Opportunity Lost,فقدت فرصة
 Opportunity Type,الفرصة نوع
 Optional. This setting will be used to filter in various transactions.,اختياري . سيتم استخدام هذا الإعداد لتصفية في المعاملات المختلفة.
-Order Type,نوع النظام
+Order Type,نوع الطلب
 Order Type must be one of {0},يجب أن يكون النظام نوع واحد من {0}
 Ordered,أمر
 Ordered Items To Be Billed,أمرت البنود التي يتعين صفت
@@ -2486,23 +2451,15 @@ Row # ,الصف #
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,الصف # {0}: الكمية المطلوبة لا يمكن أن أقل من الحد الأدنى الكمية النظام القطعة (المحددة في البند الرئيسي).
 Row #{0}: Please specify Serial No for Item {1},الصف # {0}: يرجى تحديد رقم التسلسلي للتاريخ {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","الصف {0}: الحساب لا يتطابق مع \
- شراء فاتورة الائتمان لحساب"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","الصف {0}: الحساب لا يتطابق مع \
- فاتورة المبيعات خصم لحساب"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,الصف {0}: الحساب لا يتطابق مع \ شراء فاتورة الائتمان لحساب
+Row {0}: Account does not match with \						Sales Invoice Debit To account,الصف {0}: الحساب لا يتطابق مع \ فاتورة المبيعات خصم لحساب
 Row {0}: Conversion Factor is mandatory,الصف {0}: تحويل عامل إلزامي
 Row {0}: Credit entry can not be linked with a Purchase Invoice,الصف {0} : دخول الائتمان لا يمكن ربطها مع فاتورة الشراء
 Row {0}: Debit entry can not be linked with a Sales Invoice,الصف {0} : دخول السحب لا يمكن ربطها مع فاتورة المبيعات
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,الصف {0}: يجب أن يكون مبلغ الدفع أقل من أو يساوي الفاتورة المبلغ المستحق. يرجى الرجوع لاحظ أدناه.
 Row {0}: Qty is mandatory,الصف {0}: الكمية إلزامي
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","الصف {0}: الكمية لا أفالابل في مستودع {1} في {2} {3}.
- المتوفرة الكمية: {4}، نقل الكمية: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","الصف {0}: لضبط {1} تواترها، الفرق بين من وإلى تاريخ \
- يجب أن تكون أكبر من أو يساوي {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}",الصف {0}: الكمية لا أفالابل في مستودع {1} في {2} {3}. المتوفرة الكمية: {4}، نقل الكمية: {5}
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}",الصف {0}: لضبط {1} تواترها، الفرق بين من وإلى تاريخ \ يجب أن تكون أكبر من أو يساوي {2}
 Row {0}:Start Date must be before End Date,الصف {0} : يجب أن يكون تاريخ بدء قبل تاريخ الانتهاء
 Rules for adding shipping costs.,قواعد لإضافة تكاليف الشحن.
 Rules for applying pricing and discount.,قواعد لتطبيق التسعير والخصم .
@@ -2683,9 +2640,7 @@ Serial No {0} status must be 'Available' to Deliver,"يجب أن يكون الم
 Serial Nos Required for Serialized Item {0},مسلسل نص مطلوب لل مسلسل البند {0}
 Serial Number Series,المسلسل عدد سلسلة
 Serial number {0} entered more than once,الرقم التسلسلي {0} دخلت أكثر من مرة
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","تسلسل البند {0} لا يمكن تحديث \
- باستخدام الأسهم المصالحة"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,تسلسل البند {0} لا يمكن تحديث \ باستخدام الأسهم المصالحة
 Series,سلسلة
 Series List for this Transaction,قائمة سلسلة لهذه الصفقة
 Series Updated,سلسلة تحديث
@@ -2911,9 +2866,7 @@ Tax Assets,الأصول الضريبية
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,ضريبة الفئة لا يمكن أن يكون ' التقييم ' أو ' تقييم وتوتال ' وجميع العناصر هي العناصر غير الأسهم
 Tax Rate,ضريبة
 Tax and other salary deductions.,الضرائب والاقتطاعات من الراتب أخرى.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","جلب طاولة التفاصيل الضرائب من سيده البند كسلسلة وتخزينها في هذا المجال.
- مستعملة للضرائب والرسوم"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,جلب طاولة التفاصيل الضرائب من سيده البند كسلسلة وتخزينها في هذا المجال. مستعملة للضرائب والرسوم
 Tax template for buying transactions.,قالب الضرائب لشراء صفقة.
 Tax template for selling transactions.,قالب الضريبية لبيع صفقة.
 Taxable,خاضع للضريبة
@@ -2959,9 +2912,7 @@ The First User: You,المستخدم أولا : أنت
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",العنصر الذي يمثل الحزمة. يجب أن يكون لدى هذا البند &quot;هو المخزون السلعة&quot; ب &quot;لا&quot; و &quot;هل المبيعات السلعة&quot; ب &quot;نعم&quot;
 The Organization,منظمة
 "The account head under Liability, in which Profit/Loss will be booked",رئيس الاعتبار في إطار المسؤولية، التي سيتم حجزها الربح / الخسارة
-"The date on which next invoice will be generated. It is generated on submit.
-","التاريخ الذي سيتم إنشاء فاتورة المقبل. يتم إنشاؤها على تقديم.
-"
+The date on which next invoice will be generated. It is generated on submit.,التاريخ الذي سيتم إنشاء فاتورة المقبل. يتم إنشاؤها على تقديم.
 The date on which recurring invoice will be stop,التاريخ الذي سيتم فاتورة المتكررة وقف
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",يوم من الشهر الذي سيتم إنشاء فاتورة السيارات على سبيل المثال 05، 28 الخ
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,اليوم ( ق ) التي كنت متقدما للحصول على إذن هي عطلة. لا تحتاج إلى تطبيق للحصول على إجازة .
@@ -3377,3 +3328,4 @@ website page link,الموقع رابط الصفحة
 {0} {1} status is Unstopped,{0} {1} هو الوضع تتفتح
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: مركز التكلفة إلزامي القطعة ل{2}
 {0}: {1} not found in Invoice Details table,{0}: {1} غير موجود في جدول تفاصيل الفاتورة
+﻿ (Half Day),(نصف يوم)

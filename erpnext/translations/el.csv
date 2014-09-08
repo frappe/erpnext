@@ -28,36 +28,12 @@
 'To Date' is required,« Έως » απαιτείται
 'Update Stock' for Sales Invoice {0} must be set,« Ενημέρωση Χρηματιστήριο » για τις πωλήσεις Τιμολόγιο πρέπει να ρυθμιστεί {0}
 * Will be calculated in the transaction.,* Θα πρέπει να υπολογίζεται στη συναλλαγή.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 Νόμισμα = [?] Κλάσμα 
- Για π.χ. 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Νόμισμα = [?] Κλάσμα  Για π.χ. 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,"1. Για να διατηρήσετε τον πελάτη σοφός κωδικό στοιχείο και να καταστούν προσβάσιμα με βάση τον κωδικό τους, χρησιμοποιήστε αυτή την επιλογή"
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Προσθήκη / Επεξεργασία < / a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Προσθήκη / Επεξεργασία < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Προσθήκη / Επεξεργασία < / a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> Προεπιλογή Πρότυπο </ h4> 
- <p> Χρήσεις <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> και όλα τα πεδία της Διεύθυνσης ( συμπεριλαμβανομένων των προσαρμοσμένων πεδίων, αν υπάρχουν) θα είναι διαθέσιμο </ p> 
- <pre> <code> {{}} address_line1 <br> 
- {% εάν address_line2%} {{}} address_line2 <br> { endif% -%} 
- {{}} πόλη <br> 
- {% αν το κράτος%} {{}} κατάσταση <br> {endif% -%} 
- {% εάν pincode%} PIN: {{}} pincode <br> {endif% -%} 
- {{}} χώρα <br> 
- {% αν το τηλέφωνο%} Τηλέφωνο: {{}} τηλέφωνο <br> { endif% -%} 
- {% εάν φαξ%} Fax: {{}} fax <br> {endif% -%} 
- {% εάν email_id%} Email: {{}} email_id <br> ? {endif% -%} 
- </ code> </ pre>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Προεπιλογή Πρότυπο </ h4>  <p> Χρήσεις <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> και όλα τα πεδία της Διεύθυνσης ( συμπεριλαμβανομένων των προσαρμοσμένων πεδίων, αν υπάρχουν) θα είναι διαθέσιμο </ p>  <pre> <code> {{}} address_line1 <br>  {% εάν address_line2%} {{}} address_line2 <br> { endif% -%}  {{}} πόλη <br>  {% αν το κράτος%} {{}} κατάσταση <br> {endif% -%}  {% εάν pincode%} PIN: {{}} pincode <br> {endif% -%}  {{}} χώρα <br>  {% αν το τηλέφωνο%} Τηλέφωνο: {{}} τηλέφωνο <br> { endif% -%}  {% εάν φαξ%} Fax: {{}} fax <br> {endif% -%}  {% εάν email_id%} Email: {{}} email_id <br> ? {endif% -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,Μια ομάδα πελατών υπάρχει με το ίδιο όνομα παρακαλούμε να αλλάξετε το όνομα του Πελάτη ή να μετονομάσετε την ομάδα πελατών
 A Customer exists with same name,Ένας πελάτης υπάρχει με το ίδιο όνομα
 A Lead with this email id should exist,Μια μολύβδου με αυτή την ταυτότητα ηλεκτρονικού ταχυδρομείου θα πρέπει να υπάρχει
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,Ο λογαριασμός {0
 Account {0}: Parent account {1} does not belong to company: {2},Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν ανήκει στην εταιρεία: {2}
 Account {0}: Parent account {1} does not exist,Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν υπάρχει
 Account {0}: You can not assign itself as parent account,Ο λογαριασμός {0}: Δεν μπορεί η ίδια να εκχωρήσει ως μητρική λογαριασμού
-"Account: {0} can only be updated via \
-					Stock Transactions","Λογαριασμός: {0} μπορεί να ενημερώνεται μόνο μέσω \
- Χρηματιστηριακές Συναλλαγές Μετοχών"
+Account: {0} can only be updated via \					Stock Transactions,Λογαριασμός: {0} μπορεί να ενημερώνεται μόνο μέσω \ Χρηματιστηριακές Συναλλαγές Μετοχών
 Accountant,λογιστής
 Accounting,Λογιστική
 "Accounting Entries can be made against leaf nodes, called","Λογιστικές εγγραφές μπορούν να γίνουν με κόμβους , που ονομάζεται"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Κατεβάστε συμφιλίωσης Δεδομ
 Download Template,Κατεβάστε προτύπου
 Download a report containing all raw materials with their latest inventory status,Κατεβάστε μια έκθεση που περιέχει όλες τις πρώτες ύλες με πιο πρόσφατη κατάσταση των αποθεμάτων τους
 "Download the Template, fill appropriate data and attach the modified file.","Κατεβάστε το Πρότυπο , συμπληρώστε τα κατάλληλα δεδομένα και να επισυνάψετε το τροποποιημένο αρχείο ."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Κατεβάστε το Πρότυπο, συμπληρώστε τα κατάλληλα δεδομένα και να επισυνάψετε το τροποποιημένο αρχείο.
- Όλες οι ημερομηνίες και ο συνδυασμός των εργαζομένων στην επιλεγμένη περίοδο θα έρθει στο πρότυπο, με τους υπάρχοντες καταλόγους παρουσίας"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Κατεβάστε το Πρότυπο, συμπληρώστε τα κατάλληλα δεδομένα και να επισυνάψετε το τροποποιημένο αρχείο. Όλες οι ημερομηνίες και ο συνδυασμός των εργαζομένων στην επιλεγμένη περίοδο θα έρθει στο πρότυπο, με τους υπάρχοντες καταλόγους παρουσίας"
 Draft,Προσχέδιο
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox Access κατοικίδια
@@ -994,9 +966,7 @@ Error: {0} > {1},Σφάλμα : {0} > {1}
 Estimated Material Cost,Εκτιμώμενο κόστος υλικών
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Ακόμα κι αν υπάρχουν πολλά Κανόνες τιμολόγησης με την υψηλότερη προτεραιότητα, στη συνέχεια μετά από εσωτερικές προτεραιότητες που εφαρμόζονται:"
 Everyone can read,Ο καθένας μπορεί να διαβάσει
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Παράδειγμα: ABCD # # # # # 
- Αν σειράς έχει οριστεί και Αύξων αριθμός δεν αναφέρεται στις συναλλαγές, τότε αυτόματα αύξων αριθμός θα δημιουργηθεί με βάση αυτή τη σειρά. Αν θέλετε πάντα να αναφέρεται ρητά Serial Nos για αυτό το προϊόν. αφήστε κενό αυτό."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Παράδειγμα: ABCD # # # # #  Αν σειράς έχει οριστεί και Αύξων αριθμός δεν αναφέρεται στις συναλλαγές, τότε αυτόματα αύξων αριθμός θα δημιουργηθεί με βάση αυτή τη σειρά. Αν θέλετε πάντα να αναφέρεται ρητά Serial Nos για αυτό το προϊόν. αφήστε κενό αυτό."
 Exchange Rate,Ισοτιμία
 Excise Duty 10,Ειδικό φόρο κατανάλωσης 10
 Excise Duty 14,Ειδικό φόρο κατανάλωσης 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,Στοιχείο-σοφός Ιστορικό αγορ
 Item-wise Purchase Register,Στοιχείο-σοφός Μητρώο Αγορά
 Item-wise Sales History,Στοιχείο-σοφός Ιστορία Πωλήσεις
 Item-wise Sales Register,Στοιχείο-σοφός Πωλήσεις Εγγραφή
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Θέση: {0} κατάφερε παρτίδες, δεν μπορεί να συμβιβαστεί με τη χρήση \
- Τράπεζα Συμφιλίωση, αντί να χρησιμοποιήσετε το Χρηματιστήριο Έναρξη"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Θέση: {0} κατάφερε παρτίδες, δεν μπορεί να συμβιβαστεί με τη χρήση \ Τράπεζα Συμφιλίωση, αντί να χρησιμοποιήσετε το Χρηματιστήριο Έναρξη"
 Item: {0} not found in the system,Θέση : {0} δεν βρέθηκε στο σύστημα
 Items,Είδη
 Items To Be Requested,Στοιχεία που θα ζητηθούν
@@ -1731,9 +1699,7 @@ Moving Average Rate,Κινητός μέσος όρος
 Mr,Ο κ.
 Ms,Κα
 Multiple Item prices.,Πολλαπλές τιμές Item .
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Πολλαπλές Τιμή Κανόνας υπάρχει με τα ίδια κριτήρια, παρακαλούμε να επιλύσει \
- σύγκρουση με την απόδοση προτεραιότητας. Κανόνες Τιμή: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Πολλαπλές Τιμή Κανόνας υπάρχει με τα ίδια κριτήρια, παρακαλούμε να επιλύσει \ σύγκρουση με την απόδοση προτεραιότητας. Κανόνες Τιμή: {0}"
 Music,μουσική
 Must be Whole Number,Πρέπει να είναι Ακέραιος αριθμός
 Name,Όνομα
@@ -2486,23 +2452,15 @@ Row # ,Row #
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Σειρά # {0}: Διέταξε ποσότητα δεν μπορεί να μικρότερη από την ελάχιστη ποσότητα σειρά στοιχείου (όπως ορίζεται στο σημείο master).
 Row #{0}: Please specify Serial No for Item {1},Σειρά # {0}: Παρακαλείστε να προσδιορίσετε Αύξων αριθμός για τη θέση {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \
- τιμολογίου αγοράς πίστωση του λογαριασμού"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \
- Τιμολόγιο Πώλησης χρέωση του λογαριασμού"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \ τιμολογίου αγοράς πίστωση του λογαριασμού
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \ Τιμολόγιο Πώλησης χρέωση του λογαριασμού
 Row {0}: Conversion Factor is mandatory,Σειρά {0}: συντελεστής μετατροπής είναι υποχρεωτική
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Σειρά {0} : Credit εισόδου δεν μπορεί να συνδεθεί με ένα τιμολογίου αγοράς
 Row {0}: Debit entry can not be linked with a Sales Invoice,Σειρά {0} : Χρεωστική εισόδου δεν μπορεί να συνδεθεί με ένα Τιμολόγιο Πώλησης
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Σειρά {0}: Ποσό πληρωμής πρέπει να είναι μικρότερη ή ίση με τιμολόγιο οφειλόμενο ποσό. Παρακαλούμε ανατρέξτε Σημείωση παρακάτω.
 Row {0}: Qty is mandatory,Σειρά {0}: Ποσότητα είναι υποχρεωτική
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Σειρά {0}: Ποσότητα δεν avalable στην αποθήκη {1} στο {2} {3}.
- Διαθέσιμο Ποσότητα: {4}, Μεταφορά Ποσότητα: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Σειρά {0}: Για να ρυθμίσετε {1} περιοδικότητα, η διαφορά μεταξύ της από και προς την ημερομηνία \
- πρέπει να είναι μεγαλύτερη ή ίση με {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Σειρά {0}: Ποσότητα δεν avalable στην αποθήκη {1} στο {2} {3}. Διαθέσιμο Ποσότητα: {4}, Μεταφορά Ποσότητα: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Σειρά {0}: Για να ρυθμίσετε {1} περιοδικότητα, η διαφορά μεταξύ της από και προς την ημερομηνία \ πρέπει να είναι μεγαλύτερη ή ίση με {2}"
 Row {0}:Start Date must be before End Date,Σειρά {0} : Ημερομηνία Έναρξης πρέπει να είναι πριν από την Ημερομηνία Λήξης
 Rules for adding shipping costs.,Κανόνες για την προσθήκη έξοδα αποστολής .
 Rules for applying pricing and discount.,Κανόνες για την εφαρμογή τιμών και εκπτώσεων .
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,Αύξων αριθμός {0
 Serial Nos Required for Serialized Item {0},Serial Απαιτείται αριθμοί των Serialized σημείο {0}
 Serial Number Series,Serial Number Series
 Serial number {0} entered more than once,Αύξων αριθμός {0} τέθηκε περισσότερο από μία φορά
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Serialized σημείο {0} δεν μπορεί να ενημερωθεί \
- χρησιμοποιώντας Χρηματιστήριο Συμφιλίωση"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Serialized σημείο {0} δεν μπορεί να ενημερωθεί \ χρησιμοποιώντας Χρηματιστήριο Συμφιλίωση
 Series,σειρά
 Series List for this Transaction,Λίστα Series για αυτή τη συναλλαγή
 Series Updated,σειρά ενημέρωση
@@ -2911,9 +2867,7 @@ Tax Assets,Φορολογικές Απαιτήσεις
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Φορολογική κατηγορία δεν μπορεί να είναι « Αποτίμηση » ή « Αποτίμηση και Total », όπως όλα τα στοιχεία είναι στοιχεία μη - απόθεμα"
 Tax Rate,Φορολογικός Συντελεστής
 Tax and other salary deductions.,Φορολογικές και άλλες μειώσεις μισθών.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Τραπέζι λεπτομέρεια φόρου πωλούνταν από τη θέση πλοιάρχου, όπως μια σειρά και αποθηκεύονται σε αυτόν τον τομέα.
- Χρησιμοποιείται για φόρους και τέλη"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,"Τραπέζι λεπτομέρεια φόρου πωλούνταν από τη θέση πλοιάρχου, όπως μια σειρά και αποθηκεύονται σε αυτόν τον τομέα. Χρησιμοποιείται για φόρους και τέλη"
 Tax template for buying transactions.,Φορολογική πρότυπο για την αγορά των συναλλαγών .
 Tax template for selling transactions.,Φορολογική πρότυπο για την πώληση των συναλλαγών .
 Taxable,Φορολογητέο
@@ -2959,9 +2913,7 @@ The First User: You,Η πρώτη Χρήστης : Μπορείτε
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Το στοιχείο που αντιπροσωπεύει το πακέτο. Αυτό το στοιχείο πρέπει να έχει &quot;Είναι Stock Θέση&quot;, όπως &quot;Όχι&quot; και &quot;Είναι σημείο πώλησης&quot;, όπως &quot;Ναι&quot;"
 The Organization,ο Οργανισμός
 "The account head under Liability, in which Profit/Loss will be booked","Η κεφαλή του λογαριασμού βάσει της αστικής ευθύνης, στην οποία Κέρδη / Ζημίες θα κρατηθεί"
-"The date on which next invoice will be generated. It is generated on submit.
-","Η ημερομηνία κατά την οποία θα δημιουργηθεί το επόμενο τιμολόγιο. Παράγεται σε υποβάλει.
-"
+The date on which next invoice will be generated. It is generated on submit.,Η ημερομηνία κατά την οποία θα δημιουργηθεί το επόμενο τιμολόγιο. Παράγεται σε υποβάλει.
 The date on which recurring invoice will be stop,Η ημερομηνία κατά την οποία επαναλαμβανόμενες τιμολόγιο θα σταματήσει
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","Η ημέρα του μήνα κατά τον οποίο τιμολόγιο αυτοκινήτων θα παραχθούν, π.χ. 05, 28 κλπ"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Η μέρα ( ες) στην οποία υποβάλλετε αίτηση για άδεια είναι διακοπές . Δεν χρειάζεται να υποβάλουν αίτηση για άδεια .

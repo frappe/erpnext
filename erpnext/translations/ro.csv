@@ -28,36 +28,12 @@
 'To Date' is required,"""Pentru a Data"" este necesară"
 'Update Stock' for Sales Invoice {0} must be set,"""Actualizare Stock"" pentru Vânzări Factura {0} trebuie să fie stabilite"
 * Will be calculated in the transaction.,* Vor fi calculate în tranzacție.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 valutar = [?] Fractiune 
- De exemplu, 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 valutar = [?] Fractiune  De exemplu, 1 USD = 100 Cent"
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 Pentru a menține codul de client element înțelept și pentru a le face pe baza utilizării lor cod de această opțiune
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Add / Edit </ a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> implicit Format </ h4> 
- <p> Utilizeaza <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja templating </ a> și toate domeniile de Adresa ( inclusiv Câmpuri personalizate dacă este cazul) va fi disponibil </ p> 
- <pre> <code> {{}} address_line1 <br> 
- {% dacă address_line2%} {{}} address_line2 cui { % endif -%} 
- {{oras}} <br> 
- {%, în cazul în care de stat%} {{}} stat {cui% endif -%} 
- {%, în cazul în care parola așa%} PIN: {{}} parola așa cui {% endif -%} 
- {{țară}} <br> 
- {%, în cazul în care telefonul%} Telefon: {{telefon}} cui { % endif -%} 
- {% dacă fax%} Fax: {{fax}} cui {% endif -%} 
- {% dacă email_id%} Email: {{}} email_id <br> ; {% endif -%} 
- </ code> </ pre>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> implicit Format </ h4>  <p> Utilizeaza <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja templating </ a> și toate domeniile de Adresa ( inclusiv Câmpuri personalizate dacă este cazul) va fi disponibil </ p>  <pre> <code> {{}} address_line1 <br>  {% dacă address_line2%} {{}} address_line2 cui { % endif -%}  {{oras}} <br>  {%, în cazul în care de stat%} {{}} stat {cui% endif -%}  {%, în cazul în care parola așa%} PIN: {{}} parola așa cui {% endif -%}  {{țară}} <br>  {%, în cazul în care telefonul%} Telefon: {{telefon}} cui { % endif -%}  {% dacă fax%} Fax: {{fax}} cui {% endif -%}  {% dacă email_id%} Email: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,Există un grup de clienți cu același nume vă rugăm să schimbați numele clientului sau redenumi Grupul Customer
 A Customer exists with same name,Există un client cu același nume
 A Lead with this email id should exist,Un plumb cu acest id-ul de e-mail ar trebui să existe
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,Contul {0}: cont Părinte {1
 Account {0}: Parent account {1} does not belong to company: {2},Contul {0}: cont Părinte {1} nu apartine companiei: {2}
 Account {0}: Parent account {1} does not exist,Contul {0}: cont Părinte {1} nu exista
 Account {0}: You can not assign itself as parent account,Contul {0}: Nu se poate atribui ca cont părinte
-"Account: {0} can only be updated via \
-					Stock Transactions","Cont: {0} poate fi actualizat doar prin \
- Tranzacții stoc"
+Account: {0} can only be updated via \					Stock Transactions,Cont: {0} poate fi actualizat doar prin \ Tranzacții stoc
 Accountant,Contabil
 Accounting,Contabilitate
 "Accounting Entries can be made against leaf nodes, called","Înregistrări contabile pot fi făcute împotriva nodurile frunză, numit"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Descărcați reconcilierii datelor
 Download Template,Descărcați Format
 Download a report containing all raw materials with their latest inventory status,Descărca un raport care conține toate materiile prime cu statutul lor ultimul inventar
 "Download the Template, fill appropriate data and attach the modified file.","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat.
- TOATE DATELE ȘI combinație angajat în perioada selectată va veni în șablon, cu înregistrări de prezență existente"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Descărcați șablonul, umple de date corespunzătoare și atașați fișierul modificat. TOATE DATELE ȘI combinație angajat în perioada selectată va veni în șablon, cu înregistrări de prezență existente"
 Draft,Ciornă
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox de acces permise
@@ -994,9 +966,7 @@ Error: {0} > {1},Eroare: {0}> {1}
 Estimated Material Cost,Costul estimat Material
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Chiar dacă există mai multe reguli de stabilire a prețurilor, cu cea mai mare prioritate, se aplică apoi următoarele priorități interne:"
 Everyone can read,Oricine poate citi
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Exemplu: ABCD # # # # # 
- În cazul în care seria este setat și nu de serie nu este menționat în tranzacții, numărul de atunci automat de serie va fi creat pe baza acestei serii. Dacă vrei mereu să menționeze în mod explicit de serie nr pentru acest articol. părăsi acest gol."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Exemplu: ABCD # # # # #  În cazul în care seria este setat și nu de serie nu este menționat în tranzacții, numărul de atunci automat de serie va fi creat pe baza acestei serii. Dacă vrei mereu să menționeze în mod explicit de serie nr pentru acest articol. părăsi acest gol."
 Exchange Rate,Rata de schimb
 Excise Duty 10,Accize 10
 Excise Duty 14,Accize 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,-Element înțelept Istoricul achizițiilor
 Item-wise Purchase Register,-Element înțelept cumparare Inregistrare
 Item-wise Sales History,-Element înțelept Sales Istorie
 Item-wise Sales Register,-Element înțelept vânzări Înregistrare
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Postul: {0}-lot înțelept a reușit, nu pot fi reconciliate cu ajutorul \
- Bursa de reconciliere, folosiți în schimb Bursa de intrare"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Postul: {0}-lot înțelept a reușit, nu pot fi reconciliate cu ajutorul \ Bursa de reconciliere, folosiți în schimb Bursa de intrare"
 Item: {0} not found in the system,Postul: {0} nu a fost găsit în sistemul
 Items,Obiecte
 Items To Be Requested,Elemente care vor fi solicitate
@@ -1731,9 +1699,7 @@ Moving Average Rate,Rata medie mobilă
 Mr,Mr
 Ms,Ms
 Multiple Item prices.,Mai multe prețuri element.
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Există Prețul multiple Regula cu aceleași criterii, vă rugăm să rezolve \
- conflictelor de acordând prioritate. Reguli Pret: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Există Prețul multiple Regula cu aceleași criterii, vă rugăm să rezolve \ conflictelor de acordând prioritate. Reguli Pret: {0}"
 Music,Muzica
 Must be Whole Number,Trebuie să fie Număr întreg
 Name,Nume
@@ -2486,23 +2452,15 @@ Row # ,
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Rând # {0}: Cantitate Comandat poate nu mai puțin de cantitate minimă de comandă item (definit la punctul de master).
 Row #{0}: Please specify Serial No for Item {1},Rând # {0}: Vă rugăm să specificați Nu serial pentru postul {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Rând {0}: Contul nu se potrivește cu \
- cumparare Facturi de credit a contului"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Rând {0}: Contul nu se potrivește cu \
- Vânzări Facturi de debit a contului"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Rând {0}: Contul nu se potrivește cu \ cumparare Facturi de credit a contului
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Rând {0}: Contul nu se potrivește cu \ Vânzări Facturi de debit a contului
 Row {0}: Conversion Factor is mandatory,Rând {0}: Factorul de conversie este obligatorie
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Rând {0}: intrare de credit nu poate fi legat cu o factura de cumpărare
 Row {0}: Debit entry can not be linked with a Sales Invoice,Rând {0}: intrare de debit nu poate fi legat de o factură de vânzare
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Rând {0}: Suma de plată trebuie să fie mai mic sau egal cu factura suma restante. Vă rugăm să consultați nota de mai jos.
 Row {0}: Qty is mandatory,Rând {0}: Cant este obligatorie
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Rând {0}: Cantitate nu avalable în depozit {1} la {2} {3}.
- Disponibil Cantitate: {4}, transfer Cantitate: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Rând {0}: Pentru a seta {1} periodicitate, diferența între de la și până la data \
- trebuie să fie mai mare sau egal cu {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Rând {0}: Cantitate nu avalable în depozit {1} la {2} {3}. Disponibil Cantitate: {4}, transfer Cantitate: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Rând {0}: Pentru a seta {1} periodicitate, diferența între de la și până la data \ trebuie să fie mai mare sau egal cu {2}"
 Row {0}:Start Date must be before End Date,Rând {0}: Data începerii trebuie să fie înainte de Data de încheiere
 Rules for adding shipping costs.,Reguli pentru a adăuga costurile de transport maritim.
 Rules for applying pricing and discount.,Normele de aplicare de stabilire a prețurilor și de scont.
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,"Nu {0} Stare de serie trebu
 Serial Nos Required for Serialized Item {0},Serial nr necesare pentru postul serializat {0}
 Serial Number Series,Număr de serie de serie
 Serial number {0} entered more than once,Număr de serie {0} a intrat de mai multe ori
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Postul serializat {0} nu poate fi actualizat \
- folosind Bursa de reconciliere"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Postul serializat {0} nu poate fi actualizat \ folosind Bursa de reconciliere
 Series,Serie
 Series List for this Transaction,Lista de serie pentru această tranzacție
 Series Updated,Seria Actualizat
@@ -2911,9 +2867,7 @@ Tax Assets,Active fiscale
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Taxa Categoria nu poate fi ""de evaluare"" sau ""de evaluare și total"", ca toate elementele sunt produse non-stoc"
 Tax Rate,Cota de impozitare
 Tax and other salary deductions.,Impozitul și alte rețineri salariale.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Masă detaliu impozit preluat de la postul de master ca un șir și stocate în acest domeniu.
- Folosit pentru Impozite și Taxe"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Masă detaliu impozit preluat de la postul de master ca un șir și stocate în acest domeniu. Folosit pentru Impozite și Taxe
 Tax template for buying transactions.,Șablon taxa pentru tranzacțiilor de cumpărare.
 Tax template for selling transactions.,Șablon impozit pentru tranzacțiile de vânzare.
 Taxable,Impozabil
@@ -2959,9 +2913,7 @@ The First User: You,Primul utilizator:
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Elementul care reprezintă pachetul. Acest articol trebuie să fi ""Este Piesa"" ca ""Nu"" și ""este produs de vânzări"" ca ""Da"""
 The Organization,Organizația
 "The account head under Liability, in which Profit/Loss will be booked","Contul capul sub răspunderii, în care Profit / pierdere va fi rezervat"
-"The date on which next invoice will be generated. It is generated on submit.
-","Data la care va fi generat următoarea factură. Acesta este generat pe prezinte.
-"
+The date on which next invoice will be generated. It is generated on submit.,Data la care va fi generat următoarea factură. Acesta este generat pe prezinte.
 The date on which recurring invoice will be stop,La data la care factura recurente vor fi opri
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,A doua zi (e) pe care aplici pentru concediu sunt vacanță. Tu nu trebuie să se aplice pentru concediu.
