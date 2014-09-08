@@ -241,7 +241,6 @@ class StockEntry(StockController):
 					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
-
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.amount)

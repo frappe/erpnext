@@ -14,7 +14,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_production_order(self):
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", 
 			"is_default": 1, "docstatus": 1})
-
+		
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
 			"company": "_Test Company",
@@ -39,9 +39,8 @@ class TestStockEntry(unittest.TestCase):
 			"total_fixed_cost": 1000
 		})
 		stock_entry.get_items()
-
-		fg_rate = [d.incoming_rate for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
-		self.assertEqual(fg_rate, 6100.00)
+		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
+		self.assertEqual(fg_rate, 1100.00)
 	
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -59,7 +58,6 @@ class TestStockEntry(unittest.TestCase):
 		st1 = frappe.copy_doc(test_records[0])
 		st1.insert()
 		st1.submit()
-
 		st2 = frappe.copy_doc(test_records[1])
 		st2.insert()
 		st2.submit()
@@ -254,7 +252,7 @@ class TestStockEntry(unittest.TestCase):
 		se1.submit()
 
 		se2 = frappe.copy_doc(test_records[0])
-		se2.get("mtn_details")[0].item_code = "_Test Item Home Desktop 100"
+		se2.get("mtn_details")[0].item_code = "_Test FG Item 2"
 		se2.insert()
 		se2.submit()
 
