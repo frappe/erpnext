@@ -28,36 +28,12 @@
 'To Date' is required,' To Date ' é necessária
 'Update Stock' for Sales Invoice {0} must be set,"'Atualizar Estoque ""para vendas Invoice {0} deve ser definido"
 * Will be calculated in the transaction.,* Será calculado na transação.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 Moeda = [?] Fração 
- Por exemplo 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Moeda = [?] Fração  Por exemplo 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Para manter o cliente código do item sábio e para torná-los pesquisáveis ​​com base em seu código usar esta opção
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> modelo padrão </ h4> 
- <p> Usa <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> e todos os campos de Endereço ( incluindo campos personalizados se houver) estará disponível </ p> 
- <pre> <code> {{}} address_line1 <br> 
- {% if address_line2%} {{}} address_line2 <br> { endif% -%} 
- {{cidade}} <br> 
- {% if%} Estado {{estado}} {% endif <br> -%} 
- {% if pincode%} PIN: {{}} pincode <br> {% endif -%} 
- {{país}} <br> 
- {% if%} telefone Telefone: {{telefone}} {<br> endif% -%} 
- {% if%} fax Fax: {{fax}} {% endif <br> -%} 
- {% if% email_id} E-mail: {{}} email_id <br> , {% endif -%} 
- </ code> </ pre>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> modelo padrão </ h4>  <p> Usa <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> e todos os campos de Endereço ( incluindo campos personalizados se houver) estará disponível </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { endif% -%}  {{cidade}} <br>  {% if%} Estado {{estado}} {% endif <br> -%}  {% if pincode%} PIN: {{}} pincode <br> {% endif -%}  {{país}} <br>  {% if%} telefone Telefone: {{telefone}} {<br> endif% -%}  {% if%} fax Fax: {{fax}} {% endif <br> -%}  {% if% email_id} E-mail: {{}} email_id <br> , {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Um grupo de clientes existente com o mesmo nome, por favor altere o nome do cliente ou renomear o grupo de clientes"
 A Customer exists with same name,Um cliente existe com mesmo nome
 A Lead with this email id should exist,Um chumbo com esse ID de e-mail deve existir
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,Conta {0}: conta Parent {1} 
 Account {0}: Parent account {1} does not belong to company: {2},Conta {0}: conta Parent {1} não pertence à empresa: {2}
 Account {0}: Parent account {1} does not exist,Conta {0}: conta Parent {1} não existe
 Account {0}: You can not assign itself as parent account,Conta {0}: Você não pode atribuir-se como conta principal
-"Account: {0} can only be updated via \
-					Stock Transactions","Conta: {0} só pode ser atualizado através de \
- operações com ações"
+Account: {0} can only be updated via \					Stock Transactions,Conta: {0} só pode ser atualizado através de \ operações com ações
 Accountant,contador
 Accounting,Contabilidade
 "Accounting Entries can be made against leaf nodes, called","Boekingen kunnen worden gemaakt tegen leaf nodes , genaamd"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Download Verzoening gegevens
 Download Template,Baixe Template
 Download a report containing all raw materials with their latest inventory status,Baixe um relatório contendo todas as matérias-primas com o seu estado mais recente inventário
 "Download the Template, fill appropriate data and attach the modified file.","Baixe o modelo , preencha os dados apropriados e anexe o arquivo modificado."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Baixe o modelo, preencha os dados apropriados e anexe o arquivo modificado.
- Todas as datas e combinação empregado no período selecionado virá no modelo, com registros de freqüência existentes"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Baixe o modelo, preencha os dados apropriados e anexe o arquivo modificado. Todas as datas e combinação empregado no período selecionado virá no modelo, com registros de freqüência existentes"
 Draft,Rascunho
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox acesso permitido
@@ -994,9 +966,7 @@ Error: {0} > {1},Erro: {0} > {1}
 Estimated Material Cost,Custo de Material estimada
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Mesmo se houver várias regras de preços com maior prioridade, então seguintes prioridades internas são aplicadas:"
 Everyone can read,Todo mundo pode ler
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Exemplo: ABCD # # # # # 
- Se série está definido e número de série não é mencionado em transações, número de série, então automático será criado com base nessa série. Se você sempre quis mencionar explicitamente os números de ordem para este item. deixe em branco."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Exemplo: ABCD # # # # #  Se série está definido e número de série não é mencionado em transações, número de série, então automático será criado com base nessa série. Se você sempre quis mencionar explicitamente os números de ordem para este item. deixe em branco."
 Exchange Rate,Taxa de Câmbio
 Excise Duty 10,Impostos Especiais de Consumo 10
 Excise Duty 14,Impostos Especiais de Consumo 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,Item-wise Histórico de compras
 Item-wise Purchase Register,Item-wise Compra Register
 Item-wise Sales History,Item-wise Histórico de Vendas
 Item-wise Sales Register,Vendas de item sábios Registrar
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Item: {0} gerido por lotes, não pode ser conciliada com \
- Banco de reconciliação, em vez usar Banco de Entrada"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Item: {0} gerido por lotes, não pode ser conciliada com \ Banco de reconciliação, em vez usar Banco de Entrada"
 Item: {0} not found in the system,Item : {0} não foi encontrado no sistema
 Items,Itens
 Items To Be Requested,Items worden aangevraagd
@@ -1731,9 +1699,7 @@ Moving Average Rate,Movendo Taxa Média
 Mr,Sr.
 Ms,Ms
 Multiple Item prices.,Meerdere Artikelprijzen .
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Várias Rule Preço existe com os mesmos critérios, por favor resolver \
- conflito atribuindo prioridade. Regras Preço: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Várias Rule Preço existe com os mesmos critérios, por favor resolver \ conflito atribuindo prioridade. Regras Preço: {0}"
 Music,música
 Must be Whole Number,Deve ser Número inteiro
 Name,Nome
@@ -2486,23 +2452,15 @@ Row # ,Linha #
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: qty ordenado pode não inferior a qty pedido mínimo do item (definido no mestre de item).
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: Favor especificar Sem Serial para item {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Row {0}: Conta não corresponde com \
- Compra fatura de crédito para conta"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Row {0}: Conta não corresponde com \
- Vendas fatura de débito em conta"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Row {0}: Conta não corresponde com \ Compra fatura de crédito para conta
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Row {0}: Conta não corresponde com \ Vendas fatura de débito em conta
 Row {0}: Conversion Factor is mandatory,Row {0}: Fator de Conversão é obrigatório
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Row {0}: entrada de crédito não pode ser associada com uma fatura de compra
 Row {0}: Debit entry can not be linked with a Sales Invoice,Row {0}: lançamento de débito não pode ser associada com uma factura de venda
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,"Row {0}: Valor do pagamento deve ser menor ou igual a facturar montante em dívida. Por favor, consulte a nota abaixo."
 Row {0}: Qty is mandatory,Row {0}: Quantidade é obrigatório
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Row {0}: Quantidade não avalable no armazém {1} em {2} {3}.
- Disponível Qtde: {4}, Transferência Qtde: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Fila {0}: Para definir {1} periodicidade, diferença entre a data e a partir de \
- deve ser maior do que ou igual a {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Row {0}: Quantidade não avalable no armazém {1} em {2} {3}. Disponível Qtde: {4}, Transferência Qtde: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Fila {0}: Para definir {1} periodicidade, diferença entre a data e a partir de \ deve ser maior do que ou igual a {2}"
 Row {0}:Start Date must be before End Date,Row {0}: Data de início deve ser anterior a data de término
 Rules for adding shipping costs.,Regras para adicionar os custos de envio .
 Rules for applying pricing and discount.,Regras para aplicação de preços e de desconto.
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,Serial No {0} Estado deve se
 Serial Nos Required for Serialized Item {0},Serial Nos Obrigatório para Serialized item {0}
 Serial Number Series,Serienummer Series
 Serial number {0} entered more than once,Número de série {0} entrou mais de uma vez
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Serialized item {0} não pode ser atualizado \
- usando Banco de Reconciliação"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Serialized item {0} não pode ser atualizado \ usando Banco de Reconciliação
 Series,serie
 Series List for this Transaction,Lista de séries para esta transação
 Series Updated,Série Atualizado
@@ -2911,9 +2867,7 @@ Tax Assets,Ativo Fiscal
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,Fiscale categorie kan ' Valuation ' of ' Valuation en Total ' als alle items zijn niet-voorraadartikelen niet
 Tax Rate,Taxa de Imposto
 Tax and other salary deductions.,Fiscais e deduções salariais outros.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Tabela de detalhes Imposto obtido a partir de mestre como uma string e armazenada neste campo.
- Usado para Impostos e Taxas"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Tabela de detalhes Imposto obtido a partir de mestre como uma string e armazenada neste campo. Usado para Impostos e Taxas
 Tax template for buying transactions.,Modelo de impostos para a compra de transações.
 Tax template for selling transactions.,Modelo imposto pela venda de transações.
 Taxable,Tributável
@@ -2959,9 +2913,7 @@ The First User: You,De eerste gebruiker : U
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",O item que representa o pacote. Este item deve ter &quot;é o item da&quot; como &quot;Não&quot; e &quot;é o item de vendas&quot; como &quot;Sim&quot;
 The Organization,de Organisatie
 "The account head under Liability, in which Profit/Loss will be booked","De rekening hoofd onder Aansprakelijkheid , waarin Winst / verlies zal worden geboekt"
-"The date on which next invoice will be generated. It is generated on submit.
-","A data em que próxima fatura será gerada. Ele é gerado em enviar.
-"
+The date on which next invoice will be generated. It is generated on submit.,A data em que próxima fatura será gerada. Ele é gerado em enviar.
 The date on which recurring invoice will be stop,A data em que fatura recorrente será parar
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","O dia do mês em que factura automática será gerada, por exemplo 05, 28 etc"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,No dia (s) em que você está se candidatando para a licença estão de férias. Você não precisa solicitar uma licença .

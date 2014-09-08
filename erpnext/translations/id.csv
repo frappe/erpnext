@@ -28,36 +28,12 @@
 'To Date' is required,'To Date' diperlukan
 'Update Stock' for Sales Invoice {0} must be set,'Update Stock' untuk Sales Invoice {0} harus diatur
 * Will be calculated in the transaction.,* Akan dihitung dalam transaksi.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 Currency = [?] Fraksi
- Untuk misalnya 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Currency = [?] Fraksi  Untuk misalnya 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1.5. Untuk menjaga pelanggan bijaksana kode barang dan membuat mereka dicari berdasarkan penggunaan kode mereka pilihan ini
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Tambah / Edit </ a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> default Template </ h4>
- <p> Menggunakan <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja template </ a> dan semua bidang Address ( termasuk Custom Fields jika ada) akan tersedia </ p>
- <pre> <code> {{}} address_line1 <br>
- {% jika% address_line2} {{}} address_line2 <br> { endif% -%}
- {{kota}} <br>
- {% jika negara%} {{negara}} <br> {% endif -%}
- {% jika pincode%} PIN: {{}} pincode <br> {% endif -%}
- {{negara}} <br>
- {% jika telepon%} Telepon: {{ponsel}} {<br> endif% -%}
- {% jika faks%} Fax: {{}} fax <br> {% endif -%}
- {% jika email_id%} Email: {{}} email_id <br> ; {% endif -%}
- </ code> </ pre>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> default Template </ h4>  <p> Menggunakan <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja template </ a> dan semua bidang Address ( termasuk Custom Fields jika ada) akan tersedia </ p>  <pre> <code> {{}} address_line1 <br>  {% jika% address_line2} {{}} address_line2 <br> { endif% -%}  {{kota}} <br>  {% jika negara%} {{negara}} <br> {% endif -%}  {% jika pincode%} PIN: {{}} pincode <br> {% endif -%}  {{negara}} <br>  {% jika telepon%} Telepon: {{ponsel}} {<br> endif% -%}  {% jika faks%} Fax: {{}} fax <br> {% endif -%}  {% jika email_id%} Email: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Sebuah Kelompok Pelanggan ada dengan nama yang sama, silakan mengubah nama Nasabah atau mengubah nama Grup Pelanggan"
 A Customer exists with same name,Nasabah ada dengan nama yang sama
 A Lead with this email id should exist,Sebuah Lead dengan id email ini harus ada
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,Akun {0}: akun Parent {1} ti
 Account {0}: Parent account {1} does not belong to company: {2},Akun {0}: akun Parent {1} bukan milik perusahaan: {2}
 Account {0}: Parent account {1} does not exist,Akun {0}: akun Parent {1} tidak ada
 Account {0}: You can not assign itself as parent account,Akun {0}: Anda tidak dapat menetapkan dirinya sebagai rekening induk
-"Account: {0} can only be updated via \
-					Stock Transactions","Account: {0} hanya dapat diperbarui melalui \
- Transaksi Bursa"
+Account: {0} can only be updated via \					Stock Transactions,Account: {0} hanya dapat diperbarui melalui \ Transaksi Bursa
 Accountant,Akuntan
 Accounting,Akuntansi
 "Accounting Entries can be made against leaf nodes, called","Entri Akuntansi dapat dilakukan terhadap node daun, yang disebut"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Ambil rekonsiliasi data
 Download Template,Download Template
 Download a report containing all raw materials with their latest inventory status,Download laporan yang berisi semua bahan baku dengan status persediaan terbaru mereka
 "Download the Template, fill appropriate data and attach the modified file.","Unduh Template, isi data yang tepat dan melampirkan file dimodifikasi."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Unduh Template, isi data yang tepat dan melampirkan file dimodifikasi.
- Semua tanggal dan kombinasi karyawan dalam jangka waktu yang dipilih akan datang dalam template, dengan catatan kehadiran yang ada"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Unduh Template, isi data yang tepat dan melampirkan file dimodifikasi. Semua tanggal dan kombinasi karyawan dalam jangka waktu yang dipilih akan datang dalam template, dengan catatan kehadiran yang ada"
 Draft,Konsep
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox Access Diizinkan
@@ -924,7 +896,7 @@ Electrical,Listrik
 Electricity Cost,Biaya Listrik
 Electricity cost per hour,Biaya listrik per jam
 Electronics,Elektronik
-Email,
+Email,siska_chute34@yahoo.com
 Email Digest,Email Digest
 Email Digest Settings,Email Digest Pengaturan
 Email Digest: ,
@@ -994,9 +966,7 @@ Error: {0} > {1},Kesalahan: {0}> {1}
 Estimated Material Cost,Perkiraan Biaya Material
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Bahkan jika ada beberapa Aturan Harga dengan prioritas tertinggi, kemudian mengikuti prioritas internal diterapkan:"
 Everyone can read,Setiap orang dapat membaca
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Contoh: ABCD # # # # #
- Jika seri diatur Serial dan ada tidak disebutkan dalam transaksi, nomor seri maka otomatis akan dibuat berdasarkan seri ini. Jika Anda selalu ingin secara eksplisit menyebutkan Serial Nos untuk item ini. biarkan kosong ini."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Contoh: ABCD # # # # #  Jika seri diatur Serial dan ada tidak disebutkan dalam transaksi, nomor seri maka otomatis akan dibuat berdasarkan seri ini. Jika Anda selalu ingin secara eksplisit menyebutkan Serial Nos untuk item ini. biarkan kosong ini."
 Exchange Rate,Nilai Tukar
 Excise Duty 10,Cukai Tugas 10
 Excise Duty 14,Cukai Tugas 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,Barang-bijaksana Riwayat Pembelian
 Item-wise Purchase Register,Barang-bijaksana Pembelian Register
 Item-wise Sales History,Item-wise Penjualan Sejarah
 Item-wise Sales Register,Item-wise Daftar Penjualan
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Item: {0} dikelola batch-bijaksana, tidak dapat didamaikan dengan menggunakan \
- Bursa Rekonsiliasi, sebagai gantinya menggunakan Stock Entri"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Item: {0} dikelola batch-bijaksana, tidak dapat didamaikan dengan menggunakan \ Bursa Rekonsiliasi, sebagai gantinya menggunakan Stock Entri"
 Item: {0} not found in the system,Item: {0} tidak ditemukan dalam sistem
 Items,Items
 Items To Be Requested,Items Akan Diminta
@@ -1731,9 +1699,7 @@ Moving Average Rate,Moving Average Tingkat
 Mr,Mr
 Ms,Ms
 Multiple Item prices.,Multiple Item harga.
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Beberapa Aturan Harga ada dengan kriteria yang sama, silahkan menyelesaikan \
- konflik dengan menetapkan prioritas. Aturan Harga: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Beberapa Aturan Harga ada dengan kriteria yang sama, silahkan menyelesaikan \ konflik dengan menetapkan prioritas. Aturan Harga: {0}"
 Music,Musik
 Must be Whole Number,Harus Nomor Utuh
 Name,Nama
@@ -2486,23 +2452,15 @@ Row # ,
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: qty Memerintahkan tidak bisa kurang dari minimum qty pesanan item (didefinisikan dalam master barang).
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: Silakan tentukan Serial ada untuk Item {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Row {0}: Akun tidak cocok dengan \
- Purchase Invoice Kredit Untuk account"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Row {0}: Akun tidak cocok dengan \
- Penjualan Faktur Debit Untuk account"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Row {0}: Akun tidak cocok dengan \ Purchase Invoice Kredit Untuk account
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Row {0}: Akun tidak cocok dengan \ Penjualan Faktur Debit Untuk account
 Row {0}: Conversion Factor is mandatory,Row {0}: Faktor Konversi adalah wajib
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Row {0}: entry Kredit tidak dapat dihubungkan dengan Faktur Pembelian
 Row {0}: Debit entry can not be linked with a Sales Invoice,Row {0}: entry Debit tidak dapat dihubungkan dengan Faktur Penjualan
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Row {0}: Jumlah pembayaran harus kurang dari atau sama dengan faktur jumlah yang terhutang. Silakan lihat Catatan di bawah.
 Row {0}: Qty is mandatory,Row {0}: Qty adalah wajib
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Row {0}: Qty tidak avalable di gudang {1} pada {2} {3}.
- Qty Tersedia: {4}, transfer Qty: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Row {0}: Untuk mengatur {1} periodisitas, perbedaan antara dari dan sampai saat ini \
- harus lebih besar dari atau sama dengan {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Row {0}: Qty tidak avalable di gudang {1} pada {2} {3}. Qty Tersedia: {4}, transfer Qty: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Row {0}: Untuk mengatur {1} periodisitas, perbedaan antara dari dan sampai saat ini \ harus lebih besar dari atau sama dengan {2}"
 Row {0}:Start Date must be before End Date,Row {0}: Tanggal awal harus sebelum Tanggal Akhir
 Rules for adding shipping costs.,Aturan untuk menambahkan biaya pengiriman.
 Rules for applying pricing and discount.,Aturan untuk menerapkan harga dan diskon.
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,Tidak ada Status {0} Serial 
 Serial Nos Required for Serialized Item {0},Serial Nos Diperlukan untuk Serial Barang {0}
 Serial Number Series,Serial Number Series
 Serial number {0} entered more than once,Serial number {0} masuk lebih dari sekali
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Serial Barang {0} tidak dapat diperbarui \
- menggunakan Stock Rekonsiliasi"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Serial Barang {0} tidak dapat diperbarui \ menggunakan Stock Rekonsiliasi
 Series,Seri
 Series List for this Transaction,Daftar Series Transaksi ini
 Series Updated,Seri Diperbarui
@@ -2911,9 +2867,7 @@ Tax Assets,Aset pajak
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,Pajak Kategori tidak bisa 'Penilaian' atau 'Penilaian dan Total' karena semua item item non-saham
 Tax Rate,Tarif Pajak
 Tax and other salary deductions.,Pajak dan pemotongan gaji lainnya.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Tabel rinci Pajak diambil dari master barang sebagai string dan disimpan dalam bidang ini.
- Digunakan untuk Pajak dan Biaya"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Tabel rinci Pajak diambil dari master barang sebagai string dan disimpan dalam bidang ini. Digunakan untuk Pajak dan Biaya
 Tax template for buying transactions.,Template pajak untuk membeli transaksi.
 Tax template for selling transactions.,Template Pajak menjual transaksi.
 Taxable,Kena PPN
@@ -2959,9 +2913,7 @@ The First User: You,Pengguna Pertama: Anda
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Item yang mewakili Paket tersebut. Barang ini harus ""Apakah Stock Item"" sebagai ""Tidak"" dan ""Apakah Penjualan Item"" sebagai ""Ya"""
 The Organization,Organisasi
 "The account head under Liability, in which Profit/Loss will be booked","Account kepala di bawah Kewajiban, di mana Laba / Rugi akan dipesan"
-"The date on which next invoice will be generated. It is generated on submit.
-","Tanggal dimana faktur berikutnya akan dihasilkan. Hal ini dihasilkan di submit.
-"
+The date on which next invoice will be generated. It is generated on submit.,Tanggal dimana faktur berikutnya akan dihasilkan. Hal ini dihasilkan di submit.
 The date on which recurring invoice will be stop,Tanggal dimana berulang faktur akan berhenti
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Hari (s) yang Anda lamar untuk cuti adalah liburan. Anda tidak perlu mengajukan cuti.

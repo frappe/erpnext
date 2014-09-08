@@ -28,36 +28,12 @@
 'To Date' is required,"""Đến ngày"" là cần thiết"
 'Update Stock' for Sales Invoice {0} must be set,'Cập nhật chứng khoán' cho bán hàng hóa đơn {0} phải được thiết lập
 * Will be calculated in the transaction.,* Sẽ được tính toán trong các giao dịch.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 tệ = [?] Phần 
- Đối với ví dụ 1 USD = 100 Cent"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 tệ = [?] Phần  Đối với ví dụ 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 Để duy trì khách hàng mã hàng khôn ngoan và để làm cho họ tìm kiếm dựa trên mã sử dụng tùy chọn này
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>",{0} là cần thiết
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>",Tiền tệ là cần thiết cho Giá liệt kê {0}
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<h4> Mặc định Mẫu </ h4> 
- <p> Sử dụng <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja khuôn mẫu </ a> và tất cả các lĩnh vực Địa chỉ ( bao gồm Custom Fields nếu có) sẽ có sẵn </ p> 
- <pre> <code> {{}} address_line1 <br> 
- {% nếu address_line2%} {{address_line2}} {<br> endif% -%} 
- {{}} <br> thành phố 
- {% nếu nhà nước%} {{nhà nước}} {% endif <br> -%} 
- {% nếu pincode%} PIN: {{}} pincode <br> {% endif -%} 
- {{country}} <br> 
- {% nếu điện thoại%} Điện thoại: {{}} điện thoại <br> { endif% -%} 
- {% if fax%} Fax: {{}} fax <br> {% endif -%} 
- {% nếu email_id%} Email: {{}} email_id <br> ; {% endif -%} 
- </ code> </ pre>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Mặc định Mẫu </ h4>  <p> Sử dụng <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja khuôn mẫu </ a> và tất cả các lĩnh vực Địa chỉ ( bao gồm Custom Fields nếu có) sẽ có sẵn </ p>  <pre> <code> {{}} address_line1 <br>  {% nếu address_line2%} {{address_line2}} {<br> endif% -%}  {{}} <br> thành phố  {% nếu nhà nước%} {{nhà nước}} {% endif <br> -%}  {% nếu pincode%} PIN: {{}} pincode <br> {% endif -%}  {{country}} <br>  {% nếu điện thoại%} Điện thoại: {{}} điện thoại <br> { endif% -%}  {% if fax%} Fax: {{}} fax <br> {% endif -%}  {% nếu email_id%} Email: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,Một Nhóm khách hàng tồn tại với cùng một tên xin thay đổi tên khách hàng hoặc đổi tên nhóm khách hàng
 A Customer exists with same name,Một khách hàng tồn tại với cùng một tên
 A Lead with this email id should exist,Một chì với id email này nên tồn tại
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,Tài khoản {0}: Cha mẹ t
 Account {0}: Parent account {1} does not belong to company: {2},Tài khoản {0}: Cha mẹ tài khoản {1} không thuộc về công ty: {2}
 Account {0}: Parent account {1} does not exist,Tài khoản {0}: Cha mẹ tài khoản {1} không tồn tại
 Account {0}: You can not assign itself as parent account,Tài khoản {0}: Bạn không thể chỉ định chính nó như là tài khoản phụ huynh
-"Account: {0} can only be updated via \
-					Stock Transactions","Tài khoản: {0} chỉ có thể được cập nhật thông qua \
- Giao dịch chứng khoán"
+Account: {0} can only be updated via \					Stock Transactions,Tài khoản: {0} chỉ có thể được cập nhật thông qua \ Giao dịch chứng khoán
 Accountant,Kế toán
 Accounting,Kế toán
 "Accounting Entries can be made against leaf nodes, called","Kế toán Thí sinh có thể thực hiện đối với các nút lá, được gọi là"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Tải về Reconcilation dữ liệu
 Download Template,Tải mẫu
 Download a report containing all raw materials with their latest inventory status,Tải về một bản báo cáo có chứa tất cả các nguyên liệu với tình trạng hàng tồn kho mới nhất của họ
 "Download the Template, fill appropriate data and attach the modified file.","Tải về các mẫu, điền dữ liệu thích hợp và đính kèm tập tin sửa đổi."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Tải về các mẫu, điền dữ liệu thích hợp và đính kèm tập tin sửa đổi.
- Tất cả các ngày và kết hợp nhân viên trong giai đoạn lựa chọn sẽ đến trong bản mẫu, với hồ sơ tham dự hiện có"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Tải về các mẫu, điền dữ liệu thích hợp và đính kèm tập tin sửa đổi. Tất cả các ngày và kết hợp nhân viên trong giai đoạn lựa chọn sẽ đến trong bản mẫu, với hồ sơ tham dự hiện có"
 Draft,Dự thảo
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox truy cập được phép
@@ -994,9 +966,7 @@ Error: {0} > {1},Lỗi: {0}> {1}
 Estimated Material Cost,Ước tính chi phí vật liệu
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Ngay cả khi có nhiều quy giá với ưu tiên cao nhất, ưu tiên nội bộ sau đó sau được áp dụng:"
 Everyone can read,Tất cả mọi người có thể đọc
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Ví dụ: ABCD # # # # # 
- Nếu series được thiết lập và Serial No không được đề cập trong các giao dịch, số nối tiếp sau đó tự động sẽ được tạo ra dựa trên loạt bài này. Nếu bạn luôn luôn muốn đề cập đến một cách rõ ràng nối tiếp Nos cho mặt hàng này. để trống này."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Ví dụ: ABCD # # # # #  Nếu series được thiết lập và Serial No không được đề cập trong các giao dịch, số nối tiếp sau đó tự động sẽ được tạo ra dựa trên loạt bài này. Nếu bạn luôn luôn muốn đề cập đến một cách rõ ràng nối tiếp Nos cho mặt hàng này. để trống này."
 Exchange Rate,Tỷ giá
 Excise Duty 10,Tiêu thụ đặc biệt làm việc 10
 Excise Duty 14,Tiêu thụ đặc biệt thuế 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,Item-khôn ngoan Lịch sử mua hàng
 Item-wise Purchase Register,Item-khôn ngoan mua Đăng ký
 Item-wise Sales History,Item-khôn ngoan Lịch sử bán hàng
 Item-wise Sales Register,Item-khôn ngoan doanh Đăng ký
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","Item: {0} quản lý hàng loạt khôn ngoan, không thể hòa giải bằng cách sử dụng \
- Cổ hòa giải, thay vì sử dụng hàng nhập"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Item: {0} quản lý hàng loạt khôn ngoan, không thể hòa giải bằng cách sử dụng \ Cổ hòa giải, thay vì sử dụng hàng nhập"
 Item: {0} not found in the system,Item: {0} không tìm thấy trong hệ thống
 Items,Mục
 Items To Be Requested,Mục To Be yêu cầu
@@ -1731,9 +1699,7 @@ Moving Average Rate,Tỷ lệ trung bình di chuyển
 Mr,Ông
 Ms,Ms
 Multiple Item prices.,Nhiều giá Item.
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","Giá nhiều quy tắc tồn tại với cùng một tiêu chuẩn, xin vui lòng giải quyết \
- xung đột bằng cách gán ưu tiên. Quy định giá: {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Giá nhiều quy tắc tồn tại với cùng một tiêu chuẩn, xin vui lòng giải quyết \ xung đột bằng cách gán ưu tiên. Quy định giá: {0}"
 Music,Nhạc
 Must be Whole Number,Phải có nguyên số
 Name,Tên
@@ -2486,23 +2452,15 @@ Row # ,
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Hàng # {0}: SL thứ tự có thể không ít hơn SL đặt hàng tối thiểu hàng của (quy định tại mục chủ).
 Row #{0}: Please specify Serial No for Item {1},Hàng # {0}: Hãy xác định Serial No cho mục {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","Hàng {0}: Tài khoản không phù hợp với \
- mua hóa đơn tín dụng Để giải"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","Hàng {0}: Tài khoản không phù hợp với \
- Kinh doanh hóa đơn ghi nợ Để giải"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Hàng {0}: Tài khoản không phù hợp với \ mua hóa đơn tín dụng Để giải
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Hàng {0}: Tài khoản không phù hợp với \ Kinh doanh hóa đơn ghi nợ Để giải
 Row {0}: Conversion Factor is mandatory,Hàng {0}: Chuyển đổi Factor là bắt buộc
 Row {0}: Credit entry can not be linked with a Purchase Invoice,Hàng {0}: lối vào tín dụng không thể được liên kết với một hóa đơn mua hàng
 Row {0}: Debit entry can not be linked with a Sales Invoice,Hàng {0}: lối vào Nợ không có thể được liên kết với một hóa đơn bán hàng
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Hàng {0}: Số tiền thanh toán phải nhỏ hơn hoặc bằng cho hóa đơn số tiền còn nợ. Vui lòng tham khảo Lưu ý dưới đây.
 Row {0}: Qty is mandatory,Hàng {0}: Số lượng là bắt buộc
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","Hàng {0}: Số lượng không avalable trong kho {1} trên {2} {3}.
- Có sẵn Số lượng: {4}, Chuyển Số lượng: {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","Hàng {0}: Để thiết lập {1} chu kỳ, sự khác biệt giữa các từ và đến ngày \
- phải lớn hơn hoặc bằng {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Hàng {0}: Số lượng không avalable trong kho {1} trên {2} {3}. Có sẵn Số lượng: {4}, Chuyển Số lượng: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Hàng {0}: Để thiết lập {1} chu kỳ, sự khác biệt giữa các từ và đến ngày \ phải lớn hơn hoặc bằng {2}"
 Row {0}:Start Date must be before End Date,Hàng {0}: Ngày bắt đầu phải trước khi kết thúc ngày
 Rules for adding shipping costs.,Quy tắc để thêm chi phí vận chuyển.
 Rules for applying pricing and discount.,Quy tắc áp dụng giá và giảm giá.
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,"Không nối tiếp {0} tì
 Serial Nos Required for Serialized Item {0},Nối tiếp Nos Yêu cầu cho In nhiều mục {0}
 Serial Number Series,Serial Number Dòng
 Serial number {0} entered more than once,Nối tiếp số {0} vào nhiều hơn một lần
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","Đăng hàng {0} không thể cập nhật \
- sử dụng chứng khoán Hòa giải"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Đăng hàng {0} không thể cập nhật \ sử dụng chứng khoán Hòa giải
 Series,Tùng thư
 Series List for this Transaction,Danh sách loạt cho các giao dịch này
 Series Updated,Cập nhật hàng loạt
@@ -2911,9 +2867,7 @@ Tax Assets,Tài sản thuế
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Thuế Thể loại không thể được ""định giá"" hay ""Định giá và Total 'như tất cả các mục là những mặt hàng không cổ"
 Tax Rate,Tỷ lệ thuế
 Tax and other salary deductions.,Thuế và các khoản khấu trừ lương khác.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Bảng chi tiết thuế lấy từ mục sư như là một chuỗi và lưu trữ trong lĩnh vực này.
- Sử dụng cho Thuế và lệ phí"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Bảng chi tiết thuế lấy từ mục sư như là một chuỗi và lưu trữ trong lĩnh vực này. Sử dụng cho Thuế và lệ phí
 Tax template for buying transactions.,Mẫu thuế đối với giao dịch mua.
 Tax template for selling transactions.,Mẫu thuế cho các giao dịch bán.
 Taxable,Chịu thuế
@@ -2959,9 +2913,7 @@ The First User: You,Những thành viên đầu tiên: Bạn
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Item đại diện cho các gói. Mục này đã ""là Cổ Mã"" là ""Không"" và ""Kinh doanh hàng"" là ""Có"""
 The Organization,Tổ chức
 "The account head under Liability, in which Profit/Loss will be booked","Người đứng đầu tài khoản dưới trách nhiệm pháp lý, trong đó lợi nhuận / lỗ sẽ được ghi nhận"
-"The date on which next invoice will be generated. It is generated on submit.
-","Ngày mà hóa đơn tiếp theo sẽ được tạo ra. Nó được tạo ra trên trình.
-"
+The date on which next invoice will be generated. It is generated on submit.,Ngày mà hóa đơn tiếp theo sẽ được tạo ra. Nó được tạo ra trên trình.
 The date on which recurring invoice will be stop,Ngày mà hóa đơn định kỳ sẽ được dừng lại
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Ngày (s) mà bạn đang nộp đơn xin nghỉ là nghỉ. Bạn không cần phải nộp đơn xin nghỉ phép.

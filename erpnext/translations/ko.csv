@@ -28,36 +28,12 @@
 'To Date' is required,'날짜를'필요
 'Update Stock' for Sales Invoice {0} must be set,견적서를위한 '업데이트 스톡'{0} 설정해야합니다
 * Will be calculated in the transaction.,* 트랜잭션에서 계산됩니다.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1 통화 = [?]분수 
- 예를 들어, 1 USD = 100 센트를 들어"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 통화 = [?]분수  예를 들어, 1 USD = 100 센트를 들어"
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1고객 현명한 항목 코드를 유지하고 자신의 코드 사용이 옵션에 따라이를 검색 할 수 있도록
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Customer Group""> 추가 / 편집 </ A>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Item Group""> 추가 / 편집 </ A>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Territory""> 추가 / 편집 </ A>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<H4> 기본 템플릿 </ H4> 
- <P>는 만약 당신이 좋아 href=""http://jinja.pocoo.org/docs/templates/""> 신사 템플릿 </ A> 및 주소의 모든 필드를 (사용 사용자 정의 필드있는 경우)을 포함하여 사용할 수 있습니다 </ P> 
- <PRE>의 <code> {{address_line1}} <BR> 
- {%이다 address_line2 %} {{address_line2}} {<BR> % ENDIF - %} 
- {{도시}} <BR> 
- {%의 경우 상태 %} {{상태}} <BR> {%의 ENDIF - %} 
- {%의 경우 PIN 코드의 %} PIN : {{}} 핀 코드 <BR> {%의 ENDIF - %} 
- {{국가}} <BR> 
- {% 경우 전화 %} 전화 : {{전화}} {<BR> % ENDIF - %} 
- {% 경우 팩스 %} 팩스 : {{팩스}} <BR> {%의 ENDIF - %} 
- {% email_id %} 이메일의 경우 {{email_id}} <BR> , {%의 ENDIF - %} 
- </ 코드> </ 사전>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<H4> 기본 템플릿 </ H4>  <P>는 만약 당신이 좋아 href=""http://jinja.pocoo.org/docs/templates/""> 신사 템플릿 </ A> 및 주소의 모든 필드를 (사용 사용자 정의 필드있는 경우)을 포함하여 사용할 수 있습니다 </ P>  <PRE>의 <code> {{address_line1}} <BR>  {%이다 address_line2 %} {{address_line2}} {<BR> % ENDIF - %}  {{도시}} <BR>  {%의 경우 상태 %} {{상태}} <BR> {%의 ENDIF - %}  {%의 경우 PIN 코드의 %} PIN : {{}} 핀 코드 <BR> {%의 ENDIF - %}  {{국가}} <BR>  {% 경우 전화 %} 전화 : {{전화}} {<BR> % ENDIF - %}  {% 경우 팩스 %} 팩스 : {{팩스}} <BR> {%의 ENDIF - %}  {% email_id %} 이메일의 경우 {{email_id}} <BR> , {%의 ENDIF - %}  </ 코드> </ 사전>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,고객 그룹이 동일한 이름으로 존재하는 것은 고객의 이름을 변경하거나 고객 그룹의 이름을 바꾸십시오
 A Customer exists with same name,고객은 같은 이름을 가진
 A Lead with this email id should exist,이 이메일 ID와 리드가 존재한다
@@ -103,9 +79,7 @@ Account {0}: Parent account {1} can not be a ledger,계정 {0} : 부모 계정�
 Account {0}: Parent account {1} does not belong to company: {2},계정 {0} : 부모 계정 {1} 회사에 속하지 않는 {2}
 Account {0}: Parent account {1} does not exist,계정 {0} : 부모 계정 {1}이 (가) 없습니다
 Account {0}: You can not assign itself as parent account,계정 {0} : 당신은 부모 계정 자체를 할당 할 수 없습니다
-"Account: {0} can only be updated via \
-					Stock Transactions","계정 : \
- 주식 거래 {0}을 통해서만 업데이트 할 수 있습니다"
+Account: {0} can only be updated via \					Stock Transactions,계정 : \ 주식 거래 {0}을 통해서만 업데이트 할 수 있습니다
 Accountant,회계사
 Accounting,회계
 "Accounting Entries can be made against leaf nodes, called","회계 항목은 전화, 리프 노드에 대해 수행 할 수 있습니다"
@@ -886,9 +860,7 @@ Download Reconcilation Data,Reconcilation 데이터 다운로드하십시오
 Download Template,다운로드 템플릿
 Download a report containing all raw materials with their latest inventory status,그들의 최신의 재고 상황에 따라 모든 원료가 포함 된 보고서를 다운로드
 "Download the Template, fill appropriate data and attach the modified file.","템플릿을 다운로드, 적절한 데이터를 작성하고 수정 된 파일을 첨부합니다."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","템플릿을 다운로드, 적절한 데이터를 작성하고 수정 된 파일을 첨부합니다.
- 선택한 기간의 모든 날짜와 직원의 조합은 기존의 출석 기록과 함께, 템플릿에 올 것이다"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","템플릿을 다운로드, 적절한 데이터를 작성하고 수정 된 파일을 첨부합니다. 선택한 기간의 모든 날짜와 직원의 조합은 기존의 출석 기록과 함께, 템플릿에 올 것이다"
 Draft,초안
 Dropbox,드롭박스
 Dropbox Access Allowed,허용 보관 용 액세스
@@ -994,9 +966,7 @@ Error: {0} > {1},오류 : {0}> {1}
 Estimated Material Cost,예상 재료비
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","우선 순위가 가장 높은 가격에 여러 규칙이있는 경우에도, 그 다음 다음 내부의 우선 순위가 적용됩니다"
 Everyone can read,모든 사람이 읽을 수 있습니다
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". 예 ABCD # # # # # 
- 일련 설정되고 시리얼 No가 트랜잭션에 언급되지 않은 경우, 자동으로 일련 번호가이 시리즈에 기초하여 생성 될 것이다.당신은 항상 명시 적으로이 항목에 대한 일련 NOS를 언급합니다. 이 비워 둡니다."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". 예 ABCD # # # # #  일련 설정되고 시리얼 No가 트랜잭션에 언급되지 않은 경우, 자동으로 일련 번호가이 시리즈에 기초하여 생성 될 것이다.당신은 항상 명시 적으로이 항목에 대한 일련 NOS를 언급합니다. 이 비워 둡니다."
 Exchange Rate,환율
 Excise Duty 10,소비세 (10)
 Excise Duty 14,소비세 14
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,상품 현명한 구입 내역
 Item-wise Purchase Register,상품 현명한 구매 등록
 Item-wise Sales History,상품이 많다는 판매 기록
 Item-wise Sales Register,상품이 많다는 판매 등록
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","품목 : {0} 배치 식 관리, 사용하여 조정할 수 없습니다 \
- 재고 조정 대신 증권 엔트리에게 사용"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","품목 : {0} 배치 식 관리, 사용하여 조정할 수 없습니다 \ 재고 조정 대신 증권 엔트리에게 사용"
 Item: {0} not found in the system,품목 : {0} 시스템에서 찾을 수없는
 Items,아이템
 Items To Be Requested,요청 할 항목
@@ -1731,9 +1699,7 @@ Moving Average Rate,이동 평균 속도
 Mr,씨
 Ms,MS
 Multiple Item prices.,여러 품목의 가격.
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","여러 가격 규칙이 동일한 기준으로 존재 확인하시기 바랍니다 \
- 우선 순위를 할당하여 충돌.가격 규칙 : {0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}",여러 가격 규칙이 동일한 기준으로 존재 확인하시기 바랍니다 \ 우선 순위를 할당하여 충돌.가격 규칙 : {0}
 Music,음악
 Must be Whole Number,전체 숫자 여야합니다
 Name,이름
@@ -2486,23 +2452,15 @@ Row # ,
 Row # {0}: ,
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,행 # {0} : 주문 된 수량 (품목 마스터에 정의 된) 항목의 최소 주문 수량보다 적은 수 없습니다.
 Row #{0}: Please specify Serial No for Item {1},행 번호는 {0} 항목에 대한 일련 번호를 지정하십시오 {1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","행 {0} : \
- 구매 송장 신용 계정에 대한 계정과 일치하지 않습니다"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","행 {0} : \
- 견적서 직불 계정에 대한 계정과 일치하지 않습니다"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,행 {0} : \ 구매 송장 신용 계정에 대한 계정과 일치하지 않습니다
+Row {0}: Account does not match with \						Sales Invoice Debit To account,행 {0} : \ 견적서 직불 계정에 대한 계정과 일치하지 않습니다
 Row {0}: Conversion Factor is mandatory,행 {0} : 변환 계수는 필수입니다
 Row {0}: Credit entry can not be linked with a Purchase Invoice,행 {0} : 신용 항목은 구매 송장에 링크 할 수 없습니다
 Row {0}: Debit entry can not be linked with a Sales Invoice,행 {0} : 차변 항목은 판매 송장에 링크 할 수 없습니다
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,행 {0} : 지불 금액보다 작거나 잔액을 송장에 해당해야합니다.아래의 참고를 참조하십시오.
 Row {0}: Qty is mandatory,행 {0} : 수량은 필수입니다
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","행 {0} : 수량은 창고에 avalable {1}에없는 {2} {3}.
- 가능 수량 : {4}, 수량 전송 {5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","행 {0} 설정하려면 {1}주기에서 현재까지의 차이 \
-보다 크거나 같아야합니다 {2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","행 {0} : 수량은 창고에 avalable {1}에없는 {2} {3}. 가능 수량 : {4}, 수량 전송 {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}",행 {0} 설정하려면 {1}주기에서 현재까지의 차이 \보다 크거나 같아야합니다 {2}
 Row {0}:Start Date must be before End Date,행 {0} : 시작 날짜가 종료 날짜 이전이어야합니다
 Rules for adding shipping costs.,비용을 추가하는 규칙.
 Rules for applying pricing and discount.,가격 및 할인을 적용하기위한 규칙.
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,일련 번호 {0} 상태가 
 Serial Nos Required for Serialized Item {0},직렬화 된 항목에 대한 일련 NOS 필수 {0}
 Serial Number Series,일련 번호 시리즈
 Serial number {0} entered more than once,일련 번호 {0} 번 이상 입력
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","직렬화 된 항목 {0} 업데이트 할 수 없습니다 \
- 재고 조정을 사용하여"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,직렬화 된 항목 {0} 업데이트 할 수 없습니다 \ 재고 조정을 사용하여
 Series,시리즈
 Series List for this Transaction,이 트랜잭션에 대한 시리즈 일람
 Series Updated,시리즈 업데이트
@@ -2911,9 +2867,7 @@ Tax Assets,법인세 자산
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,세금의 종류는 '평가'또는 '평가 및 전체'모든 항목은 비 재고 품목이기 때문에 할 수 없습니다
 Tax Rate,세율
 Tax and other salary deductions.,세금 및 기타 급여 공제.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","세금 세부 테이블은 문자열로 품목 마스터에서 가져온이 분야에 저장됩니다.
- 세금 및 요금에 사용"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,세금 세부 테이블은 문자열로 품목 마스터에서 가져온이 분야에 저장됩니다. 세금 및 요금에 사용
 Tax template for buying transactions.,트랜잭션을 구입을위한 세금 템플릿.
 Tax template for selling transactions.,거래를 판매에 대한 세금 템플릿.
 Taxable,과세 대상
@@ -2959,9 +2913,7 @@ The First User: You,첫 번째 사용자 : 당신
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","패키지를 나타내는 항목.""아니오""를 ""예""로 ""판매 아이템""으로이 항목은 ""재고 상품입니다""해야합니다"
 The Organization,조직
 "The account head under Liability, in which Profit/Loss will be booked","이익 / 손실은 예약 할 수있는 책임에서 계정 머리,"
-"The date on which next invoice will be generated. It is generated on submit.
-","다음 송장이 생성되는 날짜입니다.그것은 제출에 생성됩니다.
-"
+The date on which next invoice will be generated. It is generated on submit.,다음 송장이 생성되는 날짜입니다.그것은 제출에 생성됩니다.
 The date on which recurring invoice will be stop,반복 송장이 중단 될 일자
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,당신이 허가를 신청하는 날 (들)은 휴일입니다.당신은 휴가를 신청할 필요가 없습니다.
