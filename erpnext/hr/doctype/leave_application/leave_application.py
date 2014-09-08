@@ -162,8 +162,8 @@ class LeaveApplication(Document):
 
 		elif self.leave_approver and not frappe.db.sql("""select name from `tabUserRole`
 			where parent=%s and role='Leave Approver'""", self.leave_approver):
-			frappe.throw(_("{0} must have role 'Leave Approver'").format(get_fullname(self.leave_approver)),
-				InvalidLeaveApproverError)
+			frappe.throw(_("{0} ({1}) must have role 'Leave Approver'")\
+				.format(get_fullname(self.leave_approver), self.leave_approver), InvalidLeaveApproverError)
 
 		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
 			msgprint(_("Only the selected Leave Approver can submit this Leave Application"),
