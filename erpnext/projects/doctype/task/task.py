@@ -11,6 +11,9 @@ from frappe import _
 from frappe.model.document import Document
 
 class Task(Document):
+	def get_feed(self):
+		return '{0}: {1}'.format(_(self.status), self.subject)
+
 	def get_project_details(self):
 		return {
 			"project": self.project
@@ -47,7 +50,7 @@ class Task(Document):
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	if not frappe.has_permission("Task"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 

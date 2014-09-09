@@ -13,6 +13,8 @@ from erpnext.accounts.party import create_party_account
 from erpnext.utilities.transaction_base import TransactionBase
 
 class Supplier(TransactionBase):
+	def get_feed(self):
+		return self.supplier_name
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')

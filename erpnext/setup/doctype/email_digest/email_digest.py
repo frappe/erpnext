@@ -295,7 +295,7 @@ class EmailDigest(Document):
 			filter_by_company=False)
 
 	def get_calendar_events(self, user_id):
-		from frappe.core.doctype.event.event import get_events
+		from frappe.desk.doctype.event.event import get_events
 		events = get_events(self.future_from_date.strftime("%Y-%m-%d"), self.future_to_date.strftime("%Y-%m-%d"))
 
 		html = ""

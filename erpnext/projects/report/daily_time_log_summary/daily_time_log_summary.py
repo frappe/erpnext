@@ -75,7 +75,7 @@ def build_conditions(filters):
 	if filters.get("to_date"):
 		conditions += " and to_time <= timestamp(%(to_date)s, %(to_time)s)"
 
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Time Log")
 	if match_conditions:
 		conditions += " and %s" % match_conditions

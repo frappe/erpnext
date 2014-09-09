@@ -11,6 +11,9 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 
 class Lead(SellingController):
+	def get_feed(self):
+		return '{0}: {1}'.format(_(self.status), self.lead_name)
+
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer

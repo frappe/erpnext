@@ -11,6 +11,8 @@ from erpnext.utilities.transaction_base import delete_events
 from frappe.model.document import Document
 
 class Project(Document):
+	def get_feed(self):
+		return self.status
 
 	def get_gross_profit(self):
 		pft, per_pft =0, 0

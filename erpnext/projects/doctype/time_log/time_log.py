@@ -61,7 +61,7 @@ class TimeLog(Document):
 
 @frappe.whitelist()
 def get_events(start, end):
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	if not frappe.has_permission("Time Log"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
