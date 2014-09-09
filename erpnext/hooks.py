@@ -26,15 +26,6 @@ website_generators = ["Item Group", "Item", "Sales Partner"]
 
 standard_queries = "Customer:erpnext.selling.doctype.customer.customer.get_customer_list"
 
-permission_query_conditions = {
-		"Note": "erpnext.utilities.doctype.note.note.get_permission_query_conditions"
-	}
-
-has_permission = {
-		"Note": "erpnext.utilities.doctype.note.note.has_permission"
-	}
-
-
 doc_events = {
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_qty",
