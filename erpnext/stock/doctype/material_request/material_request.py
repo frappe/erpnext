@@ -260,7 +260,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 		target_doc.supplier = source_name
 		set_missing_values(source, target_doc)
 		target_doc.set("po_details", [d for d in target_doc.get("po_details")
-			if d.get("item_code") in supplier_items and d.get("qty" > 0)])
+			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
 		return target_doc
 
